@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Http\Controllers\Accountings\Invoices;
+
+use App\Exports\Accountings\Invoices\InvoicesExport;
+use App\Http\Controllers\Controller;
+use App\Models\Distributor\Distributor;
+use App\Models\Invoice\InvoiceCondition;
+use App\Models\Invoice\InvoiceMethod;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+
+class ReportController extends Controller
+{
+    public function report()
+    {
+
+        $distributors = Distributor::latest()->get()->pluck('title', 'id')->prepend('Todos', '0');
+        $methods = InvoiceMethod::latest()->get()->pluck('title', 'id')->prepend('Todos', '0');
+        $conditions = InvoiceCondition::latest()->get()->pluck('title', 'id')->prepend('Todos', '0');
+
+        return view('accountings.views.invoices.reports.index')->with([
+            'distributors' => $distributors,
+            'methods' => $methods,
+            'conditions' => $conditions,
+        ]);
+
+    }
+
+    public function generate(Request $request)
+    {
+
+        $distributor = $request->distributor;
+        $method = $request->methods;
+        $condition = $request->condition;
+        $date = explode(' - ', $request->range);
+        $start = Carbon::parse($date[0])->startOfDay();
+        $end = Carbon::parse($date[1])->endOfDay();
+
+        return Excel::download(new InvoicesExport($distributor, $method, $condition, $start, $end), 'Reporte Facturación.xlsx');
+
+    }
+}

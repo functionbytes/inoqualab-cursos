@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ $setting->title }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    {!! SEOMeta::generate() !!}
+    {!! Twitter::generate() !!}
+    {!! JsonLd::generate() !!}
+    {!! JsonLdMulti::generate() !!}
+    {!! SEO::generate() !!}
+    {!! SEO::generate(true) !!}
+
+    {!! app('seotools')->generate() !!}
+
+    {!! Html::favicon( getFavicon() ) !!}
+
+    @yield('head')
+    <!--====== Flaticon ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/flaticon.min.css') }}">
+    <!--====== Font Awesome ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/font-awesome-5.9.0.min.css') }}">
+    <!--====== Bootstrap ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/bootstrap-4.5.3.min.css') }}">
+    <!--====== Magnific Popup ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/magnific-popup.min.css') }}">
+    <!--====== Nice Select ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/nice-select.min.css') }}">
+    <!--====== jQuery UI ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/jquery-ui.min.css') }}">
+    <!--====== Animate ======-->
+    <link rel="stylesheet" href="{{ url('/pages/css/animate.min.css') }}">
+    <link rel="stylesheet" href="{{ url('/pages/css/slick.min.css') }}">
+    <link rel="stylesheet" href="{{ url('/pages/css/style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url('managers/libs/fontawesome/fontawesome.min.css') }}">
+   
+
+    @stack('css')
+
+
+</head>
+
+    <div class="">
+
+    <div class="page-wrapper">
+
+        @yield('content')
+
+        @include ('pages.includes.socials')
+
+    </div>
+
+        <!--====== Bootstrap ======-->
+    <script src="{{ url('pages/js/jquery-3.6.0.min.js') }}" type="text/javascript"></script>
+        <!--====== Bootstrap ======-->
+    <script src="{{ url('pages/js/bootstrap.min.js') }}" type="text/javascript"></script>
+    <!--====== Appear Js ======-->
+    <script src="{{ url('pages/js/appear.min.js') }}" type="text/javascript"></script>
+    <!--====== Slick ======-->
+    <script src="{{ url('pages/js/slick.min.js') }}" type="text/javascript"></script>
+    <!--====== jQuery UI ======-->
+    <script src="{{ url('pages/js/jquery-ui.min.js') }}" type="text/javascript"></script>
+    <!--====== Isotope ======-->
+    <script src="{{ url('pages/js/isotope.pkgd.min.js') }}" type="text/javascript"></script>
+    <!--====== Circle Progress bar ======-->
+    <script src="{{ url('pages/js/circle-progress.min.js') }}" type="text/javascript"></script>
+    <!--====== Images Loader ======-->
+    <script src="{{ url('pages/js/imagesloaded.pkgd.min.js') }}" type="text/javascript"></script>
+    <!--====== Magnific Popup ======-->
+    <script src="{{ url('pages/js/jquery.magnific-popup.min.js') }}" type="text/javascript"></script>
+    <!--  WOW Animation -->
+    <script src="{{ url('pages/js/wow.min.js') }}" type="text/javascript"></script>
+    <!-- Custom script -->
+    <script src="{{ url('pages/js/script.js') }}" type="text/javascript"></script>
+
+        <script src="{{ url('managers/libs/select2/dist/js/select2.min.js') }}" type="text/javascript"></script>
+        <script src="{{ url('managers/libs/jquery-validation/dist/jquery.validate.min.js') }}" type="text/javascript"></script>
+
+    
+    <script src="https://maps.google.com/maps/api/js?sensor=false"></script>
+    <script>
+        function initialize() {
+            var latlng = new google.maps.LatLng(-34.397, 150.644);
+            var myOptions = {
+                zoom: 8,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var map = new google.maps.Map(document.getElementById("map_canvas"),
+                myOptions);
+        }
+        google.maps.event.addDomListener(window, "load", initialize);
+    </script>
+
+    <script>
+        (function(i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function() {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-216062153-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+
+
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
+
+    @stack('scripts')
+
+</body>
+
+</html>

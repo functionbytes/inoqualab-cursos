@@ -1,0 +1,189 @@
+<?php
+
+namespace App\Http\Controllers\Customers;
+
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Customers\Concerns\ResolvesInscription;
+use App\Models\Course\Course;
+use App\Models\Course\CourseReview;
+use App\Models\Exam\Exam;
+use App\Models\Exam\ExamAnswer;
+use App\Models\Exam\ExamQuestion;
+use App\Models\Exam\ExamTopic;
+use App\Models\Users\Certificate;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class ExamController extends Controller
+{
+    use ResolvesInscription;
+
+    public function exam($slack)
+    {
+        $user = app('customer');
+        $course = Course::slack($slack);
+        abort_unless($course instanceof Course, 404);
+        $inscription = $this->resolveInscription($user, $course->id);
+        // A3: el examen final solo se habilita con todas las lecciones culminadas
+        $this->assertExamAccessible($course, $inscription);
+        $topic = $course->examtopic;
+        $chapters = $course->chapter;
+        $class = $course->lessons;
+        $count = $topic->show_ans;
+        $progress = $inscription->progress;
+        $questions = $topic->questions->shuffle()->take($count);
+
+        $exam = $inscription->exam;
+
+        if ($exam === null) {
+            $exam = Exam::create([
+                'course_id' => $inscription->course_id,
+                'inscription_id' => $inscription->id,
+                'topic_id' => $topic->id,
+                'user_id' => $user->id,
+                'correct' => 0,
+                'wrong' => 0,
+                'score' => 0,
+            ]);
+        } else {
+            $exam->update(['correct' => 0, 'wrong' => 0, 'score' => 0]);
+            $exam->answers()->delete();
+        }
+
+        return view('customers.views.exams.exam', compact(
+            'course', 'class', 'chapters', 'progress',
+            'topic', 'questions', 'exam', 'user', 'count'
+        ));
+    }
+
+    public function store(Request $request, $id)
+    {
+        $user = app('customer');
+        $topic = ExamTopic::id($id);
+        abort_unless($topic instanceof ExamTopic, 404);
+        $exam = Exam::where('id', $request->exam)->where('user_id', $user->id)->firstOrFail();
+
+        $exam->answers()->delete();
+
+        $unique_question = array_unique($request->question_id);
+        $count = count($request->answer);
+        $rows = [];
+        $now = Carbon::now()->setTimezone('America/Bogota');
+
+        for ($i = 1; $i <= $count; $i++) {
+            $question = ExamQuestion::id($unique_question[$i]);
+            abort_unless($question instanceof ExamQuestion, 404);
+            $answerCustomer = (array) $request->answer[$i];
+            $isMultiple = str_contains($question->answer, ',');
+
+            if ($isMultiple) {
+                $correct = explode(',', $question->answer);
+                $approved = (count($answerCustomer) === count($correct))
+                    && implode(',', $correct) === implode(',', $answerCustomer) ? 1 : 0;
+            } else {
+                $approved = ($question->answer === ($answerCustomer[0] ?? '')) ? 1 : 0;
+            }
+
+            $rows[] = [
+                'user_answer' => implode(',', $answerCustomer),
+                'question_id' => $unique_question[$i],
+                'user_id' => $user->id,
+                'exam_id' => $exam->id,
+                'course_id' => $topic->course_id,
+                'topic_id' => $topic->id,
+                'answer' => $question->answer,
+                'approved' => $approved,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        ExamAnswer::insert($rows);
+
+        return redirect()->route('customers.exam.show', $exam->id);
+    }
+
+    public function finish($id)
+    {
+        $user = app('customer');
+        $exam = Exam::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+
+        $inscription = $this->resolveInscription($user, $exam->course_id);
+        $topic = $exam->topic;
+        $course = $exam->course;
+        $answers = $exam->answers;
+        $count = $topic->show_ans;
+        $passingScore = $count > 0 ? round(($topic->per_q_mark / $count) * 100, 2) : 100;
+        $progress = $inscription->progress;
+
+        // Una sola query para correct/wrong
+        $counts = $exam->answers()->where('user_id', $user->id)
+            ->selectRaw('approved, count(*) as total')
+            ->groupBy('approved')
+            ->pluck('total', 'approved');
+        $wrong = $counts[0] ?? 0;
+        $correct = $counts[1] ?? 0;
+        $score = $count === $correct ? 100 : round(100 - ($wrong / $count * 100), 2);
+
+        $certificate = DB::transaction(function () use ($exam, $inscription, $course, $user, $wrong, $correct, $score, $progress, $passingScore) {
+            $exam->update(['wrong' => $wrong, 'correct' => $correct, 'score' => $score]);
+
+            if ($score < $passingScore) {
+                return null;
+            }
+
+            $certificate = $inscription->certificate;
+
+            if (! $certificate) {
+                $certificate = Certificate::create([
+                    'slack' => $this->generate_slack('certificates'),
+                    'certification_id' => $course->certification_id,
+                    'certifier_id' => $course->certifier_id,
+                    'course_id' => $inscription->course_id,
+                    'user_id' => $user->id,
+                    'exam_id' => $exam->id,
+                    'inscription_id' => $inscription->id,
+                    'start_at' => Carbon::now()->setTimezone('America/Bogota'),
+                    'end_at' => Carbon::now()->setTimezone('America/Bogota')->addYear(),
+                ]);
+            }
+
+            $lessons = $course->lessons()->count();
+            $inscription->update([
+                'enroll_culminated' => Carbon::now(),
+                'culminated' => 1,
+                'percent' => $lessons > 0 ? round(($progress->count() / $lessons) * 100, 2) : 100,
+            ]);
+
+            return $certificate;
+        });
+
+        // Reseña previa del usuario para este curso (si ya calificó).
+        $userReview = CourseReview::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        return view('customers.views.exams.finish', compact(
+            'user', 'course', 'topic', 'wrong', 'correct',
+            'answers', 'score', 'count', 'certificate', 'exam', 'userReview', 'passingScore'
+        ));
+    }
+
+    public function tryagain($id)
+    {
+        $user = app('customer');
+        $exam = Exam::where('id', $id)->where('user_id', $user->id)->firstOrFail();
+
+        // A5: respetar la configuración del topic — si no permite reintentos, bloquear
+        if ($exam->topic && ! $exam->topic->quiz_again) {
+            return redirect()->route('customers.exam.show', $exam->id)
+                ->with('error', 'Este examen no permite reintentos.');
+        }
+
+        $exam->update(['wrong' => 0, 'correct' => 0, 'score' => 0]);
+        $exam->answers()->delete();
+
+        return redirect()->route('customers.courses.exam', $exam->course->slack);
+    }
+}

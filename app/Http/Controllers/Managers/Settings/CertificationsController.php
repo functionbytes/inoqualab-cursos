@@ -1,0 +1,163 @@
+<?php
+
+namespace App\Http\Controllers\Managers\Settings;
+
+use App\Http\Controllers\Controller;
+use App\Models\Certification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
+class CertificationsController extends Controller
+{
+    public function index(Request $request)
+    {
+
+        $searchKey = $request->search;
+        $available = $request->available;
+        $certifications = Certification::descending();
+
+        if ($searchKey != null) {
+            $certifications = $certifications->where('title', 'like', '%'.$searchKey.'%');
+        }
+
+        if ($available != null) {
+            $certifications = $certifications->where('available', $available);
+        }
+
+        $certifications = $certifications->paginate(paginationNumber());
+
+        return view('managers.views.settings.certifications.index')->with([
+            'certifications' => $certifications,
+            'available' => $available,
+            'searchKey' => $searchKey,
+        ]);
+
+    }
+
+    public function create()
+    {
+
+        $availables = $this->availableOptions();
+
+        return view('managers.views.settings.certifications.create')->with([
+            'availables' => $availables,
+        ]);
+
+    }
+
+    public function edit($slack)
+    {
+
+        $certification = Certification::slack($slack);
+
+        $availables = $this->availableOptions();
+
+        $thumbnail = $certification->getMedia('thumbnail')->count() > 0 ? 'true' : 'false';
+
+        return view('managers.views.settings.certifications.edit')->with([
+            'certification' => $certification,
+            'thumbnail' => $thumbnail,
+            'availables' => $availables,
+        ]);
+
+    }
+
+    public function update(Request $request)
+    {
+
+        $certification = Certification::slack($request->slack);
+        $certification->title = Str::upper($request->title);
+        $certification->slug = Str::slug($request->title, '-');
+        $certification->description = $request->description;
+        $certification->available = $request->available;
+        $certification->update();
+
+        return response()->json([
+            'success' => true,
+            'slack' => $certification->slack,
+            'message' => 'Se actualizo el certificado correctamente',
+        ]);
+
+    }
+
+    public function store(Request $request)
+    {
+
+        $certification = new Certification;
+        $certification->slack = $this->generate_slack('certifications');
+        $certification->title = Str::upper($request->title);
+        $certification->slug = Str::slug($request->title, '-');
+        $certification->description = $request->description;
+        $certification->available = $request->available;
+        $certification->save();
+
+        return response()->json([
+            'success' => true,
+            'slack' => $certification->slack,
+            'message' => 'Se creo el certificado correctamente',
+        ]);
+
+    }
+
+    public function destroy($slack)
+    {
+
+        $certification = Certification::slack($slack);
+        $certification->delete();
+
+        return redirect()->route('manager.certifications');
+
+    }
+
+    public function getThumbnails($slack)
+    {
+
+        $certification = Certification::slack($slack);
+
+        if ($certification->getMedia('thumbnail')->count() > 0) {
+
+            $thumbnails = $certification->getMedia('thumbnail');
+
+            foreach ($thumbnails as $thumbnail) {
+
+                $images[] = [
+                    'id' => $thumbnail->id,
+                    'uuid' => $thumbnail->uuid,
+                    'name' => $thumbnail->name,
+                    'file' => $thumbnail->file_name,
+                    'path' => $thumbnail->getfullUrl(),
+                    'size' => $thumbnail->size,
+                ];
+            }
+
+            return response()->json($images);
+        }
+
+        $images = [];
+
+        return response()->json($images);
+
+    }
+
+    public function storeThumbnails(Request $request)
+    {
+
+        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+
+            $certification = Certification::slack($request->certification);
+            $certification->addMediaFromRequest('file')->toMediaCollection('thumbnail');
+
+            return response()->json(['status' => 'success', 'certification' => $certification->slack]);
+
+        }
+
+    }
+
+    public function deleteThumbnails($id)
+    {
+        Media::find($id)->delete();
+
+        return response()->json(['status' => 'success']);
+    }
+}
