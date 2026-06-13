@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckSession;
+use App\Http\Middleware\EnforcePanelPermission;
 use App\Http\Middleware\HandleSeoRedirects;
 use App\Http\Middleware\IsAccountings;
 use App\Http\Middleware\IsCustomer;
@@ -85,6 +86,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            // Autorización por convención (deriva el permiso del nombre de ruta).
+            'panel.permission' => EnforcePanelPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
