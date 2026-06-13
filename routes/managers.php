@@ -114,7 +114,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
         Route::delete('/destroy/{id}', [RolesController::class, 'destroy'])->middleware('permission:roles.delete')->name('manager.roles.destroy');
     });
 
-    Route::group(['prefix' => 'analytics'], function () {
+    Route::group(['prefix' => 'analytics', 'middleware' => 'permission:analytics.view'], function () {
         Route::get('/', [AnalyticsController::class, 'index'])->name('manager.analytics');
         Route::get('/data/overview', [AnalyticsController::class, 'overview'])->name('manager.analytics.overview');
         Route::get('/data/comparison', [AnalyticsController::class, 'comparison'])->name('manager.analytics.comparison');
@@ -144,7 +144,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'testimonies'], function () {
+    Route::group(['prefix' => 'testimonies', 'middleware' => 'permission:testimonies.view'], function () {
         Route::get('/', [TestimoniesController::class, 'index'])->name('manager.testimonies');
         Route::get('/create', [TestimoniesController::class, 'create'])->name('manager.testimonies.create');
         Route::post('/store', [TestimoniesController::class, 'store'])->name('manager.testimonies.store');
@@ -154,7 +154,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
         Route::delete('/destroy/{slack}', [TestimoniesController::class, 'destroy'])->name('manager.testimonies.destroy');
     });
 
-    Route::group(['prefix' => 'departments'], function () {
+    Route::group(['prefix' => 'departments', 'middleware' => 'permission:departments.view'], function () {
 
         Route::get('/', [DepartmentsController::class, 'index'])->name('manager.departments');
         Route::get('/create', [DepartmentsController::class, 'create'])->name('manager.departments.create');
@@ -181,7 +181,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'distributors'], function () {
+    Route::group(['prefix' => 'distributors', 'middleware' => 'permission:distributors.view'], function () {
 
         Route::get('/', [DistributorsController::class, 'index'])->name('manager.distributors');
         Route::get('/create', [DistributorsController::class, 'create'])->name('manager.distributors.create');
@@ -216,7 +216,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'enterprises'], function () {
+    Route::group(['prefix' => 'enterprises', 'middleware' => 'permission:enterprises.view'], function () {
 
         Route::get('/', [EnterprisesController::class, 'index'])->name('manager.enterprises');
         Route::get('/create', [EnterprisesController::class, 'create'])->name('manager.enterprises.create');
@@ -275,7 +275,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
         Route::delete('/users/courses/destroy/{user}', [EnterpriseCourseController::class, 'destroyCourse'])->name('manager.enterprises.courses.user.destroy');
     });
 
-    Route::group(['prefix' => 'documents'], function () {
+    Route::group(['prefix' => 'documents', 'middleware' => 'permission:documents.view'], function () {
 
         Route::get('/', [DocumentsController::class, 'index'])->name('manager.documents');
         Route::get('/create', [DocumentsController::class, 'create'])->name('manager.documents.create');
@@ -291,7 +291,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'contacts'], function () {
+    Route::group(['prefix' => 'contacts', 'middleware' => 'permission:contacts.view'], function () {
 
         Route::get('/', [ContactsController::class, 'index'])->name('manager.contacts');
         Route::get('/create', [ContactsController::class, 'create'])->name('manager.contacts.create');
@@ -309,7 +309,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'certifiers'], function () {
+    Route::group(['prefix' => 'certifiers', 'middleware' => 'permission:certifiers.view'], function () {
 
         Route::get('/', [CertifiersController::class, 'index'])->name('manager.certifiers');
         Route::get('/create', [CertifiersController::class, 'create'])->name('manager.certifiers.create');
@@ -345,7 +345,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'bundles'], function () {
+    Route::group(['prefix' => 'bundles', 'middleware' => 'permission:bundles.view'], function () {
 
         Route::get('/', [BundlesController::class, 'index'])->name('manager.bundles');
         Route::get('/create', [BundlesController::class, 'create'])->name('manager.bundles.create');
@@ -377,7 +377,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'instructions'], function () {
+    Route::group(['prefix' => 'instructions', 'middleware' => 'permission:instructions.view'], function () {
 
         Route::get('/', [InstructionsController::class, 'index'])->name('manager.instructions');
         Route::get('/create', [InstructionsController::class, 'create'])->name('manager.instructions.create');
@@ -395,7 +395,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'faqs'], function () {
+    Route::group(['prefix' => 'faqs', 'middleware' => 'permission:faqs.view'], function () {
 
         Route::get('/', [FaqsController::class, 'index'])->name('manager.faqs');
         Route::get('/create', [FaqsController::class, 'create'])->name('manager.faqs.create');
@@ -413,7 +413,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'blogs'], function () {
+    Route::group(['prefix' => 'blogs', 'middleware' => 'permission:blogs.view'], function () {
 
         Route::get('/', [BlogsController::class, 'index'])->name('manager.blogs');
         Route::get('/create', [BlogsController::class, 'create'])->name('manager.blogs.create');
@@ -445,7 +445,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'coupons'], function () {
+    Route::group(['prefix' => 'coupons', 'middleware' => 'permission:coupons.view'], function () {
 
         Route::get('/', [CouponsController::class, 'index'])->name('manager.coupons');
         Route::get('/create', [CouponsController::class, 'create'])->name('manager.coupons.create');
@@ -457,7 +457,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'orders'], function () {
+    Route::group(['prefix' => 'orders', 'middleware' => 'permission:orders.view'], function () {
 
         Route::get('/', [OrdersController::class, 'index'])->name('manager.orders');
         Route::get('/get', [OrdersController::class, 'get'])->name('manager.orders.get');
@@ -479,7 +479,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'invoices'], function () {
+    Route::group(['prefix' => 'invoices', 'middleware' => 'permission:invoices.view'], function () {
 
         Route::get('/', [InvoicesController::class, 'index'])->name('manager.invoices');
         Route::get('/get', [InvoicesController::class, 'get'])->name('manager.invoices.get');
@@ -592,7 +592,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'users'], function () {
+    Route::group(['prefix' => 'users', 'middleware' => 'permission:users.view'], function () {
 
         Route::get('/', [UsersController::class, 'index'])->name('manager.users');
         Route::get('/create', [UsersController::class, 'create'])->name('manager.users.create');
