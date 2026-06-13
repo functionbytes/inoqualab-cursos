@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\Auth;
 
 class IsManager
 {
+    /** Roles (columna `role`) con acceso al panel manager. */
+    private const PANEL_ROLES = ['superadmin', 'manager'];
+
     public function handle($request, Closure $next)
     {
-        if (Auth::check() && (Auth::user()->role === 'manager')) {
+        if (Auth::check() && in_array(Auth::user()->role, self::PANEL_ROLES, true)) {
             return $next($request);
-        } else {
-            return redirect()->route('validation');
         }
+
+        return redirect()->route('validation');
     }
 }

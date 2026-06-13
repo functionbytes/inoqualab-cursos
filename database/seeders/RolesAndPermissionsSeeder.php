@@ -76,16 +76,21 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::firstOrCreate(['name' => "settings.{$action}", 'guard_name' => 'web']);
         }
 
-        // 2. Crear los 6 roles (nombres == valores de la columna `role`).
+        // 2. Crear los roles (nombres == valores de la columna `role`).
         $roles = [];
-        foreach (['manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting'] as $name) {
+        foreach (['superadmin', 'manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting'] as $name) {
             $roles[$name] = Role::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
         }
 
-        // 3. manager → TODOS los permisos.
-        $roles['manager']->syncPermissions(Permission::all());
+        // 3. superadmin → TODOS los permisos (super administrador).
+        $roles['superadmin']->syncPermissions(Permission::all());
 
-        // 4. Resto de roles → subconjunto declarado.
+        // 4. manager → todo EXCEPTO la gestión de roles/permisos (exclusiva de superadmin).
+        $roles['manager']->syncPermissions(
+            Permission::where('name', 'not like', 'roles.%')->get()
+        );
+
+        // 5. Resto de roles → subconjunto declarado.
         foreach (self::ROLE_GRANTS as $roleName => $grants) {
             $permissions = $this->expandGrants($grants);
             $roles[$roleName]->syncPermissions($permissions);

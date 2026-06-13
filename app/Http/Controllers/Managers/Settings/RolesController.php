@@ -20,7 +20,7 @@ class RolesController extends Controller
 {
     /** Roles del sistema que no se pueden renombrar ni eliminar. */
     private const PROTECTED_ROLES = [
-        'manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting',
+        'superadmin', 'manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting',
     ];
 
     public function index(Request $request): View

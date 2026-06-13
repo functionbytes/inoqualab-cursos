@@ -318,6 +318,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
 
         switch ($this->role) {
+            case 'superadmin' :
             case 'manager' :
                 return 'manager.dashboard';
                 break;
