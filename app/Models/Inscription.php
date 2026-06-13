@@ -22,14 +22,17 @@ class Inscription extends Model
     protected static $recordEvents = ['deleted', 'updated', 'created'];
 
     protected $fillable = [
+        'slack',
         'user_id',
         'course_id',
         'inscription_id',
+        'order_id',
         'percent',
         'enroll_start',
         'enroll_expire',
         'enroll_culminated',
         'culminated',
+        'expire',
         'created_at',
         'updated_at',
     ];

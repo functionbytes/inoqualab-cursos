@@ -19,7 +19,7 @@ class InscriptionsController extends Controller
             ->with('course')
             ->where('user_id', $user->id)
             ->latest()
-            ->get();
+            ->paginate(paginationNumber());
 
         return view('managers.views.users.users.inscriptions.index')->with([
             'inscriptions' => $allInscriptions,
