@@ -24,11 +24,12 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens,
-        HasFactory, HasFinders, LogsActivity, Notifiable, SoftDeletes;
+        HasFactory, HasFinders, HasRoles, LogsActivity, Notifiable, SoftDeletes;
 
     protected $table = 'users';
 

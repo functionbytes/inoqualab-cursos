@@ -6,7 +6,15 @@ use App\Html\FormBuilder;
 use App\Html\HtmlBuilder;
 use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
+use App\Models\Mailer\MailerLayout;
+use App\Models\Mailer\MailerTemplate;
+use App\Models\Mailer\MailerVariable;
 use App\Models\Setting\Setting;
+use App\Models\User;
+use App\Observers\Mailer\MailerLayoutObserver;
+use App\Observers\Mailer\MailerTemplateObserver;
+use App\Observers\Mailer\MailerVariableObserver;
+use App\Observers\User\UserRoleObserver;
 use App\Services\SchemaOrgService;
 use App\Services\SeoService;
 use Illuminate\Queue\Events\JobFailed;
@@ -113,5 +121,13 @@ class AppServiceProvider extends ServiceProvider
             // $event->job
             // $event->exception
         });
+
+        // Mailer observers
+        MailerTemplate::observe(MailerTemplateObserver::class);
+        MailerLayout::observe(MailerLayoutObserver::class);
+        MailerVariable::observe(MailerVariableObserver::class);
+
+        // Sincroniza la columna `role` (legacy) con los roles de Spatie.
+        User::observe(UserRoleObserver::class);
     }
 }
