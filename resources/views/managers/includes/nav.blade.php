@@ -26,6 +26,7 @@
                 </li>
 
 
+                @can('courses.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link has-arrow " href="#" aria-expanded="false">
                           <span class="d-flex">
@@ -52,6 +53,7 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
                 @if(setting('module_coupons') !== 0)
                 <li class="sidebar-item">

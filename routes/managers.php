@@ -625,18 +625,18 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     });
 
-    Route::group(['prefix' => 'courses'], function () {
+    Route::group(['prefix' => 'courses', 'middleware' => 'permission:courses.view'], function () {
 
         Route::get('/', [CoursesController::class, 'index'])->name('manager.courses');
-        Route::get('/create', [CoursesController::class, 'create'])->name('manager.courses.create');
-        Route::post('/store', [CoursesController::class, 'store'])->name('manager.courses.store');
-        Route::post('/update', [CoursesController::class, 'update'])->name('manager.courses.update');
-        Route::post('/duplicate/action', [CoursesController::class, 'action'])->name('manager.courses.action');
-        Route::get('/duplicate/{slack}', [CoursesController::class, 'duplicate'])->name('manager.courses.duplicate');
-        Route::get('/edit/{slack}', [CoursesController::class, 'edit'])->name('manager.courses.edit');
+        Route::get('/create', [CoursesController::class, 'create'])->middleware('permission:courses.create')->name('manager.courses.create');
+        Route::post('/store', [CoursesController::class, 'store'])->middleware('permission:courses.create')->name('manager.courses.store');
+        Route::post('/update', [CoursesController::class, 'update'])->middleware('permission:courses.update')->name('manager.courses.update');
+        Route::post('/duplicate/action', [CoursesController::class, 'action'])->middleware('permission:courses.create')->name('manager.courses.action');
+        Route::get('/duplicate/{slack}', [CoursesController::class, 'duplicate'])->middleware('permission:courses.create')->name('manager.courses.duplicate');
+        Route::get('/edit/{slack}', [CoursesController::class, 'edit'])->middleware('permission:courses.update')->name('manager.courses.edit');
         Route::get('/view/{slack}', [CoursesController::class, 'view'])->name('manager.courses.view');
-        Route::delete('/destroy/{slack}', [CoursesController::class, 'destroy'])->name('manager.courses.destroy');
-        Route::post('/bulk-action', [CoursesController::class, 'bulkAction'])->name('manager.courses.bulk-action');
+        Route::delete('/destroy/{slack}', [CoursesController::class, 'destroy'])->middleware('permission:courses.delete')->name('manager.courses.destroy');
+        Route::post('/bulk-action', [CoursesController::class, 'bulkAction'])->middleware('permission:courses.delete')->name('manager.courses.bulk-action');
         Route::get('/navegation/{slack}', [CoursesController::class, 'navegation'])->name('manager.courses.navegation');
 
         Route::post('/thumbnails', [CoursesController::class, 'storeThumbnails'])->name('manager.courses.thumbnails');
