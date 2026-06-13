@@ -5,12 +5,12 @@
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Events;
+namespace App\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Modules\{ModuleName}\Models\{Entity};
+use App\Models\{Entity};
 
 class {Entity}Created
 {
@@ -57,9 +57,9 @@ class {Entity}Created implements ShouldBroadcast
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Listeners;
+namespace App\Listeners;
 
-use Modules\{ModuleName}\Events\{Entity}Created;
+use App\Events\{Entity}Created;
 
 class Send{Entity}Notification
 {
@@ -93,15 +93,17 @@ class Send{Entity}Notification implements ShouldQueue
 }
 ```
 
-## Registration in EventServiceProvider
+## Registration in AppServiceProvider
 
 ```php
-protected $listen = [
-    {Entity}Created::class => [
-        Send{Entity}Notification::class,
-        Log{Entity}Activity::class,
-    ],
-];
+// En AppServiceProvider::boot()
+use Illuminate\Support\Facades\Event;
+use App\Events\{Entity}Created;
+use App\Listeners\Send{Entity}Notification;
+use App\Listeners\Log{Entity}Activity;
+
+Event::listen({Entity}Created::class, Send{Entity}Notification::class);
+Event::listen({Entity}Created::class, Log{Entity}Activity::class);
 ```
 
 ## Rules

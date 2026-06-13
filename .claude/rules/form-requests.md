@@ -1,5 +1,5 @@
 ---
-globs: "modules/*/app/Http/Requests/**/*.php"
+globs: "app/Http/Requests/**/*.php"
 ---
 
 # Form Request Rules
@@ -9,7 +9,7 @@ globs: "modules/*/app/Http/Requests/**/*.php"
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Http\Requests;
+namespace App\Http\Requests\{Domain};
 
 use Illuminate\Foundation\Http\FormRequest;
 

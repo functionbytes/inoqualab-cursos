@@ -5,14 +5,14 @@
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Notifications;
+namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Modules\{ModuleName}\Models\{Entity};
+use App\Models\{Entity};
 
 class {Entity}StatusChangedNotification extends Notification implements ShouldQueue
 {
@@ -83,7 +83,7 @@ public function via(mixed $notifiable): array
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Mail;
+namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -91,7 +91,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Modules\{ModuleName}\Models\{Entity};
+use App\Models\{Entity};
 
 class {Entity}CreatedMail extends Mailable implements ShouldQueue
 {
@@ -108,7 +108,7 @@ class {Entity}CreatedMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
-        return new Content(view: '{alias}::emails.{entity}-created');
+        return new Content(view: 'emails.{entity}-created');
     }
 }
 ```
@@ -122,7 +122,7 @@ class {Entity}CreatedMail extends Mailable implements ShouldQueue
 - **`type` key**: `{alias}_{event}` format — `attention_closed`, `user_created`
 - **`via()` method**: dynamic channel selection using `canReceiveNotification()` when user preferences apply
 - **Broadcasting**: always implement `toBroadcast()` when `broadcast` channel is included in `via()`
-- **Mail views**: store in `modules/{ModuleName}/resources/views/emails/`
+- **Mail views**: store in `resources/views/emails/`
 - **Dispatch notifications**: `$user->notify(new {Entity}Notification($entity))` in service layer
 - **Batch notifications**: use `Notification::send($users, new Notification)` for bulk
 - **Testing**: use `Notification::fake()` + `Notification::assertSentTo()`, `Mail::fake()` + `Mail::assertSent()`

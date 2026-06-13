@@ -2,7 +2,10 @@
 globs: "modules/*/resources/views/**/*.blade.php"
 ---
 
-# Blade View Rules
+# Blade View Rules — PANEL ADMIN (modules/)
+
+> ⚠️ Estas reglas aplican SOLO a `modules/*/resources/views/` (panel admin).
+> Para vistas públicas (`resources/views/pages/`) ver `rules/pages-views.md`.
 
 - Icons: Font Awesome 6 ONLY (`fas fa-*`, `far fa-*`, `fab fa-*`). NEVER use Tabler Icons (`ti ti-*`)
 - JavaScript: jQuery + AJAX. NEVER use Livewire or Inertia.js
@@ -14,4 +17,4 @@ globs: "modules/*/resources/views/**/*.blade.php"
 - Table actions: ALWAYS dropdown with `fa-ellipsis-vertical`, no icons in items, no `text-danger` on delete
 - Modals: ALWAYS `modal-dialog-centered` with footer buttons w-100 stacked (primary mb-2 top, secondary bottom)
 - select2: NEVER use `theme: 'bootstrap-5'` (CSS not loaded)
-- Primary color: `#90bb13`
+- Primary color: `#008bce` (Bootstrap Modernize — `--bs-primary`)

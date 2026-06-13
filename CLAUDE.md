@@ -1,107 +1,121 @@
-# Proyecto Manager — Entorno Docker
+# Proyecto Manager — Entorno Herd (macOS nativo)
 
-## IMPORTANTE: Todo se ejecuta dentro de Docker
+## Entorno de desarrollo
 
-Este proyecto corre completamente en Docker. **Nunca ejecutes `php`, `artisan`, `composer` ni cualquier herramienta del stack directamente en el host Mac.** Todas las acciones deben hacerse dentro del contenedor `app`.
-
-## Contenedores
-
-| Contenedor        | Propósito                                              |
-|-------------------|--------------------------------------------------------|
-| `app`             | PHP 8.4-FPM + Laravel (principal)                      |
-| `worker`          | Queue worker — `queue:work` (proceso de larga duración)|
-| `nginx`           | Servidor web — puerto 8080                             |
-| `redis`           | Redis 7 — puerto 6379                                  |
-| `redis-commander` | UI Redis — puerto 8081                                 |
-| `mailpit`         | Captura de emails — puerto 8025                        |
-
-Docker Compose está en: `../docker/docker-compose.yml` (relativo a `src/`)  
-Directorio de trabajo dentro del contenedor: `/var/www`
-
-## CRÍTICO: Reiniciar SIEMPRE los 3 contenedores al editar PHP
-
-El contenedor `worker` ejecuta `php artisan queue:work` como proceso de **larga duración**. No recarga código automáticamente. Si solo reinicias `app`, el worker sigue con código viejo.
-
-**Después de cualquier edición de archivos `.php` hay que reiniciar los 3:**
-
-```bash
-# CORRECTO — reiniciar app + worker + nginx juntos
-cd /Users/developerts/Herd/manager/docker && docker compose restart app worker nginx
-
-# INCORRECTO — el worker mantiene el código viejo en memoria
-cd /Users/developerts/Herd/manager/docker && docker compose restart app
-```
-
-> Si `nginx` da 502 después del restart es porque cambió la IP del contenedor `app`. Reinicia siempre los 3 juntos para evitarlo.
-
-## IMPORTANTE: sintaxis obligatoria para docker exec
-
-Docker Desktop en Mac bloquea `docker exec` cuando el CWD del shell es un directorio montado como volumen (`/var/www`). **Siempre** usa `-w /tmp` y rutas absolutas:
-
-```bash
-# CORRECTO — siempre con -w /tmp
-docker exec -w /tmp app php /var/www/artisan <comando>
-docker exec -w /tmp app composer --working-dir=/var/www <comando>
-docker exec -w /tmp app php /var/www/<script.php>
-
-# INCORRECTO — falla con "container breakout detected"
-docker exec app php artisan <comando>
-```
+Este proyecto corre con **Laravel Herd nativo en macOS**. No hay Docker. Los comandos PHP, Artisan, Composer y Pint se ejecutan directamente en el host.
 
 ## Comandos esenciales
 
 ```bash
 # Artisan
-docker exec -w /tmp app php /var/www/artisan <comando>
+php artisan <comando>
 
 # Composer
-docker exec -w /tmp app composer --working-dir=/var/www <comando>
+composer <comando>
 
-# PHP directo
-docker exec -w /tmp app php /var/www/<archivo>
+# Formatear codigo (PHP CS Fixer via Pint)
+vendor/bin/pint
+vendor/bin/pint --dirty   # Solo archivos con cambios
 
-# Abrir shell en el contenedor (bash ya maneja el CWD internamente)
-docker exec -it -w /var/www app bash
-
-# Ver logs del contenedor
-docker logs app -f
-
-# Reiniciar contenedores (desde el directorio docker/)
-cd /Users/developerts/Herd/manager/docker && docker compose restart
-
-# Levantar / detener
-cd /Users/developerts/Herd/manager/docker && docker compose up -d
-cd /Users/developerts/Herd/manager/docker && docker compose down
+# Tests
+php artisan test
+vendor/bin/phpunit
 ```
 
 ## Comandos frecuentes de Laravel
 
 ```bash
-# Limpiar caché
-docker exec -w /tmp app php /var/www/artisan optimize:clear
+# Limpiar cache
+php artisan optimize:clear
 
 # Migraciones
-docker exec -w /tmp app php /var/www/artisan migrate
-docker exec -w /tmp app php /var/www/artisan migrate:status
+php artisan migrate
+php artisan migrate:status
 
 # Rutas
-docker exec -w /tmp app php /var/www/artisan route:list
-
-# Tests
-docker exec -w /tmp app php /var/www/artisan test
-docker exec -w /tmp app php /var/www/vendor/bin/phpunit
+php artisan route:list
 
 # Tinker
-docker exec -it -w /var/www app php /var/www/artisan tinker
+php artisan tinker
 ```
+
+## Arquitectura: monolito por dominios
+
+No existe `modules/`. El codigo vive en `app/` organizado por dominios:
+
+```
+app/Http/Controllers/
+├── Accountings/    # Contabilidad e invoices
+├── Auth/           # Autenticacion y validacion
+├── Customers/      # Portal del cliente
+├── Distributors/   # Portal del distribuidor
+├── Enterprises/    # Portal de empresas
+├── Managers/       # Panel de administracion
+├── Pages/          # Frontend publico (carrito, etc.)
+└── Supports/       # Soporte y atencion
+```
+
+Namespaces reales:
+- Controladores: `App\Http\Controllers\{Domain}\`
+- Modelos: `App\Models\`
+- Form Requests: `App\Http\Requests\{Domain}\`
+- Services: `App\Services\`
+- Jobs: `App\Jobs\`
+- Notifications: `App\Notifications\`
+- Events/Listeners: `App\Events\` / `App\Listeners\`
+- Policies: `App\Policies\`
+
+## Archivos de rutas por dominio
+
+```
+routes/
+├── web.php          # Frontend publico (pages)
+├── api.php          # API REST (Sanctum)
+├── managers.php     # Panel manager
+├── customers.php    # Portal cliente
+├── distributors.php # Portal distribuidor
+├── enterprises.php  # Portal empresa
+├── supports.php     # Panel soporte
+├── accountings.php  # Panel contabilidad
+└── console.php      # Comandos de consola / scheduler
+```
+
+El grupo base de cada dominio protegido:
+```php
+Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], function () {
+    // rutas del dominio managers
+});
+```
+
+Middleware disponibles por rol: `manager`, `customer`, `distributor`, `enterprise`, `support`, `accountings`.
+
+## Sistema de roles y permisos
+
+### Rol actual (columna `role` en `users`)
+
+Valores: `manager`, `customer`, `support`, `distributor`, `enterprise`, `accounting`.
+
+Middleware de verificacion directa: `IsManager`, `IsCustomer`, `IsDistributor`, `IsEnterprise`, `IsAccountings`, `IsSupport` — verifican `Auth::user()->role === '{rol}'`.
+
+### Adopcion gradual de Spatie Permission
+
+`spatie/laravel-permission` se instala en coexistencia con la columna `role`. Estrategia:
+- Los permisos Spatie (`{alias}.action`) se crean y sincronizan con el observer de rol.
+- La columna `role` se mantiene durante la transicion.
+- La autorizacion se migra dominio a dominio hacia Policies + `$user->can('{alias}.action')`.
+- Mientras no se migre un dominio, el middleware de rol sigue siendo el guardián.
+
+Convencion de permisos: `{alias}.action` — por ejemplo `orders.view`, `users.create`, `invoices.delete`.
 
 ## Base de datos
 
-- **MySQL**: host `host.docker.internal`, puerto `3306`, DB `managerchat`
-- **Oracle**: host `192.168.253.8`, puerto `1521`, servicio `GESTCENT`
+- **MySQL/MariaDB**: host `127.0.0.1`, puerto `3306`, DB `managerchat` (gestionado por Herd)
+- **Oracle**: host `192.168.253.8`, puerto `1521`, servicio `GESTCENT` (segunda conexion de solo lectura)
 
 ## Notas
 
-- El código fuente en `src/` está montado como volumen en `/var/www` — los cambios de archivo son inmediatos, sin necesidad de reconstruir la imagen.
-- Para reconstruir la imagen: `cd /Users/developerts/Herd/manager/docker && docker compose build`
-- El usuario dentro del contenedor es `www` (uid 1000).
+- Los cambios de archivo son inmediatos; no hay proceso worker de larga duracion que reiniciar.
+- Para el queue worker en desarrollo: `php artisan queue:work` en una terminal separada.
+- Variables de entorno en `.env` (raiz del proyecto).
+- NUNCA ejecutar `migrate:fresh` — destruye todos los datos.
+- NUNCA usar `config:cache`, `route:cache` ni `view:cache` en desarrollo (dificulta debug).

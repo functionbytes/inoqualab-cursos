@@ -1,5 +1,5 @@
 ---
-globs: "modules/*/database/seeders/**/*.php"
+globs: "database/seeders/**/*.php"
 ---
 
 # Seeder Rules

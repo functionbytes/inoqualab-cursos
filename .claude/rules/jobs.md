@@ -5,12 +5,12 @@
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Jobs;
+namespace App\Jobs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
-use Modules\{ModuleName}\Models\{Entity};
+use App\Models\{Entity};
 
 class Process{Entity}Job implements ShouldQueue
 {

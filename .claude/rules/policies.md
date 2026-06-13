@@ -1,5 +1,5 @@
 ---
-globs: "modules/*/app/Policies/**/*.php"
+globs: "app/Policies/**/*.php"
 ---
 
 # Policy Rules
@@ -9,11 +9,11 @@ globs: "modules/*/app/Policies/**/*.php"
 ```php
 <?php
 
-namespace Modules\{ModuleName}\Policies;
+namespace App\Policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Modules\{ModuleName}\Models\{Entity};
+use App\Models\{Entity};
 
 class {Entity}Policy
 {
@@ -84,21 +84,20 @@ class {Entity}Policy
 }
 ```
 
-## Registro en ServiceProvider
+## Registro en AppServiceProvider
+
+Las Policies se registran en `App\Providers\AppServiceProvider` (o en `AuthServiceProvider` si existe):
 
 ```php
-// En {ModuleName}ServiceProvider::boot()
+// En AppServiceProvider::boot()
 use Illuminate\Support\Facades\Gate;
-use Modules\{ModuleName}\Models\{Entity};
-use Modules\{ModuleName}\Policies\{Entity}Policy;
+use App\Models\{Entity};
+use App\Policies\{Entity}Policy;
 
-protected function registerPolicies(): void
-{
-    Gate::policy({Entity}::class, {Entity}Policy::class);
-}
+Gate::policy({Entity}::class, {Entity}Policy::class);
 ```
 
-Llamar `$this->registerPolicies();` en el `boot()` despues de `registerRoutes()`.
+Laravel tambien descubre automaticamente Policies si el modelo y la Policy estan en los namespaces convencionales (`App\Models` / `App\Policies`). La convencion de nombre es suficiente: `App\Models\Order` → `App\Policies\OrderPolicy`.
 
 ## Uso en controllers
 
@@ -157,7 +156,7 @@ public function index(): View
         })
         ->paginate(15);
 
-    return view('blog::posts.index', compact('posts'));
+    return view('managers.blog.posts.index', compact('posts'));
 }
 ```
 

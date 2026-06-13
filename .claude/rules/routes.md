@@ -1,51 +1,60 @@
 ---
-globs: "modules/*/routes/**/*.php,routes/**/*.php"
+globs: "routes/**/*.php"
 ---
 
 # Route Files Rules
 
-## Archivos de rutas por modulo
+## Archivos de rutas por dominio
 
 ```
-modules/{Module}/routes/
-├── web.php       # Rutas web (navegacion, forms, vistas)
-├── api.php       # Rutas API REST (Sanctum, JSON)
-└── settings.php  # OPCIONAL - solo algunos modulos separan rutas de admin
+routes/
+├── web.php          # Frontend publico (pages, sitemap)
+├── api.php          # API REST (Sanctum)
+├── managers.php     # Panel manager (prefix: panel, middleware: auth+manager)
+├── customers.php    # Portal cliente (middleware: auth+customer)
+├── distributors.php # Portal distribuidor (middleware: auth+distributor)
+├── enterprises.php  # Portal empresa (middleware: auth+enterprise)
+├── supports.php     # Panel soporte (middleware: auth+support)
+├── accountings.php  # Panel contabilidad (middleware: auth+accountings)
+└── console.php      # Comandos de consola / scheduler
 ```
 
-## Patron `routes/web.php` (estandar del proyecto)
+## Patron de grupo por dominio (estandar real del proyecto)
 
 ```php
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\{ModuleName}\Http\Controllers\{ModuleName}Controller;
-use Modules\{ModuleName}\Http\Controllers\{ModuleName}SettingsController;
+use App\Http\Controllers\Managers\{Domain}\{Entity}Controller;
 
-Route::middleware(['web', 'auth'])->group(function () {
+Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], function () {
 
-    // Rutas principales del modulo
-    Route::prefix('panel/{alias}')
-        ->name('{alias}.')
-        ->group(function () {
-            Route::get('/', [{ModuleName}Controller::class, 'index'])->name('index');
-            Route::get('/create', [{ModuleName}Controller::class, 'create'])->name('create');
-            Route::post('/', [{ModuleName}Controller::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [{ModuleName}Controller::class, 'edit'])->name('edit');
-            Route::put('/{id}', [{ModuleName}Controller::class, 'update'])->name('update');
-            Route::delete('/{id}', [{ModuleName}Controller::class, 'destroy'])->name('destroy');
-            Route::post('/bulk-action', [{ModuleName}Controller::class, 'bulkAction'])->name('bulk-action');
-        });
+    Route::group(['prefix' => '{domain}'], function () {
+        Route::get('/', [{Entity}Controller::class, 'index'])->name('manager.{domain}.index');
+        Route::get('/create', [{Entity}Controller::class, 'create'])->name('manager.{domain}.create');
+        Route::post('/', [{Entity}Controller::class, 'store'])->name('manager.{domain}.store');
+        Route::get('/{id}/edit', [{Entity}Controller::class, 'edit'])->name('manager.{domain}.edit');
+        Route::put('/{id}', [{Entity}Controller::class, 'update'])->name('manager.{domain}.update');
+        Route::delete('/{id}', [{Entity}Controller::class, 'destroy'])->name('manager.{domain}.destroy');
+        Route::post('/bulk-action', [{Entity}Controller::class, 'bulkAction'])->name('manager.{domain}.bulk-action');
+    });
 
-    // Rutas de settings/admin (prefix+name diferentes)
-    Route::prefix('panel/settings/{alias}')
-        ->name('settings.{alias}.')
-        ->group(function () {
-            Route::get('/', [{ModuleName}SettingsController::class, 'index'])->name('index');
-            Route::patch('/', [{ModuleName}SettingsController::class, 'update'])->name('update');
-        });
+    Route::group(['prefix' => 'settings'], function () {
+        Route::get('/{section}', [SettingsController::class, 'index'])->name('manager.settings.index');
+        Route::patch('/{section}', [SettingsController::class, 'update'])->name('manager.settings.update');
+    });
 });
 ```
+
+Middleware por rol:
+| Dominio       | Middleware           | Prefijo   |
+|---------------|----------------------|-----------|
+| managers      | `auth`, `manager`    | `panel`   |
+| customers     | `auth`, `customer`   | `customer`|
+| distributors  | `auth`, `distributor`| `distributor`|
+| enterprises   | `auth`, `enterprise` | `enterprise`|
+| supports      | `auth`, `support`    | `support` |
+| accountings   | `auth`, `accountings`| `panel`   |
 
 ## Patron `routes/api.php` (REST API)
 
@@ -53,7 +62,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\{ModuleName}\Http\Controllers\Api\{EntityName}ApiController;
+use App\Http\Controllers\Api\{Entity}ApiController;
 
 // Publicas con throttle
 Route::middleware(['api', 'throttle:60,1'])
@@ -68,7 +77,7 @@ Route::middleware(['api', 'auth:sanctum'])
     ->prefix('{alias}')
     ->name('api.{alias}.')
     ->group(function () {
-        Route::apiResource('{entity-kebab}', {EntityName}ApiController::class);
+        Route::apiResource('{entity-kebab}', {Entity}ApiController::class);
     });
 ```
 
@@ -77,7 +86,7 @@ Route::middleware(['api', 'auth:sanctum'])
 ```php
 Route::middleware(['web', 'throttle:30,1'])
     ->prefix('ruta-publica')
-    ->name('{alias}.public.')
+    ->name('public.{alias}.')
     ->group(function () {
         Route::get('/', [PublicController::class, 'form'])->name('form');
         Route::post('/', [PublicController::class, 'submit'])->name('submit')->middleware('throttle:10,1');
@@ -86,40 +95,37 @@ Route::middleware(['web', 'throttle:30,1'])
 
 ## Reglas criticas
 
-- **Prefix main**: SIEMPRE `panel/{alias}`
-- **Prefix settings**: SIEMPRE `panel/settings/{alias}`
-- **Prefix API**: SIEMPRE `api/{alias}` con `auth:sanctum`
-- **Name main**: SIEMPRE `{alias}.` (ej: `attention.index`)
-- **Name settings**: SIEMPRE `settings.{alias}.` (ej: `settings.attention.index`)
-- **Name API**: SIEMPRE `api.{alias}.` (ej: `api.attention.index`)
-- **Middleware main**: `['web', 'auth']`
-- **Middleware settings**: `['web', 'auth']` + opcional `settings` middleware
+- **Namespaces**: `App\Http\Controllers\{Domain}\` (NUNCA `Modules\`)
+- **Prefix panel**: `panel` para managers y accountings
+- **Prefix API**: `api/{alias}` con `auth:sanctum`
+- **Name convention**: `{rol}.{domain}.{action}` (ej: `manager.users.index`, `customer.orders.show`)
+- **Middleware roles**: `manager`, `customer`, `distributor`, `enterprise`, `support`, `accountings`
 - **Middleware public**: `['web', 'throttle:30,1']` (rate limit obligatorio)
 - **Middleware API publica**: `['api', 'throttle:60,1']`
 - **Middleware API privada**: `['api', 'auth:sanctum']`
 
 ## HTTP methods correctos
 
-| Accion | Method | Nombre ruta |
-|--------|--------|-------------|
-| Listar | `GET` | `index` |
-| Formulario crear | `GET` | `create` |
-| Guardar nuevo | `POST` | `store` |
-| Ver detalle | `GET` | `show` |
-| Formulario editar | `GET` | `edit` |
-| Actualizar | `PUT` | `update` |
-| Actualizar parcial (settings) | `PATCH` | `update` |
-| Eliminar | `DELETE` | `destroy` |
-| Bulk action | `POST` | `bulk-action` |
-| Exportar | `GET` | `export` |
+| Accion                        | Method   | Sufijo ruta |
+|-------------------------------|----------|-------------|
+| Listar                        | `GET`    | `index`     |
+| Formulario crear              | `GET`    | `create`    |
+| Guardar nuevo                 | `POST`   | `store`     |
+| Ver detalle                   | `GET`    | `show`      |
+| Formulario editar             | `GET`    | `edit`      |
+| Actualizar                    | `PUT`    | `update`    |
+| Actualizar parcial (settings) | `PATCH`  | `update`    |
+| Eliminar                      | `DELETE` | `destroy`   |
+| Bulk action                   | `POST`   | `bulk-action`|
+| Exportar                      | `GET`    | `export`    |
 
 ## Nested resources pattern
 
 ```php
-Route::prefix('{parent}/{parent_id}/{child}')->name('{parent}.{child}.')->group(function () {
-    Route::get('/', [ChildController::class, 'index'])->name('index');
-    Route::post('/', [ChildController::class, 'store'])->name('store');
-    Route::put('/{id}', [ChildController::class, 'update'])->name('update');
+Route::group(['prefix' => '{parent}/{parent_id}/{child}'], function () {
+    Route::get('/', [ChildController::class, 'index'])->name('manager.{parent}.{child}.index');
+    Route::post('/', [ChildController::class, 'store'])->name('manager.{parent}.{child}.store');
+    Route::put('/{id}', [ChildController::class, 'update'])->name('manager.{parent}.{child}.update');
 });
 ```
 
@@ -127,7 +133,7 @@ Route::prefix('{parent}/{parent_id}/{child}')->name('{parent}.{child}.')->group(
 
 SIEMPRE incluir ruta `bulk-action` en listados:
 ```php
-Route::post('/bulk-action', [Controller::class, 'bulkAction'])->name('bulk-action');
+Route::post('/bulk-action', [Controller::class, 'bulkAction'])->name('manager.{domain}.bulk-action');
 ```
 
 Espera JSON payload:
@@ -141,7 +147,7 @@ Espera JSON payload:
 - `Route::apiResource()` solo en api.php
 - Closures en routes (siempre usar controller)
 - Rutas fuera de grupos (siempre con middleware explicito)
-- `name()` sin prefijo de modulo
+- Namespaces `Modules\` (este proyecto es monolito en `App\`)
 
 ## Ver tambien
 
