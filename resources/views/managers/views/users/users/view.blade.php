@@ -10,7 +10,7 @@
                 class="nav-link position-relative rounded-0 active d-flex align-items-center justify-content-center bg-transparent fs-3 py-4"
                 id="pills-account-tab" data-bs-toggle="pill" data-bs-target="#pills-account" type="button" role="tab"
                 aria-controls="pills-account" aria-selected="true">
-                <i class="ti ti-user-circle me-2 fs-6"></i>
+                <i class="fas fa-user-circle me-2 fs-6"></i>
                 <span class="d-none d-md-block">Account</span>
             </button>
         </li>
@@ -19,7 +19,7 @@
                 class="nav-link position-relative rounded-0 d-flex align-items-center justify-content-center bg-transparent fs-3 py-4"
                 id="pills-notifications-tab" data-bs-toggle="pill" data-bs-target="#pills-notifications" type="button"
                 role="tab" aria-controls="pills-notifications" aria-selected="false">
-                <i class="ti ti-bell me-2 fs-6"></i>
+                <i class="fas fa-bell me-2 fs-6"></i>
                 <span class="d-none d-md-block">Notifications</span>
             </button>
         </li>
@@ -28,7 +28,7 @@
                 class="nav-link position-relative rounded-0 d-flex align-items-center justify-content-center bg-transparent fs-3 py-4"
                 id="pills-bills-tab" data-bs-toggle="pill" data-bs-target="#pills-bills" type="button" role="tab"
                 aria-controls="pills-bills" aria-selected="false">
-                <i class="ti ti-article me-2 fs-6"></i>
+                <i class="fas fa-newspaper me-2 fs-6"></i>
                 <span class="d-none d-md-block">Bills</span>
             </button>
         </li>
@@ -37,7 +37,7 @@
                 class="nav-link position-relative rounded-0 d-flex align-items-center justify-content-center bg-transparent fs-3 py-4"
                 id="pills-security-tab" data-bs-toggle="pill" data-bs-target="#pills-security" type="button" role="tab"
                 aria-controls="pills-security" aria-selected="false">
-                <i class="ti ti-lock me-2 fs-6"></i>
+                <i class="fas fa-lock me-2 fs-6"></i>
                 <span class="d-none d-md-block">Security</span>
             </button>
         </li>
@@ -195,7 +195,7 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-article text-dark d-block fs-7" width="22"
+                                                <i class="fas fa-newspaper text-dark d-block fs-7" width="22"
                                                     height="22"></i>
                                             </div>
                                             <div>
@@ -212,7 +212,7 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-checkbox text-dark d-block fs-7" width="22"
+                                                <i class="fas fa-square-check text-dark d-block fs-7" width="22"
                                                     height="22"></i>
                                             </div>
                                             <div>
@@ -229,7 +229,7 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-clock-hour-4 text-dark d-block fs-7" width="22"
+                                                <i class="fas fa-clock text-dark d-block fs-7" width="22"
                                                     height="22"></i>
                                             </div>
                                             <div>
@@ -247,7 +247,7 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-truck-delivery text-dark d-block fs-7" width="22"
+                                                <i class="fas fa-truck text-dark d-block fs-7" width="22"
                                                     height="22"></i>
                                             </div>
                                             <div>
@@ -264,7 +264,7 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div
                                                 class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-mail text-dark d-block fs-7" width="22" height="22"></i>
+                                                <i class="fas fa-envelope text-dark d-block fs-7" width="22" height="22"></i>
                                             </div>
                                             <div>
                                                 <h5 class="fs-4 fw-semibold">Email Notification</h5>
@@ -290,7 +290,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <div
                                             class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-clock-hour-4 text-dark d-block fs-7" width="22"
+                                            <i class="fas fa-clock text-dark d-block fs-7" width="22"
                                                 height="22"></i>
                                         </div>
                                         <div>
@@ -301,7 +301,7 @@
                                     <a class="text-dark fs-6 d-flex align-items-center justify-content-center bg-transparent p-2 fs-4 rounded-circle"
                                         href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top"
                                         data-bs-title="Download">
-                                        <i class="ti ti-download"></i>
+                                        <i class="fas fa-download"></i>
                                     </a>
                                 </div>
                             </div>
@@ -315,7 +315,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <div
                                             class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-player-pause text-dark d-block fs-7" width="22"
+                                            <i class="fas fa-pause text-dark d-block fs-7" width="22"
                                                 height="22"></i>
                                         </div>
                                         <div>
@@ -402,7 +402,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <div
                                             class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-package text-dark d-block fs-7" width="22" height="22"></i>
+                                            <i class="fas fa-box text-dark d-block fs-7" width="22" height="22"></i>
                                         </div>
                                         <div>
                                             <p class="mb-0">Current Plan</p>
@@ -412,7 +412,7 @@
                                     <a class="text-dark fs-6 d-flex align-items-center justify-content-center bg-transparent p-2 fs-4 rounded-circle"
                                         href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top"
                                         data-bs-title="Add">
-                                        <i class="ti ti-circle-plus"></i>
+                                        <i class="fas fa-circle-plus"></i>
                                     </a>
                                 </div>
                                 <div class="d-flex align-items-center gap-3">
@@ -431,7 +431,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <div
                                             class="bg-light rounded-1 p-6 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-credit-card text-dark d-block fs-7" width="22"
+                                            <i class="fas fa-credit-card text-dark d-block fs-7" width="22"
                                                 height="22"></i>
                                         </div>
                                         <div>
@@ -442,7 +442,7 @@
                                     <a class="text-dark fs-6 d-flex align-items-center justify-content-center bg-transparent p-2 fs-4 rounded-circle"
                                         href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top"
                                         data-bs-title="Edit">
-                                        <i class="ti ti-pencil-minus"></i>
+                                        <i class="fas fa-pen"></i>
                                     </a>
                                 </div>
                                 <p class="my-2">If you updated your payment method, it will only be dislpayed here after
@@ -502,14 +502,14 @@
                             <div class="card-body p-4">
                                 <div
                                     class="bg-light rounded-1 p-6 d-inline-flex align-items-center justify-content-center mb-3">
-                                    <i class="ti ti-device-laptop text-primary d-block fs-7" width="22" height="22"></i>
+                                    <i class="fas fa-laptop text-primary d-block fs-7" width="22" height="22"></i>
                                 </div>
                                 <h5 class="fs-5 fw-semibold mb-0">Devices</h5>
                                 <p class="mb-3">Lorem ipsum dolor sit amet consectetur adipisicing elit Rem.</p>
                                 <button class="btn btn-primary mb-4">Sign out from all devices</button>
                                 <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
                                     <div class="d-flex align-items-center gap-3">
-                                        <i class="ti ti-device-mobile text-dark d-block fs-7" width="26"
+                                        <i class="fas fa-mobile text-dark d-block fs-7" width="26"
                                             height="26"></i>
                                         <div>
                                             <h5 class="fs-4 fw-semibold mb-0">iPhone 14</h5>
@@ -518,12 +518,12 @@
                                     </div>
                                     <a class="text-dark fs-6 d-flex align-items-center justify-content-center bg-transparent p-2 fs-4 rounded-circle"
                                         href="javascript:void(0)">
-                                        <i class="ti ti-dots-vertical"></i>
+                                        <i class="fas fa-ellipsis-vertical"></i>
                                     </a>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <i class="ti ti-device-laptop text-dark d-block fs-7" width="26"
+                                        <i class="fas fa-laptop text-dark d-block fs-7" width="26"
                                             height="26"></i>
                                         <div>
                                             <h5 class="fs-4 fw-semibold mb-0">Macbook Air</h5>
@@ -532,7 +532,7 @@
                                     </div>
                                     <a class="text-dark fs-6 d-flex align-items-center justify-content-center bg-transparent p-2 fs-4 rounded-circle"
                                         href="javascript:void(0)">
-                                        <i class="ti ti-dots-vertical"></i>
+                                        <i class="fas fa-ellipsis-vertical"></i>
                                     </a>
                                 </div>
                                 <button class="btn btn-light-primary text-primary w-100 py-1">Need Help ?</button>

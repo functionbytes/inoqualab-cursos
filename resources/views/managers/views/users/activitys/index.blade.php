@@ -2,18 +2,17 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Actividades'])
 
 
 
     <div class="card overflow-hidden chat-application">
         <div class="d-flex align-items-center justify-content-between gap-3 m-3 d-lg-none">
             <button class="btn btn-primary d-flex" type="button" data-bs-toggle="offcanvas" data-bs-target="#chat-sidebar" aria-controls="chat-sidebar">
-                <i class="ti ti-menu-2 fs-5"></i>
+                <i class="fas fa-bars fs-5"></i>
             </button>
             <form class="position-relative w-100">
                 <input type="text" class="form-control search-chat py-2 ps-5" id="text-srh" placeholder="Search Contact">
-                <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
+                <i class="fas fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
             </form>
         </div>
         <div class="d-flex w-100">
@@ -24,7 +23,7 @@
                     @foreach ($models as $key => $model)
                         <li class="list-group-item border-0 p-0 mx-9">
                             <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1 list-model" data-model="{{$model}}" data-user="{{$user->slack}}">
-                                <i class="ti ti-bookmark fs-5 text-primary"></i>{{$model}} {{ $modelCounts[$model] ?? 0 }}</a>
+                                <i class="fas fa-bookmark fs-5 text-primary"></i>{{$model}} {{ $modelCounts[$model] ?? 0 }}</a>
                         </li>
                     @endforeach
                 </ul>
@@ -35,7 +34,7 @@
                         <div class="px-4 pt-9 pb-6 d-none d-lg-block">
                             <form class="position-relative">
                                 <input type="text" class="form-control search-chat py-2 ps-5" id="text-srh" placeholder="Search" />
-                                <i class="ti ti-search position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
+                                <i class="fas fa-magnifying-glass position-absolute top-50 start-0 translate-middle-y fs-6 text-dark ms-3"></i>
                             </form>
                         </div>
                         <div class="app-chat">
@@ -69,22 +68,22 @@
                                     <ul class="list-unstyled mb-0 d-flex align-items-center">
                                         <li class="d-lg-none d-block">
                                             <a class="text-dark back-btn px-2 fs-5 bg-hover-primary nav-icon-hover position-relative z-index-5" href="javascript:void(0)">
-                                                <i class="ti ti-arrow-left"></i>
+                                                <i class="fas fa-arrow-left"></i>
                                             </a>
                                         </li>
                                         <li class="position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="important">
                                             <a class="text-dark px-2 fs-5 bg-hover-primary nav-icon-hover position-relative z-index-5" href="javascript:void(0)">
-                                                <i class="ti ti-star"></i>
+                                                <i class="fas fa-star"></i>
                                             </a>
                                         </li>
                                         <li class="position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Edit">
                                             <a class="d-block text-dark px-2 fs-5 bg-hover-primary nav-icon-hover position-relative z-index-5" href="javascript:void(0)">
-                                                <i class="ti ti-pencil"></i>
+                                                <i class="fas fa-pen"></i>
                                             </a>
                                         </li>
                                         <li class="position-relative" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Delete">
                                             <a class="text-dark px-2 fs-5 bg-hover-primary nav-icon-hover position-relative z-index-5" href="javascript:void(0)">
-                                                <i class="ti ti-trash"></i>
+                                                <i class="fas fa-trash"></i>
                                             </a>
                                         </li>
                                     </ul>
@@ -559,33 +558,33 @@
                 <ul class="list-group" style="height: calc(100vh - 150px)" data-simplebar>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-inbox fs-5"></i>All Contacts </a>
+                            <i class="fas fa-inbox fs-5"></i>All Contacts </a>
                     </li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-star"></i>Starred </a>
+                            <i class="fas fa-star"></i>Starred </a>
                     </li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-file-text fs-5"></i>Pening Approval </a>
+                            <i class="fas fa-file-lines fs-5"></i>Pening Approval </a>
                     </li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-alert-circle"></i>Blocked </a>
+                            <i class="fas fa-circle-exclamation"></i>Blocked </a>
                     </li>
                     <li class="border-bottom my-3"></li>
                     <li class="fw-semibold text-dark text-uppercase mx-9 my-2 px-3 fs-2">CATEGORIES</li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-bookmark fs-5 text-primary"></i>Engineers </a>
+                            <i class="fas fa-bookmark fs-5 text-primary"></i>Engineers </a>
                     </li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-bookmark fs-5 text-warning"></i>Support Staff </a>
+                            <i class="fas fa-bookmark fs-5 text-warning"></i>Support Staff </a>
                     </li>
                     <li class="list-group-item border-0 p-0 mx-9">
                         <a class="d-flex align-items-center gap-2 list-group-item-action text-dark px-3 py-8 mb-1 rounded-1" href="javascript:void(0)">
-                            <i class="ti ti-bookmark fs-5 text-success"></i>Sales Team </a>
+                            <i class="fas fa-bookmark fs-5 text-success"></i>Sales Team </a>
                     </li>
                 </ul>
             </div>

@@ -3,7 +3,7 @@
         <ul class="navbar-nav">
             <li class="nav-item d-block d-xl-none">
                 <a class="nav-link sidebartoggler ms-n3" id="sidebarCollapse" href="javascript:void(0)">
-                    <i class="ti ti-menu-2"></i>
+                    <i class="fas fa-bars"></i>
                 </a>
             </li>
             <li class="nav-item d-none d-xl-block">
@@ -19,7 +19,7 @@
         <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="p-2">
-                <i class="ti ti-dots fs-7"></i>
+                <i class="fas fa-ellipsis fs-7"></i>
             </span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
@@ -28,7 +28,7 @@
                     class="nav-link round-40 p-1 ps-0 d-flex d-xl-none align-items-center justify-content-center"
                     type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar"
                     aria-controls="offcanvasWithBothOptions">
-                    <i class="ti ti-align-justified fs-7"></i>
+                    <i class="fas fa-align-justify fs-7"></i>
                 </a>
                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
 

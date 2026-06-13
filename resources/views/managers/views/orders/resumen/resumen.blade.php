@@ -3,9 +3,7 @@
 @section('content')
 
     @if($enterprise!=null)
-        @include('managers.includes.card', ['title' => 'Ordenes ' . $enterprise->title])
     @else
-        @include('managers.includes.card', ['title' => 'Ordenes '])
     @endif
     
 
@@ -130,7 +128,7 @@
                             <td class="text-left">
                                 <div class="dropdown dropstart">
                                     <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti ti-dots fs-5"></i>
+                                        <i class="fas fa-ellipsis fs-5"></i>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                             <li>

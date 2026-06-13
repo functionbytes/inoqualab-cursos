@@ -5,7 +5,7 @@
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link sidebartoggler nav-icon-hover ms-n3" id="headerCollapse" href="javascript:void(0)">
-                    <i class="ti ti-menu-2"></i>
+                    <i class="fas fa-bars"></i>
                 </a>
             </li>
         </ul>
@@ -16,13 +16,13 @@
         </div>
         <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
               <span class="p-2">
-                <i class="ti ti-dots fs-7"></i>
+                <i class="fas fa-ellipsis fs-7"></i>
               </span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <div class="d-flex align-items-center justify-content-between">
                 <a href="javascript:void(0)" class="nav-link d-flex d-lg-none align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar" aria-controls="offcanvasWithBothOptions">
-                    <i class="ti ti-align-justified fs-7"></i>
+                    <i class="fas fa-align-justify fs-7"></i>
                 </a>
                 <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
 
@@ -35,7 +35,7 @@
                     <li class="nav-item dropdown me-1">
                         <a class="nav-link nav-icon-hover position-relative" href="javascript:void(0)"
                            id="dropNotif" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="ti ti-bell fs-6"></i>
+                            <i class="fas fa-bell fs-6"></i>
                             @if($unreadCount > 0)
                                 <span class="badge rounded-pill bg-danger position-absolute"
                                       style="top:2px;right:2px;font-size:9px;padding:2px 5px;min-width:16px;"
@@ -60,7 +60,7 @@
                                         <div class="flex-shrink-0 mt-1">
                                             <span class="rounded-circle d-flex align-items-center justify-content-center bg-primary-subtle"
                                                   style="width:32px;height:32px;">
-                                                <i class="ti ti-bell fs-6 text-primary"></i>
+                                                <i class="fas fa-bell fs-6 text-primary"></i>
                                             </span>
                                         </div>
                                         <div class="flex-grow-1 overflow-hidden">
@@ -72,7 +72,7 @@
                                     </a>
                                 @empty
                                     <div class="text-center py-4 text-muted small">
-                                        <i class="ti ti-bell-off fs-4 d-block mb-2"></i>
+                                        <i class="fas fa-bell-slash fs-4 d-block mb-2"></i>
                                         Sin notificaciones nuevas
                                     </div>
                                 @endforelse

@@ -10,7 +10,7 @@
         <!-- Home -->
         <!-- ============================= -->
         <li class="nav-small-cap">
-          <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+          <i class="fas fa-ellipsis nav-small-cap-icon fs-4"></i>
         </li>
         <!-- =================== -->
         <!-- Dashboard -->

@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Cursos'])
 
     <div class="widget-content searchable-container list">
         
@@ -61,7 +60,7 @@
                             <td class="text-left">
                                 <div class="dropdown dropstart">
                                     <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti ti-dots fs-5"></i>
+                                        <i class="fas fa-ellipsis fs-5"></i>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 

@@ -2,7 +2,7 @@
 <li class="nav-item dropdown">
     <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
        aria-expanded="false">
-        <i class="ti ti-bell-ringing"></i>
+        <i class="fas fa-bell"></i>
         <div class="notification bg-primary rounded-circle"></div>
     </a>
     <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">

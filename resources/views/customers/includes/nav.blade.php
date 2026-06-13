@@ -3,7 +3,7 @@
     <nav class="sidebar-nav scroll-sidebar container-fluid">
       <ul id="sidebarnav">
         <li class="nav-small-cap">
-          <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+          <i class="fas fa-ellipsis nav-small-cap-icon fs-4"></i>
         </li>
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false" >

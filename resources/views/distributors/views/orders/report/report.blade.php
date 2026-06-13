@@ -38,7 +38,7 @@
                                     <div class="input-group">
                                         <input type="text" id="range" name="range" class="form-control daterange" />
                                         <span class="input-group-text">
-                                              <i class="ti ti-calendar fs-5"></i>
+                                              <i class="fas fa-calendar fs-5"></i>
                                             </span>
                                     </div>
                                 </div>

@@ -165,7 +165,7 @@
                                             <td class="">
                                                 <div class="dropdown">
                                                     <a class="text-decoration-none" href="{{ route('manager.contacts.edit', $contact->slack) }}" >
-                                                        <i class="ti ti-dots fs-4"></i>
+                                                        <i class="fas fa-ellipsis fs-4"></i>
                                                     </a>
                                                 </div>
                                             </td>
