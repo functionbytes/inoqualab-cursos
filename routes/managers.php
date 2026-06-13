@@ -146,23 +146,23 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     Route::group(['prefix' => 'testimonies', 'middleware' => 'permission:testimonies.view'], function () {
         Route::get('/', [TestimoniesController::class, 'index'])->name('manager.testimonies');
-        Route::get('/create', [TestimoniesController::class, 'create'])->name('manager.testimonies.create');
-        Route::post('/store', [TestimoniesController::class, 'store'])->name('manager.testimonies.store');
-        Route::post('/update', [TestimoniesController::class, 'update'])->name('manager.testimonies.update');
-        Route::get('/edit/{slack}', [TestimoniesController::class, 'edit'])->name('manager.testimonies.edit');
+        Route::get('/create', [TestimoniesController::class, 'create'])->middleware('permission:testimonies.create')->name('manager.testimonies.create');
+        Route::post('/store', [TestimoniesController::class, 'store'])->middleware('permission:testimonies.create')->name('manager.testimonies.store');
+        Route::post('/update', [TestimoniesController::class, 'update'])->middleware('permission:testimonies.update')->name('manager.testimonies.update');
+        Route::get('/edit/{slack}', [TestimoniesController::class, 'edit'])->middleware('permission:testimonies.update')->name('manager.testimonies.edit');
         Route::get('/view/{slack}', [TestimoniesController::class, 'view'])->name('manager.testimonies.view');
-        Route::delete('/destroy/{slack}', [TestimoniesController::class, 'destroy'])->name('manager.testimonies.destroy');
+        Route::delete('/destroy/{slack}', [TestimoniesController::class, 'destroy'])->middleware('permission:testimonies.delete')->name('manager.testimonies.destroy');
     });
 
     Route::group(['prefix' => 'departments', 'middleware' => 'permission:departments.view'], function () {
 
         Route::get('/', [DepartmentsController::class, 'index'])->name('manager.departments');
-        Route::get('/create', [DepartmentsController::class, 'create'])->name('manager.departments.create');
-        Route::post('/store', [DepartmentsController::class, 'store'])->name('manager.departments.store');
-        Route::post('/update', [DepartmentsController::class, 'update'])->name('manager.departments.update');
-        Route::get('/edit/{slack}', [DepartmentsController::class, 'edit'])->name('manager.departments.edit');
+        Route::get('/create', [DepartmentsController::class, 'create'])->middleware('permission:departments.create')->name('manager.departments.create');
+        Route::post('/store', [DepartmentsController::class, 'store'])->middleware('permission:departments.create')->name('manager.departments.store');
+        Route::post('/update', [DepartmentsController::class, 'update'])->middleware('permission:departments.update')->name('manager.departments.update');
+        Route::get('/edit/{slack}', [DepartmentsController::class, 'edit'])->middleware('permission:departments.update')->name('manager.departments.edit');
         Route::get('/view/{slack}', [DepartmentsController::class, 'view'])->name('manager.departaments.view');
-        Route::delete('/destroy/{slack}', [DepartmentsController::class, 'destroy'])->name('manager.departments.destroy');
+        Route::delete('/destroy/{slack}', [DepartmentsController::class, 'destroy'])->middleware('permission:departments.delete')->name('manager.departments.destroy');
 
     });
 
@@ -184,12 +184,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'distributors', 'middleware' => 'permission:distributors.view'], function () {
 
         Route::get('/', [DistributorsController::class, 'index'])->name('manager.distributors');
-        Route::get('/create', [DistributorsController::class, 'create'])->name('manager.distributors.create');
-        Route::post('/store', [DistributorsController::class, 'store'])->name('manager.distributors.store');
-        Route::post('/update', [DistributorsController::class, 'update'])->name('manager.distributors.update');
-        Route::get('/edit/{slack}', [DistributorsController::class, 'edit'])->name('manager.distributors.edit');
+        Route::get('/create', [DistributorsController::class, 'create'])->middleware('permission:distributors.create')->name('manager.distributors.create');
+        Route::post('/store', [DistributorsController::class, 'store'])->middleware('permission:distributors.create')->name('manager.distributors.store');
+        Route::post('/update', [DistributorsController::class, 'update'])->middleware('permission:distributors.update')->name('manager.distributors.update');
+        Route::get('/edit/{slack}', [DistributorsController::class, 'edit'])->middleware('permission:distributors.update')->name('manager.distributors.edit');
         Route::get('/view/{slack}', [DistributorsController::class, 'view'])->name('manager.distributors.view');
-        Route::delete('/destroy/{slack}', [DistributorsController::class, 'destroy'])->name('manager.distributors.destroy');
+        Route::delete('/destroy/{slack}', [DistributorsController::class, 'destroy'])->middleware('permission:distributors.delete')->name('manager.distributors.destroy');
         Route::get('/navegation/{slack}', [DistributorsController::class, 'navegation'])->name('manager.distributors.navegation');
 
         Route::get('/courses/{slack}', [DistributorCourseController::class, 'index'])->name('manager.distributors.courses');
@@ -219,12 +219,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'enterprises', 'middleware' => 'permission:enterprises.view'], function () {
 
         Route::get('/', [EnterprisesController::class, 'index'])->name('manager.enterprises');
-        Route::get('/create', [EnterprisesController::class, 'create'])->name('manager.enterprises.create');
-        Route::post('/store', [EnterprisesController::class, 'store'])->name('manager.enterprises.store');
-        Route::post('/update', [EnterprisesController::class, 'update'])->name('manager.enterprises.update');
-        Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('manager.enterprises.edit');
+        Route::get('/create', [EnterprisesController::class, 'create'])->middleware('permission:enterprises.create')->name('manager.enterprises.create');
+        Route::post('/store', [EnterprisesController::class, 'store'])->middleware('permission:enterprises.create')->name('manager.enterprises.store');
+        Route::post('/update', [EnterprisesController::class, 'update'])->middleware('permission:enterprises.update')->name('manager.enterprises.update');
+        Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->middleware('permission:enterprises.update')->name('manager.enterprises.edit');
         Route::get('/view/{slack}', [EnterprisesController::class, 'view'])->name('manager.enterprises.view');
-        Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->name('manager.enterprises.destroy');
+        Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->middleware('permission:enterprises.delete')->name('manager.enterprises.destroy');
         Route::get('/dashboard/{slack}', [EnterprisesController::class, 'dashboard'])->name('manager.enterprises.dashboard');
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('manager.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterprisesController::class, 'inscriptions'])->name('manager.enterprises.inscriptions');
@@ -278,12 +278,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'documents', 'middleware' => 'permission:documents.view'], function () {
 
         Route::get('/', [DocumentsController::class, 'index'])->name('manager.documents');
-        Route::get('/create', [DocumentsController::class, 'create'])->name('manager.documents.create');
-        Route::post('/store', [DocumentsController::class, 'store'])->name('manager.documents.store');
-        Route::post('/update', [DocumentsController::class, 'update'])->name('manager.documents.update');
-        Route::get('/edit/{slack}', [DocumentsController::class, 'edit'])->name('manager.documents.edit');
+        Route::get('/create', [DocumentsController::class, 'create'])->middleware('permission:documents.create')->name('manager.documents.create');
+        Route::post('/store', [DocumentsController::class, 'store'])->middleware('permission:documents.create')->name('manager.documents.store');
+        Route::post('/update', [DocumentsController::class, 'update'])->middleware('permission:documents.update')->name('manager.documents.update');
+        Route::get('/edit/{slack}', [DocumentsController::class, 'edit'])->middleware('permission:documents.update')->name('manager.documents.edit');
         Route::get('/view/{slack}', [DocumentsController::class, 'view'])->name('manager.documents.view');
-        Route::delete('/destroy/{slack}', [DocumentsController::class, 'destroy'])->name('manager.documents.destroy');
+        Route::delete('/destroy/{slack}', [DocumentsController::class, 'destroy'])->middleware('permission:documents.delete')->name('manager.documents.destroy');
 
         Route::post('/files', [DocumentsController::class, 'storeFiles'])->name('manager.documents.files');
         Route::delete('/delete/files/{id}', [DocumentsController::class, 'deleteFiles'])->name('manager.documents.files.delete');
@@ -294,11 +294,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'contacts', 'middleware' => 'permission:contacts.view'], function () {
 
         Route::get('/', [ContactsController::class, 'index'])->name('manager.contacts');
-        Route::get('/create', [ContactsController::class, 'create'])->name('manager.contacts.create');
-        Route::post('/update', [ContactsController::class, 'update'])->name('manager.contacts.update');
-        Route::get('/edit/{slack}', [ContactsController::class, 'edit'])->name('manager.contacts.edit');
+        Route::get('/create', [ContactsController::class, 'create'])->middleware('permission:contacts.create')->name('manager.contacts.create');
+        Route::post('/update', [ContactsController::class, 'update'])->middleware('permission:contacts.update')->name('manager.contacts.update');
+        Route::get('/edit/{slack}', [ContactsController::class, 'edit'])->middleware('permission:contacts.update')->name('manager.contacts.edit');
         Route::get('/view/{slack}', [ContactsController::class, 'view'])->name('manager.contacts.view');
-        Route::delete('/destroy/{slack}', [ContactsController::class, 'destroy'])->name('manager.contacts.destroy');
+        Route::delete('/destroy/{slack}', [ContactsController::class, 'destroy'])->middleware('permission:contacts.delete')->name('manager.contacts.destroy');
 
     });
 
@@ -312,12 +312,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'certifiers', 'middleware' => 'permission:certifiers.view'], function () {
 
         Route::get('/', [CertifiersController::class, 'index'])->name('manager.certifiers');
-        Route::get('/create', [CertifiersController::class, 'create'])->name('manager.certifiers.create');
-        Route::post('/store', [CertifiersController::class, 'store'])->name('manager.certifiers.store');
-        Route::post('/update', [CertifiersController::class, 'update'])->name('manager.certifiers.update');
-        Route::get('/edit/{slack}', [CertifiersController::class, 'edit'])->name('manager.certifiers.edit');
+        Route::get('/create', [CertifiersController::class, 'create'])->middleware('permission:certifiers.create')->name('manager.certifiers.create');
+        Route::post('/store', [CertifiersController::class, 'store'])->middleware('permission:certifiers.create')->name('manager.certifiers.store');
+        Route::post('/update', [CertifiersController::class, 'update'])->middleware('permission:certifiers.update')->name('manager.certifiers.update');
+        Route::get('/edit/{slack}', [CertifiersController::class, 'edit'])->middleware('permission:certifiers.update')->name('manager.certifiers.edit');
         Route::get('/view/{slack}', [CertifiersController::class, 'view'])->name('manager.certifiers.view');
-        Route::delete('/destroy/{slack}', [CertifiersController::class, 'destroy'])->name('manager.certifiers.destroy');
+        Route::delete('/destroy/{slack}', [CertifiersController::class, 'destroy'])->middleware('permission:certifiers.delete')->name('manager.certifiers.destroy');
 
         Route::post('/thumbnails', [CertifiersController::class, 'storeThumbnails'])->name('manager.certifiers.thumbnails');
         Route::delete('/delete/thumbnails/{id}', [CertifiersController::class, 'deleteThumbnails'])->name('manager.certifiers.thumbnails.delete');
@@ -348,12 +348,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'bundles', 'middleware' => 'permission:bundles.view'], function () {
 
         Route::get('/', [BundlesController::class, 'index'])->name('manager.bundles');
-        Route::get('/create', [BundlesController::class, 'create'])->name('manager.bundles.create');
-        Route::post('/store', [BundlesController::class, 'store'])->name('manager.bundles.store');
-        Route::post('/update', [BundlesController::class, 'update'])->name('manager.bundles.update');
-        Route::get('/edit/{slack}', [BundlesController::class, 'edit'])->name('manager.bundles.edit');
+        Route::get('/create', [BundlesController::class, 'create'])->middleware('permission:bundles.create')->name('manager.bundles.create');
+        Route::post('/store', [BundlesController::class, 'store'])->middleware('permission:bundles.create')->name('manager.bundles.store');
+        Route::post('/update', [BundlesController::class, 'update'])->middleware('permission:bundles.update')->name('manager.bundles.update');
+        Route::get('/edit/{slack}', [BundlesController::class, 'edit'])->middleware('permission:bundles.update')->name('manager.bundles.edit');
         Route::get('/view/{slack}', [BundlesController::class, 'view'])->name('manager.bundles.view');
-        Route::delete('/destroy/{slack}', [BundlesController::class, 'destroy'])->name('manager.bundles.destroy');
+        Route::delete('/destroy/{slack}', [BundlesController::class, 'destroy'])->middleware('permission:bundles.delete')->name('manager.bundles.destroy');
         Route::post('/toggle-available', [BundlesController::class, 'toggleAvailable'])->name('manager.bundles.toggle');
 
         Route::post('/thumbnails', [BundlesController::class, 'storeThumbnails'])->name('manager.bundles.thumbnails');
@@ -380,11 +380,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'instructions', 'middleware' => 'permission:instructions.view'], function () {
 
         Route::get('/', [InstructionsController::class, 'index'])->name('manager.instructions');
-        Route::get('/create', [InstructionsController::class, 'create'])->name('manager.instructions.create');
-        Route::post('/store', [InstructionsController::class, 'store'])->name('manager.instructions.store');
-        Route::post('/update', [InstructionsController::class, 'update'])->name('manager.instructions.update');
-        Route::get('/edit/{slack}', [InstructionsController::class, 'edit'])->name('manager.instructions.edit');
-        Route::delete('/destroy/{slack}', [InstructionsController::class, 'destroy'])->name('manager.instructions.destroy');
+        Route::get('/create', [InstructionsController::class, 'create'])->middleware('permission:instructions.create')->name('manager.instructions.create');
+        Route::post('/store', [InstructionsController::class, 'store'])->middleware('permission:instructions.create')->name('manager.instructions.store');
+        Route::post('/update', [InstructionsController::class, 'update'])->middleware('permission:instructions.update')->name('manager.instructions.update');
+        Route::get('/edit/{slack}', [InstructionsController::class, 'edit'])->middleware('permission:instructions.update')->name('manager.instructions.edit');
+        Route::delete('/destroy/{slack}', [InstructionsController::class, 'destroy'])->middleware('permission:instructions.delete')->name('manager.instructions.destroy');
 
         Route::get('/categories', [InstructionsCategoriesController::class, 'index'])->name('manager.instructions.categories');
         Route::get('/categories/create', [InstructionsCategoriesController::class, 'create'])->name('manager.instructions.categories.create');
@@ -398,11 +398,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'faqs', 'middleware' => 'permission:faqs.view'], function () {
 
         Route::get('/', [FaqsController::class, 'index'])->name('manager.faqs');
-        Route::get('/create', [FaqsController::class, 'create'])->name('manager.faqs.create');
-        Route::post('/store', [FaqsController::class, 'store'])->name('manager.faqs.store');
-        Route::post('/update', [FaqsController::class, 'update'])->name('manager.faqs.update');
-        Route::get('/edit/{slack}', [FaqsController::class, 'edit'])->name('manager.faqs.edit');
-        Route::delete('/destroy/{slack}', [FaqsController::class, 'destroy'])->name('manager.faqs.destroy');
+        Route::get('/create', [FaqsController::class, 'create'])->middleware('permission:faqs.create')->name('manager.faqs.create');
+        Route::post('/store', [FaqsController::class, 'store'])->middleware('permission:faqs.create')->name('manager.faqs.store');
+        Route::post('/update', [FaqsController::class, 'update'])->middleware('permission:faqs.update')->name('manager.faqs.update');
+        Route::get('/edit/{slack}', [FaqsController::class, 'edit'])->middleware('permission:faqs.update')->name('manager.faqs.edit');
+        Route::delete('/destroy/{slack}', [FaqsController::class, 'destroy'])->middleware('permission:faqs.delete')->name('manager.faqs.destroy');
 
         Route::get('/categories', [FaqsCategoriesController::class, 'index'])->name('manager.faqs.categories');
         Route::get('/categories/create', [FaqsCategoriesController::class, 'create'])->name('manager.faqs.categories.create');
@@ -416,12 +416,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'blogs', 'middleware' => 'permission:blogs.view'], function () {
 
         Route::get('/', [BlogsController::class, 'index'])->name('manager.blogs');
-        Route::get('/create', [BlogsController::class, 'create'])->name('manager.blogs.create');
-        Route::post('/store', [BlogsController::class, 'store'])->name('manager.blogs.store');
-        Route::post('/update', [BlogsController::class, 'update'])->name('manager.blogs.update');
-        Route::get('/edit/{slack}', [BlogsController::class, 'edit'])->name('manager.blogs.edit');
+        Route::get('/create', [BlogsController::class, 'create'])->middleware('permission:blogs.create')->name('manager.blogs.create');
+        Route::post('/store', [BlogsController::class, 'store'])->middleware('permission:blogs.create')->name('manager.blogs.store');
+        Route::post('/update', [BlogsController::class, 'update'])->middleware('permission:blogs.update')->name('manager.blogs.update');
+        Route::get('/edit/{slack}', [BlogsController::class, 'edit'])->middleware('permission:blogs.update')->name('manager.blogs.edit');
         Route::get('/view/{slack}', [BlogsController::class, 'view'])->name('manager.blogs.view');
-        Route::delete('/destroy/{slack}', [BlogsController::class, 'destroy'])->name('manager.blogs.destroy');
+        Route::delete('/destroy/{slack}', [BlogsController::class, 'destroy'])->middleware('permission:blogs.delete')->name('manager.blogs.destroy');
 
         Route::post('/thumbnails', [BlogsController::class, 'storeThumbnails'])->name('manager.blogs.thumbnails');
         Route::delete('/delete/thumbnails/{id}', [BlogsController::class, 'deleteThumbnails'])->name('manager.blogs.thumbnails.delete');
@@ -448,12 +448,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'coupons', 'middleware' => 'permission:coupons.view'], function () {
 
         Route::get('/', [CouponsController::class, 'index'])->name('manager.coupons');
-        Route::get('/create', [CouponsController::class, 'create'])->name('manager.coupons.create');
-        Route::post('/store', [CouponsController::class, 'store'])->name('manager.coupons.store');
-        Route::post('/update', [CouponsController::class, 'update'])->name('manager.coupons.update');
-        Route::get('/edit/{slack}', [CouponsController::class, 'edit'])->name('manager.coupons.edit');
+        Route::get('/create', [CouponsController::class, 'create'])->middleware('permission:coupons.create')->name('manager.coupons.create');
+        Route::post('/store', [CouponsController::class, 'store'])->middleware('permission:coupons.create')->name('manager.coupons.store');
+        Route::post('/update', [CouponsController::class, 'update'])->middleware('permission:coupons.update')->name('manager.coupons.update');
+        Route::get('/edit/{slack}', [CouponsController::class, 'edit'])->middleware('permission:coupons.update')->name('manager.coupons.edit');
         Route::get('/view/{slack}', [CouponsController::class, 'view'])->name('manager.coupons.view');
-        Route::delete('/destroy/{slack}', [CouponsController::class, 'destroy'])->name('manager.coupons.destroy');
+        Route::delete('/destroy/{slack}', [CouponsController::class, 'destroy'])->middleware('permission:coupons.delete')->name('manager.coupons.destroy');
 
     });
 
@@ -461,13 +461,13 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
         Route::get('/', [OrdersController::class, 'index'])->name('manager.orders');
         Route::get('/get', [OrdersController::class, 'get'])->name('manager.orders.get');
-        Route::get('/create', [OrdersController::class, 'create'])->name('manager.orders.create');
-        Route::post('/store', [OrdersController::class, 'store'])->name('manager.orders.store');
-        Route::post('/update', [OrdersController::class, 'update'])->name('manager.orders.update');
+        Route::get('/create', [OrdersController::class, 'create'])->middleware('permission:orders.create')->name('manager.orders.create');
+        Route::post('/store', [OrdersController::class, 'store'])->middleware('permission:orders.create')->name('manager.orders.store');
+        Route::post('/update', [OrdersController::class, 'update'])->middleware('permission:orders.update')->name('manager.orders.update');
         Route::get('/print/{slack}', [OrdersController::class, 'print'])->name('manager.orders.print');
-        Route::get('/edit/{slack}', [OrdersController::class, 'edit'])->name('manager.orders.edit');
+        Route::get('/edit/{slack}', [OrdersController::class, 'edit'])->middleware('permission:orders.update')->name('manager.orders.edit');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('manager.orders.view');
-        Route::delete('/destroy/{slack}', [OrdersController::class, 'destroy'])->name('manager.orders.destroy');
+        Route::delete('/destroy/{slack}', [OrdersController::class, 'destroy'])->middleware('permission:orders.delete')->name('manager.orders.destroy');
 
         Route::get('/report', [OrdersReportController::class, 'report'])->name('manager.orders.report');
         Route::get('/report/generate', [OrdersReportController::class, 'generate'])->name('manager.orders.generate');
@@ -483,15 +483,15 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
         Route::get('/', [InvoicesController::class, 'index'])->name('manager.invoices');
         Route::get('/get', [InvoicesController::class, 'get'])->name('manager.invoices.get');
-        Route::get('/create', [InvoicesController::class, 'create'])->name('manager.invoices.create');
-        Route::post('/store', [InvoicesController::class, 'store'])->name('manager.invoices.store');
-        Route::post('/update', [InvoicesController::class, 'update'])->name('manager.invoices.update');
+        Route::get('/create', [InvoicesController::class, 'create'])->middleware('permission:invoices.create')->name('manager.invoices.create');
+        Route::post('/store', [InvoicesController::class, 'store'])->middleware('permission:invoices.create')->name('manager.invoices.store');
+        Route::post('/update', [InvoicesController::class, 'update'])->middleware('permission:invoices.update')->name('manager.invoices.update');
         Route::get('/print/{slack}', [InvoicesController::class, 'print'])->name('manager.invoices.print');
-        Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('manager.invoices.edit');
+        Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->middleware('permission:invoices.update')->name('manager.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('manager.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('manager.invoices.details');
 
-        Route::delete('/destroy/{slack}', [InvoicesController::class, 'destroy'])->name('manager.invoices.destroy');
+        Route::delete('/destroy/{slack}', [InvoicesController::class, 'destroy'])->middleware('permission:invoices.delete')->name('manager.invoices.destroy');
 
         Route::get('/report', [InvoicesReportController::class, 'report'])->name('manager.invoices.report');
         Route::get('/report/generate', [InvoicesReportController::class, 'generate'])->name('manager.invoices.generate');
@@ -595,13 +595,13 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
     Route::group(['prefix' => 'users', 'middleware' => 'permission:users.view'], function () {
 
         Route::get('/', [UsersController::class, 'index'])->name('manager.users');
-        Route::get('/create', [UsersController::class, 'create'])->name('manager.users.create');
-        Route::post('/store', [UsersController::class, 'store'])->name('manager.users.store');
+        Route::get('/create', [UsersController::class, 'create'])->middleware('permission:users.create')->name('manager.users.create');
+        Route::post('/store', [UsersController::class, 'store'])->middleware('permission:users.create')->name('manager.users.store');
         Route::post('/filters', [UsersController::class, 'filters'])->name('manager.users.filters');
-        Route::post('/update', [UsersController::class, 'update'])->name('manager.users.update');
-        Route::get('/edit/{slack}', [UsersController::class, 'edit'])->name('manager.users.edit');
+        Route::post('/update', [UsersController::class, 'update'])->middleware('permission:users.update')->name('manager.users.update');
+        Route::get('/edit/{slack}', [UsersController::class, 'edit'])->middleware('permission:users.update')->name('manager.users.edit');
         Route::get('/view/{slack}', [UsersController::class, 'view'])->name('manager.users.view');
-        Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->name('manager.users.destroy');
+        Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->middleware('permission:users.delete')->name('manager.users.destroy');
         Route::get('/dashboard/{slack}', [UsersController::class, 'dashboard'])->name('manager.users.dashboard');
         Route::get('/activitys/{slack}', [ActivitysController::class, 'index'])->name('manager.users.activitys');
         Route::post('/reports/generate', [UsersController::class, 'generate'])->name('manager.users.generate');
