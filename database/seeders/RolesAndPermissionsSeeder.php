@@ -27,7 +27,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'coupons', 'users', 'enterprises', 'distributors', 'staff',
         'registers', 'blogs', 'faqs', 'testimonies', 'departments',
         'newsletters', 'incoming-mails', 'contacts', 'documents', 'instructions',
-        'analytics',
+        'analytics', 'roles',
     ];
 
     /**

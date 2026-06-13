@@ -104,14 +104,14 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], functio
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('manager.dashboard');
 
-    Route::group(['prefix' => 'roles'], function () {
+    Route::group(['prefix' => 'roles', 'middleware' => 'permission:roles.view'], function () {
         Route::get('/', [RolesController::class, 'index'])->name('manager.roles.index');
         Route::get('/matrix', [RolesController::class, 'matrix'])->name('manager.roles.matrix');
-        Route::get('/create', [RolesController::class, 'create'])->name('manager.roles.create');
-        Route::post('/', [RolesController::class, 'store'])->name('manager.roles.store');
-        Route::get('/edit/{id}', [RolesController::class, 'edit'])->name('manager.roles.edit');
-        Route::put('/{id}', [RolesController::class, 'update'])->name('manager.roles.update');
-        Route::delete('/destroy/{id}', [RolesController::class, 'destroy'])->name('manager.roles.destroy');
+        Route::get('/create', [RolesController::class, 'create'])->middleware('permission:roles.manage')->name('manager.roles.create');
+        Route::post('/', [RolesController::class, 'store'])->middleware('permission:roles.manage')->name('manager.roles.store');
+        Route::get('/edit/{id}', [RolesController::class, 'edit'])->middleware('permission:roles.manage')->name('manager.roles.edit');
+        Route::put('/{id}', [RolesController::class, 'update'])->middleware('permission:roles.manage')->name('manager.roles.update');
+        Route::delete('/destroy/{id}', [RolesController::class, 'destroy'])->middleware('permission:roles.delete')->name('manager.roles.destroy');
     });
 
     Route::group(['prefix' => 'analytics'], function () {
