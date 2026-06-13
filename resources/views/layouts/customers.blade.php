@@ -19,16 +19,16 @@
     <meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
     <meta content="Ace" name="author" />
 
-    {!! SEOMeta::generate() !!}
-    {!! Twitter::generate() !!}
-    {!! JsonLd::generate() !!}
-    {!! JsonLdMulti::generate() !!}
-    {!! SEO::generate() !!}
-    {!! SEO::generate(true) !!}
+    
+    
+    
+    
+    
+    
 
-    {!! app('seotools')->generate() !!}
+    
 
-    {!! Html::favicon( getFavicon() ) !!}
+    <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 

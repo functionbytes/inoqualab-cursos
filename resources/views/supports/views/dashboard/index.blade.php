@@ -1,4 +1,4 @@
-@extends('layouts.supports')
+@extends('layouts.managers')
 
 
     @section('content')

@@ -10,16 +10,16 @@
     <title>{{ $setting->title }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    {!! SEOMeta::generate() !!}
-    {!! Twitter::generate() !!}
-    {!! JsonLd::generate() !!}
-    {!! JsonLdMulti::generate() !!}
-    {!! SEO::generate() !!}
-    {!! SEO::generate(true) !!}
+    
+    
+    
+    
+    
+    
 
-    {!! app('seotools')->generate() !!}
+    
 
-    {!! Html::favicon( getFavicon() ) !!}
+    <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
 
     @yield('head')
     <!--====== Flaticon ======-->

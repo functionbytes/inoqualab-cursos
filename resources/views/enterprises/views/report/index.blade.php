@@ -1,8 +1,7 @@
-@extends('layouts.enterprises')
+@extends('layouts.managers')
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Reporte de curso'])
 
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">

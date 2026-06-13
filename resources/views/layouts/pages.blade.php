@@ -7,35 +7,10 @@
    
     <meta charset="UTF-8" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', setting('meta_title'))</title>
-    <meta name="description" content="{{ setting('meta_description') }}">
-    <meta name="keywords" content="{{ setting('meta_keywords') }}">
-    <meta name="google-site-verification" content="+nxGUDJ4QpAZ5l9Bsjdi102tLVC21AIh5d1Nl23908vVuFHs34=" />
-    <meta name="image" content="{{ getMeta() }}" />
-    <meta name="robots" content="index,follow">
-    <meta name="rating" content="RTA-5042-1996-1400-1577-RTA" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <!-- Twitter Card data -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@publisher_handle">
-    <meta name="twitter:title" content="{{ setting('meta_title') }}">
-    <meta name="twitter:description" content="{{ setting('meta_description') }}">
-    <meta name="twitter:creator" content="@author_handle">
-    <meta name="twitter:image" content="{{ getMeta() }}">
-    
-    {!! SEOMeta::generate() !!}
-    {!! Twitter::generate() !!}
-    {!! JsonLd::generate() !!}
-    {!! JsonLdMulti::generate() !!}
-    {!! SEO::generate() !!}
-    {!! SEO::generate(true) !!}
-    {!! Html::favicon( getFavicon() ) !!}
-
-    {!! app('seotools')->generate() !!}
-
+    <meta name="rating" content="RTA-5042-1996-1400-1577-RTA" />
+    <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
+    @seoTags
     @yield('head')
     <!--====== Flaticon ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/flaticon.min.css') }}">
@@ -89,6 +64,7 @@
             font-size: 14px; color: #fff;
         }
     </style>
+    <style>.cart-drawer:not(.open) { visibility: hidden; pointer-events: none; }</style>
     @stack('css')
 
 
@@ -460,6 +436,84 @@
         });
     })();
     </script>
+
+@if(setting('newsletter_enabled') != '0' && setting('newsletter_popup_enabled') != '0')
+<script>
+(function () {
+    function getCookie(n) {
+        var m = document.cookie.match('(^|;)\\s*' + n + '=([^;]*)');
+        return m ? m[2] : null;
+    }
+    function setCookie(n, v, days) {
+        var d = new Date();
+        d.setTime(d.getTime() + days * 86400000);
+        document.cookie = n + '=' + v + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+    }
+
+    if (getCookie('newsletter_popup')) return;
+
+    var delay = parseInt('{{ setting('newsletter_popup_delay') ?: 2 }}', 10) || 2;
+
+    setTimeout(function () {
+        if (getCookie('newsletter_popup')) return;
+        $.get('{{ route('newsletters.ajax-popup') }}', function (html) {
+            if (!html || !html.trim()) return;
+            $('#newsletter-popup-modal').remove();
+            $('body').append(html);
+            var $modal = $('#newsletter-popup-modal');
+            $modal.modal({ backdrop: true, keyboard: true });
+            $modal.modal('show');
+
+            // Cerrar con el botón X personalizado
+            $(document).on('click', '#newsletter-popup-close', function () {
+                $modal.modal('hide');
+            });
+
+            // Al cerrar con X o backdrop → cookie 1 día
+            $modal.on('hide.bs.modal', function () {
+                if (!getCookie('newsletter_popup')) setCookie('newsletter_popup', '1', 1);
+            });
+
+            // Checkbox "No mostrar" → cookie 30 días
+            $(document).on('change', '#newsletter-popup-no-show-chk', function () {
+                if ($(this).prop('checked')) {
+                    setCookie('newsletter_popup', '1', 30);
+                    $modal.modal('hide');
+                }
+            });
+
+            // Envío del formulario
+            $(document).on('submit', '#newsletter-popup-form', function (e) {
+                e.preventDefault();
+                var email = $('#newsletter-popup-email').val();
+                var name  = $('#newsletter-popup-name').val();
+                $('#newsletter-popup-error').hide().text('');
+                $.ajax({
+                    url: '{{ route('newsletters.store') }}',
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                    data: { email: email, name: name },
+                    success: function () {
+                        setCookie('newsletter_popup', '1', 7);
+                        $('#newsletter-popup-form').hide();
+                        $('#newsletter-popup-no-show-chk').closest('label').hide();
+                        $('#newsletter-popup-success').show();
+                        setTimeout(function () { $modal.modal('hide'); }, 2500);
+                    },
+                    error: function (xhr) {
+                        var resp = xhr.responseJSON;
+                        var msg = (resp && resp.errors && resp.errors.email)
+                            ? resp.errors.email[0]
+                            : (resp && resp.message ? resp.message : 'Ingresa un correo electrónico válido.');
+                        $('#newsletter-popup-error').text(msg).show();
+                    }
+                });
+            });
+        });
+    }, delay * 1000);
+})();
+</script>
+@endif
 
 </body>
 

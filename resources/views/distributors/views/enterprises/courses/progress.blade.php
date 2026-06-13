@@ -1,7 +1,7 @@
 @php use App\Models\Course\CourseProgress;
  @endphp
 
-@extends('layouts.distributors')
+@extends('layouts.managers')
 
 @section('content')
 

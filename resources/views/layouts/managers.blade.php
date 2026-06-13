@@ -20,17 +20,9 @@
     <meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
     <meta content="Ace" name="author" />
 
-    {!! SEOMeta::generate() !!}
-    {!! Twitter::generate() !!}
-    {!! JsonLd::generate() !!}
-    {!! JsonLdMulti::generate() !!}
-    {!! SEO::generate() !!}
-    {!! SEO::generate(true) !!}
+    <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
 
-    {!! app('seotools')->generate() !!}
-
-    {!! Html::favicon( getFavicon() ) !!}
-
+    <meta name="robots" content="noindex,nofollow">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
@@ -43,10 +35,12 @@
     <link rel="stylesheet" href="{{ url('managers/libs/dropzone/dist/min/dropzone.min.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ url('managers/css/style.css') }}">
+    <link rel="stylesheet" href="{{ url('managers/css/theme.css') }}">
 
 
 
     @stack('css')
+    @yield('head')
 
 </head>
 
@@ -62,20 +56,32 @@
         data-header-position="fixed"
 >
 
-    @include ('managers.includes.nav')
+    @php
+        // Layout unificado: resuelve nav/header/delete según el rol del usuario.
+        // manager/superadmin usan el panel "managers"; cada otro perfil el suyo.
+        $__panel = match (auth()->user()?->role) {
+            'support' => 'supports',
+            'distributor' => 'distributors',
+            'enterprise' => 'enterprises',
+            'accounting' => 'accountings',
+            default => 'managers',
+        };
+    @endphp
+
+    @include($__panel.'.includes.nav')
 
     <!-- Main wrapper -->
 
     <div class="body-wrapper">
 
 
-        @include ('managers.includes.header')
+        @include($__panel.'.includes.header')
 
         <div class="container-fluid">
             @yield('content')
         </div>
 
-        @include('managers.includes.delete')
+        @includeFirst([$__panel.'.includes.delete', 'managers.includes.delete'])
 
     </div>
 </div>
@@ -144,6 +150,19 @@ $(document).ajaxError(function(event, xhr) {
 @stack('scripts')
 
 <script>
+// Fix: dropdown clipped by overflow:hidden en .table-responsive
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function (el) {
+        new bootstrap.Dropdown(el, {
+            popperConfig: function (defaultConfig) {
+                return Object.assign({}, defaultConfig, { strategy: 'fixed' });
+            }
+        });
+    });
+});
+</script>
+
+<script>
 $(document).ready(function () {
     // Marcar todas las notificaciones como leídas desde el header
     $(document).on('click', '#markAllReadHeader', function (e) {
@@ -156,6 +175,10 @@ $(document).ready(function () {
     });
 });
 </script>
+
+@includeIf($__panel.'.includes.scripts')
+
+@yield('modal')
 
 </body>
 

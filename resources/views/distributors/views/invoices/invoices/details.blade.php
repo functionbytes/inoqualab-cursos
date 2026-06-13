@@ -1,4 +1,4 @@
-@extends('layouts.distributors')
+@extends('layouts.managers')
 @section('content')
     
     @include('distributors.includes.card', ['title' => 'Detalle Factura '. $invoice->slack])

@@ -1,11 +1,10 @@
 @php use App\Models\Course\CourseProgress;
  @endphp
 
-@extends('layouts.enterprises')
+@extends('layouts.managers')
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => "Progreso" ])
 
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12">

@@ -1,4 +1,4 @@
-@extends('layouts.supports')
+@extends('layouts.managers')
 @section('content')
     @include('distributors.includes.card', ['title' => 'Detalle orden '. $order->slack])
     <div class="row">

@@ -1,8 +1,7 @@
-@extends('layouts.supports')
+@extends('layouts.managers')
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Cursos'])
 
     <div class="widget-content searchable-container list">
         
