@@ -6,15 +6,25 @@ use App\Html\FormBuilder;
 use App\Html\HtmlBuilder;
 use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
+use App\Models\Inscription;
+use App\Models\Invoice\Invoice;
 use App\Models\Mailer\MailerLayout;
 use App\Models\Mailer\MailerTemplate;
 use App\Models\Mailer\MailerVariable;
+use App\Models\Order\Order;
 use App\Models\Setting\Setting;
 use App\Models\User;
+use App\Models\Users\Certificate;
 use App\Observers\Mailer\MailerLayoutObserver;
 use App\Observers\Mailer\MailerTemplateObserver;
 use App\Observers\Mailer\MailerVariableObserver;
 use App\Observers\User\UserRoleObserver;
+use App\Policies\CertificatePolicy;
+use App\Policies\CoursePolicy;
+use App\Policies\InscriptionPolicy;
+use App\Policies\InvoicePolicy;
+use App\Policies\OrderPolicy;
+use App\Policies\UserPolicy;
 use App\Services\SchemaOrgService;
 use App\Services\SeoService;
 use Illuminate\Queue\Events\JobFailed;
@@ -80,12 +90,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function about(): ?object
     {
-        return static::$settingCache ??= Setting::first();
+        return static::$settingCache ??= Setting::first() ?? new Setting;
     }
 
     public function setting(): ?object
     {
-        return static::$settingCache ??= Setting::first();
+        return static::$settingCache ??= Setting::first() ?? new Setting;
     }
 
     public function courses(): object
@@ -140,11 +150,11 @@ class AppServiceProvider extends ServiceProvider
      */
     private function registerPolicies(): void
     {
-        Gate::policy(\App\Models\Order\Order::class, \App\Policies\OrderPolicy::class);
-        Gate::policy(\App\Models\Invoice\Invoice::class, \App\Policies\InvoicePolicy::class);
-        Gate::policy(\App\Models\Inscription::class, \App\Policies\InscriptionPolicy::class);
-        Gate::policy(\App\Models\Users\Certificate::class, \App\Policies\CertificatePolicy::class);
-        Gate::policy(\App\Models\Course\Course::class, \App\Policies\CoursePolicy::class);
-        Gate::policy(\App\Models\User::class, \App\Policies\UserPolicy::class);
+        Gate::policy(Order::class, OrderPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(Inscription::class, InscriptionPolicy::class);
+        Gate::policy(Certificate::class, CertificatePolicy::class);
+        Gate::policy(Course::class, CoursePolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 }
