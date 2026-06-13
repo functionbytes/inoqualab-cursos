@@ -3,10 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class TransferCountriesTables extends Migration
+return new class extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $countries = DB::connection('mysql_second')->table('countries')->get();
         foreach ($countries as $countrie) {
@@ -23,4 +26,4 @@ class TransferCountriesTables extends Migration
         }
 
     }
-}
+};

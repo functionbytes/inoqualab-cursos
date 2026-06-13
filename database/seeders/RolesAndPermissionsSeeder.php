@@ -53,7 +53,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ],
         'customer' => [
             'courses.view', 'orders.view', 'invoices.view', 'quizzes.view',
-            'exams.view', 'certificates.view',
+            'exams.view', 'certificates.view', 'inscriptions.view',
         ],
     ];
 

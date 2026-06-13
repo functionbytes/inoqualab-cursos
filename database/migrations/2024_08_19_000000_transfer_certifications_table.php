@@ -3,10 +3,13 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class TransferCertificationsTables extends Migration
+return new class extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $certifications = DB::connection('mysql_second')->table('certifications')->get();
         foreach ($certifications as $certification) {
@@ -14,4 +17,4 @@ class TransferCertificationsTables extends Migration
         }
 
     }
-}
+};

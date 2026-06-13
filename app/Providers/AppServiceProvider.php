@@ -22,6 +22,7 @@ use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
@@ -129,5 +130,21 @@ class AppServiceProvider extends ServiceProvider
 
         // Sincroniza la columna `role` (legacy) con los roles de Spatie.
         User::observe(UserRoleObserver::class);
+
+        $this->registerPolicies();
+    }
+
+    /**
+     * Registro explícito de Policies (los modelos viven en sub-namespaces,
+     * por lo que el auto-discovery convencional no los resuelve).
+     */
+    private function registerPolicies(): void
+    {
+        Gate::policy(\App\Models\Order\Order::class, \App\Policies\OrderPolicy::class);
+        Gate::policy(\App\Models\Invoice\Invoice::class, \App\Policies\InvoicePolicy::class);
+        Gate::policy(\App\Models\Inscription::class, \App\Policies\InscriptionPolicy::class);
+        Gate::policy(\App\Models\Users\Certificate::class, \App\Policies\CertificatePolicy::class);
+        Gate::policy(\App\Models\Course\Course::class, \App\Policies\CoursePolicy::class);
+        Gate::policy(\App\Models\User::class, \App\Policies\UserPolicy::class);
     }
 }
