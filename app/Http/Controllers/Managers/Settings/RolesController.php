@@ -41,6 +41,33 @@ class RolesController extends Controller
         ]);
     }
 
+    /**
+     * Matriz comparativa: qué permiso tiene cada rol (filas = permisos por
+     * módulo, columnas = roles). Solo lectura — para ver de un vistazo qué
+     * puede hacer un rol y qué no frente a los demás.
+     */
+    public function matrix(): View
+    {
+        $roles = Role::query()->with('permissions:id')->orderBy('name')->get();
+
+        $permissionsByModule = Permission::query()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->groupBy(fn (Permission $p) => explode('.', $p->name)[0]);
+
+        $rolePermissionIds = $roles->mapWithKeys(
+            fn (Role $role) => [$role->id => $role->permissions->pluck('id')->flip()]
+        );
+
+        return view('managers.views.settings.roles.matrix', [
+            'roles' => $roles,
+            'permissionsByModule' => $permissionsByModule,
+            'rolePermissionIds' => $rolePermissionIds,
+            'totalPermissions' => $permissionsByModule->flatten()->count(),
+            'protectedRoles' => self::PROTECTED_ROLES,
+        ]);
+    }
+
     public function create(): View
     {
         return view('managers.views.settings.roles.form', [

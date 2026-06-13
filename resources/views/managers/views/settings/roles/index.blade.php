@@ -15,7 +15,8 @@
                         <h5 class="mb-1 fw-bold">Roles del sistema</h5>
                         <p class="small mb-0 text-muted">Administra los roles y sus permisos</p>
                     </div>
-                    <div class="ms-auto">
+                    <div class="ms-auto d-flex gap-2">
+                        <a href="{{ route('manager.roles.matrix') }}" class="btn btn-outline-secondary">Matriz de permisos</a>
                         <a href="{{ route('manager.roles.create') }}" class="btn btn-primary">Crear rol</a>
                     </div>
                 </div>
