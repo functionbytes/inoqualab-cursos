@@ -12,8 +12,8 @@
                     {{ csrf_field() }}
 
 
-                    <textarea style="display: none"  id="short" name="short"></textarea>
-                    <textarea style="display: none"  id="description" name="description"></textarea>
+                    <textarea class="d-none" id="short" name="short"></textarea>
+                    <textarea class="d-none" id="description" name="description"></textarea>
 
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">

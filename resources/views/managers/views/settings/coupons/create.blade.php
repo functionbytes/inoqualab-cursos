@@ -14,7 +14,7 @@
 
                     <input type="hidden" id="id" name="id" value="">
                     <input type="hidden" id="slack" name="slack" value="">
-                    <textarea style="display: none"  id="description" name="description"></textarea>
+                    <textarea class="d-none" id="description" name="description"></textarea>
 
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">

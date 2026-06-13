@@ -12,9 +12,9 @@
                     {{ csrf_field() }}
 
 
-                    <textarea  style="display: none"  type="hidden"  id="page_description" name="page_description">{!!  setting('page_description')   !!}</textarea>
-                    <textarea  style="display: none"  type="hidden"  id="page_politic" name="page_politic">{!! setting('page_politic')  !!}</textarea>
-                    <textarea  style="display: none"  type="hidden"  id="page_term" name="page_term">{!! setting('page_term')  !!}</textarea>
+                    <textarea class="d-none" type="hidden"  id="page_description" name="page_description">{!!  setting('page_description')   !!}</textarea>
+                    <textarea class="d-none" type="hidden"  id="page_politic" name="page_politic">{!! setting('page_politic')  !!}</textarea>
+                    <textarea class="d-none" type="hidden"  id="page_term" name="page_term">{!! setting('page_term')  !!}</textarea>
                     <input  type="hidden" id="page_logo" name="page_logo" value="{!! setting('page_logo') !!}">
                     <input  type="hidden" id="page_favicon" name="page_favicon" value="{!! setting('page_favicon') !!}">
                     <input  type="hidden" id="id" name="id" value="{{ $setting->id }}">
@@ -207,17 +207,6 @@
                                                 <option value="0" {{ setting('reviews_enabled') == 1 ? '' : 'selected' }}>Deshabilitadas</option>
                                             </select>
                                             <small class="text-muted d-block mt-1">Cuando está habilitada, al aprobar el examen de un curso el estudiante podrá calificarlo con estrellas y dejar un comentario que se mostrará en la página del curso.</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-12 mt-3">
-                                        <div class="form-group">
-                                            <label class="control-label col-form-label">Suscripción al Newsletter</label>
-                                            <select class="form-select" id="newsletter_enabled" name="newsletter_enabled">
-                                                <option value="1" {{ setting('newsletter_enabled') != '0' ? 'selected' : '' }}>Habilitada — los visitantes pueden suscribirse</option>
-                                                <option value="0" {{ setting('newsletter_enabled') == '0' ? 'selected' : '' }}>Deshabilitada</option>
-                                            </select>
-                                            <small class="text-muted d-block mt-1">Controla si el formulario de newsletter en la web pública acepta nuevas suscripciones.</small>
                                         </div>
                                     </div>
 
@@ -506,12 +495,10 @@
                     var page_hour_weekend = $("#page_hour_weekend").val();
                     var page_hour_weekends = $("#page_hour_weekends").val();
                     var reviews_enabled = $("#reviews_enabled").val();
-                    var newsletter_enabled = $("#newsletter_enabled").val();
                     var contact_notifications = $("#contact_notifications").val();
                     var registration_enabled = $("#registration_enabled").val();
 
                     formData.append('reviews_enabled', reviews_enabled);
-                    formData.append('newsletter_enabled', newsletter_enabled);
                     formData.append('contact_notifications', contact_notifications);
                     formData.append('registration_enabled', registration_enabled);
                     formData.append('slack', slack);

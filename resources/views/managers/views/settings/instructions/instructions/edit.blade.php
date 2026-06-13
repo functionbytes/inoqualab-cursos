@@ -12,8 +12,8 @@
                     {{ csrf_field() }}
 
                     <input type="hidden" id="slack" name="slack" value="{{ $instruction->slack }}">
-                    <textarea style="display: none"  id="short" name="short">{!! $instruction->short !!}</textarea>
-                    <textarea style="display: none"  id="description" name="description">{!! $instruction->description !!}</textarea>
+                    <textarea class="d-none" id="short" name="short">{!! $instruction->short !!}</textarea>
+                    <textarea class="d-none" id="description" name="description">{!! $instruction->description !!}</textarea>
                     
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">

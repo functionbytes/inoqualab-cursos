@@ -31,7 +31,7 @@
 
                     <input type="hidden" id="id" name="id" value="{{ $coupon->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $coupon->slack }}">
-                    <textarea style="display: none" id="description"
+                    <textarea class="d-none" id="description"
                               name="description">{!! $coupon->description !!}</textarea>
 
                     <div class="card-body border-top">

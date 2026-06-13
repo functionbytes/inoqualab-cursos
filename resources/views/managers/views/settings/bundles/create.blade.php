@@ -13,8 +13,8 @@
 
                     <input type="hidden" id="id" name="id" value="">
                     <input type="hidden" id="slack" name="slack" value="">
-                    <textarea style="display: none"  id="description" name="description"></textarea>
-                    <textarea style="display: none"  id="meta_description" name="meta_description"></textarea>
+                    <textarea class="d-none" id="description" name="description"></textarea>
+                    <textarea class="d-none" id="meta_description" name="meta_description"></textarea>
                     <input type="hidden" id="status" name="status" value="false">
                     <input type="hidden" id="edit" name="edit" value="true">
                     <input type="hidden" id="thumbnail" name="thumbnail">
