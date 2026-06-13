@@ -112,7 +112,8 @@ CREATE TABLE `blog_categories` (
   `available` tinyint(1) DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `blog_categories_slug_index` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `blog_tag`;
@@ -160,6 +161,7 @@ CREATE TABLE `blogs` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_blogs_categories_idx` (`categorie_id`),
+  KEY `blogs_available_categorie_id_index` (`available`,`categorie_id`),
   CONSTRAINT `fk_blogs_categories_idx` FOREIGN KEY (`categorie_id`) REFERENCES `blog_categories` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -198,7 +200,9 @@ CREATE TABLE `bundles` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `bundles_deleted_at_index` (`deleted_at`)
+  KEY `bundles_deleted_at_index` (`deleted_at`),
+  KEY `bundles_available_index` (`available`),
+  KEY `bundles_slug_index` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `certificates`;
@@ -340,7 +344,9 @@ CREATE TABLE `coupons` (
   `available` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0 - Disabled, 1 - Enabled, 2 - Expired',
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `coupons_code_index` (`code`),
+  KEY `coupons_available_index` (`available`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `course_aliases`;
@@ -412,6 +418,7 @@ CREATE TABLE `course_chapters` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_coursechapters_courses_idx` (`course_id`),
+  KEY `course_chapters_available_index` (`available`),
   CONSTRAINT `fk_coursechapters_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -442,6 +449,7 @@ CREATE TABLE `course_lessons` (
   KEY `fk_courseclasses_chapters_idx` (`chapter_id`),
   KEY `fk_courseclasses_types_idx` (`type_id`),
   KEY `fk_courseclasses_courses_idx` (`course_id`),
+  KEY `course_lessons_available_index` (`available`),
   CONSTRAINT `fk_courseclasses_chapters_idx` FOREIGN KEY (`chapter_id`) REFERENCES `course_chapters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_courseclasses_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_courseclasses_types_idx` FOREIGN KEY (`type_id`) REFERENCES `course_types` (`id`)
@@ -468,6 +476,7 @@ CREATE TABLE `course_progress` (
   KEY `course_progress_lesson_id_foreign` (`lesson_id`),
   KEY `course_progress_user_id_course_id_order_id_index` (`user_id`,`course_id`,`inscription_id`),
   KEY `course_progress_inscription_id_foreign` (`inscription_id`),
+  KEY `course_progress_inscription_id_lesson_id_index` (`inscription_id`,`lesson_id`),
   CONSTRAINT `course_progress_chapter_id_foreign` FOREIGN KEY (`chapter_id`) REFERENCES `course_chapters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `course_progress_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `course_progress_inscription_id_foreign` FOREIGN KEY (`inscription_id`) REFERENCES `inscriptions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -490,7 +499,8 @@ CREATE TABLE `course_reviews` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `course_reviews_user_id_course_id_unique` (`user_id`,`course_id`),
-  KEY `course_reviews_course_id_index` (`course_id`)
+  KEY `course_reviews_course_id_index` (`course_id`),
+  KEY `course_reviews_inscription_id_index` (`inscription_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `course_types`;
@@ -546,6 +556,10 @@ CREATE TABLE `courses` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_courses_categories_idx` (`categorie_id`),
+  KEY `courses_slug_index` (`slug`),
+  KEY `courses_available_index` (`available`),
+  KEY `courses_certification_id_index` (`certification_id`),
+  KEY `courses_certifier_id_index` (`certifier_id`),
   CONSTRAINT `fk_courses_categories_idx` FOREIGN KEY (`categorie_id`) REFERENCES `course_categories` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -765,7 +779,9 @@ CREATE TABLE `enterprises` (
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nit_UNIQUE` (`nit`),
-  UNIQUE KEY `enterprises_code_unique` (`code`)
+  UNIQUE KEY `enterprises_code_unique` (`code`),
+  KEY `enterprises_available_index` (`available`),
+  KEY `enterprises_slack_index` (`slack`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `exam_answers`;
@@ -1033,6 +1049,7 @@ CREATE TABLE `inscriptions` (
   KEY `inscriptions_course_id_foreign` (`course_id`),
   KEY `inscriptions_order_id_foreign` (`order_id`),
   KEY `inscriptions_user_id_course_id_order_id_percent_culminated_index` (`user_id`,`course_id`,`order_id`,`percent`,`culminated`),
+  KEY `inscriptions_culminated_expire_index` (`culminated`,`expire`),
   CONSTRAINT `inscriptions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `inscriptions_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `inscriptions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1636,6 +1653,7 @@ CREATE TABLE `orders` (
   KEY `orders_condition_id_foreign` (`condition_id`),
   KEY `orders_user_id_foreign` (`user_id`),
   KEY `orders_coupon_id_foreign` (`coupon_id`),
+  KEY `orders_user_id_condition_id_index` (`user_id`,`condition_id`),
   CONSTRAINT `orders_condition_id_foreign` FOREIGN KEY (`condition_id`) REFERENCES `order_condition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `orders_coupon_id_foreign` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `orders_method_id_foreign` FOREIGN KEY (`method_id`) REFERENCES `order_method` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1874,6 +1892,7 @@ CREATE TABLE `reviewables` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `reviewables_user_id_foreign` (`user_id`),
+  KEY `reviewables_reviewable_type_reviewable_id_index` (`reviewable_type`,`reviewable_id`),
   CONSTRAINT `reviewables_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2150,7 +2169,8 @@ CREATE TABLE `settings` (
   `value` longtext DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `settings_key_index` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `sliders`;
@@ -2378,6 +2398,7 @@ CREATE TABLE `tickets` (
   KEY `tickets_status_id_foreign` (`status_id`),
   KEY `tickets_priority_id_foreign` (`priority_id`),
   KEY `tickets_category_id_foreign` (`category_id`),
+  KEY `tickets_status_id_user_id_index` (`status_id`,`user_id`),
   CONSTRAINT `tickets_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `ticket_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `tickets_cust_id_foreign` FOREIGN KEY (`cust_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `tickets_priority_id_foreign` FOREIGN KEY (`priority_id`) REFERENCES `ticket_priorities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2452,6 +2473,10 @@ CREATE TABLE `users` (
   UNIQUE KEY `email_UNIQUE` (`email`),
   KEY `fk_users_cities_idx_idx` (`citie_id`),
   KEY `fk_users_enterprises_idx` (`enterprise_id`),
+  KEY `users_role_index` (`role`),
+  KEY `users_available_index` (`available`),
+  KEY `users_slack_index` (`slack`),
+  KEY `users_departament_id_index` (`departament_id`),
   CONSTRAINT `fk_users_cities_idx` FOREIGN KEY (`citie_id`) REFERENCES `cities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_users_enterprises_idx` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprises` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -2535,5 +2560,6 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (262,'2026_06_11_30
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (263,'2026_06_11_300006_create_mailer_template_versions_table',34);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (264,'2026_06_10_181416_create_newsletter_campaigns_table',35);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (265,'2026_06_12_193744_create_permission_tables',36);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (266,'2026_06_13_120000_add_performance_indexes',37);
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;
