@@ -56,6 +56,7 @@
                 @endcan
 
                 @if(setting('module_coupons') !== 0)
+                @can('coupons.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.coupons') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -64,9 +65,11 @@
                         <span class="hide-menu">Cupones</span>
                     </a>
                 </li>
+                @endcan
                 @endif
 
                 @if(setting('module_bundles') !== 0)
+                @can('bundles.view')
                 <li class="sidebar-item">
                   <a class="sidebar-link" href="{{ route('manager.bundles') }}" aria-expanded="false">
                         <span class="d-flex">
@@ -75,9 +78,11 @@
                       <span class="hide-menu">Paquetes</span>
                   </a>
               </li>
+                @endcan
                 @endif
 
 
+                @can('orders.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.orders') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -86,6 +91,7 @@
                         <span class="hide-menu">Ordenes</span>
                     </a>
                 </li>
+                @endcan
                 @if(setting('module_incoming_mail') !== 0)
                 @php
                     $pendingMailsCount = \App\Models\Mail\IncomingMail::query()
@@ -102,6 +108,7 @@
                 </li>
                 @endif
                 @if(setting('module_invoices') !== 0)
+                @can('invoices.view')
                 <li class="sidebar-item">
                   <a class="sidebar-link" href="{{ route('manager.invoices') }}" aria-expanded="false">
                         <span class="d-flex">
@@ -110,9 +117,11 @@
                       <span class="hide-menu">Facturas</span>
                   </a>
               </li>
+                @endcan
                 @endif
 
                 @if(setting('module_departments') !== 0)
+                @can('departments.view')
                 <li class="sidebar-item">
                   <a class="sidebar-link" href="{{ route('manager.departments') }}" aria-expanded="false">
                         <span class="d-flex">
@@ -121,9 +130,11 @@
                       <span class="hide-menu">Departamentos</span>
                   </a>
                </li>
+                @endcan
                 @endif
 
                 @if(setting('module_documents') !== 0)
+                @can('documents.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.documents') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -132,8 +143,10 @@
                         <span class="hide-menu">Documentos</span>
                     </a>
                 </li>
+                @endcan
                 @endif
                 @if(setting('module_contacts') !== 0)
+                @can('contacts.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.contacts') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -142,6 +155,7 @@
                         <span class="hide-menu">Contactenos</span>
                     </a>
                 </li>
+                @endcan
                 @endif
                 @can('roles.view')
                 <li class="sidebar-item">
@@ -218,6 +232,7 @@
                 </li>
                 @endif
                 @if(setting('module_certifiers') !== 0)
+                @can('certifiers.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.certifiers') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -226,8 +241,10 @@
                         <span class="hide-menu">Capacitadores</span>
                     </a>
                 </li>
+                @endcan
                 @endif
                 @if(setting('module_enterprises') !== 0)
+                @can('enterprises.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.enterprises') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -236,8 +253,10 @@
                         <span class="hide-menu">Empresas</span>
                     </a>
                 </li>
+                @endcan
                 @endif
                 @if(setting('module_distributors') !== 0)
+                @can('distributors.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.distributors') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -246,7 +265,9 @@
                         <span class="hide-menu">Distribuidores</span>
                     </a>
                 </li>
+                @endcan
                 @endif
+                @can('users.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link" href="{{ route('manager.users') }}" aria-expanded="false">
                           <span class="d-flex">
@@ -255,6 +276,7 @@
                         <span class="hide-menu">Usuarios</span>
                     </a>
                 </li>
+                @endcan
 
                 <li class="nav-small-cap">
                     <i class="fas fa-ellipsis nav-small-cap-icon fs-4"></i>
@@ -323,6 +345,7 @@
 
 
 
+                @can('faqs.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link has-arrow " href="#" aria-expanded="false">
                           <span class="d-flex">
@@ -349,9 +372,11 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
 
 
+                @can('instructions.view')
                 <li class="sidebar-item">
                     <a class="sidebar-link has-arrow " href="#" aria-expanded="false">
                           <span class="d-flex">
@@ -378,6 +403,7 @@
                         </li>
                     </ul>
                 </li>
+                @endcan
 
 
                 <li class="sidebar-item">

@@ -1,168 +1,279 @@
 @extends('layouts.managers')
 
+@section('title', 'Usuarios')
+
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Usuarios'])
 
     <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="role" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar estado</option>
-                                        <option value="admin" @isset($role) @if ($role=='admin') selected @endif @endisset>  Administrador</option>
-                                        <option value="customer" @isset($role) @if ($role=='customer') selected @endif @endisset>  Cliente</option>
-                                        <option value="enterprise" @isset($role) @if ($role=='enterprises') selected  @endif @endisset>  Empresa</option>
-                                        <option value="enterprise" @isset($role) @if ($role=='distributors') selected  @endif @endisset>  Distribuidor</option>
-                                        <option value="enterprise" @isset($role) @if ($role=='supports') selected  @endif @endisset>  Soporte</option>
-                                        <option value="enterprise" @isset($role) @if ($role=='accountings') selected  @endif @endisset>  Contabilidad</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            <div class="col-auto">
-                                <a href=" {{ route('manager.users.create') }}" class="btn btn-primary">
-                                    <i class="fa-duotone fa-plus"></i>
-                                </a>
+
+        <div class="card">
+
+            {{-- Header --}}
+            <div class="card-header p-4 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Usuarios</h5>
+                        <p class="mb-0 text-muted">Gestiona los usuarios registrados en la plataforma</p>
+                    </div>
+                    <div class="ms-auto">
+                        @can('users.create')
+                        <a href="{{ route('manager.users.create') }}" class="btn btn-primary">
+                            Nuevo usuario
+                        </a>
+                        @endcan
+                    </div>
+                </div>
+            </div>
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ route('manager.users') }}" id="searchForm">
+
+                    <input type="hidden" name="role" id="filterRole" value="{{ $role ?? '' }}">
+
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="flex-fill">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" name="search" class="form-control border-start-0 ps-0"
+                                       placeholder="Buscar por nombre, correo o identificación..."
+                                       value="{{ $searchKey ?? '' }}">
                             </div>
                         </div>
-                    </form>
+
+                        @php
+                            $activeFilters = (int)(($role ?? '') !== '');
+                        @endphp
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                                data-bs-toggle="modal" data-bs-target="#filters-modal">
+                            <i class="fas fa-sliders me-1"></i>
+                            Filtros
+                            @if($activeFilters > 0)
+                                <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
+                            @endif
+                        </button>
+
+                        <button type="submit" class="btn btn-primary flex-shrink-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($users->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Identificación</th>
+                                    <th>Cliente</th>
+                                    <th>Correo electrónico</th>
+                                    <th class="text-center">Perfil</th>
+                                    <th class="text-center">Fecha creación</th>
+                                    <th class="text-center">Actualización</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($users as $user)
+                                    <tr>
+                                        <td>{{ $user->identification }}</td>
+                                        <td>
+                                            <div class="fw-semibold">
+                                                {{ Str::words(Str::upper(Str::lower($user->firstname . ' ' . $user->lastname)), 2, '...') }}
+                                            </div>
+                                        </td>
+                                        <td>{{ $user->email }}</td>
+                                        <td class="text-center">
+                                            @php
+                                                $roleLabels = [
+                                                    'manager'     => 'Administrador',
+                                                    'customer'    => 'Cliente',
+                                                    'enterprise'  => 'Empresa',
+                                                    'distributor' => 'Empleado distribuidor',
+                                                    'support'     => 'Soporte',
+                                                    'accounting'  => 'Contabilidad',
+                                                ];
+                                            @endphp
+                                            <span class="badge bg-primary-subtle text-primary">
+                                                {{ $roleLabels[$user->role] ?? ucfirst($user->role) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ date('d/m/Y', strtotime($user->created_at)) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ date('d/m/Y', strtotime($user->updated_at)) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    @if($user->role === 'customer')
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('manager.enterprises.users.results', $user->slack) }}">
+                                                                Resultados
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('manager.enterprises.users.certificates', $user->slack) }}">
+                                                                Certificados
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('manager.users.orders', $user->slack) }}">
+                                                                Ordenes
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('manager.users.inscriptions', $user->slack) }}">
+                                                                Inscripciones
+                                                            </a>
+                                                        </li>
+                                                        <li><hr class="dropdown-divider"></li>
+                                                    @endif
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('manager.users.emails', $user->slack) }}">
+                                                            Correos enviados
+                                                        </a>
+                                                    </li>
+                                                    @can('users.update')
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('manager.users.edit', $user->slack) }}">
+                                                            Editar
+                                                        </a>
+                                                    </li>
+                                                    @endcan
+                                                    @can('users.delete')
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item btn-delete" href="#"
+                                                           data-url="{{ route('manager.users.destroy', $user->slack) }}"
+                                                           data-title="Eliminar: {{ $user->firstname }} {{ $user->lastname }}">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+                                                    @endcan
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x mb-3 text-muted opacity-50"></i>
+                        <h5 class="fw-bold mb-2">
+                            @if(($searchKey ?? '') || ($role ?? '') !== '')
+                                No se encontraron resultados
+                            @else
+                                No hay usuarios
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-4">
+                            @if(($searchKey ?? '') || ($role ?? '') !== '')
+                                No hay usuarios que coincidan con los filtros aplicados.
+                            @else
+                                Los usuarios registrados aparecerán aquí.
+                            @endif
+                        </p>
+                        @if(($searchKey ?? '') || ($role ?? '') !== '')
+                            <a href="{{ route('manager.users') }}" class="btn btn-outline-secondary">
+                                Ver todos
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($users->hasPages())
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        Mostrando {{ $users->firstItem() }}–{{ $users->lastItem() }} de {{ $users->total() }} usuarios
+                    </span>
+                    {{ $users->appends(request()->input())->links() }}
+                </div>
+            @endif
+
+        </div>
+    </div>
+
+    {{-- Filters modal --}}
+    <div class="modal fade" id="filters-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtros avanzados</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Perfil</label>
+                        <select id="modalRole" class="form-select">
+                            <option value="">Todos los perfiles</option>
+                            <option value="manager"     {{ ($role ?? '') === 'manager'     ? 'selected' : '' }}>Administrador</option>
+                            <option value="customer"    {{ ($role ?? '') === 'customer'    ? 'selected' : '' }}>Cliente</option>
+                            <option value="enterprise"  {{ ($role ?? '') === 'enterprise'  ? 'selected' : '' }}>Empresa</option>
+                            <option value="distributor" {{ ($role ?? '') === 'distributor' ? 'selected' : '' }}>Empleado distribuidor</option>
+                            <option value="support"     {{ ($role ?? '') === 'support'     ? 'selected' : '' }}>Soporte</option>
+                            <option value="accounting"  {{ ($role ?? '') === 'accounting'  ? 'selected' : '' }}>Contabilidad</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer flex-column">
+                    <button type="button" id="applyFiltersBtn" class="btn btn-primary w-100 mb-2">
+                        Aplicar filtros
+                    </button>
+                    <a href="{{ route('manager.users') }}" class="btn btn-secondary w-100">
+                        Limpiar filtros
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th>Identificación</th>
-                        <th>Cliente</th>
-                        <th>Correo electronico</th>
-                        <th>Perfil</th>
-                        <th>Fecha creación</th>
-                        <th>Fecha actualización</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($users as $key => $user)
-                        <tr class="search-items">
-
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->identification }}">{{ ucfirst($user->identification) }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->firstname . ' ' . $user->lastname }}">{{ Str::words( Str::upper(Str::lower($user->firstname . ' ' . $user->lastname)), 2, '...')  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->email }}">{{ $user->email }}</span>
-                            </td>
-                            <td>
-                               <span class="badge {{ $user->role == 'manager' ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-
-                                       @if ($user->role == 'manager')
-                                          Administrador
-                                       @elseif($user->role == 'customer')
-                                           Cliente
-                                       @elseif($user->role == 'enterprise')
-                                           Empresa
-                                        @elseif($user->role == 'distributor')
-                                       Empleado distribuidor
-                                        @elseif($user->role == 'support')
-                                            Soporte
-                                        @elseif($user->role == 'accounting')
-                                            Contabilidad
-                                       @endif
-                               </span>
-                            </td>
-
-                            <td>
-                                <span class="usr-ph-no" >{{ date('Y-m-d', strtotime($user->created_at)) }}</span>
-                            </td>
-
-                            <td>
-                                <span class="usr-ph-no" >{{ date('Y-m-d', strtotime($user->updated_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti ti-dots fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-
-                                            @if ($user->role == 'customer')
-                                                <li>
-                                                    <a class="dropdown-item {{ $user->role == 'customer' ? '': 'd-none' }} d-flex align-items-center gap-3" href="{{ route('manager.enterprises.users.results', $user->slack) }}">
-                                                        Resultados
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item {{ $user->role == 'customer' ? '': 'd-none' }} d-flex align-items-center gap-3" href="{{ route('manager.enterprises.users.certificates', $user->slack) }}">
-                                                        Certificados
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item {{ $user->role == 'customer' ? '': 'd-none' }} d-flex align-items-center gap-3" href="{{ route('manager.users.orders', $user->slack) }}">
-                                                        Ordenes
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item {{ $user->role == 'customer' ? '': 'd-none' }} d-flex align-items-center gap-3" href="{{ route('manager.users.inscriptions', $user->slack) }}">
-                                                        Inscripciones
-                                                    </a>
-                                                </li>
-                                            @endif
-
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.users.emails', $user->slack) }}">
-                                                    <i class="fas fa-envelope-open-text me-1"></i>Correos enviados
-                                                </a>
-                                            </li>
-
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.users.edit', $user->slack) }}">
-                                                    Editar
-                                                </a>
-                                            </li>
-
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('manager.users.destroy', $user->slack) }}">Eliminar</a>
-                                            </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $users->firstItem() }}-{{ $users->lastItem() }} de {{ $users->total() }} resultados</span>
-                <nav>
-                    {{ $users->appends(request()->input())->links() }}
-                </nav>
-            </div>
-        </div>
     </div>
+
+    @include('managers.includes.delete')
+
 @endsection
 
+@push('scripts')
+<script>
+$(function () {
 
+    @if(session('success'))
+        toastr.success('{{ session('success') }}');
+    @endif
+    @if(session('error'))
+        toastr.error('{{ session('error') }}');
+    @endif
+
+    // ── Filters modal ────────────────────────────────────────────────────────
+    $('#applyFiltersBtn').on('click', function () {
+        $('#filterRole').val($('#modalRole').val());
+        $('#filters-modal').modal('hide');
+        $('#searchForm').submit();
+    });
+
+    // ── Eliminar individual vía modal ────────────────────────────────────────
+    $(document).on('click', '.btn-delete', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        $('#delete-modal .modal-title').text($btn.data('title'));
+        $('#delete-form').attr('action', $btn.data('url'));
+        $('#delete-modal').modal('show');
+    });
+
+});
+</script>
+@endpush
