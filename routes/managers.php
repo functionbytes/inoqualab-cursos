@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Managers\Analytics\AnalyticsReportScheduleController;
 use App\Http\Controllers\Managers\AnalyticsController;
 use App\Http\Controllers\Managers\Blogs\BlogsController;
 use App\Http\Controllers\Managers\Blogs\CategoriesController as BlogsCategoriesController;
@@ -37,7 +38,13 @@ use App\Http\Controllers\Managers\Instructions\InstructionsController;
 use App\Http\Controllers\Managers\Invoices\GenerateController as InvoicesGenerateController;
 use App\Http\Controllers\Managers\Invoices\InvoicesController;
 use App\Http\Controllers\Managers\Invoices\ReportController as InvoicesReportController;
+use App\Http\Controllers\Managers\Mailer\MailerComponentController;
+use App\Http\Controllers\Managers\Mailer\MailerEndpointController;
+use App\Http\Controllers\Managers\Mailer\MailerTemplateController;
+use App\Http\Controllers\Managers\Mailer\MailerVariableController;
 use App\Http\Controllers\Managers\MailTemplates\MailTemplatesController;
+use App\Http\Controllers\Managers\NewsletterCampaignController;
+use App\Http\Controllers\Managers\NewsletterController;
 use App\Http\Controllers\Managers\NotificationsController;
 use App\Http\Controllers\Managers\Orders\OrdersController;
 use App\Http\Controllers\Managers\Orders\ReportController as OrdersReportController;
@@ -45,6 +52,26 @@ use App\Http\Controllers\Managers\Orders\ResumenController as OrdersResumenContr
 use App\Http\Controllers\Managers\Quizs\QuizController;
 use App\Http\Controllers\Managers\Quizs\TopicController as QuizTopicController;
 use App\Http\Controllers\Managers\ReportController;
+use App\Http\Controllers\Managers\Seo\GscController;
+use App\Http\Controllers\Managers\Seo\SchemaOrgController;
+use App\Http\Controllers\Managers\Seo\Seo404LogController;
+use App\Http\Controllers\Managers\Seo\SeoAlertsController;
+use App\Http\Controllers\Managers\Seo\SeoAuditController;
+use App\Http\Controllers\Managers\Seo\SeoAuditHistoryController;
+use App\Http\Controllers\Managers\Seo\SeoDashboardController;
+use App\Http\Controllers\Managers\Seo\SeoIndexNowController;
+use App\Http\Controllers\Managers\Seo\SeoLlmsController;
+use App\Http\Controllers\Managers\Seo\SeoMetaController;
+use App\Http\Controllers\Managers\Seo\SeoOrphanController;
+use App\Http\Controllers\Managers\Seo\SeoPageUrlsController;
+use App\Http\Controllers\Managers\Seo\SeoRedirectController;
+use App\Http\Controllers\Managers\Seo\SeoReportController;
+use App\Http\Controllers\Managers\Seo\SeoRobotsController;
+use App\Http\Controllers\Managers\Seo\SeoSitemapController;
+use App\Http\Controllers\Managers\Seo\SeoStaticUrlController;
+use App\Http\Controllers\Managers\Seo\SeoTemplateController;
+use App\Http\Controllers\Managers\Seo\WebVitalsController;
+use App\Http\Controllers\Managers\Settings\AnalyticsNotificationsController;
 use App\Http\Controllers\Managers\Settings\AnalyticsSettingsController;
 use App\Http\Controllers\Managers\Settings\CertificationsController;
 use App\Http\Controllers\Managers\Settings\ContactsController;
@@ -55,8 +82,12 @@ use App\Http\Controllers\Managers\Settings\IncomingMailSettingsController;
 use App\Http\Controllers\Managers\Settings\InvoicesSettingsController;
 use App\Http\Controllers\Managers\Settings\MantenanceSettingsController;
 use App\Http\Controllers\Managers\Settings\MetaSettingsController;
+use App\Http\Controllers\Managers\Settings\ModulesSettingsController;
+use App\Http\Controllers\Managers\Settings\NewsletterSettingsController;
 use App\Http\Controllers\Managers\Settings\PaymentsSettingsController;
 use App\Http\Controllers\Managers\Settings\PixelSettingsController;
+use App\Http\Controllers\Managers\Settings\RolesController;
+use App\Http\Controllers\Managers\Settings\SeoSettingsController;
 use App\Http\Controllers\Managers\Settings\SettingsController;
 use App\Http\Controllers\Managers\Settings\SlidersController;
 use App\Http\Controllers\Managers\Settings\TestimoniesController;
@@ -69,9 +100,18 @@ use App\Http\Controllers\Managers\Users\ResultsController;
 use App\Http\Controllers\Managers\Users\UsersController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], function () {
+Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('manager.dashboard');
+
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('/', [RolesController::class, 'index'])->name('manager.roles.index');
+        Route::get('/create', [RolesController::class, 'create'])->name('manager.roles.create');
+        Route::post('/', [RolesController::class, 'store'])->name('manager.roles.store');
+        Route::get('/edit/{id}', [RolesController::class, 'edit'])->name('manager.roles.edit');
+        Route::put('/{id}', [RolesController::class, 'update'])->name('manager.roles.update');
+        Route::delete('/destroy/{id}', [RolesController::class, 'destroy'])->name('manager.roles.destroy');
+    });
 
     Route::group(['prefix' => 'analytics'], function () {
         Route::get('/', [AnalyticsController::class, 'index'])->name('manager.analytics');
@@ -85,6 +125,14 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
         Route::get('/data/countries', [AnalyticsController::class, 'countries'])->name('manager.analytics.countries');
         Route::get('/data/channels', [AnalyticsController::class, 'channels'])->name('manager.analytics.channels');
         Route::get('/data/realtime', [AnalyticsController::class, 'realtime'])->name('manager.analytics.realtime');
+        Route::get('/data/os', [AnalyticsController::class, 'operatingSystems'])->name('manager.analytics.os');
+        Route::get('/data/traffic-sources', [AnalyticsController::class, 'trafficSources'])->name('manager.analytics.traffic-sources');
+        Route::get('/data/landing-pages', [AnalyticsController::class, 'landingPages'])->name('manager.analytics.landing-pages');
+        Route::get('/data/exit-pages', [AnalyticsController::class, 'exitPages'])->name('manager.analytics.exit-pages');
+        Route::get('/data/channel-trend', [AnalyticsController::class, 'channelTrend'])->name('manager.analytics.channel-trend');
+        Route::get('/data/hourly-heatmap', [AnalyticsController::class, 'hourlyHeatmap'])->name('manager.analytics.hourly-heatmap');
+        Route::get('/data/search-terms', [AnalyticsController::class, 'searchTerms'])->name('manager.analytics.search-terms');
+        Route::get('/data/user-flow', [AnalyticsController::class, 'userFlow'])->name('manager.analytics.user-flow');
     });
 
     Route::group(['prefix' => 'notifications'], function () {
@@ -484,6 +532,21 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
 
         Route::get('/analytics', [AnalyticsSettingsController::class, 'index'])->name('manager.settings.analytics');
         Route::post('/analytics/update', [AnalyticsSettingsController::class, 'update'])->name('manager.settings.analytics.update');
+        Route::post('/analytics/clear-cache', [AnalyticsSettingsController::class, 'clearCache'])->name('manager.settings.analytics.clear-cache');
+
+        Route::get('/analytics/notifications', [AnalyticsNotificationsController::class, 'index'])->name('manager.settings.analytics.notifications');
+        Route::post('/analytics/notifications/update', [AnalyticsNotificationsController::class, 'update'])->name('manager.settings.analytics.notifications.update');
+
+        Route::prefix('/analytics/schedules')->name('manager.settings.analytics.schedules.')->group(function () {
+            Route::get('/', [AnalyticsReportScheduleController::class, 'index'])->name('index');
+            Route::get('/create', [AnalyticsReportScheduleController::class, 'create'])->name('create');
+            Route::post('/', [AnalyticsReportScheduleController::class, 'store'])->name('store');
+            Route::get('/{schedule}/edit', [AnalyticsReportScheduleController::class, 'edit'])->name('edit');
+            Route::put('/{schedule}', [AnalyticsReportScheduleController::class, 'update'])->name('update');
+            Route::delete('/{schedule}', [AnalyticsReportScheduleController::class, 'destroy'])->name('destroy');
+            Route::post('/{schedule}/toggle', [AnalyticsReportScheduleController::class, 'toggle'])->name('toggle');
+            Route::post('/bulk-action', [AnalyticsReportScheduleController::class, 'bulkAction'])->name('bulk-action');
+        });
 
         Route::get('/hours', [HoursSettingsController::class, 'index'])->name('manager.settings.hours');
         Route::post('/hours/update', [HoursSettingsController::class, 'update'])->name('manager.settings.hours.update');
@@ -493,6 +556,12 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
 
         Route::get('/incoming-mail', [IncomingMailSettingsController::class, 'index'])->name('manager.settings.incoming-mail');
         Route::post('/incoming-mail/update', [IncomingMailSettingsController::class, 'update'])->name('manager.settings.incoming-mail.update');
+
+        Route::get('/newsletter', [NewsletterSettingsController::class, 'index'])->name('manager.settings.newsletter');
+        Route::post('/newsletter/update', [NewsletterSettingsController::class, 'update'])->name('manager.settings.newsletter.update');
+
+        Route::get('/modules', [ModulesSettingsController::class, 'index'])->name('manager.settings.modules');
+        Route::post('/modules/update', [ModulesSettingsController::class, 'update'])->name('manager.settings.modules.update');
 
         Route::get('/mails', [MailAutoConfirmRulesController::class, 'index'])->name('manager.settings.mails');
         Route::post('/mails/rules', [MailAutoConfirmRulesController::class, 'store'])->name('manager.settings.mails.rules.store');
@@ -566,6 +635,7 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
         Route::get('/edit/{slack}', [CoursesController::class, 'edit'])->name('manager.courses.edit');
         Route::get('/view/{slack}', [CoursesController::class, 'view'])->name('manager.courses.view');
         Route::delete('/destroy/{slack}', [CoursesController::class, 'destroy'])->name('manager.courses.destroy');
+        Route::post('/bulk-action', [CoursesController::class, 'bulkAction'])->name('manager.courses.bulk-action');
         Route::get('/navegation/{slack}', [CoursesController::class, 'navegation'])->name('manager.courses.navegation');
 
         Route::post('/thumbnails', [CoursesController::class, 'storeThumbnails'])->name('manager.courses.thumbnails');
@@ -640,6 +710,199 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
 
     });
 
+    // ─── SEO ────────────────────────────────────────────────────────────────────
+
+    Route::group(['prefix' => 'seo'], function () {
+
+        // Meta tags
+        Route::prefix('metas')->name('manager.seo.metas.')->group(function () {
+            Route::get('/', [SeoMetaController::class, 'index'])->name('index');
+            Route::get('/export', [SeoMetaController::class, 'export'])->name('export');
+            Route::get('/export-json', [SeoMetaController::class, 'exportJson'])->name('export-json');
+            Route::get('/import', [SeoMetaController::class, 'showImport'])->name('import');
+            Route::post('/import', [SeoMetaController::class, 'import'])->name('import.process');
+            Route::get('/import-json', [SeoMetaController::class, 'showImportJson'])->name('import-json');
+            Route::post('/import-json', [SeoMetaController::class, 'importJson'])->name('import-json.process');
+            Route::get('/hreflang', [SeoMetaController::class, 'hreflangIndex'])->name('hreflang');
+            Route::get('/keywords/suggestions', [SeoMetaController::class, 'keywordSuggestions'])->name('keyword-suggestions');
+            Route::get('/{seoMeta}', [SeoMetaController::class, 'edit'])->name('edit');
+            Route::put('/{seoMeta}', [SeoMetaController::class, 'update'])->name('update');
+            Route::patch('/{seoMeta}/inline', [SeoMetaController::class, 'inlineUpdate'])->name('inline-update');
+            Route::delete('/{seoMeta}', [SeoMetaController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk-destroy', [SeoMetaController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::post('/{seoMeta}/translate', [SeoMetaController::class, 'translateMeta'])->name('translate');
+            Route::post('/{seoMeta}/create-locale', [SeoMetaController::class, 'createLocale'])->name('create-locale');
+        });
+
+        // Redirects
+        Route::prefix('redirects')->name('manager.seo.redirects.')->group(function () {
+            Route::get('/', [SeoRedirectController::class, 'index'])->name('index');
+            Route::get('/export', [SeoRedirectController::class, 'export'])->name('export');
+            Route::get('/htaccess-import', [SeoRedirectController::class, 'showHtaccessImport'])->name('htaccess-import');
+            Route::post('/htaccess-import', [SeoRedirectController::class, 'importHtaccess'])->name('htaccess-import.process');
+            Route::get('/detect-chains', [SeoRedirectController::class, 'detectChains'])->name('detect-chains');
+            Route::post('/resolve-chains', [SeoRedirectController::class, 'resolveChains'])->name('resolve-chains');
+            Route::get('/create', [SeoRedirectController::class, 'create'])->name('create');
+            Route::post('/', [SeoRedirectController::class, 'store'])->name('store');
+            Route::get('/{seoRedirect}/analytics', [SeoRedirectController::class, 'analytics'])->name('analytics');
+            Route::post('/{seoRedirect}/test', [SeoRedirectController::class, 'test'])->name('test');
+            Route::get('/{seoRedirect}', [SeoRedirectController::class, 'edit'])->name('edit');
+            Route::put('/{seoRedirect}', [SeoRedirectController::class, 'update'])->name('update');
+            Route::delete('/{seoRedirect}', [SeoRedirectController::class, 'destroy'])->name('destroy');
+            Route::post('/{seoRedirect}/toggle', [SeoRedirectController::class, 'toggleActive'])->name('toggle');
+            Route::post('/bulk-destroy', [SeoRedirectController::class, 'bulkDestroy'])->name('bulk-destroy');
+        });
+
+        // 404 logs
+        Route::prefix('logs')->name('manager.seo.logs.')->group(function () {
+            Route::get('/', [Seo404LogController::class, 'index'])->name('index');
+            Route::post('/create-redirect', [Seo404LogController::class, 'createRedirect'])->name('create-redirect');
+            Route::delete('/{seo404Log}', [Seo404LogController::class, 'markResolved'])->name('mark-resolved');
+            Route::post('/bulk-destroy', [Seo404LogController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::post('/clear', [Seo404LogController::class, 'clear'])->name('clear');
+        });
+
+        // Dashboard SEO
+        Route::get('/dashboard', [SeoDashboardController::class, 'index'])->name('manager.seo.dashboard');
+        Route::get('/analytics', [SeoDashboardController::class, 'analytics'])->name('manager.seo.analytics');
+        Route::get('/verification', [SeoDashboardController::class, 'verification'])->name('manager.seo.verification');
+        Route::put('/verification', [SeoDashboardController::class, 'verificationUpdate'])->name('manager.seo.verification.update');
+        Route::get('/search-console/import', [SeoDashboardController::class, 'showSearchConsoleImport'])->name('manager.seo.search-console.import');
+        Route::post('/search-console/import', [SeoDashboardController::class, 'importSearchConsole'])->name('manager.seo.search-console.import.store');
+
+        // Robots.txt dedicado
+        Route::prefix('robots')->name('manager.seo.robots.')->group(function () {
+            Route::get('/', [SeoRobotsController::class, 'index'])->name('index');
+            Route::post('/', [SeoRobotsController::class, 'update'])->name('update');
+            Route::post('/reset', [SeoRobotsController::class, 'reset'])->name('reset');
+        });
+
+        // llms.txt dedicado
+        Route::prefix('llms')->name('manager.seo.llms.')->group(function () {
+            Route::get('/', [SeoLlmsController::class, 'index'])->name('index');
+            Route::post('/', [SeoLlmsController::class, 'update'])->name('update');
+            Route::post('/reset', [SeoLlmsController::class, 'reset'])->name('reset');
+        });
+
+        // IndexNow
+        Route::prefix('indexnow')->name('manager.seo.indexnow.')->group(function () {
+            Route::get('/', [SeoIndexNowController::class, 'index'])->name('index');
+            Route::post('/submit', [SeoIndexNowController::class, 'submit'])->name('submit');
+        });
+
+        // Sitemap admin
+        Route::prefix('sitemap')->name('manager.seo.sitemap.')->group(function () {
+            Route::get('/', [SeoSitemapController::class, 'index'])->name('index');
+            Route::post('/generate', [SeoSitemapController::class, 'generate'])->name('generate');
+            Route::post('/clear-cache', [SeoSitemapController::class, 'clearCache'])->name('clear-cache');
+        });
+
+        // Static URLs (sitemap manual)
+        Route::prefix('static-urls')->name('manager.seo.static-urls.')->group(function () {
+            Route::get('/', [SeoStaticUrlController::class, 'index'])->name('index');
+            Route::get('/create', [SeoStaticUrlController::class, 'create'])->name('create');
+            Route::post('/', [SeoStaticUrlController::class, 'store'])->name('store');
+            Route::get('/{seoStaticUrl}/edit', [SeoStaticUrlController::class, 'edit'])->name('edit');
+            Route::put('/{seoStaticUrl}', [SeoStaticUrlController::class, 'update'])->name('update');
+            Route::delete('/{seoStaticUrl}', [SeoStaticUrlController::class, 'destroy'])->name('destroy');
+            Route::patch('/{seoStaticUrl}/toggle', [SeoStaticUrlController::class, 'toggleActive'])->name('toggle');
+            Route::post('/bulk-action', [SeoStaticUrlController::class, 'bulkAction'])->name('bulk-action');
+        });
+
+        // Page URLs
+        Route::get('/page-urls', [SeoPageUrlsController::class, 'index'])->name('manager.seo.page-urls.index');
+
+        // Orphans
+        Route::prefix('orphans')->name('manager.seo.orphans.')->group(function () {
+            Route::get('/', [SeoOrphanController::class, 'index'])->name('index');
+            Route::post('/generate', [SeoOrphanController::class, 'generate'])->name('generate');
+            Route::post('/bulk-generate', [SeoOrphanController::class, 'bulkGenerate'])->name('bulk-generate');
+        });
+
+        // Auditoría SEO
+        Route::prefix('audit')->name('manager.seo.audit.')->group(function () {
+            Route::get('/', [SeoAuditController::class, 'index'])->name('index');
+            Route::post('/url', [SeoAuditController::class, 'auditUrl'])->middleware('throttle:10,1')->name('url');
+            Route::get('/all', [SeoAuditController::class, 'auditAll'])->name('all');
+            Route::get('/check-canonicals', [SeoAuditController::class, 'checkCanonicals'])->name('check-canonicals');
+            Route::post('/bulk-start', [SeoAuditController::class, 'startBulkAudit'])->middleware('throttle:3,60')->name('bulk-start');
+            Route::get('/bulk-progress', [SeoAuditController::class, 'bulkAuditProgress'])->name('bulk-progress');
+            Route::post('/broken-links-start', [SeoAuditController::class, 'startBrokenLinksCheck'])->middleware('throttle:3,60')->name('broken-links-start');
+            Route::get('/broken-links-progress', [SeoAuditController::class, 'brokenLinksProgress'])->name('broken-links-progress');
+            Route::get('/internal-links', [SeoAuditController::class, 'analyzeInternalLinks'])->name('internal-links');
+            Route::post('/core-web-vitals', [SeoAuditController::class, 'coreWebVitals'])->middleware('throttle:20,1')->name('core-web-vitals');
+            // Historial
+            Route::get('/history', [SeoAuditHistoryController::class, 'index'])->name('history');
+            Route::post('/history/bulk-action', [SeoAuditHistoryController::class, 'bulkAction'])->name('history.bulk-action');
+            Route::post('/history/clear', [SeoAuditHistoryController::class, 'clear'])->name('history.clear');
+            Route::delete('/history/{seoAuditLog}', [SeoAuditHistoryController::class, 'destroy'])->name('history.destroy');
+            Route::get('/history/{seoMeta}', [SeoAuditHistoryController::class, 'forMeta'])->name('history.meta');
+            Route::get('/history/{seoMeta}/json', [SeoAuditHistoryController::class, 'forMetaJson'])->name('history.meta.json');
+        });
+
+        // Alertas SEO
+        Route::prefix('alerts')->name('manager.seo.alerts.')->group(function () {
+            Route::get('/', [SeoAlertsController::class, 'index'])->name('index');
+            Route::post('/{seoAlert}/acknowledge', [SeoAlertsController::class, 'acknowledge'])->name('acknowledge');
+            Route::post('/acknowledge-all', [SeoAlertsController::class, 'acknowledgeAll'])->name('acknowledge-all');
+        });
+
+        // Plantillas SEO
+        Route::prefix('templates')->name('manager.seo.templates.')->group(function () {
+            Route::post('/bulk-action', [SeoTemplateController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/', [SeoTemplateController::class, 'index'])->name('index');
+            Route::get('/create', [SeoTemplateController::class, 'create'])->name('create');
+            Route::post('/', [SeoTemplateController::class, 'store'])->name('store');
+            Route::get('/{seoTemplate}/edit', [SeoTemplateController::class, 'edit'])->name('edit');
+            Route::put('/{seoTemplate}', [SeoTemplateController::class, 'update'])->name('update');
+            Route::delete('/{seoTemplate}', [SeoTemplateController::class, 'destroy'])->name('destroy');
+            Route::patch('/{seoTemplate}/toggle-active', [SeoTemplateController::class, 'toggleActive'])->name('toggle-active');
+            Route::get('/{seoTemplate}/preview', [SeoTemplateController::class, 'preview'])->name('preview');
+            Route::post('/{seoTemplate}/bulk-apply', [SeoTemplateController::class, 'bulkApply'])->name('bulk-apply');
+        });
+
+        // Reporte SEO
+        Route::prefix('report')->name('manager.seo.report.')->group(function () {
+            Route::get('/', [SeoReportController::class, 'index'])->name('index');
+            Route::get('/export', [SeoReportController::class, 'export'])->name('export');
+        });
+
+        // Core Web Vitals
+        Route::prefix('web-vitals')->name('manager.seo.web-vitals.')->group(function () {
+            Route::get('/', [WebVitalsController::class, 'index'])->name('index');
+            Route::get('/path/{path}', [WebVitalsController::class, 'show'])->where('path', '.*')->name('show');
+        });
+
+        // Schema.org avanzado (Phase 8)
+        Route::prefix('schema-org')->name('manager.seo.schema-org.')->group(function () {
+            Route::post('/validate', [SchemaOrgController::class, 'validateJson'])->name('validate');
+            Route::get('/template/{type}', [SchemaOrgController::class, 'template'])->name('template');
+            Route::post('/bulk-apply', [SchemaOrgController::class, 'bulkApply'])->name('bulk-apply');
+            Route::get('/{seoMeta}/edit', [SchemaOrgController::class, 'edit'])->name('edit');
+            Route::put('/{seoMeta}', [SchemaOrgController::class, 'update'])->name('update');
+        });
+
+        // Google Search Console OAuth (Phase 9)
+        Route::prefix('gsc')->name('manager.seo.gsc.')->group(function () {
+            Route::get('/', [GscController::class, 'index'])->name('index');
+            Route::get('/connect', [GscController::class, 'connect'])->name('connect');
+            Route::get('/callback', [GscController::class, 'callback'])->name('callback');
+            Route::post('/disconnect', [GscController::class, 'disconnect'])->name('disconnect');
+            Route::post('/import', [GscController::class, 'import'])->name('import');
+        });
+
+    });
+
+    // Settings SEO
+    Route::prefix('settings/seo')->name('manager.settings.seo.')->group(function () {
+        Route::get('/', [SeoSettingsController::class, 'index'])->name('index');
+        Route::post('/', [SeoSettingsController::class, 'update'])->name('update');
+        Route::post('/robots', [SeoSettingsController::class, 'updateRobots'])->name('robots');
+        Route::post('/llms', [SeoSettingsController::class, 'updateLlms'])->name('llms');
+    });
+
+    // ─── Mail Templates ──────────────────────────────────────────────────────────
+
     Route::group(['prefix' => 'mail-templates'], function () {
         Route::get('/', [MailTemplatesController::class, 'index'])->name('manager.mail_templates');
         Route::get('/edit/{id}', [MailTemplatesController::class, 'edit'])->name('manager.mail_templates.edit');
@@ -647,6 +910,102 @@ Route::group(['prefix' => 'manager', 'middleware' => ['auth', 'manager']], funct
         Route::get('/preview/{id}', [MailTemplatesController::class, 'preview'])->name('manager.mail_templates.preview');
         Route::post('/preview-ajax/{id}', [MailTemplatesController::class, 'previewAjax'])->name('manager.mail_templates.preview_ajax');
         Route::post('/send-test/{id}', [MailTemplatesController::class, 'sendTest'])->name('manager.mail_templates.send_test');
+    });
+
+    // ─── Newsletter ───────────────────────────────────────────────────────────────
+
+    Route::prefix('newsletter/campaigns')->name('manager.newsletter.campaigns.')->group(function () {
+        Route::get('/', [NewsletterCampaignController::class, 'index'])->name('index');
+        Route::get('/create', [NewsletterCampaignController::class, 'create'])->name('create');
+        Route::get('/active-count', [NewsletterCampaignController::class, 'activeCount'])->name('active-count');
+        Route::post('/', [NewsletterCampaignController::class, 'store'])->name('store');
+        Route::get('/{campaign}/edit', [NewsletterCampaignController::class, 'edit'])->name('edit');
+        Route::put('/{campaign}', [NewsletterCampaignController::class, 'update'])->name('update');
+        Route::delete('/{campaign}', [NewsletterCampaignController::class, 'destroy'])->name('destroy');
+        Route::post('/{campaign}/send', [NewsletterCampaignController::class, 'send'])->name('send');
+        Route::post('/{campaign}/test', [NewsletterCampaignController::class, 'test'])->name('test');
+        Route::get('/{campaign}/preview', [NewsletterCampaignController::class, 'preview'])->name('preview');
+        Route::post('/{campaign}/duplicate', [NewsletterCampaignController::class, 'duplicate'])->name('duplicate');
+        Route::post('/{campaign}/retry', [NewsletterCampaignController::class, 'retry'])->name('retry');
+    });
+
+    Route::prefix('newsletter')->name('manager.newsletter.')->group(function () {
+        Route::get('/', [NewsletterController::class, 'index'])->name('index');
+        Route::post('/', [NewsletterController::class, 'store'])->name('store');
+        Route::post('/import', [NewsletterController::class, 'import'])->name('import');
+        Route::post('/bulk-action', [NewsletterController::class, 'bulkAction'])->name('bulk-action');
+        Route::get('/export', [NewsletterController::class, 'export'])->name('export');
+        Route::patch('/{newsletter}/toggle', [NewsletterController::class, 'toggle'])->name('toggle');
+        Route::post('/{newsletter}/resend-confirmation', [NewsletterController::class, 'resendConfirmation'])->name('resend-confirmation');
+        Route::delete('/{newsletter}', [NewsletterController::class, 'destroy'])->name('destroy');
+    });
+
+    // ─── Mailer ──────────────────────────────────────────────────────────────────
+
+    Route::prefix('settings/mailers')->name('mailers.')->group(function () {
+
+        // Templates
+        Route::prefix('templates')->name('templates.')->group(function () {
+            Route::get('/', [MailerTemplateController::class, 'index'])->name('index');
+            Route::get('/create', [MailerTemplateController::class, 'create'])->name('create');
+            Route::post('/', [MailerTemplateController::class, 'store'])->name('store');
+            Route::get('/{uid}/edit', [MailerTemplateController::class, 'edit'])->name('edit');
+            Route::patch('/{uid}', [MailerTemplateController::class, 'update'])->name('update');
+            Route::delete('/{uid}', [MailerTemplateController::class, 'destroy'])->name('destroy');
+            Route::get('/{uid}/preview', [MailerTemplateController::class, 'preview'])->name('preview');
+            Route::post('/{uid}/preview-ajax', [MailerTemplateController::class, 'previewAjax'])->name('preview-ajax');
+            Route::get('/{uid}/versions', [MailerTemplateController::class, 'versions'])->name('versions');
+            Route::post('/{uid}/versions/{version}/restore', [MailerTemplateController::class, 'restoreVersion'])->name('versions.restore');
+            Route::post('/{uid}/toggle-status', [MailerTemplateController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{uid}/send-test', [MailerTemplateController::class, 'sendTest'])->name('send-test');
+            Route::post('/bulk-action', [MailerTemplateController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('/format-html', [MailerTemplateController::class, 'formatHtml'])->name('format-html');
+            Route::get('/{uid}/variables', [MailerTemplateController::class, 'variables'])->name('variables');
+            Route::get('/variables-by-module', [MailerTemplateController::class, 'variablesByModule'])->name('variables-by-module');
+        });
+
+        // Components (Layouts)
+        Route::prefix('components')->name('components.')->group(function () {
+            Route::get('/', [MailerComponentController::class, 'index'])->name('index');
+            Route::get('/create', [MailerComponentController::class, 'create'])->name('create');
+            Route::post('/', [MailerComponentController::class, 'store'])->name('store');
+            Route::get('/{uid}/edit', [MailerComponentController::class, 'edit'])->name('edit');
+            Route::patch('/{uid}', [MailerComponentController::class, 'update'])->name('update');
+            Route::delete('/{uid}', [MailerComponentController::class, 'destroy'])->name('destroy');
+            Route::get('/{uid}/preview', [MailerComponentController::class, 'preview'])->name('preview');
+            Route::post('/{uid}/preview-ajax', [MailerComponentController::class, 'previewAjax'])->name('preview-ajax');
+            Route::post('/{uid}/duplicate', [MailerComponentController::class, 'duplicate'])->name('duplicate');
+            Route::post('/{uid}/toggle-status', [MailerComponentController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('/variables', [MailerComponentController::class, 'variables'])->name('variables');
+        });
+
+        // Variables
+        Route::prefix('variables')->name('variables.')->group(function () {
+            Route::get('/', [MailerVariableController::class, 'index'])->name('index');
+            Route::get('/create', [MailerVariableController::class, 'create'])->name('create');
+            Route::post('/', [MailerVariableController::class, 'store'])->name('store');
+            Route::get('/{variable}/edit', [MailerVariableController::class, 'edit'])->name('edit');
+            Route::patch('/{variable}', [MailerVariableController::class, 'update'])->name('update');
+            Route::delete('/{variable}', [MailerVariableController::class, 'destroy'])->name('destroy');
+            Route::post('/{variable}/toggle-status', [MailerVariableController::class, 'toggleStatus'])->name('toggle-status');
+            Route::get('/by-module', [MailerVariableController::class, 'getByModule'])->name('by-module');
+            Route::get('/grouped-by-category', [MailerVariableController::class, 'getGroupedByCategory'])->name('grouped-by-category');
+            Route::get('/available-keys', [MailerVariableController::class, 'getAvailableKeys'])->name('available-keys');
+        });
+
+        // Endpoints
+        Route::prefix('endpoints')->name('endpoints.')->group(function () {
+            Route::get('/documentation', [MailerEndpointController::class, 'documentation'])->name('documentation');
+            Route::get('/', [MailerEndpointController::class, 'index'])->name('index');
+            Route::get('/create', [MailerEndpointController::class, 'create'])->name('create');
+            Route::post('/', [MailerEndpointController::class, 'store'])->name('store');
+            Route::get('/{endpoint}/edit', [MailerEndpointController::class, 'edit'])->name('edit');
+            Route::patch('/{endpoint}', [MailerEndpointController::class, 'update'])->name('update');
+            Route::delete('/{endpoint}', [MailerEndpointController::class, 'destroy'])->name('destroy');
+            Route::get('/{endpoint}/logs', [MailerEndpointController::class, 'logs'])->name('logs');
+            Route::post('/{endpoint}/regenerate-token', [MailerEndpointController::class, 'regenerateToken'])->name('regenerate-token');
+        });
+
     });
 
 });
