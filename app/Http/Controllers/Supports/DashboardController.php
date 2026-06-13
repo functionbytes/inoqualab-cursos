@@ -10,85 +10,47 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Newsletter;
 use App\Models\Order\Order;
 use App\Models\User;
-use App\Structure\Elements;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(): View
     {
-        $enterprises = Enterprise::latest()->count();
-        $blogs = Blog::latest()->count();
-        $users = User::latest()->count();
-        $courses = Course::latest()->count();
-        $newsletters = Newsletter::latest()->count();
-        $contacts = Contact::latest()->take(5)->get();
+        $monthlyOrders = Order::query()
+            ->selectRaw('MONTH(created_at) as month_num, COUNT(*) as total')
+            ->where('created_at', '>=', Carbon::now()->startOfYear())
+            ->groupByRaw('MONTH(created_at)')
+            ->orderByRaw('MONTH(created_at)')
+            ->pluck('total', 'month_num');
 
-        $useradmins = User::where('role', 'manager')->count();
-        $usercustomers = User::where('role', 'customers')->count();
-        $userenterprises = User::where('role', 'enterprises')->count();
+        $viewOrders = collect(range(1, 12))
+            ->map(fn ($m) => (int) ($monthlyOrders->get($m, 0)));
 
-        $orders = Order::count();
-        $online = Order::where('method_id', 1)->where('condition_id', 4)->count();
-        $agreements = Order::where('method_id', 1)->where('condition_id', 4)->count();
-        $total = 0;
+        $weeklyOrders = Order::query()
+            ->selectRaw('DATE_FORMAT(created_at, "%d-%m") as date, COUNT(*) as total')
+            ->where('created_at', '>=', Carbon::now()->subDays(7)->startOfDay())
+            ->groupByRaw('DATE_FORMAT(created_at, "%d-%m")')
+            ->orderByRaw('MIN(created_at)')
+            ->get();
 
-        $analyticsOrders = Order::where('created_at', '>=', Carbon::now()->startOfYear())->get();
-
-        $analyticsOrders = $analyticsOrders->groupBy(function ($val) {
-            return Carbon::parse($val->created_at)->format('M');
-        });
-
-        $viewsOrders = new Collection;
-
-        foreach ($analyticsOrders as $order) {
-            $element = new Elements;
-            $element->number = (int) $order->count();
-            $element->date = Carbon::parse($order->first()->created_at)->format('M');
-            $viewsOrders->push($element);
-        }
-
-        $viewsOrders = $viewsOrders->pluck('number');
-
-        $analyticsEaning = Order::where('created_at', '>=', Carbon::now()->add(-7, 'day')->format('Y-m-d'))->get();
-
-        $analyticsEanings = $analyticsEaning->groupBy(function ($val) {
-            return Carbon::parse($val->created_at)->format('d-m');
-        });
-
-        $viewsEanings = new Collection;
-
-        foreach ($analyticsEanings as $item) {
-            $element = new Elements;
-            $element->number = (int) $item->count();
-            $element->date = Carbon::parse($item->first()->created_at)->format('d-m');
-            $viewsEanings->push($element);
-        }
-
-        $monthEanings = $viewsEanings->pluck('date');
-        $numberEanings = $viewsEanings->pluck('number');
-
-        return view('supports.views.dashboard.index')->with([
-            'viewOrders' => $viewsOrders,
-            'analyticsEanings' => $analyticsEanings,
-            'analyticsEaning' => $analyticsEaning,
-            'numberEanings' => $numberEanings,
-            'analyticsOrders' => $analyticsOrders,
-            'monthEanings' => $monthEanings,
-            'contacts' => $contacts,
-            'users' => $users,
-            'blogs' => $blogs,
-            'courses' => $courses,
-            'total' => $total,
-            'orders' => $orders,
-            'online' => $online,
-            'newsletters' => $newsletters,
-            'useradmins' => $useradmins,
-            'usercustomers' => $usercustomers,
-            'userenterprises' => $userenterprises,
-            'enterprises' => $enterprises,
-            'agreements' => $agreements,
+        return view('supports.views.dashboard.index', [
+            'viewOrders' => $viewOrders->values(),
+            'monthEanings' => $weeklyOrders->pluck('date'),
+            'numberEanings' => $weeklyOrders->pluck('total'),
+            'contacts' => Contact::latest()->take(5)->get(),
+            'users' => User::count(),
+            'blogs' => Blog::count(),
+            'courses' => Course::count(),
+            'total' => 0,
+            'orders' => Order::count(),
+            'online' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
+            'newsletters' => Newsletter::count(),
+            'useradmins' => User::where('role', 'manager')->count(),
+            'usercustomers' => User::where('role', 'customers')->count(),
+            'userenterprises' => User::where('role', 'enterprises')->count(),
+            'enterprises' => Enterprise::count(),
+            'agreements' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
         ]);
     }
 }
