@@ -4,6 +4,7 @@ namespace Tests\Feature\Invoices;
 
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
+use App\Models\Enterprise\Enterprise;
 use App\Models\Invoice\Invoice;
 use App\Models\Invoice\InvoiceCondition;
 use App\Models\Invoice\InvoiceMethod;
@@ -111,11 +112,19 @@ class InvoiceTest extends TestCase
             'amount' => 50000,
         ]);
 
+        $enterprise = new Enterprise;
+        $enterprise->save();
+
         // OrderActivity is what Distributor::orders() returns.
         OrderActivity::create([
             'slack' => 'oa-'.uniqid(),
             'order_id' => $order->id,
             'distributor_id' => $distributor->id,
+            'course_id' => $course->id,
+            'enterprise_id' => $enterprise->id,
+            'item_type' => Course::class,
+            'id_type' => 0,
+            'relation_id' => 0,
             'invoiced' => 0,
             'created_at' => Carbon::now(),
         ]);
