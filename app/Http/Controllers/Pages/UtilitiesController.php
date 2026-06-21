@@ -10,17 +10,19 @@ class UtilitiesController extends Controller
 {
     public static function getCities(Request $request)
     {
-
-        if ($request->term != '') {
-            $cities = Citie::where('title', 'like', $request->term.'%')->get();
-            $formatted_tags = [];
-            foreach ($cities as $citie) {
-                $formatted_tags[] = ['id' => $citie->id, 'text' => $citie->title.', '.$citie->state->countrie->title];
-            }
-        } else {
-            $formatted_tags = [];
+        if ($request->term === '' || $request->term === null) {
+            return response()->json([]);
         }
 
-        return \Response::json($formatted_tags);
+        $cities = Citie::with('state.countrie')
+            ->where('title', 'like', $request->term.'%')
+            ->get();
+
+        $formatted = $cities->map(fn ($citie) => [
+            'id' => $citie->id,
+            'text' => $citie->title.', '.$citie->state->countrie->title,
+        ]);
+
+        return response()->json($formatted);
     }
 }

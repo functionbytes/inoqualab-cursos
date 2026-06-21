@@ -67,7 +67,7 @@
                     <p class="card-subtitle mb-3 mt-1">
                         Puntuación mínima (0–100) para auto-procesar un correo. Por debajo de este valor
                         el correo pasa a revisión manual aunque el procesamiento automático esté activo.
-                        <br><small class="text-muted">Recomendado: 90 — garantiza que empresa y todos los cursos estén perfectamente mapeados.</small>
+                        <br><p class="text-muted">Recomendado: 90 — garantiza que empresa y todos los cursos estén perfectamente mapeados.</p>
                     </p>
                     <div class="row">
                         <div class="col-md-4">

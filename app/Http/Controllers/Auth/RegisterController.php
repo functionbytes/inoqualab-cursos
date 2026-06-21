@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\StoreRegisterRequest;
+use App\Models\Newsletter;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class RegisterController extends Controller
@@ -20,17 +21,12 @@ class RegisterController extends Controller
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(StoreRegisterRequest $request)
     {
         if (setting('registration_enabled') === 0 || setting('registration_enabled') === '0') {
             return redirect()->route('login')
                 ->with('error', 'El registro de nuevas cuentas está deshabilitado en este momento.');
         }
-
-        $request->validate([
-            'email' => ['required', 'email', 'max:191', 'unique:users,email'],
-            'password' => ['required', 'min:8', 'confirmed'],
-        ]);
 
         $user = User::create([
             'slack' => Str::uuid(),
@@ -44,6 +40,11 @@ class RegisterController extends Controller
         ]);
 
         event(new Registered($user));
+
+        Newsletter::query()->firstOrCreate(
+            ['email' => $user->email],
+            ['user_id' => $user->id, 'source' => 'registration', 'slack' => Str::uuid()]
+        );
 
         return redirect()->route('login')
             ->with('success', 'Cuenta creada. Por favor verifica tu correo electrónico.');

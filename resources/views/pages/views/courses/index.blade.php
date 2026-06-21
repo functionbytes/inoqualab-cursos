@@ -47,8 +47,8 @@
                     <div class="fblock">
                         <h4>Buscar</h4>
                         <div class="fsearch">
-                            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
-                            <input id="catSearch" type="text" placeholder="Buscar un curso…" value="{{ request('search') }}">
+                            <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+                            <input id="catSearch" type="text" placeholder="Buscar un curso…" aria-label="Buscar un curso" value="{{ request('search') }}">
                         </div>
                     </div>
 
@@ -155,17 +155,19 @@
                                             <div class="ccard-cat">{{ $course->categorie->title }}</div>
                                         @endif
                                     </div>
-                                    <div class="ccard-title">{{ $course->title }}</div>
-                                    @if ($rating > 0)
-                                        <div class="ccard-rating">
-                                            <span class="stars">
-                                                @for ($s = 1; $s <= 5; $s++)
-                                                    <span class="{{ $s <= round($rating) ? '' : 'off' }}">{!! $starSvg !!}</span>
-                                                @endfor
-                                            </span>
+                                    <div class="ccard-title">{{ str($course->title)->lower()->ucfirst() }}</div>
+                                    <div class="ccard-rating">
+                                        <span class="stars">
+                                            @for ($s = 1; $s <= 5; $s++)
+                                                <span class="{{ $rating > 0 && $s <= round($rating) ? '' : 'off' }}">{!! $starSvg !!}</span>
+                                            @endfor
+                                        </span>
+                                        @if ($rating > 0)
                                             <span class="num">{{ number_format($rating, 1) }}</span>
-                                        </div>
-                                    @endif
+                                        @else
+                                            <span class="num-empty">Sin calificaciones</span>
+                                        @endif
+                                    </div>
                                     <div class="ccard-meta">
                                         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg> {{ $course->lessons_count ?? 0 }} clases</span>
                                         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg> {{ $course->chapters_count ?? 0 }} temas</span>

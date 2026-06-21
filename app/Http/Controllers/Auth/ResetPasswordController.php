@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Events\Auth\Password\ResetPasswordCreated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -28,21 +28,12 @@ class ResetPasswordController extends Controller
         ]);
     }
 
-    public function reset(Request $request)
+    public function reset(ResetPasswordRequest $request)
     {
-        $request->validate([
-            'slack' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], [
-            'password.required' => 'La contraseña es obligatoria.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.confirmed' => 'Las contraseñas no coinciden.',
-        ]);
-
         $user = User::where('slack', $request->slack)->first();
 
         if ($user === null || ! $user->password_reset_token) {
-            return redirect()->route('password.request')->withErrors([
+            return redirect()->route('password.confirm')->withErrors([
                 'email' => 'El enlace de recuperación ha expirado o ya fue utilizado.',
             ]);
         }

@@ -31,7 +31,8 @@ class RegistersController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $enterprise = Enterprise::slack($request->enterprise);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->firstOrFail();
 
         if (User::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);

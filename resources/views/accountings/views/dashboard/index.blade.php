@@ -157,10 +157,10 @@
                                             </td>
                                             <td class="text-left">
                                                 <div class="dropdown dropstart">
-                                                    <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="fas fa-ellipsis fs-5"></i>
+                                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
                                                     </a>
-                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
 
                                                         <li>
                                                             <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('accounting.invoices.edit',$invoice->slack) }}">Editar</a>

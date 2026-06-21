@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customers\UpdateSettingsRequest;
 use App\Models\Citie;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class SettingsController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $user = app('customer');
         $citie = $user->citie_id;
@@ -19,26 +21,13 @@ class SettingsController extends Controller
         return view('customers.views.settings.index', compact('user', 'cities', 'citie'));
     }
 
-    public function update(Request $request)
+    public function update(UpdateSettingsRequest $request): JsonResponse
     {
         $user = app('customer');
-
-        $validated = $request->validate([
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'password_confirmation' => ['nullable', 'string'],
-            'cellphone' => ['nullable', 'string', 'max:30'],
-            'address' => ['nullable', 'string', 'max:255'],
-        ], [
-            'email.required' => 'El correo es obligatorio.',
-            'email.email' => 'El correo no tiene un formato válido.',
-            'email.unique' => 'Ese correo ya está registrado.',
-            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-            'password.confirmed' => 'Las contraseñas no coinciden.',
-        ]);
+        $validated = $request->validated();
 
         if ($request->filled('password')) {
-            $user->password = bcrypt($validated['password']);
+            $user->password = $validated['password'];
         }
 
         $user->cellphone = $validated['cellphone'] ?? $user->cellphone;

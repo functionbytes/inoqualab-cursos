@@ -3,9 +3,7 @@
 @section('content')
 
     @if($user)
-        @include('managers.includes.card', ['title' => 'Correo — ' . $user->firstname . ' ' . $user->lastname])
     @else
-        @include('managers.includes.card', ['title' => 'Vista previa del correo'])
     @endif
 
     <div class="row g-3">
@@ -17,7 +15,7 @@
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
                             <h6 class="mb-0 fw-bold">Vista previa del correo</h6>
-                            <small class="text-muted">Contenido exacto enviado al destinatario</small>
+                            <p class="text-muted">Contenido exacto enviado al destinatario</p>
                         </div>
                         <div class="btn-group btn-group-sm" role="group">
                             <button type="button" class="btn btn-outline-primary active" id="btnDesktopView" data-width="100%"
@@ -40,10 +38,10 @@
                     </div>
                 </div>
                 <div class="card-footer bg-light border-top">
-                    <small class="text-muted">
+                    <p class="text-muted">
                         <i class="fas fa-info-circle me-1"></i>
                         Este es el contenido exacto del correo que fue enviado.
-                    </small>
+                    </p>
                 </div>
             </div>
         </div>
@@ -55,7 +53,7 @@
             <div class="card mb-3">
                 <div class="card-header p-3 border-bottom bg-warning-subtle">
                     <h6 class="mb-0 fw-bold">Detalle del correo</h6>
-                    <small class="text-muted">Información del envío</small>
+                    <p class="text-muted">Información del envío</p>
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
@@ -83,7 +81,7 @@
                             <small class="text-muted fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Fecha de envío</small>
                             <span>{{ $log->sent_at ? $log->sent_at->format('d/m/Y H:i:s') : $log->created_at->format('d/m/Y H:i:s') }}</span>
                             <br>
-                            <small class="text-muted">{{ $log->sent_at ? $log->sent_at->diffForHumans() : $log->created_at->diffForHumans() }}</small>
+                            <p class="text-muted">{{ $log->sent_at ? $log->sent_at->diffForHumans() : $log->created_at->diffForHumans() }}</p>
                         </div>
                         @if($log->error_message)
                             <div class="list-group-item px-3 py-2">

@@ -52,10 +52,15 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="dropdown dropstart">
-                                        <a href="#" class="text-muted" id="certMenu{{ $certificate->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-vertical"></i>
-                                        </a>
+                                        <button type="button" class="btn btn-link text-muted p-0" id="certMenu{{ $certificate->id }}" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Acciones del certificado">
+                                            <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
+                                        </button>
                                         <ul class="dropdown-menu" aria-labelledby="certMenu{{ $certificate->id }}">
+                                            <li>
+                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('customers.certificate.view', $certificate->slack) }}" target="_blank">
+                                                    <i class="fa-duotone fa-eye"></i> Ver certificado
+                                                </a>
+                                            </li>
                                             <li>
                                                 <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
                                                     <i class="fa-duotone fa-file-arrow-down"></i> Descargar

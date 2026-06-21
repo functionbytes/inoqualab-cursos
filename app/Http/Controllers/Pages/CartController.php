@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pages;
 use App\Http\Controllers\Controller;
 use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
+use App\Models\Inscription;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -46,6 +47,32 @@ class CartController extends Controller
             }
 
             return back()->with('error', 'Producto no encontrado.');
+        }
+
+        // Rechazar ítems retirados de la venta (no disponibles).
+        if ($item->available != 1) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Este producto ya no está disponible.'], 422);
+            }
+
+            return back()->with('error', 'Este producto ya no está disponible.');
+        }
+
+        // Para usuarios autenticados, evitar recomprar un curso con inscripción ACTIVA
+        // (las inscripciones expiradas sí pueden re-comprarse como renovación).
+        if ($type === 'course' && auth()->check()) {
+            $activeEnrollment = Inscription::where('user_id', auth()->id())
+                ->where('course_id', $item->id)
+                ->where('expire', 0)
+                ->exists();
+
+            if ($activeEnrollment) {
+                if ($request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Ya estás inscrito en este curso.'], 422);
+                }
+
+                return back()->with('error', 'Ya estás inscrito en este curso.');
+            }
         }
 
         // Precio efectivo (promotion-aware y gratis-aware), consistente con el checkout.
@@ -111,7 +138,7 @@ class CartController extends Controller
                     'qty' => $qty,
                     'line_total' => $price * $qty,
                 ],
-                'cart_count' => count(session('cart', [])),
+                'cart_count' => cartUnits(),
                 'cart_total' => $this->cartTotal(),
             ]);
         }
@@ -130,7 +157,7 @@ class CartController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'cart_count' => count($cart),
+                'cart_count' => cartUnits(),
                 'cart_total' => $this->cartTotal(),
                 'message' => 'Eliminado del carrito.',
             ]);

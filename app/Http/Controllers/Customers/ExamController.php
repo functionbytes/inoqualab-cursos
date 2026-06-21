@@ -12,6 +12,7 @@ use App\Models\Exam\ExamQuestion;
 use App\Models\Exam\ExamTopic;
 use App\Models\Users\Certificate;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -57,7 +58,7 @@ class ExamController extends Controller
         ));
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request, $id): RedirectResponse
     {
         $user = app('customer');
         $topic = ExamTopic::id($id);

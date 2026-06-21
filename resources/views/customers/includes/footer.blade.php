@@ -14,10 +14,8 @@
             </div>
             <div class="col-xxl-6 col-xl-6 col-lg-6 col-md-12 col-12">
                 <ul class="copyright-link rbt-link-hover justify-content-center justify-content-lg-end mt_sm--10 mt_md--10">
-                    <li><a href="#">Terms of service</a></li>
-                    <li><a href="privacy-policy.html">Privacy policy</a></li>
-                    <li><a href="subscription.html">Subscription</a></li>
-                    <li><a href="login.html">Login & Register</a></li>
+                    <li><a href="{{ route('terms') }}">Términos y condiciones</a></li>
+                    <li><a href="{{ route('contacts') }}">Contacto</a></li>
                 </ul>
             </div>
         </div>

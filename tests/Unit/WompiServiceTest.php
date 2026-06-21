@@ -39,4 +39,60 @@ class WompiServiceTest extends TestCase
         $this->assertStringContainsString('signature:integrity=', $url);
         $this->assertStringContainsString('redirect-url=', $url);
     }
+
+    public function test_webhook_signature_fails_closed_without_secret(): void
+    {
+        $service = new WompiService;
+        $this->setEventsSecret($service, '');
+
+        $payload = $this->webhookPayload('checksum-irrelevante', 'whatever');
+
+        $this->assertFalse(
+            $service->verifyWebhookSignature($payload, 'whatever'),
+            'Sin events secret la verificación debe fallar (fail-closed).'
+        );
+    }
+
+    public function test_webhook_signature_validates_correct_checksum_and_rejects_tampered(): void
+    {
+        $secret = 'test_events_secret';
+        $service = new WompiService;
+        $this->setEventsSecret($service, $secret);
+
+        $timestamp = 1610641025;
+        $concat = 'T1'.'APPROVED'.'4900000'.$timestamp.$secret;
+        $checksum = hash('sha256', $concat);
+
+        $payload = $this->webhookPayload($checksum, $timestamp);
+
+        $this->assertTrue($service->verifyWebhookSignature($payload, $checksum), 'Checksum correcto.');
+        $this->assertTrue($service->verifyWebhookSignature($payload, ''), 'Checksum del body cuando no llega header.');
+        $this->assertFalse($service->verifyWebhookSignature($payload, 'deadbeef'), 'Checksum manipulado.');
+    }
+
+    private function webhookPayload(string $checksum, int|string $timestamp): array
+    {
+        return [
+            'timestamp' => $timestamp,
+            'signature' => [
+                'properties' => ['transaction.id', 'transaction.status', 'transaction.amount_in_cents'],
+                'checksum' => $checksum,
+            ],
+            'data' => [
+                'transaction' => [
+                    'id' => 'T1',
+                    'status' => 'APPROVED',
+                    'amount_in_cents' => 4900000,
+                    'reference' => 'REF123',
+                ],
+            ],
+        ];
+    }
+
+    private function setEventsSecret(WompiService $service, string $secret): void
+    {
+        $ref = new \ReflectionProperty($service, 'eventsSecret');
+        $ref->setAccessible(true);
+        $ref->setValue($service, $secret);
+    }
 }

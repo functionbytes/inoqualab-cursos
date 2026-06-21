@@ -27,7 +27,8 @@ class RolesAndPermissionsSeeder extends Seeder
         'coupons', 'users', 'enterprises', 'distributors', 'staff',
         'registers', 'blogs', 'faqs', 'testimonies', 'departments',
         'newsletters', 'incoming-mails', 'contacts', 'documents', 'instructions',
-        'analytics', 'roles',
+        'analytics', 'roles', 'certifications', 'categories', 'reviews',
+        'sliders', 'trusteds', 'seo',
     ];
 
     /**
@@ -36,20 +37,22 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     private const ROLE_GRANTS = [
         'accounting' => [
-            'invoices.*', 'orders.*', 'distributors.view', 'enterprises.view',
-            'analytics.view',
+            'invoices.*', 'orders.*', 'distributors.view', 'distributors.update',
+            'enterprises.view', 'enterprises.update', 'analytics.view',
         ],
         'support' => [
             'users.*', 'contacts.*', 'faqs.*', 'instructions.*', 'documents.*',
             'incoming-mails.*', 'departments.view', 'inscriptions.view',
+            'distributors.*', 'enterprises.*', 'settings.view', 'settings.update',
         ],
         'distributor' => [
-            'courses.view', 'inscriptions.*', 'enterprises.view', 'staff.*',
+            'courses.view', 'inscriptions.*', 'enterprises.*', 'staff.*',
             'registers.*', 'orders.view', 'invoices.view',
+            'settings.view', 'settings.update',
         ],
         'enterprise' => [
-            'courses.view', 'users.view', 'inscriptions.view', 'certificates.view',
-            'staff.view',
+            'courses.view', 'users.view', 'users.update', 'inscriptions.view',
+            'certificates.view', 'staff.view', 'documents.view', 'enterprises.view',
         ],
         'customer' => [
             'courses.view', 'orders.view', 'invoices.view', 'quizzes.view',

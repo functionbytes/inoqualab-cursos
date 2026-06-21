@@ -28,7 +28,7 @@ class SchemaOrgService
             '@context' => 'https://schema.org',
             '@type' => 'Course',
             'name' => $course->title ?? '',
-            'description' => $course->short ?? $course->description ?? '',
+            'description' => strip_tags($course->short ?? $course->description ?? ''),
             'url' => $course->url ?? url('/'),
             'provider' => [
                 '@type' => 'Organization',

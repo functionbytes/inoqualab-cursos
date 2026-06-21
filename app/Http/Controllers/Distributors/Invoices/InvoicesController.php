@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Distributors\Invoices;
 use App\Exports\Distributors\Invoices\InvoicesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
-use App\Models\Invoice\Invoice;
 use App\Models\Invoice\InvoiceCondition;
 use App\Models\Invoice\InvoiceMethod;
 use Carbon\Carbon;
@@ -58,7 +57,7 @@ class InvoicesController extends Controller
     public function detail($slack)
     {
 
-        $invoice = Invoice::slack($slack);
+        $invoice = app('distributor')->invoices()->where('slack', $slack)->firstOrFail();
 
         $detailsInvoice = $invoice->details()->with('course', 'enterprise')->get();
 
@@ -103,7 +102,7 @@ class InvoicesController extends Controller
     public function view($slack)
     {
 
-        $invoice = Invoice::slack($slack);
+        $invoice = app('distributor')->invoices()->where('slack', $slack)->firstOrFail();
         $orders = $invoice->orders;
 
         return view('distributors.views.invoices.invoices.view')->with([

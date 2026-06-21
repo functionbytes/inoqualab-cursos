@@ -57,6 +57,12 @@ return Application::configure(basePath: dirname(__DIR__))
             TrackSeo404::class,
         ]);
 
+        // El webhook de Wompi es un POST externo sin token CSRF; se valida por
+        // firma (X-Wompi-Signature) en CheckoutController::webhook.
+        $middleware->validateCsrfTokens(except: [
+            'payments/wompi/webhook',
+        ]);
+
         $middleware->trustProxies(
             at: '127.0.0.1',
             headers: Request::HEADER_X_FORWARDED_FOR |

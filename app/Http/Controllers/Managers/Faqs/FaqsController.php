@@ -70,6 +70,7 @@ class FaqsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('faqs.create'), 403);
 
         $faq = new Faq;
         $faq->slack = $this->generate_slack('faqs');
@@ -89,6 +90,7 @@ class FaqsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('faqs.update'), 403);
 
         $faq = Faq::slack($request->slack);
         $faq->title = $request->title;
@@ -107,6 +109,7 @@ class FaqsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('faqs.delete'), 403);
 
         $faq = Faq::slack($slack);
         $faq->delete();

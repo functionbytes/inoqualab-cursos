@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Distributors\Orders;
 
 use App\Http\Controllers\Controller;
-use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class OrdersController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $searchKey = $request->search ?? null;
         $condition = $request->condition ?? null;
@@ -66,14 +66,16 @@ class OrdersController extends Controller
         ]);
     }
 
-    public function view($slack)
+    public function view($slack): View
     {
-
-        $order = Order::slack($slack);
+        // Ownership: solo órdenes que pertenecen al distribuidor autenticado
+        // (misma relación que alimenta el listado). Evita IDOR por slack.
+        $order = app('distributor')->ordersActititys()
+            ->where('orders.slack', $slack)
+            ->firstOrFail();
 
         return view('distributors.views.orders.orders.view')->with([
             'order' => $order,
         ]);
-
     }
 }

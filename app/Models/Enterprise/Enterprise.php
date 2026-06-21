@@ -100,7 +100,7 @@ class Enterprise extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\User', 'enterprise_user')->withPivot('enterprise_id')->orderBy('updated_at', 'desc');
+        return $this->belongsToMany('App\Models\User', 'enterprise_user')->withPivot('enterprise_id')->orderBy('users.updated_at', 'desc');
     }
 
     public function courses(): BelongsToMany

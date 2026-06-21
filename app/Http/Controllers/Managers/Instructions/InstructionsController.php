@@ -69,6 +69,7 @@ class InstructionsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('instructions.create'), 403);
 
         $instruction = new Instruction;
         $instruction->slack = $this->generate_slack('instructions');
@@ -91,6 +92,7 @@ class InstructionsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('instructions.update'), 403);
 
         $instruction = Instruction::slack($request->slack);
         $instruction->title = $request->title;
@@ -112,6 +114,7 @@ class InstructionsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('instructions.delete'), 403);
 
         $instruction = Instruction::slack($slack);
         $instruction->delete();

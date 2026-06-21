@@ -37,8 +37,8 @@ class ReportController extends Controller
 
     public function generate(Request $request)
     {
-
-        $enterprise = $request->enterprise;
+        // Ownership: SIEMPRE la empresa autenticada, nunca la del request (evita IDOR).
+        $enterprise = app('enterprise')->id;
         $course = $request->course;
         $modalitie = $request->modalitie;
 

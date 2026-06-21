@@ -482,7 +482,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
     Route::group(['prefix' => 'invoices'], function () {
 
         Route::get('/', [InvoicesController::class, 'index'])->name('manager.invoices');
-        Route::get('/get', [InvoicesController::class, 'get'])->name('manager.invoices.get');
         Route::get('/create', [InvoicesController::class, 'create'])->name('manager.invoices.create');
         Route::post('/store', [InvoicesController::class, 'store'])->name('manager.invoices.store');
         Route::post('/update', [InvoicesController::class, 'update'])->name('manager.invoices.update');
@@ -490,8 +489,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('manager.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('manager.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('manager.invoices.details');
-
-        Route::delete('/destroy/{slack}', [InvoicesController::class, 'destroy'])->name('manager.invoices.destroy');
 
         Route::get('/report', [InvoicesReportController::class, 'report'])->name('manager.invoices.report');
         Route::get('/report/generate', [InvoicesReportController::class, 'generate'])->name('manager.invoices.generate');
@@ -942,8 +939,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
     });
 
     // ─── Mailer ──────────────────────────────────────────────────────────────────
-
-    Route::prefix('settings/mailers')->name('mailers.')->group(function () {
+    // El nombre de ruta `mailers.*` no sigue la convención `manager.*`, así que
+    // EnforcePanelPermission no lo cubre. Mailer es infraestructura de Newsletter
+    // (sus escrituras ya exigen `newsletters.*`), por lo que se exige el permiso
+    // de lectura del newsletter para todo el grupo.
+    Route::prefix('settings/mailers')->name('mailers.')->middleware('can:newsletters.view')->group(function () {
 
         // Templates
         Route::prefix('templates')->name('templates.')->group(function () {

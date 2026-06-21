@@ -5,18 +5,16 @@ namespace App\Http\Controllers\Managers\Enterprises;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
-use App\Models\Inscription;
-use App\Models\Invoice\InvoiceCondition;
-use App\Models\Method;
-use App\Models\Order\Order;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Services\InscriptionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class EnterprisesController extends Controller
 {
+    public function __construct(
+        private readonly InscriptionService $inscriptionService
+    ) {}
+
     public function index(Request $request)
     {
 
@@ -70,6 +68,7 @@ class EnterprisesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
         $enterprise = Enterprise::slack($request->slack);
 
         if (Enterprise::where('email', $request->email)->where('id', '!=', $enterprise->id)->exists()) {
@@ -97,6 +96,7 @@ class EnterprisesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
         if (Enterprise::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
@@ -124,6 +124,7 @@ class EnterprisesController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.delete'), 403);
 
         $enterprise = Enterprise::slack($slack);
         $enterprise->delete();
@@ -162,51 +163,17 @@ class EnterprisesController extends Controller
 
     public function generate(Request $request)
     {
-
         $enterprise = Enterprise::slack($request->enterprise);
         $course = Course::id($request->course);
 
-        $users = explode(',', $request->users);
-        $condition = InvoiceCondition::slug('pagada');
-        $method = Method::slug('acuerdo');
+        $identifications = array_filter(array_map('trim', explode(',', $request->users)));
 
-        foreach ($users as $user) {
-
-            $validate = User::identification($user);
-
-            $order = new Order;
-            $order->slack = $this->generate_slack('orders');
-            $order->subtotal = 0;
-            $order->discount = 0;
-            $order->total = 0;
-            $order->transaction = null;
-            $order->condition_id = $condition->id;
-            $order->method_id = $method->id;
-            $order->course_id = $course->id;
-            $order->user_id = $validate->id;
-            $order->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-            $order->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-            $order->payment_at = Carbon::now()->setTimezone('America/Bogota');
-
-            $include = new Inscription;
-            $include->user_id = $validate->id;
-            $include->course_id = $course->id;
-            $include->culminated = 0;
-            $include->culminated_at = null;
-
-            DB::transaction(function () use ($order, $include) {
-                $order->save();
-                $include->order_id = $order->id;
-                $include->save();
-            });
-
-        }
+        $this->inscriptionService->enrollSimpleBulk($identifications, $course);
 
         return response()->json([
             'success' => true,
             'message' => 'Se generado correctamente la empresa',
             'slack' => $enterprise->slack,
         ]);
-
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pages;
 
+use App\Events\Inscriptions\InscriptionCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRegisterRequest;
 use App\Mail\Customers\Orders\ApprovedMails;
@@ -19,13 +20,10 @@ use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderItem;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
+use App\Models\Order\PaymentEvent;
 use App\Models\User;
 use App\Models\Users\Certificate;
 use App\Services\WompiService;
-use Artesaos\SEOTools\Facades\JsonLd;
-use Artesaos\SEOTools\Facades\OpenGraph;
-use Artesaos\SEOTools\Facades\SEOMeta;
-use Artesaos\SEOTools\Facades\SEOTools;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,29 +38,7 @@ class CheckoutController extends Controller
      */
     public function checkout(Request $request)
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
+        seo()->noindex(true);
 
         [$lines, $subtotal] = cartCheckoutLines();
 
@@ -175,37 +151,7 @@ class CheckoutController extends Controller
         $existingUser = User::where('email', $request->email)->first();
 
         if ($existingUser) {
-
-            if ($existingUser->id === ($user->id ?? null)) {
-
-                $user->firstname = $request->firstname;
-                $user->lastname = $request->lastname;
-                $user->identification = $request->identification;
-                $user->identification_type = $request->identification_type;
-                $user->newsletter_notification = $request->newsletter ? 1 : 0;
-                $user->cellphone = $request->cellphone;
-                $user->company = $request->company;
-
-                if ($request->password != null) {
-                    $user->password = $request->password;
-                }
-
-                $user->address = $request->address;
-                $user->email = $request->email;
-                $user->role = 'customer';
-                $user->citie_id = $request->citie;
-                $user->terms = 1;
-                $user->updated_at = Carbon::now()->setTimezone('America/Bogota');
-                $user->save();
-
-                $this->guard()->login($user);
-
-                return 'success';
-
-            } else {
-                return 'email';
-            }
-
+            return 'email';
         } else {
 
             $user = new User;
@@ -219,6 +165,8 @@ class CheckoutController extends Controller
             $user->company = $request->company;
 
             if ($request->password != null) {
+                // El mutator password() del modelo User hashea automáticamente;
+                // Hash::make aquí causaría doble-hash (login imposible).
                 $user->password = $request->password;
             }
             $user->available = 1;
@@ -270,6 +218,14 @@ class CheckoutController extends Controller
             return redirect()->route('index');
         }
 
+        // Solo el dueño de la orden puede simular su pago (evita que un tercero
+        // marque APPROVED cualquier orden por referencia con sandbox activo).
+        $order = Order::slack($reference);
+
+        if (! $order instanceof Order || ! auth()->check() || $order->user_id !== auth()->id()) {
+            abort(404);
+        }
+
         $this->processOrderStatus($reference, 'SANDBOX-'.strtoupper($status).'-'.$reference, $status);
 
         return redirect()->route('payments.status', [$reference, $status]);
@@ -295,7 +251,9 @@ class CheckoutController extends Controller
             $transaction['reference'],
             $transaction['id'],
             $transaction['status'],
-            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null
+            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null,
+            $transaction['currency'] ?? null,
+            $transaction['payment_method_type'] ?? null
         );
 
         return redirect()->route('payments.status', [$transaction['reference'], $transaction['status']]);
@@ -314,7 +272,9 @@ class CheckoutController extends Controller
             $transaction['reference'],
             $transaction['id'],
             $transaction['status'],
-            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null
+            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null,
+            $transaction['currency'] ?? null,
+            $transaction['payment_method_type'] ?? null
         );
 
         return redirect()->route('payments.status', [$transaction['reference'], $transaction['status']]);
@@ -323,12 +283,12 @@ class CheckoutController extends Controller
     public function webhook(Request $request)
     {
         $payload = $request->all();
-        $signature = $request->header('X-Wompi-Signature', '');
+        $checksum = $request->header('X-Event-Checksum', '');
 
         $service = new WompiService;
 
-        // Verificar SIEMPRE la firma (un webhook sin firma no debe procesarse)
-        if (! $service->verifyWebhookSignature($payload, $signature)) {
+        // Verificar SIEMPRE la firma (un webhook sin firma o inválido no se procesa)
+        if (! $service->verifyWebhookSignature($payload, $checksum)) {
             return response()->json(['message' => 'Invalid signature'], 401);
         }
 
@@ -338,17 +298,57 @@ class CheckoutController extends Controller
             return response()->json(['message' => 'No transaction data'], 400);
         }
 
+        // Idempotencia: cada (transacción, estado) se procesa una sola vez. Si Wompi
+        // reintenta el webhook, se acusa recibo sin reprocesar.
+        $event = PaymentEvent::firstOrCreate(
+            ['transaction_id' => $transaction['id'], 'status' => $transaction['status']],
+            ['reference' => $transaction['reference'] ?? null, 'payload' => $payload],
+        );
+
+        if (! $event->wasRecentlyCreated) {
+            return response()->json(['message' => 'Already processed'], 200);
+        }
+
         $this->processOrderStatus(
             $transaction['reference'],
             $transaction['id'],
             $transaction['status'],
-            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null
+            isset($transaction['amount_in_cents']) ? (int) $transaction['amount_in_cents'] : null,
+            $transaction['currency'] ?? null,
+            $transaction['payment_method_type'] ?? null
         );
 
         return response()->json(['message' => 'OK'], 200);
     }
 
-    private function processOrderStatus(string $reference, string $transactionId, string $status, ?int $amountInCents = null): void
+    /**
+     * Mapea el payment_method_type de Wompi a un OrderMethod local (lo crea si no existe).
+     */
+    private function paymentMethodIdFor(?string $type): ?int
+    {
+        $map = [
+            'CARD' => ['card', 'Tarjeta'],
+            'NEQUI' => ['nequi', 'Nequi'],
+            'PSE' => ['pse', 'PSE'],
+            'BANCOLOMBIA_TRANSFER' => ['bancolombia', 'Bancolombia'],
+            'BANCOLOMBIA_QR' => ['bancolombia', 'Bancolombia'],
+            'BANCOLOMBIA_COLLECT' => ['bancolombia', 'Bancolombia'],
+            'DAVIPLATA' => ['daviplata', 'Daviplata'],
+            'PCOL' => ['pcol', 'Botón Bancolombia'],
+        ];
+
+        $key = strtoupper(trim((string) $type));
+
+        if ($key === '' || ! isset($map[$key])) {
+            return null;
+        }
+
+        [$slug, $title] = $map[$key];
+
+        return OrderMethod::firstOrCreate(['slug' => $slug], ['slack' => $slug, 'title' => $title])->id;
+    }
+
+    public function processOrderStatus(string $reference, string $transactionId, string $status, ?int $amountInCents = null, ?string $currency = null, ?string $paymentMethodType = null): void
     {
         $order = Order::slack($reference);
 
@@ -360,6 +360,13 @@ class CheckoutController extends Controller
         $order->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
         if ($status === 'APPROVED') {
+            // Validar moneda: solo se acepta COP (evita pagos en otra divisa con el mismo número).
+            if ($currency !== null && strtoupper($currency) !== 'COP') {
+                Log::warning("Pago con moneda inesperada en orden {$order->slack}: recibido {$currency}, esperado COP.");
+
+                return;
+            }
+
             // Validar que el monto pagado coincide con el total de la orden.
             // Evita que se acepte un pago por un importe menor al debido.
             if ($amountInCents !== null) {
@@ -386,12 +393,19 @@ class CheckoutController extends Controller
                 return; // Ya fue procesada por otra petición.
             }
 
+            // Registrar el método de pago real reportado por la pasarela (PSE/Nequi/tarjeta/...).
+            $methodId = $this->paymentMethodIdFor($paymentMethodType);
+            if ($methodId) {
+                Order::where('id', $order->id)->update(['method_id' => $methodId]);
+            }
+
             $order->refresh();
 
             $this->createInscriptions($order);
             try {
                 Mail::send(new ApprovedMails($order));
             } catch (\Throwable $e) {
+                Log::error('Fallo al encolar correo de orden aprobada', ['order' => $order->slack, 'error' => $e->getMessage()]);
             }
 
         } elseif ($status === 'PENDING') {
@@ -400,6 +414,7 @@ class CheckoutController extends Controller
             try {
                 Mail::send(new PendingMails($order));
             } catch (\Throwable $e) {
+                Log::error('Fallo al encolar correo de orden pendiente', ['order' => $order->slack, 'error' => $e->getMessage()]);
             }
 
         } elseif (in_array($status, ['VOIDED', 'DECLINED', 'ERROR'])) {
@@ -408,6 +423,7 @@ class CheckoutController extends Controller
             try {
                 Mail::send(new VoidedMails($order));
             } catch (\Throwable $e) {
+                Log::error('Fallo al encolar correo de orden rechazada', ['order' => $order->slack, 'error' => $e->getMessage()]);
             }
         }
     }
@@ -451,14 +467,25 @@ class CheckoutController extends Controller
 
     private function createInscriptions(Order $order): void
     {
+        // Eager-load items + bundle courses to avoid N+1 queries.
+        $order->loadMissing('items');
+
+        $bundleIds = $order->items
+            ->where('item_type', Bundle::class)
+            ->pluck('item_id');
+
+        $bundles = $bundleIds->isNotEmpty()
+            ? Bundle::with('courses')->whereIn('id', $bundleIds)->get()->keyBy('id')
+            : collect();
+
         // Transacción para garantizar que todas las inscripciones de un bundle
         // se crean completas o ninguna (evita inscripciones parciales ante fallo de BD).
-        DB::transaction(function () use ($order) {
+        DB::transaction(function () use ($order, $bundles) {
             foreach ($order->items as $item) {
                 if ($item->item_type === Course::class) {
                     $this->enrollCourse($order, $item->item_id);
                 } elseif ($item->item_type === Bundle::class) {
-                    $bundle = Bundle::find($item->item_id);
+                    $bundle = $bundles->get($item->item_id);
                     if ($bundle) {
                         foreach ($bundle->courses as $course) {
                             $this->enrollCourse($order, $course->id);
@@ -516,33 +543,15 @@ class CheckoutController extends Controller
         $inscription->created_at = $now;
         $inscription->updated_at = $now;
         $inscription->save();
+
+        // Notificar la matrícula (correo de bienvenida al alumno + reporte), igual
+        // que el flujo de InscriptionService. El listener está en cola.
+        InscriptionCreated::dispatch($inscription);
     }
 
     public function status($slack, $status)
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
+        seo()->noindex(true);
 
         $order = Order::slack($slack);
 
@@ -550,8 +559,14 @@ class CheckoutController extends Controller
             return redirect()->route('index');
         }
 
-        // Solo el dueño de la orden puede ver su página de confirmación
-        if (! auth()->check() || $order->user_id !== auth()->id()) {
+        // Si se perdió la sesión en el redirect de la pasarela, mandar a login
+        // (guardando el destino) en vez de un 403 duro. El pago ya se procesó.
+        if (! auth()->check()) {
+            return redirect()->guest(route('login'));
+        }
+
+        // Solo el dueño de la orden puede ver su página de confirmación.
+        if ($order->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -575,24 +590,12 @@ class CheckoutController extends Controller
 
     }
 
-    private function couponApply($message = '', $success = false, $code = '', $discount = 0, $total = 0, $subtotal = 0)
+    private function couponApplyFailed(string $message = '', bool $success = false): array
     {
-        $response['success'] = $success;
-        $response['message'] = $message;
-        $response['discount'] = $discount;
-        $response['total'] = $total;
-        $response['subtotal'] = $subtotal;
-        $response['code'] = $code;
-
-        return $response;
-    }
-
-    private function couponApplyFailed($message = '', $success = false, $result = '')
-    {
-        $response['success'] = $success;
-        $response['message'] = $message;
-
-        return $response;
+        return [
+            'success' => $success,
+            'message' => $message,
+        ];
     }
 
     public function clearCoupon()
@@ -604,29 +607,7 @@ class CheckoutController extends Controller
 
     public function generate(Request $request)
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
+        seo()->noindex(true);
 
         $user = User::auth();
 
@@ -657,7 +638,11 @@ class CheckoutController extends Controller
             $couponModel = null;
             if ($couponCode) {
                 $couponModel = Coupon::where('code', $couponCode)->lockForUpdate()->first();
-                if ($couponModel && $this->couponUsableNow($couponModel, $user)) {
+                // Re-validar en el consumo: vigencia/límite/uso + importe mínimo sobre el
+                // subtotal actual (el carrito pudo cambiar tras aplicar el cupón).
+                if ($couponModel
+                    && $this->couponUsableNow($couponModel, $user)
+                    && $subtotal >= (float) $couponModel->min_price) {
                     $discount = cartCouponDiscount($lines, $couponModel);
                     if ($discount <= 0) {
                         $couponModel = null;
@@ -671,7 +656,9 @@ class CheckoutController extends Controller
             $isFree = $total <= 0;
             $condition = OrderCondition::slug($isFree ? 'payment' : 'generada');
 
-            $number = (DB::table('orders')->max('number') ?? 0) + 1;
+            // lockForUpdate serializa la asignación del número entre transacciones
+            // concurrentes (evita números de orden duplicados bajo carga).
+            $number = (DB::table('orders')->lockForUpdate()->max('number') ?? 0) + 1;
 
             $order = new Order;
             $order->slack = $this->generate_slack('orders');
@@ -733,6 +720,7 @@ class CheckoutController extends Controller
             try {
                 Mail::send(new ApprovedMails($order));
             } catch (\Throwable $e) {
+                Log::error('Fallo al encolar correo de orden gratuita', ['order' => $order->slack, 'error' => $e->getMessage()]);
             }
 
             return response()->json([

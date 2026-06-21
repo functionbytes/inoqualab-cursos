@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Correos enviados — ' . $user->firstname . ' ' . $user->lastname])
 
     <div class="card">
         {{-- Encabezado --}}
@@ -77,13 +76,13 @@
                                         <code class="small text-muted">{{ $log->recipient_email }}</code>
                                     </td>
                                     <td>
-                                        <small class="text-muted">
+                                        <p class="text-muted">
                                             {{ $log->sent_at ? $log->sent_at->format('d/m/Y H:i') : $log->created_at->format('d/m/Y H:i') }}
-                                        </small>
+                                        </p>
                                         <br>
-                                        <small class="text-muted">
+                                        <p class="text-muted">
                                             {{ $log->sent_at ? $log->sent_at->diffForHumans() : $log->created_at->diffForHumans() }}
-                                        </small>
+                                        </p>
                                     </td>
                                     <td class="text-center">
                                         <a href="{{ route('manager.users.emails.show', $log->id) }}"
@@ -101,9 +100,9 @@
             @if($logs->hasPages())
                 <div class="card-footer bg-white border-top">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <small class="text-muted">
+                        <p class="text-muted">
                             Mostrando {{ $logs->firstItem() }}–{{ $logs->lastItem() }} de {{ $logs->total() }} correos
-                        </small>
+                        </p>
                         {{ $logs->links() }}
                     </div>
                 </div>

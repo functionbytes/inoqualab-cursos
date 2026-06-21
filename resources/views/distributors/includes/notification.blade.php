@@ -82,7 +82,7 @@
                                                                             class="badge badge-success badge-notify br-13 ms-2 mt-0"
                                                                             style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
                         <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customer.notiication.view', $notification->id)}}" data-id="{{$notification->id}}"
+                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
                                     data-id="{{$notification->id}}" class="ms-3 text-blue mark-as-read">Ver</a></p>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                                                                             class="badge badge-success badge-notify br-13 ms-2 mt-0"
                                                                             style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
                         <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customer.notiication.view', $notification->id)}}" data-id="{{$notification->id}}"
+                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
                                     class="ms-3 text-blue mark-as-read">Ver</a></p>
                     </div>
                 </div>

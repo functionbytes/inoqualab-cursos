@@ -7,6 +7,9 @@ class TransferBlogsTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $categories = DB::connection('mysql_second')->table('categories_blogs')->get();
         foreach ($categories as $categorie) {

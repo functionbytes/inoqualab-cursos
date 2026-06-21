@@ -9,7 +9,7 @@ use App\Models\Course\CourseProgress;
 use App\Models\Quiz\Quiz;
 use App\Models\Quiz\QuizAnswer;
 use App\Models\Quiz\QuizQuestion;
-use Auth;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
@@ -24,6 +24,7 @@ class QuizController extends Controller
         $inscription = $this->resolveInscription($user, $lesson->course_id);
         $this->assertLessonAccessible($lesson, $inscription, $user->id);
         $topic = $lesson->quiztopic;
+        abort_unless($topic, 404, 'Cuestionario no configurado.');
 
         $count = $topic->show_ans;
         $course = $lesson->course;
@@ -43,15 +44,14 @@ class QuizController extends Controller
             $quiz->inscription_id = $inscription->id;
             $quiz->lesson_id = $lesson->id;
             $quiz->course_id = $course->id;
-            $quiz->user_id = Auth::user()->id;
+            $quiz->user_id = $user->id;
             $quiz->save();
-
-            $answers = [];
         } else {
             $quiz->update(['correct' => 0, 'wrong' => 0, 'score' => 0]);
             $quiz->answers()->delete();
-            $answers = $quiz->answers;
         }
+
+        $answers = [];
 
         return view('customers.views.quizs.quiz', [
             'course' => $course,
@@ -68,7 +68,7 @@ class QuizController extends Controller
 
     }
 
-    public function store(Request $request, $id)
+    public function store(Request $request, $id): RedirectResponse
     {
 
         $user = app('customer');
@@ -81,7 +81,8 @@ class QuizController extends Controller
         $userAnswers = $request->answer ?? [];
 
         // A1: la calificación se hace contra la respuesta almacenada en BD, nunca contra el cliente
-        $answers = $this->processQuizAnswers($topic, $quiz, $questionIds, $userAnswers);
+        $questions = QuizQuestion::findMany($questionIds)->keyBy('id');
+        $answers = $this->processQuizAnswers($topic, $quiz, $questionIds, $userAnswers, $questions);
 
         QuizAnswer::insert($answers);
 
@@ -89,14 +90,19 @@ class QuizController extends Controller
 
     }
 
-    private function processQuizAnswers($topic, $quiz, $questionIds, $userAnswers)
+    private function processQuizAnswers($topic, $quiz, $questionIds, $userAnswers, $questions)
     {
 
         $answers = [];
 
         foreach ($questionIds as $index => $questionId) {
 
-            $question = QuizQuestion::findOrFail($questionId);
+            $question = $questions->get($questionId);
+
+            if (! $question) {
+                continue;
+            }
+
             $userAnswer = $userAnswers[$index] ?? null;
             $correctAnswer = $question->answer;   // ← fuente de verdad: la BD
 
@@ -150,7 +156,7 @@ class QuizController extends Controller
         $wrong = $quiz->answers()->where('approved', 0)->count();
         $correct = $quiz->answers()->where('approved', 1)->count();
 
-        $score = $count == $correct ? 100 : round(100 - ($wrong / $count * 100), 2);
+        $score = $count > 0 ? ($count == $correct ? 100 : round(100 - ($wrong / $count * 100), 2)) : 0;
 
         $quiz->update([
             'wrong' => $wrong,
@@ -203,6 +209,10 @@ class QuizController extends Controller
         $user = app('customer');
         $lesson = CourseLesson::findOrFail($request->lesson);
         $inscription = $this->resolveInscription($user, $lesson->course_id);
+
+        // Impide marcar lecciones fuera de orden por POST (desbloquearía el examen).
+        $this->assertLessonAccessible($lesson, $inscription, $user->id);
+
         $course = $inscription->course;
         $lessons = $course->lessons;
         $chapter = $lesson->chapter;
@@ -223,8 +233,11 @@ class QuizController extends Controller
                 'culminated' => 1,
             ]);
 
+            $lessonsCount = count($lessons);
             $inscription->update([
-                'percent' => round((count($inscription->progress) * (100 / count($lessons))), 2),
+                'percent' => $lessonsCount > 0
+                    ? round((count($inscription->progress) * (100 / $lessonsCount)), 2)
+                    : 0,
             ]);
 
         }

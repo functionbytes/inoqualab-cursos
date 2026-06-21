@@ -9,13 +9,13 @@ class IndexNowService
 {
     public function enabled(): bool
     {
-        return setting('indexnow_enabled') === 'true'
-            && ! empty(setting('indexnow_key'));
+        return setting('seo_indexnow_enabled') === '1'
+            && ! empty(setting('seo_indexnow_key'));
     }
 
     public function key(): string
     {
-        return (string) setting('indexnow_key', '');
+        return (string) setting('seo_indexnow_key', '');
     }
 
     public function submit(array|string $urls): bool

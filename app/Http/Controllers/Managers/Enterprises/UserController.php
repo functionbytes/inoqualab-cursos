@@ -120,18 +120,18 @@ class UserController extends Controller
                 $user->password = $request->password;
             }
 
-            if ($request->role == 'enterprises') {
+            if ($request->role === 'enterprise') {
                 $user->enterprise_id = $request->enterprise;
-            } elseif ($user->role == 'customers') {
+            } elseif ($user->role === 'customer') {
                 $enterprise = $user->relation;
 
                 if ($enterprise != null) {
-                    $enterprise->enterprise_id = $request->enterprises;
+                    $enterprise->enterprise_id = $request->enterprise;
                     $enterprise->save();
                 } else {
                     $inscription = new EnterpriseUser;
                     $inscription->user_id = $user->id;
-                    $inscription->enterprise_id = $request->enterprises;
+                    $inscription->enterprise_id = $request->enterprise;
                     $inscription->available = 1;
                     $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
                     $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');

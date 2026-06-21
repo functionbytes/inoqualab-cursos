@@ -590,6 +590,88 @@ INNER),
 INNER),
             ],
 
+            /* ------------------------------------------------------------------ */
+            /* NEWSLETTER — SUSCRIPCIÓN CONFIRMADA */
+            /* ------------------------------------------------------------------ */
+            [
+                'key' => 'newsletter.subscribed',
+                'name' => 'Newsletter: suscripción confirmada',
+                'subject' => '¡Gracias por suscribirte a {SITE_NAME}!',
+                'description' => 'Se envía al correo cuando alguien se suscribe al newsletter desde el formulario público.',
+                'variables' => [
+                    'SUBSCRIBER_EMAIL' => 'Correo del suscriptor',
+                    'UNSUBSCRIBE_URL' => 'Enlace para darse de baja',
+                ],
+                'content' => $this->wrap(<<<'INNER'
+<tr><td style="padding:30px 20px 10px;background:#FFFFFF;text-align:center;">
+  <h2 style="color:#081A28;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;margin:0 0 10px;">
+    ¡GRACIAS POR SUSCRIBIRTE!
+  </h2>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 20px;">
+    El correo <strong>{SUBSCRIBER_EMAIL}</strong> ha sido suscrito correctamente al newsletter de <strong>{SITE_NAME}</strong>.<br>
+    A partir de ahora recibirás noticias, novedades y contenido exclusivo.
+  </p>
+</td></tr>
+<tr><td style="padding:10px 20px 30px;background:#FFFFFF;text-align:center;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto;">
+    <tr>
+      <td style="background-color:#081A28;padding:12px 30px;border-radius:4px;">
+        <a href="{SITE_URL}" style="color:#FFFFFF;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-decoration:none;text-transform:uppercase;">
+          VISITAR EL SITIO
+        </a>
+      </td>
+    </tr>
+  </table>
+  <p style="color:#AAAAAA;font-size:11px;margin:20px 0 0;">
+    Si no deseas recibir estos correos, puedes
+    <a href="{UNSUBSCRIBE_URL}" style="color:#555555;">darte de baja aquí</a>.
+  </p>
+</td></tr>
+INNER),
+            ],
+
+            /* ------------------------------------------------------------------ */
+            /* NEWSLETTER — DADO DE BAJA */
+            /* ------------------------------------------------------------------ */
+            [
+                'key' => 'newsletter.unsubscribed',
+                'name' => 'Newsletter: dado de baja',
+                'subject' => 'Te has dado de baja del newsletter de {SITE_NAME}',
+                'description' => 'Se envía al correo cuando un suscriptor es dado de baja del newsletter.',
+                'variables' => [
+                    'SUBSCRIBER_EMAIL' => 'Correo del suscriptor',
+                    'SUBSCRIBE_URL' => 'Enlace para volver a suscribirse',
+                ],
+                'content' => $this->wrap(<<<'INNER'
+<tr><td style="padding:30px 20px 10px;background:#FFFFFF;text-align:center;">
+  <h2 style="color:#081A28;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;margin:0 0 10px;">
+    HAS SIDO DADO DE BAJA
+  </h2>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 20px;">
+    El correo <strong>{SUBSCRIBER_EMAIL}</strong> ha sido eliminado de la lista del newsletter de <strong>{SITE_NAME}</strong>.<br>
+    Ya no recibirás más comunicaciones por este medio.
+  </p>
+  <p style="color:#888888;font-size:13px;margin:0 0 20px;">
+    Si esto fue un error o cambias de opinión, puedes volver a suscribirte desde nuestro sitio web.
+  </p>
+</td></tr>
+<tr><td style="padding:0 20px 30px;background:#FFFFFF;text-align:center;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="border:1px solid #081A28;padding:11px 30px;border-radius:4px;">
+        <a href="{SUBSCRIBE_URL}" style="color:#081A28;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-decoration:none;text-transform:uppercase;">
+          VOLVER AL SITIO
+        </a>
+      </td>
+    </tr>
+  </table>
+  <p style="color:#CCCCCC;font-size:11px;margin:20px 0 0;">
+    Si tienes dudas escríbenos a <a href="mailto:{SUPPORT_EMAIL}" style="color:#888888;">{SUPPORT_EMAIL}</a>
+  </p>
+</td></tr>
+INNER),
+            ],
+
         ];
     }
 }

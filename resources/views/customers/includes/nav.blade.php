@@ -47,12 +47,12 @@
         </li>
 
         <li class="sidebar-item" style="display: none;">
-          <a class="sidebar-link" href="#" aria-expanded="false">
+          <button type="button" class="sidebar-link border-0 bg-transparent w-100 text-start">
             <span>
-              <i class="fa-duotone fa-headset"></i>
+              <i class="fa-duotone fa-headset" aria-hidden="true"></i>
             </span>
             <span class="hide-menu">Soporte</span>
-          </a>
+          </button>
         </li>
         <!-- Enlace a la sección de soporte para los clientes (oculto) -->
         <li class="sidebar-item">

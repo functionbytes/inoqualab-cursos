@@ -107,7 +107,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
             <div class="modal-body text-center">
-                <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
+                <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
                 <h4 class="my-0">Proceso realizado</h4>
                 <p>¿Deseas crear un nuevo usuario?</p>
                 <div class="row justify-content-center mt-20  ">
@@ -133,7 +133,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
             <div class="modal-body text-center">
-                <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
+                <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
                 <h4 class="my-0 modal-content-message">¿Deseas seguir creando usuarios o retornar a la empresa?</h4>
                 <p class="modal-content-description"></p>
                 <div class="row justify-content-center mt-20  ">

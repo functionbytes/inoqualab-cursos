@@ -29,6 +29,7 @@ class EnterpriseController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('distributors.update'), 403);
 
         $distributor = Distributor::slack($request->slack);
 

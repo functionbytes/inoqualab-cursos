@@ -17,6 +17,7 @@ class PixelSettingsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $data['fb_pixel_enable'] = $request->fb_pixel_enable;
         $data['fb_pixel'] = $request->fb_pixel;

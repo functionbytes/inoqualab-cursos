@@ -22,7 +22,9 @@ class SettingsController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $user = User::slack($request->slack);
+        // Ajustes de perfil: SIEMPRE el usuario autenticado, nunca el slack del
+        // request (evita toma de cuenta: editar/resetear password de cualquiera).
+        $user = auth()->user();
 
         if (User::where('email', $request->email)->where('id', '!=', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);

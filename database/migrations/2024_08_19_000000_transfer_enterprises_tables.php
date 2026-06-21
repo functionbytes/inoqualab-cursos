@@ -7,6 +7,9 @@ class TransferEnterprisesTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $users = DB::connection('mysql_second')->table('enterprise_user')->get();
         dd($users);

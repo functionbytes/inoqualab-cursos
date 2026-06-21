@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Supports\Instructions;
 
 use App\Http\Controllers\Controller;
 use App\Models\Instruction\InstructionCategorie;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class CategoriesController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 
         $searchKey = $request->search;
@@ -35,7 +38,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function create()
+    public function create(): View
     {
 
         $availables = collect([
@@ -51,7 +54,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
 
         $categorie = InstructionCategorie::slack($slack);
@@ -70,7 +73,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
 
         $categorie = InstructionCategorie::slack($request->slack);
@@ -88,7 +91,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
 
         $categorie = new InstructionCategorie;
@@ -107,7 +110,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function destroy($slack)
+    public function destroy($slack): RedirectResponse
     {
 
         $categorie = InstructionCategorie::slack($slack);

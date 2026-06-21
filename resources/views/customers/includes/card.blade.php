@@ -1,5 +1,5 @@
 
-<div class="card  position-relative overflow-hidden">
+<div class="card">
     <div class="card-body">
         <div class="row align-items-center">
             <div class="col-9">

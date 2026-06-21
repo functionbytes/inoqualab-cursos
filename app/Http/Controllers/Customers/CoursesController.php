@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Customers\Concerns\ResolvesInscription;
+use App\Http\Requests\Customers\StoreReviewRequest;
 use App\Models\Course\Course;
 use App\Models\Course\CourseLesson;
 use App\Models\Course\CourseProgress;
@@ -13,12 +14,13 @@ use App\Models\Inscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class CoursesController extends Controller
 {
     use ResolvesInscription;
 
-    public function index()
+    public function index(): View
     {
 
         $user = app('customer');
@@ -87,8 +89,8 @@ class CoursesController extends Controller
         $present = null;
         $certificate = null;
 
-        if ($exam != null && $exam->score >= $this->passingScoreFor($exam)) {
-            $inscription->certificate != null ? $certificate = $inscription->certificate : $certificate = null;
+        if ($exam !== null && $exam->score >= $this->passingScoreFor($exam)) {
+            $certificate = $inscription->certificate;
         }
 
         // C1: set de lecciones culminadas (evita N+1 de CourseProgress::validate en la vista)
@@ -178,6 +180,10 @@ class CoursesController extends Controller
         $user = app('customer');
         $lesson = CourseLesson::findOrFail($request->lesson);
         $inscription = $this->resolveInscription($user, $lesson->course_id);
+
+        // Impide marcar lecciones fuera de orden por POST (desbloquearía el certificado).
+        $this->assertLessonAccessible($lesson, $inscription, $user->id);
+
         $course = $inscription->course;
 
         // C3: calcular una sola vez; recontar progreso solo tras crear el avance
@@ -241,7 +247,7 @@ class CoursesController extends Controller
 
     }
 
-    public function review(Request $request)
+    public function review(StoreReviewRequest $request)
     {
         // Las reseñas solo se aceptan si el administrador habilitó la opción en el panel.
         if (! setting('reviews_enabled')) {
@@ -249,16 +255,6 @@ class CoursesController extends Controller
         }
 
         $user = app('customer');
-
-        $request->validate([
-            'course' => 'required',
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000',
-        ], [
-            'rating.required' => 'Selecciona una calificación.',
-            'rating.min' => 'La calificación debe ser de 1 a 5 estrellas.',
-            'rating.max' => 'La calificación debe ser de 1 a 5 estrellas.',
-        ]);
 
         $course = Course::where('slack', $request->course)->first();
 
@@ -299,7 +295,7 @@ class CoursesController extends Controller
     private function createExamIfNeeded($inscription, $course)
     {
 
-        $topic = $course->examtopic->first();
+        $topic = $course->examtopic;
 
         if (! $topic) {
             return null;

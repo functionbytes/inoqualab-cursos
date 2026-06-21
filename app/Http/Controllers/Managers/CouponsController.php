@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\StoreCouponRequest;
+use App\Http\Requests\Managers\UpdateCouponRequest;
 use App\Models\Bundle\Bundle;
 use App\Models\Coupon\Coupon;
 use App\Models\Coupon\CouponUsage;
@@ -97,8 +99,9 @@ class CouponsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateCouponRequest $request)
     {
+        abort_unless(auth()->user()->can('coupons.update'), 403);
 
         $coupon = Coupon::slack($request->slack);
         $coupon->title = $request->title;
@@ -130,8 +133,9 @@ class CouponsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreCouponRequest $request)
     {
+        abort_unless(auth()->user()->can('coupons.create'), 403);
 
         $coupon = new Coupon;
         $coupon->slack = $this->generate_slack('coupons');
@@ -166,6 +170,7 @@ class CouponsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('coupons.delete'), 403);
 
         $coupon = Coupon::slack($slack);
         $coupon->delete();

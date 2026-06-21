@@ -13,7 +13,7 @@
                             <div class="col-auto flex-grow-1">
                                 <div class="tt-search-box">
                                     <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
+                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
                                         <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
                                     </div>
                                 </div>
@@ -57,10 +57,10 @@
                             </td>
                             <td class="text-left">
                                 <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis fs-5"></i>
+                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
                                     </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
 
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('manager.enterprises.users.orders.destroy',$order->slack) }}">Eliminar</a>
@@ -76,6 +76,11 @@
             </div>
 
         </div>
+        @if($orders->hasPages())
+        <div class="card card-body mt-2">
+            {{ $orders->links() }}
+        </div>
+        @endif
     </div>
 @endsection
 

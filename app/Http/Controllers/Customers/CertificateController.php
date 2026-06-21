@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use App\Models\Users\Certificate;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\View\View;
 
 class CertificateController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $user = app('customer');
 
@@ -20,9 +21,16 @@ class CertificateController extends Controller
         return view('customers.views.certificates.index', compact('certificates', 'user'));
     }
 
-    public function view(string $slack)
+    public function view(string $slack): View
     {
-        return $this->render($slack)->stream("certificado_{$slack}.pdf");
+        $user = app('customer');
+
+        $certificate = Certificate::with(['user', 'course', 'certifier'])
+            ->where('slack', $slack)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        return view('customers.views.certificates.view', compact('certificate'));
     }
 
     public function download(string $slack)

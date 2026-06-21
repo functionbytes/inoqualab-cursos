@@ -232,6 +232,17 @@
                                         </div>
                                     </div>
 
+                                    <div class="col-12 mt-3">
+                                        <div class="form-group">
+                                            <label class="control-label col-form-label">Diseño del aula (portal del estudiante)</label>
+                                            <select class="form-select" id="aula_version" name="aula_version">
+                                                <option value="1" {{ setting('aula_version') == '2' ? '' : 'selected' }}>Versión 1 — contenido a la izquierda, temario a la derecha</option>
+                                                <option value="2" {{ setting('aula_version') == '2' ? 'selected' : '' }}>Versión 2 — temario lateral izquierdo, contenido a la derecha</option>
+                                            </select>
+                                            <small class="text-muted d-block mt-1">Define cómo ven los alumnos el aula y las clases de cada curso.</small>
+                                        </div>
+                                    </div>
+
                                     <div class="col-12">
                                         <div class="action-form border-top mt-4">
                                             <div class="text-center">
@@ -497,10 +508,12 @@
                     var reviews_enabled = $("#reviews_enabled").val();
                     var contact_notifications = $("#contact_notifications").val();
                     var registration_enabled = $("#registration_enabled").val();
+                    var aula_version = $("#aula_version").val();
 
                     formData.append('reviews_enabled', reviews_enabled);
                     formData.append('contact_notifications', contact_notifications);
                     formData.append('registration_enabled', registration_enabled);
+                    formData.append('aula_version', aula_version);
                     formData.append('slack', slack);
                     formData.append('page_title', page_title);
                     formData.append('page_copyright', page_copyright);

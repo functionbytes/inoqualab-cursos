@@ -38,6 +38,11 @@ class Slider extends Model implements HasMedia
         return LogOptions::defaults()->logOnlyDirty()->logFillable()->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
     }
 
+    public function scopeDescending($query)
+    {
+        return $query->orderBy('created_at', 'desc');
+    }
+
     public function scopeSlack($query, $slack)
     {
         $model = $query->where('slack', $slack)->first();

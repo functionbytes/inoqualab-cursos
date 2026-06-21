@@ -5,10 +5,11 @@ namespace App\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class DocumentsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 
         $searchKey = $request->search;

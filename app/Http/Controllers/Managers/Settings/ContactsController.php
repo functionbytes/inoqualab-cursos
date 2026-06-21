@@ -59,6 +59,7 @@ class ContactsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('contacts.update'), 403);
 
         $contact = Contact::slack($request->slack);
         $contact->reviewed = $request->reviewed;
@@ -73,6 +74,7 @@ class ContactsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('contacts.delete'), 403);
 
         $contact = Contact::slack($slack);
         $contact->delete();

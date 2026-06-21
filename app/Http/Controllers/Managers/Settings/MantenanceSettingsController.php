@@ -22,6 +22,7 @@ class MantenanceSettingsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->maintenance_mode == 'true') {
 

@@ -11,7 +11,7 @@ use App\Http\Controllers\Enterprises\Users\ResultsController;
 use App\Http\Controllers\Enterprises\Users\UsersController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'enterprise', 'middleware' => ['auth', 'enterprise', 'session']], function () {
+Route::group(['prefix' => 'enterprise', 'middleware' => ['auth', 'enterprise', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('enterprise.dashboard');
 

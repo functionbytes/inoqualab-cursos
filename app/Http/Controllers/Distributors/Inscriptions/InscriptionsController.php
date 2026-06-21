@@ -8,7 +8,6 @@ use App\Http\Requests\Distributors\Inscriptions\StoreInscriptionRequest;
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorCourse;
-use App\Models\Enterprise\Enterprise;
 use App\Models\Inscription;
 use App\Models\Order\Order;
 use App\Models\Order\OrderActivity;
@@ -42,10 +41,12 @@ class InscriptionsController extends Controller
     public function enroll(Request $request)
     {
 
-        $enterprise = Enterprise::id($request->enterprise);
+        // Ownership: empresa del distribuidor + usuario perteneciente a esa empresa.
+        $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
         $course = Course::id($request->course);
         $user = User::id($request->user);
-        $distributor = app('distributor');
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404);
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
         $condition = OrderCondition::slug('payment');
@@ -130,10 +131,12 @@ class InscriptionsController extends Controller
     public function store(StoreInscriptionRequest $request)
     {
 
-        $enterprise = Enterprise::slack($request->enterprise);
-        $distributor = Distributor::slack($request->distributor);
+        // Ownership: NUNCA el distribuidor del request; empresa y usuario del distribuidor autenticado.
+        $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.slack', $request->enterprise)->firstOrFail();
         $course = Course::id($request->course);
         $user = User::identification($request->user);
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404);
 
         $existingInscription = Inscription::existingInscription($user->id, $course->id)->first();
 
@@ -240,7 +243,9 @@ class InscriptionsController extends Controller
     {
 
         if ($request->enterprise != null) {
-            $courses = Enterprise::slack($request->enterprise)->courses;
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
+            $courses = $enterprise ? $enterprise->courses : collect();
             $formatted_courses = [];
             $formatted_courses[] = ['id' => '', 'text' => ''];
             foreach ($courses as $course) {
@@ -258,11 +263,12 @@ class InscriptionsController extends Controller
         $formatted_users = [['id' => '', 'text' => '']];
 
         if ($request->enterprise != null) {
-            $enterprise = Enterprise::slack($request->enterprise); // Asegúrate de obtener la empresa.
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
 
             if ($enterprise) {
 
-                $users = $enterprise->users()->orderBy('created_at', 'desc')->get();
+                $users = $enterprise->users()->orderBy('users.created_at', 'desc')->get();
 
                 foreach ($users as $user) {
                     if ($user->identification != null) {

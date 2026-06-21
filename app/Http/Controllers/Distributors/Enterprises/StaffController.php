@@ -14,10 +14,28 @@ use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
+    /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
+    private function managedEnterprise(string $slack): Enterprise
+    {
+        return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
+    }
+
+    /** Usuario que es staff de una empresa del distribuidor autenticado, o 404. */
+    private function managedStaff(string $slack): User
+    {
+        $enterpriseIds = app('distributor')->enterprises()->pluck('enterprises.id')->all();
+
+        return User::where('slack', $slack)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('enterprise_staff')
+                ->whereColumn('enterprise_staff.user_id', 'users.id')
+                ->whereIn('enterprise_staff.enterprise_id', $enterpriseIds))
+            ->firstOrFail();
+    }
+
     public function index(Request $request, $slack)
     {
-
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($slack);
         $searchKey = $request->search;
         $available = $request->available;
 
@@ -49,8 +67,8 @@ class StaffController extends Controller
 
     public function create($slack)
     {
-
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($slack);
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
@@ -67,8 +85,8 @@ class StaffController extends Controller
 
     public function edit($slack)
     {
-
-        $user = User::slack($slack);
+        // Ownership: solo staff de empresas del distribuidor (evita IDOR por slack).
+        $user = $this->managedStaff($slack);
 
         $enterprise = $user->relationsenterprise;
 
@@ -89,7 +107,8 @@ class StaffController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $user = User::slack($request->slack);
+        // Ownership: solo staff de empresas del distribuidor (evita IDOR por slack).
+        $user = $this->managedStaff($request->slack);
 
         if (User::where('email', $request->email)->where('id', '!=', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -119,7 +138,8 @@ class StaffController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $enterprise = Enterprise::slack($request->enterprise);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($request->enterprise);
 
         if (User::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -161,8 +181,8 @@ class StaffController extends Controller
 
     public function destroy($slack)
     {
-
-        $user = User::slack($slack);
+        // Ownership: solo staff de empresas del distribuidor (evita borrar usuarios ajenos).
+        $user = $this->managedStaff($slack);
         $user->delete();
 
         return redirect()->back();

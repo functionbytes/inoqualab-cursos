@@ -48,7 +48,8 @@ class SettingsController extends Controller
 
     public function updateDistributor(Request $request): JsonResponse
     {
-        $distributor = Distributor::slack($request->slack);
+        // Ajustes: SIEMPRE el distribuidor autenticado, nunca el slack del request.
+        $distributor = app('distributor');
 
         if (Distributor::where('email', $request->email)->where('id', '!=', $distributor->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -81,7 +82,9 @@ class SettingsController extends Controller
 
     public function updateUser(Request $request): JsonResponse
     {
-        $user = User::slack($request->slack);
+        // Ajustes de perfil: SIEMPRE el usuario autenticado, nunca el slack del
+        // request (evita toma de cuenta: editar/resetear password de cualquiera).
+        $user = auth()->user();
 
         if (User::where('email', $request->email)->where('id', '!=', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -110,8 +113,8 @@ class SettingsController extends Controller
 
     public function updateNotifications(Request $request)
     {
-
-        $distributor = Distributor::slack($request->slack);
+        // Ajustes: SIEMPRE el distribuidor autenticado, nunca el slack del request.
+        $distributor = app('distributor');
 
         $distributor->mail_notification = $request->mail_notification == 'true' ? 1 : 0;
         $distributor->inscription_notification = $request->inscription_notification == 'true' ? 1 : 0;

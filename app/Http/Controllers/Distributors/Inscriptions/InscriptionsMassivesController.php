@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorCourse;
-use App\Models\Enterprise\Enterprise;
 use App\Models\Inscription;
 use App\Models\Order\Order;
 use App\Models\Order\OrderActivity;
@@ -41,10 +40,12 @@ class InscriptionsMassivesController extends Controller
     public function enroll(Request $request)
     {
 
-        $enterprise = Enterprise::id($request->enterprise);
+        // Ownership: NUNCA el distribuidor del request; empresa y usuario del distribuidor autenticado.
+        $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
         $course = Course::id($request->course);
         $user = User::id($request->user);
-        $distributor = Distributor::id($request->distributor);
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404);
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
         $condition = OrderCondition::slug('payment');
@@ -128,8 +129,9 @@ class InscriptionsMassivesController extends Controller
 
     public function store(Request $request)
     {
-        $enterprise = Enterprise::slack($request->enterprise);
-        $distributor = Distributor::slack($request->distributor);
+        // Ownership: NUNCA el distribuidor del request; empresa del distribuidor autenticado.
+        $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.slack', $request->enterprise)->firstOrFail();
 
         $courses = array_filter(array_map('trim', explode(',', $request->courses)));
         $users = array_reverse(array_filter(array_map('trim', explode(',', $request->users))));
@@ -141,6 +143,11 @@ class InscriptionsMassivesController extends Controller
 
             $user = User::identification($userId);
 
+            // Solo se matricula a usuarios que pertenecen a la empresa del distribuidor.
+            if (! $enterprise->users()->where('users.id', $user->id)->exists()) {
+                continue;
+            }
+
             foreach ($courses as $courseId) {
                 $course = Course::id($courseId);
 
@@ -150,7 +157,7 @@ class InscriptionsMassivesController extends Controller
                     $errors[] = [
                         'enterprise_enroll' => $enterprise->id,
                         'course_enroll' => $course->id,
-                        'customer_name' => $user->first_name.' '.$user->last_name,
+                        'customer_name' => $user->firstname.' '.$user->lastname,
                         'customer_enroll' => $user->id,
                         'customer_identification' => $user->identification,
                         'course' => $course->title,
@@ -244,7 +251,9 @@ class InscriptionsMassivesController extends Controller
     {
 
         if ($request->enterprise != null) {
-            $courses = Enterprise::slack($request->enterprise)->courses;
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
+            $courses = $enterprise ? $enterprise->courses : collect();
             $formatted_courses = [];
             $formatted_courses[] = ['id' => '', 'text' => ''];
             foreach ($courses as $course) {
@@ -262,11 +271,12 @@ class InscriptionsMassivesController extends Controller
         $formatted_users = [['id' => '', 'text' => '']];
 
         if ($request->enterprise != null) {
-            $enterprise = Enterprise::slack($request->enterprise); // Asegúrate de obtener la empresa.
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
 
             if ($enterprise) {
 
-                $users = $enterprise->users()->orderBy('created_at', 'desc')->get();
+                $users = $enterprise->users()->orderBy('users.created_at', 'desc')->get();
 
                 foreach ($users as $user) {
                     if ($user->identification != null) {

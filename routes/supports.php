@@ -39,7 +39,7 @@ use App\Http\Controllers\Supports\Users\UsersController;
 use App\Http\Controllers\Supports\Users\UsersCoursesController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'session']], function () {
+Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('support.dashboard');
 

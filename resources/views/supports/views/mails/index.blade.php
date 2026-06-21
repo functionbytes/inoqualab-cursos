@@ -57,7 +57,7 @@
                             <div class="col-auto flex-grow-1">
                                 <div class="tt-search-box">
                                     <div class="input-group">
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar por remitente o asunto" value="{{ request('search') }}">
+                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar por remitente o asunto" value="{{ request('search') }}">
                                     </div>
                                 </div>
                             </div>
@@ -78,13 +78,13 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                         <tr>
-                            <th>Remitente</th>
-                            <th>Asunto</th>
-                            <th>Empresa</th>
-                            <th>Confianza</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
+                            <th scope="col">Remitente</th>
+                            <th scope="col">Asunto</th>
+                            <th scope="col">Empresa</th>
+                            <th scope="col">Confianza</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
             </div>
             <div class="modal-body text-center">
-                <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
+                <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
                 <h4 class="my-0">¿Estás seguro de eliminar esto?</h4>
                 <p>Todos los datos relacionados con esto pueden eliminarse</p>
                 <form id="delete-form" method="POST" action="">

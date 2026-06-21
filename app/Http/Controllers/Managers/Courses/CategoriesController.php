@@ -72,6 +72,7 @@ class CategoriesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.update'), 403);
 
         $categorie = CourseCategorie::slack($request->slack);
         $categorie->title = $request->title;
@@ -88,6 +89,7 @@ class CategoriesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.create'), 403);
 
         $categorie = new CourseCategorie;
         $categorie->slack = $this->generate_slack('courses');
@@ -105,6 +107,7 @@ class CategoriesController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('courses.delete'), 403);
 
         $categorie = CourseCategorie::slack($slack);
         $categorie->delete();

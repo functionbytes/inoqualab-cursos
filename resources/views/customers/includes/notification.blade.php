@@ -7,11 +7,11 @@
     </a>
     <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
         <div class="d-flex align-items-center justify-content-between py-3 px-7">
-            <h5 class="mb-0 fs-5 fw-semibold">Notitictiones</h5>
+            <h5 class="mb-0 fs-5 fw-semibold">Notificaciones</h5>
             <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">{{ count(auth()->user()->notifications) }}</span>
         </div>
         <div class="message-body" data-simplebar>
-            @forelse( auth()->user()->notifications as $created_at => $notificationss)
+            @forelse( auth()->user()->notifications->groupBy(fn ($n) => $n->created_at->format('Y-m-d')) as $created_at => $group)
 
             @php
             $today = \Carbon\Carbon::parse(now());
@@ -33,7 +33,7 @@
             </div>
             @endif
 
-            @foreach(auth()->user()->notifications as $notification)
+            @foreach($group as $notification)
 
             @if($notification->data['status'] != 'mail')
             @if($notification->read_at != null)
@@ -82,7 +82,7 @@
                                                                             class="badge badge-success badge-notify br-13 ms-2 mt-0"
                                                                             style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
                         <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customers.notiication.view', $notification->id)}}" data-id="{{$notification->id}}"
+                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
                                     data-id="{{$notification->id}}" class="ms-3 text-blue mark-as-read">Ver</a></p>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                                                                             class="badge badge-success badge-notify br-13 ms-2 mt-0"
                                                                             style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
                         <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customers.notiication.view', $notification->id)}}" data-id="{{$notification->id}}"
+                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
                                     class="ms-3 text-blue mark-as-read">Ver</a></p>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
             @endforelse
         </div>
         <div class="py-6 px-7 mb-1">
-            <a href="{{ route('customers.notifications') }}" class ="btn btn-outline-primary w-100"> Ver todas las notificaciones </button>
+            <a href="{{ route('customers.notifications') }}" class="btn btn-outline-primary w-100"> Ver todas las notificaciones </a>
         </div>
     </div>
 </li>

@@ -8,38 +8,12 @@ use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Faq\Faq;
 use App\Models\User;
-use Artesaos\SEOTools\Facades\JsonLd;
-use Artesaos\SEOTools\Facades\OpenGraph;
-use Artesaos\SEOTools\Facades\SEOMeta;
-use Artesaos\SEOTools\Facades\SEOTools;
 
 class PagesController extends Controller
 {
     public function index()
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
+        seo()->setCanonical(url('/'));
 
         $courses = Course::latest()->available()->two(5)->website()->withCount(['lessons', 'chapters'])->get();
         $bpms = Course::latest()->available()->one(23)->website()->withCount(['lessons', 'chapters'])->get();
@@ -52,196 +26,50 @@ class PagesController extends Controller
             'populars' => $populars,
             'bundles' => $bundles,
         ]);
-
     }
 
     public function coming()
     {
+        seo()->setCanonical(url()->current());
 
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
-        return view('pages.views.comings')->with([]);
-
+        return view('pages.views.comings');
     }
 
     public function home()
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
         return redirect()->route(User::auth()->redirect());
-
     }
 
     public function about()
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
-        $users = User::count();
-        $enterprises = Enterprise::count();
+        seo()->setCanonical(url()->current());
 
         return view('pages.views.about')->with([
-            'enterprises' => $enterprises,
-            'users' => $users,
+            'enterprises' => Enterprise::count(),
+            'users' => User::count(),
         ]);
-
     }
 
     public function faqs()
     {
-
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
-        $faqs = Faq::get();
+        seo()->setCanonical(url()->current());
 
         return view('pages.views.faqs')->with([
-            'faqs' => $faqs,
+            'faqs' => Faq::get(),
         ]);
-
     }
 
     public function politics()
     {
+        seo()->setCanonical(url()->current());
 
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
-        return view('pages.views.politics')->with([]);
-
+        return view('pages.views.politics');
     }
 
     public function terms()
     {
+        seo()->setCanonical(url()->current());
 
-        SEOMeta::setTitle(getSetting()->meta_title);
-        SEOMeta::setDescription(getSetting()->meta_description);
-        SEOMeta::setCanonical(getUrl());
-
-        SEOTools::setTitle(getSetting()->meta_title);
-        SEOTools::setDescription(getSetting()->meta_description);
-        SEOTools::opengraph()->setUrl(getUrl());
-        SEOTools::setCanonical(getUrl());
-        SEOTools::opengraph()->addProperty('type', 'articles');
-        SEOTools::twitter()->setSite('@bpmsandiego');
-        SEOTools::jsonLd()->addImage(getMeta());
-
-        OpenGraph::setTitle(getSetting()->meta_title);
-        OpenGraph::setDescription(getSetting()->meta_description);
-        OpenGraph::setUrl(getUrl());
-        OpenGraph::addProperty('type', 'article');
-        OpenGraph::addProperty('locale', 'en-En');
-        OpenGraph::addImage(getMeta());
-
-        JsonLd::setTitle(getSetting()->meta_title);
-        JsonLd::setDescription(getSetting()->meta_description);
-        JsonLd::addImage(getMeta());
-
-        return view('pages.views.terms')->with([]);
-
+        return view('pages.views.terms');
     }
 }

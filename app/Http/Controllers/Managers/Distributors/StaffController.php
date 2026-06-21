@@ -116,6 +116,7 @@ class StaffController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('staff.update'), 403);
         $user = User::slack($request->slack);
 
         if (! $user) {
@@ -159,6 +160,7 @@ class StaffController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('staff.create'), 403);
         $distributor = Distributor::slack($request->distributor);
 
         $emailExists = User::where('email', $request->email)->exists();
@@ -209,6 +211,7 @@ class StaffController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('staff.delete'), 403);
 
         $user = User::slack($slack);
         $user->delete();

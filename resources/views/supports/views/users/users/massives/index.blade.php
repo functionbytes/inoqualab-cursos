@@ -13,8 +13,8 @@
                         <div class="col-auto flex-grow-1">
                             <div class="tt-search-box">
                                 <div class="input-group">
-                                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                    <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+                                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
+                                    <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
                                 </div>
                             </div>
                         </div>
@@ -34,10 +34,10 @@
             <table class="table search-table align-middle text-nowrap">
                 <thead class="header-item">
                 <tr>
-                    <th>Curso</th>
-                    <th>Estado</th>
-                    <th>Año</th>
-                    <th>Acciones</th>
+                    <th scope="col">Curso</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Año</th>
+                    <th scope="col">Acciones</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -58,10 +58,10 @@
                     </td>
                     <td class="text-left">
                         <div class="dropdown dropstart">
-                            <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-ellipsis-vertical fs-5"></i>
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
 
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.inscriptions.edit', $inscription->slack) }}">Editar</a>

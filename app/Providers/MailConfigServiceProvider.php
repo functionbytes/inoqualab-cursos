@@ -2,42 +2,61 @@
 
 namespace App\Providers;
 
-use Config;
-use DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class MailConfigServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
+        // En local usamos siempre la config del .env (Mailpit, etc.)
+        if ($this->app->environment('local')) {
+            return;
+        }
+
         try {
             DB::connection()->getPdo();
+
             if (! DB::getSchemaBuilder()->hasTable('settings')) {
-
                 return;
-            } else {
-
-                $config = [
-                    'driver' => @(DB::table('settings')->where('key', 'mail_driver')->first()->value),
-                    'host' => @(DB::table('settings')->where('key', 'mail_host')->first()->value),
-                    'port' => @(DB::table('settings')->where('key', 'mail_port')->first()->value),
-                    'from' => @['address' => @(DB::table('settings')->where('key', 'mail_from_address')->first()->value), 'name' => @(DB::table('settings')->where('key', 'mail_from_name')->first()->value)],
-                    'encryption' => @(DB::table('settings')->where('key', 'mail_encryption')->first()->value),
-                    'username' => @(DB::table('settings')->where('key', 'mail_username')->first()->value),
-                    'password' => @(DB::table('settings')->where('key', 'mail_password')->first()->value),
-                    'sendmail' => @'/usr/sbin/sendmail -bs',
-                    'pretend' => @false,
-                ];
-                Config::set('mail', $config);
             }
-        } catch (\Exception $e) {
-            return;
-            exit('Could not connect to the database.  Please check your configuration. error:'.$e);
+
+            $rows = DB::table('settings')
+                ->whereIn('key', [
+                    'mail_driver', 'mail_host', 'mail_port',
+                    'mail_from_address', 'mail_from_name',
+                    'mail_encryption', 'mail_username', 'mail_password',
+                ])
+                ->pluck('value', 'key');
+
+            $driver = $rows->get('mail_driver', 'smtp');
+
+            // 'mailjet' como driver legacy se mapea a smtp usando su servidor SMTP
+            $transport = match ($driver) {
+                'mailjet' => 'smtp',
+                default => $driver,
+            };
+
+            Config::set('mail.default', 'db_mailer');
+            Config::set('mail.mailers.db_mailer', [
+                'transport' => $transport,
+                'host' => $rows->get('mail_host', 'smtp.mailgun.org'),
+                'port' => (int) $rows->get('mail_port', 587),
+                'encryption' => $rows->get('mail_encryption', 'tls') ?: 'tls',
+                'username' => $rows->get('mail_username'),
+                'password' => $rows->get('mail_password'),
+                'timeout' => null,
+            ]);
+            Config::set('mail.from', [
+                'address' => $rows->get('mail_from_address', config('mail.from.address')),
+                'name' => $rows->get('mail_from_name', config('mail.from.name')),
+            ]);
+
+        } catch (\Exception) {
+            // No hay BD disponible — se usa la config del .env
         }
     }
 
-    public function boot()
-    {
-        //
-    }
+    public function boot(): void {}
 }

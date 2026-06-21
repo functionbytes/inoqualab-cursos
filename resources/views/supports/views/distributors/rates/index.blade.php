@@ -27,8 +27,8 @@
                                 <table class="table card-table table-vcenter text-nowrap mb-0">
                                     <thead>
                                     <tr class="">
-                                        <th class="w-20 border-bottom-0">Cursos</th>
-                                        <th class="w-20 border-bottom-0">Valor</th>
+                                        <th scope="col" class="w-20 border-bottom-0">Cursos</th>
+                                        <th scope="col" class="w-20 border-bottom-0">Valor</th>
                                     </tr>
                                     </thead>
                                     <tbody>

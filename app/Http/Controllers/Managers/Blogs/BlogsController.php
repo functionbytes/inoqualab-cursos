@@ -18,7 +18,7 @@ class BlogsController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $blogs = Blog::descending();
+        $blogs = Blog::descending()->with('categorie');
 
         if ($searchKey) {
             $blogs = $blogs->where('title', 'like', '%'.$searchKey.'%');
@@ -108,6 +108,7 @@ class BlogsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $blog = Blog::slack($request->slack);
         $blog->title = Str::upper($request->title);
@@ -117,10 +118,7 @@ class BlogsController extends Controller
         $blog->date_at = $request->date;
         $blog->categorie_id = $request->categorie;
         $blog->available = $request->available;
-        $blog->date_at = $request->date;
         $blog->update();
-
-        $blog->tags()->detach();
 
         if ($request->has('tags')) {
             $tagIds = array_filter(explode(',', $request->tags));
@@ -139,6 +137,7 @@ class BlogsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $blog = new Blog;
         $blog->title = Str::upper($request->title);
@@ -166,6 +165,7 @@ class BlogsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('blogs.delete'), 403);
 
         $blog = Blog::slack($slack);
         $blog->delete();
@@ -214,6 +214,7 @@ class BlogsController extends Controller
             return response()->json(['status' => 'success', 'blog' => $blog->slack]);
         }
 
+        return response()->json(['status' => 'error', 'message' => 'Archivo no válido.'], 422);
     }
 
     public function deleteThumbnails($id)

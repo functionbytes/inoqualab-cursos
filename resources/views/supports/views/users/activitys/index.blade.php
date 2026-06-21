@@ -37,10 +37,10 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                         <tr>
-                            <th>Descripción</th>
-                            <th>Modelo</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Modelo</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>

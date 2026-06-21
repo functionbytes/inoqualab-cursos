@@ -8,10 +8,12 @@ use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Autorización por convención para el panel manager.
+ * Autorización por convención para los paneles internos.
  *
  * Deriva el permiso requerido del nombre de la ruta:
- *   manager.{dominio}.{accion}  ->  {dominio}.{view|create|update|delete}
+ *   {panel}.{dominio}.{accion}  ->  {dominio}.{view|create|update|delete}
+ *
+ * donde {panel} es uno de: manager, support, distributor, enterprise, accounting.
  *
  * Si ese permiso existe en el sistema y el usuario no lo tiene, responde 403.
  * Si el permiso no existe (dominios sin permisos definidos), deja pasar.
@@ -21,6 +23,24 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class EnforcePanelPermission
 {
+    /** Prefijos de nombre de ruta sujetos a autorización por convención. */
+    private const PANEL_PREFIXES = ['manager', 'support', 'distributor', 'enterprise', 'accounting'];
+
+    /**
+     * Alias de dominio: nombre de ruta -> alias de permiso real.
+     *
+     * Cubre los nombres de ruta que no coinciden 1:1 con el catálogo de permisos:
+     * singulares (`order` -> `orders`), nombres cortos (`mails` -> `incoming-mails`)
+     * y erratas históricas (`departaments` -> `departments`). Evita el fail-open
+     * sin tener que renombrar rutas ya referenciadas por `route()`.
+     */
+    private const DOMAIN_ALIASES = [
+        'newsletter' => 'newsletters',
+        'order' => 'orders',
+        'mails' => 'incoming-mails',
+        'departaments' => 'departments',
+    ];
+
     /** Sufijo de acción de ruta -> verbo de permiso. */
     private const ACTION_MAP = [
         'index' => 'view', 'show' => 'view', 'view' => 'view', 'list' => 'view',
@@ -45,17 +65,17 @@ class EnforcePanelPermission
 
     private function permissionForRoute(?string $routeName): ?string
     {
-        if ($routeName === null || ! str_starts_with($routeName, 'manager.')) {
+        if ($routeName === null) {
             return null;
         }
 
         $parts = explode('.', $routeName);
 
-        if (count($parts) < 2) {
+        if (count($parts) < 2 || ! in_array($parts[0], self::PANEL_PREFIXES, true)) {
             return null;
         }
 
-        $domain = $parts[1];
+        $domain = self::DOMAIN_ALIASES[$parts[1]] ?? $parts[1];
         $action = end($parts);
         $verb = self::ACTION_MAP[$action] ?? 'view';
 

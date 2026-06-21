@@ -70,7 +70,7 @@ class Course extends Model implements HasMedia
 
     public function getUrlAttribute(): string
     {
-        return route('courses.view', $this->slug);
+        return route('courses.view', $this->slack);
     }
 
     public function getSitemapPriorityAttribute(): string

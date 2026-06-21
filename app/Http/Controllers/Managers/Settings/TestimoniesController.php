@@ -66,6 +66,7 @@ class TestimoniesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('testimonies.update'), 403);
 
         $testimonie = Testimonie::slack($request->slack);
         $testimonie->firstname = $request->firstname;
@@ -83,6 +84,7 @@ class TestimoniesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('testimonies.create'), 403);
 
         $testimonie = new Testimonie;
         $testimonie->slack = $this->generate_slack('testimonies');
@@ -101,6 +103,7 @@ class TestimoniesController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('testimonies.delete'), 403);
 
         $testimonie = Testimonie::slack($slack);
         $testimonie->delete();

@@ -145,6 +145,7 @@ class LessonsController extends Controller
 
     public function store(StoreLessonRequest $request)
     {
+        abort_unless(auth()->user()->can('lessons.create'), 403);
         $course = Course::slack($request->course);
 
         if (! $course) {
@@ -212,6 +213,7 @@ class LessonsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('lessons.update'), 403);
         $lesson = CourseLesson::slack($request->slack);
         $lesson->chapter_id = $request->chapter;
         $lesson->title = Str::upper($request->title);
@@ -275,63 +277,11 @@ class LessonsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('lessons.delete'), 403);
 
         $lesson = CourseLesson::slack($slack);
         $lesson->delete();
 
         return back();
-
-        // if ($courseclass->type == "video") {
-
-        //     $video_file = @file_get_contents(public_path() . '/video/class/' . $courseclass->video);
-
-        //     if ($video_file) {
-        //         unlink(public_path() . '/video/class/' . $courseclass->video);
-        //     }
-        // }
-
-        // if ($courseclass->type == "audio") {
-
-        //     $video_file = @file_get_contents(public_path() . '/files/audio/' . $courseclass->audio);
-
-        //     if ($video_file) {
-        //         unlink(public_path() . '/files/audio/' . $courseclass->audio);
-        //     }
-        // }
-
-        // if ($courseclass->type == "image") {
-
-        //     $image_file = @file_get_contents(public_path() . '/images/class/' . $courseclass->image);
-
-        //     if ($image_file) {
-        //         unlink(public_path() . '/images/class/' . $courseclass->image);
-        //     }
-        // }
-
-        // if ($courseclass->type == "zip") {
-
-        //     $zip_file = @file_get_contents(public_path() . '/files/zip/' . $courseclass->zip);
-
-        //     if ($zip_file) {
-        //         unlink(public_path() . '/files/zip/' . $courseclass->zip);
-        //     }
-        // }
-
-        // if ($courseclass->type == "pdf") {
-
-        //     $pdf_file = @file_get_contents(public_path() . '/files/pdf/' . $courseclass->pdf);
-
-        //     if ($pdf_file) {
-        //         unlink(public_path() . '/files/pdf/' . $courseclass->pdf);
-        //     }
-        // }
-
-        // if ($courseclass->preview_type = "video") {
-        //     $content = @file_get_contents(public_path() . '/video/class/preview/' . $courseclass->preview_video);
-        //     if ($content) {
-        //         unlink(public_path() . '/video/class/preview/' . $courseclass->preview_video);
-        //     }
-        // }
-
     }
 }

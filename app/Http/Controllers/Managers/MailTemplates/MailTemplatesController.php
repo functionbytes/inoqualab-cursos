@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\MailTemplates;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\MailTemplates\SendTestMailTemplateRequest;
+use App\Http\Requests\Managers\MailTemplates\UpdateMailTemplateRequest;
 use App\Models\MailTemplate;
 use App\Services\MailTemplateService;
 use Illuminate\Http\Request;
@@ -24,21 +26,11 @@ class MailTemplatesController extends Controller
         return view('managers.views.mail_templates.edit', compact('template'));
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateMailTemplateRequest $request, $id)
     {
         $template = MailTemplate::findOrFail($id);
 
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'subject' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string'],
-        ]);
-
-        $template->update([
-            'name' => $request->name,
-            'subject' => $request->subject,
-            'content' => $request->content,
-        ]);
+        $template->update($request->validated());
 
         return redirect()->route('manager.mail_templates.edit', $template->id)
             ->with('success', 'Plantilla actualizada correctamente.');
@@ -63,13 +55,9 @@ class MailTemplatesController extends Controller
         return response()->json(['success' => true, 'html' => $html]);
     }
 
-    public function sendTest(Request $request, $id)
+    public function sendTest(SendTestMailTemplateRequest $request, $id)
     {
         $template = MailTemplate::findOrFail($id);
-
-        $request->validate([
-            'test_email' => ['required', 'email', 'max:255'],
-        ]);
 
         $service = app(MailTemplateService::class);
         $content = $request->input('content', $template->content);

@@ -62,8 +62,8 @@ class EnterprisesController extends Controller
 
     public function edit($slack)
     {
-
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: solo empresas del distribuidor autenticado (evita IDOR por slack).
+        $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
 
         $availables = collect([
             ['id' => '1', 'label' => 'Publico'],
@@ -171,9 +171,9 @@ class EnterprisesController extends Controller
 
     public function navegation($slack)
     {
-
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
         $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
 
         return view('distributors.views.enterprises.enterprises.navegation')->with([
             'distributor' => $distributor,

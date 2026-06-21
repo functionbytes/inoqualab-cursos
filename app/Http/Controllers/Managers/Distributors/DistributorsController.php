@@ -78,6 +78,7 @@ class DistributorsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('distributors.update'), 403);
         $distributor = Distributor::slack($request->slack);
 
         if ($distributor->email != $request->email || $distributor->nit != $request->nit) {
@@ -125,6 +126,7 @@ class DistributorsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('distributors.create'), 403);
         if (Distributor::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
@@ -155,6 +157,7 @@ class DistributorsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('distributors.delete'), 403);
 
         $distributor = Distributor::slack($slack);
         $distributor->delete();

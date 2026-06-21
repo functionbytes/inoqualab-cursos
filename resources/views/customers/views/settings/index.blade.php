@@ -1,249 +1,176 @@
 @extends('layouts.customers')
 
-@section('content')
+@section('title', 'Configuración')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
-
-            <div class="card w-100">
-
-                <form id="formUsers" enctype="multipart/form-data" role="form" onSubmit="return false">
-
-                    {{ csrf_field() }}
-
-                    <input type="hidden" id="id" name="id" value="{{ $user->id }}">
-                    <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
-                    <input type="hidden" id="edit" name="edit" value="true">
-
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar usuario</h5>
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
-                        </p>
-
-                        <div class="row">
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Nombres</label>
-                                        <input type="text" class="form-control" id="firstname"  name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres" disabled>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Apellidos</label>
-                                        <input type="text" class="form-control" id="lastname"  name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido" disabled>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Identificación</label>
-                                        <input type="text" class="form-control" id="identification"  name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación" disabled>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Correo electronico</label>
-                                        <input type="text" class="form-control" id="email"  name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico" >
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Contraseña</label>
-                                        <input type="password" class="form-control" id="password" name="password" value="" placeholder="Ingresar contraseña">
-                                </div>
-                            </div>
-                           
-                            <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Celular</label>
-                                        <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular" >
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Dirección</label>
-                                        <input type="text" class="form-control" id="address"  name="address" value="{{ $user->address }}" placeholder="Ingresar dirección" >
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                       Guardar
-                                </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-        </div>
-
-    </div>
-
-@endsection
-
-
-
-@push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-
-            $('#roles').change(function(e) {
-
-                e.preventDefault();
-                var role = $(this).val();
-
-                if (role == 'enterprises') {
-                    $('.divEnterprise').removeClass("d-none");
-                } else if (role == 'customer') {
-                    $('.divEnterprise').removeClass("d-none");
-                } else {
-                    $('.divEnterprise').addClass("d-none");
-                }
-
-            });
-
-            jQuery.validator.addMethod(
-                'emailExt',
-                function (value, element, param) {
-                    return value.match(
-                        /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
-                    )
-                },
-                'Porfavor ingrese email valido',
-            );
-
-            $("#formUsers").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    cellphone: {
-                        required: false,
-                        number: true,
-                        minlength: 6,
-                        maxlength: 10,
-                    },
-                    address: {
-                        required: false,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                    email: {
-                        required: true,
-                        email: true,
-                        emailExt: true,
-                    },
-                    password: {
-                        required: false,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                },
-                messages: {
-                    cellphone: {
-                        required: "El parametro es necesario.",
-                        number: 'Solo se puede ingresar números.',
-                        minlength: "Debe contener al menos 6 caracter",
-                        maxlength: "Debe contener al menos 10 caracter",
-                    },
-                    address: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 3 caracter",
-                        maxlength: "Debe contener al menos 100 caracter",
-                    },
-                    email: {
-                        required: 'Tu email ingresar correo electrónico es necesario.',
-                        email: 'Por favor, introduce una dirección de correo electrónico válida.',
-                    },
-                    password: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 6 caracter",
-                        maxlength: "Debe contener al menos 10 caracter",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formUsers');
-                    var formData = new FormData($form[0]);
-                    var slack = $("#slack").val();
-                    var cellphone = $("#cellphone").val();
-                    var address = $("#address").val();
-                    var email = $("#email").val();
-                    var password = $("#password").val();
-
-                    formData.append('slack', slack);
-                    formData.append('cellphone', cellphone);
-                    formData.append('address', address);
-                    formData.append('password', password);
-                    formData.append('email', email);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-                    
-
-                    $.ajax({
-                        url: "{{ route('customers.settings.update')}}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-                            if(response.success == true){
-
-                                toastr.success(response.message, "Operación exitosa", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                window.location.href = "{{ route('customers.dashboard') }}";
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-
-                                toastr.warning("Se ha generado un error.", "Operación fallida", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right"
-                                });
-
-                                error = response.message;
-                                $('.errors').removeClass('d-none');
-                                $('.errors').html(error);
-                            }
-                            }
-                    });
-
-                }
-
-            });
-
-
-
-        });
-
-    </script>
-
+@push('css')
+    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}">
 @endpush
 
+@section('content')
 
+@php
+    $cityName = ($citie && isset($cities[$citie])) ? $cities[$citie] : ($user->city ?? '');
+    $photo = method_exists($user, 'getFirstMediaUrl') ? $user->getFirstMediaUrl('avatar') : '';
+@endphp
 
+<section class="cfg-stack">
 
+    {{-- Perfil --}}
+    <div class="pnl-card cfg-profile">
+        <div class="cfg-av">
+            @if($photo)
+                <img src="{{ $photo }}" alt="{{ $user->firstname }}" style="width:100%;height:100%;border-radius:inherit;object-fit:cover">
+            @else
+                <i class="fa-duotone fa-user"></i>
+            @endif
+        </div>
+        <div class="cfg-id">
+            <b>{{ ucwords(Str::lower(trim($user->firstname.' '.$user->lastname))) }}</b>
+            <span>{{ $user->email }}</span><br/>
+            <span class="cfg-role">Estudiante</span>
+        </div>
+    </div>
 
+    <form id="formUsers" role="form" onsubmit="return false">
+        @csrf
+        <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
+
+        {{-- Información personal --}}
+        <div class="pnl-card">
+            <div class="pnl-head">
+                <h2>Información personal</h2>
+                <div class="sub">Mantén tus datos de contacto actualizados.</div>
+            </div>
+            <div class="pnl-form">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="cfg_firstname">Nombres</label>
+                        <input class="control" id="cfg_firstname" value="{{ $user->firstname }}" readonly>
+                    </div>
+                    <div class="field">
+                        <label for="cfg_lastname">Apellidos</label>
+                        <input class="control" id="cfg_lastname" value="{{ $user->lastname }}" readonly>
+                    </div>
+                    <div class="field">
+                        <label for="cfg_identification">Identificación</label>
+                        <input class="control" id="cfg_identification" value="{{ $user->identification }}" readonly>
+                    </div>
+                    <div class="field">
+                        <label for="email">Correo electrónico</label>
+                        <input class="control" type="email" id="email" name="email" value="{{ $user->email }}" placeholder="Ingresar correo">
+                    </div>
+                    <div class="field">
+                        <label for="cellphone">Celular</label>
+                        <input class="control" id="cellphone" name="cellphone" value="{{ $user->cellphone }}" inputmode="tel" placeholder="Ingresar celular">
+                    </div>
+                    <div class="field">
+                        <label for="cfg_city">Ciudad</label>
+                        <input class="control" id="cfg_city" value="{{ $cityName }}" readonly>
+                    </div>
+                    <div class="field full">
+                        <label for="address">Dirección</label>
+                        <input class="control" id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
+                    </div>
+                </div>
+                <button type="submit" class="pnl-save" id="cfgSave">Guardar cambios</button>
+            </div>
+        </div>
+
+        {{-- Seguridad --}}
+        <div class="pnl-card">
+            <div class="pnl-head">
+                <h2>Seguridad</h2>
+                <div class="sub">Deja los campos vacíos si no deseas cambiar tu contraseña.</div>
+            </div>
+            <div class="pnl-form">
+                <div class="field-grid">
+                    <div class="field">
+                        <label for="password">Nueva contraseña</label>
+                        <div class="pw-wrap">
+                            <input class="control" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres">
+                            <button type="button" class="pw-toggle" id="cfgPwToggle" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="password_confirmation">Confirmar nueva contraseña</label>
+                        <input class="control" type="password" id="password_confirmation" name="password_confirmation" placeholder="Repetir contraseña">
+                    </div>
+                </div>
+                <button type="submit" class="pnl-save" id="cfgPwSave">Actualizar contraseña</button>
+            </div>
+        </div>
+    </form>
+
+    {{-- Notificaciones (preferencias visuales) --}}
+    <div class="pnl-card">
+        <div class="pnl-head">
+            <h2>Notificaciones</h2>
+            <div class="sub">Elige qué avisos quieres recibir.</div>
+        </div>
+        <div class="cfg-notes">
+            <label class="switch-row"><div class="stxt"><b>Novedades de cursos</b><span>Avisos cuando se publiquen nuevos cursos o módulos.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
+            <label class="switch-row"><div class="stxt"><b>Recordatorios de clases</b><span>Te recordamos continuar tus cursos en progreso.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
+            <label class="switch-row"><div class="stxt"><b>Vencimientos y fechas</b><span>Alertas de quizzes, exámenes y cierres próximos.</span></div><span class="switch"><input type="checkbox"><i></i></span></label>
+            <label class="switch-row"><div class="stxt"><b>Promociones</b><span>Descuentos y ofertas de capacitación.</span></div><span class="switch"><input type="checkbox"><i></i></span></label>
+        </div>
+    </div>
+
+</section>
+@endsection
+
+@push('scripts')
+<script type="text/javascript">
+    $(function () {
+        // Mostrar/ocultar contraseña
+        $('#cfgPwToggle').on('click', function () {
+            var $i = $('#password');
+            $i.attr('type', $i.attr('type') === 'password' ? 'text' : 'password');
+            $(this).find('i').toggleClass('fa-eye fa-eye-slash');
+        });
+
+        $('#formUsers').on('submit', function (e) {
+            e.preventDefault();
+
+            var password = $('#password').val();
+            var confirm = $('#password_confirmation').val();
+
+            if (password && password.length < 8) {
+                toastr.warning('La contraseña debe tener al menos 8 caracteres.', 'Advertencia', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                return;
+            }
+            if (password && password !== confirm) {
+                toastr.warning('Las contraseñas no coinciden.', 'Advertencia', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                return;
+            }
+
+            var formData = new FormData(this);
+            var $btns = $('#formUsers button[type="submit"]');
+            $btns.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ route('customers.settings.update') }}",
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    $btns.prop('disabled', false);
+                    if (response.success === true) {
+                        toastr.success(response.message, 'Operación exitosa', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                        $('#password, #password_confirmation').val('');
+                    }
+                },
+                error: function (xhr) {
+                    $btns.prop('disabled', false);
+                    var msg = 'Se ha generado un error.';
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        msg = Object.values(xhr.responseJSON.errors).map(function (e) { return e[0]; }).join(' ');
+                    }
+                    toastr.warning(msg, 'Operación fallida', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                }
+            });
+        });
+    });
+</script>
+@endpush

@@ -53,6 +53,7 @@ class AnnouncementsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.create'), 403);
 
         $course = Course::slack($request->course);
         $announcement = new CourseAnnouncement;
@@ -89,6 +90,7 @@ class AnnouncementsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.update'), 403);
 
         $announcement = CourseAnnouncement::slack($request->slack);
         $announcement->title = $request->title;
@@ -106,6 +108,7 @@ class AnnouncementsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('courses.delete'), 403);
         $announcement = CourseAnnouncement::slack($slack);
         $announcement->delete();
 

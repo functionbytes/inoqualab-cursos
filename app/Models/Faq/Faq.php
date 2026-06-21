@@ -6,13 +6,14 @@ use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Faq extends Model
 {
     use HasFactory,
-        HasFinders  , LogsActivity;
+        HasFinders, LogsActivity, SoftDeletes;
 
     protected $table = 'faqs';
 

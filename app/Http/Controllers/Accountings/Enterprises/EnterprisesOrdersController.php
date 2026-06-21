@@ -27,7 +27,7 @@ class EnterprisesOrdersController extends Controller
         $types = OrderType::latest()->get();
 
         if ($searchKey) {
-            $orders = $orders->where('slack', 'like', '%'.$searchKey.'%');
+            $orders = $orders->where('orders.slack', 'like', '%'.$searchKey.'%');
         }
 
         if ($method) {

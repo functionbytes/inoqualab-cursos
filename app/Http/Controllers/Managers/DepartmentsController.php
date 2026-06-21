@@ -62,6 +62,7 @@ class DepartmentsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('departments.update'), 403);
         $department = Department::slack($request->slack);
         $department->title = Str::upper($request->title);
         $department->slug = Str::slug($request->title, '-');
@@ -78,6 +79,7 @@ class DepartmentsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('departments.create'), 403);
 
         $department = new Department;
         $department->slack = $this->generate_slack('departments');
@@ -96,6 +98,7 @@ class DepartmentsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('departments.delete'), 403);
         $department = Department::slack($slack);
         $department->delete();
 

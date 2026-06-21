@@ -14,8 +14,8 @@
                             <div class="col-auto flex-grow-1">
                                 <div class="tt-search-box">
                                     <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
+                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
                                     </div>
                                 </div>
                             </div>
@@ -35,9 +35,9 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                     <tr>
-                        <th>Titulo</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
+                        <th scope="col">Titulo</th>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>

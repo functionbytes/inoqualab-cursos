@@ -1,65 +1,68 @@
-@if(count($relateds)>0)
-<section class="course-section rel z-1 pt-120 rpt-90 pb-100 rpb-70 brand1-bg-1">
-   <div class="container">
-      <div class="row justify-content-center">
-         <div class="col-xl-8 col-lg-8 col-md-8">
-            <div class="section-title text-center mb-40">
-               <h2>Cursos relacionados</h2>
-            </div>
-         </div>
-      </div>
-      <div class="row justify-content-center">
+@if(count($relateds) > 0)
+<section class="related">
+    <div class="container">
+        <h2>Cursos relacionados</h2>
+        <div class="related-grid">
 
-         @foreach ($relateds as $related)
-            <div class="col-lg-4 col-md-4  col-sm-12">
-               <div class="coach-item wow fadeInUp delay-0-2s">
-                  <div class="coach-image">
-                     <a href="{{ route('courses.view', [$related->slack]) }}" class="category">{{ $related->categorie->title }}</a>
-                     @if(count($related->getMedia('thumbnail'))>0)
-                        <img src="{{ $related->getfirstMedia('thumbnail')->getfullUrl() }}"
-                             class="card-img-top rounded-0 object-fit-cover" alt="..." height="440" loading="lazy"
-                             onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
-                     @else
-                        <img src="{{ asset('/pages/images/courses/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="..." height="440" loading="lazy">
-                     @endif
-                        </a>
-                  </div>
-                  <div class="coach-content">
-                     <h4><a href="{{ route('courses.view', [$related->slack]) }}">{{ $related->title }}</a></h4>
-                     <div class="ratting-price">
-                        <div class="ratting">
-                           <i class="fas fa-star"></i>
-                           <i class="fas fa-star"></i>
-                           <i class="fas fa-star"></i>
-                           <i class="fas fa-star"></i>
-                           <i class="fas fa-star"></i>
-                        </div>
-                        @if ($related->payment == 1)
-                           @php $relOnSale = $related->promotion == 1 && $related->discount < $related->price; @endphp
-                           @if ($relOnSale)
-                              <div class="rbt-price">
-                                 <span class="price">{{ number_format($related->discount, 0, ',', '.') }}</span>
-                                 <span class="off-price">${{ number_format($related->price, 0, ',', '.') }}</span>
-                              </div>
-                           @else
-                              <div class="rbt-price">
-                                 <span class="price">{{ number_format($related->price, 0, ',', '.') }}</span>
-                              </div>
-                           @endif
-                        @elseif($related->payment == 0)
-                           <span class="price">GRATIS</span>
+            @foreach ($relateds as $related)
+                @php
+                    $relOnSale = $related->promotion == 1 && $related->discount > 0 && $related->discount < $related->price;
+                    $relLessons = $related->lessons_count ?? count($related->lessons);
+                    $relChapters = $related->chapters_count ?? count($related->chapters);
+                @endphp
+                <a class="ccard" href="{{ route('courses.view', $related->slack) }}">
+
+                    <div class="ccard-media">
+                        @if(count($related->getMedia('thumbnail')) > 0)
+                            <img src="{{ $related->getFirstMedia('thumbnail')->getFullUrl() }}"
+                                 alt="{{ $related->title }}" loading="lazy"
+                                 onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
+                        @else
+                            <img src="{{ asset('/pages/images/courses/default.jpg') }}"
+                                 alt="{{ $related->title }}" loading="lazy">
                         @endif
+                        @if($related->categorie)
+                            <span class="ccard-badge premium">{{ $related->categorie->title }}</span>
+                        @endif
+                    </div>
 
-                     </div>
-                     <ul class="coach-footer">
-                        <li><i class="fas fa-list"></i><span>{{ $related->lessons_count ?? count($related->lessons) }} Clases</span></li>
-                        <li><i class="fas fa-folder"></i><span>{{ $related->chapters_count ?? count($related->chapters) }} Temas</span></li>
-                     </ul>
-                  </div>
-               </div>
-            </div>
-         @endforeach
-      </div>
-   </div>
+                    <div class="ccard-body">
+                        <div class="ccard-title">{{ $related->title }}</div>
+
+                        <div class="ccard-rating">
+                            <span class="stars">
+                                @for ($s = 0; $s < 5; $s++)
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.9 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+                                @endfor
+                            </span>
+                            <span class="rel-price">
+                                @if ($related->payment == 0)
+                                    <span class="now">Gratis</span>
+                                @elseif ($relOnSale)
+                                    <span class="now">$ {{ number_format($related->discount) }}</span>
+                                    <span class="was">$ {{ number_format($related->price) }}</span>
+                                @else
+                                    <span class="now">$ {{ number_format($related->price) }}</span>
+                                @endif
+                            </span>
+                        </div>
+
+                        <div class="ccard-meta">
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+                                {{ $relLessons }} Clases
+                            </span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                {{ $relChapters }} Temas
+                            </span>
+                        </div>
+                    </div>
+
+                </a>
+            @endforeach
+
+        </div>
+    </div>
 </section>
 @endif

@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Managers\Settings\UpdatePaymentsSettingsRequest;
+use Illuminate\Http\JsonResponse;
 
 class PaymentsSettingsController extends Controller
 {
@@ -12,14 +13,8 @@ class PaymentsSettingsController extends Controller
         return view('managers.views.settings.payments.setting');
     }
 
-    public function update(Request $request)
+    public function update(UpdatePaymentsSettingsRequest $request): JsonResponse
     {
-        $request->validate([
-            'wompi_public_key' => ['required', 'string', 'max:255'],
-            'wompi_integrity_secret' => ['required', 'string', 'max:255'],
-            'wompi_events_secret' => ['required', 'string', 'max:255'],
-        ]);
-
         $data['wompi_public_key'] = $request->wompi_public_key;
         $data['wompi_integrity_secret'] = $request->wompi_integrity_secret;
         $data['wompi_events_secret'] = $request->wompi_events_secret;

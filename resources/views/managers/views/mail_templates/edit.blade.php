@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Editar plantilla: ' . $template->name])
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -46,7 +45,7 @@
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h5 class="mb-0 fw-bold">Editor de código</h5>
-                                <small class="text-muted">Edita el contenido HTML de la plantilla</small>
+                                <p class="text-muted">Edita el contenido HTML de la plantilla</p>
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <span class="badge text-info small">
@@ -132,7 +131,7 @@
                                 <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
                                     <div>
                                         <h6 class="mb-0 fw-semibold text-dark">Variables disponibles</h6>
-                                        <small class="text-muted">Haz clic en una variable para insertarla en el cursor</small>
+                                        <p class="text-muted">Haz clic en una variable para insertarla en el cursor</p>
                                     </div>
                                 </div>
 
@@ -186,7 +185,7 @@
                             <div class="d-flex align-items-center justify-content-between gap-3 mb-3 flex-wrap">
                                 <div>
                                     <h6 class="mb-0 fw-semibold text-dark">Vista previa del email</h6>
-                                    <small class="text-muted">Cambia entre escritorio y móvil para previsualizar</small>
+                                    <p class="text-muted">Cambia entre escritorio y móvil para previsualizar</p>
                                 </div>
                                 <div class="d-flex gap-2 align-items-center">
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Device preview">
@@ -216,10 +215,10 @@
                                 </div>
                             </div>
                             <div class="mt-2">
-                                <small class="text-muted">
+                                <p class="text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
                                     Las variables globales se reemplazan con los valores reales del sitio. Las variables de plantilla quedan como <code>{VAR}</code>.
-                                </small>
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -247,7 +246,7 @@
                 <div class="card mb-3">
                     <div class="card-header bg-info-subtle border-bottom p-3">
                         <h6 class="mb-0 fw-bold">Información de la plantilla</h6>
-                        <small class="text-muted">Datos de referencia (no editables)</small>
+                        <p class="text-muted">Datos de referencia (no editables)</p>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
@@ -273,7 +272,7 @@
                 <div class="card">
                     <div class="card-header border-bottom p-3">
                         <h6 class="mb-0 fw-bold">Atajos de teclado</h6>
-                        <small class="text-muted">Acelera tu trabajo con estos atajos</small>
+                        <p class="text-muted">Acelera tu trabajo con estos atajos</p>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
@@ -304,10 +303,10 @@
                         </div>
                     </div>
                     <div class="card-footer bg-light p-2 text-center">
-                        <small class="text-muted">
+                        <p class="text-muted">
                             <i class="fas fa-lightbulb me-1"></i>
                             El editor detecta y resalta sintaxis HTML, CSS y JavaScript
-                        </small>
+                        </p>
                     </div>
                 </div>
             </div>

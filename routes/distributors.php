@@ -19,7 +19,7 @@ use App\Http\Controllers\Distributors\Users\CertificatesController;
 use App\Http\Controllers\Distributors\Users\ResultsController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor']], function () {
+Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('distributor.dashboard');
 
@@ -73,7 +73,6 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor']
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('distributor.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterpriseInscriptionsController::class, 'index'])->name('distributor.enterprises.inscriptions');
         Route::get('/courses/{slack}', [EnterpriseCourseController::class, 'index'])->name('distributor.enterprises.courses');
-        Route::get('/users/{slack}', [EnterpriseUserController::class, 'index'])->name('distributor.enterprises.users');
         Route::get('/users/{slack}', [EnterpriseUserController::class, 'index'])->name('distributor.enterprises.users');
         Route::get('/staff/{slack}', [EnterpriseStaffController::class, 'index'])->name('distributor.enterprises.staffs');
         Route::post('/staff/store', [EnterpriseStaffController::class, 'store'])->name('distributor.enterprises.staffs.store');

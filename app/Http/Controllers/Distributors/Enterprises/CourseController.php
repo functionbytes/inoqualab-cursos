@@ -19,11 +19,29 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CourseController extends Controller
 {
+    /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
+    private function managedEnterprise(string $slack): Enterprise
+    {
+        return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
+    }
+
+    /** Inscripción cuyo usuario pertenece a una empresa del distribuidor, o 404. */
+    private function managedInscription(string $slack): Inscription
+    {
+        $enterpriseIds = app('distributor')->enterprises()->pluck('enterprises.id')->all();
+
+        return Inscription::where('slack', $slack)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('enterprise_user')
+                ->whereColumn('enterprise_user.user_id', 'inscriptions.user_id')
+                ->whereIn('enterprise_user.enterprise_id', $enterpriseIds))
+            ->firstOrFail();
+    }
+
     public function index(Request $request, $slack)
     {
 
         $searchKey = $request->search;
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
 
         $courses = $enterprise->courses()->descending();
 
@@ -47,44 +65,35 @@ class CourseController extends Controller
         $searchKey = $request->search;
         $year = $request->year;
         $culminated = $request->culminated;
-        $enterprise = Enterprise::slack($enterprise);
+        $enterprise = $this->managedEnterprise($enterprise);
         $course = Course::slack($course);
 
-        $inscriptions = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)->select(
-                'users.slack',
-                'users.firstname',
-                'users.lastname',
-                'users.available',
-                'users.identification',
-                'inscriptions.id',
-                'inscriptions.slack as slack',
-                'inscriptions.percent',
-                'inscriptions.order_id',
-                'inscriptions.enroll_start',
-                'inscriptions.enroll_expire',
-                'inscriptions.enroll_culminated',
-                'inscriptions.culminated',
-                'inscriptions.created_at',
-                'inscriptions.updated_at',
-            )->orderBy('enroll_culminated', 'desc');
+        $baseQuery = fn () => User::query()
+            ->join('enterprise_user', fn ($j) => $j->on('users.id', '=', 'enterprise_user.user_id'))
+            ->where('enterprise_user.enterprise_id', $enterprise->id)
+            ->join('inscriptions', fn ($j) => $j->on('users.id', '=', 'inscriptions.user_id'))
+            ->join('orders', fn ($j) => $j->on('orders.id', '=', 'inscriptions.order_id'))
+            ->where('inscriptions.course_id', $course->id);
 
-        $years = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)
+        $inscriptions = $baseQuery()->select(
+            'users.slack',
+            'users.firstname',
+            'users.lastname',
+            'users.available',
+            'users.identification',
+            'inscriptions.id',
+            'inscriptions.slack as slack',
+            'inscriptions.percent',
+            'inscriptions.order_id',
+            'inscriptions.enroll_start',
+            'inscriptions.enroll_expire',
+            'inscriptions.enroll_culminated',
+            'inscriptions.culminated',
+            'inscriptions.created_at',
+            'inscriptions.updated_at',
+        )->orderBy('enroll_culminated', 'desc');
+
+        $years = $baseQuery()
             ->selectRaw('YEAR(enroll_culminated) as year')
             ->groupBy('year')
             ->orderBy('year', 'desc')
@@ -126,7 +135,7 @@ class CourseController extends Controller
     public function progress($slack)
     {
 
-        $inscription = Inscription::slack($slack);
+        $inscription = $this->managedInscription($slack);
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
@@ -145,7 +154,7 @@ class CourseController extends Controller
     public function reasign($enterprise, $course)
     {
 
-        $enterprise = Enterprise::slack($enterprise);
+        $enterprise = $this->managedEnterprise($enterprise);
         $courses = $enterprise->courses;
         $course = Course::slack($course);
 
@@ -177,13 +186,21 @@ class CourseController extends Controller
     public function includes(Request $request)
     {
 
-        $enterprise = Enterprise::slack($request->enterprise);
+        // Ownership: empresa del distribuidor + curso asignado a esa empresa.
+        $enterprise = $this->managedEnterprise($request->enterprise);
         $course = Course::slack($request->course);
+        abort_unless($enterprise->courses()->where('courses.id', $course->id)->exists(), 404);
         $users = explode(',', $request->users);
 
-        DB::transaction(function () use ($course, $users) {
+        DB::transaction(function () use ($enterprise, $course, $users) {
             foreach ($users as $user) {
                 $validate = User::identification($user);
+
+                // Solo se matricula a usuarios que pertenecen a la empresa.
+                if (! $enterprise->users()->where('users.id', $validate->id)->exists()) {
+                    continue;
+                }
+
                 $condition = InvoiceCondition::slug('pagada');
                 $method = Method::slug('acuerdo');
 
@@ -218,7 +235,7 @@ class CourseController extends Controller
     public function report($enterprise, $course)
     {
 
-        $enterprise = Enterprise::slack($enterprise);
+        $enterprise = $this->managedEnterprise($enterprise);
         $course = Course::slack($course);
 
         $modalities = collect([
@@ -248,18 +265,21 @@ class CourseController extends Controller
     public function destroy($enterprise, $course)
     {
 
-        $enterprise = Enterprise::slack($enterprise);
+        $enterprise = $this->managedEnterprise($enterprise);
         $course = Course::slack($course);
 
         $inscription = EnterpriseCourse::validate($enterprise->id, $course->id);
-        $inscription->delete();
+
+        if ($inscription) {
+            $inscription->delete();
+        }
 
         return redirect()->route('manager.enterprises.courses', $enterprise->slack);
     }
 
     public function destroyInscription($slack)
     {
-        $inscription = Inscription::slack($slack);
+        $inscription = $this->managedInscription($slack);
         $inscription->delete();
 
         return back();
@@ -268,7 +288,7 @@ class CourseController extends Controller
     public function details($slack)
     {
 
-        $inscription = Inscription::slack($slack);
+        $inscription = $this->managedInscription($slack);
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
@@ -290,7 +310,7 @@ class CourseController extends Controller
         $distributor = app('distributor');
         $courses = $distributor->courses;
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
         $course = $enterprise->courses;
 
         $courses = $courses->pluck('title', 'id');
@@ -305,8 +325,8 @@ class CourseController extends Controller
 
     public function update(Request $request)
     {
-
-        $enterprise = Enterprise::slack($request->slack);
+        // Ownership: solo empresas del distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($request->slack);
 
         $currentCourses = $enterprise->courses->pluck('id')->toArray();
 

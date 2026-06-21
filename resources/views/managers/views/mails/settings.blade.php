@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Configuración de correos entrantes'])
 
     <div class="row g-3">
 
@@ -13,10 +12,10 @@
                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                         <div>
                             <h6 class="mb-0 fw-bold">Reglas de auto-confirmación</h6>
-                            <small class="text-muted">
+                            <p class="text-muted">
                                 Cuando un correo de una empresa alcance la confianza mínima y todos los cursos tengan alias registrados,
                                 se confirmará automáticamente sin revisión manual.
-                            </small>
+                            </p>
                         </div>
                         <a href="{{ route('manager.mails.index') }}" class="btn btn-outline-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i> Volver al listado

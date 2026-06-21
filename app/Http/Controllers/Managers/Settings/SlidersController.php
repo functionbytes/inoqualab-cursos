@@ -84,6 +84,7 @@ class SlidersController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $slider = new Slider;
         $slider->slack = $this->generate_slack('sliders');
@@ -106,6 +107,7 @@ class SlidersController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $slider = Slider::slack($request->slack);
         $slider->title = $request->title;
@@ -127,6 +129,7 @@ class SlidersController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $slider = Slider::slack($slack);
         $slider->delete();
@@ -167,6 +170,7 @@ class SlidersController extends Controller
 
     public function storeThumbnails(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
 
@@ -180,6 +184,8 @@ class SlidersController extends Controller
 
     public function deleteThumbnails($id)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
+
         Media::find($id)->delete();
 
         return response()->json(['status' => 'success']);

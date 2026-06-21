@@ -20,9 +20,9 @@
                            <div class="instructor-details-wrap">
                               <div class="instructor-details-img">
                                  @if($certifier->hasMedia('thumbnail'))
-                                    <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}">
+                                    <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}">
                                  @else
-                                    <img src="/pages/images/certifier/default.jpg">
+                                    <img src="/pages/images/certifier/default.jpg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}">
                                  @endif
                               </div>
                               <div class="instructor-details-content">
@@ -31,13 +31,13 @@
                                        <h2 class="title">{{ $certifier->firstname . ' ' . $certifier->lastname}}</h2>
                                        <span>{{ $certifier->profession }}</span>
                                     </div>
-                                    <div class="instructor-details-social">
+                                    <div class="instructor-details-social" aria-hidden="true">
                                        <ul class="list-wrap">
-                                          <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                                          <li><a href="#"><i class="fab fa-twitter"></i></a></li>
-                                          <li><a href="#"><i class="fab fa-whatsapp"></i></a></li>
-                                          <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                                          <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+                                          <li><span class="social-icon"><i class="fab fa-facebook-f"></i></span></li>
+                                          <li><span class="social-icon"><i class="fab fa-twitter"></i></span></li>
+                                          <li><span class="social-icon"><i class="fab fa-whatsapp"></i></span></li>
+                                          <li><span class="social-icon"><i class="fab fa-linkedin-in"></i></span></li>
+                                          <li><span class="social-icon"><i class="fab fa-youtube"></i></span></li>
                                        </ul>
                                     </div>
                                  </div>
@@ -88,11 +88,11 @@
                                     }}</a>
                                  @if(count($course->getMedia('thumbnail'))>0)
                                  <img src="{{ $course->getfirstMedia('thumbnail')->getfullUrl() }}"
-                                    class="card-img-top rounded-0 object-fit-cover" alt="..." height="440"
+                                    class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440"
                                     onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                                  @else
                                  <img src="{{ asset('/pages/images/courses/default.jpg') }}"
-                                    class="card-img-top rounded-0 object-fit-cover" alt="..." height="440">
+                                    class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440">
                                  @endif
                                  </a>
                               </div>

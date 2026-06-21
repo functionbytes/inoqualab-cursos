@@ -7,7 +7,6 @@ use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -54,14 +53,14 @@ class UsersImport implements ToCollection, WithHeadingRow, WithValidation
             $enterprise = Enterprise::slack($this->token);
 
             $user = new User;
-            $user->token = User::generate();
+            $user->slack = Str::uuid()->toString();
             $user->firstname = $row['firstname'];
             $user->lastname = $row['lastname'];
             $user->cellphone = $row['cellphone'];
             $user->identification = $row['identification'];
             $user->address = $row['address'];
             $user->email = $row['email'];
-            $user->password = Hash::make($row['password']);
+            $user->password = $row['password'];
             $user->terms = 1;
             $user->available = 1;
             $user->validation = 0;

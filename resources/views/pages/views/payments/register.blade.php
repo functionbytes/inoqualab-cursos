@@ -311,6 +311,17 @@
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
         });
 
+        // Conversión: InitiateCheckout al abrir el checkout (si hay pixels cargados).
+        (function () {
+            var value = {{ (float) $total }};
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'InitiateCheckout', { value: value, currency: 'COP' });
+            }
+            if (typeof ttq !== 'undefined') {
+                ttq.track('InitiateCheckout', { value: value, currency: 'COP' });
+            }
+        })();
+
         $(document).ready(function () {
 
             function loaderCheckout() {
@@ -546,10 +557,11 @@
                     success: function (data) {
 
                         if (data == "email") {
-                            $('#email-error').removeClass('d-none').text("El correo electronico ya existe en nuestros registros.");
+                            var em = encodeURIComponent($('#email').val() || '');
+                            $('#email-error').removeClass('d-none')
+                                .html('Este correo ya está registrado. <a href="{{ route('login') }}?email=' + em + '" style="text-decoration:underline;font-weight:700">Inicia sesión</a> para continuar tu compra.');
                             $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
                                 .html('<i class="fas fa-lock"></i> Realizar pago');
-                            setTimeout(function () { $('#email-error').addClass('d-none'); }, 4000);
                             return;
                         }
 
@@ -575,6 +587,38 @@
                                     alert(jqXHR.status == 422 ? 'Tu carrito está vacío.' : 'Error al generar la orden de pago.');
                                 }
                             });
+                        }
+                    },
+                    error: function (jqXHR) {
+                        $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
+                            .html('<i class="fas fa-lock"></i> Realizar pago');
+
+                        // Limpiar errores previos por campo
+                        $('label.error').addClass('d-none').text('');
+
+                        if (jqXHR.status === 422 && jqXHR.responseJSON && jqXHR.responseJSON.errors) {
+                            var errors = jqXHR.responseJSON.errors;
+                            var firstField = null;
+                            $.each(errors, function (field, messages) {
+                                var msg = Array.isArray(messages) ? messages[0] : messages;
+                                var $lbl = $('#' + field + '-error');
+                                if ($lbl.length) {
+                                    $lbl.removeClass('d-none').text(msg);
+                                    if (!firstField) firstField = field;
+                                }
+                            });
+                            if (firstField) {
+                                var $el = $('#' + firstField);
+                                if ($el.length) {
+                                    $el.trigger('focus');
+                                    $('html,body').animate({ scrollTop: $el.offset().top - 130 }, 300);
+                                }
+                            } else {
+                                var first = Object.values(errors)[0];
+                                alert(Array.isArray(first) ? first[0] : first);
+                            }
+                        } else {
+                            alert('No se pudo procesar el registro. Revisa tus datos e intenta de nuevo.');
                         }
                     }
                 });

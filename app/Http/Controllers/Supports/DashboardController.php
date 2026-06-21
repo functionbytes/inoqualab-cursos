@@ -47,8 +47,8 @@ class DashboardController extends Controller
             'online' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
             'newsletters' => Newsletter::count(),
             'useradmins' => User::where('role', 'manager')->count(),
-            'usercustomers' => User::where('role', 'customers')->count(),
-            'userenterprises' => User::where('role', 'enterprises')->count(),
+            'usercustomers' => User::where('role', 'customer')->count(),
+            'userenterprises' => User::where('role', 'enterprise')->count(),
             'enterprises' => Enterprise::count(),
             'agreements' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
         ]);

@@ -7,6 +7,9 @@ class TransferMethodsTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $methods = DB::connection('mysql_second')->table('methods')->get();
         foreach ($methods as $method) {

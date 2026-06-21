@@ -80,6 +80,7 @@ class UsersController extends Controller
 
     public function store(StoreUserRequest $request)
     {
+        abort_unless(auth()->user()->can('users.create'), 403);
         $user = new User;
         $user->slack = $this->generate_slack('users');
         $user->firstname = Str::upper($request->firstname);
@@ -97,7 +98,7 @@ class UsersController extends Controller
         $user->setting = 1;
         $user->validation = 1;
         $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
-        $request->roles == 'enterprises' ? $user->enterprise_id = $request->enterprise : $user->enterprise_id = null;
+        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprise : null;
         $user->save();
 
         return response()->json([
@@ -172,6 +173,7 @@ class UsersController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('users.update'), 403);
         $user = User::slack($request->slack);
 
         if (! $user) {
@@ -250,6 +252,7 @@ class UsersController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('users.delete'), 403);
         $user = User::slack($slack);
         $user->delete();
 

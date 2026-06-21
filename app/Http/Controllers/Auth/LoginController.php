@@ -27,9 +27,9 @@ class LoginController extends Controller
     {
         if ($this->guard()->check()) {
             return redirect()->route($this->guard()->user()->redirect());
-        } else {
-            return view('auth.login');
         }
+
+        return view('auth.login');
     }
 
     protected function attemptLogin(Request $request)
@@ -41,7 +41,6 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-
         $this->validateLogin($request);
 
         if ($this->hasTooManyLoginAttempts($request)) {
@@ -57,7 +56,6 @@ class LoginController extends Controller
         $this->incrementLoginAttempts($request);
 
         return $this->sendFailedLoginResponse($request);
-
     }
 
     protected function validateLogin(Request $request)
@@ -82,35 +80,30 @@ class LoginController extends Controller
 
     protected function sendLoginResponse(Request $request)
     {
-
-        if ($this->guard()->user()->available) {
-
-            $request->session()->regenerate();
-
-            $previousSession = $this->guard()->user()->session;
-
-            if ($previousSession) {
-                Session::getHandler()->destroy($previousSession);
-            }
-
-            $this->guard()->user()->session = Session::getId();
-            $this->guard()->user()->save();
-
-            event(new UserLoggedIn($request->user()));
-
-            $this->clearLoginAttempts($request);
-            $fallback = route($this->guard()->user()->redirect());
-
-            return $this->authenticated($request, $this->guard()->user()) ?: redirect()->intended($fallback);
-
-        } else {
-
+        if (! $this->guard()->user()->available) {
             $this->guard()->logout();
             $request->session()->invalidate();
 
-            return view('auth.disabled')->with([]);
-
+            return view('auth.disabled');
         }
+
+        $request->session()->regenerate();
+
+        $previousSession = $this->guard()->user()->session;
+
+        if ($previousSession) {
+            Session::getHandler()->destroy($previousSession);
+        }
+
+        $this->guard()->user()->session = Session::getId();
+        $this->guard()->user()->save();
+
+        event(new UserLoggedIn($request->user()));
+
+        $this->clearLoginAttempts($request);
+        $fallback = route($this->guard()->user()->redirect());
+
+        return $this->authenticated($request, $this->guard()->user()) ?: redirect()->intended($fallback);
 
     }
 

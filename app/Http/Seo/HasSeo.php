@@ -5,11 +5,22 @@ namespace App\Http\Seo;
 use App\Models\Seo\SeoMeta;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
+/**
+ * Agrega relación y accessors SEO a un modelo Eloquent.
+ *
+ * En listados con accessors SEO, hacer eager-load: ->with('seoMeta')
+ * loadedSeoMeta() evita N+1: solo lee la relación si ya fue cargada.
+ */
 trait HasSeo
 {
     public function seoMeta(): MorphOne
     {
         return $this->morphOne(SeoMeta::class, 'seoable');
+    }
+
+    protected function loadedSeoMeta(): ?SeoMeta
+    {
+        return $this->relationLoaded('seoMeta') ? $this->getRelation('seoMeta') : null;
     }
 
     public function hasSeoMeta(): bool
@@ -19,9 +30,16 @@ trait HasSeo
 
     public function isIndexable(): bool
     {
-        $robots = $this->seoMeta?->robots ?? 'index,follow';
+        $robots = $this->loadedSeoMeta()?->robots ?? 'index,follow';
 
         return ! str_contains($robots, 'noindex');
+    }
+
+    public function isFollowable(): bool
+    {
+        $robots = $this->loadedSeoMeta()?->robots ?? 'index,follow';
+
+        return str_contains(strtolower($robots), 'follow');
     }
 
     public function updateSeoMeta(array $data): SeoMeta
@@ -32,16 +50,16 @@ trait HasSeo
         );
     }
 
-    public function deleteSeoMeta(): void
+    public function deleteSeoMeta(): ?bool
     {
-        $this->seoMeta()->delete();
+        return $this->seoMeta()->delete();
     }
 
-    // Accessors con fallback a campos del propio modelo
+    // ── Accessors con fallback al modelo ──────────────────────────────────
 
     public function getSeoTitleAttribute(): string
     {
-        return $this->seoMeta?->title
+        return $this->loadedSeoMeta()?->title
             ?? $this->meta_title
             ?? $this->title
             ?? setting('meta_title', config('app.name'));
@@ -49,7 +67,7 @@ trait HasSeo
 
     public function getSeoDescriptionAttribute(): string
     {
-        return $this->seoMeta?->description
+        return $this->loadedSeoMeta()?->description
             ?? $this->meta_description
             ?? $this->short
             ?? $this->description
@@ -58,26 +76,30 @@ trait HasSeo
 
     public function getOgTitleAttribute(): string
     {
-        return $this->seoMeta?->og_title ?? $this->seo_title;
+        $meta = $this->loadedSeoMeta();
+
+        return $meta?->og_title ?? $meta?->title ?? $this->seo_title;
     }
 
     public function getOgDescriptionAttribute(): string
     {
-        return $this->seoMeta?->og_description ?? $this->seo_description;
+        $meta = $this->loadedSeoMeta();
+
+        return $meta?->og_description ?? $meta?->description ?? $this->seo_description;
     }
 
     public function getOgImageAttribute(): string
     {
-        return $this->seoMeta?->og_image ?? setting('seo_og_image_default', getMeta());
+        return $this->loadedSeoMeta()?->og_image ?? setting('seo_og_image_default', getMeta());
     }
 
     public function getCanonicalUrlAttribute(): string
     {
-        return $this->seoMeta?->canonical_url ?? $this->url ?? url()->current();
+        return $this->loadedSeoMeta()?->canonical_url ?? $this->url ?? url()->current();
     }
 
     public function getRobotsAttribute(): string
     {
-        return $this->seoMeta?->robots ?? 'index,follow';
+        return $this->loadedSeoMeta()?->robots ?? 'index,follow';
     }
 }

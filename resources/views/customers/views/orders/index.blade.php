@@ -14,8 +14,8 @@
                             <div class="col-auto flex-grow-1">
                                 <div class="tt-search-box">
                                     <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
+                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
                                     </div>
                                 </div>
                             </div>
@@ -43,7 +43,7 @@
                     </thead>
                     <tbody>
                    
-                    @foreach ($orders as $key =>$order)
+                    @forelse ($orders as $key =>$order)
                         <tr class="search-items">
 
                             <td>
@@ -62,9 +62,9 @@
                             </td>
                             <td class="text-center">
                                 <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton{{ $order->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical"></i>
-                                    </a>
+                                    <button type="button" class="btn btn-link text-muted p-0" id="dropdownMenuButton{{ $order->id }}" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Acciones de la orden">
+                                        <i class="fas fa-ellipsis-vertical" aria-hidden="true"></i>
+                                    </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ $order->id }}">
 
                                         <li>
@@ -81,17 +81,27 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-duotone fa-cart-shopping fa-2x d-block mb-3 opacity-50"></i>
+                                <span class="fw-semibold d-block">No tienes pedidos</span>
+                                <small>Aún no has realizado ninguna compra.</small>
+                            </td>
+                        </tr>
+                    @endforelse
 
                     </tbody>
                 </table>
             </div>
+            @if ($orders->total() > 0)
             <div class="result-body ">
                 <span>Mostrar {{ $orders->firstItem() }}-{{ $orders->lastItem() }} de {{ $orders->total() }} resultados</span>
                 <nav>
                     {{ $orders->appends(request()->input())->links() }}
                 </nav>
             </div>
+            @endif
         </div>
     </div>
 @endsection

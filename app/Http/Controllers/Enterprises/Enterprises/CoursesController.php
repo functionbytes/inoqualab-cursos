@@ -5,11 +5,21 @@ namespace App\Http\Controllers\Enterprises\Enterprises;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Inscription;
-use DB;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CoursesController extends Controller
 {
+    /** Inscripción cuyo usuario pertenece a la empresa autenticada, o 404 (evita IDOR). */
+    private function managedInscription(string $slack): Inscription
+    {
+        $inscription = Inscription::slack($slack);
+        abort_unless(app('enterprise')->users()->where('users.id', $inscription->user_id)->exists(), 404);
+
+        return $inscription;
+    }
+
     public function index(Request $request)
     {
 
@@ -40,41 +50,32 @@ class CoursesController extends Controller
         $enterprise = app('enterprise');
         $course = Course::slack($slack);
 
-        $inscriptions = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)->select(
-                'users.slack',
-                'users.firstname',
-                'users.lastname',
-                'users.available',
-                'users.identification',
-                'inscriptions.id',
-                'inscriptions.slack as slack',
-                'inscriptions.percent',
-                'inscriptions.order_id',
-                'inscriptions.enroll_start',
-                'inscriptions.enroll_expire',
-                'inscriptions.enroll_culminated',
-                'inscriptions.culminated',
-                'inscriptions.created_at',
-                'inscriptions.updated_at',
-            )->orderBy('enroll_culminated', 'desc');
+        $baseQuery = fn () => User::query()
+            ->join('enterprise_user', fn ($j) => $j->on('users.id', '=', 'enterprise_user.user_id'))
+            ->where('enterprise_user.enterprise_id', $enterprise->id)
+            ->join('inscriptions', fn ($j) => $j->on('users.id', '=', 'inscriptions.user_id'))
+            ->join('orders', fn ($j) => $j->on('orders.id', '=', 'inscriptions.order_id'))
+            ->where('inscriptions.course_id', $course->id);
 
-        $years = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)
+        $inscriptions = $baseQuery()->select(
+            'users.slack',
+            'users.firstname',
+            'users.lastname',
+            'users.available',
+            'users.identification',
+            'inscriptions.id',
+            'inscriptions.slack as slack',
+            'inscriptions.percent',
+            'inscriptions.order_id',
+            'inscriptions.enroll_start',
+            'inscriptions.enroll_expire',
+            'inscriptions.enroll_culminated',
+            'inscriptions.culminated',
+            'inscriptions.created_at',
+            'inscriptions.updated_at',
+        )->orderBy('enroll_culminated', 'desc');
+
+        $years = $baseQuery()
             ->selectRaw('YEAR(enroll_culminated) as year')
             ->groupBy('year')
             ->orderBy('year', 'desc')
@@ -116,7 +117,7 @@ class CoursesController extends Controller
     public function progress($slack)
     {
 
-        $inscription = Inscription::slack($slack);
+        $inscription = $this->managedInscription($slack);
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
@@ -135,7 +136,7 @@ class CoursesController extends Controller
     public function details($slack)
     {
 
-        $inscription = Inscription::slack($slack);
+        $inscription = $this->managedInscription($slack);
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;

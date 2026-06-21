@@ -32,6 +32,28 @@ class SeoRedirect extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (self $redirect) {
+            if (! $redirect->is_regex && ! $redirect->is_wildcard) {
+                $redirect->source_path = strtolower(trim($redirect->source_path));
+                if (! str_starts_with($redirect->source_path, '/')) {
+                    $redirect->source_path = '/'.$redirect->source_path;
+                }
+            }
+
+            if (
+                ! str_starts_with($redirect->target_path, '/')
+                && ! filter_var($redirect->target_path, FILTER_VALIDATE_URL)
+            ) {
+                $redirect->target_path = '/'.$redirect->target_path;
+            }
+        });
+
+        static::saved(fn () => static::clearCache());
+        static::deleted(fn () => static::clearCache());
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

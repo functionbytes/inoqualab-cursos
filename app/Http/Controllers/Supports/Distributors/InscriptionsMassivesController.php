@@ -245,7 +245,7 @@ class InscriptionsMassivesController extends Controller
     {
 
         if ($request->enterprise != null) {
-            $courses = Enterprise::slack($request->enterprise)->courses;
+            $courses = Enterprise::slack($request->enterprise)->courses()->limit(500)->get();
             $formatted_courses = [];
             $formatted_courses[] = ['id' => '', 'text' => ''];
             foreach ($courses as $course) {
@@ -267,7 +267,7 @@ class InscriptionsMassivesController extends Controller
 
             if ($enterprise) {
 
-                $users = $enterprise->users()->orderBy('created_at', 'desc')->get();
+                $users = $enterprise->users()->orderBy('created_at', 'desc')->limit(500)->get();
 
                 foreach ($users as $user) {
                     if ($user->identification != null) {

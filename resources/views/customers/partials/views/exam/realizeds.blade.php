@@ -14,7 +14,7 @@
                     
 
             <button type="submit" role="presentation" class="owl">
-                <i class="feather-chevron-left"></i>
+                <i class="fas fa-chevron-left"></i>
             </button>
                 
 
@@ -30,7 +30,7 @@
         <input type="hidden"name="user" value="{{ $user->id }}">
 
             <button type="submit" role="presentation" class="owl">
-                <i class="feather-chevron-right"></i>
+                <i class="fas fa-chevron-right"></i>
             </button>
             
 

@@ -327,27 +327,27 @@ class IncomingMailsController extends Controller
         }
 
         try {
-            $order = (new OrderCreator)->createFromPayload(
-                $mail,
-                $payload,
-                $enterprise,
-                $courses->all(),
-                Auth::id()
-            );
+            $order = DB::transaction(function () use ($mail, $enterprise, $payload, $courses, $saveAlias, $courseMap) {
+                $created = (new OrderCreator)->createFromPayload(
+                    $mail,
+                    $payload,
+                    $enterprise,
+                    $courses->all(),
+                    Auth::id()
+                );
 
-            DB::transaction(function () use ($mail, $enterprise, $order, $saveAlias, $courseMap, $courses, $payload) {
                 $mail->status = IncomingMail::STATUS_PROCESSED;
                 $mail->matched_enterprise_id = $enterprise->id;
-                $mail->order_id = $order?->id;
+                $mail->order_id = $created?->id;
                 $mail->processed_at = Carbon::now()->setTimezone('America/Bogota');
                 $mail->save();
 
-                if (! $saveAlias) {
-                    return;
+                if ($saveAlias) {
+                    $this->persistEnterpriseAlias($mail, $enterprise, $payload);
+                    $this->persistCourseAliases($courseMap, $courses);
                 }
 
-                $this->persistEnterpriseAlias($mail, $enterprise, $payload);
-                $this->persistCourseAliases($courseMap, $courses);
+                return $created;
             });
 
             if ($order !== null) {
@@ -393,6 +393,7 @@ class IncomingMailsController extends Controller
         $mail->assigned_to = $userId ?: null;
         $mail->save();
 
+        $mail->load('assignedUser');
         $name = $mail->assignedUser ? trim($mail->assignedUser->firstname.' '.$mail->assignedUser->lastname) : null;
 
         return response()->json([
@@ -455,16 +456,18 @@ class IncomingMailsController extends Controller
                         $courseIds = array_values(array_filter(array_map(fn ($m) => $m?->id, $courseMatches)));
                         $courses = $enterprise->courses()->whereIn('courses.id', $courseIds)->get();
 
-                        $order = (new OrderCreator)->createFromPayload(
-                            $mail, $payload, $enterprise, $courses->all(), Auth::id()
-                        );
+                        $order = DB::transaction(function () use ($mail, $enterprise, $courses, $payload) {
+                            $created = (new OrderCreator)->createFromPayload(
+                                $mail, $payload, $enterprise, $courses->all(), Auth::id()
+                            );
 
-                        DB::transaction(function () use ($mail, $enterprise, $order) {
                             $mail->status = IncomingMail::STATUS_PROCESSED;
                             $mail->matched_enterprise_id = $enterprise->id;
-                            $mail->order_id = $order?->id;
+                            $mail->order_id = $created?->id;
                             $mail->processed_at = Carbon::now()->setTimezone('America/Bogota');
                             $mail->save();
+
+                            return $created;
                         });
 
                         if ($order !== null) {
@@ -678,31 +681,33 @@ class IncomingMailsController extends Controller
         $enterpriseMatcher = new EnterpriseMatcher;
         $courseMatcher = new CourseMatcher;
 
-        foreach ($mails as $mail) {
-            try {
-                $payload = $mail->parsed_payload ?? [];
-                $enterprise = $enterpriseMatcher->match(
-                    $payload['enterprise_code'] ?? null,
-                    $payload['enterprise_name'] ?? null
-                );
-                $courseMatches = array_map(
-                    fn (string $txt) => $courseMatcher->match($txt, $enterprise),
-                    $payload['courses'] ?? []
-                );
-                $allMatched = count($payload['courses'] ?? []) > 0
-                    && ! in_array(null, $courseMatches, true);
+        DB::transaction(function () use ($mails, $enterpriseMatcher, $courseMatcher, &$count) {
+            foreach ($mails as $mail) {
+                try {
+                    $payload = $mail->parsed_payload ?? [];
+                    $enterprise = $enterpriseMatcher->match(
+                        $payload['enterprise_code'] ?? null,
+                        $payload['enterprise_name'] ?? null
+                    );
+                    $courseMatches = array_map(
+                        fn (string $txt) => $courseMatcher->match($txt, $enterprise),
+                        $payload['courses'] ?? []
+                    );
+                    $allMatched = count($payload['courses'] ?? []) > 0
+                        && ! in_array(null, $courseMatches, true);
 
-                $mail->matched_enterprise_id = $enterprise?->id;
-                $mail->status = ($enterprise instanceof Enterprise && $allMatched)
-                    ? IncomingMail::STATUS_PENDING_REVIEW
-                    : IncomingMail::STATUS_FAILED;
-                $mail->error_log = null;
-                $mail->save();
-                $count++;
-            } catch (\Throwable) {
-                // continue with remaining mails
+                    $mail->matched_enterprise_id = $enterprise?->id;
+                    $mail->status = ($enterprise instanceof Enterprise && $allMatched)
+                        ? IncomingMail::STATUS_PENDING_REVIEW
+                        : IncomingMail::STATUS_FAILED;
+                    $mail->error_log = null;
+                    $mail->save();
+                    $count++;
+                } catch (\Throwable) {
+                    // continue with remaining mails
+                }
             }
-        }
+        });
 
         return response()->json(['success' => true, 'message' => "Se re-analizaron {$count} correos."]);
     }
@@ -744,11 +749,21 @@ class IncomingMailsController extends Controller
                 }
             });
 
+        $normalizedKeys = array_map(
+            fn ($item) => $courseMatcher->normalize((string) $item['text']),
+            $rawCourseTexts
+        );
+
+        $existingAliases = CourseAlias::query()
+            ->whereIn('normalized_alias', $normalizedKeys)
+            ->pluck('normalized_alias')
+            ->flip()
+            ->all();
+
         $missingCourses = [];
         foreach ($rawCourseTexts as $item) {
             $normalized = $courseMatcher->normalize((string) $item['text']);
-            $hasAlias = CourseAlias::query()->where('normalized_alias', $normalized)->exists();
-            if (! $hasAlias) {
+            if (! isset($existingAliases[$normalized])) {
                 $missingCourses[] = ['text' => $item['text'], 'count' => $item['count']];
             }
         }

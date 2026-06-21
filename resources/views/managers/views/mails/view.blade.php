@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Revisar correo entrante'])
 
     @if($mail->status === 'processed')
         <div class="alert alert-success d-flex align-items-center gap-2 mb-3" role="alert">
@@ -95,7 +94,7 @@
             <div class="card mb-3">
                 <div class="card-header p-3 border-bottom">
                     <h6 class="mb-0 fw-bold">Datos del correo</h6>
-                    <small class="text-muted">Información del mensaje recibido</small>
+                    <p class="text-muted">Información del mensaje recibido</p>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -143,7 +142,7 @@
                 <div class="card mb-3">
                     <div class="card-header p-3 border-bottom">
                         <h6 class="mb-0 fw-bold">Datos extraídos</h6>
-                        <small class="text-muted">Información parseada del cuerpo del correo</small>
+                        <p class="text-muted">Información parseada del cuerpo del correo</p>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -204,13 +203,13 @@
             <div class="card mb-3">
                 <div class="card-header p-3 border-bottom">
                     <h6 class="mb-0 fw-bold">Asignar a revisor</h6>
-                    <small class="text-muted">
+                    <p class="text-muted">
                         @if($mail->assignedUser)
                             Actualmente: <strong>{{ trim($mail->assignedUser->firstname.' '.$mail->assignedUser->lastname) }}</strong>
                         @else
                             Sin asignar
                         @endif
-                    </small>
+                    </p>
                 </div>
                 <div class="card-body">
                     <div class="d-flex gap-2">
@@ -233,7 +232,7 @@
             <div class="card mb-3">
                 <div class="card-header p-3 border-bottom">
                     <h6 class="mb-0 fw-bold">Acciones rápidas</h6>
-                    <small class="text-muted">Opciones disponibles</small>
+                    <p class="text-muted">Opciones disponibles</p>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
@@ -262,14 +261,14 @@
             <div class="card mb-3">
                 <div class="card-header p-3 border-bottom">
                     <h6 class="mb-0 fw-bold">Notas internas</h6>
-                    <small class="text-muted">Comentarios del equipo (no visibles al cliente)</small>
+                    <p class="text-muted">Comentarios del equipo (no visibles al cliente)</p>
                 </div>
                 <div class="card-body">
                     <textarea id="notes-textarea" class="form-control form-control-sm"
                               rows="3" placeholder="Añadir nota..."
                               style="resize:vertical">{{ $mail->notes ?? '' }}</textarea>
                     <div class="d-flex justify-content-between align-items-center mt-2">
-                        <small class="text-muted"><span id="notes-chars">{{ strlen($mail->notes ?? '') }}</span> caracteres</small>
+                        <p class="text-muted"><span id="notes-chars">{{ strlen($mail->notes ?? '') }}</span> caracteres</p>
                         <button type="button" id="save-notes-btn" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-floppy-disk me-1"></i> Guardar nota
                         </button>
@@ -282,7 +281,7 @@
                 <div class="card mb-3">
                     <div class="card-header p-3 border-bottom">
                         <h6 class="mb-0 fw-bold">Historial</h6>
-                        <small class="text-muted">Seguimiento de cambios de estado</small>
+                        <p class="text-muted">Seguimiento de cambios de estado</p>
                     </div>
                     <div class="card-body p-0">
                         <ul class="list-unstyled mb-0">
@@ -343,13 +342,13 @@
                 <form id="confirmForm" onsubmit="return false">
                     <div class="card-header p-3 border-bottom {{ $isReadOnly ? 'bg-light' : '' }}">
                         <h6 class="mb-0 fw-bold">Confirmar orden</h6>
-                        <small class="text-muted">
+                        <p class="text-muted">
                             @if($isReadOnly)
                                 Vista de solo lectura — correo {{ $mail->status === 'processed' ? 'procesado' : 'descartado' }}
                             @else
                                 Verificar empresa y mapeo de cursos antes de crear la orden
                             @endif
-                        </small>
+                        </p>
                     </div>
                     <div class="card-body">
 
@@ -469,7 +468,7 @@
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <h6 class="mb-0 fw-bold">Cuerpo del correo</h6>
-                                <small class="text-muted">Contenido original recibido</small>
+                                <p class="text-muted">Contenido original recibido</p>
                             </div>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-primary active" id="btnFormatted">
@@ -490,10 +489,10 @@
                         </div>
                     </div>
                     <div class="card-footer bg-light">
-                        <small class="text-muted">
+                        <p class="text-muted">
                             <i class="fas fa-info-circle me-1"></i>
                             Contenido exacto del correo recibido desde {{ $mail->from }}
-                        </small>
+                        </p>
                     </div>
                 </div>
             @endif

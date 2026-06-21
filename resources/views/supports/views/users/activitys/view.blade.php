@@ -68,8 +68,8 @@
                                         <table class="table table-sm align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th>Campo</th>
-                                                    <th>Valor</th>
+                                                    <th scope="col">Campo</th>
+                                                    <th scope="col">Valor</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -91,8 +91,8 @@
                                         <table class="table table-sm align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th>Campo</th>
-                                                    <th>Valor</th>
+                                                    <th scope="col">Campo</th>
+                                                    <th scope="col">Valor</th>
                                                 </tr>
                                             </thead>
                                             <tbody>

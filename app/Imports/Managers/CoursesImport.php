@@ -12,6 +12,7 @@ use App\Models\Order\Order;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -20,68 +21,62 @@ class CoursesImport implements ToCollection, WithHeadingRow
 {
     use Importable;
 
-    public $enterprise;
+    private readonly Enterprise $enterprise;
 
-    public $course;
+    private readonly Course $course;
 
-    public function __construct($enterprise, $course)
+    private readonly InvoiceCondition $condition;
+
+    private readonly Method $method;
+
+    public function __construct(string $enterpriseSlack, string $courseSlack)
     {
-        $this->enterprise = $enterprise;
-        $this->course = $course;
+        $this->enterprise = Enterprise::slack($enterpriseSlack);
+        $this->course = Course::slack($courseSlack);
+        $this->condition = InvoiceCondition::slug('pagada');
+        $this->method = Method::slug('acuerdo');
     }
 
-    public function collection(Collection $rows)
+    public function collection(Collection $rows): void
     {
+        if ($this->enterprise->users()->doesntExist()) {
+            return;
+        }
+
+        $now = Carbon::now()->setTimezone('America/Bogota');
+
         foreach ($rows as $row) {
+            $user = User::query()
+                ->where('identification', $row['identification'])
+                ->first();
 
-            $enterprise = Enterprise::slack($this->enterprise);
-            $course = Course::slack($this->course);
-
-            $users = $enterprise->users;
-
-            if (count($users) > 0) {
-
-                $identification = $row['identification'];
-                $user = User::where('identification', $identification)->firstOrFail();
-
-                $validate = $user->relations;
-
-                if ($validate != null) {
-
-                    $condition = InvoiceCondition::slug('pagada');
-                    $method = Method::slug('acuerdo');
-                    $date = new Carbon;
-
-                    $order = new Order;
-                    $order->slack = Controller::generate_slack('users');
-                    $order->subtotal = 0;
-                    $order->discount = 0;
-                    $order->total = 0;
-                    $order->transaction = null;
-                    $order->condition_id = $condition->id;
-                    $order->method_id = $method->id;
-                    $order->course_id = $course->id;
-                    $order->user_id = $user->id;
-                    $order->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-                    $order->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-                    $order->created_at = Carbon::now()->setTimezone('America/Bogota');
-                    $order->updated_at = Carbon::now()->setTimezone('America/Bogota');
-                    $order->save();
-
-                    $include = new Inscription;
-                    $include->user_id = $user->id;
-                    $include->course_id = $course->id;
-                    $include->order_id = $order->id;
-                    $include->culminated = 0;
-                    $include->culminated_at = null;
-                    $include->created_at = Carbon::now()->setTimezone('America/Bogota');
-                    $include->updated_at = Carbon::now()->setTimezone('America/Bogota');
-                    $include->save();
-
-                }
-
+            if (! $user || $user->relations === null) {
+                continue;
             }
 
+            DB::transaction(function () use ($user, $now): void {
+                $order = Order::create([
+                    'slack' => Controller::generate_slack('users'),
+                    'subtotal' => 0,
+                    'discount' => 0,
+                    'total' => 0,
+                    'transaction' => null,
+                    'condition_id' => $this->condition->id,
+                    'method_id' => $this->method->id,
+                    'course_id' => $this->course->id,
+                    'user_id' => $user->id,
+                    'enroll_start' => $now,
+                    'enroll_expire' => $now->copy()->addMonths(3),
+                ]);
+
+                Inscription::create([
+                    'user_id' => $user->id,
+                    'course_id' => $this->course->id,
+                    'order_id' => $order->id,
+                    'culminated' => 0,
+                    'culminated_at' => null,
+                ]);
+            });
         }
     }
 

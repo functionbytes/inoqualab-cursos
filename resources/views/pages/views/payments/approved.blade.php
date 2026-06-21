@@ -58,6 +58,7 @@
                 <div class="res-actions">
                     @if(auth()->check() && auth()->id() === $order->user_id)
                         <a class="primary" href="{{ route('customers.courses') }}">Ir a mis cursos</a>
+                        <a class="ghost" href="{{ route('customers.orders.invoice', $order->slack) }}">Descargar recibo</a>
                     @endif
                     <a class="ghost" href="{{ route('courses') }}">Seguir explorando</a>
                 </div>
@@ -66,5 +67,31 @@
         </div>
     </section>
 </main>
+
+@push('scripts')
+<script>
+(function () {
+    var orderId  = @json($order->slack);
+    var value    = {{ (float) $order->total_order_amount }};
+    var currency = 'COP';
+
+    // Disparar la conversión una sola vez por orden (evita recargas/duplicados).
+    var key = 'purchase_fired_' + orderId;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) {}
+
+    var contentIds = @json($order->items->pluck('id')->values());
+
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'Purchase', { value: value, currency: currency, content_ids: contentIds, content_type: 'product', num_items: contentIds.length });
+    }
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'purchase', { transaction_id: orderId, value: value, currency: currency });
+    }
+    if (typeof ttq !== 'undefined') {
+        ttq.track('CompletePayment', { value: value, currency: currency, content_type: 'product' });
+    }
+})();
+</script>
+@endpush
 
 @endsection

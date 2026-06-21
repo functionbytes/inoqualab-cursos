@@ -72,6 +72,7 @@ class TagsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $tag = BlogTag::slack($request->slack);
         $tag->title = $request->title;
@@ -88,6 +89,7 @@ class TagsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $tag = new BlogTag;
         $tag->slack = $this->generate_slack('blog_categories');
@@ -105,6 +107,7 @@ class TagsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('blogs.delete'), 403);
         $tag = BlogTag::slack($slack);
         $tag->delete();
 

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="es">
 
 <head>
 
@@ -310,6 +310,14 @@
                     $('#addedQty').text(res.item.qty);
                     $('#addedSubtotal').text(fmtCOP(res.item.line_total));
 
+                    // Conversión: AddToCart (si hay pixels cargados)
+                    if (typeof fbq !== 'undefined') {
+                        fbq('track', 'AddToCart', { value: res.item.price, currency: 'COP', content_ids: [res.item.slack], content_type: 'product' });
+                    }
+                    if (typeof ttq !== 'undefined') {
+                        ttq.track('AddToCart', { value: res.item.price, currency: 'COP', content_id: res.item.slack });
+                    }
+
                     openAdded();
                 },
                 error: function () {
@@ -356,7 +364,7 @@
             $('#cartDrawerInner .ci-qty').each(function () { totalQty += parseInt($(this).text(), 10) || 0; });
             var lines = $('#cartDrawerInner .cart-item').length;
             $('#cdhCount').text(totalQty);
-            updateHeaderBadge(lines);
+            updateHeaderBadge(totalQty);
         }
 
         function loadDrawer() {

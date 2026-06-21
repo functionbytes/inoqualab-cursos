@@ -88,7 +88,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
+                    <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
                     <h4 class="my-0">¿Deseas visualizar la factura?</h4>
                     <p>Visualizaras el detalle de la factura que acabaste de genrar</p>
                     <div class="row justify-content-center mt-20  ">

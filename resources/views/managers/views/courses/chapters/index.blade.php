@@ -2,109 +2,229 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Temas'])
 
     <div class="widget-content searchable-container list">
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="available" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar estado</option>
-                                        <option value="1" @isset($available) @if ($available==1) selected @endif @endisset>  Publico</option>
-                                        <option value="0" @isset($available) @if ($available==0) selected  @endif @endisset>  Oculto</option>
-                                    </select>
-                                </div>
-                            </div>
 
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fas fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            <div class="col-auto">
-                                <a href=" {{ route('manager.courses.chapters.create', $course->slack) }}" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i>
-                                </a>
+        <div class="card">
+
+            {{-- Header --}}
+            <div class="card-header p-4 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Temas del curso</h5>
+                        <p class="mb-0 text-muted">Gestiona los temas y su orden de aparición</p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{ route('manager.courses.chapters.create', $course->slack) }}" class="btn btn-primary">
+                            Nuevo tema
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ Request::url() }}" id="searchForm">
+
+                    <input type="hidden" name="available" id="filterAvailable" value="{{ $available ?? '' }}">
+
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="flex-fill">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" name="search" class="form-control border-start-0 ps-0"
+                                       placeholder="Buscar por título..."
+                                       value="{{ $searchKey ?? '' }}">
                             </div>
                         </div>
-                    </form>
+
+                        @php
+                            $activeFilters = (int)(($available ?? '') !== '');
+                        @endphp
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                                data-bs-toggle="modal" data-bs-target="#filters-modal">
+                            <i class="fas fa-sliders me-1"></i>
+                            Filtros
+                            @if($activeFilters > 0)
+                                <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
+                            @endif
+                        </button>
+
+                        <button type="submit" class="btn btn-primary flex-shrink-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($chapters->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Título</th>
+                                    <th class="text-center">Posición</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Actualización</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($chapters as $chapter)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ Str::words($chapter->title, 8, '...') }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ $chapter->position }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($chapter->available)
+                                                <span class="badge bg-success-subtle text-success">Publico</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Oculto</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ date('d/m/Y', strtotime($chapter->updated_at)) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           href="{{ route('manager.courses.chapters.edit', $chapter->slack) }}">
+                                                            Editar
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item btn-delete" href="#"
+                                                           data-url="{{ route('manager.courses.chapters.destroy', $chapter->slack) }}"
+                                                           data-title="Eliminar: {{ $chapter->title }}">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-layer-group fa-3x mb-3 text-muted opacity-50"></i>
+                        <h5 class="fw-bold mb-2">
+                            @if(($searchKey ?? '') !== '' || ($available ?? '') !== '')
+                                No se encontraron resultados
+                            @else
+                                No hay temas
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-4">
+                            @if(($searchKey ?? '') !== '' || ($available ?? '') !== '')
+                                No hay temas que coincidan con los filtros aplicados.
+                            @else
+                                Crea el primer tema para este curso.
+                            @endif
+                        </p>
+                        @if(($searchKey ?? '') !== '' || ($available ?? '') !== '')
+                            <a href="{{ Request::url() }}" class="btn btn-outline-secondary">
+                                Ver todos
+                            </a>
+                        @else
+                            <a href="{{ route('manager.courses.chapters.create', $course->slack) }}" class="btn btn-primary">
+                                Nuevo tema
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($chapters->hasPages())
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        Mostrando {{ $chapters->firstItem() }}–{{ $chapters->lastItem() }} de {{ $chapters->total() }} temas
+                    </span>
+                    {{ $chapters->appends(request()->input())->links() }}
+                </div>
+            @endif
+
+        </div>
+    </div>
+
+    {{-- Filters modal --}}
+    <div class="modal fade" id="filters-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtros</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Estado</label>
+                        <select id="modalAvailable" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="1" {{ ($available ?? '') === '1' ? 'selected' : '' }}>Publico</option>
+                            <option value="0" {{ ($available ?? '') === '0' ? 'selected' : '' }}>Oculto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer flex-column">
+                    <button type="button" id="applyFiltersBtn" class="btn btn-primary w-100 mb-2">
+                        Aplicar filtros
+                    </button>
+                    <a href="{{ Request::url() }}" class="btn btn-secondary w-100">
+                        Limpiar filtros
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                        <tr>
-                            <th>Titulo</th>
-                            <th>Posición</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    @foreach ($chapters as $key => $chapter)
-                        <tr class="search-items">
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $chapter->title }}">{{ Str::upper( Str::lower($chapter->title) )  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $chapter->position }}">{{ $chapter->position }}</span>
-                            </td>
-                            <td>
-                              <span class="badge {{ $chapter->available == 1 ? 'bg-light-primary text-primary' : 'bg-light-secondary text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                   {{ $chapter->available == 1 ? 'Publico' : 'Oculto' }}
-                              </span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y-m-d', strtotime($chapter->updated_at)) }}">{{ date('Y-m-d', strtotime($chapter->updated_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdown-{{ $chapter->slack }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdown-{{ $chapter->slack }}">
-
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.courses.chapters.edit', $chapter->slack) }}">Editar</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('manager.courses.chapters.destroy', $chapter->slack) }}">Eliminar</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $chapters->firstItem() }}-{{ $chapters->lastItem() }} de {{ $chapters->total() }} resultados</span>
-                <nav>
-                    {{ $chapters->appends(request()->input())->links() }}
-                </nav>
-            </div>
-        </div>
     </div>
+
+    @include('managers.includes.delete')
+
 @endsection
 
+@push('css')
+@endpush
 
+@push('scripts')
+<script>
+$(function () {
 
+    @if(session('success'))
+        toastr.success('{{ session('success') }}');
+    @endif
 
+    // ── Filters modal ────────────────────────────────────────────────────────
+    $('#applyFiltersBtn').on('click', function () {
+        $('#filterAvailable').val($('#modalAvailable').val());
+        $('#filters-modal').modal('hide');
+        $('#searchForm').submit();
+    });
+
+    // ── Eliminar individual vía modal ────────────────────────────────────────
+    $(document).on('click', '.btn-delete', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        $('#delete-modal .modal-title').text($btn.data('title'));
+        $('#delete-form').attr('action', $btn.data('url'));
+        $('#delete-modal').modal('show');
+    });
+
+});
+</script>
+@endpush

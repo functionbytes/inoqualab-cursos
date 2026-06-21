@@ -178,7 +178,7 @@
                                     positionClass: "toast-bottom-right"
                                 });
                                 setTimeout(function() {
-                                    window.location.href = "{{ route('manager.distributors.invoices', '') }}/" + distributor;
+                                    window.location.href = "{{ route('manager.distributors.invoices', ['slack' => 'SLACK_PLACEHOLDER']) }}".replace('SLACK_PLACEHOLDER', distributor);
                                 }, 2000);
                             }else{
 

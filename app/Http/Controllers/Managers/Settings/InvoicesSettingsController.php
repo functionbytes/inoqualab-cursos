@@ -15,6 +15,7 @@ class InvoicesSettingsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $data['invoices_notification_email_enable'] = $request->invoices_notification_email_enable;
         $data['invoice_default'] = $request->invoice_default;

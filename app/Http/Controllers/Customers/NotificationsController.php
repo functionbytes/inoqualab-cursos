@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class NotificationsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 
         $user = app('customer');
@@ -32,29 +33,6 @@ class NotificationsController extends Controller
         return view('customers.views.livechat.view')->with([
             'notification' => $notification,
         ]);
-
-    }
-
-    public function status(Request $request)
-    {
-
-        $status = $request->statusnotify;
-
-        if (! $status) {
-            $notifications = Auth::user()->notifications()->paginate(10)->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('Y-m-d');
-            });
-        } else {
-            $notifications = Auth::user()->notifications()->whereIn('data->status', $status)->paginate(10)->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('Y-m-d');
-            });
-        }
-
-        $view = view('customers.includes.notifications')->with([
-            'notifications' => $notifications,
-        ])->render();
-
-        return response()->json(['html' => $view]);
 
     }
 
@@ -90,7 +68,7 @@ class NotificationsController extends Controller
             });
         }
 
-        $view = view('customers.includes.notifications')->with([
+        $view = view('customers.includes.notification')->with([
             'notifications' => $notifications,
         ])->render();
 
@@ -102,6 +80,11 @@ class NotificationsController extends Controller
     {
 
         $notification = Auth::user()->notifications()->find($request->id);
+
+        if (! $notification) {
+            return response()->json(['error' => 'Notificación no encontrada.'], 404);
+        }
+
         $notification->delete();
 
         return response()->json(['success' => 'Borrado exitosamente', 200]);

@@ -39,6 +39,7 @@ class ReviewsController extends Controller
 
     public function destroy($id)
     {
+        abort_unless(auth()->user()->can('courses.delete'), 403);
         $review = CourseReview::find($id);
 
         if ($review) {

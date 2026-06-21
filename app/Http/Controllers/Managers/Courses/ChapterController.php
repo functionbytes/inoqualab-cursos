@@ -41,6 +41,7 @@ class ChapterController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.create'), 403);
 
         $course = Course::slack($request->course);
 
@@ -95,6 +96,7 @@ class ChapterController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.update'), 403);
 
         $chapter = CourseChapter::slack($request->slack);
         $chapter->title = Str::upper($request->title);
@@ -112,6 +114,7 @@ class ChapterController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('courses.delete'), 403);
 
         $chapter = CourseChapter::slack($slack);
         CourseLesson::where('chapter_id', $chapter->id)->delete();

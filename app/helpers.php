@@ -6,7 +6,10 @@ use App\Models\Coupon\CouponUsage;
 use App\Models\Course\Course;
 use App\Models\Setting\Setting;
 use App\Models\User;
+use App\Services\SchemaOrgService;
+use App\Services\SeoService;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
@@ -99,15 +102,36 @@ if (! function_exists('getCouponDiscount')) {
 
         $date = date('Y-m-d');
 
-        if ($coupon->start_date <= $date && $coupon->end_date >= $date) {
+        // Fechas NULL = sin restricción de vigencia (coherente con el flujo multi-item).
+        $vigente = (! $coupon->start_date || $coupon->start_date <= $date)
+            && (! $coupon->end_date || $coupon->end_date >= $date);
+
+        if ($vigente) {
+            // Porcentaje clampeado a [0,100]; descuento nunca supera el subtotal.
             $amount = $coupon->type == 0
-                ? (float) $coupon->amount
-                : round(((float) $coupon->amount * $subtotal) / 100, 2);
+                ? min((float) $coupon->amount, (float) $subtotal)
+                : round((float) $subtotal * min(100, max(0, (float) $coupon->amount)) / 100, 2);
         } else {
             removeCoupon();
         }
 
         return $amount;
+    }
+}
+
+if (! function_exists('cartUnits')) {
+    /**
+     * Total de UNIDADES en el carrito (suma de qty), no de líneas.
+     * Semántica única del badge del carrito en header, drawer y respuestas JSON.
+     */
+    function cartUnits(): int
+    {
+        $total = 0;
+        foreach (session('cart', []) as $item) {
+            $total += max(1, (int) ($item['qty'] ?? 1));
+        }
+
+        return $total;
     }
 }
 
@@ -212,9 +236,12 @@ if (! function_exists('cartCouponDiscount')) {
         }
 
         // type 1 = porcentaje, type 0 = monto fijo
-        return $coupon->type == 1
-            ? round($eligible * (float) $coupon->amount / 100, 2)
-            : min((float) $coupon->amount, $eligible);
+        $discount = $coupon->type == 1
+            ? round($eligible * min(100, max(0, (float) $coupon->amount)) / 100, 2)
+            : (float) $coupon->amount;
+
+        // El descuento nunca puede superar el monto elegible (evita totales en cero/negativos).
+        return min($discount, $eligible);
     }
 }
 
@@ -270,7 +297,8 @@ if (! function_exists('checkCouponValidityForCart')) {
             }
         }
 
-        if ($coupon->start_date > $date || $coupon->end_date < $date) {
+        // Fechas NULL = sin restricción de vigencia (coherente con couponUsableNow del consumo).
+        if (($coupon->start_date && $coupon->start_date > $date) || ($coupon->end_date && $coupon->end_date < $date)) {
             removeCoupon();
 
             return ['success' => false, 'status' => false, 'message' => 'El cupón ha caducado'];
@@ -493,60 +521,61 @@ function input_date($dates): string
 // ─── SEO Helpers ────────────────────────────────────────────────────────────
 
 if (! function_exists('seo')) {
-    function seo(): \App\Services\SeoService
+    function seo(): SeoService
     {
-        return app(\App\Services\SeoService::class);
+        return app(SeoService::class);
     }
 }
 
 if (! function_exists('seo_title')) {
-    function seo_title(?string $title = null, bool $suffix = true): string|\App\Services\SeoService
+    function seo_title(?string $title = null, bool $suffix = true): string|SeoService
     {
         if ($title === null) {
-            return app(\App\Services\SeoService::class)->render();
+            return app(SeoService::class)->render();
         }
-        return app(\App\Services\SeoService::class)->setTitle($title, $suffix);
+
+        return app(SeoService::class)->setTitle($title, $suffix);
     }
 }
 
 if (! function_exists('seo_description')) {
-    function seo_description(?string $desc = null): \App\Services\SeoService
+    function seo_description(?string $desc = null): SeoService
     {
-        return app(\App\Services\SeoService::class)->setDescription($desc ?? '');
+        return app(SeoService::class)->setDescription($desc ?? '');
     }
 }
 
 if (! function_exists('seo_image')) {
-    function seo_image(string $url): \App\Services\SeoService
+    function seo_image(string $url): SeoService
     {
-        return app(\App\Services\SeoService::class)->setOgImage($url);
+        return app(SeoService::class)->setOgImage($url);
     }
 }
 
 if (! function_exists('seo_canonical')) {
-    function seo_canonical(string $url): \App\Services\SeoService
+    function seo_canonical(string $url): SeoService
     {
-        return app(\App\Services\SeoService::class)->setCanonical($url);
+        return app(SeoService::class)->setCanonical($url);
     }
 }
 
 if (! function_exists('seo_render')) {
     function seo_render(): string
     {
-        return app(\App\Services\SeoService::class)->render();
+        return app(SeoService::class)->render();
     }
 }
 
 if (! function_exists('seo_from_model')) {
-    function seo_from_model(\Illuminate\Database\Eloquent\Model $model): \App\Services\SeoService
+    function seo_from_model(Model $model): SeoService
     {
-        return app(\App\Services\SeoService::class)->loadFromModel($model);
+        return app(SeoService::class)->loadFromModel($model);
     }
 }
 
 if (! function_exists('schema_org')) {
-    function schema_org(): \App\Services\SchemaOrgService
+    function schema_org(): SchemaOrgService
     {
-        return app(\App\Services\SchemaOrgService::class);
+        return app(SchemaOrgService::class);
     }
 }

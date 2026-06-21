@@ -8,14 +8,14 @@
             </li>
             <li class="nav-item d-none d-xl-block">
                 <a href="{{  route('home') }}" class="text-nowrap nav-link">
-                    <img class='logo' src="{{ getlogo() }}" alt="" />
+                    <img class='logo' src="{{ getlogo() }}" alt="Logo" />
                 </a>
             </li>
 
         </ul>
         <div class="d-block d-xl-none">
             <a href="{{  route('home') }}" class="text-nowrap nav-link">
-                <img class='logo' src="{{ getlogo() }}" alt="" />
+                <img class='logo' src="{{ getlogo() }}" alt="Logo" />
             </a>
         </div>
         <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -40,14 +40,14 @@
                             <div class="d-flex align-items-center">
                                 <div class="user-profile-img">
                                     <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="35"
-                                        height="35" alt="" />
+                                        height="35" alt="Foto de perfil" />
                                 </div>
                             </div>
                         </a>
                         <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
                             aria-labelledby="drop1">
                             <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="50" alt="" />
+                                <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="50" alt="Foto de perfil" />
                                 <div class="ms-3">
                                     <h5 class="mb-1 fs-3 text-uppercase">{{ Str::words(Auth::user()->firstname ,1,'') }} {{
                                         Str::words(Auth::user()->lastname,1,'') }} </h5>

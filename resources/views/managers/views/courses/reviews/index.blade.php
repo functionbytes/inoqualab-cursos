@@ -1,107 +1,227 @@
 @extends('layouts.managers')
 
+@section('title', 'Reseñas de cursos')
+
 @section('content')
 
-  @include('managers.includes.card', ['title' => 'Reseñas de cursos'])
 
-  <div class="widget-content searchable-container list">
-    <div class="card card-body">
-      <div class="row">
-        <div class="col-md-12 col-xl-12">
-          <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-            <div class="row justify-content-between g-2 ">
-              <div class="col-auto flex-grow-1">
-                <div class="tt-search-box">
-                  <div class="input-group">
-                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                    <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar por curso, estudiante o comentario" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                  </div>
-                </div>
-              </div>
-              <div class="col-auto">
-                <div class="input-group">
-                  <select class="form-select select2" name="rating" data-minimum-results-for-search="Infinity">
-                    <option value="">Todas las calificaciones</option>
-                    @for ($r = 5; $r >= 1; $r--)
-                      <option value="{{ $r }}" @isset($rating) @if ($rating == $r) selected @endif @endisset>{{ $r }} estrella{{ $r == 1 ? '' : 's' }}</option>
-                    @endfor
-                  </select>
-                </div>
-              </div>
-              <div class="col-auto">
-                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                  <i class="fa-duotone fa-magnifying-glass"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-    <div class="card card-body">
-      <div class="table-responsive">
-        <table class="table search-table align-middle text-nowrap">
-          <thead class="header-item">
-              <tr>
-                <th>Curso</th>
-                <th>Estudiante</th>
-                <th>Calificación</th>
-                <th>Comentario</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-              </tr>
-          </thead>
-          <tbody>
-              @forelse ($reviews as $review)
-                <tr class="search-items">
-                  <td>
-                    <span class="usr-email-addr">{{ Str::words(Str::upper(optional($review->course)->title ?? 'Curso eliminado'), 8, '...') }}</span>
-                  </td>
-                  <td>
-                    <span>{{ Str::upper(Str::lower(trim((optional($review->user)->firstname ?? 'Estudiante') . ' ' . (optional($review->user)->lastname ?? '')))) }}</span>
-                  </td>
-                  <td>
-                    <span class="text-warning fw-semibold">
-                      @for ($s = 1; $s <= 5; $s++)
-                        <i class="fa-{{ $s <= $review->rating ? 'solid' : 'regular' }} fa-star fs-2"></i>
-                      @endfor
-                    </span>
-                  </td>
-                  <td style="white-space: normal; max-width: 360px;">
-                    <span class="text-muted">{{ $review->comment ? Str::limit($review->comment, 120) : '—' }}</span>
-                  </td>
-                  <td>
-                    <span class="usr-ph-no">{{ date('Y-m-d', strtotime($review->created_at)) }}</span>
-                  </td>
-                  <td class="text-left">
-                    <div class="dropdown dropstart">
-                      <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="ti ti-dots fs-5"></i>
-                      </a>
-                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                        <li>
-                          <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('manager.reviews.destroy', $review->id) }}">Eliminar</a>
-                        </li>
-                      </ul>
+    <div class="widget-content searchable-container list">
+
+        <div class="card">
+
+            {{-- Header --}}
+            <div class="card-header p-4 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Reseñas de cursos</h5>
+                        <p class="mb-0 text-muted">Gestiona las reseñas y calificaciones de los estudiantes</p>
                     </div>
-                  </td>
-                </tr>
-              @empty
-                <tr>
-                  <td colspan="6" class="text-center text-muted py-4">No hay reseñas registradas.</td>
-                </tr>
-              @endforelse
-          </tbody>
-        </table>
-      </div>
-      @if ($reviews->total() > 0)
-      <div class="result-body ">
-        <span>Mostrar {{ $reviews->firstItem() }}-{{ $reviews->lastItem() }} de {{ $reviews->total() }} resultados</span>
-        <nav>
-          {{ $reviews->appends(request()->input())->links() }}
-        </nav>
-      </div>
-      @endif
+                </div>
+            </div>
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ Request::url() }}" id="searchForm">
+
+                    <input type="hidden" name="rating" id="filterRating" value="{{ $rating ?? '' }}">
+
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="flex-fill">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" name="search" class="form-control border-start-0 ps-0"
+                                       placeholder="Buscar por curso, estudiante o comentario..."
+                                       value="{{ $searchKey ?? '' }}">
+                            </div>
+                        </div>
+
+                        @php
+                            $activeFilters = (int)(($rating ?? '') !== '');
+                        @endphp
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                                data-bs-toggle="modal" data-bs-target="#filters-modal">
+                            <i class="fas fa-sliders me-1"></i>
+                            Filtros
+                            @if($activeFilters > 0)
+                                <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
+                            @endif
+                        </button>
+
+                        <button type="submit" class="btn btn-primary flex-shrink-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($reviews->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Estudiante</th>
+                                    <th class="text-center">Calificacion</th>
+                                    <th>Comentario</th>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($reviews as $review)
+                                    <tr>
+                                        <td>
+                                            <span class="fw-semibold">{{ Str::words(optional($review->course)->title ?? 'Curso eliminado', 8, '...') }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ trim((optional($review->user)->firstname ?? 'Estudiante') . ' ' . (optional($review->user)->lastname ?? '')) }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-warning">
+                                                @for($s = 1; $s <= 5; $s++)
+                                                    <i class="fa-{{ $s <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                                @endfor
+                                            </span>
+                                        </td>
+                                        <td style="white-space:normal;max-width:360px">
+                                            <span class="text-muted">{{ $review->comment ? Str::limit($review->comment, 120) : '—' }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item btn-delete" href="#"
+                                                           data-url="{{ route('manager.reviews.destroy', $review->id) }}"
+                                                           data-title="Eliminar reseña de {{ optional($review->user)->firstname ?? 'este estudiante' }}">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-star fa-3x mb-3 text-muted opacity-50"></i>
+                        <h5 class="fw-bold mb-2">
+                            @if(($searchKey ?? '') || ($rating ?? '') !== '')
+                                No se encontraron resultados
+                            @else
+                                No hay reseñas
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-4">
+                            @if(($searchKey ?? '') || ($rating ?? '') !== '')
+                                No hay reseñas que coincidan con los filtros aplicados.
+                            @else
+                                Las reseñas aparecerán aquí cuando los estudiantes califiquen los cursos.
+                            @endif
+                        </p>
+                        @if(($searchKey ?? '') || ($rating ?? '') !== '')
+                            <a href="{{ Request::url() }}" class="btn btn-outline-secondary">
+                                Ver todas
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($reviews->hasPages())
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        Mostrando {{ $reviews->firstItem() }}–{{ $reviews->lastItem() }} de {{ $reviews->total() }} reseñas
+                    </span>
+                    {{ $reviews->appends(request()->input())->links() }}
+                </div>
+            @endif
+
+        </div>
     </div>
-  </div>
+
+    {{-- Filters modal --}}
+    <div class="modal fade" id="filters-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtros</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Calificacion</label>
+                        <select id="modalRating" class="form-select">
+                            <option value="">Todas las calificaciones</option>
+                            @for($r = 5; $r >= 1; $r--)
+                                <option value="{{ $r }}" {{ ($rating ?? '') == $r ? 'selected' : '' }}>
+                                    {{ $r }} estrella{{ $r === 1 ? '' : 's' }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer flex-column">
+                    <button type="button" id="applyFiltersBtn" class="btn btn-primary w-100 mb-2">
+                        Aplicar filtros
+                    </button>
+                    <a href="{{ Request::url() }}" class="btn btn-secondary w-100">
+                        Limpiar filtros
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @include('managers.includes.delete')
+
 @endsection
+
+@push('css')
+<style>.bulk-toolbar-float { z-index: 1050; }</style>
+@endpush
+
+@push('scripts')
+<script>
+$(function () {
+
+    @if(session('success'))
+        toastr.success('{{ session('success') }}');
+    @endif
+    @if(session('error'))
+        toastr.error('{{ session('error') }}');
+    @endif
+
+    // ── Filters modal ────────────────────────────────────────────────────────
+    $('#applyFiltersBtn').on('click', function () {
+        $('#filterRating').val($('#modalRating').val());
+        $('#filters-modal').modal('hide');
+        $('#searchForm').submit();
+    });
+
+    // ── Eliminar individual vía modal ────────────────────────────────────────
+    $(document).on('click', '.btn-delete', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        $('#delete-modal .modal-title').text($btn.data('title'));
+        $('#delete-form').attr('action', $btn.data('url'));
+        $('#delete-modal').modal('show');
+    });
+
+});
+</script>
+@endpush

@@ -8,7 +8,6 @@ use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
-use App\Services\WompiService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -166,23 +165,9 @@ class CheckoutTest extends TestCase
             'total_order_amount' => 50000,
         ]);
 
-        // Simulate a Wompi webhook with an APPROVED transaction.
-        // WompiService::verifyWebhookSignature returns true when eventsSecret is empty.
-        $payload = [
-            'event' => 'transaction.updated',
-            'data' => [
-                'transaction' => [
-                    'id' => 'txn-approved-001',
-                    'reference' => $order->slack,
-                    'status' => 'APPROVED',
-                    'amount_in_cents' => 5000000,
-                    'currency' => 'COP',
-                ],
-            ],
-            'signature' => [
-                'checksum' => '',
-            ],
-        ];
+        // El webhook ahora valida firma y es fail-closed: se firma el payload.
+        config(['services.wompi.events_secret' => 'test-secret']);
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-approved-001', 'APPROVED', 5000000, 'test-secret');
 
         $this->postJson(route('payments.wompi.webhook'), $payload)
             ->assertOk();
@@ -216,19 +201,8 @@ class CheckoutTest extends TestCase
             'total_order_amount' => 20000,
         ]);
 
-        $payload = [
-            'event' => 'transaction.updated',
-            'data' => [
-                'transaction' => [
-                    'id' => 'txn-declined-001',
-                    'reference' => $order->slack,
-                    'status' => 'DECLINED',
-                    'amount_in_cents' => 2000000,
-                    'currency' => 'COP',
-                ],
-            ],
-            'signature' => ['checksum' => ''],
-        ];
+        config(['services.wompi.events_secret' => 'test-secret']);
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-declined-001', 'DECLINED', 2000000, 'test-secret');
 
         $this->postJson(route('payments.wompi.webhook'), $payload)
             ->assertOk();
@@ -263,8 +237,36 @@ class CheckoutTest extends TestCase
         $this->postJson(
             route('payments.wompi.webhook'),
             $payload,
-            ['X-Wompi-Signature' => 'bad-signature']
+            ['X-Event-Checksum' => 'bad-signature']
         )->assertStatus(401);
+    }
+
+    /**
+     * Construye un payload de webhook de Wompi correctamente firmado:
+     * SHA256( valores de signature.properties + timestamp + events_secret ).
+     */
+    private function signedWebhookPayload(string $reference, string $txnId, string $status, int $amountInCents, string $secret): array
+    {
+        $timestamp = 1700000000;
+        $checksum = hash('sha256', $txnId.$status.$amountInCents.$timestamp.$secret);
+
+        return [
+            'event' => 'transaction.updated',
+            'timestamp' => $timestamp,
+            'signature' => [
+                'properties' => ['transaction.id', 'transaction.status', 'transaction.amount_in_cents'],
+                'checksum' => $checksum,
+            ],
+            'data' => [
+                'transaction' => [
+                    'id' => $txnId,
+                    'reference' => $reference,
+                    'status' => $status,
+                    'amount_in_cents' => $amountInCents,
+                    'currency' => 'COP',
+                ],
+            ],
+        ];
     }
 
     public function test_apply_coupon_returns_error_for_unknown_code(): void

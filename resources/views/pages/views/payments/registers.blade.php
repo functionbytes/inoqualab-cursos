@@ -11,7 +11,7 @@
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="courses__breadcrumb-content">
-                            <a href="#" class="category">{{ $course->categorie->title }}</a>
+                            <span class="category">{{ $course->categorie->title }}</span>
                             <h3 class="title">{{ $course->title }}</h3>
                             <ul class="courses__item-meta list-wrap">
                                 <li>
@@ -183,14 +183,14 @@
                                                                 <div class="accordion-body">
                                                                     <ul class="list-wrap">
                                                                         <li class="course-item">
-                                                                            <a href="#" class="course-item-link">
+                                                                            <span class="course-item-link">
                                                                                 <span class="item-name">{{ ucfirst($lesson->title) }}</span>
                                                                                 <div class="course-item-meta">
                                                                         <span class="item-meta course-item-status">
-                                                                            <img src="/pages/images/icons/lock.svg" alt="icon">
+                                                                            <img src="/pages/images/icons/lock.svg" alt="Lección bloqueada">
                                                                         </span>
                                                                                 </div>
-                                                                            </a>
+                                                                            </span>
                                                                         </li>
                                                                     </ul>
                                                                 </div>

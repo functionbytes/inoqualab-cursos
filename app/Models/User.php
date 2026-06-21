@@ -304,11 +304,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Bundle::class);
     }
 
-    public function coursess()
-    {
-        return $this->belongsToMany(Course::class, 'course_user');
-    }
-
     public function session(): HasOne
     {
         return $this->hasOne('App\Models\Setting\Session', 'user_id');
@@ -382,16 +377,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany('App\Models\Course\Course', 'user_id');
     }
 
-    public function answer(): HasMany
-    {
-        return $this->hasMany('App\Models\Question', 'user_id');
-    }
-
-    public function announsment(): HasMany
-    {
-        return $this->hasMany('App\Models\Course\CourseAnnouncement', 'user_id');
-    }
-
     public function review(): HasMany
     {
         return $this->hasMany('App\Models\ReviewRating', 'user_id');
@@ -425,42 +410,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
 
         return Auth::user();
-    }
-
-    public static function validateIdentification($identification)
-    {
-
-        $existenceUser = User::where('identification', $identification)->get();
-
-        if ($existenceUser->count() == 1) {
-            return $existenceUser;
-        } else {
-            return null;
-        }
-    }
-
-    public static function validations($email, $identification)
-    {
-
-        $existenceUser = User::where('email', $email)->orWhere('identification', $identification)->get();
-
-        if ($existenceUser->count() == 1) {
-            return $existenceUser;
-        } else {
-            return null;
-        }
-    }
-
-    public static function validate($email)
-    {
-
-        $existenceUser = User::where('email', $email)->get();
-
-        if ($existenceUser->count() == 1) {
-            return $existenceUser;
-        } else {
-            return null;
-        }
     }
 
     public function scopeValidates($query)
@@ -525,6 +474,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public static function existence($slack)
     {
         return User::where('slack', '=', $slack)->first();
+    }
+
+    protected function fullName(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => trim($this->firstname.' '.$this->lastname),
+        );
+    }
+
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->user_img,
+        );
     }
 
     protected function password(): Attribute

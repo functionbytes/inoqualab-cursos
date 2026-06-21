@@ -71,6 +71,6 @@
             </div>
         </div>
         <!-- Scroll Top Button -->
-        <button class="scroll-top scroll-to-target" data-target="html" ><span class="fas fa-angle-double-up"></span></button>
+        <button class="scroll-top scroll-to-target" data-target="html" aria-label="Volver arriba"><span class="fas fa-angle-double-up" aria-hidden="true"></span></button>
     </div>
 </footer>

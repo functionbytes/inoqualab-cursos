@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Instruction\Instruction;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class InstructionsController extends Controller
 {
-    public function index()
+    public function index(): View
     {
 
         $instructions = Instruction::available()->get();

@@ -22,6 +22,7 @@ class MailAutoConfirmRulesController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('incoming-mails.create'), 403);
         $enterpriseId = $request->input('enterprise_id');
         $minConfidence = (int) $request->input('min_confidence', 90);
 
@@ -75,6 +76,7 @@ class MailAutoConfirmRulesController extends Controller
 
     public function destroy(int $id): JsonResponse
     {
+        abort_unless(auth()->user()->can('incoming-mails.delete'), 403);
         MailAutoConfirmRule::findOrFail($id)->delete();
 
         return response()->json(['success' => true, 'message' => 'Regla eliminada.']);

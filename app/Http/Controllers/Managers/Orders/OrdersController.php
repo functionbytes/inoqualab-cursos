@@ -102,6 +102,7 @@ class OrdersController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('orders.update'), 403);
 
         $order = Order::slack($request->slack);
 
@@ -125,6 +126,7 @@ class OrdersController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('orders.delete'), 403);
         $user = null;
         $order = Order::slack($slack);
         $user = $order->user->slack;

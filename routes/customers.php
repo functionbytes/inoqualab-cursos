@@ -20,6 +20,7 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'verified', 'cust
     Route::group(['prefix' => 'orders'], function () {
         Route::get('/', [OrdersController::class, 'index'])->name('customers.orders')->middleware('profile');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('customers.orders.view');
+        Route::get('/invoice/{slack}', [OrdersController::class, 'invoice'])->name('customers.orders.invoice');
         Route::get('/payment/{slack}', [OrdersController::class, 'payment'])->name('customers.orders.payments');
     });
 
@@ -66,7 +67,7 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'verified', 'cust
 
     Route::group(['prefix' => 'notifications'], function () {
         Route::get('/', [NotificationsController::class, 'index'])->name('customers.notifications');
-        Route::get('/view/{id}', [NotificationsController::class, 'view'])->name('customers.notiication.view');
+        Route::get('/view/{id}', [NotificationsController::class, 'view'])->name('customers.notifications.view');
         Route::post('/mark', [NotificationsController::class, 'mark'])->name('customers.notifications.mark');
         Route::post('/search', [NotificationsController::class, 'search'])->name('customers.notifications.search');
         Route::delete('/delete', [NotificationsController::class, 'delete'])->name('customers.notifications.delete');

@@ -15,6 +15,10 @@ class IsEnterprise
                 $request->attributes->set('enterprise', $enterprise);
                 $request->session()->put('enterprise', $enterprise);
                 app()->instance('enterprise', $enterprise);
+            } else {
+                // Sin empresa asociada: cualquier app('enterprise') aguas abajo
+                // responde 403 limpio en vez de un 500 BindingResolutionException.
+                app()->bind('enterprise', fn () => abort(403, 'No tienes una empresa asociada.'));
             }
 
             return $next($request);

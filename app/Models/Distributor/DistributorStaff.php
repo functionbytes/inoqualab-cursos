@@ -14,7 +14,7 @@ class DistributorStaff extends Model
 
     protected $fillable = [
         'user_id',
-        'enterprise_id',
+        'distributor_id',
         'available',
         'created_at',
         'updated_at',
@@ -27,7 +27,7 @@ class DistributorStaff extends Model
 
     public function scopeDisabled($query)
     {
-        return $query->where('available', 1);
+        return $query->where('available', 0);
     }
 
     public function user(): BelongsTo
@@ -35,8 +35,8 @@ class DistributorStaff extends Model
         return $this->belongsTo('App\Models\User', 'user_id', 'id');
     }
 
-    public function enterprise(): BelongsTo
+    public function distributor(): BelongsTo
     {
-        return $this->belongsTo('App\Models\Enterprise\Enterprise', 'enterprise_id', 'id');
+        return $this->belongsTo('App\Models\Distributor\Distributor', 'distributor_id', 'id');
     }
 }

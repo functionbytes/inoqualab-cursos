@@ -25,6 +25,8 @@ class RolesController extends Controller
 
     public function index(Request $request): View
     {
+        abort_unless(auth()->user()->can('roles.view'), 403);
+
         $searchKey = $request->input('search');
 
         $roles = Role::query()
@@ -48,6 +50,8 @@ class RolesController extends Controller
      */
     public function matrix(): View
     {
+        abort_unless(auth()->user()->can('roles.view'), 403);
+
         $roles = Role::query()->with('permissions:id')->orderBy('name')->get();
 
         $permissionsByModule = Permission::query()
@@ -70,6 +74,8 @@ class RolesController extends Controller
 
     public function create(): View
     {
+        abort_unless(auth()->user()->can('roles.create'), 403);
+
         return view('managers.views.settings.roles.form', [
             'role' => null,
             'permissions' => Permission::orderBy('name')->get(),
@@ -80,6 +86,8 @@ class RolesController extends Controller
 
     public function edit(int $id): View
     {
+        abort_unless(auth()->user()->can('roles.update'), 403);
+
         $role = Role::findOrFail($id);
 
         return view('managers.views.settings.roles.form', [
@@ -92,6 +100,7 @@ class RolesController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(auth()->user()->can('roles.create'), 403);
         $data = $this->validateRole($request);
 
         $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
@@ -106,6 +115,7 @@ class RolesController extends Controller
 
     public function update(Request $request, int $id): RedirectResponse
     {
+        abort_unless(auth()->user()->can('roles.update'), 403);
         $role = Role::findOrFail($id);
         $isProtected = in_array($role->name, self::PROTECTED_ROLES, true);
 
@@ -126,6 +136,7 @@ class RolesController extends Controller
 
     public function destroy(Request $request, int $id): RedirectResponse|JsonResponse
     {
+        abort_unless(auth()->user()->can('roles.delete'), 403);
         $role = Role::findOrFail($id);
 
         if (in_array($role->name, self::PROTECTED_ROLES, true)) {

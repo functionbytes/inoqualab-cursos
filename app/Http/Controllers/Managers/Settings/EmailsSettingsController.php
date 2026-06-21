@@ -3,30 +3,19 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Managers\Settings\UpdateEmailsSettingsRequest;
+use Illuminate\Http\JsonResponse;
 
 class EmailsSettingsController extends Controller
 {
     public function index()
     {
-
-        return view('managers.views.settings.emails.setting')->with([
-        ]);
-
+        return view('managers.views.settings.emails.setting');
     }
 
-    public function update(Request $request)
+    public function update(UpdateEmailsSettingsRequest $request): JsonResponse
     {
-        $request->validate([
-            'imap_host' => ['nullable', 'string', 'max:255'],
-            'imap_port' => ['nullable', 'integer', 'between:1,65535'],
-            'imap_protocol' => ['nullable', 'string', 'in:imap,pop3'],
-            'imap_username' => ['nullable', 'string', 'max:255'],
-            'imap_password' => ['nullable', 'string', 'max:255'],
-            'imap_encryption' => ['nullable', 'string', 'in:ssl,tls,notls'],
-        ]);
-
-        $data['imap_status'] = $request->imap_status;
+        $data['imap_status'] = $request->has('imap_status') ? 'true' : 'false';
         $data['imap_host'] = $request->imap_host;
         $data['imap_port'] = $request->imap_port;
         $data['imap_protocol'] = $request->imap_protocol;
@@ -34,12 +23,23 @@ class EmailsSettingsController extends Controller
         $data['imap_password'] = $request->imap_password;
         $data['imap_encryption'] = $request->imap_encryption;
 
+        $data['mail_host'] = $request->mail_host;
+        $data['mail_port'] = $request->mail_port;
+        $data['mail_encryption'] = $request->mail_encryption;
+        $data['mail_username'] = $request->mail_username;
+        $data['mail_from_address'] = $request->mail_from_address;
+        $data['mail_from_name'] = $request->mail_from_name;
+
+        // Solo actualizar contraseña si se envió un valor
+        if ($request->filled('mail_password')) {
+            $data['mail_password'] = $request->mail_password;
+        }
+
         updateSettings($data);
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo correctamente configuración de correo',
+            'message' => 'Configuración de correo actualizada correctamente.',
         ]);
-
     }
 }

@@ -2,7 +2,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Configuración de Analytics'])
 
     <div class="widget-content searchable-container list">
 
@@ -32,9 +31,11 @@
                             <small class="text-muted d-block">Activa el seguimiento y el acceso al dashboard de Analytics.</small>
                         </div>
 
+                        <div id="ga4Fields" class="{{ $settings['google_analytics_enable'] ? '' : 'd-none' }}">
+
                         <hr class="my-0">
 
-                        <div class="card-body" id="ga4Fields">
+                        <div class="card-body">
                             <h6 class="fw-bold text-dark mb-1">Identificadores</h6>
                             <p class="text-muted mb-3">Necesitas dos IDs distintos de Google Analytics.</p>
 
@@ -98,12 +99,12 @@
                             <small class="text-muted d-block mt-1 mb-3">
                                 Deja vacío para conservar las credenciales actuales.
                                 <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" class="ms-1">
-                                    Google Cloud Console <i class="fas fa-external-link-alt" style="font-size:0.7rem;"></i>
+                                    Google Cloud Console
                                 </a>
                             </small>
 
                             <button type="button" class="btn btn-outline-primary" id="validateBtn">
-                                <i class="fas fa-check me-1"></i> Validar JSON
+                                Validar JSON
                             </button>
                         </div>
 
@@ -113,9 +114,9 @@
                             <h6 class="fw-bold text-dark mb-1">Caché del dashboard</h6>
                             <p class="text-muted mb-3">Los datos del dashboard se almacenan en caché para no exceder los límites de la API.</p>
 
-                            <div class="col-md-4">
+                            <div>
                                 <label for="cacheLifetime" class="form-label fw-semibold">Tiempo de caché (minutos)</label>
-                                <input type="number" class="form-control" id="cacheLifetime"
+                                <input type="number" class="form-control w-100" id="cacheLifetime"
                                        name="analytics_cache_lifetime"
                                        min="1" max="1440"
                                        value="{{ $settings['analytics_cache_lifetime'] }}">
@@ -123,9 +124,17 @@
                             </div>
                         </div>
 
+                        </div>{{-- /#ga4Fields --}}
+
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-save me-1"></i> Guardar configuración GA4
+                                Guardar configuración GA4
+                            </button>
+                        </div>
+
+                        <div class="card-footer border-top-0 pt-0">
+                            <button type="button" class="btn btn-outline-secondary w-100" id="clearCacheBtn">
+                                Limpiar caché del dashboard
                             </button>
                         </div>
 
@@ -150,13 +159,7 @@
 
                         {{-- Meta Pixel --}}
                         <div class="card-body">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="rounded-2 d-flex align-items-center justify-content-center"
-                                      style="width:32px;height:32px;background:#1877f2;">
-                                    <i class="fab fa-facebook-f text-white" style="font-size:0.9rem;"></i>
-                                </span>
-                                <h6 class="fw-bold mb-0">Meta Pixel (Facebook / Instagram)</h6>
-                            </div>
+                            <h6 class="fw-bold mb-2">Meta Pixel (Facebook / Instagram)</h6>
                             <input type="text" class="form-control font-monospace" name="meta_pixel_id"
                                    placeholder="123456789012345"
                                    value="{{ $settings['meta_pixel_id'] }}">
@@ -170,10 +173,6 @@
                         {{-- Microsoft Clarity --}}
                         <div class="card-body">
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="rounded-2 d-flex align-items-center justify-content-center"
-                                      style="width:32px;height:32px;background:#00bcf2;">
-                                    <i class="fab fa-microsoft text-white" style="font-size:0.9rem;"></i>
-                                </span>
                                 <h6 class="fw-bold mb-0">Microsoft Clarity</h6>
                                 <span class="badge bg-success-subtle text-success">Gratis</span>
                             </div>
@@ -190,13 +189,7 @@
 
                         {{-- TikTok Pixel --}}
                         <div class="card-body">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="rounded-2 d-flex align-items-center justify-content-center"
-                                      style="width:32px;height:32px;background:#000;">
-                                    <i class="fab fa-tiktok text-white" style="font-size:0.9rem;"></i>
-                                </span>
-                                <h6 class="fw-bold mb-0">TikTok Pixel</h6>
-                            </div>
+                            <h6 class="fw-bold mb-2">TikTok Pixel</h6>
                             <input type="text" class="form-control font-monospace" name="tiktok_pixel_id"
                                    placeholder="CXXXXXXXXXXXXXXXXXXXXXXX"
                                    value="{{ $settings['tiktok_pixel_id'] }}">
@@ -209,13 +202,7 @@
 
                         {{-- LinkedIn Insight Tag --}}
                         <div class="card-body">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <span class="rounded-2 d-flex align-items-center justify-content-center"
-                                      style="width:32px;height:32px;background:#0077b5;">
-                                    <i class="fab fa-linkedin-in text-white" style="font-size:0.9rem;"></i>
-                                </span>
-                                <h6 class="fw-bold mb-0">LinkedIn Insight Tag</h6>
-                            </div>
+                            <h6 class="fw-bold mb-2">LinkedIn Insight Tag</h6>
                             <input type="text" class="form-control font-monospace" name="linkedin_insight_tag_id"
                                    placeholder="1234567"
                                    value="{{ $settings['linkedin_insight_tag_id'] }}">
@@ -226,7 +213,7 @@
 
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-save me-1"></i> Guardar pixels
+                                Guardar pixels
                             </button>
                         </div>
 
@@ -238,14 +225,35 @@
             {{-- Columna lateral --}}
             <div class="col-lg-4">
 
+                {{-- Reportes programados --}}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">Reportes programados</h6>
+                        <p class="text-muted mb-3">Configura el envío automático de reportes por email con frecuencia y formato personalizados.</p>
+                        <a href="{{ route('manager.settings.analytics.schedules.index') }}" class="btn btn-primary w-100">
+                            Gestionar reportes
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Notificaciones --}}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">Notificaciones</h6>
+                        <p class="text-muted mb-3">Configura los destinatarios que reciben alertas cuando un reporte se envía o falla.</p>
+                        <a href="{{ route('manager.settings.analytics.notifications') }}" class="btn btn-outline-secondary w-100">
+                            Configurar notificaciones
+                        </a>
+                    </div>
+                </div>
+
                 {{-- Cómo configurar GA4 --}}
                 <div class="card mb-4">
                     <div class="card-body">
                         <h6 class="fw-bold text-dark mb-3">
-                            <i class="fas fa-graduation-cap text-primary me-1"></i>
                             Cómo configurar GA4
                         </h6>
-                        <ol class="ps-3 mb-0" style="font-size:0.85rem;line-height:1.8;">
+                        <ol class="ps-3 mb-0 small">
                             <li>Ve a <a href="https://analytics.google.com" target="_blank">analytics.google.com</a></li>
                             <li>Admin → Configuración de la propiedad → copia el <strong>Property ID</strong></li>
                             <li>Admin → Streams de datos → Web → copia el <strong>Measurement ID</strong> (<code>G-XXXXX</code>)</li>
@@ -263,10 +271,9 @@
                 <div class="card">
                     <div class="card-body">
                         <h6 class="fw-bold text-dark mb-3">
-                            <i class="fas fa-circle-info text-primary me-1"></i>
                             Estado actual
                         </h6>
-                        <div class="d-flex flex-column gap-2" style="font-size:0.85rem;">
+                        <div class="d-flex flex-column gap-2 small">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-muted">Seguimiento web (gtag.js)</span>
                                 @if($settings['google_analytics_enable'] && $settings['google_analytics_measurement_id'])
@@ -330,6 +337,11 @@
 @push('scripts')
 <script>
 $(function () {
+    // Toggle GA4 dependent fields
+    $('#googleAnalyticsEnable').on('change', function () {
+        $('#ga4Fields').toggleClass('d-none', !this.checked);
+    });
+
     // Submit GA4 form
     $('#analyticsForm').on('submit', function (e) {
         e.preventDefault();
@@ -357,7 +369,7 @@ $(function () {
                 }
             },
             complete: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Guardar configuración GA4');
+                $btn.prop('disabled', false).html('Guardar configuración GA4');
             }
         });
     });
@@ -380,8 +392,27 @@ $(function () {
                 toastr.error(xhr.responseJSON?.message || 'Error al guardar los pixels.');
             },
             complete: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Guardar pixels');
+                $btn.prop('disabled', false).html('Guardar pixels');
             }
+        });
+    });
+
+    // Clear analytics dashboard cache
+    $('#clearCacheBtn').on('click', function () {
+        const $btn = $(this);
+        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Limpiando...');
+
+        $.post('{{ route("manager.settings.analytics.clear-cache") }}', {
+            _token: $('meta[name="csrf-token"]').attr('content')
+        })
+        .done(function (res) {
+            toastr.success(res.message || 'Caché limpiado correctamente.');
+        })
+        .fail(function () {
+            toastr.error('Error al limpiar el caché.');
+        })
+        .always(function () {
+            $btn.prop('disabled', false).html('Limpiar caché del dashboard');
         });
     });
 

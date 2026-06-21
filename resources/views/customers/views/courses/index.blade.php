@@ -1,138 +1,131 @@
-@php use Carbon\Carbon; @endphp
 @extends('layouts.customers')
 
-@section('title', 'Cursos')
+@section('title', 'Mis cursos')
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}">
+@endpush
 
 @section('content')
-<div class="container-fluid note-has-grid">
+<section class="pnl-section" id="sec-cursos">
 
-    @include('customers.includes.card', ['title' => 'Cursos'])
+    <div class="pnl-card pnl-head">
+        <h2>Mis cursos</h2>
+        <div class="sub">Gestiona y continúa tus capacitaciones.</div>
+    </div>
 
-    {{-- Filtros --}}
-    <ul class="nav nav-pills p-3 mb-3 rounded align-items-center card flex-row">
-        <li class="nav-item">
-            <a href="javascript:void(0)" id="order-all" class="nav-link note-link d-flex align-items-center justify-content-center px-3 me-2 text-body-color active">
-                <span class="d-md-block font-weight-medium">TODOS</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="javascript:void(0)" id="order-earrings" class="nav-link note-link d-flex align-items-center justify-content-center px-3 me-2 text-body-color">
-                <span class="d-md-block font-weight-medium">PENDIENTES</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="javascript:void(0)" id="order-expires" class="nav-link note-link d-flex align-items-center justify-content-center px-3 me-2 text-body-color">
-                <span class="d-md-block font-weight-medium">EXPIRADOS</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a href="javascript:void(0)" id="order-completeds" class="nav-link note-link d-flex align-items-center justify-content-center px-3 me-2 text-body-color">
-                <span class="d-md-block font-weight-medium">COMPLETADOS</span>
-            </a>
-        </li>
-    </ul>
+    <div style="height:22px"></div>
 
-    <div class="tab-content">
-        <div id="note-full-container" class="note-has-grid row g-3">
-            @foreach($courses as $course)
+    @if($courses->isEmpty())
+
+        <div class="pnl-card">
+            <div class="doc-empty">
+                <i class="fa-regular fa-folder-open" style="font-size:30px;display:block;margin-bottom:12px;"></i>
+                Aún no tienes cursos asignados. Cuando te inscribas en una capacitación aparecerá aquí.
+            </div>
+        </div>
+
+    @else
+
+        <div class="pnl-filter" id="cursosFilter" role="group" aria-label="Filtrar mis cursos">
+            <button type="button" class="active" data-f="todos" aria-pressed="true">Todos</button>
+            <button type="button" data-f="progress" aria-pressed="false">En progreso</button>
+            <button type="button" data-f="pending" aria-pressed="false">Pendientes</button>
+            <button type="button" data-f="done" aria-pressed="false">Completados</button>
+        </div>
+
+        <div class="pc-grid" id="cursosCards">
+            @foreach($courses as $inscription)
                 @php
-                    $progress   = min(100, round($course->percent, 2));
-                    $culminated = $course->culminated;
-                    $certificate = $culminated == 1 ? $course->certificate : null;
-                    $expire     = Carbon::parse($course->enroll_expire);
-                    $diff       = max(0, (int) floor(Carbon::now()->diffInDays($expire, false)));
-                    $isExpired  = $diff <= 0 && $culminated == 0;
-                    $thumb      = $course->course?->getFirstMedia('thumbnail');
-                    $thumbUrl   = $thumb ? $thumb->getFullUrl() : asset('/pages/images/courses/default.jpg');
-                    $year       = date('Y', strtotime($course->enroll_start));
+                    $progress = min(100, max(0, (int) round($inscription->percent)));
+
+                    if ($inscription->expire == 1) {
+                        $status = 'expired';
+                        $statusLabel = 'Expirado';
+                    } elseif ($progress >= 100) {
+                        $status = 'done';
+                        $statusLabel = 'Completado';
+                    } elseif ($progress > 0) {
+                        $status = 'progress';
+                        $statusLabel = 'En progreso';
+                    } else {
+                        $status = 'pending';
+                        $statusLabel = 'Pendiente';
+                    }
+
+                    $course   = $inscription->course;
+                    $category = $course?->categorie?->title ?? 'Curso';
+                    $year     = optional($inscription->created_at)->format('Y') ?? date('Y');
+                    $thumb    = $course?->getFirstMedia('thumbnail')?->getFullUrl() ?? '/pages/images/courses/default.jpg';
+
+                    $contentUrl  = route('customers.courses.content', $inscription->slack);
+                    $certificate = $status === 'done' ? $inscription->certificate : null;
                 @endphp
 
-                <div class="col-xl-4 col-md-6 col-sm-12 single-note-item order-all
-                    {{ $isExpired ? 'order-expires' : '' }}
-                    {{ $culminated == 0 && !$isExpired ? 'order-earrings' : '' }}
-                    {{ $culminated == 1 ? 'order-completeds' : '' }}">
+                <div class="pc-card" data-status="{{ $status }}">
+                    <div class="pc-media"
+                         style="background-image:linear-gradient(150deg,rgba(13,27,42,.72),rgba(13,27,42,.55)),url('{{ $thumb }}');background-size:cover;background-position:center;">
+                        <span class="pc-cat">{{ $category }}</span>
+                    </div>
 
-                    <div class="card h-100 overflow-hidden border-0 shadow-sm">
-
-                        {{-- Thumbnail --}}
-                        <div class="position-relative" style="aspect-ratio:16/9;overflow:hidden;background:#0d1b2a;">
-                            <img src="{{ $thumbUrl }}"
-                                 alt="{{ $course->course?->title }}"
-                                 style="width:100%;height:100%;object-fit:cover;display:block;"
-                                 onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
-                            <span class="badge position-absolute top-0 start-0 m-2
-                                @if($culminated == 1) bg-success
-                                @elseif($isExpired) bg-danger
-                                @else bg-primary
-                                @endif" style="font-size:11px;padding:5px 10px;">
-                                @if($culminated == 1) Completado
-                                @elseif($isExpired) Expirado
-                                @else En curso
-                                @endif
-                            </span>
-                            <span class="badge bg-dark bg-opacity-75 position-absolute top-0 end-0 m-2" style="font-size:11px;padding:5px 10px;">{{ $year }}</span>
+                    <div class="pc-body">
+                        <div class="pc-top">
+                            <span class="pc-year">{{ $year }}</span>
+                            <span class="pc-badge {{ $status }}">{{ $statusLabel }}</span>
                         </div>
 
-                        <div class="card-body d-flex flex-column gap-2 p-3">
+                        <div class="pc-title">{{ $course?->title ?? 'Curso' }}</div>
 
-                            <h6 class="fw-semibold mb-0 lh-sm" style="font-size:13.5px;">
-                                <a class="text-dark text-decoration-none"
-                                   href="{{ route('customers.courses.content', $course->slack) }}">
-                                    {{ $course->course?->title }}
-                                </a>
-                            </h6>
+                        <div class="pc-track" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progress }}% completado"><div class="pc-fill" style="--p:{{ $progress }}%"></div></div>
 
-                            {{-- Progreso --}}
-                            <div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span style="font-size:11.5px;color:#5a7093;">Progreso</span>
-                                    <span style="font-size:11.5px;font-weight:700;color:#0d1b2a;">{{ $progress }}%</span>
-                                </div>
-                                <div class="progress" style="height:6px;border-radius:4px;">
-                                    <div class="progress-bar {{ $culminated == 1 ? 'bg-success' : 'bg-primary' }}"
-                                         style="width:{{ $progress }}%"></div>
-                                </div>
+                        <div class="pc-foot">
+                            <div class="col">
+                                <div class="k">Progreso</div>
+                                <div class="v">{{ $progress }}%</div>
                             </div>
-
-                            {{-- Días restantes --}}
-                            @if($culminated == 0)
-                                <div class="d-flex align-items-center gap-1" style="font-size:12px;color:{{ $isExpired ? '#dc3545' : ($diff <= 10 ? '#fd7e14' : '#5a7093') }};">
-                                    <i class="fa-solid fa-clock" style="font-size:11px;"></i>
-                                    @if($isExpired)
-                                        Acceso expirado
-                                    @elseif($diff <= 10)
-                                        Vence en {{ $diff }} {{ $diff == 1 ? 'día' : 'días' }}
-                                    @else
-                                        {{ $diff }} días restantes
-                                    @endif
-                                </div>
-                            @endif
-
-                            {{-- CTA --}}
-                            <div class="mt-auto pt-1 d-flex gap-2">
-                                @if($culminated == 1 && $certificate)
-                                    <a class="btn btn-sm btn-outline-success flex-fill"
-                                       href="{{ route('customers.certificate.download', $certificate->slack) }}"
-                                       target="_blank">
-                                        <i class="fa-solid fa-award me-1"></i> Certificado
-                                    </a>
-                                @endif
-                                <a class="btn btn-sm flex-fill {{ $isExpired ? 'btn-outline-secondary' : 'btn-primary' }}"
-                                   href="{{ route('customers.courses.content', $course->slack) }}">
-                                    <i class="fa-solid fa-{{ $culminated == 1 ? 'rotate-right' : ($isExpired ? 'lock' : 'play') }} me-1"></i>
-                                    {{ $culminated == 1 ? 'Repasar' : ($isExpired ? 'Ver detalle' : 'Continuar') }}
-                                </a>
+                            <div class="col r">
+                                <div class="k">Estado</div>
+                                <div class="v">{{ $statusLabel }}</div>
                             </div>
-
                         </div>
+
+                        @if($status === 'done' && $certificate)
+                            <a class="pc-btn ghost" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
+                                <i class="fa-solid fa-download"></i> Ver certificado
+                            </a>
+                        @elseif($status === 'expired')
+                            <a class="pc-btn ghost" href="{{ $contentUrl }}">
+                                <i class="fa-solid fa-lock"></i> Acceso expirado
+                            </a>
+                        @else
+                            <a class="pc-btn" href="{{ $contentUrl }}">
+                                <i class="fa-solid fa-play"></i> {{ $progress > 0 ? 'Continuar' : 'Comenzar curso' }}
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endforeach
         </div>
-    </div>
-</div>
+
+    @endif
+
+</section>
 @endsection
 
 @push('scripts')
-<script src="{{ url('managers/js/apps/notes.js') }}"></script>
+<script>
+    $(function () {
+        $('#cursosFilter').on('click', 'button', function () {
+            var $btn = $(this);
+            $btn.siblings().removeClass('active').attr('aria-pressed', 'false');
+            $btn.addClass('active').attr('aria-pressed', 'true');
+
+            var f = $btn.data('f');
+            $('#cursosCards .pc-card').each(function () {
+                var match = (f === 'todos') || ($(this).data('status') === f);
+                $(this).prop('hidden', !match);
+            });
+        });
+    });
+</script>
 @endpush

@@ -24,7 +24,7 @@ class InvoicesController extends Controller
         $type = $request->type;
         $method = $request->methods;
 
-        $invoices = Invoice::latest()->orderBy('number', 'desc');
+        $invoices = Invoice::with(['distributor', 'condition', 'method'])->latest()->orderBy('number', 'desc');
         $methods = InvoiceMethod::latest()->get();
         $conditions = InvoiceCondition::latest()->get();
 
@@ -92,11 +92,11 @@ class InvoicesController extends Controller
         $details = [];
 
         foreach ($groupedDetails as $enterpriseId => $courses) {
-            $enterprise = $courses->first()->first()->enterprise->title;
+            $enterprise = $courses->first()->first()->enterprise?->title ?? 'Empresa';
             $totalEnterprise = 0;
 
             foreach ($courses as $courseId => $detail) {
-                $course = $detail->first()->course->title;
+                $course = $detail->first()->course?->title ?? 'Curso';
                 $quantity = $detail->sum('quantity');
                 $amount = $detail->sum('amount');
 
@@ -128,11 +128,11 @@ class InvoicesController extends Controller
 
         $methods = InvoiceMethod::latest()->get();
         $methods->prepend('', '');
-        $methods = $methods->pluck('label', 'id');
+        $methods = $methods->pluck('title', 'id');
 
         $conditions = InvoiceCondition::latest()->get();
         $conditions->prepend('', '');
-        $conditions = $conditions->pluck('label', 'id');
+        $conditions = $conditions->pluck('title', 'id');
 
         return view('managers.views.invoices.invoices.edit')->with([
             'invoice' => $invoice,
@@ -144,8 +144,9 @@ class InvoicesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('invoices.update'), 403);
 
-        $invoice = Invoice::slack($request->slack);
+        $invoice = Invoice::with('distributor')->slack($request->slack);
 
         if ($request->condition == 4) {
             $invoice->payment_at = Carbon::parse($request->payment);
@@ -178,11 +179,11 @@ class InvoicesController extends Controller
 
         $methods = InvoiceMethod::latest()->get();
         $methods->prepend('', '');
-        $methods = $methods->pluck('label', 'id');
+        $methods = $methods->pluck('title', 'id');
 
         $conditions = InvoiceCondition::latest()->get();
         $conditions->prepend('', '');
-        $conditions = $conditions->pluck('label', 'id');
+        $conditions = $conditions->pluck('title', 'id');
 
         return view('managers.views.invoices.invoices.create')->with([
             'distributors' => $distributors,
@@ -194,6 +195,7 @@ class InvoicesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('invoices.create'), 403);
 
         $method = $request->methods ?? null;
         $condition = $request->condition ?? null;
@@ -202,7 +204,7 @@ class InvoicesController extends Controller
         $endDate = Carbon::parse($date[1])->endOfDay();
 
         $distributor = Distributor::slack($request->distributor);
-        $items = $distributor->orders()->date($startDate, $endDate)->get();
+        $items = $distributor->orders()->date($startDate, $endDate)->with('order.items')->get();
 
         if ($items->count() == 0) {
 
@@ -284,7 +286,9 @@ class InvoicesController extends Controller
                         $itemInvoice->course_id = $data['course_id'];
                         $itemInvoice->invoice_id = $invoice->id;
                         $itemInvoice->quantity = $data['quantity'];
-                        $itemInvoice->amount = $data['total_amount'];
+                        // La tabla invoice_items tiene subtotal/total (no 'amount'); sin descuento por línea, total = subtotal.
+                        $itemInvoice->subtotal = $data['total_amount'];
+                        $itemInvoice->total = $data['total_amount'];
                         $itemInvoice->created_at = now();
                         $itemInvoice->updated_at = now();
                         $itemInvoice->save();

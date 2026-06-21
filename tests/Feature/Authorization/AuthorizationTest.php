@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Users\Certificate;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -69,12 +70,31 @@ class AuthorizationTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function test_all_six_roles_are_seeded(): void
+    public function test_all_roles_are_seeded(): void
     {
+        // superadmin (todos los permisos) + los 6 roles de dominio.
         $this->assertEqualsCanonicalizing(
-            ['manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting'],
+            ['superadmin', 'manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting'],
             Role::pluck('name')->all()
         );
+    }
+
+    public function test_new_panel_domains_have_granular_permissions(): void
+    {
+        // Dominios del panel manager que antes quedaban en fail-open por no
+        // tener permiso en el catálogo. Ahora deben existir y respetar la
+        // granularidad: manager los tiene, customer no.
+        $manager = User::factory()->manager()->create();
+        $customer = User::factory()->customer()->create();
+
+        foreach (['seo', 'reviews', 'sliders', 'trusteds', 'categories', 'certifications'] as $domain) {
+            $this->assertTrue(
+                Permission::where('name', "{$domain}.view")->exists(),
+                "falta el permiso {$domain}.view en el catálogo"
+            );
+            $this->assertTrue($manager->can("{$domain}.view"), "manager debería poder ver {$domain}");
+            $this->assertFalse($customer->can("{$domain}.view"), "customer NO debería poder ver {$domain}");
+        }
     }
 
     // ── OrderPolicy (ownership por user_id) ───────────────────────────────

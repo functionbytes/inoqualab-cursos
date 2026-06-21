@@ -16,6 +16,7 @@ use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
 use Carbon\Carbon;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -29,6 +30,7 @@ class InvoiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed(RolesAndPermissionsSeeder::class);
 
         $this->manager = User::factory()->create([
             'role' => 'manager',

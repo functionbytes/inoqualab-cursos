@@ -10,6 +10,8 @@ class GenerateController extends Controller
 {
     public function generate($slack)
     {
+        abort_unless(auth()->user()->can('invoices.view'), 403);
+
         $invoice = Invoice::slack($slack);
 
         if (! $invoice) {

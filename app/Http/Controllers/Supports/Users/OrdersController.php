@@ -14,9 +14,10 @@ class OrdersController extends Controller
 
         $user = User::slack($slack);
 
-        $orders = $user->orders;
+        $orders = $user->orders()->latest()->paginate(paginationNumber());
 
         return view('supports.views.users.users.orders')->with([
+            'user' => $user,
             'orders' => $orders,
         ]);
 

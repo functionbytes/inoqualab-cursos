@@ -16,19 +16,19 @@
                 <div class="top-right d-flex align-items-center">
                     <div class="social-style-two">
                         @if (setting('social_media_facebook')!=null)
-                            <a href="{{ setting('social_media_facebook') }}"><i class="fab fa-facebook-f"></i></a>
+                            <a href="{{ setting('social_media_facebook') }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
                         @endif
                         @if (setting('social_media_instagram')!=null)
-                            <a href="{{ setting('social_media_instagram') }}"><i class="fab fa-instagram"></i></a>
+                            <a href="{{ setting('social_media_instagram') }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
                         @endif
                         @if (setting('social_media_twitter')!=null)
-                            <a href="{{ setting('social_media_twitter') }}"><i class="fab fa-twitter"></i></a>
+                            <a href="{{ setting('social_media_twitter') }}" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a>
                         @endif
                         @if (setting('social_media_linkedin')!=null)
-                            <a href="{{ setting('social_media_linkedin') }}"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="{{ setting('social_media_linkedin') }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
                         @endif
                         @if (setting('social_media_youtube')!=null)
-                            <a href="{{ setting('social_media_youtube') }}"><i class="fab fa-youtube-in"></i></a>
+                            <a href="{{ setting('social_media_youtube') }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube" aria-hidden="true"></i></a>
                         @endif
 
                     </div>
@@ -45,7 +45,7 @@
                 <div class="logo-outer">
                     <div class="logo">
                         <a href="{{ route('index') }}">
-                              <img src="{{ getlogo() }}" width="180" alt="" />
+                              <img src="{{ getlogo() }}" width="180" alt="{{ setting('page_title') }}" />
                          </a>
                     </div>
                 </div>
@@ -70,7 +70,7 @@
                             <div class="mobile-header-actions">
                                 <a href="{{ route('cart.index') }}" class="mobile-cart-btn position-relative">
                                     <i class="fas fa-shopping-cart"></i>
-                                    @php $cartCount = count(session('cart', [])); @endphp
+                                    @php $cartCount = cartUnits(); @endphp
                                     @if($cartCount > 0)
                                         <span class="cart-count-badge">{{ $cartCount }}</span>
                                     @endif
@@ -114,7 +114,7 @@
                 <div class="menu-btns d-lg-flex d-none align-items-center">
                     <a href="{{ route('cart.index') }}" class="cart-btn mr-3 position-relative" style="color:inherit;">
                         <i class="fas fa-shopping-cart fa-lg"></i>
-                        @php $cartCount = count(session('cart', [])); @endphp
+                        @php $cartCount = cartUnits(); @endphp
                         @if($cartCount > 0)
                             <span class="cart-count-badge">{{ $cartCount }}</span>
                         @endif

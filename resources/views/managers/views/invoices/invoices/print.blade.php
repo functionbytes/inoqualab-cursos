@@ -80,7 +80,7 @@
                                                                 </td>
                                                                 <td class="border-bottom-0">
                                                                     <div class="d-flex align-items-center gap-3">
-                                                                        <p class="mb-0">${{ number_format($item->amount)}}</p>
+                                                                        <p class="mb-0">${{ number_format($item->total)}}</p>
                                                                     </div>
                                                                 </td>
 

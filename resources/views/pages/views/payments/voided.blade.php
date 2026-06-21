@@ -14,7 +14,7 @@
                 <p class="res-msg">Esto suele ocurrir por fondos insuficientes o restricciones del banco. Si el problema continúa, escríbenos y te ayudamos.</p>
 
                 <div class="res-actions">
-                    <a class="primary" href="{{ route('checkout.cart') }}">Reintentar pago</a>
+                    <a class="primary" href="{{ route('payments.pay', $order->slack) }}">Reintentar pago</a>
                     <a class="whatsapp" href="https://wa.me/573152880890" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>
                     <a class="ghost" href="{{ route('courses') }}">Volver a cursos</a>
                 </div>

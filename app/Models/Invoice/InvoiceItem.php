@@ -21,7 +21,8 @@ class InvoiceItem extends Model
         'invoice_id',
         'course_id',
         'quantity',
-        'amount',
+        'subtotal',
+        'total',
         'created_at',
         'updated_at',
     ];

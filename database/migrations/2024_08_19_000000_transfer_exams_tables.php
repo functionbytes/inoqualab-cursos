@@ -7,6 +7,9 @@ class TransferExamsTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $topics = DB::connection('mysql_second')->table('exam_topics')->get();
         foreach ($topics as $topic) {

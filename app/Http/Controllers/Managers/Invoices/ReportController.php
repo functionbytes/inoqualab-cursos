@@ -22,11 +22,11 @@ class ReportController extends Controller
 
         $methods = InvoiceMethod::latest()->get();
         $methods->prepend('', '');
-        $methods = $methods->pluck('label', 'id');
+        $methods = $methods->pluck('title', 'id');
 
         $conditions = InvoiceCondition::latest()->get();
         $conditions->prepend('', '');
-        $conditions = $conditions->pluck('label', 'id');
+        $conditions = $conditions->pluck('title', 'id');
 
         return view('managers.views.invoices.reports.index')->with([
             'distributors' => $distributors,

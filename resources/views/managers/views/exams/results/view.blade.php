@@ -5,7 +5,6 @@
 
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Resultados'])
 
     <div class="row">
         <div class="col-lg-4 col-md-4 col-sm-12">

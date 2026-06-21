@@ -18,7 +18,7 @@ class InvoicesController extends Controller
         $type = $request->type;
         $method = $request->methods;
 
-        $invoices = Distributor::slack($slack)->invoices()->orderBy('number', 'desc');
+        $invoices = Distributor::slack($slack)->invoices()->with(['condition', 'method'])->orderBy('number', 'desc');
         $methods = InvoiceMethod::latest()->get();
         $conditions = InvoiceCondition::latest()->get();
 

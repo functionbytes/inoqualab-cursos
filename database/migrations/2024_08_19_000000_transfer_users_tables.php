@@ -7,6 +7,9 @@ class TransferUsersTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
         // Copiar la tabla 'courses'
         $courses = DB::connection('mysql_second')->table('users')->get();
         foreach ($courses as $course) {

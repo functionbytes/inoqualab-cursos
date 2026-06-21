@@ -41,10 +41,10 @@
                             <table class="table align-middle text-nowrap mb-0">
                                 <thead>
                                     <tr class="text-muted fw-semibold">
-                                        <th>Identificación</th>
-                                        <th>Cliente</th>
-                                        <th>Correo electronico</th>
-                                        <th>Fecha</th>
+                                        <th scope="col">Identificación</th>
+                                        <th scope="col">Cliente</th>
+                                        <th scope="col">Correo electronico</th>
+                                        <th scope="col">Fecha</th>
                                     </tr>
                                 </thead>
                                 <tbody class="border-top">

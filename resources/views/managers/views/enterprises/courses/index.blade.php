@@ -1,93 +1,168 @@
 @extends('layouts.managers')
 
+@section('title', 'Cursos de empresa')
+
 @section('content')
 
-    @include('managers.includes.card', ['title' => 'Cursos'])
 
     <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            <div class="col-auto">
-                                <a href=" {{ route('manager.enterprises.courses.create' , $enterprise->slack) }}" class="btn btn-primary">
-                                    <i class="fa-duotone fa-plus"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+
+        <div class="card">
+
+            {{-- Header --}}
+            <div class="card-header p-4 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Cursos asignados</h5>
+                        <p class="mb-0 text-muted">Gestiona los cursos vinculados a esta empresa</p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{ route('manager.enterprises.courses.create', $enterprise->slack) }}" class="btn btn-primary">
+                            Agregar curso
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th>Titulo</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($courses as $key => $course)
-                        <tr class="search-items">
 
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $course->title }}">{{ Str::words( Str::upper(Str::lower($course->title)), 12, '...')  }}</span>
-                            </td>
-
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="ti ti-dots fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
-                                                Dashboard
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.enterprises.courses.destroy', [$enterprise->slack, $course->slack]) }}">
-                                                
-                                                Eliminar
-                                            </a>
-                                        </li>
-
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
+            {{-- Search --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ route('manager.enterprises.courses', $enterprise->slack) }}" id="searchForm">
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="flex-fill">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" name="search" class="form-control border-start-0 ps-0"
+                                       placeholder="Buscar por título..."
+                                       value="{{ $searchKey ?? '' }}">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary flex-shrink-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        @if($searchKey ?? '')
+                            <a href="{{ route('manager.enterprises.courses', $enterprise->slack) }}"
+                               class="btn btn-outline-secondary flex-shrink-0">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
             </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $courses->firstItem() }}-{{ $courses->lastItem() }} de {{ $courses->total() }} resultados</span>
-                <nav>
+
+            {{-- Table --}}
+            <div class="card-body">
+                @if($courses->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Título</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($courses as $course)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ Str::words($course->title, 12, '...') }}</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           href="{{ route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
+                                                            Dashboard
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item btn-delete" href="#"
+                                                           data-url="{{ route('manager.enterprises.courses.destroy', [$enterprise->slack, $course->slack]) }}"
+                                                           data-title="Eliminar: {{ $course->title }}">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-book-open fa-3x mb-3 text-muted opacity-50"></i>
+                        <h5 class="fw-bold mb-2">
+                            @if($searchKey ?? '')
+                                No se encontraron resultados
+                            @else
+                                No hay cursos asignados
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-4">
+                            @if($searchKey ?? '')
+                                No hay cursos que coincidan con la búsqueda.
+                            @else
+                                Agrega el primer curso a esta empresa.
+                            @endif
+                        </p>
+                        @if($searchKey ?? '')
+                            <a href="{{ route('manager.enterprises.courses', $enterprise->slack) }}" class="btn btn-outline-secondary">
+                                Ver todos
+                            </a>
+                        @else
+                            <a href="{{ route('manager.enterprises.courses.create', $enterprise->slack) }}" class="btn btn-primary">
+                                Agregar curso
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($courses->hasPages())
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        Mostrando {{ $courses->firstItem() }}–{{ $courses->lastItem() }} de {{ $courses->total() }} cursos
+                    </span>
                     {{ $courses->appends(request()->input())->links() }}
-                </nav>
-            </div>
+                </div>
+            @endif
+
         </div>
     </div>
+
+    @include('managers.includes.delete')
+
 @endsection
 
+@push('scripts')
+<script>
+$(function () {
 
+    @if(session('success'))
+        toastr.success('{{ session('success') }}');
+    @endif
+    @if(session('error'))
+        toastr.error('{{ session('error') }}');
+    @endif
+
+    $(document).on('click', '.btn-delete', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        $('#delete-modal .modal-title').text($btn.data('title'));
+        $('#delete-form').attr('action', $btn.data('url'));
+        $('#delete-modal').modal('show');
+    });
+
+});
+</script>
+@endpush

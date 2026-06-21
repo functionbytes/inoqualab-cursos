@@ -10,14 +10,14 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\ExamAnswer;
 use App\Models\Inscription;
-use App\Models\Invoice\InvoiceCondition;
-use App\Models\Method;
 use App\Models\Order\Order;
 use App\Models\QuizAnswer;
 use App\Models\User;
+use App\Services\InscriptionService;
 use App\Structure\Courses;
 use App\Structure\Users;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +26,10 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class CourseController extends Controller
 {
+    public function __construct(
+        private readonly InscriptionService $inscriptionService
+    ) {}
+
     public function index(Request $request, $slack)
     {
 
@@ -94,6 +98,7 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
         $enterprise = Enterprise::slack($request->enterprise);
         $course = Course::id($request->course);
 
@@ -130,15 +135,13 @@ class CourseController extends Controller
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);
 
-        $users = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)->select(
+        $users = User::query()
+            ->join('enterprise_user', fn ($j) => $j->on('users.id', '=', 'enterprise_user.user_id'))
+            ->where('enterprise_user.enterprise_id', $enterprise->id)
+            ->join('inscriptions', fn ($j) => $j->on('users.id', '=', 'inscriptions.user_id'))
+            ->join('orders', fn ($j) => $j->on('orders.id', '=', 'inscriptions.order_id'))
+            ->where('inscriptions.course_id', $course->id)
+            ->select(
                 'users.slack',
                 'users.firstname',
                 'users.lastname',
@@ -157,11 +160,16 @@ class CourseController extends Controller
             )->orderBy('inscriptions.enroll_culminated', 'desc');
 
         if ($searchKey) {
-            $users = $users->where('users.firstname', 'like', '%'.$searchKey.'%')->orWhere('users.lastname', 'like', '%'.$searchKey.'%')->orWhere('users.email', $searchKey)->orWhere('users.identification', $searchKey);
+            $users = $users->where(function ($q) use ($searchKey) {
+                $q->where('users.firstname', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.email', $searchKey)
+                    ->orWhere('users.identification', $searchKey);
+            });
         }
 
         if ($culminate != null) {
-            $users = $users->where('course_user.culminated', $culminate);
+            $users = $users->where('inscriptions.culminated', $culminate);
         }
 
         $users = $users->paginate(paginationNumber());
@@ -377,43 +385,13 @@ class CourseController extends Controller
         return response()->json($order->slack);
     }
 
-    public function includes(Request $request)
+    public function includes(Request $request): JsonResponse
     {
         $enterprise = Enterprise::slack($request->enterprise);
         $course = Course::slack($request->course);
-        $condition = InvoiceCondition::slug('pagada');
-        $method = Method::slug('acuerdo');
+        $identifications = explode(',', $request->users);
 
-        $users = explode(',', $request->users);
-
-        DB::transaction(function () use ($users, $course, $condition, $method) {
-            foreach ($users as $identifier) {
-                $validate = User::identification($identifier);
-
-                $order = new Order;
-                $order->slack = $this->generate_slack('orders');
-                $order->subtotal = 0;
-                $order->discount = 0;
-                $order->total = 0;
-                $order->transaction = null;
-                $order->condition_id = $condition->id;
-                $order->method_id = $method->id;
-                $order->course_id = $course->id;
-                $order->user_id = $validate->id;
-                $order->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-                $order->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-                $order->payment_at = Carbon::now()->setTimezone('America/Bogota');
-                $order->save();
-
-                $include = new Inscription;
-                $include->user_id = $validate->id;
-                $include->course_id = $course->id;
-                $include->order_id = $order->id;
-                $include->culminated = 0;
-                $include->culminated_at = null;
-                $include->save();
-            }
-        });
+        $this->inscriptionService->enrollSimpleBulk($identifications, $course);
 
         return response()->json($enterprise->slack);
     }
@@ -485,6 +463,7 @@ class CourseController extends Controller
 
     public function destroy($enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.delete'), 403);
 
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);

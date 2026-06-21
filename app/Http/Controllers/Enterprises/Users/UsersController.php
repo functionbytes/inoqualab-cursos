@@ -5,15 +5,17 @@ namespace App\Http\Controllers\Enterprises\Users;
 use App\Exports\Enterprises\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise\Enterprise;
-use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UsersController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 
         $searchKey = $request->search ?? null;
@@ -43,10 +45,10 @@ class UsersController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
-
-        $user = User::slack($slack);
+        // Ownership: solo usuarios de la empresa autenticada (evita IDOR por slack).
+        $user = app('enterprise')->users()->where('users.slack', $slack)->firstOrFail();
 
         $roles = collect([
             ['id' => 'admin', 'title' => 'Administrador'],
@@ -79,10 +81,10 @@ class UsersController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
-
-        $user = User::slack($request->slack);
+        // Ownership: solo usuarios de la empresa autenticada (evita IDOR por slack).
+        $user = app('enterprise')->users()->where('users.slack', $request->slack)->firstOrFail();
         $user->firstname = $request->firstname;
         $user->lastname = $request->lastname;
         $user->identification = $request->identification;
@@ -101,7 +103,7 @@ class UsersController extends Controller
 
     }
 
-    public function report($slack)
+    public function report($slack): View
     {
 
         $enterprise = app('enterprise');
@@ -122,7 +124,7 @@ class UsersController extends Controller
 
     }
 
-    public function generate(Request $request)
+    public function generate(Request $request): BinaryFileResponse
     {
 
         $enterprise = app('enterprise');

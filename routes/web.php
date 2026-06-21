@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\UpgradeController;
 use App\Http\Controllers\Auth\ValidationController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\Managers\MigrationController;
+use App\Http\Controllers\Managers\Seo\SeoWebVitalsController;
 use App\Http\Controllers\Pages\BlogController;
 use App\Http\Controllers\Pages\BundlesController;
 use App\Http\Controllers\Pages\CartController;
@@ -17,8 +18,10 @@ use App\Http\Controllers\Pages\CommercialController;
 use App\Http\Controllers\Pages\ContactsController;
 use App\Http\Controllers\Pages\CoursesController;
 use App\Http\Controllers\Pages\InstructionsController;
+use App\Http\Controllers\Pages\LlmsTxtController;
 use App\Http\Controllers\Pages\NewslettersController;
 use App\Http\Controllers\Pages\PagesController;
+use App\Http\Controllers\Pages\RobotsTxtController;
 use App\Http\Controllers\Pages\UtilitiesController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Http\Request;
@@ -72,8 +75,11 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('/email/resend', 'resend')->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
     });
 
-    Route::post('/newsletters/store', [NewslettersController::class, 'store'])->name('newsletters.store');
-    Route::post('/upgrade/store', [UpgradeController::class, 'store'])->name('upgrade.store');
+    Route::post('/newsletters/store', [NewslettersController::class, 'store'])->name('newsletters.store')->middleware('throttle:10,1');
+    Route::get('/newsletters/confirm/{token}', [NewslettersController::class, 'confirm'])->name('newsletters.confirm');
+    Route::get('/newsletters/unsubscribe/{slack}', [NewslettersController::class, 'unsubscribe'])->name('newsletters.unsubscribe');
+    Route::get('/ajax/newsletter/popup', [NewslettersController::class, 'ajaxPopup'])->name('newsletters.ajax-popup')->middleware('throttle:60,1');
+    Route::post('/upgrade/store', [UpgradeController::class, 'store'])->name('upgrade.store')->middleware('throttle:10,1');
 
     Route::get('/clear', function () {
         Artisan::call('dump-autoload');
@@ -81,7 +87,6 @@ Route::group(['middleware' => ['web']], function () {
         Artisan::call('route:clear');
         Artisan::call('view:clear');
         Artisan::call('config:clear');
-        Artisan::call('config:cache');
 
         return '<h1>Cache Borrado</h1>';
     })->middleware(['auth', 'manager']);
@@ -90,14 +95,14 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('/', [CertifiersController::class, 'index'])->name('certifiers');
         Route::get('/{slug}', [CertifiersController::class, 'view'])->name('certifiers.view');
-        Route::post('/filters', [CertifiersController::class, 'filters'])->name('certifiers.filters');
+        Route::post('/filters', [CertifiersController::class, 'filters'])->name('certifiers.filters')->middleware('throttle:30,1');
     });
 
     Route::group(['prefix' => 'blogs'], function () {
 
         Route::get('/', [BlogController::class, 'index'])->name('blogs');
         Route::get('/{slug}', [BlogController::class, 'view'])->name('blogs.view');
-        Route::post('/filters', [BlogController::class, 'filters'])->name('blogs.filters');
+        Route::post('/filters', [BlogController::class, 'filters'])->name('blogs.filters')->middleware('throttle:30,1');
         Route::get('/categories/{slug}', [BlogController::class, 'categories'])->name('blogs.categories');
         Route::get('/tags/{slug}', [BlogController::class, 'tags'])->name('blogs.tags');
     });
@@ -123,7 +128,6 @@ Route::group(['middleware' => ['web']], function () {
         Route::get('/', [CheckoutController::class, 'checkout'])->name('checkout.cart');
         Route::get('/cities', [CheckoutController::class, 'cities'])->name('checkout.cities');
         Route::post('/register', [CheckoutController::class, 'register'])->name('checkout.register')->middleware('throttle:10,1');
-        Route::post('/payments', [CheckoutController::class, 'payments'])->name('checkout.payments')->middleware('throttle:20,1');
         Route::post('/generate', [CheckoutController::class, 'generate'])->name('checkout.generate')->middleware('throttle:15,1');
         Route::post('/coupon/apply', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply')->middleware('throttle:15,1');
         Route::post('/coupon/clear', [CheckoutController::class, 'clearCoupon'])->name('checkout.coupon.clear');
@@ -131,7 +135,7 @@ Route::group(['middleware' => ['web']], function () {
 
     });
 
-    Route::group(['prefix' => 'cart'], function () {
+    Route::group(['prefix' => 'cart', 'middleware' => 'throttle:60,1'], function () {
         Route::get('/', [CartController::class, 'index'])->name('cart.index');
         Route::get('/drawer', [CartController::class, 'drawer'])->name('cart.drawer');
         Route::post('/add', [CartController::class, 'add'])->name('cart.add');
@@ -145,8 +149,8 @@ Route::group(['middleware' => ['web']], function () {
         Route::get('/response', [CheckoutController::class, 'response'])->name('payments.response')->middleware('throttle:30,1');
         Route::get('/status/{token}/{status}', [CheckoutController::class, 'status'])->name('payments.status');
         Route::get('/pay/{slack}', [CheckoutController::class, 'pay'])->name('payments.pay');
-        Route::get('/sandbox/{slack}', [CheckoutController::class, 'sandbox'])->name('payments.sandbox');
-        Route::get('/simulate/{reference}/{status}', [CheckoutController::class, 'simulate'])->name('checkout.simulate');
+        Route::get('/sandbox/{slack}', [CheckoutController::class, 'sandbox'])->name('payments.sandbox')->middleware('throttle:20,1');
+        Route::get('/simulate/{reference}/{status}', [CheckoutController::class, 'simulate'])->name('checkout.simulate')->middleware('throttle:10,1');
         Route::post('/wompi/webhook', [CheckoutController::class, 'webhook'])->name('payments.wompi.webhook');
     });
 
@@ -166,6 +170,15 @@ Route::group(['middleware' => ['web']], function () {
         Route::get('/reset/{slack}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset.token')->middleware('signed');
 
     });
+
+    // Web Vitals beacon (público, llamado desde el browser del visitante)
+    Route::post('/seo/web-vitals', [SeoWebVitalsController::class, 'store'])
+        ->middleware('throttle:120,1')
+        ->name('seo.web-vitals.beacon');
+
+    // SEO — rutas públicas sin throttle agresivo
+    Route::get('/robots.txt', [RobotsTxtController::class, 'serve'])->name('robots.txt');
+    Route::get('/llms.txt', [LlmsTxtController::class, 'serve'])->name('llms.txt');
 
     // Sitemaps — públicos, throttle para bots
     Route::middleware('throttle:30,1')->group(function () {

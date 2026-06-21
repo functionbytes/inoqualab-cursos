@@ -106,7 +106,7 @@
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" id="terms">
                                         <label for="terms" class="form-check-label">
-                                            Acepta <a href="#">términos</a> y <a href="#">política de privacidad</a>.
+                                            Acepta <a href="{{ route('terms') }}">términos y condiciones</a>.
                                         </label>
                                     </div>
                                 </div>
@@ -116,7 +116,7 @@
                                     </div>
                                 </div>
 
-                                <a  id="submitContacts" class="btn btn-primary contact-disabled w-100">Enviar</a>
+                                <button type="button" id="submitContacts" class="btn btn-primary contact-disabled w-100">Enviar</button>
 
                             </form>
                     </div>

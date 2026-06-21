@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\UpdateIncomingMailSettingsRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class IncomingMailSettingsController extends Controller
 {
@@ -13,12 +13,8 @@ class IncomingMailSettingsController extends Controller
         return view('managers.views.settings.incoming-mail.setting');
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateIncomingMailSettingsRequest $request): JsonResponse
     {
-        $request->validate([
-            'incoming_mail_confidence_threshold' => ['nullable', 'integer', 'between:0,100'],
-        ]);
-
         $data = [
             'incoming_mail_enabled' => $request->has('incoming_mail_enabled') ? 'true' : 'false',
             'incoming_mail_auto_process' => $request->has('incoming_mail_auto_process') ? 'true' : 'false',

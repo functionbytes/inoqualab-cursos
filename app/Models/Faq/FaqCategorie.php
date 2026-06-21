@@ -6,11 +6,12 @@ use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FaqCategorie extends Model
 {
     use HasFactory,
-        HasFinders;
+        HasFinders, SoftDeletes;
 
     protected $table = 'faq_categories';
 

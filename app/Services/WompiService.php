@@ -4,6 +4,8 @@ namespace App\Services;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\Log;
 
 class WompiService
 {
@@ -126,38 +128,80 @@ class WompiService
      */
     public function getTransaction(string $transactionId): ?array
     {
-        try {
-            $client = new Client(['timeout' => 15]);
-            $response = $client->get("{$this->baseUrl}/transactions/{$transactionId}");
-            $data = json_decode((string) $response->getBody(), true);
+        $client = new Client(['timeout' => 15]);
 
-            return $data['data'] ?? null;
-        } catch (\Throwable $e) {
-            return null;
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            try {
+                $response = $client->get("{$this->baseUrl}/transactions/{$transactionId}");
+                $data = json_decode((string) $response->getBody(), true);
+
+                return $data['data'] ?? null;
+            } catch (ClientException $e) {
+                // 4xx (p.ej. 404: transacción inexistente) es definitivo, no se reintenta.
+                Log::warning('Wompi getTransaction 4xx', [
+                    'id' => $transactionId,
+                    'status' => $e->getResponse()?->getStatusCode(),
+                ]);
+
+                return null;
+            } catch (\Throwable $e) {
+                // Error de red / 5xx: fallo transitorio -> reintentar con backoff.
+                Log::warning('Wompi getTransaction fallo transitorio', [
+                    'id' => $transactionId,
+                    'attempt' => $attempt,
+                    'error' => $e->getMessage(),
+                ]);
+
+                if ($attempt < 3) {
+                    usleep(300000 * $attempt);
+                }
+            }
         }
+
+        return null;
     }
 
     /**
      * Verifica la firma del webhook enviado por Wompi.
      * Concatenación: transactionId + status + amountInCents + currency + checksum + eventsSecret
      */
-    public function verifyWebhookSignature(array $payload, string $receivedSignature): bool
+    /**
+     * Valida la firma de un evento (webhook) de Wompi según su especificación:
+     * se concatenan los valores de los campos listados en signature.properties
+     * (en orden, extraídos de data), luego el timestamp y luego el events_secret;
+     * se hace SHA256 y se compara con el checksum recibido (header X-Event-Checksum
+     * o body signature.checksum). Ver https://docs.wompi.co/docs/colombia/eventos/
+     */
+    public function verifyWebhookSignature(array $payload, string $receivedChecksum = ''): bool
     {
+        // Fail-closed: sin secret configurado no se puede verificar -> rechazar y avisar.
         if (empty($this->eventsSecret)) {
-            return true;
+            Log::error('Wompi events secret no configurado: webhook rechazado (fail-closed). Configura wompi_events_secret.');
+
+            return false;
         }
 
-        $transaction = $payload['data']['transaction'] ?? [];
-        $concatenated = implode('', [
-            $transaction['id'] ?? '',
-            $transaction['status'] ?? '',
-            $transaction['amount_in_cents'] ?? '',
-            $transaction['currency'] ?? '',
-            $payload['signature']['checksum'] ?? '',
-        ]);
+        $properties = $payload['signature']['properties'] ?? null;
+        $checksum = $receivedChecksum !== '' ? $receivedChecksum : ($payload['signature']['checksum'] ?? '');
+        $timestamp = $payload['timestamp'] ?? null;
+        $data = $payload['data'] ?? [];
 
-        $expected = hash('sha256', $concatenated.$this->eventsSecret);
+        if (! is_array($properties) || $properties === [] || $checksum === '' || $timestamp === null) {
+            Log::warning('Webhook Wompi sin signature.properties/checksum/timestamp válidos.');
 
-        return hash_equals($expected, $receivedSignature);
+            return false;
+        }
+
+        // Valores de las propiedades indicadas (en orden) + timestamp + events_secret.
+        $concatenated = '';
+        foreach ($properties as $property) {
+            $concatenated .= (string) data_get($data, $property, '');
+        }
+        $concatenated .= (string) $timestamp;
+        $concatenated .= $this->eventsSecret;
+
+        $computed = hash('sha256', $concatenated);
+
+        return hash_equals(strtoupper($computed), strtoupper((string) $checksum));
     }
 }

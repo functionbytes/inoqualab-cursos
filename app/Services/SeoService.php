@@ -32,7 +32,7 @@ class SeoService
 
     private string $twitterImage = '';
 
-    private ?array $schemaOrg = null;
+    private array $schemas = [];
 
     private ?string $prevUrl = null;
 
@@ -127,19 +127,44 @@ class SeoService
         return $this;
     }
 
+    /** Reemplaza todos los schemas (retrocompatibilidad con setSchema único). */
     public function setSchema(array $schema): static
     {
-        $this->schemaOrg = $schema;
+        $this->schemas = [$schema];
+
+        return $this;
+    }
+
+    /** Agrega un schema adicional (se renderizarán todos como JSON-LD separados). */
+    public function addSchema(array $schema): static
+    {
+        $this->schemas[] = $schema;
 
         return $this;
     }
 
     public function loadFromModel(Model $model): static
     {
-        $meta = method_exists($model, 'seoMeta') ? $model->seoMeta : null;
+        $meta = method_exists($model, 'seoMeta')
+            ? ($model->relationLoaded('seoMeta') ? $model->getRelation('seoMeta') : $model->seoMeta)
+            : null;
 
-        $title = $meta?->title ?? $model->meta_title ?? $model->title ?? '';
-        $desc = $meta?->description ?? $model->meta_description ?? $model->short ?? $model->description ?? '';
+        // A/B testing: si hay variante B configurada, usar el título/descripción activo
+        if ($meta?->hasAbTest()) {
+            $title = $meta->getActiveTitle() ?: ($model->meta_title ?? $model->title ?? '');
+            $desc = $meta->getActiveDescription() ?: ($model->meta_description ?? $model->short ?? $model->description ?? '');
+
+            try {
+                $variant = $meta->getActiveVariant();
+                $meta->increment("ab_impressions_{$variant}");
+            } catch (\Throwable) {
+                // No bloquear el request si falla el incremento
+            }
+        } else {
+            $title = $meta?->title ?? $model->meta_title ?? $model->title ?? '';
+            $desc = $meta?->description ?? $model->meta_description ?? $model->short ?? $model->description ?? '';
+        }
+
         $image = $meta?->og_image ?? '';
 
         if ($title) {
@@ -157,8 +182,8 @@ class SeoService
         $this->ogType = $meta?->og_type ?? 'website';
         $this->keywords = $meta?->keywords ?? $model->meta_keywords ?? '';
 
-        if ($meta?->schema_custom) {
-            $this->schemaOrg = $meta->schema_custom;
+        if (! empty($meta?->schema_custom)) {
+            $this->schemas = [$meta->schema_custom];
         }
 
         return $this;
@@ -167,8 +192,8 @@ class SeoService
     public function render(): string
     {
         $appName = config('app.name');
-        $title = $this->title ?: setting('meta_title', $appName);
-        $desc = $this->description ?: setting('meta_description', '');
+        $title = strip_tags($this->title ?: setting('meta_title', $appName));
+        $desc = strip_tags($this->description ?: setting('meta_description', ''));
         $keywords = $this->keywords ?: setting('meta_keywords', '');
         $canonical = $this->canonical ?: url()->current();
         $ogImage = $this->ogImage ?: setting('seo_og_image_default', getMeta());
@@ -179,6 +204,7 @@ class SeoService
         $twImage = $this->twitterImage ?: $ogImage;
         $twSite = setting('seo_twitter_site', '');
         $siteName = setting('seo_site_name', $appName);
+        $locale = str_replace('-', '_', config('app.locale', 'es_CO'));
 
         $html = '';
         $html .= '<title>'.e($title).'</title>'."\n";
@@ -197,6 +223,7 @@ class SeoService
         $html .= '<meta property="og:description" content="'.e($ogDesc).'">'."\n";
         $html .= '<meta property="og:url" content="'.e($canonical).'">'."\n";
         $html .= '<meta property="og:site_name" content="'.e($siteName).'">'."\n";
+        $html .= '<meta property="og:locale" content="'.e($locale).'">'."\n";
 
         if ($ogImage) {
             $html .= '<meta property="og:image" content="'.e($ogImage).'">'."\n";
@@ -222,9 +249,26 @@ class SeoService
             $html .= '<link rel="next" href="'.e($this->nextUrl).'">'."\n";
         }
 
-        // Schema.org JSON-LD
-        if ($this->schemaOrg) {
-            $html .= '<script type="application/ld+json">'.json_encode($this->schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).'</script>'."\n";
+        // Verificación de motores de búsqueda
+        $verifications = [
+            'google-site-verification' => setting('seo_google_verification', ''),
+            'msvalidate.01' => setting('seo_bing_verification', ''),
+            'p:domain_verify' => setting('seo_pinterest_verification', ''),
+            'baidu-site-verification' => setting('seo_baidu_verification', ''),
+            'yandex-verification' => setting('seo_yandex_verification', ''),
+        ];
+
+        foreach ($verifications as $name => $content) {
+            if ($content) {
+                $html .= '<meta name="'.e($name).'" content="'.e($content).'">'."\n";
+            }
+        }
+
+        // Schema.org JSON-LD (uno por schema)
+        foreach ($this->schemas as $schema) {
+            if (! empty($schema)) {
+                $html .= '<script type="application/ld+json">'.json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).'</script>'."\n";
+            }
         }
 
         return $html;
@@ -245,7 +289,7 @@ class SeoService
         $this->twitterTitle = '';
         $this->twitterDescription = '';
         $this->twitterImage = '';
-        $this->schemaOrg = null;
+        $this->schemas = [];
         $this->prevUrl = null;
         $this->nextUrl = null;
 

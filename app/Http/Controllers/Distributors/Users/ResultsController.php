@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Distributors\Users;
 use App\Exports\Distributors\ResultsExport;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
+use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use App\Models\Users\Certificate;
 use Illuminate\Http\Request;
@@ -12,6 +13,35 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ResultsController extends Controller
 {
+    /** IDs de las empresas del distribuidor autenticado. */
+    private function distributorEnterpriseIds(): array
+    {
+        return app('distributor')->enterprises()->pluck('enterprises.id')->all();
+    }
+
+    /** Usuario que pertenece (enterprise_user) a una empresa del distribuidor, o 404. */
+    private function managedUser(string $slack): User
+    {
+        $enterpriseIds = $this->distributorEnterpriseIds();
+
+        return User::where('slack', $slack)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('enterprise_user')
+                ->whereColumn('enterprise_user.user_id', 'users.id')
+                ->whereIn('enterprise_user.enterprise_id', $enterpriseIds))
+            ->firstOrFail();
+    }
+
+    /** Aborta 404 si el user_id no pertenece a una empresa del distribuidor. */
+    private function assertManagedUser($userId): void
+    {
+        abort_unless(
+            EnterpriseUser::where('user_id', $userId)
+                ->whereIn('enterprise_id', $this->distributorEnterpriseIds())
+                ->exists(),
+            404
+        );
+    }
+
     public function index(Request $request, $slack)
     {
 
@@ -20,8 +50,8 @@ class ResultsController extends Controller
         $year = $request->year;
 
         $courses = Course::latest()->get();
-        $user = User::slack($slack);
-        $certificates = $user->certificates()->latest();
+        $user = $this->managedUser($slack);
+        $certificates = $user->certificates()->with('course')->latest();
 
         $years = $user->certificates()
             ->selectRaw('YEAR(start_at) as year')
@@ -60,6 +90,7 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->assertManagedUser($certificate->user_id);
         $course = $certificate->course;
         $exam = $certificate->exam;
         $answers = $certificate->exam?->answers;
@@ -81,6 +112,7 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->assertManagedUser($certificate->user_id);
         $course = $certificate->course;
         $exam = $certificate->exam;
         $user = $certificate->user;

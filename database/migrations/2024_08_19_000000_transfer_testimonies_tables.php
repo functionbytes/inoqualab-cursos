@@ -7,6 +7,9 @@ class TransferTestimoniesTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $testimonies = DB::connection('mysql_second')->table('testimonies')->get();
         foreach ($testimonies as $testimonie) {

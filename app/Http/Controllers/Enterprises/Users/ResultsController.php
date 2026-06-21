@@ -7,12 +7,23 @@ use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\User;
 use App\Models\Users\Certificate;
-use DB;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultsController extends Controller
 {
+    /** Usuario que pertenece a la empresa autenticada, o 404 (evita IDOR). */
+    private function managedUser(string $slack): User
+    {
+        return app('enterprise')->users()->where('users.slack', $slack)->firstOrFail();
+    }
+
+    /** Aborta 404 si el user_id no pertenece a la empresa autenticada. */
+    private function assertEnterpriseUser($userId): void
+    {
+        abort_unless(app('enterprise')->users()->where('users.id', $userId)->exists(), 404);
+    }
+
     public function index(Request $request, $slack)
     {
 
@@ -21,7 +32,7 @@ class ResultsController extends Controller
         $year = $request->year;
 
         $courses = Course::latest()->get();
-        $user = User::slack($slack);
+        $user = $this->managedUser($slack);
 
         $certificatesQuery = $user->certificates()
             ->join('courses', 'certificates.course_id', '=', 'courses.id')
@@ -42,8 +53,7 @@ class ResultsController extends Controller
 
         $certificates = $certificatesQuery->paginate(paginationNumber());
 
-        $years = DB::table('certificates')
-            ->where('certificates.user_id', $user->id)
+        $years = $user->certificates()
             ->selectRaw('YEAR(start_at) as year')
             ->groupBy('year')
             ->orderBy('year', 'desc')
@@ -64,6 +74,7 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->assertEnterpriseUser($certificate->user_id);
         $exam = $certificate->exam;
         $answers = $certificate->exam?->answers;
         $wrongs = $certificate->exam?->answers()?->wrong()->count();
@@ -83,6 +94,7 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->assertEnterpriseUser($certificate->user_id);
         $exam = $certificate->exam;
         $user = $certificate->user;
 

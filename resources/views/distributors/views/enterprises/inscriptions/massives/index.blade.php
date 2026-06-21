@@ -95,7 +95,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
+                    <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
                     <h4 class="my-0">Este usuario ya esta inscrito a este curso</h4>
                     <p><span class="customer"></span></p>
                     <p><span class="course"> <span> con fecha <span class="start"> <span></span></p>

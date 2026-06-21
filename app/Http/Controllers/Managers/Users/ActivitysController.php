@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers\Users;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 
 class ActivitysController extends Controller
@@ -27,26 +28,24 @@ class ActivitysController extends Controller
             'Invoice' => 'Facturas',
         ];
 
-        $activitiesFilter = $query->orderBy('created_at', 'desc')->get()
-            ->groupBy(function ($activity) {
-                return class_basename($activity->subject_type);
-            });
+        // Counts por tipo vía SQL GROUP BY — evita cargar todos los registros en PHP.
+        $countsRaw = Activity::causedBy($user)
+            ->select(DB::raw('subject_type, COUNT(*) as total'))
+            ->groupBy('subject_type')
+            ->pluck('total', 'subject_type');
 
-        $activities = $query->orderBy('created_at', 'desc')->get();
-
-        if ($propertySearch) {
-            $query->where('properties->'.$propertySearch, '!=', null);
+        $counts = [];
+        foreach ($models as $key => $friendlyName) {
+            $counts[$key] = $countsRaw
+                ->filter(fn ($v, $k) => str_contains($k, $key))
+                ->sum();
         }
 
         if ($modelSearch) {
-            $model = 'App\\Models\\'.$modelSearch;
+            $query->where('subject_type', 'like', '%'.$modelSearch.'%');
         }
 
-        $counts = [];
-
-        foreach ($models as $key => $friendlyName) {
-            $counts[$key] = $activities->has($key) ? $activities[$key]->count() : 0;
-        }
+        $activities = $query->orderBy('created_at', 'desc')->paginate(paginationNumber());
 
         return view('managers.views.users.activitys.index')->with([
             'user' => $user,
@@ -68,7 +67,7 @@ class ActivitysController extends Controller
             $query->where('subject_type', 'like', '%'.$request->model.'%');
         }
 
-        $activities = $query->orderBy('created_at', 'desc')->get();
+        $activities = $query->orderBy('created_at', 'desc')->limit(200)->get();
 
         return response()->json([
             'success' => true,

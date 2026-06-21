@@ -30,3 +30,12 @@ Homestead.json
 /storage/app/analytics
 .phpactor.json
 auth.json
+
+# Editor / OS
+/.idea
+.idea/
+.DS_Store
+
+# Storage logs / worker
+/storage/*.log
+/storage/worker/

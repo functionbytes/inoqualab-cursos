@@ -4,10 +4,11 @@ namespace App\Mail\Customers\Orders;
 
 use App\Services\MailTemplateService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class PendingMails extends Mailable
+class PendingMails extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

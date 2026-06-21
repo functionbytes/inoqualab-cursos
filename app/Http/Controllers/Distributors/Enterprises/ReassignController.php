@@ -10,10 +10,34 @@ use Illuminate\Http\Request;
 
 class ReassignController extends Controller
 {
+    /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
+    private function managedEnterprise(string $slack): Enterprise
+    {
+        return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
+    }
+
+    /** IDs de las empresas del distribuidor autenticado. */
+    private function distributorEnterpriseIds(): array
+    {
+        return app('distributor')->enterprises()->pluck('enterprises.id')->all();
+    }
+
+    /** Usuario que pertenece (enterprise_user) a una empresa del distribuidor, o 404. */
+    private function managedUser(string $slack): User
+    {
+        $enterpriseIds = $this->distributorEnterpriseIds();
+
+        return User::where('slack', $slack)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('enterprise_user')
+                ->whereColumn('enterprise_user.user_id', 'users.id')
+                ->whereIn('enterprise_user.enterprise_id', $enterpriseIds))
+            ->firstOrFail();
+    }
+
     public function all($slack)
     {
-
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($slack);
         $distributor = app('distributor');
         $enterprises = $distributor->enterprises;
         $users = $enterprise->users()->available()->get();
@@ -35,19 +59,22 @@ class ReassignController extends Controller
     {
 
         $users = explode(',', $request->users);
-        $newEnterprise = Enterprise::slack($request->enterprise);
+        // Ownership: la empresa destino debe pertenecer al distribuidor.
+        $newEnterprise = $this->managedEnterprise($request->enterprise);
+        $enterpriseIds = $this->distributorEnterpriseIds();
 
         foreach ($users as $identification) {
 
             $user = User::identification($identification);
 
-            if (! $user || ! $newEnterprise) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuario o empresa no encontrados.']);
-            }
+            // Solo reasigna usuarios que YA pertenecen a una empresa del distribuidor.
+            $enterpriseUser = EnterpriseUser::where('user_id', $user->id)
+                ->whereIn('enterprise_id', $enterpriseIds)
+                ->first();
 
-            $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
+            if (! $enterpriseUser) {
+                continue;
+            }
 
             $enterpriseUser->enterprise_id = $newEnterprise->id;
             $enterpriseUser->save();
@@ -64,8 +91,8 @@ class ReassignController extends Controller
 
     public function single($slack)
     {
-
-        $user = User::slack($slack);
+        // Ownership: solo usuarios de empresas del distribuidor (evita IDOR por slack).
+        $user = $this->managedUser($slack);
         $enterprise = $user->getEnterprise();
 
         $distributor = app('distributor');
@@ -86,17 +113,13 @@ class ReassignController extends Controller
     public function reassignSingle(Request $request)
     {
 
-        $user = User::slack($request->slack);
-        $newEnterprise = Enterprise::slack($request->enterprise);
+        // Ownership: usuario y empresa destino deben pertenecer al distribuidor.
+        $user = $this->managedUser($request->slack);
+        $newEnterprise = $this->managedEnterprise($request->enterprise);
 
-        if (! $user || ! $newEnterprise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuario o empresa no encontrados.',
-            ]);
-        }
-
-        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
+        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)
+            ->whereIn('enterprise_id', $this->distributorEnterpriseIds())
+            ->first();
 
         if ($enterpriseUser) {
 

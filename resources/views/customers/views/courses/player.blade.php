@@ -75,6 +75,7 @@
     <div class="player-wrap">
         <iframe
             src="{{ $embedUrl }}"
+            title="Reproductor de video de la lección"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
             allowfullscreen
             referrerpolicy="strict-origin-when-cross-origin"

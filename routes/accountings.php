@@ -16,7 +16,7 @@ use App\Http\Controllers\Accountings\Orders\ResumenController as OrdersResumenCo
 use App\Http\Controllers\Accountings\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting']], function () {
+Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('accounting.dashboard');
 

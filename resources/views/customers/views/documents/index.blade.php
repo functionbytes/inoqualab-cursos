@@ -14,8 +14,8 @@
                             <div class="col-auto flex-grow-1">
                                 <div class="tt-search-box">
                                     <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i data-feather="search"></i></span>
-                                        <input class="form-control rounded-start w-100" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
+                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
                                     </div>
                                 </div>
                             </div>
@@ -42,7 +42,7 @@
                     </thead>
                     <tbody>
                    
-                    @foreach ($documents as $key => $document)
+                    @forelse ($documents as $key => $document)
                         <tr class="search-items">
                             <td>
                                 <span class="usr-email-addr" data-email="{{ $document->title }}">{{ Str::upper( Str::lower($document->title) )  }}</span>
@@ -60,17 +60,27 @@
                                 @endif
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">
+                                <i class="fa-duotone fa-folder-open fa-2x d-block mb-3 opacity-50"></i>
+                                <span class="fw-semibold d-block">No tienes documentos</span>
+                                <small>Aquí aparecerán los documentos de tus cursos cuando estén disponibles.</small>
+                            </td>
+                        </tr>
+                    @endforelse
 
                     </tbody>
                 </table>
             </div>
+            @if ($documents->total() > 0)
             <div class="result-body ">
                 <span>Mostrar {{ $documents->firstItem() }}-{{ $documents->lastItem() }} de {{ $documents->total() }} resultados</span>
                 <nav>
                     {{ $documents->appends(request()->input())->links() }}
                 </nav>
             </div>
+            @endif
         </div>
     </div>
 @endsection

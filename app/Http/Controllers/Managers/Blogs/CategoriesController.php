@@ -73,6 +73,7 @@ class CategoriesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $categorie = BlogCategorie::slack($request->slack);
         $categorie->title = $request->title;
@@ -89,6 +90,7 @@ class CategoriesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $categorie = new BlogCategorie;
         $categorie->slack = $this->generate_slack('blog_categories');
@@ -106,6 +108,7 @@ class CategoriesController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('blogs.delete'), 403);
 
         $categorie = BlogCategorie::slack($slack);
         $categorie->delete();

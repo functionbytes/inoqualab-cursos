@@ -79,6 +79,7 @@ class BundlesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('bundles.update'), 403);
 
         $bundle = Bundle::slack($request->slack);
         $bundle->title = Str::upper($request->title);
@@ -111,6 +112,7 @@ class BundlesController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('bundles.create'), 403);
 
         $bundle = new Bundle;
         $bundle->slack = $this->generate_slack('bundles');
@@ -206,6 +208,7 @@ class BundlesController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('bundles.delete'), 403);
 
         $bundle = Bundle::slack($slack);
         $bundle->delete();

@@ -1,0 +1,252 @@
+@extends('layouts.managers')
+
+@section('title', 'llms.txt')
+
+@section('content')
+
+
+    <div class="row g-4">
+
+        {{-- Columna principal: editor --}}
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header border-bottom p-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="mb-0 fw-bold">llms.txt</h5>
+                            <p class="text-muted">
+                                Describe tu sitio para motores de IA (ChatGPT, Claude, Perplexity, Gemini).
+                                Formato Markdown con enlaces a las URLs más relevantes.
+                            </p>
+                        </div>
+                        @if(isset($public_url))
+                            <a href="{{ $public_url }}" target="_blank" rel="noopener"
+                               class="badge bg-primary text-decoration-none d-flex align-items-center gap-1">
+                                <i class="fas fa-external-link-alt"></i>
+                                Ver archivo público
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label for="llms-editor" class="form-label fw-semibold">Contenido</label>
+                        <small class="text-muted d-block mb-2">
+                            Markdown simple. Un encabezado H1 con el nombre del sitio, un bloque
+                            <code>&gt;</code> como resumen, y listas de enlaces por sección.
+                        </small>
+                        <textarea
+                            id="llms-editor"
+                            name="llms_txt"
+                            class="form-control font-monospace"
+                            rows="20"
+                            style="resize: vertical; font-size: 13px; line-height: 1.6;">{{ $content ?? '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-top p-3">
+                    <button type="button" class="btn btn-primary w-100 mb-2" id="btn-save-llms">
+                        <i class="fas fa-save me-1"></i>Guardar llms.txt
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary w-100" id="btn-reset-llms">
+                        <i class="fas fa-rotate-left me-1"></i>Restaurar default
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Columna lateral: guía --}}
+        <div class="col-lg-4">
+
+            {{-- URL pública --}}
+            <div class="card mb-3">
+                <div class="card-header border-bottom p-3">
+                    <h6 class="mb-0 fw-bold">URL pública</h6>
+                </div>
+                <div class="card-body p-3">
+                    <p class="text-muted small mb-2">Los motores de IA buscan el archivo en:</p>
+                    @if(isset($public_url))
+                        <a href="{{ $public_url }}" target="_blank" rel="noopener"
+                           class="d-flex align-items-center gap-2 text-primary text-decoration-none small">
+                            <i class="fas fa-link"></i>
+                            <code class="text-primary">{{ $public_url }}</code>
+                        </a>
+                    @else
+                        <code class="small">{{ url('/llms.txt') }}</code>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Guía de formato --}}
+            <div class="card mb-3">
+                <div class="card-header border-bottom p-3">
+                    <h6 class="mb-0 fw-bold">Formato Markdown para LLMs</h6>
+                    <p class="text-muted">Estructura recomendada del archivo</p>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start gap-2">
+                                <span class="badge bg-dark text-white flex-shrink-0 mt-1" style="font-size:10px;">H1</span>
+                                <div>
+                                    <code class="small"># Nombre del sitio</code>
+                                    <div class="text-muted" style="font-size:11px;">Encabezado principal, nombre del proyecto o marca</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start gap-2">
+                                <span class="badge bg-secondary text-white flex-shrink-0 mt-1" style="font-size:10px;">&gt;</span>
+                                <div>
+                                    <code class="small">&gt; Descripción corta</code>
+                                    <div class="text-muted" style="font-size:11px;">Blockquote con resumen breve del sitio en una línea</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start gap-2">
+                                <span class="badge bg-info text-white flex-shrink-0 mt-1" style="font-size:10px;">H2</span>
+                                <div>
+                                    <code class="small">## Secciones</code>
+                                    <div class="text-muted" style="font-size:11px;">Agrupa los enlaces por categoría o área</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start gap-2">
+                                <span class="badge bg-success text-white flex-shrink-0 mt-1" style="font-size:10px;">–</span>
+                                <div>
+                                    <code class="small">- [Enlace](url): descripción</code>
+                                    <div class="text-muted" style="font-size:11px;">Lista de URLs relevantes con descripción breve</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Plantilla de ejemplo --}}
+            <div class="card mb-3">
+                <div class="card-header border-bottom p-3">
+                    <h6 class="mb-0 fw-bold">Plantilla básica</h6>
+                    <p class="text-muted">Copia y adapta este ejemplo</p>
+                </div>
+                <div class="card-body p-3">
+                    <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.72rem;white-space:pre-wrap;"># Nombre del sitio
+
+&gt; Descripción breve en una línea.
+
+## Contenido principal
+
+- [Cursos]({{ url('/cursos') }}): Catálogo completo.
+- [Blog]({{ url('/blog') }}): Artículos recientes.
+
+## Soporte
+
+- [Contacto]({{ url('/contacto') }}): Formulario de contacto.</pre>
+                </div>
+            </div>
+
+            {{-- ¿Qué es llms.txt? --}}
+            <div class="card">
+                <div class="card-header border-bottom p-3">
+                    <h6 class="mb-0 fw-bold">¿Qué es llms.txt?</h6>
+                </div>
+                <div class="card-body p-3">
+                    <p class="text-muted small mb-2">
+                        Estándar propuesto en 2024 para ayudar a modelos de lenguaje a entender el sitio.
+                        Complementa <code>robots.txt</code>, no lo reemplaza.
+                    </p>
+                    <p class="text-muted small mb-0">
+                        Especificación: <a href="https://llmstxt.org" target="_blank" rel="noopener">llmstxt.org</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+@endsection
+
+@push('scripts')
+<script>
+$(document).ready(function () {
+
+    // Guardar llms.txt via AJAX
+    $('#btn-save-llms').on('click', function () {
+        var $btn = $(this);
+        var content = $('#llms-editor').val();
+
+        $btn.prop('disabled', true).html(
+            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
+        );
+
+        $.ajax({
+            url: '{{ route('manager.seo.llms.update') }}',
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: { llms_txt: content },
+            dataType: 'json',
+            success: function (response) {
+                toastr.success(response.message ?? 'llms.txt guardado correctamente');
+            },
+            error: function (xhr) {
+                var msg = 'Error al guardar';
+                if (xhr.responseJSON) {
+                    msg = xhr.responseJSON.message ?? msg;
+                    if (xhr.responseJSON.errors) {
+                        var errors = xhr.responseJSON.errors;
+                        msg = Object.values(errors).flat().join('<br>');
+                    }
+                }
+                toastr.error(msg);
+            },
+            complete: function () {
+                $btn.prop('disabled', false).html(
+                    '<i class="fas fa-save me-1"></i>Guardar llms.txt'
+                );
+            }
+        });
+    });
+
+    // Restaurar default via AJAX
+    $('#btn-reset-llms').on('click', function () {
+        if (!confirm('¿Restaurar el llms.txt al valor por defecto? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true).html(
+            '<span class="spinner-border spinner-border-sm me-1"></span>Restaurando...'
+        );
+
+        $.ajax({
+            url: '{{ route('manager.seo.llms.reset') }}',
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            dataType: 'json',
+            success: function (response) {
+                toastr.success(response.message ?? 'Contenido restaurado al valor por defecto');
+                if (response.content !== undefined) {
+                    $('#llms-editor').val(response.content);
+                } else {
+                    setTimeout(function () { window.location.reload(); }, 800);
+                }
+            },
+            error: function (xhr) {
+                var msg = xhr.responseJSON ? (xhr.responseJSON.message ?? 'Error al restaurar') : 'Error al restaurar';
+                toastr.error(msg);
+            },
+            complete: function () {
+                $btn.prop('disabled', false).html(
+                    '<i class="fas fa-rotate-left me-1"></i>Restaurar default'
+                );
+            }
+        });
+    });
+
+});
+</script>
+@endpush

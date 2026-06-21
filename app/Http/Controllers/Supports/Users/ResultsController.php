@@ -21,7 +21,7 @@ class ResultsController extends Controller
 
         $courses = Course::latest()->get();
         $user = User::slack($slack);
-        $certificates = $user->certificates()->latest();
+        $certificates = $user->certificates()->with('course')->latest();
 
         $years = $user->certificates()
             ->selectRaw('YEAR(start_at) as year')

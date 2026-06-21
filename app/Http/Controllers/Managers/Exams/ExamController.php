@@ -61,6 +61,7 @@ class ExamController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('exams.create'), 403);
 
         $course = Course::slack($request->course);
 
@@ -110,6 +111,7 @@ class ExamController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('exams.update'), 403);
 
         $topic = ExamTopic::slack($request->slack);
 
@@ -134,6 +136,7 @@ class ExamController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('exams.delete'), 403);
         $topic = ExamTopic::slack($slack);
         $topic->questions()->delete();
         $topic->delete();

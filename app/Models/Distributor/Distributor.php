@@ -88,7 +88,7 @@ class Distributor extends Model
 
     public function staffs(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\User', 'distributor_staff')->withPivot('distributor_id')->orderBy('created_at', 'desc');
+        return $this->belongsToMany('App\Models\User', 'distributor_staff')->withPivot('distributor_id')->orderBy('users.created_at', 'desc');
     }
 
     public function courses(): BelongsToMany

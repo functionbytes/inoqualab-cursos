@@ -50,41 +50,32 @@ class CourseController extends Controller
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);
 
-        $inscriptions = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)->select(
-                'users.slack',
-                'users.firstname',
-                'users.lastname',
-                'users.available',
-                'users.identification',
-                'inscriptions.id',
-                'inscriptions.slack as slack',
-                'inscriptions.percent',
-                'inscriptions.order_id',
-                'inscriptions.enroll_start',
-                'inscriptions.enroll_expire',
-                'inscriptions.enroll_culminated',
-                'inscriptions.culminated',
-                'inscriptions.created_at',
-                'inscriptions.updated_at',
-            )->orderBy('enroll_culminated', 'desc');
+        $baseQuery = fn () => User::query()
+            ->join('enterprise_user', fn ($j) => $j->on('users.id', '=', 'enterprise_user.user_id'))
+            ->where('enterprise_user.enterprise_id', $enterprise->id)
+            ->join('inscriptions', fn ($j) => $j->on('users.id', '=', 'inscriptions.user_id'))
+            ->join('orders', fn ($j) => $j->on('orders.id', '=', 'inscriptions.order_id'))
+            ->where('inscriptions.course_id', $course->id);
 
-        $years = DB::table('users')
-            ->join('enterprise_user', function ($join) {
-                $join->on('users.id', '=', 'enterprise_user.user_id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise->id)
-            ->join('inscriptions', function ($join) {
-                $join->on('users.id', '=', 'inscriptions.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'inscriptions.order_id');
-            })->where('inscriptions.course_id', '=', $course->id)
+        $inscriptions = $baseQuery()->select(
+            'users.slack',
+            'users.firstname',
+            'users.lastname',
+            'users.available',
+            'users.identification',
+            'inscriptions.id',
+            'inscriptions.slack as slack',
+            'inscriptions.percent',
+            'inscriptions.order_id',
+            'inscriptions.enroll_start',
+            'inscriptions.enroll_expire',
+            'inscriptions.enroll_culminated',
+            'inscriptions.culminated',
+            'inscriptions.created_at',
+            'inscriptions.updated_at',
+        )->orderBy('enroll_culminated', 'desc');
+
+        $years = $baseQuery()
             ->selectRaw('YEAR(enroll_culminated) as year')
             ->groupBy('year')
             ->orderBy('year', 'desc')

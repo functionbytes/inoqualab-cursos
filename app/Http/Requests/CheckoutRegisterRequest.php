@@ -35,7 +35,7 @@ class CheckoutRegisterRequest extends FormRequest
             'company' => ['nullable', 'string', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
             'citie' => ['nullable', 'integer', 'exists:cities,id'],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'password' => ['nullable', 'string', 'min:8'],
             'terms' => ['accepted'],
             'newsletter' => ['nullable', 'boolean'],
         ];

@@ -15,6 +15,10 @@ class IsDistributor
                 $request->attributes->set('distributor', $distributor);
                 $request->session()->put('distributor', $distributor);
                 app()->instance('distributor', $distributor);
+            } else {
+                // Sin distribuidor asociado: cualquier app('distributor') aguas abajo
+                // responde 403 limpio en vez de un 500 BindingResolutionException.
+                app()->bind('distributor', fn () => abort(403, 'No tienes un distribuidor asociado.'));
             }
 
             return $next($request);

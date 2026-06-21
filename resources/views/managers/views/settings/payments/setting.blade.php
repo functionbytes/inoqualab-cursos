@@ -27,7 +27,7 @@
 
                         <div class="col-12">
                             <div class="mb-3">
-                                <label class="control-label col-form-label">Llave pública <small class="text-muted">(Public Key)</small></label>
+                                <label class="control-label col-form-label">Llave pública <p class="text-muted">(Public Key)</p></label>
                                 <input type="text" class="form-control" id="wompi_public_key" name="wompi_public_key"
                                     value="{{ setting('wompi_public_key') }}"
                                     placeholder="pub_test_XXXXXXXXXXXXXXXX  o  pub_prod_XXXXXXXXXXXXXXXX">
@@ -37,7 +37,7 @@
 
                         <div class="col-12">
                             <div class="mb-3">
-                                <label class="control-label col-form-label">Secreto de integridad <small class="text-muted">(Integrity Secret)</small></label>
+                                <label class="control-label col-form-label">Secreto de integridad <p class="text-muted">(Integrity Secret)</p></label>
                                 <input type="password" class="form-control" id="wompi_integrity_secret" name="wompi_integrity_secret"
                                     value="{{ setting('wompi_integrity_secret') }}"
                                     placeholder="test_integrity_XXXXXXXX  o  prod_integrity_XXXXXXXX">
@@ -47,7 +47,7 @@
 
                         <div class="col-12">
                             <div class="mb-3">
-                                <label class="control-label col-form-label">Secreto de eventos <small class="text-muted">(Events Secret)</small></label>
+                                <label class="control-label col-form-label">Secreto de eventos <p class="text-muted">(Events Secret)</p></label>
                                 <input type="password" class="form-control" id="wompi_events_secret" name="wompi_events_secret"
                                     value="{{ setting('wompi_events_secret') }}"
                                     placeholder="test_events_XXXXXXXX  o  prod_events_XXXXXXXX">

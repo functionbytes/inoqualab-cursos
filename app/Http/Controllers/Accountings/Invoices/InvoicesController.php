@@ -193,7 +193,7 @@ class InvoicesController extends Controller
         $endDate = Carbon::parse($date[1])->endOfDay();
 
         $distributor = Distributor::id($request->distributor);
-        $items = $distributor->orders()->date($startDate, $endDate)->get();
+        $items = $distributor->orders()->date($startDate, $endDate)->with('order.items')->get();
 
         if ($items->count() == 0) {
             return response()->json([

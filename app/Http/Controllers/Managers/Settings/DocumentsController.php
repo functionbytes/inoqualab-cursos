@@ -63,6 +63,7 @@ class DocumentsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('documents.update'), 403);
 
         $document = Document::slack($request->slack);
         $document->title = Str::upper($request->title);
@@ -80,6 +81,7 @@ class DocumentsController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('documents.create'), 403);
 
         $document = new Document;
         $document->slack = $this->generate_slack('trusteds');
@@ -98,6 +100,7 @@ class DocumentsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('documents.delete'), 403);
 
         $document = Document::slack($slack);
         $document->delete();

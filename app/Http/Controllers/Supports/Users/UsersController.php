@@ -53,8 +53,8 @@ class UsersController extends Controller
     {
 
         $roles = collect([
-            ['id' => 'customers', 'title' => 'Cliente'],
-            ['id' => 'enterprises', 'title' => 'Empresa'],
+            ['id' => 'customer', 'title' => 'Cliente'],
+            ['id' => 'enterprise', 'title' => 'Empresa'],
         ]);
 
         $roles = $roles->pluck('title', 'id');
@@ -97,7 +97,7 @@ class UsersController extends Controller
         $user->setting = 1;
         $user->validation = 1;
         $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
-        $request->roles == 'enterprises' ? $user->enterprise_id = $request->enterprise : $user->enterprise_id = null;
+        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprise : null;
         $user->save();
 
         return response()->json([
@@ -149,9 +149,10 @@ class UsersController extends Controller
 
         $user = $this->guardManageableUser(User::slack($slack));
 
-        $orders = $user->orders;
+        $orders = $user->orders()->latest()->paginate(paginationNumber());
 
         return view('supports.views.users.users.orders')->with([
+            'user' => $user,
             'orders' => $orders,
         ]);
 
@@ -334,9 +335,8 @@ class UsersController extends Controller
             ], 422);
         }
 
-        $user = User::slack($request->slack);
-
-        abort_unless($user instanceof User, 404);
+        // Escalada: un soporte NO puede resetear la contraseña de un manager/support.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         $user->password = $request->new_password;
         $user->remember_token = Str::random(60);
@@ -362,8 +362,8 @@ class UsersController extends Controller
 
     public function forgotpassword(Request $request)
     {
-
-        $user = User::slack($request->slack);
+        // Escalada: un soporte NO puede disparar reset de un manager/support.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         $reset_tries = 0;
 

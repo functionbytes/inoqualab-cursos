@@ -7,6 +7,9 @@ class TransferCoursesTables extends Migration
 {
     public function up()
     {
+        if (app()->environment('testing')) {
+            return;
+        }
 
         $courseCategories = DB::connection('mysql_second')->table('categories')->get();
         foreach ($courseCategories as $category) {

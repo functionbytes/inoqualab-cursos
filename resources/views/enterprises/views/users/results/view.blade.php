@@ -59,10 +59,10 @@
                     <table class="table search-table align-middle text-nowrap">
                         <thead class="header-item">
                         <tr>
-                            <th>Pregunta</th>
-                            <th>R. usuario</th>
-                            <th>R. correcta</th>
-                            <th>Estado</th>
+                            <th scope="col">Pregunta</th>
+                            <th scope="col">R. usuario</th>
+                            <th scope="col">R. correcta</th>
+                            <th scope="col">Estado</th>
                         </tr>
                         </thead>
                         <tbody>

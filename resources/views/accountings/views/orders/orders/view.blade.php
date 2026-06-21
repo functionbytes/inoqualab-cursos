@@ -97,9 +97,9 @@
 
                                                         <thead>
                                                         <tr>
-                                                            <th class="fw-bolder text-uppercase">Descripción</th>
-                                                            <th class=" fw-bolder text-uppercase">Cantidad</th>
-                                                            <th class=" fw-bolder text-uppercase">Total</th>
+                                                            <th scope="col" class="fw-bolder text-uppercase">Descripción</th>
+                                                            <th scope="col" class=" fw-bolder text-uppercase">Cantidad</th>
+                                                            <th scope="col" class=" fw-bolder text-uppercase">Total</th>
                                                         </tr>
                                                         </thead>
 

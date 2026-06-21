@@ -27,7 +27,7 @@ class EnterpriseUser extends Model
 
     public function scopeDisabled($query)
     {
-        return $query->where('available', 1);
+        return $query->where('available', 0);
     }
 
     public function user(): BelongsTo

@@ -16,6 +16,7 @@ use App\Models\Exam\ExamTopic;
 use App\Models\ExamQuestion;
 use App\Models\Quiz\QuizTopic;
 use App\Models\QuizQuestion;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -46,11 +47,19 @@ class CoursesController extends Controller
 
         $courses = $courses->paginate(paginationNumber());
 
+        $stats = [
+            'total' => Course::count(),
+            'public' => Course::where('available', 1)->count(),
+            'hidden' => Course::where('available', 0)->count(),
+            'website' => Course::where('website', 1)->count(),
+        ];
+
         return view('managers.views.courses.courses.index')->with([
             'courses' => $courses,
             'available' => $available,
             'website' => $website,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
 
     }
@@ -150,6 +159,7 @@ class CoursesController extends Controller
 
     public function update(UpdateCourseRequest $request)
     {
+        abort_unless(auth()->user()->can('courses.update'), 403);
         $course = Course::slack($request->slack);
 
         if (! $course) {
@@ -315,6 +325,7 @@ class CoursesController extends Controller
 
     public function store(StoreCourseRequest $request)
     {
+        abort_unless(auth()->user()->can('courses.create'), 403);
         $course = new Course;
         $course->slack = $this->generate_slack('courses');
         $course->title = Str::upper($request->title);
@@ -401,8 +412,29 @@ class CoursesController extends Controller
         return response()->json(['status' => 'success']);
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:courses,id'],
+        ]);
+
+        $query = Course::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' curso(s) procesados.']);
+    }
+
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('courses.delete'), 403);
         $course = Course::slack($slack);
         $course->delete();
 

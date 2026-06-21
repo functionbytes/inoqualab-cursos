@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Enterprise\Enterprise;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class EnterprisesController extends Controller
 {
-    public function index()
+    public function index(): View
     {
 
         $enterprise = app('enterprise');
@@ -22,13 +23,14 @@ class EnterprisesController extends Controller
 
     public function update(Request $request): JsonResponse
     {
+        // Ownership: se actualiza SIEMPRE la empresa autenticada, nunca la del
+        // slack del request (evita IDOR: editar la empresa de otro por slack).
         $enterprise = app('enterprise');
 
         if (Enterprise::where('email', $request->email)->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        $enterprise = Enterprise::slack($request->slack);
         $enterprise->supporting = $request->supporting;
         $enterprise->address = $request->address;
         $enterprise->cellphone = $request->cellphone;

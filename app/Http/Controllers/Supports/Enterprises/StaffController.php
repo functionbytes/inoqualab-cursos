@@ -89,11 +89,8 @@ class StaffController extends Controller
 
     public function update(Request $request)
     {
-        $user = User::slack($request->slack);
-
-        if (! $user) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado.'], 404);
-        }
+        // Escalada: un soporte NO puede editar un manager/support (solo roles gestionables).
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         if ($error = $this->uniqueUserFieldError($request->email, $request->identification, $user)) {
             return response()->json(['success' => false, 'message' => $error]);

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\UpdateAnalyticsSettingsRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -20,18 +21,8 @@ class AnalyticsSettingsController extends Controller
         ]);
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateAnalyticsSettingsRequest $request): JsonResponse
     {
-        $request->validate([
-            'google_analytics_property_id' => ['nullable', 'string', 'regex:/^[0-9]+$/'],
-            'google_analytics_measurement_id' => ['nullable', 'string', 'regex:/^G-[A-Z0-9]+$/i'],
-            'analytics_cache_lifetime' => ['nullable', 'integer', 'min:1', 'max:1440'],
-            'meta_pixel_id' => ['nullable', 'string', 'regex:/^[0-9]+$/'],
-            'microsoft_clarity_id' => ['nullable', 'string', 'max:20'],
-            'tiktok_pixel_id' => ['nullable', 'string', 'max:50'],
-            'linkedin_insight_tag_id' => ['nullable', 'string', 'regex:/^[0-9]+$/'],
-        ]);
-
         if ($request->filled('google_analytics_credentials')) {
             $json = trim($request->google_analytics_credentials);
             $decoded = json_decode($json, true);
@@ -61,6 +52,20 @@ class AnalyticsSettingsController extends Controller
         updateSettings($data);
 
         return response()->json(['success' => true, 'message' => 'Configuración guardada correctamente.']);
+    }
+
+    public function clearCache(): JsonResponse
+    {
+        $keys = ['overview', 'comparison', 'session_metrics', 'top_pages', 'referrers', 'browsers', 'devices', 'countries', 'channels'];
+        $ranges = ['today', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year'];
+
+        foreach ($keys as $key) {
+            foreach ($ranges as $range) {
+                Cache::forget("analytics.{$key}.{$range}");
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Caché del dashboard limpiado correctamente.']);
     }
 
     private function currentSettings(): array

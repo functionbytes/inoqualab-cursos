@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Supports;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class NotificationsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $user = Auth::user();
 
@@ -20,7 +22,7 @@ class NotificationsController extends Controller
         return view('supports.views.notifications.index', compact('notifications'));
     }
 
-    public function show(Request $request)
+    public function show(Request $request): RedirectResponse
     {
         Auth::user()->unreadNotifications->markAsRead();
 

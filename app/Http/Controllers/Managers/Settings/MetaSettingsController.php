@@ -22,6 +22,7 @@ class MetaSettingsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $data['meta_title'] = $request->meta_title;
         $data['meta_description'] = $request->meta_description;
@@ -37,6 +38,7 @@ class MetaSettingsController extends Controller
 
     public function storeMetas(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
             $setting = Setting::key($request->setting);
@@ -49,6 +51,7 @@ class MetaSettingsController extends Controller
 
     public function deleteMetas($id)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         Media::find($id)->delete();
 

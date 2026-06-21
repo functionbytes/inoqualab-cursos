@@ -95,11 +95,21 @@
                     </div>
 
                     {{-- Acción de pago si está pendiente --}}
-                    @if(in_array($order->condition_id, [1, 2]) && $order->total_order_amount > 0)
+                    @if(in_array($order->condition_id, [1, 2, 3]) && $order->total_order_amount > 0)
                         <div class="mt-4 border-top pt-3">
                             <a href="{{ route('customers.orders.payments', $order->slack) }}"
                                class="btn btn-primary">
-                                <i class="fa-solid fa-credit-card me-1"></i> Pagar ahora
+                                <i class="fa-solid fa-credit-card me-1"></i> {{ $order->condition_id == 3 ? 'Reintentar pago' : 'Pagar ahora' }}
+                            </a>
+                        </div>
+                    @endif
+
+                    {{-- Descarga de recibo si está pagada --}}
+                    @if($order->condition_id === 4)
+                        <div class="mt-4 border-top pt-3">
+                            <a href="{{ route('customers.orders.invoice', $order->slack) }}"
+                               class="btn btn-outline-primary">
+                                <i class="fa-solid fa-file-arrow-down me-1"></i> Descargar recibo
                             </a>
                         </div>
                     @endif

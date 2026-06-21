@@ -1,37 +1,5 @@
 @extends('layouts.pages')
 
-@inject('finds', 'App\Models\Course\Course')
-
-@section('title', "$bundle->title")
-
-@section('head')
-
-    @php
-    $url = URL::current();
-    @endphp
-
-    <meta name="title" content="{{ $bundle->title }}">
-    <meta name="description" content="{{ $bundle->short_detail }} ">
-    <meta property="og:title" content="{{ $bundle->title }} ">
-    <meta property="og:url" content="{{ $url }}">
-    <meta property="og:description" content="{{ $bundle->short_detail }}">
-    <meta property="og:image" content="{{ asset('images/course/' . $bundle->preview_image) }}">
-    <meta itemprop="image" content="{{ asset('images/course/' . $bundle->preview_image) }}">
-    <meta property="og:type" content="website">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="{{ asset('images/course/' . $bundle->preview_image) }}">
-    <meta property="twitter:title" content="{{ $bundle->title }} ">
-    <meta property="twitter:description" content="{{ $bundle->short_detail }}">
-    <meta name="twitter:site" content="{{ url()->full() }}" />
-
-    <link rel="canonical" href="{{ url()->full() }}" />
-    <meta name="robots" content="all">
-    <meta name="keywords" content="">
-
-
-@endsection
-
 @section('content')
 
     <main class="main-area fix">

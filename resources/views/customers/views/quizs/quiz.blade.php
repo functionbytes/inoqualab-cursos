@@ -40,6 +40,9 @@
                     <div class="lesion-content-wrapper rbt-article-content-wrapper">
 
                         <div class="content">
+                            <div class="progress mb-3" style="height: 6px;" aria-label="Progreso">
+                                <div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
 
                             <div id="question_block" class="question-block">
 
@@ -79,7 +82,7 @@
                                                                 <div class="form-group">
                                                                     <div class="content-header">
                                                                         <h3 class="main_question">
-                                                                            <i class="bx bx-right-arrow-alt"></i>
+                                                                            <i class="fas fa-arrow-right"></i>
                                                                             {{ $questions[0]['question'] }}
                                                                         </h3>
                                                                         <span class="step-count">
@@ -127,7 +130,7 @@
                                                                     <div class="step">
                                                                         <div class="content-header">
                                                                             <h3 class="main_question">
-                                                                                <i class="bx bx-right-arrow-alt"></i>
+                                                                                <i class="fas fa-arrow-right"></i>
                                                                                 {{ $question['question'] }}
                                                                             </h3>
                                                                             <span class="step-count">
@@ -223,7 +226,7 @@
 
                                                                         <div class="content-header">
                                                                             <h3 class="main_question">
-                                                                                <i class="bx bx-right-arrow-alt"></i>
+                                                                                <i class="fas fa-arrow-right"></i>
                                                                                 {{ $questions[0]['question'] }}
                                                                             </h3>
                                                                             <span class="step-count">
@@ -287,7 +290,7 @@
 
                                                                             <div class="content-header">
                                                                                 <h3 class="main_question">
-                                                                                    <i class="bx bx-right-arrow-alt"></i>
+                                                                                    <i class="fas fa-arrow-right"></i>
                                                                                     {{ $question['question'] }}
                                                                                 </h3>
                                                                                 <span class="step-count">
@@ -468,7 +471,7 @@
                                 }
 
                                 progres = (x / totalques) * 100;
-                                $('#progressbar').css('width', progres + '%');
+                                $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
 
                                 count++;
 
@@ -513,7 +516,7 @@
                             }
 
                             progres = (x / totalques) * 100;
-                            $('#progressbar').css('width', progres + '%');
+                            $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
 
                             count++;
 
@@ -556,7 +559,7 @@
 
 
                         progres = (x / totalques) * 100;
-                        $('#progressbar').css('width', progres + '%');
+                        $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
 
                     });
 

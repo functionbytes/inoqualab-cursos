@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class CertificationsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
 
         $searchKey = $request->search;
@@ -35,7 +37,7 @@ class CertificationsController extends Controller
 
     }
 
-    public function create()
+    public function create(): View
     {
 
         $availables = $this->availableOptions();
@@ -46,7 +48,7 @@ class CertificationsController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
 
         $certification = Certification::slack($slack);
@@ -63,8 +65,9 @@ class CertificationsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $certification = Certification::slack($request->slack);
         $certification->title = Str::upper($request->title);
@@ -81,8 +84,9 @@ class CertificationsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $certification = new Certification;
         $certification->slack = $this->generate_slack('certifications');
@@ -102,6 +106,7 @@ class CertificationsController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         $certification = Certification::slack($slack);
         $certification->delete();
@@ -142,6 +147,7 @@ class CertificationsController extends Controller
 
     public function storeThumbnails(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
 
@@ -156,6 +162,8 @@ class CertificationsController extends Controller
 
     public function deleteThumbnails($id)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
+
         Media::find($id)->delete();
 
         return response()->json(['status' => 'success']);

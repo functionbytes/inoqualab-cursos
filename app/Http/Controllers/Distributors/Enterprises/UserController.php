@@ -18,10 +18,28 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
+    /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
+    private function managedEnterprise(string $slack): Enterprise
+    {
+        return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
+    }
+
+    /** Usuario que pertenece (enterprise_user) a una empresa del distribuidor, o 404. */
+    private function managedUser(string $slack): User
+    {
+        $enterpriseIds = app('distributor')->enterprises()->pluck('enterprises.id')->all();
+
+        return User::where('slack', $slack)
+            ->whereExists(fn ($q) => $q->selectRaw('1')->from('enterprise_user')
+                ->whereColumn('enterprise_user.user_id', 'users.id')
+                ->whereIn('enterprise_user.enterprise_id', $enterpriseIds))
+            ->firstOrFail();
+    }
+
     public function index(Request $request, $slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
         $searchKey = $request->search;
         $available = $request->available;
 
@@ -52,7 +70,7 @@ class UserController extends Controller
     public function reassign($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->managedUser($slack);
         $enterprise = $user->getEnterprise();
 
         $distributor = app('distributor');
@@ -73,8 +91,8 @@ class UserController extends Controller
     public function reassignUser(Request $request)
     {
 
-        $user = User::slack($request->slack);
-        $newEnterprise = Enterprise::slack($request->enterprise);
+        $user = $this->managedUser($request->slack);
+        $newEnterprise = $this->managedEnterprise($request->enterprise);
 
         if (! $user || ! $newEnterprise) {
             return response()->json([
@@ -106,7 +124,7 @@ class UserController extends Controller
     public function create($slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
@@ -124,7 +142,7 @@ class UserController extends Controller
     public function view($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->managedUser($slack);
         $enterprise = $user->relations;
 
         return view('distributors.views.enterprises.users.users.view')->with([
@@ -136,7 +154,7 @@ class UserController extends Controller
     public function edit($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->managedUser($slack);
         $enterprise = $user->relations;
 
         $availables = collect([
@@ -156,7 +174,7 @@ class UserController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-        $user = User::slack($request->slack);
+        $user = $this->managedUser($request->slack);
 
         if (User::where('email', $request->email)->where('id', '!=', $user->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -185,7 +203,7 @@ class UserController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $enterprise = Enterprise::slack($request->enterprise);
+        $enterprise = $this->managedEnterprise($request->enterprise);
 
         if (User::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
@@ -227,7 +245,7 @@ class UserController extends Controller
     public function users($slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
         $users = $enterprise->users;
 
         return view('distributors.views.enterprises.users.users.index')->with([
@@ -239,7 +257,7 @@ class UserController extends Controller
     public function courses($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->managedUser($slack);
         $inscriptions = $user->inscriptions()->with('course');
         $inscriptions = $inscriptions->paginate(paginationNumber());
 
@@ -252,7 +270,7 @@ class UserController extends Controller
     public function report($slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
 
         $modalities = collect([
             ['id' => '0', 'title' => 'Todos'],
@@ -271,7 +289,7 @@ class UserController extends Controller
     public function income($slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        $enterprise = $this->managedEnterprise($slack);
 
         $courses = $enterprise->courses;
         $courses = $courses->pluck('title', 'id');

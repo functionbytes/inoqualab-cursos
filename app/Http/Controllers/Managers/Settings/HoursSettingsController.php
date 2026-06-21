@@ -22,6 +22,7 @@ class HoursSettingsController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
         $anyChanged = false;
         for ($i = 1; $i <= 7; $i++) {
             if ($request->input("starttime{$i}") != $request->input("endtime{$i}")) {

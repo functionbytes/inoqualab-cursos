@@ -51,4 +51,18 @@ class CartCouponDiscountTest extends TestCase
         $coupon = $this->coupon(['type' => 1, 'amount' => 50, 'course_ids' => '999']);
         $this->assertSame(0.0, (float) cartCouponDiscount($this->lines(), $coupon));
     }
+
+    public function test_percentage_above_100_is_clamped_and_never_exceeds_subtotal(): void
+    {
+        // Dato inválido (11000%): el descuento se topa al subtotal elegible (350000),
+        // evitando totales negativos/gratuitos por overflow.
+        $coupon = $this->coupon(['type' => 1, 'amount' => 11000]);
+        $this->assertEqualsWithDelta(350000, cartCouponDiscount($this->lines(), $coupon), 0.01);
+    }
+
+    public function test_negative_percentage_is_clamped_to_zero(): void
+    {
+        $coupon = $this->coupon(['type' => 1, 'amount' => -50]);
+        $this->assertSame(0.0, (float) cartCouponDiscount($this->lines(), $coupon));
+    }
 }

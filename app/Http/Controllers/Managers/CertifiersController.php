@@ -78,6 +78,7 @@ class CertifiersController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('certifiers.update'), 403);
 
         $certifier = Certifier::slack($request->slack);
         $certifier->firstname = Str::upper($request->firstname);
@@ -97,6 +98,7 @@ class CertifiersController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('certifiers.create'), 403);
 
         $certifier = new Certifier;
         $certifier->slack = $this->generate_slack('certifiers');
@@ -118,6 +120,7 @@ class CertifiersController extends Controller
 
     public function destroy($slack)
     {
+        abort_unless(auth()->user()->can('certifiers.delete'), 403);
 
         $certifier = Certifier::slack($slack);
         $certifier->delete();
