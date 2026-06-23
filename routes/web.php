@@ -165,7 +165,7 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('/confirm', [ForgotPasswordController::class, 'showLinkRequest'])->name('password.confirm');
         Route::get('/reset', [ForgotPasswordController::class, 'showLinkRequest'])->name('password.reset');
-        Route::post('/reset', [ResetPasswordController::class, 'reset']);
+        Route::post('/reset', [ResetPasswordController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
         Route::post('/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->middleware('throttle:3,1')->name('password.email');
         Route::get('/reset/{slack}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset.token')->middleware('signed');
 
