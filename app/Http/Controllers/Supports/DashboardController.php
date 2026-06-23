@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports;
 
+use App\Enums\OrderCondition;
 use App\Http\Controllers\Controller;
 use App\Models\Blog\Blog;
 use App\Models\Contact;
@@ -44,13 +45,13 @@ class DashboardController extends Controller
             'courses' => Course::count(),
             'total' => 0,
             'orders' => Order::count(),
-            'online' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
+            'online' => Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count(),
             'newsletters' => Newsletter::count(),
             'useradmins' => User::where('role', 'manager')->count(),
             'usercustomers' => User::where('role', 'customer')->count(),
             'userenterprises' => User::where('role', 'enterprise')->count(),
             'enterprises' => Enterprise::count(),
-            'agreements' => Order::where('method_id', 1)->where('condition_id', 4)->count(),
+            'agreements' => Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count(),
         ]);
     }
 }

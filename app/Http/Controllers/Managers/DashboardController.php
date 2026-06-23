@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Managers;
 
+use App\Enums\OrderCondition;
 use App\Http\Controllers\Controller;
 use App\Models\Blog\Blog;
 use App\Models\Contact;
@@ -31,7 +32,7 @@ class DashboardController extends Controller
         $userenterprises = User::where('role', 'enterprises')->count();
 
         $orders = Order::count();
-        $online = Order::where('method_id', 1)->where('condition_id', 4)->count();
+        $online = Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count();
         $agreements = $online;
         $total = 0;
 

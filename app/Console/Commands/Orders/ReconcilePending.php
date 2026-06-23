@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Orders;
 
 use App\Http\Controllers\Pages\CheckoutController;
+use App\Enums\OrderCondition;
 use App\Models\Order\Order;
 use App\Services\WompiService;
 use Carbon\Carbon;
@@ -20,9 +21,9 @@ class ReconcilePending extends Command
         $minutes = (int) $this->option('minutes');
         $maxHours = (int) $this->option('max-hours');
 
-        // condition_id 2 = pendiente. Con transacción asignada y dentro de una ventana razonable.
+        // Órdenes pendientes con transacción asignada, dentro de una ventana razonable.
         $orders = Order::query()
-            ->where('condition_id', 2)
+            ->where('condition_id', OrderCondition::Pendiente->value)
             ->whereNotNull('transaction')
             ->where('transaction', '!=', '')
             ->where('updated_at', '<', Carbon::now()->subMinutes($minutes))

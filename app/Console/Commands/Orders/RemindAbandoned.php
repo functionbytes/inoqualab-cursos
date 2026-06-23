@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Orders;
 
 use App\Mail\Customers\Orders\AbandonedOrderMail;
+use App\Enums\OrderCondition;
 use App\Models\Order\Order;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -20,9 +21,9 @@ class RemindAbandoned extends Command
         $hours = (int) $this->option('hours');
         $cutoff = Carbon::now()->subHours($hours);
 
-        // condition_id 1 = generada (sin pagar). Solo se recuerda una vez (reminded_at null).
+        // Órdenes generadas (sin pagar). Solo se recuerda una vez (reminded_at null).
         $orders = Order::query()
-            ->where('condition_id', 1)
+            ->where('condition_id', OrderCondition::Generada->value)
             ->whereNull('reminded_at')
             ->where('total_order_amount', '>', 0)
             ->where('created_at', '<', $cutoff)

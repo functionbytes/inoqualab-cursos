@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customers;
 
+use App\Enums\OrderCondition as Condition;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Order\Order;
@@ -63,7 +64,7 @@ class OrdersController extends Controller
         $order = Order::where('slack', $slack)->where('user_id', $user->id)->firstOrFail();
 
         // Ya pagada -> confirmación.
-        if ($order->condition_id === 4) {
+        if ($order->condition_id === Condition::Pagada->value) {
             return redirect()->route('payments.status', [$order->slack, 'APPROVED']);
         }
 
@@ -87,7 +88,7 @@ class OrdersController extends Controller
             ->firstOrFail();
 
         // Solo se genera recibo de órdenes pagadas.
-        if ($order->condition_id !== 4) {
+        if ($order->condition_id !== Condition::Pagada->value) {
             return redirect()->route('customers.orders.view', $order->slack)
                 ->with('error', 'El recibo está disponible cuando la orden esté pagada.');
         }

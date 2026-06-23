@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Orders;
 
+use App\Enums\OrderCondition;
 use App\Models\Order\Order;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -18,11 +19,11 @@ class CleanupAbandoned extends Command
         $days = (int) $this->option('days');
         $cutoff = Carbon::now()->subDays($days);
 
-        // condition_id: 1 = generada (sin pagar). 3 = rechazada.
-        $count = Order::where('condition_id', 1)
+        // Marca como rechazadas las órdenes generadas (sin pagar) más antiguas que N días.
+        $count = Order::where('condition_id', OrderCondition::Generada->value)
             ->where('created_at', '<', $cutoff)
             ->update([
-                'condition_id' => 3,
+                'condition_id' => OrderCondition::Rechazada->value,
                 'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
             ]);
 

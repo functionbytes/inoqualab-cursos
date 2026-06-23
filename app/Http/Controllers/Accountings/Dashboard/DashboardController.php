@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Accountings\Dashboard;
 
+use App\Enums\OrderCondition;
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Invoice\Invoice;
@@ -29,7 +30,7 @@ class DashboardController extends Controller
 
         // Pedidos
         $totalOrders = Order::count();
-        $onlineOrders = Order::where('method_id', 1)->where('condition_id', 4)->count();
+        $onlineOrders = Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count();
 
         $monthlyOrders = Order::whereYear('created_at', $currentDate->year)
             ->selectRaw('MONTH(created_at) as month_number, MONTHNAME(created_at) as month_name, COUNT(*) as count')

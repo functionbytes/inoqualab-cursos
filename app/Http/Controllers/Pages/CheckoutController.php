@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Pages;
 
+use App\Enums\OrderCondition as Condition;
 use App\Events\Inscriptions\InscriptionCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRegisterRequest;
@@ -205,7 +206,7 @@ class CheckoutController extends Controller
         }
 
         // Si ya está pagada, ir directo a la confirmación.
-        if ($order->condition_id === 4) {
+        if ($order->condition_id === Condition::Pagada->value) {
             return redirect()->route('payments.status', [$order->slack, 'APPROVED']);
         }
 
@@ -352,7 +353,7 @@ class CheckoutController extends Controller
     {
         $order = Order::slack($reference);
 
-        if (! $order instanceof Order || $order->condition_id === 4) {
+        if (! $order instanceof Order || $order->condition_id === Condition::Pagada->value) {
             return;
         }
 
@@ -381,9 +382,9 @@ class CheckoutController extends Controller
             // Transición atómica: solo un proceso puede pasar la orden a pagada.
             // Evita inscripciones duplicadas ante webhooks/redirects concurrentes.
             $claimed = Order::where('id', $order->id)
-                ->where('condition_id', '!=', 4)
+                ->where('condition_id', '!=', Condition::Pagada->value)
                 ->update([
-                    'condition_id' => 4,
+                    'condition_id' => Condition::Pagada->value,
                     'payment_at' => Carbon::now()->setTimezone('America/Bogota'),
                     'transaction' => $transactionId,
                     'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
@@ -409,7 +410,7 @@ class CheckoutController extends Controller
             }
 
         } elseif ($status === 'PENDING') {
-            $order->condition_id = 2;
+            $order->condition_id = Condition::Pendiente->value;
             $order->save();
             try {
                 Mail::send(new PendingMails($order));
@@ -418,7 +419,7 @@ class CheckoutController extends Controller
             }
 
         } elseif (in_array($status, ['VOIDED', 'DECLINED', 'ERROR'])) {
-            $order->condition_id = 3;
+            $order->condition_id = Condition::Rechazada->value;
             $order->save();
             try {
                 Mail::send(new VoidedMails($order));
@@ -751,7 +752,7 @@ class CheckoutController extends Controller
             abort(404);
         }
 
-        if ($order->condition_id === 4) {
+        if ($order->condition_id === Condition::Pagada->value) {
             return redirect()->route('payments.status', [$order->slack, 'APPROVED']);
         }
 
