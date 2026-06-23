@@ -1,0 +1,29 @@
+# Ejecución de mejoras — 2026-06-23
+
+> Sesión de ejecución sobre el Plan Maestro V2. Backup de BD previo: `~/Desktop/training_backup_20260623_073754.sql` (872 MB, 124 tablas).
+> Línea base de tests antes y después: **173 passed (375 assertions)**. Suite contra `training_test` (MySQL).
+
+## Aplicado y verificado
+
+| # | Cambio | Archivos | Verificación |
+|---|--------|----------|--------------|
+| 1 | **Índices `slack`** en `inscriptions` (44k) y `certificates` (31k) | `database/migrations/2026_06_23_010733_add_slack_indexes_...php` | `EXPLAIN`: scan 44.573→**1 fila** (`type=ref`). `down()` probado (rollback limpio) y re-aplicado. |
+| 2 | **N+1 home + categoría**: `with(['categorie','media'])` | `Pages/PagesController@index` (3 colecciones), `Pages/CoursesController@categories` (3) | Navegador: home **200/0.47s**, categoría **200/0.075s**, 0 errores, tarjetas OK. |
+| 3 | **Bug de render** en tarjetas de blog (expresión Blade partida `{{ $blog- loading=...>getfirstMedia }}`) | `pages/partials/sections/blogs/items.blade.php` | `view:clear` OK; línea reconstruida. |
+| 4 | **SEO/a11y**: 9 `alt="..."` placeholder → `$course->title`/`$blog->title`; alt añadido donde faltaba | `pages/partials/sections/{pages/courses,pages/populars,blogs/items}.blade.php`, `pages/views/{instructions,blogs}/view.blade.php` | 0 `alt="..."` remanentes. |
+| 5 | **Limpieza** de 3 `dd()` comentados | `Supports/Users/{Inscriptions,Management}Controller`, `Managers/MigrationController` | — |
+| 6 | **Doc** en `phpunit.xml`: por qué SQLite in-memory queda deshabilitado | `phpunit.xml` | — |
+
+## Investigado — sin acción (premise del 13-jun ya superado)
+
+- **Track Policies (IDOR Customers/)**: los 10 controllers de `Customers/` resuelven recursos con dueño scopeando por `where('user_id',$user->id)->firstOrFail()`. **No hay IDOR.** Las 7 Policies están registradas (`AppServiceProvider:153-158`) pero cablear `authorize()` sería **redundante** (el `firstOrFail` ya da 404) o **riesgoso** (quitar el scope cambiaría 404→403 y tocaría código auditado). Decisión: no cablear. El IDOR de inscripción ya está cubierto por `QuizExamRegressionTest`.
+- **Track FormRequests (dinero)**: `CheckoutController::register` ya usa `CheckoutRegisterRequest`; el resto de métodos con `Request` plano son callbacks/webhook (validación por firma). Las **47 validaciones inline** restantes son de **admin** (Seo/Mailer/Courses/Settings/Supports), no de dinero.
+- **SQLite in-memory**: probado → rompe 137 tests (migraciones no SQLite-compatibles, ej. `add_platform_to_course_lessons`). Revertido; se mantiene MySQL (suite ~27s).
+
+## Pendiente real (alto valor, seguro) — para próxima sesión
+
+1. **Factories `Order` y `Certificate`** + **test HTTP de aislamiento entre clientes** (own→200 / ajeno→404). Zero riesgo, cierra Fase 2 y "blinda" el scoping de Customers/ ante futuros refactors.
+2. **Índices `slack`** en el resto de tablas medianas con `scopeSlack` si crecen (course_lessons, etc.) — additive.
+3. Convertir las **47 validaciones inline admin** a FormRequest — incremental, Fase 4 (no money/seguridad).
+4. **Observabilidad**: Horizon (cola Redis) + error tracking (Flare/Sentry) — Fase 6.
+5. Sanitizar **221 `{!!`** con datos de usuario (HTMLPurifier) — Fase 5, requiere cuidado con HTML de WYSIWYG.
