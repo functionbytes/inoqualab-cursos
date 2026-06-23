@@ -27,3 +27,21 @@
 3. Convertir las **47 validaciones inline admin** a FormRequest — incremental, Fase 4 (no money/seguridad).
 4. **Observabilidad**: Horizon (cola Redis) + error tracking (Flare/Sentry) — Fase 6.
 5. Sanitizar **221 `{!!`** con datos de usuario (HTMLPurifier) — Fase 5, requiere cuidado con HTML de WYSIWYG.
+
+## Features implementadas (sesión 2)
+
+| Feature | Detalle | Estado |
+|---|---|---|
+| **Visor de audit-log** | `/panel/activity` (Spatie activitylog, 1.5M registros): filtros (log/evento/entidad/autor/fecha), modal de diff, paginación. Permiso `activity.view` sembrado, enlace en nav, índice `created_at`, `activitylog:clean` programado 03:00. Test feature + verificado en navegador con datos reales. | ✅ |
+| **Caché del catálogo** | `Cache::remember('catalog.home', 15min)` en `PagesController@index`; invalidación al guardar Course/Bundle/CourseCategorie (`AppServiceProvider::registerCatalogCacheInvalidation`). Medido: hit caliente **0.046s** (vs ~0.46s). | ✅ |
+| **Conversiones de imagen** | `registerMediaConversions('card')` webp/optimizado (cwebp) en `Course` y `Blog`. Validado: PNG 181KB → webp **54KB (−70%)**. | ⚠️ Parcial |
+
+### ⚠️ Activación pendiente de las conversiones webp (#13)
+
+El disco de media en `.env` apunta al dominio de **producción** (`https://www.capacitacion.inoqualab.com/media/...`), no a local. Por eso las vistas **NO** se cambiaron a usar `getFirstMediaUrl('thumbnail', 'card')`: las URLs webp darían 404 hasta que **producción** regenere. Para activar:
+
+1. En producción: `php artisan media-library:regenerate "App\Models\Course\Course"` (y Blog cuando tenga miniaturas).
+2. Cambiar en las tarjetas del storefront `getFirstMedia('thumbnail')->getFullUrl()` → `getFirstMediaUrl('thumbnail', 'card')` (mantener el `onerror` de fallback).
+3. Limpiar `catalog.home` (`php artisan cache:clear` o se invalida solo al guardar un curso).
+
+Mientras tanto, **toda subida nueva** ya genera la conversión optimizada automáticamente.
