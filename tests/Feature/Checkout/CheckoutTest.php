@@ -3,8 +3,10 @@
 namespace Tests\Feature\Checkout;
 
 use App\Models\Course\Course;
+use App\Models\Inscription;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
+use App\Models\Order\OrderItem;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
@@ -277,5 +279,125 @@ class CheckoutTest extends TestCase
             ->postJson(route('checkout.coupon.apply'), ['code' => 'DOES-NOT-EXIST'])
             ->assertOk()
             ->assertJsonPath('success', false);
+    }
+
+    // ── Garantías anti-fraude del webhook / checkout ───────────────────────────────
+
+    /** Crea una orden "generada" con un ítem de curso, lista para que el webhook la pague. */
+    private function makeGeneratedOrder(User $user, Course $course, string $slack, float $total): Order
+    {
+        $order = Order::create([
+            'slack' => $slack,
+            'number' => random_int(1000, 9999),
+            'reference' => 'FAC-'.$slack,
+            'user_id' => $user->id,
+            'type_id' => OrderType::where('slug', 'online')->first()->id,
+            'method_id' => OrderMethod::where('slug', 'card')->first()->id,
+            'condition_id' => OrderCondition::where('slug', 'generada')->first()->id,
+            'total_before_discount' => $total,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => $total,
+        ]);
+
+        OrderItem::create([
+            'slack' => 'oi-'.$slack,
+            'order_id' => $order->id,
+            'item_id' => $course->id,
+            'item_type' => Course::class,
+            'quantity' => 1,
+            'amount' => $total,
+        ]);
+
+        return $order;
+    }
+
+    private function paidConditionId(): int
+    {
+        return OrderCondition::where('slug', 'payment')->first()->id;
+    }
+
+    public function test_wompi_webhook_is_idempotent_and_does_not_double_enroll(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse(50000);
+        $order = $this->makeGeneratedOrder($user, $course, 'idem-order', 50000);
+
+        config(['services.wompi.events_secret' => 'test-secret']);
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-idem', 'APPROVED', 5000000, 'test-secret');
+
+        // Mismo webhook entregado dos veces (Wompi reintenta).
+        $this->postJson(route('payments.wompi.webhook'), $payload)->assertOk();
+        $this->postJson(route('payments.wompi.webhook'), $payload)->assertOk();
+
+        // La orden se paga una vez y la matrícula NO se duplica.
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'condition_id' => $this->paidConditionId()]);
+        $this->assertSame(1, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
+    }
+
+    public function test_wompi_webhook_rejects_amount_mismatch(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse(50000);
+        $order = $this->makeGeneratedOrder($user, $course, 'amount-order', 50000);
+
+        config(['services.wompi.events_secret' => 'test-secret']);
+        // Firma válida, pero el monto (100 cents) no coincide con el total (5.000.000 cents).
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-bad-amount', 'APPROVED', 100, 'test-secret');
+
+        $this->postJson(route('payments.wompi.webhook'), $payload)->assertOk();
+
+        // No se marca pagada ni se inscribe (anti-underpayment).
+        $this->assertDatabaseMissing('orders', ['id' => $order->id, 'condition_id' => $this->paidConditionId()]);
+        $this->assertSame(0, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
+    }
+
+    public function test_wompi_webhook_rejects_non_cop_currency(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse(50000);
+        $order = $this->makeGeneratedOrder($user, $course, 'currency-order', 50000);
+
+        config(['services.wompi.events_secret' => 'test-secret']);
+        // La moneda no entra en la firma; se altera a USD manteniendo el checksum válido.
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-usd', 'APPROVED', 5000000, 'test-secret');
+        $payload['data']['transaction']['currency'] = 'USD';
+
+        $this->postJson(route('payments.wompi.webhook'), $payload)->assertOk();
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id, 'condition_id' => $this->paidConditionId()]);
+        $this->assertSame(0, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
+    }
+
+    public function test_free_order_enrolls_without_gateway(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse(0);
+
+        $response = $this->actingAs($user)
+            ->withSession(['cart' => $this->cartWithCourse($course)])
+            ->postJson(route('checkout.generate'));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('free', true);
+
+        $order = Order::where('user_id', $user->id)->latest('id')->first();
+        $this->assertNotNull($order);
+        $this->assertSame(0, (int) $order->total_order_amount);
+        $this->assertSame($this->paidConditionId(), $order->condition_id);
+        $this->assertSame(1, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
     }
 }
