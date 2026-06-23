@@ -13,6 +13,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Blog extends Model implements HasMedia
 {
@@ -35,6 +36,22 @@ class Blog extends Model implements HasMedia
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Conversión optimizada para las tarjetas del blog: webp redimensionado
+     * (cwebp disponible → optimización automática). Activar con
+     * `php artisan media-library:regenerate` tras subir miniaturas.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('card')
+            ->width(800)
+            ->format('webp')
+            ->quality(82)
+            ->optimize()
+            ->nonQueued()
+            ->performOnCollections('thumbnail');
+    }
 
     public function scopeDescending($query)
     {

@@ -16,6 +16,7 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Course extends Model implements HasMedia
 {
@@ -58,6 +59,22 @@ class Course extends Model implements HasMedia
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Conversión optimizada para las tarjetas del catálogo: webp redimensionado.
+     * cwebp está disponible, así que la imagen se optimiza automáticamente.
+     * Las imágenes existentes se generan con `php artisan media-library:regenerate`.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('card')
+            ->width(800)
+            ->format('webp')
+            ->quality(82)
+            ->optimize()
+            ->nonQueued()
+            ->performOnCollections('thumbnail');
+    }
 
     public function getActivitylogOptions(): LogOptions
     {
