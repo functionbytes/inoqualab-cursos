@@ -92,12 +92,12 @@ class CoursesController extends Controller
 
         seo()->setTitle($categorie->title)->setCanonical(url()->current());
 
-        $courses = $categorie->courses()->available()->latest()->website()->withCount(['lessons', 'chapters']);
+        $courses = $categorie->courses()->available()->latest()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters']);
         $courses = $courses->paginate(paginationNumber());
 
         $categories = CourseCategorie::select('id', 'title', 'slug')->orderBy('title')->get();
-        $recents = Course::latest()->available()->website()->withCount(['lessons', 'chapters'])->limit(3)->get();
-        $populars = Course::latest()->available()->website()->withCount(['lessons', 'chapters'])->limit(2)->get();
+        $recents = Course::latest()->available()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->limit(3)->get();
+        $populars = Course::latest()->available()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->limit(2)->get();
 
         return view('pages.views.courses.index')->with([
             'courses' => $courses,

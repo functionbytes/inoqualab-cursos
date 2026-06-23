@@ -15,9 +15,9 @@ class PagesController extends Controller
     {
         seo()->setCanonical(url('/'));
 
-        $courses = Course::latest()->available()->two(5)->website()->withCount(['lessons', 'chapters'])->get();
-        $bpms = Course::latest()->available()->one(23)->website()->withCount(['lessons', 'chapters'])->get();
-        $populars = Course::latest()->available()->featured()->website()->withCount(['lessons', 'chapters'])->get();
+        $courses = Course::latest()->available()->two(5)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get();
+        $bpms = Course::latest()->available()->one(23)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get();
+        $populars = Course::latest()->available()->featured()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get();
         $bundles = Bundle::available()->latest()->withCount('courses')->limit(4)->get();
 
         return view('pages.views.index')->with([
