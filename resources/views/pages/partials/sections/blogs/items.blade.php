@@ -7,10 +7,10 @@
                      <div class="blog-standard-item wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
                          <div class="image">
                              @if(count($blog->getMedia('thumbnail'))>0)
-                                 <img src="{{ $blog- loading="lazy">getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover" alt="..." height="440"
+                                 <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}" height="440" loading="lazy"
                                       onerror="this.src='{{ asset('/pages/images/blog/default.jpg') }}'">
                              @else
-                                 <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="..." height="440" loading="lazy">
+                                 <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}" height="440" loading="lazy">
                              @endif
                          </div>
                          <div class="blog-standard-content">

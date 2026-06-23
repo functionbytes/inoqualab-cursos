@@ -181,8 +181,6 @@ class MigrationController extends Controller
         //    $item->save();
         // }
 
-        // dd($orders);
-
         $number = 1;
 
         foreach ($orders as $item) {

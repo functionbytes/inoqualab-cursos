@@ -10,10 +10,10 @@
                     <div class="blog-details-wrap">
                         <div class="image mb-25 wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
                            @if(count($blog->getMedia('thumbnail'))>0)
-                            <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover"
+                            <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}"
                                  onerror="this.src='{{ asset('/pages/images/blog/default.jpg') }}'">
                             @else
-                            <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="...">
+                            <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}">
                             @endif
                             <a href="#"><i class="fas fa-share-alt"></i></a>
                         </div>

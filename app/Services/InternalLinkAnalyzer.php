@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class InternalLinkAnalyzer
 {
@@ -24,7 +25,11 @@ class InternalLinkAnalyzer
                         }
                     }
                 }
-            } catch (\Throwable) {
+            } catch (\Throwable $e) {
+                Log::debug('InternalLinkAnalyzer: URL inaccesible al escanear enlaces', [
+                    'url' => $url,
+                    'error' => $e->getMessage(),
+                ]);
             }
             $scanned++;
         }

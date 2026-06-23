@@ -30,7 +30,6 @@ class InscriptionsController extends Controller
     public function edit($slack)
     {
         $inscription = Inscription::slack($slack);
-        // dd($inscription);
         $user = $inscription->user;
         $enterprise = $user->enterprise;
         $course = $inscription->course;

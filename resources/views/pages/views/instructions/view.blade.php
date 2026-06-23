@@ -43,7 +43,7 @@
                                                     <div class="course-image">
                                                             <a href="{{ route('courses.view', $course->slack) }}" class="category">{{ $course->categorie->title }}</a>
                                                             <img src="{{ count($course->getMedia('thumbnail'))>0 ? $course->getfirstMedia('thumbnail')->getfullUrl() : asset('/pages/images/courses/default.jpg') }}"
-                                                                 class="card-img-top rounded-0 object-fit-cover" alt="..." height="440"
+                                                                 class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440"
                                                                  onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                                                     </div>
                                                     <div class="course-content">

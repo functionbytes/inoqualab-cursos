@@ -7,6 +7,7 @@ use App\Mail\Pages\Contact\AlertsMails;
 use App\Mail\Pages\Contact\ResponseMails;
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class ContactsController extends Controller
@@ -48,12 +49,20 @@ class ContactsController extends Controller
             try {
                 Mail::send(new AlertsMails($contact));
             } catch (\Throwable $e) {
+                Log::warning('Fallo al enviar AlertsMails de contacto', [
+                    'contact' => $contact->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
 
         try {
             Mail::send(new ResponseMails($contact));
         } catch (\Throwable $e) {
+            Log::warning('Fallo al enviar ResponseMails de contacto', [
+                'contact' => $contact->id,
+                'error' => $e->getMessage(),
+            ]);
         }
 
         return response()->json([

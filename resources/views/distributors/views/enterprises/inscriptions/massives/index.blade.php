@@ -187,8 +187,6 @@
 
                 $('.registration').attr('data-enterprise', '').attr('data-course', '').attr('data-user', '');
 
-                console.log('Cola actual:', errorQueue);
-
                 if (errorQueue.length === 0) {
                     $("#error-modal").modal("hide");
 

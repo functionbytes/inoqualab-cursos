@@ -21,6 +21,9 @@
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_DRIVER" value="array"/>
+        <!-- SQLite in-memory deshabilitado: las migraciones no son SQLite-compatibles
+             (ej. add_platform_to_course_lessons falla por orden/sintaxis MySQL). La suite
+             corre contra training_test (MySQL) en ~27s. Reactivar solo tras portar migraciones. -->
         <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
         <!-- <env name="DB_DATABASE" value=":memory:"/> -->
         <env name="MAIL_MAILER" value="array"/>

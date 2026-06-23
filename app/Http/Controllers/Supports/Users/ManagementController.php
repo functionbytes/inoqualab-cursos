@@ -354,7 +354,6 @@ class ManagementController extends Controller
 
                 $failures = $e->failures();
 
-                // dd($failures);
                 return view('supports.views.enterprises.users.users.response')->with([
                     'error_message' => $e->getMessage(),
                     'failures' => $failures,
