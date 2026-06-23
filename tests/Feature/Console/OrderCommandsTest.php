@@ -4,7 +4,10 @@ namespace Tests\Feature\Console;
 
 use App\Http\Controllers\Pages\CheckoutController;
 use App\Mail\Customers\Orders\AbandonedOrderMail;
+use App\Models\Course\Course;
+use App\Models\Inscription;
 use App\Models\Order\Order;
+use App\Models\Order\OrderItem;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
@@ -126,5 +129,52 @@ class OrderCommandsTest extends TestCase
             ->shouldReceive('processOrderStatus')->once();
 
         $this->artisan('orders:reconcile-pending')->assertExitCode(0);
+    }
+
+    // ── orders:repair-enrollments ───────────────────────────────────────────
+
+    public function test_repair_creates_missing_enrollment_for_paid_order(): void
+    {
+        Mail::fake();
+
+        $course = Course::factory()->create(['available' => 1]);
+        $order = $this->makeOrder(['condition_id' => 4], createdAt: now()->subHour()->toDateTimeString());
+        DB::table('orders')->where('id', $order->id)->update(['payment_at' => now()]);
+
+        OrderItem::create([
+            'slack' => 'oi-repair', 'order_id' => $order->id,
+            'item_id' => $course->id, 'item_type' => Course::class,
+            'quantity' => 1, 'amount' => 50000,
+        ]);
+
+        // Orden pagada sin matrícula (el enrolamiento falló).
+        $this->assertSame(0, Inscription::where('order_id', $order->id)->count());
+
+        $this->artisan('orders:repair-enrollments')->assertExitCode(0);
+
+        $this->assertSame(1, Inscription::where('order_id', $order->id)->where('course_id', $course->id)->count());
+    }
+
+    public function test_repair_skips_order_that_already_has_inscription(): void
+    {
+        Mail::fake();
+
+        $course = Course::factory()->create(['available' => 1]);
+        $order = $this->makeOrder(['condition_id' => 4], createdAt: now()->subHour()->toDateTimeString());
+        DB::table('orders')->where('id', $order->id)->update(['payment_at' => now()]);
+
+        OrderItem::create([
+            'slack' => 'oi-ok', 'order_id' => $order->id,
+            'item_id' => $course->id, 'item_type' => Course::class,
+            'quantity' => 1, 'amount' => 50000,
+        ]);
+        Inscription::factory()->create([
+            'order_id' => $order->id, 'user_id' => $order->user_id, 'course_id' => $course->id,
+        ]);
+
+        $this->artisan('orders:repair-enrollments')->assertExitCode(0);
+
+        // No se duplica la matrícula existente.
+        $this->assertSame(1, Inscription::where('order_id', $order->id)->count());
     }
 }

@@ -14,6 +14,8 @@ Schedule::command('customers:inactive_delete')->daily();
 Schedule::command('orders:reconcile-pending')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('orders:remind-abandoned --hours=12')->dailyAt('09:00');
 Schedule::command('orders:cleanup-abandoned')->daily();
+// Red de seguridad: repara matrículas de órdenes pagadas cuyo enrolamiento falló.
+Schedule::command('orders:repair-enrollments')->hourly()->withoutOverlapping();
 // Aviso de renovación de certificados: 30 y 7 días antes del vencimiento.
 Schedule::command('certificates:notify-expiring --days=30')->dailyAt('08:00');
 Schedule::command('certificates:notify-expiring --days=7')->dailyAt('08:05');

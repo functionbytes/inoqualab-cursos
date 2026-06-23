@@ -466,7 +466,7 @@ class CheckoutController extends Controller
         return true;
     }
 
-    private function createInscriptions(Order $order): void
+    public function createInscriptions(Order $order): void
     {
         // Eager-load items + bundle courses to avoid N+1 queries.
         $order->loadMissing('items');
