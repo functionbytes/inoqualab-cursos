@@ -20,3 +20,5 @@ Schedule::command('certificates:notify-expiring --days=7')->dailyAt('08:05');
 Schedule::command('mail:fetch-orders')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('mails:reparse-failed')->hourly()->withoutOverlapping();
 Schedule::command('analytics:dispatch-schedules')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+// Poda del audit trail (Spatie activitylog) según retención de config/activitylog.php (365 días).
+Schedule::command('activitylog:clean')->dailyAt('03:00')->withoutOverlapping();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Managers\ActivityLogController;
 use App\Http\Controllers\Managers\Analytics\AnalyticsReportScheduleController;
 use App\Http\Controllers\Managers\AnalyticsController;
 use App\Http\Controllers\Managers\Blogs\BlogsController;
@@ -707,6 +708,9 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/results/download/{slack}', [ResultsController::class, 'download'])->name('manager.enterprises.results.download');
 
     });
+
+    // Audit trail (Spatie activitylog) — visor de solo lectura
+    Route::get('/activity', [ActivityLogController::class, 'index'])->name('manager.activity.index');
 
     // ─── SEO ────────────────────────────────────────────────────────────────────
 

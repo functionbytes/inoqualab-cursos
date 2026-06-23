@@ -167,6 +167,16 @@
                     </a>
                 </li>
                 @endcan
+                @can('activity.view')
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('manager.activity.index') }}" aria-expanded="false">
+                          <span class="d-flex">
+                           <i class="fa-duotone fa-clock-rotate-left"></i>
+                          </span>
+                        <span class="hide-menu">Registro de actividad</span>
+                    </a>
+                </li>
+                @endcan
                 @if(setting('module_newsletter') !== 0)
                 <li class="sidebar-item">
                     <a class="sidebar-link has-arrow" href="#" aria-expanded="false">

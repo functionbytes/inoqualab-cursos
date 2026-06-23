@@ -28,7 +28,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'registers', 'blogs', 'faqs', 'testimonies', 'departments',
         'newsletters', 'incoming-mails', 'contacts', 'documents', 'instructions',
         'analytics', 'roles', 'certifications', 'categories', 'reviews',
-        'sliders', 'trusteds', 'seo',
+        'sliders', 'trusteds', 'seo', 'activity',
     ];
 
     /**
