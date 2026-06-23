@@ -45,3 +45,31 @@ El disco de media en `.env` apunta al dominio de **producción** (`https://www.c
 3. Limpiar `catalog.home` (`php artisan cache:clear` o se invalida solo al guardar un curso).
 
 Mientras tanto, **toda subida nueva** ya genera la conversión optimizada automáticamente.
+
+## Hardening del checkout / órdenes (sesión 3)
+
+El flujo de pago ya estaba muy bien construido (total server-side, idempotencia, validación monto/moneda, transición atómica). Refinamientos aplicados:
+
+| Cambio | Detalle |
+|---|---|
+| **Enum `App\Enums\OrderCondition`** | Reemplaza 14 `condition_id` mágicos (Generada=1/Pendiente=2/Rechazada=3/Pagada=4) en CheckoutController, 3 dashboards y 3 comandos. |
+| **Tests anti-fraude** | `CheckoutTest`: idempotencia (webhook duplicado no re-inscribe), rechazo por monto incorrecto, rechazo por moneda ≠ COP, orden gratis. |
+| **`orders:repair-enrollments`** | Red de seguridad: repara órdenes pagadas con ítems pero sin inscripción (si `createInscriptions` falló tras el claim atómico). Idempotente, programado cada hora. `reconcile-pending` no cubría este caso (solo mira condition_id=2). |
+| **Test de aislamiento entre clientes** | `CustomerIsolationTest`: order/certificate ajeno → 404, propio → 200. |
+
+Suite: **183 passed**.
+
+## Backlog diferido (plan preciso para retomar)
+
+### Sanitizar XSS WYSIWYG (severidad moderada — vector de inyección privilegiado)
+Campos editados en el panel admin renderizados con `{!!}` sin sanitizar: `customers/views/courses/content.blade.php:208,212,220,236,290,294` (`$course->short/learn`, `$announsment->description`, `$course->certifier->description`), `customers/views/instructions/view.blade.php:35`, `customers/views/courses/lesion.blade.php:70`.
+- `ezyang/htmlpurifier` está presente pero NO el wrapper Laravel (`clean()` no existe). Opciones: (a) `composer require mews/purifier` → `{!! clean($campo) !!}` en render; (b) helper propio con `HTMLPurifier` + `Cache.SerializerPath` a `storage/`.
+- Preferir sanitización en **render** (no mutar datos almacenados). Verificar en navegador que no rompa el HTML legítimo del aula (login de cliente).
+- Excluir los `{!! Form::select(...) !!}` de Laravel Collective (seguros).
+
+### Limpiar dead code `app/Model/` (singular)
+54 clases; solo 4 referenciadas externamente: `Wompi` (`CheckoutController:12`) y `Enterprise/Order/User` (`MigrationController:6-8`, herramienta de migración). Las ~50 restantes no tienen `use`/FQN externos PERO se referencian entre sí por string (`belongsTo('App\Model\Condition')`).
+- Plan seguro: trazar el cierre de dependencias de las 4 usadas dentro de `app/Model/` y borrar solo las clases FUERA de ese cierre; confirmar 0 referencias dinámicas (config, string class names). Considerar mover `Wompi` a `App\Models\` para eliminar el namespace legacy del flujo de checkout.
+
+### Otros (TIER 2/3, no urgentes)
+SoftDeletes en `Inscription`/`Invoice`; alinear `.claude/rules/` (lenguaje "modules/") con el monolito; `<img>` alt restantes (~49); 73 SQL raw (verificadas las de IncomingMail = parametrizadas seguras).
