@@ -67,7 +67,7 @@
                     <h1 class="lp-title">{{ ucfirst($classing->title) }}</h1>
 
                     @if ($classing->detail)
-                        <div class="lp-desc">{!! $classing->detail !!}</div>
+                        <div class="lp-desc">{!! clean($classing->detail, 'content') !!}</div>
                     @endif
 
                     @if (in_array($typeSlug, ['audio','image','pdf','zip']) && $classing->hasMedia($typeSlug))

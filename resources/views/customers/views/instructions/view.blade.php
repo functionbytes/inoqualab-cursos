@@ -32,7 +32,7 @@
             <h2 class="fs-9 fw-semibold mb-0">{{ $instruction->title }}.</h2>
         </div>
         <div class="card-body border-top p-4">
-            {!! $instruction->description !!}
+            {!! clean($instruction->description, 'content') !!}
         </div>
     </div>
 

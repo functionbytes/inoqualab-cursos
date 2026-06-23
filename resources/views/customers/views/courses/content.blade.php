@@ -205,11 +205,11 @@
                             <div class="lv-pane">
                                 @if ($course->short != null)
                                     <h3>De qué trata este curso</h3>
-                                    {!! $course->short !!}
+                                    {!! clean($course->short, 'content') !!}
                                 @endif
                                 @if ($course->learn != null)
                                     <h3 class="spaced">¿Qué aprenderás?</h3>
-                                    {!! $course->learn !!}
+                                    {!! clean($course->learn, 'content') !!}
                                 @endif
                             </div>
                         </div>
@@ -217,7 +217,7 @@
                             <div class="lv-pane">
                                 @foreach ($announsments as $announsment)
                                     <h3>{{ $announsment->title }}</h3>
-                                    <p>{!! $announsment->description !!}</p>
+                                    <p>{!! clean($announsment->description, 'content') !!}</p>
                                 @endforeach
                             </div>
                         </div>
@@ -233,7 +233,7 @@
                                     </div>
                                 </div>
                                 @if($course->certifier && $course->certifier->description != null)
-                                    <div class="lv-pane px-0 pt-3">{!! $course->certifier->description !!}</div>
+                                    <div class="lv-pane px-0 pt-3">{!! clean($course->certifier->description, 'content') !!}</div>
                                 @endif
                             </div>
                         </div>
@@ -287,11 +287,11 @@
                             <div class="lv-pane px-0">
                                 @if ($course->short != null)
                                     <h3>De qué trata este curso</h3>
-                                    {!! $course->short !!}
+                                    {!! clean($course->short, 'content') !!}
                                 @endif
                                 @if ($course->learn != null)
                                     <h3 class="spaced">¿Qué aprenderás?</h3>
-                                    {!! $course->learn !!}
+                                    {!! clean($course->learn, 'content') !!}
                                 @endif
                             </div>
                         </div>
@@ -299,7 +299,7 @@
                             <div class="lv-pane px-0">
                                 @foreach ($announsments as $announsment)
                                     <h3>{{ $announsment->title }}</h3>
-                                    <p>{!! $announsment->description !!}</p>
+                                    <p>{!! clean($announsment->description, 'content') !!}</p>
                                 @endforeach
                             </div>
                         </div>
@@ -315,7 +315,7 @@
                                     </div>
                                 </div>
                                 @if($course->certifier && $course->certifier->description != null)
-                                    <div class="lv-pane px-0 pt-3">{!! $course->certifier->description !!}</div>
+                                    <div class="lv-pane px-0 pt-3">{!! clean($course->certifier->description, 'content') !!}</div>
                                 @endif
                             </div>
                         </div>
