@@ -29,7 +29,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['web']], function () {
 
-    Route::group(['prefix' => 'migration', 'middleware' => ['auth', 'manager']], function () {
+    // Migración de datos legacy: endpoints sensibles (escriben en masa). Se añade
+    // panel.permission (exige migration.view) y throttle. TODO: convertir a POST.
+    Route::group(['prefix' => 'migration', 'middleware' => ['auth', 'manager', 'panel.permission', 'throttle:10,1']], function () {
 
         Route::get('/users', [MigrationController::class, 'users'])->name('manager.migration.users');
         Route::get('/enterprises', [MigrationController::class, 'enterprises'])->name('manager.migration.enterprises');

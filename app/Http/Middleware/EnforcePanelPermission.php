@@ -54,6 +54,9 @@ class EnforcePanelPermission
         'create' => 'create', 'store' => 'create', 'duplicate' => 'create', 'clone' => 'create',
         'edit' => 'update', 'update' => 'update',
         'destroy' => 'delete', 'delete' => 'delete', 'bulk-action' => 'delete',
+        // Acciones destructivas adicionales: sin esto degradaban a 'update' (default de escritura),
+        // dejando el borrado masivo accesible a roles con solo '{dominio}.update'.
+        'bulk-destroy' => 'delete', 'clear' => 'delete',
     ];
 
     public function handle(Request $request, Closure $next): Response
