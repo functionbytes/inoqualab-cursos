@@ -68,7 +68,7 @@
                             </div>
 
                             <div class="mobile-header-actions">
-                                <a href="{{ route('cart.index') }}" class="mobile-cart-btn position-relative">
+                                <a href="{{ route('cart.index') }}" class="mobile-cart-btn position-relative" aria-label="Carrito de compras">
                                     <i class="fas fa-shopping-cart"></i>
                                     @php $cartCount = cartUnits(); @endphp
                                     @if($cartCount > 0)
@@ -85,7 +85,7 @@
                             </div>
 
                             <!-- Toggle Button -->
-                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse" aria-label="Abrir menú" aria-expanded="false">
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
                                 <span class="icon-bar"></span>
@@ -112,8 +112,8 @@
                     <!-- Main Menu End-->
                 </div>
                 <div class="menu-btns d-lg-flex d-none align-items-center">
-                    <a href="{{ route('cart.index') }}" class="cart-btn mr-3 position-relative" style="color:inherit;">
-                        <i class="fas fa-shopping-cart fa-lg"></i>
+                    <a href="{{ route('cart.index') }}" class="cart-btn mr-3 position-relative" aria-label="Carrito de compras">
+                        <i class="fas fa-shopping-cart"></i>
                         @php $cartCount = cartUnits(); @endphp
                         @if($cartCount > 0)
                             <span class="cart-count-badge">{{ $cartCount }}</span>
@@ -131,7 +131,7 @@
                                                     <div class="d-flex align-items-center">
                                                         <div class="user-profile-img">
                                                             <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="35"
-                                                                height="35" alt="" />
+                                                                height="35" alt="Foto de perfil" />
                                                         </div>
                                                     </div>
                                                 </a>
@@ -218,7 +218,7 @@
                                 </div>
                             </div>
                     @else
-                    <a href="{{ route('login') }}" class="theme-btn">Ingresar</a>
+                    <a href="{{ route('login') }}" class="theme-btn login-icon-btn" aria-label="Ingresar"><i class="fas fa-user"></i></a>
                     @endif
                 </div>
             </div>

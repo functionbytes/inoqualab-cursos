@@ -75,7 +75,9 @@
     <div class="page-wrapper">
         @include ('pages.includes.header')
 
-        @yield('content')
+        <main>
+            @yield('content')
+        </main>
 
         @include ('pages.includes.footer')
 
@@ -110,23 +112,6 @@
     <script src="{{ url('pages/js/script.js') }}" type="text/javascript"></script>
 
     <script src="{{ url('pages/js/jquery.validate.min.js') }}" type="text/javascript"></script>
-
-    
-    <script src="https://maps.google.com/maps/api/js?sensor=false"></script>
-    <script>
-        function initialize() {
-            var latlng = new google.maps.LatLng(-34.397, 150.644);
-            var myOptions = {
-                zoom: 8,
-                center: latlng,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-            var map = new google.maps.Map(document.getElementById("map_canvas"),
-                myOptions);
-        }
-        google.maps.event.addDomListener(window, "load", initialize);
-    </script>
-
 
         @if(setting('google_analytics_enable') === 'true' && setting('google_analytics_measurement_id'))
         {{-- Google tag (gtag.js) GA4 --}}
@@ -198,21 +183,6 @@
         @endif
 
 
-        <script>
-  (function(d,t) {
-    var BASE_URL="https://chat.inoqualab.com";
-    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=BASE_URL+"/packs/js/sdk.js";
-    g.async = true;
-    s.parentNode.insertBefore(g,s);
-    g.onload=function(){
-      window.chatwootSDK.run({
-        websiteToken: 'Sn8sdgZ4toBBXcamEKoG5rco',
-        baseUrl: BASE_URL
-      })
-    }
-  })(document,"script");
-</script>
 
 
 
@@ -231,14 +201,13 @@
         <div class="added-modal" role="dialog" aria-label="Producto añadido al carrito">
             <div class="added-head">
                 <div class="added-head-title">
-                    <span class="added-check"><i class="fas fa-check"></i></span>
                     Producto añadido al carrito
                 </div>
                 <button type="button" class="added-close" id="addedClose" aria-label="Cerrar"><i class="fas fa-times"></i></button>
             </div>
             <div class="added-body">
                 <div class="added-prod">
-                    <div class="added-thumb"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="added-thumb" id="addedThumb"><i class="fas fa-graduation-cap"></i></div>
                     <div>
                         <div class="added-name" id="addedName"></div>
                         <div class="added-ref" id="addedType"></div>
@@ -255,7 +224,7 @@
                     <b id="addedSubtotal"></b>
                 </div>
                 <div class="added-actions">
-                    <a class="added-primary" id="addedCheckout" href="{{ route('checkout.cart') }}"><i class="fas fa-lock"></i> Realizar pedido</a>
+                    <a class="added-primary" id="addedCheckout" href="{{ route('checkout.cart') }}">Realizar pedido</a>
                     <button type="button" class="added-secondary" id="addedKeep">Seguir comprando</button>
                 </div>
             </div>
@@ -309,6 +278,13 @@
                     $('#addedUnit').text(fmtCOP(res.item.price));
                     $('#addedQty').text(res.item.qty);
                     $('#addedSubtotal').text(fmtCOP(res.item.line_total));
+
+                    // Miniatura real del producto; si no hay imagen, se conserva el ícono genérico.
+                    if (res.item.image) {
+                        $('#addedThumb').html('<img src="' + res.item.image + '" alt="">');
+                    } else {
+                        $('#addedThumb').html('<i class="fas fa-graduation-cap"></i>');
+                    }
 
                     // Conversión: AddToCart (si hay pixels cargados)
                     if (typeof fbq !== 'undefined') {
@@ -437,9 +413,8 @@
         });
         $btn.on('click', function () { $('html,body').animate({ scrollTop: 0 }, 380); });
 
-        // Spinner en "Ir al pago"
+        // Estado de carga en "Finalizar pago"
         $(document).on('click', '#goPayBtn', function () {
-            $('#goPayIcon').removeClass('fa-lock').addClass('fa-spinner fa-spin');
             $('#goPayText').text('Cargando...');
         });
     })();

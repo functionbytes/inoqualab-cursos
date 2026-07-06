@@ -6,18 +6,15 @@
 
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <meta charset="utf-8" />
-    <title>INOQUALAB - E-Learning</title>
+    <title>@hasSection('title')@yield('title') · @endif{{ setting('page_title') ?: 'INOQUALAB - E-Learning' }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
-    <link rel="apple-touch-icon" href="pages/ico/60.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png">
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="{{ url('pages/ico/60.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ url('pages/ico/76.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ url('pages/ico/120.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url('pages/ico/152.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
-    <meta content="Ace" name="author" />
 
     
     
@@ -195,23 +192,6 @@
 
 
 <script>
-  (function(d,t) {
-    var BASE_URL="https://chat.inoqualab.com";
-    var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=BASE_URL+"/packs/js/sdk.js";
-    g.async = true;
-    s.parentNode.insertBefore(g,s);
-    g.onload=function(){
-      window.chatwootSDK.run({
-        websiteToken: 'Sn8sdgZ4toBBXcamEKoG5rco',
-        baseUrl: BASE_URL
-      })
-    }
-  })(document,"script");
-</script>
-
-
-<script>
     "use strict"
     $(function () {
 
@@ -241,6 +221,20 @@ $(document).ajaxError(function(event, xhr) {
     }
 });
 </script>
+
+@if(session('error') || session('success') || session('warning'))
+<script>
+    @if(session('error'))
+        toastr.error({!! json_encode(session('error')) !!}, 'Aviso', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+    @endif
+    @if(session('success'))
+        toastr.success({!! json_encode(session('success')) !!}, 'Listo', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+    @endif
+    @if(session('warning'))
+        toastr.warning({!! json_encode(session('warning')) !!}, 'Aviso', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+    @endif
+</script>
+@endif
 @stack('scripts')
 
 </body>

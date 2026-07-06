@@ -86,22 +86,6 @@
         <script src="{{ url('managers/libs/select2/dist/js/select2.min.js') }}" type="text/javascript"></script>
         <script src="{{ url('managers/libs/jquery-validation/dist/jquery.validate.min.js') }}" type="text/javascript"></script>
 
-    
-    <script src="https://maps.google.com/maps/api/js?sensor=false"></script>
-    <script>
-        function initialize() {
-            var latlng = new google.maps.LatLng(-34.397, 150.644);
-            var myOptions = {
-                zoom: 8,
-                center: latlng,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-            var map = new google.maps.Map(document.getElementById("map_canvas"),
-                myOptions);
-        }
-        google.maps.event.addDomListener(window, "load", initialize);
-    </script>
-
     <script>
         (function(i, s, o, g, r, a, m) {
             i['GoogleAnalyticsObject'] = r;

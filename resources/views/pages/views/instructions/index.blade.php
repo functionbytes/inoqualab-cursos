@@ -48,7 +48,7 @@
                                                                 <a  href="{{ route('courses.view', $course->slack) }}" target="_blank">
                                                                     <div class="content">
                                                                         <div class="img">
-                                                                            <img loading="lazy" src="{{ count($course->getMedia('thumbnail'))>0 ? $course->getfirstMedia('thumbnail')->getfullUrl() : asset('/pages/images/courses/default.jpg') }}" alt=""
+                                                                            <img loading="lazy" src="{{ count($course->getMedia('thumbnail'))>0 ? $course->getfirstMedia('thumbnail')->getfullUrl() : asset('/pages/images/courses/default.jpg') }}" alt="{{ $course->title }}"
                                                                  onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                                                                         </div>
                                                                         <h3 class="fw-400 title">{{ $course->title }}</h3>

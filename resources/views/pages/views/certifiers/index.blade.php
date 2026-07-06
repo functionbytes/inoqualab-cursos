@@ -28,9 +28,9 @@
                         <div class="instructor-item wow fadeInUp delay-0-2s animated">
                             <div class="image">
                                 @if($certifier->hasMedia('thumbnail'))
-                                    <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}">
+                                    <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}" loading="lazy">
                                 @else
-                                    <img src="/pages/images/certifier/default.jpg">
+                                    <img src="/pages/images/certifier/default.jpg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}" loading="lazy">
                                 @endif
                             </div>
                             <div class="member-description">

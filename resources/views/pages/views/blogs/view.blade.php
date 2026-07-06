@@ -25,7 +25,7 @@
                         </ul>
                         <h3 class="title">{{ $blog->title }}.</h3>
                         <div class="blog-content">
-                            {!! $blog->content !!}
+                            {!! clean($blog->content, 'content') !!}
                         </div>
                         
                         <div class="tag-share pt-10">
@@ -92,16 +92,16 @@
                <div class="post-thumbnail mb--0 position-relative wp-block-image alignwide">
                    <figure>
                         @if($blog->image!=null)
-                              <img src="{{ asset('/pages/images/blog/'.$blog->image) }}" alt="image">
+                              <img src="{{ asset('/pages/images/blog/'.$blog->image) }}" alt="{{ $blog->title }}" loading="lazy">
                         @else
-                           <img src="{{ asset('/pages/images/blog/default.jpg') }}" alt="image">
+                           <img src="{{ asset('/pages/images/blog/default.jpg') }}" alt="{{ $blog->title }}" loading="lazy">
                         @endif
                    </figure>
                </div>
                
 
                <div class="post-content">
-                 {!! $blog->content !!}
+                 {!! clean($blog->content, 'content') !!}
                 </div>
                 
 

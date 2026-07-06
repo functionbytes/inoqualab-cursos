@@ -11,7 +11,7 @@
                     <div class="col-lg-8">
                         <div class="courses__breadcrumb-content">
                             <h3 class="title">{{ $bundle->title }}</h3>
-                            <p>{!! $bundle->description !!}</p>
+                            <p>{!! clean($bundle->description, 'content') !!}</p>
                             <ul class="courses__item-meta list-wrap">
                                 <li>
                                     <div class="rating">
@@ -92,10 +92,10 @@
                             <div class="event-widget">
                                 <div class="thumb">
                                     @if(count($bundle->getMedia('thumbnail'))>0)
-                                        <img src="{{ $bundle->getfirstMedia('thumbnail')->getfullUrl() }}"
+                                        <img src="{{ $bundle->getfirstMedia('thumbnail')->getfullUrl() }}" alt="{{ $bundle->title }}" loading="lazy"
                                              onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                                     @else
-                                        <img src="{{ asset('/pages/images/courses/default.jpg') }}">
+                                        <img src="{{ asset('/pages/images/courses/default.jpg') }}" alt="{{ $bundle->title }}" loading="lazy">
                                     @endif
                                     @if ($bundle->film!=null)
                                             <a href="{{ $bundle->film }}" class="popup-video"><i class="fas fa-play"></i></a>
