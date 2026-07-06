@@ -51,6 +51,7 @@ use App\Http\Controllers\Managers\NotificationsController;
 use App\Http\Controllers\Managers\Orders\OrdersController;
 use App\Http\Controllers\Managers\Orders\ReportController as OrdersReportController;
 use App\Http\Controllers\Managers\Orders\ResumenController as OrdersResumenController;
+use App\Http\Controllers\Managers\ProfileController;
 use App\Http\Controllers\Managers\Quizs\QuizController;
 use App\Http\Controllers\Managers\Quizs\TopicController as QuizTopicController;
 use App\Http\Controllers\Managers\RemarketingController;
@@ -106,6 +107,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('manager.dashboard');
+
+    // Perfil propio del manager autenticado (no requiere permiso de recurso).
+    Route::group(['prefix' => 'profile'], function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('manager.profile.edit');
+        Route::put('/', [ProfileController::class, 'update'])->name('manager.profile.update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('manager.profile.password');
+    });
 
     Route::group(['prefix' => 'roles'], function () {
         Route::get('/', [RolesController::class, 'index'])->name('manager.roles.index');

@@ -89,7 +89,7 @@
                         <a class="nav-link pe-0" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="d-flex align-items-center">
                                 <div class="user-profile-img">
-                                    <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="35" height="35" alt="" />
+                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="35" height="35" alt="Foto de perfil" onerror="this.src='{{ url('managers/images/profile/profile.jpg') }}'" />
                                 </div>
                             </div>
                         </a>
@@ -97,7 +97,7 @@
                             <div class="profile-dropdown position-relative" data-simplebar>
 
                                 <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                    <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="50" alt="" />
+                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="50" height="50" alt="Foto de perfil" onerror="this.src='{{ url('managers/images/profile/profile.jpg') }}'" />
                                     <div class="ms-3">
                                         <h5 class="mb-1 fs-3 text-uppercase">{{ Str::words(Auth::user()->firstname ,1,'') }} {{ Str::words(Auth::user()->lastname,1,'') }} </h5>
                                         <span class="mb-1 d-block text-dark">
@@ -111,6 +111,7 @@
                                 </div>
 
                                 <div class="d-grid py-4 px-7 pt-8">
+                                    <a href="{{ route('manager.profile.edit') }}" class="btn btn-outline-primary px-4 w-100 mb-2">Mi perfil</a>
                                     <form action="{{ route('logout') }}" method="POST" class="w-100">
                                         @csrf
                                         <button type="submit" class="btn btn-info px-4 waves-effect waves-light w-100">Salir</button>
