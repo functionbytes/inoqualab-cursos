@@ -207,17 +207,18 @@ class CoursesController extends Controller
         $nextLesson = CourseProgress::prevNext($lesson->id, 'next');
 
         if ($nextLesson !== 'true') {
-            return $this->redirectToNextLesson($nextLesson);
+            return $this->redirectToNextLesson($nextLesson, $inscription);
         }
 
         return redirect()->route('customers.courses.content', $inscription->slack);
     }
 
-    private function redirectToNextLesson($nextLesson)
+    private function redirectToNextLesson($nextLesson, $inscription)
     {
 
         if (! $nextLesson) {
-            return redirect()->route('customers.courses.content');
+            // Faltaba el {slug} -> UrlGenerationException (500). Se vuelve al contenido del curso.
+            return redirect()->route('customers.courses.content', $inscription->slack);
         }
 
         if (! isset($nextLesson->type_id) || ! is_numeric($nextLesson->type_id)) {
