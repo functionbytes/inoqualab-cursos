@@ -29,12 +29,17 @@ class InvoicesController extends Controller
         $invoices = $distributor->invoices()->with(['distributor', 'condition', 'method']);
 
         if ($searchKey) {
-            $invoices = $invoices->where('reference', 'like', '%'.$searchKey.'%')
-                ->orWhereHas('distributor', function ($query) use ($searchKey) {
-                    $query->where('title', 'like', '%'.$searchKey.'%')
-                        ->orWhere('nit', 'like', '%'.$searchKey.'%')
-                        ->orWhere('email', 'like', '%'.$searchKey.'%');
-                });
+            // Envuelto en un closure: sin esto, el orWhereHas quedaba al mismo
+            // nivel que el WHERE distributor_id del scope base y lo anulaba,
+            // mezclando facturas de otro distribuidor en los resultados.
+            $invoices = $invoices->where(function ($query) use ($searchKey) {
+                $query->where('reference', 'like', '%'.$searchKey.'%')
+                    ->orWhereHas('distributor', function ($query) use ($searchKey) {
+                        $query->where('title', 'like', '%'.$searchKey.'%')
+                            ->orWhere('nit', 'like', '%'.$searchKey.'%')
+                            ->orWhere('email', 'like', '%'.$searchKey.'%');
+                    });
+            });
         }
 
         if ($method) {

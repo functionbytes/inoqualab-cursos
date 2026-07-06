@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -45,6 +46,13 @@ class SeoRedirectController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $this->guardAgainstRedirectLoop(
+            $validated['source_path'],
+            $validated['target_path'],
+            $validated['is_regex'] ?? false,
+            $validated['is_wildcard'] ?? false,
+        );
+
         SeoRedirect::create($validated);
         SeoRedirect::clearCache();
 
@@ -71,6 +79,14 @@ class SeoRedirectController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $this->guardAgainstRedirectLoop(
+            $validated['source_path'],
+            $validated['target_path'],
+            $validated['is_regex'] ?? $seoRedirect->is_regex,
+            $validated['is_wildcard'] ?? $seoRedirect->is_wildcard,
+            $seoRedirect->id,
+        );
+
         $seoRedirect->update($validated);
         SeoRedirect::clearCache();
 
@@ -78,6 +94,28 @@ class SeoRedirectController extends Controller
             'success' => true,
             'message' => 'Redirección actualizada correctamente.',
         ]);
+    }
+
+    /**
+     * Rechaza el guardado si el redirect apunta a sí mismo o si, combinado con los
+     * redirects activos existentes, formaría un ciclo (bucle infinito de
+     * redirecciones para el visitante público). Ver RedirectChainDetector.
+     */
+    private function guardAgainstRedirectLoop(
+        string $sourcePath,
+        string $targetPath,
+        bool $isRegex,
+        bool $isWildcard,
+        ?int $ignoreId = null,
+    ): void {
+        $source = SeoRedirect::normalizeSourcePath($sourcePath, $isRegex, $isWildcard);
+        $target = SeoRedirect::normalizeTargetPath($targetPath);
+
+        if ((new RedirectChainDetector)->wouldCreateCycle($source, $target, $ignoreId)) {
+            throw ValidationException::withMessages([
+                'target_path' => 'El destino no puede apuntar a sí mismo ni crear un ciclo con otra redirección existente.',
+            ]);
+        }
     }
 
     public function destroy(SeoRedirect $seoRedirect): JsonResponse
@@ -281,7 +319,7 @@ class SeoRedirectController extends Controller
 
         return response()->streamDownload(function () {
             $handle = fopen('php://output', 'w');
-            fputcsv($handle, ['source_path', 'target_path', 'status_code', 'is_active', 'hits_count']);
+            fputcsv($handle, ['source_path', 'target_path', 'status_code', 'is_active', 'hits_count'], ',', '"', '\\');
 
             SeoRedirect::query()->orderBy('source_path')->each(function (SeoRedirect $r) use ($handle) {
                 fputcsv($handle, [
@@ -290,7 +328,7 @@ class SeoRedirectController extends Controller
                     $r->status_code,
                     $r->is_active ? '1' : '0',
                     $r->hits_count,
-                ]);
+                ], ',', '"', '\\');
             });
 
             fclose($handle);

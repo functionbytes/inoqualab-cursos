@@ -26,13 +26,24 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => 'customer',
             'available' => 1,
             'verified' => 1,
             'validation' => 1,
             'terms' => 1,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * `role` no está en `$fillable` (evita mass assignment vía request), así
+     * que se asigna por propiedad directa tras construir el modelo en vez de
+     * ir en `definition()`.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (User $user) {
+            $user->role ??= 'customer';
+        });
     }
 
     public function unverified(): static
@@ -52,7 +63,9 @@ class UserFactory extends Factory
     /** Asigna un rol concreto (columna `role`; el observer sincroniza Spatie). */
     public function role(string $role): static
     {
-        return $this->state(fn (array $attributes) => ['role' => $role]);
+        return $this->afterMaking(function (User $user) use ($role) {
+            $user->role = $role;
+        });
     }
 
     public function manager(): static

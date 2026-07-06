@@ -9,7 +9,6 @@ use App\Models\Course\Course;
 use App\Models\Course\CourseLesson;
 use App\Models\Course\CourseProgress;
 use App\Models\Course\CourseReview;
-use App\Models\Exam\Exam;
 use App\Models\Inscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -37,6 +36,7 @@ class CoursesController extends Controller
 
         $user = app('customer');
         $inscription = Inscription::where('slack', $slack)->where('user_id', $user->id)->firstOrFail();
+        $this->assertInscriptionActive($inscription);
         $course = $inscription->course;
         $exam = $inscription->exam;
         $progress = $inscription->progress;
@@ -45,8 +45,9 @@ class CoursesController extends Controller
 
         if ($exam && $exam->score >= $this->passingScoreFor($exam)) {
             $certificate = $inscription->certificate;
-        } elseif ($progress->count() >= 100) {
-            $exam = $this->createExamIfNeeded($inscription, $course);
+        } elseif ((float) $inscription->percent >= 100) {
+            // Red de seguridad: si el curso ya está completo y el examen no existe, crearlo aquí.
+            $exam = $exam ?: $this->ensureExamCreated($inscription, $course);
         }
 
         rescue(fn () => Cache::put('inscription'.$user->slack, $inscription->slack, 6000), null, false);
@@ -74,6 +75,7 @@ class CoursesController extends Controller
         $course = $lessoning->course;
 
         $inscription = $this->resolveInscription($user, $course->id);
+        $this->assertInscriptionActive($inscription);
 
         // A3: bloquear acceso por URL si no respeta el orden del curso
         $this->assertLessonAccessible($lessoning, $inscription, $user->id);
@@ -136,7 +138,7 @@ class CoursesController extends Controller
             ->where('course_id', $lesson->course_id)
             ->first();
 
-        if (! $inscription) {
+        if (! $inscription || (int) $inscription->expire === 1) {
             abort(403);
         }
 
@@ -180,6 +182,7 @@ class CoursesController extends Controller
         $user = app('customer');
         $lesson = CourseLesson::findOrFail($request->lesson);
         $inscription = $this->resolveInscription($user, $lesson->course_id);
+        $this->assertInscriptionActive($inscription);
 
         // Impide marcar lecciones fuera de orden por POST (desbloquearía el certificado).
         $this->assertLessonAccessible($lesson, $inscription, $user->id);
@@ -233,6 +236,7 @@ class CoursesController extends Controller
         $user = app('customer');
         $lessoning = CourseLesson::id($request->lesson);
         $inscription = $this->resolveInscription($user, $lessoning->course_id);
+        $this->assertInscriptionActive($inscription);
         $nextLesson = CourseProgress::prevNext($lessoning->id, 'prev');
 
         if ($nextLesson != 'true') {
@@ -292,30 +296,6 @@ class CoursesController extends Controller
         return back()->with('success', '¡Gracias por calificar este curso!');
     }
 
-    private function createExamIfNeeded($inscription, $course)
-    {
-
-        $topic = $course->examtopic;
-
-        if (! $topic) {
-            return null;
-        }
-
-        $existingExam = Exam::where('inscription_id', $inscription->id)->first();
-
-        if ($existingExam) {
-            return $existingExam;
-        } else {
-            return Exam::create([
-                'inscription_id' => $inscription->id,
-                'topic_id' => $topic->id,
-                'course_id' => $course->id,
-                'user_id' => $inscription->user_id,
-            ]);
-        }
-
-    }
-
     private function createOrUpdateProgress($user, $course, $lesson, $inscription)
     {
 
@@ -351,7 +331,7 @@ class CoursesController extends Controller
     private function handleCourseCompletion($inscription)
     {
 
-        $exam = $this->createExamIfNeeded($inscription, $inscription->course);
+        $exam = $this->ensureExamCreated($inscription, $inscription->course);
 
         if ($exam && $exam->score < $this->passingScoreFor($exam)) {
             return redirect()->route('customers.courses.exam', $inscription->course->slack);

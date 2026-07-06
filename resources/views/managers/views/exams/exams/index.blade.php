@@ -17,9 +17,10 @@
                         <p class="mb-0 text-muted">Gestiona los examenes y sus preguntas</p>
                     </div>
                     <div class="ms-auto">
-                        <a href="{{ route('manager.courses.exam.create', $course->slack) }}" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary btn-new-exam"
+                                data-bs-toggle="modal" data-bs-target="#exam-modal">
                             Nuevo examen
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -45,10 +46,9 @@
                         @php
                             $activeFilters = (int)(($available ?? '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders me-1"></i>
-                            Filtros
+                            <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
@@ -105,8 +105,8 @@
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a class="dropdown-item"
-                                                           href="{{ route('manager.courses.exam.edit', $exam->slack) }}">
+                                                        <a class="dropdown-item btn-edit-exam" href="#"
+                                                           data-slack="{{ $exam->slack }}">
                                                             Editar
                                                         </a>
                                                     </li>
@@ -148,9 +148,10 @@
                                 Ver todos
                             </a>
                         @else
-                            <a href="{{ route('manager.courses.exam.create', $course->slack) }}" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary btn-new-exam"
+                                    data-bs-toggle="modal" data-bs-target="#exam-modal">
                                 Nuevo examen
-                            </a>
+                            </button>
                         @endif
                     </div>
                 @endif
@@ -198,6 +199,101 @@
         </div>
     </div>
 
+    {{-- Crear / Editar examen --}}
+    <div class="modal fade" id="exam-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form id="formExam">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="examModalTitle">Nuevo examen</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="examSlack" name="slack" value="">
+                        <input type="hidden" name="course" value="{{ $course->slack }}">
+
+                        <p class="text-muted mb-3">
+                            Configura el examen final de este curso. Después de guardarlo podrás agregar sus preguntas.
+                        </p>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="examTitle" name="title" maxlength="200" placeholder="Ingresar título">
+                                <label id="title-error" class="error d-none" for="examTitle"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Modalidad <span class="text-danger">*</span></label>
+                                <select class="select2 form-control" id="examType" name="type" data-placeholder="Selecciona la modalidad">
+                                    @foreach($types as $optId => $optLabel)
+                                        <option value="{{ $optId }}">{{ $optLabel }}</option>
+                                    @endforeach
+                                </select>
+                                <label id="type-error" class="error d-none" for="examType"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">¿Permite repetir el examen? <span class="text-danger">*</span></label>
+                                <select class="select2 form-control" id="examDuration" name="duration">
+                                    <option value="1">Sí</option>
+                                    <option value="0">No</option>
+                                </select>
+                                <label id="duration-error" class="error d-none" for="examDuration"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Vigencia (días) <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="examDay" name="day" placeholder="Ej: 365">
+                                <small class="form-text text-muted">Días que el examen permanece disponible para el alumno</small>
+                                <label id="day-error" class="error d-none" for="examDay"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tiempo límite (minutos) <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="examTimer" name="timer" placeholder="Ej: 60">
+                                <label id="timer-error" class="error d-none" for="examTimer"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Cantidad preguntas <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="examQuestion" name="question" placeholder="Ingresar cantidad preguntas">
+                                <label id="question-error" class="error d-none" for="examQuestion"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Preguntas correctas <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="examMark" name="mark" placeholder="Ingresar cantidad de preguntas correctas">
+                                <label id="mark-error" class="error d-none" for="examMark"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                                <select class="select2 form-control" id="examAvailable" name="available">
+                                    @foreach($availables as $optId => $optLabel)
+                                        <option value="{{ $optId }}">{{ $optLabel }}</option>
+                                    @endforeach
+                                </select>
+                                <label id="available-error" class="error d-none" for="examAvailable"></label>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Detalle</label>
+                                <div class="quill-wrapper">
+                                    <div id="examDescription"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer flex-column">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Guardar</button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @include('managers.includes.delete')
 
 @endsection
@@ -229,6 +325,173 @@ $(function () {
         $('#delete-modal .modal-title').text($btn.data('title'));
         $('#delete-form').attr('action', $btn.data('url'));
         $('#delete-modal').modal('show');
+    });
+
+    // ── Crear / Editar examen (modal) ──────────────────────────────────────────
+    var examQuill = null;
+    var examMode = 'create';
+
+    function initExamQuill() {
+        if (examQuill) return;
+        examQuill = new Quill('#examDescription', {
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link'],
+                    ['clean'],
+                ],
+            },
+            placeholder: 'Escriba aquí...',
+            theme: 'snow',
+        });
+    }
+
+    // El script global (select2.init.js) ya auto-inicializa ".select2" en
+    // documentReady SIN dropdownParent (el select vive oculto dentro del modal
+    // en ese momento) — su dropdown terminaría flotando sobre <body> en vez del
+    // modal. Por eso se destruye esa instancia y se re-crea con las opciones
+    // correctas cada vez que el modal se abre.
+    function initExamSelect2(selector) {
+        var $select = $(selector);
+        if (!$select.length) return;
+        if ($select.hasClass('select2-hidden-accessible')) $select.select2('destroy');
+        $select.select2({ dropdownParent: $('#exam-modal'), width: '100%', placeholder: $select.data('placeholder') });
+    }
+
+    function initExamSelects() {
+        initExamSelect2('#examType');
+        initExamSelect2('#examDuration');
+        initExamSelect2('#examAvailable');
+    }
+
+    var examValidator = $('#formExam').validate({
+        ignore: '.ignore',
+        rules: {
+            title: { required: true, minlength: 3, maxlength: 200 },
+            type: { required: true },
+            duration: { required: true },
+            day: { required: true, number: true, min: 0, max: 999 },
+            timer: { required: true, number: true, min: 0, max: 999 },
+            question: { required: true, number: true, min: 0, max: 999 },
+            mark: { required: true, number: true, min: 0, max: 999 },
+            available: { required: true },
+        },
+        messages: {
+            title: {
+                required: 'El título es obligatorio.',
+                minlength: 'Debe contener al menos 3 caracteres.',
+                maxlength: 'Debe contener como máximo 200 caracteres.',
+            },
+            type: { required: 'Selecciona una opción.' },
+            duration: { required: 'Selecciona una opción.' },
+            day: { required: 'El campo es obligatorio.', number: 'Solo se pueden ingresar números.', min: 'Debe ser mayor o igual a 0.', max: 'Debe ser menor a 999.' },
+            timer: { required: 'El campo es obligatorio.', number: 'Solo se pueden ingresar números.', min: 'Debe ser mayor o igual a 0.', max: 'Debe ser menor a 999.' },
+            question: { required: 'El campo es obligatorio.', number: 'Solo se pueden ingresar números.', min: 'Debe ser mayor o igual a 0.', max: 'Debe ser menor a 999.' },
+            mark: { required: 'El campo es obligatorio.', number: 'Solo se pueden ingresar números.', min: 'Debe ser mayor o igual a 0.', max: 'Debe ser menor a 999.' },
+            available: { required: 'Selecciona un estado.' },
+        },
+        errorPlacement: function (error, element) {
+            error.insertAfter(element).addClass('error').removeClass('d-none');
+        },
+        submitHandler: function (form) {
+            var isEdit = examMode === 'edit';
+            var url = isEdit
+                ? "{{ route('manager.courses.exam.update') }}"
+                : "{{ route('manager.courses.exam.store') }}";
+
+            var payload = $(form).serializeArray().reduce(function (acc, field) {
+                acc[field.name] = field.value;
+                return acc;
+            }, {});
+            payload.description = examQuill ? examQuill.root.innerHTML.replace('<p><br></p>', '') : '';
+
+            var $submitButton = $('#formExam button[type="submit"]').prop('disabled', true);
+            var submitOriginalText = $submitButton.text();
+            $submitButton.text('Guardando...');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken },
+                data: payload,
+                success: function (response) {
+                    $submitButton.prop('disabled', false).text(submitOriginalText);
+                    if (response.success) {
+                        $('#exam-modal').modal('hide');
+                        toastr.success(response.message);
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else {
+                        toastr.warning(response.message || 'No se pudo guardar.');
+                    }
+                },
+                error: function () {
+                    $submitButton.prop('disabled', false).text(submitOriginalText);
+                    toastr.error('Ocurrió un error al guardar el examen.');
+                },
+            });
+        },
+    });
+
+    function resetExamForm() {
+        $('#formExam')[0].reset();
+        examValidator.resetForm();
+        $('#formExam .is-invalid').removeClass('is-invalid');
+        $('#examSlack').val('');
+        // .reset() no dispara 'change': select2 necesita el evento para refrescar su UI.
+        $('#examType, #examDuration, #examAvailable').trigger('change');
+        if (examQuill) examQuill.setText('');
+    }
+
+    function populateExamForm(data) {
+        $('#examSlack').val(data.slack);
+        $('#examTitle').val(data.title);
+        $('#examType').val(String(data.type)).trigger('change');
+        $('#examDuration').val(String(data.duration)).trigger('change');
+        $('#examDay').val(data.day);
+        $('#examTimer').val(data.timer);
+        $('#examQuestion').val(data.question);
+        $('#examMark').val(data.mark);
+        $('#examAvailable').val(String(data.available)).trigger('change');
+        examQuill.root.innerHTML = data.description || '';
+    }
+
+    // Abrir en modo "crear"
+    $(document).on('click', '.btn-new-exam', function () {
+        examMode = 'create';
+        $('#examModalTitle').text('Nuevo examen');
+    });
+
+    $('#exam-modal').on('shown.bs.modal', function () {
+        initExamQuill();
+        initExamSelects();
+        if (examMode === 'create') resetExamForm();
+    });
+
+    // Abrir en modo "editar": trae los datos vía AJAX y precarga el modal.
+    $(document).on('click', '.btn-edit-exam', function (e) {
+        e.preventDefault();
+        var slack = $(this).data('slack');
+
+        $.getJSON("{{ url('panel/courses/exam/edit') }}/" + slack, function (data) {
+            examMode = 'edit';
+            $('#examModalTitle').text('Editar examen');
+            $('#exam-modal').modal('show');
+
+            var applyData = function () {
+                initExamQuill();
+                initExamSelects();
+                populateExamForm(data);
+            };
+
+            if ($('#exam-modal').hasClass('show')) {
+                applyData();
+            } else {
+                $('#exam-modal').one('shown.bs.modal', applyData);
+            }
+        }).fail(function () {
+            toastr.error('No se pudo cargar el examen.');
+        });
     });
 
 });

@@ -90,8 +90,6 @@
 @push('scripts')
 
     <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
         $(document).ready(function() {
 
             jQuery.validator.addMethod(
@@ -147,12 +145,6 @@
                         minlength: "Debe contener al menos 3 caracter",
                         maxlength: "Debe contener al menos 100 caracter",
                     },
-                    identification: {
-                        required: "El parametro es necesario.",
-                        number: 'Solo se puede ingresar números.',
-                        minlength: "Debe contener al menos 3 caracter",
-                        maxlength: "Debe contener al menos 100 caracter",
-                    },
                     email: {
                         required: 'Tu email ingresar correo electrónico es necesario.',
                         email: 'Por favor, introduce una dirección de correo electrónico válida.',
@@ -170,22 +162,19 @@
                     var slack = $("#slack").val();
                     var firstname = $("#firstname").val();
                     var lastname = $("#lastname").val();
-                    var identification = $("#identification").val();
                     var cellphone = $("#cellphone").val();
                     var email = $("#email").val();
                     var password = $("#password").val();
-                    var enterprise = $("#enterprise").val();
-                    var address = $("#address").val();
 
                     formData.append('slack', slack);
-                    formData.append('enterprise', enterprise);
                     formData.append('firstname', firstname);
                     formData.append('lastname', lastname);
-                    formData.append('identification', identification);
                     formData.append('cellphone', cellphone);
                     formData.append('email', email);
-                    formData.append('address', address);
                     formData.append('password', password);
+
+                    var $submitButton = $('button[type="submit"]');
+                    $submitButton.prop('disabled', true);
 
                     $.ajax({
                         url: "{{ route('accounting.profile.update') }}",
@@ -198,8 +187,9 @@
                         data: formData,
                         success: function(response) {
 
-                             if(response.success == true){
+                             $submitButton.prop('disabled', false);
 
+                             if(response.success == true){
 
                                  toastr.success("Se ha editado correctamente el perfil.", "Operación exitosa", {
                                      closeButton: true,
@@ -225,6 +215,29 @@
                                 $('.errors').html(error);
                             }
 
+                        },
+                        error: function(xhr) {
+
+                            $submitButton.prop('disabled', false);
+
+                            var messages = [];
+
+                            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                $.each(xhr.responseJSON.errors, function(field, errs) {
+                                    messages.push(errs[0]);
+                                });
+                            } else {
+                                messages.push('Se ha generado un error inesperado.');
+                            }
+
+                            toastr.warning("Revisa los datos del formulario.", "Operación fallida", {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-bottom-right"
+                            });
+
+                            $('.errors').removeClass('d-none');
+                            $('.errors').html(messages.join('<br>'));
                         }
                     });
 

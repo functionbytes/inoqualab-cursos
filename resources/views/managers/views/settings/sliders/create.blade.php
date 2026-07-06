@@ -22,7 +22,7 @@
                             <h5 class="mb-0">Imagen</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Sube la imagen que se mostrará en el banner.
                         </p>
                         <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
@@ -37,7 +37,7 @@
                             <h5 class="mb-0">Crear noticia</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos del banner. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
 
                         <div class="row">

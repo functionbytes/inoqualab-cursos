@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RegistersController extends Controller
@@ -42,31 +43,35 @@ class RegistersController extends Controller
             return response()->json(['success' => false, 'message' => 'La identificación ya está registrada en nuestro sistema.']);
         }
 
-        $user = new User;
-        $user->slack = $this->generate_slack('users');
-        $user->firstname = Str::upper($request->firstname);
-        $user->lastname = Str::upper($request->lastname);
-        $user->cellphone = $request->cellphone;
-        $user->identification = $request->identification;
-        $user->email = $request->email;
-        $user->address = $request->address;
-        $user->password = $request->filled('password') ? $request->password : $request->identification;
-        $user->available = 1;
-        $user->role = 'customer';
-        $user->terms = 1;
-        $user->page = 0;
-        $user->setting = 0;
-        $user->validation = 1;
-        $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
-        $user->save();
+        DB::transaction(function () use ($request, $enterprise) {
+            $user = new User;
+            $user->slack = $this->generate_slack('users');
+            $user->firstname = Str::upper($request->firstname);
+            $user->lastname = Str::upper($request->lastname);
+            $user->cellphone = $request->cellphone;
+            $user->identification = $request->identification;
+            $user->email = $request->email;
+            $user->address = $request->address;
+            // Sin password explícita, un valor aleatorio (no la identificación,
+            // un dato semi-público) — el cliente la establece vía "olvidé mi contraseña".
+            $user->password = $request->filled('password') ? $request->password : Str::random(16);
+            $user->available = 1;
+            $user->role = 'customer';
+            $user->terms = 1;
+            $user->page = 0;
+            $user->setting = 0;
+            $user->validation = 1;
+            $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
+            $user->save();
 
-        $inscription = new EnterpriseUser;
-        $inscription->user_id = $user->id;
-        $inscription->enterprise_id = $enterprise->id;
-        $inscription->available = 1;
-        $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->save();
+            $inscription = new EnterpriseUser;
+            $inscription->user_id = $user->id;
+            $inscription->enterprise_id = $enterprise->id;
+            $inscription->available = 1;
+            $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
+            $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
+            $inscription->save();
+        });
 
         return response()->json(['success' => true, 'message' => 'Se ha inscrito el cliente.']);
     }
@@ -84,7 +89,18 @@ class RegistersController extends Controller
 
                 $enterprise = Enterprise::find($enterpriseUser->enterprise_id);
 
-                if ($enterprise) {
+                // Ownership: si la empresa del usuario NO pertenece al distribuidor
+                // autenticado, no revelar nombre de empresa ni de distribuidor ajeno
+                // (evita mapear la cartera de clientes de un competidor).
+                $managed = $enterprise && app('distributor')->enterprises()->where('enterprises.id', $enterprise->id)->exists();
+
+                if (! $managed) {
+                    $response = [
+                        'success' => true,
+                        'message' => 'Este usuario ya está registrado en otra empresa.',
+                        'enterprise' => null,
+                    ];
+                } elseif ($enterprise) {
 
                     $distributorEnterprise = DistributorEnterprise::where('enterprise_id', $enterprise->id)->first();
 
@@ -96,7 +112,7 @@ class RegistersController extends Controller
                             'success' => true,
                             'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
                             'enterprise' => $enterprise->title,
-                            'distributor' => $distributor->title,
+                            'distributor' => $distributor?->title,
                             'url_reassign' => route('distributor.enterprises.users.reassign', ['slack' => $user->slack]),
                             'url_enterprise' => route('distributor.enterprises.users', ['slack' => $enterprise->slack]),
 

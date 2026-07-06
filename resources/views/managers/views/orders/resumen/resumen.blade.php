@@ -104,7 +104,7 @@
                                 <span class="usr-email-addr" data-email="{{$order->slack }}">{{$order->slack }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" data-email="{{ strtoupper($order->user->firstname . ' ' . $order->user->lastname)  }}">{{strtoupper($order->user->firstname . ' ' . $order->user->lastname) }}</span>
+                                <span class="usr-email-addr" data-email="{{ ($order->user ? strtoupper($order->user->firstname.' '.$order->user->lastname) : 'USUARIO ELIMINADO')  }}">{{($order->user ? strtoupper($order->user->firstname.' '.$order->user->lastname) : 'USUARIO ELIMINADO') }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light-{{$order->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
@@ -132,7 +132,7 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                             <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.orders.view',$order->slack) }}">Visualizar</a>
+                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('manager.orders.view', $order->slack) }}">Visualizar</a>
                                             </li>
                                     </ul>
                                 </div>

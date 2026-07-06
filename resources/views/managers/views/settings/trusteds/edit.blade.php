@@ -22,7 +22,7 @@
                             <h5 class="mb-0">Imagen</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Sube el logo de la empresa aliada.
                         </p>
                         <div class="dropzone dz-clickable dz-started" id="thumbnail">
                             <div class="fallback">
@@ -38,7 +38,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Actualiza los datos de la empresa aliada. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">

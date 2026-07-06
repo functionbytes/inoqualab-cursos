@@ -40,7 +40,7 @@
                     <p class="ar-rate-done">
                         <span class="ar-rate-stars">
                             @for ($s = 1; $s <= 5; $s++)
-                                <i class="{{ $s <= $userReview->rating ? 'fa-solid' : 'fa-regular' }} fa-star"></i>
+                                <i class="fa-solid fa-star{{ $s <= $userReview->rating ? ' is-filled' : '' }}"></i>
                             @endfor
                         </span>
                         Ya calificaste este curso con {{ $userReview->rating }}/5. ¡Gracias!
@@ -53,7 +53,7 @@
                         <input type="hidden" name="rating" id="rateValue" value="">
                         <div class="ar-stars" id="rateStars">
                             @for ($s = 1; $s <= 5; $s++)
-                                <button type="button" class="star" data-val="{{ $s }}" aria-label="{{ $s }} estrellas"><i class="fa-regular fa-star"></i></button>
+                                <button type="button" class="star" data-val="{{ $s }}" aria-label="{{ $s }} estrellas"><i class="fa-solid fa-star"></i></button>
                             @endfor
                         </div>
                         <textarea name="comment" class="ar-comment" rows="3" placeholder="Cuéntanos tu opinión sobre el curso (opcional)…" maxlength="1000"></textarea>
@@ -119,7 +119,7 @@
         function paint(val) {
             stars.forEach(function (s) {
                 var v = parseInt(s.getAttribute('data-val'), 10);
-                s.querySelector('i').className = (v <= val ? 'fa-solid' : 'fa-regular') + ' fa-star';
+                s.querySelector('i').className = 'fa-solid fa-star' + (v <= val ? ' is-filled' : '');
             });
         }
         stars.forEach(function (s) {

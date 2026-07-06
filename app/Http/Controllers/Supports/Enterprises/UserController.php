@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Supports\Enterprises;
 
-use App\Exports\Distributors\IncomesExport;
+use App\Exports\Supports\IncomesExport;
+use App\Exports\Supports\UsersExport;
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Supports\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Supports\Concerns\ValidatesUniqueUserFields;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorEnterprise;
@@ -51,60 +52,6 @@ class UserController extends Controller
             'available' => $available,
             'searchKey' => $searchKey,
         ]);
-    }
-
-    public function reassign($slack)
-    {
-
-        $user = User::slack($slack);
-        $enterprise = $user->getEnterprise();
-
-        $distributor = app('support');
-        $enterprises = $distributor->enterprises;
-        $enterprises->prepend('', '');
-        $enterprises = $enterprises->pluck('title', 'slack');
-
-        $enterprises = $enterprises->forget($enterprise->slack);
-
-        return view('supports.views.enterprises.users.users.reassign')->with([
-            'user' => $user,
-            'enterprises' => $enterprises,
-            'enterprise' => $enterprise,
-        ]);
-
-    }
-
-    public function reassignUser(Request $request)
-    {
-
-        $user = User::slack($request->slack);
-        $newEnterprise = Enterprise::slack($request->enterprise);
-
-        if (! $user || ! $newEnterprise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuario o empresa no encontrados.']);
-        }
-
-        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
-
-        if ($enterpriseUser) {
-
-            $enterpriseUser->enterprise_id = $newEnterprise->id;
-            $enterpriseUser->save();
-
-            return response()->json([
-                'success' => true,
-                'enterprise' => $newEnterprise->slack,
-                'message' => 'Usuario reasignado a la nueva empresa correctamente.',
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'No se encontró la relación del usuario con la empresa.',
-        ]);
-
     }
 
     public function create($slack)
@@ -204,7 +151,9 @@ class UserController extends Controller
             $user->identification = $request->identification;
             $user->email = $request->email;
             $user->address = $request->address;
-            $user->password = $request->filled('password') ? $request->password : $request->identification;
+            // Sin password explícita, un valor aleatorio (no la identificación,
+            // un dato semi-público) — el cliente la establece vía "olvidé mi contraseña".
+            $user->password = $request->filled('password') ? $request->password : Str::random(16);
             $user->role = 'customer';
             $user->available = 1;
             $user->terms = 1;
@@ -287,8 +236,9 @@ class UserController extends Controller
     public function generate(Request $request)
     {
 
+        // UsersExport necesita el modelo (llama $this->enterprise->users()), no un id crudo.
         $modalitie = $request->modalitie;
-        $enterprise = $request->enterprise;
+        $enterprise = Enterprise::where('id', $request->enterprise)->firstOrFail();
 
         return Excel::download(new UsersExport($enterprise, $modalitie), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }

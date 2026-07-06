@@ -110,7 +110,7 @@ El widget se inyecta en sitios de terceros. Debe:
 - Animaciones suaves (no jarring)
 - Accesible (ARIA, keyboard navigation, focus management)
 
-**Colores del widget**: configurables desde el admin (primario viene del setting). Default: `#90bb13`. Adaptar automáticamente contraste del texto sobre el color de fondo (wcag aa).
+**Colores del widget**: configurables desde el admin (primario viene del setting). Default: `#008bcd`. Adaptar automáticamente contraste del texto sobre el color de fondo (wcag aa).
 
 ### B.2 Launcher (Estado cerrado)
 

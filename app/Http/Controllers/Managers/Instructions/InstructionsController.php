@@ -16,7 +16,7 @@ class InstructionsController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $instructions = Instruction::descending();
+        $instructions = Instruction::descending()->with('categorie');
 
         if ($searchKey) {
             $instructions = $instructions->where('title', 'like', '%'.$searchKey.'%');

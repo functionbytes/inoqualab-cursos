@@ -20,6 +20,7 @@ class UserController extends Controller
 {
     public function index(Request $request, $slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
         $searchKey = $request->search;
@@ -48,6 +49,7 @@ class UserController extends Controller
 
     public function create($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -67,6 +69,7 @@ class UserController extends Controller
 
     public function edit($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
         $user = User::slack($slack);
 
@@ -89,6 +92,8 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
         $user = User::slack($request->slack);
 
         abort_unless($user instanceof User, 404);
@@ -150,6 +155,8 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
+
         $enterprise = Enterprise::slack($request->enterprise);
 
         $emailExists = User::where('email', $request->email)->exists();
@@ -200,6 +207,7 @@ class UserController extends Controller
 
     public function report($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -219,6 +227,7 @@ class UserController extends Controller
 
     public function income($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -235,6 +244,7 @@ class UserController extends Controller
 
     public function import($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -244,25 +254,23 @@ class UserController extends Controller
 
     }
 
-    public function importation(Request $request)
+    public function importation(ImportUsersRequest $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
-        $enterprise = Enterprise::slack($request->enterprise);
+        $enterprise = Enterprise::slack($request->validated('enterprise'));
 
-        if ($request->hasFile('file') && $request->file('file')->isValid()) {
+        try {
+            Excel::import(new UsersImport($enterprise->slack), $request->file('file'));
+        } catch (ValidationException $e) {
 
-            try {
-                Excel::import(new UsersImport($enterprise->slack), request()->file('file'));
-            } catch (ValidationException $e) {
+            $failures = $e->failures();
 
-                $failures = $e->failures();
-
-                return view('managers.views.enterprises.users.response')->with([
-                    'error_message' => $e->getMessage(),
-                    'failures' => $failures,
-                    'enterprise' => $enterprise,
-                ]);
-            }
+            return view('managers.views.enterprises.users.response')->with([
+                'error_message' => $e->getMessage(),
+                'failures' => $failures,
+                'enterprise' => $enterprise,
+            ]);
         }
 
         return redirect()->route('manager.enterprises.users', $enterprise->slack);
@@ -270,19 +278,27 @@ class UserController extends Controller
 
     public function generate(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
+        // UsersExport necesita el modelo (llama $this->enterprise->users()), no un id crudo.
         $modalitie = $request->modalitie;
-        $enterprise = $request->enterprise;
+        $enterprise = Enterprise::id($request->enterprise);
 
         return Excel::download(new UsersExport($enterprise, $modalitie), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }
 
     public function incoming(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $course = $request->course;
-        $enterprise = $request->enterprise;
+        // IncomesExport espera el id crudo (lo usa en un where con DB::table),
+        // pero Enterprise::id() valida su existencia y aborta 404 si no existe.
+        $enterprise = Enterprise::id($request->enterprise)->id;
         $date = explode(' - ', $request->range);
+
+        abort_unless(count($date) === 2, 422, 'Rango de fechas invalido.');
+
         $start = Carbon::parse($date[0])->startOfDay();
         $end = Carbon::parse($date[1])->endOfDay();
 

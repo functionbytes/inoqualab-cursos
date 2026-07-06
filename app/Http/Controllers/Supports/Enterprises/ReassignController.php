@@ -13,14 +13,11 @@ class ReassignController extends Controller
     public function all($slack)
     {
         $enterprise = Enterprise::slack($slack);
-        $distributor = app('support');
-        $enterprises = $distributor->enterprises ?? collect(); // Asegurar que sea una colección
+        // Soporte gestiona TODAS las empresas (no está atado a un distribuidor):
+        // `app('support')` es el propio usuario autenticado, que no tiene relación
+        // `enterprises()` — antes esto era siempre null y crasheaba en prepend().
+        $enterprises = Enterprise::available()->get();
         $users = $enterprise->users()->available()->get();
-
-        // Asegurar que la colección no sea nula antes de llamar a prepend
-        if ($enterprises->isNotEmpty()) {
-            $enterprises->prepend('', '');
-        }
 
         $enterprises = $enterprises->pluck('title', 'slack');
         $users = $users->pluck('identification', 'identification');
@@ -29,6 +26,8 @@ class ReassignController extends Controller
         if ($enterprises->has($enterprise->slack)) {
             $enterprises = $enterprises->forget($enterprise->slack);
         }
+
+        $enterprises->prepend('', '');
 
         return view('supports.views.enterprises.reassigns.all')->with([
             'users' => $users,
@@ -58,6 +57,15 @@ class ReassignController extends Controller
 
             $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
 
+            // Sin esta guarda, un usuario sin fila enterprise_user (2,737 casos
+            // reales) crashea con "Attempt to assign property on null".
+            if (! $enterpriseUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El usuario '.$identification.' no tiene una empresa asignada para reasignar.',
+                ]);
+            }
+
             $enterpriseUser->enterprise_id = $newEnterprise->id;
             $enterpriseUser->save();
 
@@ -77,12 +85,13 @@ class ReassignController extends Controller
         $user = User::slack($slack);
         $enterprise = $user->getEnterprise();
 
-        $distributor = app('support');
-        $enterprises = $distributor->enterprises;
-        $enterprises->prepend('', '');
-        $enterprises = $enterprises->pluck('title', 'slack');
+        abort_if($enterprise === null, 404, 'El usuario no tiene ninguna empresa asignada.');
 
+        // Soporte gestiona TODAS las empresas — `app('support')` es el propio
+        // usuario autenticado, sin relación `enterprises()` (antes null y crasheaba).
+        $enterprises = Enterprise::available()->get()->pluck('title', 'slack');
         $enterprises = $enterprises->forget($enterprise->slack);
+        $enterprises->prepend('', '');
 
         return view('supports.views.enterprises.reassigns.single')->with([
             'user' => $user,

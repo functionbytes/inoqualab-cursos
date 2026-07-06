@@ -69,12 +69,6 @@
                             @endphp
                             <div class="cp-item" data-key="{{ $key }}" data-unit="{{ $item['price'] }}">
                                 <div class="cp-prod">
-                                    @if(!empty($item['image']))
-                                        <div class="cp-thumb">
-                                            <img src="{{ $item['image'] }}" alt="{{ $item['title'] }}"
-                                                 onerror="this.style.display='none'">
-                                        </div>
-                                    @endif
                                     <div class="cp-info">
                                         <div class="cp-tags">
                                             <span class="cp-tag">{{ $item['type'] == 'bundle' ? 'Paquete' : 'Curso' }}</span>
@@ -152,7 +146,7 @@
                                 </div>
 
                                 <a class="go-pay" id="goPayBtn" href="{{ route('checkout.cart') }}">
-                                    <i class="fas fa-lock" id="goPayIcon"></i> <span id="goPayText">Ir al pago</span> <span class="arr">→</span>
+                                    <span id="goPayText">Finalizar pago</span> <span class="arr">→</span>
                                 </a>
 
                                 <div class="trust">

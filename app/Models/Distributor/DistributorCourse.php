@@ -33,12 +33,20 @@ class DistributorCourse extends Model
 
     }
 
-    public function scopeTariff($query, $course, $distributor)
+    /**
+     * Tarifa asignada al curso para ese distribuidor, o null si no existe.
+     *
+     * NO se implementa como `scopeTariff()`: los scopes locales de Eloquent
+     * envuelven el valor devuelto en `$result ?? $this` (ver Builder::callScope()),
+     * así que un `null` real se sustituye silenciosamente por el objeto Builder
+     * — el mismo antipatrón que causó el bug de `enrollSimple()`. Un método
+     * estático evita ese envoltorio y permite devolver null de verdad.
+     */
+    public static function tariff($course, $distributor): ?float
     {
-
-        return $query->where('course_id', $course)
+        return static::where('course_id', $course)
             ->where('distributor_id', $distributor)
-            ->first()->price; // Solo traer el parámetro price
+            ->first()?->price;
     }
 
     public function distributor(): BelongsTo

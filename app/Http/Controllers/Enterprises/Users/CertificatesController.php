@@ -98,7 +98,9 @@ class CertificatesController extends Controller
     {
 
         $user = $this->managedUser($slack);
-        $certificates = $user->certificates;
+        $certificates = $user->certificates()
+            ->with(['user', 'course', 'certification.media', 'certifier.media'])
+            ->get();
         $pdf = Pdf::loadView('enterprises.views.users.certificates.broad', compact('certificates'))->setPaper('a4', 'landscape');
 
         return $pdf->stream("certificados_{$user->identification}.pdf");

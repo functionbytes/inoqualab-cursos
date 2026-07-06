@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Supports\Enterprises;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Supports\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Supports\Concerns\ValidatesUniqueUserFields;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseStaff;

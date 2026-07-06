@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customers\Concerns;
 
 use App\Models\Course\CourseProgress;
+use App\Models\Exam\Exam;
 use App\Models\Inscription;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +21,33 @@ trait ResolvesInscription
         return ($topic && $topic->show_ans > 0)
             ? round(($topic->per_q_mark / $topic->show_ans) * 100, 2)
             : 100;
+    }
+
+    /**
+     * Crea el examen final de la inscripción si el curso lo tiene configurado
+     * y aún no existe. Debe invocarse al completar la última lección,
+     * sin importar si esa lección fue normal o quiz.
+     */
+    protected function ensureExamCreated($inscription, $course)
+    {
+        $topic = $course->examtopic;
+
+        if (! $topic) {
+            return null;
+        }
+
+        $existingExam = Exam::where('inscription_id', $inscription->id)->first();
+
+        if ($existingExam) {
+            return $existingExam;
+        }
+
+        return Exam::create([
+            'inscription_id' => $inscription->id,
+            'topic_id' => $topic->id,
+            'course_id' => $course->id,
+            'user_id' => $inscription->user_id,
+        ]);
     }
 
     /**
@@ -80,6 +108,21 @@ trait ResolvesInscription
         throw new HttpResponseException(
             redirect()->route('customers.courses.content', $inscription->slack)
         );
+    }
+
+    /**
+     * Verifica server-side que la inscripción no esté vencida.
+     * El badge "Expirado" de la UI solo ocultaba botones; el contenido
+     * seguía siendo accesible por URL directa. Bloquea aquí de verdad.
+     */
+    protected function assertInscriptionActive($inscription): void
+    {
+        if ((int) $inscription->expire === 1) {
+            throw new HttpResponseException(
+                redirect()->route('customers.courses')
+                    ->with('error', 'Tu acceso a este curso expiró. Contáctanos para renovarlo y continuar.')
+            );
+        }
     }
 
     /**

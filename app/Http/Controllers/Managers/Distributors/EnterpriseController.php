@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Managers\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\UpdateDistributorEnterprisesRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Enterprise\Enterprise;
-use Illuminate\Http\Request;
 
 class EnterpriseController extends Controller
 {
@@ -27,23 +27,16 @@ class EnterpriseController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDistributorEnterprisesRequest $request)
     {
         abort_unless(auth()->user()->can('distributors.update'), 403);
 
-        $distributor = Distributor::slack($request->slack);
-
-        if (! $distributor) {
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Distribuidor no encontrado.',
-            ]);
-        }
+        $data = $request->validated();
+        $distributor = Distributor::slack($data['slack']);
 
         $currentEnterprises = $distributor->enterprises->pluck('id')->toArray();
 
-        $newEnterprises = $request->enterprises ? explode(',', $request->enterprises) : [];
+        $newEnterprises = $data['enterprises'];
 
         if (! empty($newEnterprises)) {
 

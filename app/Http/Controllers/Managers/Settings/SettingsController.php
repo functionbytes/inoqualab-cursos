@@ -13,6 +13,7 @@ class SettingsController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user()->can('settings.view'), 403);
 
         $logo = Setting::key('page_logo')->getMedia('logo')->count() > 0 ? true : false;
         $favicon = Setting::key('page_favicon')->getMedia('favicon')->count() > 0 ? true : false;
@@ -60,11 +61,15 @@ class SettingsController extends Controller
 
     public function getLogo($slack)
     {
+        abort_unless(auth()->user()->can('settings.view'), 403);
+
         return $this->getSettingMedia($slack, 'logo');
     }
 
     public function storeLogo(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
+
         return $this->storeSettingMedia($request, 'logo');
     }
 
@@ -75,11 +80,15 @@ class SettingsController extends Controller
 
     public function getFavicon($slack)
     {
+        abort_unless(auth()->user()->can('settings.view'), 403);
+
         return $this->getSettingMedia($slack, 'favicon');
     }
 
     public function storeFavicon(Request $request)
     {
+        abort_unless(auth()->user()->can('settings.update'), 403);
+
         return $this->storeSettingMedia($request, 'favicon');
     }
 
@@ -121,7 +130,11 @@ class SettingsController extends Controller
 
     private function deleteMedia(int $id): JsonResponse
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('settings.update'), 403);
+
+        Media::where('id', $id)
+            ->where('model_type', Setting::class)
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }

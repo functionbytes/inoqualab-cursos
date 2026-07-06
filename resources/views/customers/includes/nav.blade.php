@@ -8,7 +8,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false" >
             <span>
-               <i class="fa-duotone fa-house"></i>
+               <i class="fa-solid fa-house"></i>
             </span>
             <span class="hide-menu">Inicio</span>
           </a>
@@ -16,7 +16,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.courses') }}" aria-expanded="false" >
             <span>
-              <i class="fa-duotone fa-ballot-check"></i>
+              <i class="fa-solid fa-graduation-cap"></i>
             </span>
             <span class="hide-menu">Cursos</span>
           </a>
@@ -24,7 +24,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.certificates') }}" aria-expanded="false" >
             <span>
-              <i class="fa-duotone fa-award"></i>
+              <i class="fa-solid fa-award"></i>
             </span>
             <span class="hide-menu">Certificados</span>
           </a>
@@ -32,7 +32,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.orders') }}" aria-expanded="false" >
             <span>
-              <i class="fa-duotone fa-receipt"></i>
+              <i class="fa-solid fa-receipt"></i>
             </span>
             <span class="hide-menu">Mis pedidos</span>
           </a>
@@ -40,7 +40,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.documents') }}" aria-expanded="false" >
             <span>
-              <i class="fa-duotone fa-envelope"></i>
+              <i class="fa-solid fa-folder-open"></i>
             </span>
             <span class="hide-menu">Documentos</span>
           </a>
@@ -49,7 +49,7 @@
         <li class="sidebar-item" style="display: none;">
           <button type="button" class="sidebar-link border-0 bg-transparent w-100 text-start">
             <span>
-              <i class="fa-duotone fa-headset" aria-hidden="true"></i>
+              <i class="fa-solid fa-headset" aria-hidden="true"></i>
             </span>
             <span class="hide-menu">Soporte</span>
           </button>
@@ -58,7 +58,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.settings') }}" aria-expanded="false" >
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-gear"></i>
             </span>
             <span class="hide-menu">Configuración</span>
           </a>

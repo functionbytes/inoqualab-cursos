@@ -105,10 +105,15 @@ class EnterpriseController extends Controller
     public function destroy($slack)
     {
 
-        $distributor = null;
         $enterprise = Enterprise::slack($slack);
         $distributor = $enterprise->distributor;
         $enterprise->delete();
+
+        // 143 de 252 empresas no tienen distribuidor: sin él, generar la ruta
+        // con slack=null lanza UrlGenerationException tras ya haber borrado.
+        if (! $distributor) {
+            return redirect()->back();
+        }
 
         return redirect()->route('support.distributors.enterprises', $distributor->slack);
     }

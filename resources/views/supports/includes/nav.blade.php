@@ -18,7 +18,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false" >
             <span>
-               <i class="fa-duotone fa-house"></i>
+               <i class="fa-solid fa-house"></i>
             </span>
             <span class="hide-menu">Inicio</span>
           </a>
@@ -26,7 +26,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link " href="{{  route('support.enterprises') }}" aria-expanded="false" >
                 <span>
-                  <i class="fa-duotone fa-ballot-check"></i>
+                  <i class="fa-solid fa-building"></i>
                 </span>
                 <span class="hide-menu">Empresas</span>
               </a>
@@ -34,7 +34,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link " href="{{  route('support.distributors') }}" aria-expanded="false" >
                 <span>
-                  <i class="fa-duotone fa-envelope"></i>
+                  <i class="fa-solid fa-people-arrows"></i>
                 </span>
                 <span class="hide-menu">Distribuidor</span>
               </a>
@@ -42,7 +42,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link " href="{{  route('support.users') }}" aria-expanded="false" >
                 <span>
-                  <i class="fa-duotone fa-envelope"></i>
+                  <i class="fa-solid fa-users"></i>
                 </span>
                 <span class="hide-menu">Usuarios</span>
               </a>
@@ -50,7 +50,7 @@
             <li class="sidebar-item">
               <a class="sidebar-link " href="{{ route('support.mails.index') }}" aria-expanded="false">
                 <span>
-                  <i class="fa-duotone fa-inbox"></i>
+                  <i class="fa-solid fa-inbox"></i>
                 </span>
                 <span class="hide-menu">Correos entrantes</span>
               </a>
@@ -58,7 +58,7 @@
           <li class="sidebar-item">
               <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
                 <span>
-                 <i class="fa-duotone fa-headset"></i>
+                 <i class="fa-solid fa-headset"></i>
                 </span>
                   <span class="hide-menu">Configuración Sistema</span>
               </a>
@@ -84,7 +84,7 @@
           <li class="sidebar-item">
               <a class="sidebar-link has-arrow" >
             <span>
-              <i class="fa-duotone fa-note"></i>
+              <i class="fa-solid fa-gear"></i>
             </span>
                   <span class="hide-menu">Configuración</span>
               </a>

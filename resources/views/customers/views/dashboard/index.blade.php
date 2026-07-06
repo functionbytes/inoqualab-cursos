@@ -39,6 +39,9 @@
     // Cursos activos = inscripciones no expiradas
     $activos = $courses->filter(fn ($c) => (int) $c->expire !== 1);
 
+    // Cursos con acceso vencido
+    $expirados = $courses->filter(fn ($c) => (int) $c->expire === 1);
+
     // Progreso promedio (sobre todas las inscripciones)
     $promedio = $courses->count() > 0
         ? (int) round($courses->avg(fn ($c) => min(100, (float) $c->percent)))
@@ -81,6 +84,16 @@
         @endif
     </div>
 
+    @if($expirados->count() > 0)
+        <div class="pnl-streak warn" style="margin-bottom:22px;">
+            <span class="ic"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <div>
+                <b>{{ $expirados->count() }}</b> {{ $expirados->count() === 1 ? 'curso con acceso vencido' : 'cursos con acceso vencido' }}
+                <a href="{{ route('customers.courses') }}">Ver y renovar</a>
+            </div>
+        </div>
+    @endif
+
     @if($hero)
         @php
             $heroStatus = $statusOf($hero);
@@ -106,7 +119,7 @@
                 </div>
                 <h2>{{ $hero->course?->title }}</h2>
                 <div class="resume-next">
-                    <i class="fa-regular fa-circle-play"></i>
+                    <i class="fa-solid fa-circle-play"></i>
                     {{ $statusLabels[$heroStatus] }}
                 </div>
                 <div class="resume-prog">
@@ -188,7 +201,7 @@
                             <div class="pc-body">
                                 <div class="pc-top">
                                     <span class="pc-year">{{ optional($insc->created_at)->format('Y') }}</span>
-                                    <span class="pc-badge {{ $st }}">{{ $statusLabels[$st] }}</span>
+                                    <span class="pc-badge st-{{ $st }}">{{ $statusLabels[$st] }}</span>
                                 </div>
                                 <div class="pc-title">{{ $insc->course?->title }}</div>
                                 <div class="pc-track"><div class="pc-fill" style="--p:{{ $percent }}%"></div></div>

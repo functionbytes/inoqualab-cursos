@@ -34,6 +34,19 @@ class OrdersExport implements FromQuery, Responsable, WithHeadings, WithMapping,
 
     private $end;
 
+    /** Catálogos precargados (id => title) para no consultar por cada fila del export. */
+    private array $methods;
+
+    private array $conditions;
+
+    private array $types;
+
+    private array $distributors;
+
+    private array $enterprises;
+
+    private array $courses;
+
     public function __construct($distributor, $enterprise, $type, $method, $condition, $start, $end)
     {
 
@@ -44,6 +57,13 @@ class OrdersExport implements FromQuery, Responsable, WithHeadings, WithMapping,
         $this->condition = $condition;
         $this->start = $start;
         $this->end = $end;
+
+        $this->methods = OrderMethod::pluck('title', 'id')->all();
+        $this->conditions = OrderCondition::pluck('title', 'id')->all();
+        $this->types = OrderType::pluck('title', 'id')->all();
+        $this->distributors = Distributor::pluck('title', 'id')->all();
+        $this->enterprises = Enterprise::pluck('title', 'id')->all();
+        $this->courses = Course::pluck('title', 'id')->all();
 
     }
 
@@ -126,12 +146,12 @@ class OrdersExport implements FromQuery, Responsable, WithHeadings, WithMapping,
             date('Y-m-d', strtotime($row->inscription_enroll_start)),
             date('Y-m-d', strtotime($row->inscription_enroll_expire)),
             date('Y-m-d', strtotime($row->order_payment_at)),
-            $row->order_method == null ? '' : strtoupper(OrderMethod::id($row->order_method)->title),
-            $row->order_condition == null ? '' : strtoupper(OrderCondition::id($row->order_condition)->title),
-            $row->order_type == null ? '' : strtoupper(OrderType::id($row->order_type)->title),
-            $row->orders_activity_distributor != null ? strtoupper(Distributor::id($row->orders_activity_distributor)->title) : '',
-            $row->orders_activity_enterprise != null ? strtoupper(Enterprise::id($row->orders_activity_enterprise)->title) : '',
-            $row->inscription_course == null ? '' : strtoupper(Course::id($row->inscription_course)->title),
+            $row->order_method == null ? '' : strtoupper($this->methods[$row->order_method] ?? ''),
+            $row->order_condition == null ? '' : strtoupper($this->conditions[$row->order_condition] ?? ''),
+            $row->order_type == null ? '' : strtoupper($this->types[$row->order_type] ?? ''),
+            $row->orders_activity_distributor != null ? strtoupper($this->distributors[$row->orders_activity_distributor] ?? '') : '',
+            $row->orders_activity_enterprise != null ? strtoupper($this->enterprises[$row->orders_activity_enterprise] ?? '') : '',
+            $row->inscription_course == null ? '' : strtoupper($this->courses[$row->inscription_course] ?? ''),
             strtoupper($row->firstname),
             strtoupper($row->lastname),
             $row->identification == null ? '' : $row->identification,

@@ -88,7 +88,7 @@
                         <label for="password">Nueva contraseña</label>
                         <div class="pw-wrap">
                             <input class="control" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres">
-                            <button type="button" class="pw-toggle" id="cfgPwToggle" aria-label="Mostrar contraseña"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>
+                            <button type="button" class="pw-toggle" id="cfgPwToggle" aria-label="Mostrar contraseña"><i class="fa-solid fa-eye" aria-hidden="true"></i></button>
                         </div>
                     </div>
                     <div class="field">

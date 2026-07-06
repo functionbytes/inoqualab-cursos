@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Managers\Distributors;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\StoreDistributorStaffRequest;
+use App\Http\Requests\Managers\Distributors\UpdateDistributorStaffRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorStaff;
 use App\Models\User;
@@ -13,6 +16,8 @@ use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
@@ -68,7 +73,7 @@ class StaffController extends Controller
     public function edit($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
 
         $distributor = $user->relationsDistributor;
 
@@ -89,7 +94,7 @@ class StaffController extends Controller
     public function view($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
@@ -114,40 +119,37 @@ class StaffController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDistributorStaffRequest $request)
     {
-        abort_unless(auth()->user()->can('staff.update'), 403);
-        $user = User::slack($request->slack);
+        abort_unless(auth()->user()->can('distributors.update'), 403);
 
-        if (! $user) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado.']);
-        }
+        $data = $request->validated();
+        $user = $this->guardManageableUser(User::slack($data['slack']));
 
-        if ($user->email !== $request->email) {
-            $emailExists = User::where('email', $request->email)->where('id', '!=', $user->id)->exists();
+        if ($user->email !== $data['email']) {
+            $emailExists = User::where('email', $data['email'])->where('id', '!=', $user->id)->exists();
             if ($emailExists) {
                 return response()->json(['success' => false, 'message' => 'El correo electronico ya estan regitrada en nuestro sistema']);
             }
         }
 
-        if ($request->identification && $user->identification !== $request->identification) {
-            $identificationExists = User::where('identification', $request->identification)->where('id', '!=', $user->id)->exists();
+        if (! empty($data['identification']) && $user->identification !== $data['identification']) {
+            $identificationExists = User::where('identification', $data['identification'])->where('id', '!=', $user->id)->exists();
             if ($identificationExists) {
                 return response()->json(['success' => false, 'message' => 'El nit ya estan regitrada en nuestro sistema']);
             }
         }
 
-        $user->firstname = Str::upper($request->firstname);
-        $user->lastname = Str::upper($request->lastname);
-        $user->cellphone = $request->cellphone;
-        $user->email = $request->email;
-        $user->address = $request->address;
-        $user->company = $request->company;
-        $user->available = $request->available;
-        $user->identification = $request->identification;
+        $user->firstname = Str::upper($data['firstname']);
+        $user->lastname = Str::upper($data['lastname']);
+        $user->cellphone = $data['cellphone'] ?? null;
+        $user->email = $data['email'];
+        $user->address = $data['address'] ?? null;
+        $user->available = $data['available'];
+        $user->identification = $data['identification'] ?? null;
 
-        if ($request->filled('password')) {
-            $user->password = $request->password;
+        if (! empty($data['password'])) {
+            $user->password = $data['password'];
         }
 
         $user->update();
@@ -158,33 +160,35 @@ class StaffController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreDistributorStaffRequest $request)
     {
-        abort_unless(auth()->user()->can('staff.create'), 403);
-        $distributor = Distributor::slack($request->distributor);
+        abort_unless(auth()->user()->can('distributors.create'), 403);
 
-        $emailExists = User::where('email', $request->email)->exists();
+        $data = $request->validated();
+        $distributor = Distributor::slack($data['distributor']);
+
+        $emailExists = User::where('email', $data['email'])->exists();
         if ($emailExists) {
             return response()->json(['success' => false, 'message' => 'El correo electronico ya estan regitrada en nuestro sistema']);
         }
 
-        if ($request->identification) {
-            $identificationExists = User::where('identification', $request->identification)->exists();
+        if (! empty($data['identification'])) {
+            $identificationExists = User::where('identification', $data['identification'])->exists();
             if ($identificationExists) {
                 return response()->json(['success' => false, 'message' => 'El nit ya estan regitrada en nuestro sistema']);
             }
         }
 
-        DB::transaction(function () use ($request, $distributor) {
+        DB::transaction(function () use ($data, $distributor) {
             $user = new User;
             $user->slack = $this->generate_slack('users');
-            $user->firstname = Str::upper($request->firstname);
-            $user->lastname = Str::upper($request->lastname);
-            $user->cellphone = $request->cellphone;
-            $user->identification = $request->identification;
-            $user->email = $request->email;
-            $user->address = $request->address;
-            $user->password = $request->password;
+            $user->firstname = Str::upper($data['firstname']);
+            $user->lastname = Str::upper($data['lastname']);
+            $user->cellphone = $data['cellphone'] ?? null;
+            $user->identification = $data['identification'] ?? null;
+            $user->email = $data['email'];
+            $user->address = $data['address'] ?? null;
+            $user->password = $data['password'];
             $user->available = 1;
             $user->role = 'distributor';
             $user->terms = 1;
@@ -211,9 +215,9 @@ class StaffController extends Controller
 
     public function destroy($slack)
     {
-        abort_unless(auth()->user()->can('staff.delete'), 403);
+        abort_unless(auth()->user()->can('distributors.delete'), 403);
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
         $user->delete();
 
         return redirect()->back();

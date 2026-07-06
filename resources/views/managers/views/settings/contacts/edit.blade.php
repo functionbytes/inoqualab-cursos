@@ -20,11 +20,11 @@
 
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar contactenos</h5>
+                            <h5 class="mb-0">Editar contáctenos</h5>
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Actualiza la información de contacto de la empresa. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">
@@ -66,7 +66,7 @@
                             <div class="col-12">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Correo electronico</label>
-                                        <input type="text" class="form-control" id="email"  name="email" disabled value="{{ $contact->email }}" placeholder="Ingresar profección">
+                                        <input type="text" class="form-control" id="email"  name="email" disabled value="{{ $contact->email }}" placeholder="Ingresar correo electrónico">
                                     </div>
                                 </div>
                             </div>

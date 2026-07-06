@@ -51,12 +51,22 @@
                                placeholder="Ej: Novedades de {SITE_NAME} — Junio"
                                maxlength="255">
                     </div>
-                    <div class="mb-0">
+                    <div class="mb-3">
                         <label class="form-label fw-semibold">Preencabezado</label>
                         <input type="text" class="form-control" id="fieldPreheader"
                                value="{{ old('preheader', $campaign?->preheader) }}"
                                placeholder="Texto breve visible antes de abrir el email (opcional)"
                                maxlength="255">
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Lista destino</label>
+                        <select class="form-select" id="fieldList">
+                            <option value="">Todos los suscriptores</option>
+                            @foreach ($lists as $list)
+                                <option value="{{ $list->id }}" @selected(old('newsletter_list_id', $campaign?->newsletter_list_id) == $list->id)>{{ $list->name }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Deja "Todos los suscriptores" para enviar a la lista general. Las listas dinámicas se pueblan solas por evento.</small>
                     </div>
                 </div>
 
@@ -386,10 +396,11 @@ $(document).ready(function () {
             method: saveMethod,
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             data: {
-                name:      name,
-                subject:   subject,
-                preheader: $('#fieldPreheader').val(),
-                content:   content,
+                name:               name,
+                subject:            subject,
+                preheader:          $('#fieldPreheader').val(),
+                content:            content,
+                newsletter_list_id: $('#fieldList').val() || null,
             },
             success: function (res) {
                 hasChanges = false;

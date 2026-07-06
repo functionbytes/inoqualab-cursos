@@ -155,7 +155,7 @@ class SeoMetaController extends Controller
                 'og_title', 'og_description', 'og_image', 'og_type',
                 'twitter_card', 'twitter_title', 'twitter_description', 'twitter_image',
                 'canonical_url', 'robots', 'seo_score', 'seo_grade',
-            ]);
+            ], ',', '"', '\\');
 
             SeoMeta::query()->orderBy('id')->each(function (SeoMeta $meta) use ($handle) {
                 fputcsv($handle, [
@@ -178,7 +178,7 @@ class SeoMetaController extends Controller
                     $meta->robots ?? 'index,follow',
                     $meta->seo_score ?? '',
                     $meta->seo_grade ?? '',
-                ]);
+                ], ',', '"', '\\');
             });
 
             fclose($handle);

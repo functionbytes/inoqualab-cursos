@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Supports\Distributors;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Supports\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Supports\Concerns\ValidatesUniqueUserFields;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorStaff;
@@ -113,11 +113,9 @@ class StaffController extends Controller
 
     public function update(Request $request)
     {
-        $user = User::slack($request->slack);
-
-        if (! $user) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado.'], 404);
-        }
+        // Ownership: bloquea editar/resetear password de un manager u otro
+        // support (evita escalada de privilegios) — mismo guard que edit/view/destroy.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         if ($error = $this->uniqueUserFieldError($request->email, $request->identification, $user)) {
             return response()->json(['success' => false, 'message' => $error]);

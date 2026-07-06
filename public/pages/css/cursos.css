@@ -1,0 +1,173 @@
+/* ============================================================
+   Catálogo de cursos — diseño "Cursos" (Claude Design handoff)
+   Scopeado bajo .cursos-page para no colisionar con el sitio.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.cursos-page {
+  --navy: #0d1b2a;
+  --navy-2: #102536;
+  --navy-soft: #16304a;
+  --ink: #1b2a3a;
+  --muted: #6a7888;
+  --muted-2: #93a0ad;
+  --line: #e7ecf1;
+  --field: #f7f9fb;
+  --green: #008bcd;
+  --green-deep: #006fa3;
+  --amber: #c98a14;
+  --shadow-soft: 0 6px 22px rgba(13,27,42,.07);
+  --ease: cubic-bezier(.22,.61,.36,1);
+
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: var(--ink);
+}
+.cursos-page * { box-sizing: border-box; }
+.cursos-page button { font-family: inherit; cursor: pointer; }
+.cursos-page input, .cursos-page select { font-family: inherit; }
+.cursos-page a { text-decoration: none; }
+/* El filtrado client-side oculta cards con el atributo [hidden]; esta regla
+   gana en especificidad a la de .ccard { display:flex } para que se oculten. */
+.cursos-page [hidden] { display: none !important; }
+
+.cursos-page .cx-container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+/* ===== Band ===== */
+.cursos-page .band {
+  background:
+    radial-gradient(1100px 360px at 82% -40%, rgba(0,139,205,.16), transparent 60%),
+    linear-gradient(180deg, var(--navy), var(--navy-2));
+  color: #fff; position: relative; overflow: hidden;
+}
+.cursos-page .band::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(115deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 26px 26px; opacity: .5; pointer-events: none;
+}
+.cursos-page .band .cx-container { position: relative; padding-top: 56px; padding-bottom: 64px; }
+.cursos-page .crumb {
+  display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--navy);
+  font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 8px 16px; border-radius: 7px; white-space: nowrap;
+}
+.cursos-page .crumb .sep { color: var(--muted-2); font-weight: 600; }
+.cursos-page .crumb .cur { color: var(--green-deep); }
+.cursos-page .band h1 { font-size: clamp(34px, 5vw, 50px); font-weight: 800; letter-spacing: -.02em; margin: 18px 0 0; color: #fff; }
+.cursos-page .band .lede { margin: 10px 0 0; color: rgba(255,255,255,.62); font-size: 15px; max-width: 460px; }
+
+/* ===== Catalog ===== */
+.cursos-page .catalog { background: #f3f6f9; padding: 44px 0 72px; }
+.cursos-page .cat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
+
+.cursos-page .cat-side { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 16px; }
+.cursos-page .fblock { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-soft); padding: 20px 20px 22px; }
+.cursos-page .fblock h4 { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 15px; display: flex; align-items: center; gap: 9px; }
+.cursos-page .fblock h4::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: var(--green); }
+.cursos-page .fsearch { position: relative; display: flex; align-items: center; }
+.cursos-page .fsearch input { width: 100%; background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px 14px 11px 40px; font-size: 14px; line-height: 1.4; color: var(--ink); transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s var(--ease); }
+.cursos-page .fsearch input:focus { outline: none; border-color: var(--green); background: #fff; box-shadow: 0 0 0 4px rgba(0,139,205,.12); }
+.cursos-page .fsearch .ic { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted-2); width: 17px; height: 17px; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+.cursos-page .fopt { display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 0; background: none; border: none; text-align: left; cursor: pointer; font-size: 14px; color: var(--ink); font-weight: 600; transition: color .15s var(--ease); }
+.cursos-page .fopt:hover { color: var(--green-deep); }
+.cursos-page .fopt .box { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--line); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; transition: all .15s var(--ease); }
+.cursos-page .fopt .box svg { width: 12px; height: 12px; color: #fff; opacity: 0; }
+.cursos-page .fopt.round .box { border-radius: 50%; }
+.cursos-page .fopt.on .box { background: var(--green); border-color: var(--green); }
+.cursos-page .fopt.on .box svg { opacity: 1; }
+.cursos-page .fopt.on { color: var(--navy); font-weight: 800; }
+.cursos-page .fopt .lbl { flex: 1; min-width: 0; }
+.cursos-page .fopt .cnt { font-size: 12px; color: var(--muted-2); font-weight: 700; }
+.cursos-page .fclear { margin-top: 6px; font-size: 12.5px; font-weight: 700; color: var(--green-deep); background: none; border: none; cursor: pointer; padding: 4px 0; }
+.cursos-page .fclear:hover { text-decoration: underline; }
+
+/* toolbar */
+.cursos-page .cat-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-soft); padding: 12px 18px; margin-bottom: 22px; flex-wrap: wrap; }
+.cursos-page .cat-count { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.cursos-page .cat-count b { color: var(--navy); font-weight: 800; }
+.cursos-page .cat-tools { display: flex; align-items: center; gap: 14px; }
+.cursos-page .view-toggle { display: inline-flex; background: var(--field); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 2px; }
+.cursos-page .view-toggle button { width: 32px; height: 30px; border: none; background: none; border-radius: 7px; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s var(--ease), color .15s var(--ease); }
+.cursos-page .view-toggle button.on { background: #fff; color: var(--navy); box-shadow: 0 1px 4px rgba(13,27,42,.12); }
+.cursos-page .view-toggle button svg { width: 17px; height: 17px; }
+.cursos-page .cat-sort { appearance: none; background: var(--field); border: 1.5px solid var(--line); border-radius: 9px; padding: 9px 36px 9px 13px; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236a7888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+.cursos-page .cat-sort:focus { outline: none; border-color: var(--green); }
+
+/* grid + cards */
+.cursos-page .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(264px, 1fr)); gap: 22px; }
+.cursos-page .ccard { background: #fff; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-soft); transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease); display: flex; flex-direction: column; }
+.cursos-page .ccard:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(13,27,42,.14); border-color: var(--green); }
+.cursos-page .ccard-media { position: relative; aspect-ratio: 16/10; background: linear-gradient(135deg, #081A28 0%, #0d2a40 60%, #0a3050 100%); overflow: hidden; }
+.cursos-page .ccard-media::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(0,139,205,.08) 1px, transparent 1px); background-size: 22px 22px; pointer-events: none; }
+.cursos-page .ccard-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cursos-page .ccard-media .ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: rgba(0,139,205,.55); }
+.cursos-page .ccard-media .ph svg { width: 48px; height: 48px; filter: drop-shadow(0 2px 8px rgba(0,139,205,.3)); }
+.cursos-page .ccard-badge { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 5px 10px; border-radius: 6px; }
+.cursos-page .ccard-badge.free { background: var(--green); color: #fff; }
+.cursos-page .ccard-badge.premium { background: rgba(13,27,42,.82); color: #fff; backdrop-filter: blur(4px); }
+.cursos-page .ccard-off { position: absolute; top: 12px; right: 12px; z-index: 2; font-size: 11px; font-weight: 800; letter-spacing: .03em; padding: 5px 10px; border-radius: 6px; background: var(--green); color: #fff; box-shadow: 0 4px 12px rgba(0,139,205,.35); }
+.cursos-page .ccard-price del { color: var(--soft, #8D9DB5); font-weight: 600; margin-left: 6px; }
+.cursos-page .ccard-media .ph svg { transition: transform .25s var(--ease); }
+.cursos-page .ccard:hover .ccard-media .ph svg { transform: scale(1.08); }
+.cursos-page .ccard-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+.cursos-page .ccard-cathead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cursos-page .ccard-cat { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--green-deep); }
+.cursos-page .ccard-level { font-size: 10px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); background: var(--field); border: 1px solid var(--line); padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+.cursos-page .ccard-rating { display: flex; align-items: center; gap: 7px; margin: 10px 0 0; }
+.cursos-page .ccard-rating .stars { display: inline-flex; gap: 2px; color: #f5b740; }
+.cursos-page .ccard-rating .stars svg { width: 14px; height: 14px; }
+.cursos-page .ccard-rating .stars .off { color: var(--line); }
+.cursos-page .ccard-rating .num { font-size: 12.5px; font-weight: 800; color: var(--ink); }
+.cursos-page .ccard-rating .num-empty { font-size: 11px; font-weight: 600; color: var(--muted-2); }
+.cursos-page .fopt .stars { display: inline-flex; gap: 2px; color: #f5b740; }
+.cursos-page .fopt .stars svg { width: 15px; height: 15px; }
+.cursos-page .fopt .stars .off { color: var(--line); }
+.cursos-page .ccard-title { font-size: 15.5px; font-weight: 800; line-height: 1.35; color: var(--ink); margin: 7px 0 0; letter-spacing: -.01em; }
+.cursos-page .ccard-meta { display: flex; gap: 14px; margin: 12px 0 0; color: var(--muted); font-size: 12.5px; font-weight: 600; justify-content: center; }
+.cursos-page .ccard-meta span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.cursos-page .ccard-meta svg { width: 14px; height: 14px; color: var(--green-deep); }
+.cursos-page .ccard-foot { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px; }
+.cursos-page .ccard-price { font-size: 19px; font-weight: 800; color: var(--navy); letter-spacing: -.01em; white-space: nowrap; }
+.cursos-page .ccard-price small { font-size: 12px; font-weight: 700; color: var(--muted); }
+.cursos-page .ccard-price del { font-size: 12px; font-weight: 700; color: var(--muted-2); }
+.cursos-page .ccard-price.free { color: var(--green-deep); }
+.cursos-page .ccard-price.has-sale { display: flex; flex-direction: column; gap: 1px; white-space: normal; }
+.cursos-page .ccard-price .price-new { font-size: 19px; font-weight: 800; line-height: 1.15; color: var(--navy); letter-spacing: -.01em; }
+.cursos-page .ccard-price .price-new small { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.cursos-page .ccard-price .price-old { font-size: 11px; font-weight: 600; color: var(--muted); text-decoration: line-through; line-height: 1.2; }
+.cursos-page .ccard-cta { font-size: 12px; font-weight: 700; color: #fff; background: var(--green-deep); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; padding: 6px 14px; border-radius: 20px; transition: background .18s var(--ease); }
+.cursos-page .ccard-cta svg { width: 14px; height: 14px; transition: transform .18s var(--ease); }
+.cursos-page .ccard:hover .ccard-cta { background: var(--navy); }
+.cursos-page .ccard:hover .ccard-cta svg { transform: translateX(3px); }
+
+/* list view */
+.cursos-page .cat-grid.list { grid-template-columns: 1fr; gap: 16px; }
+.cursos-page .cat-grid.list .ccard { flex-direction: row; }
+.cursos-page .cat-grid.list .ccard-media { width: 280px; aspect-ratio: auto; flex: 0 0 auto; }
+.cursos-page .cat-grid.list .ccard-body { padding: 22px 24px; }
+.cursos-page .cat-grid.list .ccard-title { font-size: 18px; }
+
+/* empty */
+.cursos-page .cat-empty { background: #fff; border: 1px dashed var(--line); border-radius: 16px; padding: 60px 20px; text-align: center; }
+.cursos-page .cat-empty .ic { width: 64px; height: 64px; border-radius: 16px; background: var(--field); color: var(--muted-2); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.cursos-page .cat-empty .ic svg { width: 30px; height: 30px; }
+.cursos-page .cat-empty p { color: var(--muted); font-size: 15px; margin: 0 0 16px; }
+.cursos-page .cat-empty button { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* franja de paquetes destacados */
+.cursos-page .bundles-strip { margin-top: 52px; }
+.cursos-page .bs-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.cursos-page .bs-kicker { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green-deep); }
+.cursos-page .bs-title { font-size: 24px; font-weight: 800; letter-spacing: -.01em; margin: 4px 0 0; color: var(--navy); }
+.cursos-page .bs-all { font-size: 13.5px; font-weight: 800; color: var(--green-deep); display: inline-flex; align-items: center; gap: 6px; }
+.cursos-page .bs-all svg { width: 16px; height: 16px; }
+
+/* responsive */
+@media (max-width: 920px) {
+  .cursos-page .cat-layout { grid-template-columns: 1fr; }
+  .cursos-page .cat-side { position: static; flex-direction: row; flex-wrap: wrap; }
+  .cursos-page .cat-side .fblock { flex: 1; min-width: 220px; }
+}
+@media (max-width: 560px) {
+  .cursos-page .cx-container { padding: 0 18px; }
+  .cursos-page .cat-grid.list .ccard { flex-direction: column; }
+  .cursos-page .cat-grid.list .ccard-media { width: 100%; aspect-ratio: 16/10; }
+}

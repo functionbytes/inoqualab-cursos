@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\StoreCourseCategoryRequest;
+use App\Http\Requests\Managers\Courses\UpdateCourseCategoryRequest;
 use App\Models\Course\CourseCategorie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,6 +13,7 @@ class CategoriesController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.view'), 403);
 
         $searchKey = $request->search;
         $available = $request->available;
@@ -36,6 +39,7 @@ class CategoriesController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->can('courses.view'), 403);
 
         $availables = $this->availableOptions();
 
@@ -47,6 +51,7 @@ class CategoriesController extends Controller
 
     public function view($slug)
     {
+        abort_unless(auth()->user()->can('courses.view'), 403);
 
         $categorie = CourseCategorie::slug($slug);
 
@@ -58,6 +63,7 @@ class CategoriesController extends Controller
 
     public function edit($slack)
     {
+        abort_unless(auth()->user()->can('courses.view'), 403);
 
         $categorie = CourseCategorie::slack($slack);
 
@@ -70,7 +76,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateCourseCategoryRequest $request)
     {
         abort_unless(auth()->user()->can('courses.update'), 403);
 
@@ -87,7 +93,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreCourseCategoryRequest $request)
     {
         abort_unless(auth()->user()->can('courses.create'), 403);
 
@@ -110,6 +116,14 @@ class CategoriesController extends Controller
         abort_unless(auth()->user()->can('courses.delete'), 403);
 
         $categorie = CourseCategorie::slack($slack);
+
+        // Una categoría con cursos asociados no puede eliminarse: dejaría cursos huérfanos
+        // y rompería los listados que muestran $course->categorie->title.
+        if ($categorie->courses()->exists()) {
+            return redirect()->route('manager.categories.courses')
+                ->with('error', 'No se puede eliminar: la categoría tiene cursos asociados. Reasigna esos cursos primero.');
+        }
+
         $categorie->delete();
 
         return redirect()->route('manager.categories.courses');

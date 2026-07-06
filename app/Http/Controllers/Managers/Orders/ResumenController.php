@@ -15,6 +15,7 @@ class ResumenController extends Controller
 {
     public function resumen()
     {
+        $this->authorize('viewAny', Order::class);
 
         $distributors = Distributor::available()->get();
         $distributors = $distributors->pluck('title', 'id');
@@ -44,6 +45,7 @@ class ResumenController extends Controller
 
     public function generate(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
 
         $conditions = OrderCondition::available()->get();
         $types = OrderType::available()->get();
@@ -61,13 +63,13 @@ class ResumenController extends Controller
 
         $orders = Order::filterOrders($filters);
 
-        $distributor = Distributor::id($request->distributor);
+        $distributor = ($request->distributor && $request->distributor !== '0')
+            ? Distributor::id($request->distributor)
+            : null;
 
-        if (isset($request->enterprise)) {
-            $enterprise = Enterprise::id($request->enterprise);
-        } else {
-            $enterprise = null;
-        }
+        $enterprise = ($request->enterprise && $request->enterprise !== '0')
+            ? Enterprise::id($request->enterprise)
+            : null;
 
         return view('managers.views.orders.resumen.resumen')->with([
             'orders' => $orders,

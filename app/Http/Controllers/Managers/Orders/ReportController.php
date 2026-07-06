@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers\Orders;
 use App\Exports\Managers\Orders\OrdersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
+use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
@@ -16,6 +17,7 @@ class ReportController extends Controller
 {
     public function report()
     {
+        $this->authorize('viewAny', Order::class);
 
         $distributors = Distributor::available()->get();
         $distributors = $distributors->pluck('title', 'id');
@@ -44,6 +46,7 @@ class ReportController extends Controller
 
     public function generate(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
 
         $distributor = $request->distributor;
         $enterprise = $request->enterprise;

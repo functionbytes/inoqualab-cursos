@@ -10,13 +10,9 @@ class GenerateController extends Controller
 {
     public function generate($slack)
     {
-        abort_unless(auth()->user()->can('invoices.view'), 403);
-
         $invoice = Invoice::slack($slack);
 
-        if (! $invoice) {
-            abort(404);
-        }
+        $this->authorize('view', $invoice);
 
         $pdf = Pdf::loadView('managers.views.invoices.invoices.print', [
             'invoice' => $invoice,

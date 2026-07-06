@@ -161,10 +161,12 @@ class NewsletterService
         }
 
         $firstRow = true;
-        while (($row = fgetcsv($handle, 0, ',')) !== false) {
+        // escape: '\\' preserva el comportamiento histórico y silencia la
+        // deprecación de PHP 8.4 (el $escape por defecto dejó de ser implícito).
+        while (($row = fgetcsv($handle, 0, ',', '"', '\\')) !== false) {
             // Fallback: semicolon delimiter
             if (count($row) === 1 && str_contains($row[0], ';')) {
-                $row = str_getcsv($row[0], ';');
+                $row = str_getcsv($row[0], ';', '"', '\\');
             }
 
             $email = trim($row[0] ?? '');
@@ -289,7 +291,7 @@ class NewsletterService
         return response()->stream(function () use ($search, $source, $status) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($handle, ['ID', 'Email', 'Nombre', 'Estado', 'Origen', 'IP', 'Suscrito el', 'Confirmado el', 'Dado de baja el', 'Creado']);
+            fputcsv($handle, ['ID', 'Email', 'Nombre', 'Estado', 'Origen', 'IP', 'Suscrito el', 'Confirmado el', 'Dado de baja el', 'Creado'], ',', '"', '\\');
 
             Newsletter::query()
                 ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
@@ -317,7 +319,7 @@ class NewsletterService
                         $n->confirmed_at?->format('Y-m-d H:i:s') ?? '',
                         $n->unsubscribed_at?->format('Y-m-d H:i:s') ?? '',
                         $n->created_at?->format('Y-m-d H:i:s') ?? '',
-                    ]);
+                    ], ',', '"', '\\');
                 });
 
             fclose($handle);

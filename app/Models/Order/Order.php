@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -27,7 +26,6 @@ class Order extends Model
         'slack',
         'number',
         'reference',
-        'subtotal',
         'distributor_id',
         'user_id',
         'type_id',
@@ -76,26 +74,6 @@ class Order extends Model
         return $model;
     }
 
-    public static function scopeTotal($query, $method, $condition)
-    {
-        return $query->where('method_id', $method)->where('condition_id', $condition)->sum('total');
-    }
-
-    public static function finds($user, $course)
-    {
-        return Order::where('user_id', $user)->where('course_id', $course)->get();
-    }
-
-    public function scopeValidate($query, $user, $course)
-    {
-        return $query->where('user_id', $user)->where('course_id', $course)->first();
-    }
-
-    public function scopeValidates($query, $user, $course)
-    {
-        return $query->where('user_id', $user)->where('course_id', $course)->get();
-    }
-
     public function scopeActions($query, $method, $condition)
     {
         return $query->where('method_id', $method)->where('condition_id', $condition)->get();
@@ -106,91 +84,12 @@ class Order extends Model
         return $query->where('user_id', $user);
     }
 
-    public function scopeCompleteds($query, $user)
-    {
-        $end = Carbon::now()->endOfDay();
-
-        return DB::table('orders')
-            ->join('courses', function ($join) {
-                $join->on('courses.id', '=', 'orders.course_id');
-            })->join('course_user', function ($join) {
-                $join->on('course_user.order_id', '=', 'orders.id');
-            })->where('course_user.culminated', '=', 1)->where('orders.user_id', '=', $user)->select(
-                'orders.id',
-            )->get();
-
-    }
-
-    public function scopeExpires($query, $user)
-    {
-
-        $end = Carbon::now()->endOfDay();
-
-        return DB::table('orders')
-            ->join('courses', function ($join) {
-                $join->on('courses.id', '=', 'orders.course_id');
-            })->join('course_user', function ($join) {
-                $join->on('course_user.order_id', '=', 'orders.id');
-            })->whereDate('orders.enroll_expire', '>=', $end)->where('course_user.culminated', '=', 0)->where('orders.user_id', '=', $user)->select(
-                'orders.id',
-            )->get();
-
-    }
-
-    public function scopeEarrings($query, $user)
-    {
-        $end = Carbon::now()->endOfDay();
-
-        return DB::table('orders')
-            ->join('courses', function ($join) {
-                $join->on('courses.id', '=', 'orders.course_id');
-            })->join('course_user', function ($join) {
-                $join->on('course_user.order_id', '=', 'orders.id');
-            })->whereDate('orders.enroll_expire', '>=', $end)->where('course_user.culminated', '=', 0)->where('orders.user_id', '=', $user)->select(
-                'orders.id',
-            )->get();
-
-    }
-
     public function scopeByEnterprise($query, $enterpriseId)
     {
         return $query->join('users', 'users.id', '=', 'orders.user_id')
             ->join('enterprise_user', 'users.id', '=', 'enterprise_user.user_id')
             ->where('enterprise_user.enterprise_id', $enterpriseId)
             ->select('orders.*');
-    }
-
-    public function scopeReport($query, $enterprise, $course, $start, $end)
-    {
-
-        return DB::table('orders')
-            ->join('users', function ($join) {
-                $join->on('users.id', '=', 'orders.user_id');
-            })->join('enterprise_user', function ($join) {
-                $join->on('enterprise_user.user_id', '=', 'users.id');
-            })->join('course_user', function ($join) {
-                $join->on('course_user.order_id', '=', 'orders.id');
-            })->where('enterprise_user.enterprise_id', '=', $enterprise)
-            ->where('orders.course_id', '=', $course)
-            ->whereBetween('orders.payment_at', [$start, $end])
-            ->select(
-                'users.slack',
-                'users.firstname',
-                'users.lastname',
-                'users.available',
-                'users.cellphone',
-                'users.address',
-                'users.identification',
-                'users.email',
-                'course_user.id',
-                'course_user.order_id',
-                'course_user.culminated',
-                'course_user.culminated_at',
-                'course_user.percent',
-                'course_user.updated_at',
-                'course_user.created_at'
-            )->orderBy('culminated_at', 'desc');
-
     }
 
     public function items(): HasMany

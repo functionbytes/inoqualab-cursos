@@ -39,9 +39,9 @@
                             <div class="mb-3">
                                 <label class="control-label col-form-label">Secreto de integridad <p class="text-muted">(Integrity Secret)</p></label>
                                 <input type="password" class="form-control" id="wompi_integrity_secret" name="wompi_integrity_secret"
-                                    value="{{ setting('wompi_integrity_secret') }}"
-                                    placeholder="test_integrity_XXXXXXXX  o  prod_integrity_XXXXXXXX">
-                                <small class="form-text text-muted">Usado para firmar y verificar las transacciones del widget.</small>
+                                    autocomplete="new-password"
+                                    placeholder="{{ setting('wompi_integrity_secret') ? '•••••••• (guardado — deja vacío para conservarlo)' : 'test_integrity_XXXXXXXX  o  prod_integrity_XXXXXXXX' }}">
+                                <small class="form-text text-muted">Usado para firmar y verificar las transacciones del widget. Deja el campo vacío para mantener el valor actual.</small>
                             </div>
                         </div>
 
@@ -49,9 +49,9 @@
                             <div class="mb-3">
                                 <label class="control-label col-form-label">Secreto de eventos <p class="text-muted">(Events Secret)</p></label>
                                 <input type="password" class="form-control" id="wompi_events_secret" name="wompi_events_secret"
-                                    value="{{ setting('wompi_events_secret') }}"
-                                    placeholder="test_events_XXXXXXXX  o  prod_events_XXXXXXXX">
-                                <small class="form-text text-muted">Usado para verificar la firma de los webhooks entrantes de Wompi.</small>
+                                    autocomplete="new-password"
+                                    placeholder="{{ setting('wompi_events_secret') ? '•••••••• (guardado — deja vacío para conservarlo)' : 'test_events_XXXXXXXX  o  prod_events_XXXXXXXX' }}">
+                                <small class="form-text text-muted">Usado para verificar la firma de los webhooks entrantes de Wompi. Deja el campo vacío para mantener el valor actual.</small>
                             </div>
                         </div>
 

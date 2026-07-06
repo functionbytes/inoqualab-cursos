@@ -1,4 +1,9 @@
 @if(auth()->user())
+@php
+    // Si el controller pasa $notifications (búsqueda), respetarlo; si no, las del usuario.
+    $notifyItems = $notifications ?? auth()->user()->notifications;
+    $notifyTz = auth()->user()->timezone ?? config('app.timezone');
+@endphp
 <li class="nav-item dropdown">
     <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
        aria-expanded="false">
@@ -8,10 +13,10 @@
     <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
         <div class="d-flex align-items-center justify-content-between py-3 px-7">
             <h5 class="mb-0 fs-5 fw-semibold">Notificaciones</h5>
-            <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">{{ count(auth()->user()->notifications) }}</span>
+            <span class="badge bg-primary rounded-4 px-3 py-1 lh-sm">{{ count($notifyItems) }}</span>
         </div>
         <div class="message-body" data-simplebar>
-            @forelse( auth()->user()->notifications->groupBy(fn ($n) => $n->created_at->format('Y-m-d')) as $created_at => $group)
+            @forelse( collect($notifyItems)->groupBy(fn ($n) => $n->created_at->format('Y-m-d')) as $created_at => $group)
 
             @php
             $today = \Carbon\Carbon::parse(now());
@@ -35,27 +40,27 @@
 
             @foreach($group as $notification)
 
-            @if($notification->data['status'] != 'mail')
+            @if(($notification->data['status'] ?? null) != 'mail')
             @if($notification->read_at != null)
-            <a  class="py-6 px-7 d-flex align-items-center dropdown-item notify-read"   href="{{$notification->data['link']}}" data-id="{{$notification->id}}">
+            <a  class="py-6 px-7 d-flex align-items-center dropdown-item notify-read"   href="{{ $notification->data['link'] ?? route('customers.notifications') }}" data-id="{{$notification->id}}">
                                                             <span class="me-3">
-                                                                <img src="/pages/images/profile/user-1.jpg" alt="user" class="rounded-circle" width="48" height="48" />
+                                                                <img src="/managers/images/profile/profile.jpg" alt="user" class="rounded-circle" width="48" height="48" />
                                                             </span>
                 <div class="w-75 d-inline-block v-middle">
-                    <h6 class="mb-1 fw-semibold">{{Str::limit($notification->data['title'], '50', '...')}}</h6>
-                    <span class="d-block">{{$notification->created_at->timezone(Auth::guard('customer')->user()->timezone)->format(setting('time_format'))}}</span>
+                    <h6 class="mb-1 fw-semibold">{{Str::limit($notification->data['title'] ?? 'Notificación', '50', '...')}}</h6>
+                    <span class="d-block">{{$notification->created_at->timezone($notifyTz)->format(setting('time_format'))}}</span>
                 </div>
             </a>
             @else
-            <a class="py-6 px-7 d-flex align-items-center dropdown-item" href="{{$notification->data['link']}}"
+            <a class="py-6 px-7 d-flex align-items-center dropdown-item" href="{{ $notification->data['link'] ?? route('customers.notifications') }}"
                data-id="{{$notification->id}}">
                                                             <span class="me-3">
-                                                                <img src="/pages/images/profile/user-1.jpg" alt="user" class="rounded-circle" width="48" height="48" />
+                                                                <img src="/managers/images/profile/profile.jpg" alt="user" class="rounded-circle" width="48" height="48" />
                                                             </span>
                 <div class="w-75 d-inline-block v-middle">
-                    <h6 class="mb-1 fw-semibold">{{Str::limit($notification->data['title'], '50', '...')}}</h6>
+                    <h6 class="mb-1 fw-semibold">{{Str::limit($notification->data['title'] ?? 'Notificación', '50', '...')}}</h6>
                     <span
-                            class="d-block">{{$notification->created_at->timezone(Auth::guard('customer')->user()->timezone)->format(setting('time_format'))}}</span>
+                            class="d-block">{{$notification->created_at->timezone($notifyTz)->format(setting('time_format'))}}</span>
                 </div>
             </a>
             @endif

@@ -136,7 +136,7 @@
                                 <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
                             </div>
                         </div>
-                    @elseif ($exam->score >= 80)
+                    @elseif ($certificate)
                         <div class="lv-mod">
                             <div class="examen-card">
                                 <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
@@ -239,7 +239,7 @@
                         </div>
                     </div>
 
-                    @if ($certificate && $exam && $exam->score >= 80)
+                    @if ($certificate)
                         <div class="lv-pane">
                             <a class="examen-card ready" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
                                 <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
@@ -330,7 +330,7 @@
                         </div>
                     @endif
 
-                    @if ($certificate && $exam && $exam->score >= 80)
+                    @if ($certificate)
                         <a class="examen-card ready mt-3" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
                             <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
                             <span class="ex-info"><b>¡Felicidades por alcanzar tu objetivo!</b><span>Haz clic aquí para descargar tu certificado.</span></span>
@@ -420,7 +420,7 @@
                                 <span class="ex-info"><b>Examen final</b><span>Disponible al completar el curso</span></span>
                                 <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
                             </div>
-                        @elseif ($exam->score >= 80)
+                        @elseif ($certificate)
                             <div class="side-card examen-card">
                                 <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
                                 <span class="ex-info"><b>Examen final</b><span>¡Aprobado!</span></span>

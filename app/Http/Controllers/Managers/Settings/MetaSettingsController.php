@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\UpdateMetaSettingsRequest;
 use App\Models\Setting\Setting;
 use Illuminate\Http\Request;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -20,7 +21,7 @@ class MetaSettingsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateMetaSettingsRequest $request)
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
 
@@ -53,7 +54,10 @@ class MetaSettingsController extends Controller
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
 
-        Media::find($id)->delete();
+        Media::where('id', $id)
+            ->where('model_type', Setting::class)
+            ->where('collection_name', 'meta')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
 

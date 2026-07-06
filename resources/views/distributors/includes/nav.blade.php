@@ -18,7 +18,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-house"></i>
+              <i class="fa-solid fa-house"></i>
             </span>
             <span class="hide-menu">Inicio</span>
           </a>
@@ -26,7 +26,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('distributor.enterprises') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-house-medical-circle-check"></i>
+              <i class="fa-solid fa-building"></i>
             </span>
             <span class="hide-menu">Empresas</span>
           </a>
@@ -34,7 +34,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('distributor.registers') }}" aria-expanded="false">
           <span>
-            <i class="fa-duotone fa-gear-code"></i>
+            <i class="fa-solid fa-user-plus"></i>
           </span>
             <span class="hide-menu">Crear usuario</span>
           </a>
@@ -43,7 +43,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
               <span>
-                <i class="fa-duotone fa-note"></i>
+                <i class="fa-solid fa-list-check"></i>
               </span>
             <span class="hide-menu">Inscripciones</span>
           </a>
@@ -65,7 +65,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('distributor.invoices') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-file-invoice"></i>
             </span>
             <span class="hide-menu">Facturas</span>
           </a>
@@ -73,7 +73,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('distributor.orders') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-receipt"></i>
             </span>
             <span class="hide-menu">Ordenes</span>
           </a>
@@ -89,7 +89,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link has-arrow" href="javascript:void(0)" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-note"></i>
+              <i class="fa-solid fa-gear"></i>
             </span>
             <span class="hide-menu">Configuración</span>
           </a>

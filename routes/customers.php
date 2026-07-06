@@ -12,13 +12,13 @@ use App\Http\Controllers\Customers\QuizController;
 use App\Http\Controllers\Customers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'verified', 'customers', 'upgrade', 'session']], function () {
+Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'customers', 'session']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('customers.dashboard');
     Route::post('/ping', fn () => response()->json(['ok' => true]))->name('customers.ping');
 
     Route::group(['prefix' => 'orders'], function () {
-        Route::get('/', [OrdersController::class, 'index'])->name('customers.orders')->middleware('profile');
+        Route::get('/', [OrdersController::class, 'index'])->name('customers.orders');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('customers.orders.view');
         Route::get('/invoice/{slack}', [OrdersController::class, 'invoice'])->name('customers.orders.invoice');
         Route::get('/payment/{slack}', [OrdersController::class, 'payment'])->name('customers.orders.payments');
@@ -32,7 +32,7 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'verified', 'cust
 
     Route::group(['prefix' => 'courses'], function () {
 
-        Route::get('/', [CoursesController::class, 'index'])->name('customers.courses')->middleware('profile');
+        Route::get('/', [CoursesController::class, 'index'])->name('customers.courses');
         Route::get('/content/{slug}', [CoursesController::class, 'content'])->name('customers.courses.content');
         Route::get('/content/lesion/{slug}', [CoursesController::class, 'lesion'])->name('customers.courses.lesion');
         Route::get('/content/player/{lesson}', [CoursesController::class, 'player'])->name('customers.courses.player');
@@ -57,7 +57,7 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'verified', 'cust
     });
 
     Route::group(['prefix' => 'documents'], function () {
-        Route::get('/', [DocumentsController::class, 'index'])->name('customers.documents')->middleware('profile');
+        Route::get('/', [DocumentsController::class, 'index'])->name('customers.documents');
     });
 
     Route::group(['prefix' => 'settings'], function () {

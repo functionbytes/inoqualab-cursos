@@ -50,7 +50,7 @@ class BlogTag extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where('available', 1)->get();
+        return $query->where('available', 1);
     }
 
     public function scopeSlug($query, $slug)

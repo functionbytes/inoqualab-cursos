@@ -10,6 +10,7 @@ use App\Listeners\Auth\Password\ForgotPasswordListener;
 use App\Listeners\Auth\Password\ResetPasswordListener;
 use App\Listeners\Auth\UserEventListener as AuthUserEventListener;
 use App\Listeners\Inscriptions\InscriptionListener;
+use App\Listeners\Inscriptions\RemoveFromRemarketingLists;
 use App\Listeners\Invoices\InvoiceListener;
 use App\Listeners\LogMailSent;
 use App\Listeners\User\UserEventListener as UserUserEventListener;
@@ -31,6 +32,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         InscriptionCreated::class => [
             InscriptionListener::class,
+            RemoveFromRemarketingLists::class,
         ],
         InvoiceCreated::class => [
             InvoiceListener::class,

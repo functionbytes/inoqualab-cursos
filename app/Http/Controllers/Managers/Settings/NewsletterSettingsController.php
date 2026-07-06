@@ -24,9 +24,14 @@ class NewsletterSettingsController extends Controller
             'newsletter_popup_delay' => max(0, (int) $request->input('newsletter_popup_delay', 2)),
             'newsletter_mailjet_enabled' => $request->newsletter_mailjet_enabled == 1 ? 1 : 0,
             'newsletter_mailjet_api_key' => $request->input('newsletter_mailjet_api_key', ''),
-            'newsletter_mailjet_api_secret' => $request->input('newsletter_mailjet_api_secret', ''),
             'newsletter_mailjet_list_id' => $request->input('newsletter_mailjet_list_id', ''),
         ];
+
+        // El secreto va enmascarado en la vista: solo se actualiza si se envía uno
+        // nuevo; un envío vacío conserva el secreto guardado.
+        if ($request->filled('newsletter_mailjet_api_secret')) {
+            $data['newsletter_mailjet_api_secret'] = $request->input('newsletter_mailjet_api_secret');
+        }
 
         updateSettings($data);
 

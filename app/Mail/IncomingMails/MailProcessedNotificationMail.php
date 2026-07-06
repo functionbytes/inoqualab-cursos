@@ -20,12 +20,13 @@ class MailProcessedNotificationMail extends Mailable implements ShouldQueue
 
     public function build(): self
     {
-        $siteName = getSetting()->page_title ?? config('app.name');
+        // settings es key/value: setting($clave). getSetting()->prop devolvía null.
+        $siteName = setting('page_title') ?: config('app.name');
         $enterprise = $this->incomingMail->enterprise?->title ?? '';
         $orderSlack = $this->incomingMail->order?->slack;
         $coursesUrl = route('customers.courses');
         $logoUrl = getLogo();
-        $supportEmail = getSetting()->page_email ?? '';
+        $supportEmail = setting('page_email') ?: '';
 
         $enterpriseLine = $enterprise
             ? "<p style=\"color:#5A7093;line-height:1.7;margin:0 0 16px\">La solicitud de inscripción para <strong>{$enterprise}</strong> ha sido procesada correctamente.</p>"

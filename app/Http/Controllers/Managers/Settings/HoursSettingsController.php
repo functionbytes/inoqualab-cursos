@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\UpdateHoursSettingsRequest;
 use App\Models\Setting\Hour;
-use Illuminate\Http\Request;
 
 class HoursSettingsController extends Controller
 {
@@ -20,7 +20,7 @@ class HoursSettingsController extends Controller
         return view('managers.views.settings.hours.setting')->with($data);
     }
 
-    public function update(Request $request)
+    public function update(UpdateHoursSettingsRequest $request)
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
         $anyChanged = false;

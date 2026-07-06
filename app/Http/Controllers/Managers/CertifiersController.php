@@ -172,7 +172,12 @@ class CertifiersController extends Controller
 
     public function deleteThumbnails($id)
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('certifiers.update'), 403);
+
+        Media::where('id', $id)
+            ->where('model_type', Certifier::class)
+            ->where('collection_name', 'thumbnail')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }
@@ -221,7 +226,12 @@ class CertifiersController extends Controller
 
     public function deleteSignatures($id)
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('certifiers.update'), 403);
+
+        Media::where('id', $id)
+            ->where('model_type', Certifier::class)
+            ->where('collection_name', 'signature')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }

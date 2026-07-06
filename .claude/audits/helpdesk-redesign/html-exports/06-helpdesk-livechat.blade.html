@@ -17,7 +17,7 @@
 
                     {{-- Header --}}
                     <tr>
-                        <td style="background:#90bb13;padding:24px 32px;text-align:center;">
+                        <td style="background:#008bcd;padding:24px 32px;text-align:center;">
                             @if($conversation->inbox?->channel?->logo_url)
                                 <img src="{{ $conversation->inbox->channel->logo_url }}"
                                      alt="Logo"
@@ -59,7 +59,7 @@
                                     <tr>
                                         <td>
                                             <p style="margin:0 0 4px;font-size:12px;color:#999999;">
-                                                <strong style="color:{{ $isAgent ? '#90bb13' : '#333333' }};">
+                                                <strong style="color:{{ $isAgent ? '#008bcd' : '#333333' }};">
                                                     {{ $senderName }}
                                                 </strong>
                                                 &nbsp;&middot;&nbsp;
@@ -67,7 +67,7 @@
                                             </p>
                                             <div style="
                                                 background:{{ $isAgent ? '#fff5f5' : '#f8f8f8' }};
-                                                border-left:3px solid {{ $isAgent ? '#90bb13' : '#cccccc' }};
+                                                border-left:3px solid {{ $isAgent ? '#008bcd' : '#cccccc' }};
                                                 padding:10px 14px;
                                                 border-radius:0 4px 4px 0;
                                                 font-size:14px;
@@ -139,7 +139,7 @@
             overflow: hidden;
         }
         .demo-header {
-            background: linear-gradient(135deg, {{ $config['widgetColor'] ?? '#90bb13' }} 0%, {{ $config['widgetColor'] ?? '#90bb13' }}dd 100%);
+            background: linear-gradient(135deg, {{ $config['widgetColor'] ?? '#008bcd' }} 0%, {{ $config['widgetColor'] ?? '#008bcd' }}dd 100%);
             color: white;
             padding: 40px;
             text-align: center;
@@ -160,7 +160,7 @@
             background: #f7fafc;
             padding: 18px;
             border-radius: 8px;
-            border-left: 4px solid {{ $config['widgetColor'] ?? '#90bb13' }};
+            border-left: 4px solid {{ $config['widgetColor'] ?? '#008bcd' }};
         }
         .config-item h3 {
             font-size: 0.85rem;
@@ -218,7 +218,7 @@
                         </div>
                         <div class="config-item">
                             <h3>Color</h3>
-                            <p style="color: {{ $config['widgetColor'] ?? '#90bb13' }}">{{ $config['widgetColor'] ?? '#90bb13' }}</p>
+                            <p style="color: {{ $config['widgetColor'] ?? '#008bcd' }}">{{ $config['widgetColor'] ?? '#008bcd' }}</p>
                         </div>
                         <div class="config-item">
                             <h3>Pre-chat form</h3>
@@ -314,7 +314,7 @@
 
 
         .chat-landing .sidebar{
-            background: linear-gradient(135deg, #90bb13 0%, #7a9e10 100%);
+            background: linear-gradient(135deg, #008bcd 0%, #7a9e10 100%);
         }
 
 
@@ -376,7 +376,7 @@
             }
 
             .chat-container {
-                background: linear-gradient(135deg, #90bb13 0%, #7a9e10 100%);
+                background: linear-gradient(135deg, #008bcd 0%, #7a9e10 100%);
             }
         }
 
@@ -547,7 +547,7 @@
     #widgetAccordion .accordion-collapse.show .accordion-body,
     .tab-content > .tab-pane.show { visibility: visible !important; }
     .lc-settings-header {
-        background: linear-gradient(135deg, #90bb13 0%, #7b0000 100%);
+        background: linear-gradient(135deg, #008bcd 0%, #7b0000 100%);
         color: white;
         padding: 1.5rem 2rem;
         border-radius: 12px;
@@ -567,7 +567,7 @@
         align-items: center;
         gap: .5rem;
     }
-    .lc-section-title i { color: #90bb13; }
+    .lc-section-title i { color: #008bcd; }
 
     .lc-preview-wrap {
         position: sticky;
@@ -617,7 +617,7 @@
         border-radius: 6px;
     }
     .preview-screen-tabs .nav-link.active {
-        background: #90bb13;
+        background: #008bcd;
         color: #fff;
     }
 
@@ -632,10 +632,10 @@
         padding: .6rem 1rem;
         font-weight: 500;
     }
-    .lc-nav-tabs .nav-link:hover { color: #90bb13; }
+    .lc-nav-tabs .nav-link:hover { color: #008bcd; }
     .lc-nav-tabs .nav-link.active {
-        color: #90bb13;
-        border-bottom-color: #90bb13;
+        color: #008bcd;
+        border-bottom-color: #008bcd;
         background: transparent;
     }
 
@@ -648,8 +648,8 @@
         cursor: pointer;
         transition: border-color .15s;
     }
-    .timeout-row:hover { border-color: #90bb13; }
-    .timeout-row.active { border-color: #90bb13; background: #fff8f8; }
+    .timeout-row:hover { border-color: #008bcd; }
+    .timeout-row.active { border-color: #008bcd; background: #fff8f8; }
 
     /* Code block */
     .lc-code-block {
@@ -1027,9 +1027,9 @@
                                                 <label class="form-label fw-semibold" for="primary_color">Color primario</label>
                                                 <div class="input-group">
                                                     <input type="color" class="form-control form-control-color lc-color-picker" id="primary_color" name="primary_color"
-                                                        value="{{ old('primary_color', $backups['primary_color'] ?? '#90bb13') }}" style="max-width:50px;">
+                                                        value="{{ old('primary_color', $backups['primary_color'] ?? '#008bcd') }}" style="max-width:50px;">
                                                     <input type="text" class="form-control color-hex-input" id="primary_color_hex"
-                                                        value="{{ old('primary_color', $backups['primary_color'] ?? '#90bb13') }}" readonly>
+                                                        value="{{ old('primary_color', $backups['primary_color'] ?? '#008bcd') }}" readonly>
                                                 </div>
                                             </div>
                                             <div class="col-md-4">

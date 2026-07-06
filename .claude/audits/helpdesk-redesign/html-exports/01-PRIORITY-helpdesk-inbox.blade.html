@@ -468,7 +468,7 @@
 
     .left-part .bg-primary-subtle {
         background-color: rgba(177, 1, 0, 0.1) !important;
-        color: #90bb13 !important;
+        color: #008bcd !important;
         font-weight: 600;
     }
 
@@ -564,7 +564,7 @@
     /* Offcanvas sidebar active state */
     #helpdeskSidebar .bg-primary-subtle {
         background-color: rgba(177, 1, 0, 0.1) !important;
-        color: #90bb13 !important;
+        color: #008bcd !important;
         font-weight: 600;
     }
 
@@ -6922,7 +6922,6 @@ $(document).on('bv:modal:open', function (e, name) {
                         <div class="rp3-cart" @if($cartId) data-cart-id="{{ $cartId }}" @endif>
                             <div class="hd">
                                 <span class="dot"></span>
-                                <i class="fas fa-cart-shopping"></i>
                                 {{ $cartItemCount }} item{{ $cartItemCount === 1 ? '' : 's' }}
                             </div>
                             <div class="rp3-cart-items">
@@ -6982,7 +6981,7 @@ $(document).on('bv:modal:open', function (e, name) {
                 return round($bytes / 1073741824, 1).' GB';
             };
             $rpDocIcons = [
-                'pdf'  => ['icon' => 'fa-file-pdf',        'color' => '#90bb13'],
+                'pdf'  => ['icon' => 'fa-file-pdf',        'color' => '#008bcd'],
                 'doc'  => ['icon' => 'fa-file-word',       'color' => '#2563eb'],
                 'docx' => ['icon' => 'fa-file-word',       'color' => '#2563eb'],
                 'xls'  => ['icon' => 'fa-file-excel',      'color' => '#059669'],
@@ -7014,7 +7013,7 @@ $(document).on('bv:modal:open', function (e, name) {
                     @php
                         $rpTypeColors = [
                             'image'    => '#e67000',
-                            'video'    => '#90bb13',
+                            'video'    => '#008bcd',
                             'audio'    => '#059669',
                             'document' => '#71717a',
                         ];
@@ -7123,7 +7122,7 @@ $(document).on('bv:modal:open', function (e, name) {
                                     <img src="{{ $f->url }}" alt="{{ $f->name }}" loading="lazy">
                                     <span class="bv-file-overlay"><i class="fas fa-magnifying-glass-plus"></i></span>
                                 @elseif($f->type === 'video')
-                                    <div class="bv-file-icon-wrap" style="color:#90bb13;">
+                                    <div class="bv-file-icon-wrap" style="color:#008bcd;">
                                         <i class="fas fa-circle-play"></i>
                                     </div>
                                 @elseif($f->type === 'audio')
@@ -7178,7 +7177,7 @@ $(document).on('bv:modal:open', function (e, name) {
                         ->get();
                 }
                 $prevChannelColors = [
-                    'whatsapp'  => ['color' => '#25d366', 'icon' => 'fab fa-whatsapp'],
+                    'whatsapp'  => ['color' => '#008bcd', 'icon' => 'fab fa-whatsapp'],
                     'facebook'  => ['color' => '#1877f2', 'icon' => 'fab fa-facebook-messenger'],
                     'instagram' => ['color' => '#e4405f', 'icon' => 'fab fa-instagram'],
                     'email'     => ['color' => '#52525b', 'icon' => 'far fa-envelope'],
@@ -9354,10 +9353,10 @@ $(document).on('bv:modal:open', function (e, name) {
                         <div class="input-group">
                             <input type="color" id="wt_primary_color" name="widget[widget_color]"
                                    class="form-control form-control-color wt-color-picker"
-                                   value="{{ $w('widget_color', '#90bb13') }}"
+                                   value="{{ $w('widget_color', '#008bcd') }}"
                                    data-hex-target="#wt_primary_color_hex">
                             <input type="text" id="wt_primary_color_hex" class="form-control"
-                                   value="{{ $w('widget_color', '#90bb13') }}" readonly>
+                                   value="{{ $w('widget_color', '#008bcd') }}" readonly>
                         </div>
                     </div>
                     <div class="col-md-6">

@@ -19,7 +19,6 @@ class ReportController extends Controller
 
         return view('distributors.views.orders.report.report')->with([
             'enterprises' => $enterprises,
-            'distributor' => $distributor,
         ]);
 
     }
@@ -27,7 +26,9 @@ class ReportController extends Controller
     public function generate(Request $request)
     {
 
-        $distributor = $request->distributor;
+        // SIEMPRE el distribuidor autenticado: nunca confiar en un id del
+        // request (evita descargar órdenes de otro distribuidor).
+        $distributor = app('distributor')->id;
         $enterprise = $request->enterprise;
         $date = explode(' - ', $request->range);
         $start = Carbon::parse($date[0])->startOfDay();

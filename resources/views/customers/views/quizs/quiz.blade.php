@@ -181,7 +181,7 @@
                                                             </div>
                                                         @endif
 
-                                                        @if ($count == $que_count)
+                                                        @if ($que_count == 1)
                                                             <div class="col-12">
                                                                 <a id="finish"  class="owl">
                                                                     <i class="fa-duotone fa-flag-checkered me-1 fs-6"></i>
@@ -364,7 +364,7 @@
                                                                 </div>
                                                             @endif
 
-                                                            @if ($count == $que_count)
+                                                            @if ($que_count == 1)
 
                                                                 <div class="col-12">
                                                                     <a id="finish"  class="owl">
@@ -545,7 +545,7 @@
 
                         y--;
 
-                        if (y == 1) {
+                        if (y == 0) {
                             $('#next').val(0);
                             $('#prev').val(1);
                             $('#prev').hide();
@@ -561,6 +561,13 @@
                         progres = (x / totalques) * 100;
                         $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
 
+                    });
+
+                    // Quiz de una sola pregunta: "Finalizar" envía directo (no hay botón "siguiente").
+                    $('#finish').click(function() {
+                        if ($('#more_quiz0').find('input:checked').length > 0) {
+                            $('#question-form').submit();
+                        }
                     });
 
 

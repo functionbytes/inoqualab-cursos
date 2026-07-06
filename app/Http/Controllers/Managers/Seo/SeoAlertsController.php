@@ -48,4 +48,11 @@ class SeoAlertsController extends Controller
 
         return back()->with('success', "{$count} alertas marcadas como revisadas.");
     }
+
+    public function destroy(SeoAlert $seoAlert): RedirectResponse
+    {
+        $seoAlert->delete();
+
+        return back()->with('success', 'Alerta eliminada.');
+    }
 }

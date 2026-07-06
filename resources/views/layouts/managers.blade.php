@@ -6,19 +6,16 @@
 
     <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
     <meta charset="utf-8" />
-    <title>INOQUALAB - E-Learning</title>
+    <title>@hasSection('title')@yield('title') · @endif{{ setting('page_title') ?: 'INOQUALAB - E-Learning' }}</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no" />
-    <link rel="apple-touch-icon" href="pages/ico/60.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="pages/ico/76.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="pages/ico/120.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="pages/ico/152.png">
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="{{ url('pages/ico/60.png') }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ url('pages/ico/76.png') }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ url('pages/ico/120.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ url('pages/ico/152.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-touch-fullscreen" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta content="Meet pages - The simplest and fastest way to build web UI for your dashboard or app." name="description" />
-    <meta content="Ace" name="author" />
 
     <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
 
@@ -34,8 +31,8 @@
     <link rel="stylesheet" href="{{ url('managers/libs/fontawesome/fontawesome.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/dropzone/dist/min/dropzone.min.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/daterangepicker/daterangepicker.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/css/style.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url('managers/css/style.css') }}?v={{ filemtime(public_path('managers/css/style.css')) }}">
+    <link rel="stylesheet" href="{{ url('managers/css/theme.css') }}?v={{ filemtime(public_path('managers/css/theme.css')) }}">
 
 
 

@@ -45,7 +45,7 @@
                                 Cuando está <strong>activado</strong>, los correos con confianza ≥ umbral se procesan
                                 inmediatamente y crean la orden sin intervención humana.<br>
                                 Cuando está <strong>desactivado</strong>, <em>todos</em> los correos van a la
-                                <a href="{{ route('support.mails.index') }}" target="_blank">bandeja de revisión</a>
+                                bandeja de revisión (en el panel de soporte)
                                 sin importar el nivel de confianza.
                             </p>
                         </div>

@@ -339,13 +339,13 @@
                                 </div>
 
                                 <div class="buy-actions">
-                                    <button type="submit" class="buy-primary" id="btnBuyNow"><i class="fa-solid fa-bolt"></i> Compra ahora</button>
-                                    <button type="submit" class="buy-outline" id="btnAddCart"><i class="fa-solid fa-cart-plus"></i> Agregar al carrito</button>
+                                    <button type="submit" class="buy-primary" id="btnBuyNow">Compra ahora</button>
+                                    <button type="submit" class="buy-outline" id="btnAddCart">Agregar al carrito</button>
                                 </div>
                             </form>
                         @else
                             <div class="buy-actions">
-                                <a href="{{ route('checkout', ['course', $course->slack]) }}" class="buy-primary"><i class="fa-solid fa-bolt"></i> Obtener gratis</a>
+                                <a href="{{ route('checkout', ['course', $course->slack]) }}" class="buy-primary">Obtener gratis</a>
                             </div>
                         @endif
 

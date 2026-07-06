@@ -58,7 +58,7 @@
                                  </div>
                                  <div class="bio-content">
                                     @if($certifier->description!=null)
-                                    <p class="info">{!! $certifier->description !!}.</p>
+                                    <p class="info">{!! clean($certifier->description, 'content') !!}.</p>
                                     @endif
                                  </div>
                               </div>

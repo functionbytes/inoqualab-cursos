@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Accountings\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Accountings\UpdateAccountingProfileRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class SettingsController extends Controller
@@ -20,32 +20,33 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateAccountingProfileRequest $request): JsonResponse
     {
         // Ajustes de perfil: SIEMPRE el usuario autenticado, nunca el slack del
         // request (evita toma de cuenta: editar/resetear password de cualquiera).
         $user = auth()->user();
 
-        if (User::where('email', $request->email)->where('id', '!=', $user->id)->exists()) {
-            return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
-        }
-
-        if (User::where('identification', $request->identification)->where('id', '!=', $user->id)->exists()) {
-            return response()->json(['success' => false, 'message' => 'La identificación ya está registrada en nuestro sistema.']);
-        }
-
         $user->firstname = Str::upper($request->firstname);
         $user->lastname = Str::upper($request->lastname);
         $user->cellphone = $request->cellphone;
         $user->email = $request->email;
-        $user->available = $user->available;
 
         if ($request->filled('password')) {
             $user->password = $request->password;
         }
 
-        $user->update();
+        if ($user->isDirty()) {
+            $user->save();
 
-        return response()->json(['success' => true, 'message' => '']);
+            $changes = $user->getChanges();
+            unset($changes['password'], $changes['updated_at']);
+
+            activity()
+                ->performedOn($user)
+                ->withProperties($changes)
+                ->log('updated');
+        }
+
+        return response()->json(['success' => true, 'message' => 'Se ha actualizado correctamente el perfil.']);
     }
 }

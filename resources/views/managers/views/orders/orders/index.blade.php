@@ -50,10 +50,9 @@
                         @php
                             $activeFilters = (int)(($condition ?? '') !== '') + (int)(($type ?? '') !== '') + (int)(($method ?? '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders me-1"></i>
-                            Filtros
+                            <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
@@ -89,7 +88,7 @@
                                             <span class="fw-semibold">{{ $order->slack }}</span>
                                         </td>
                                         <td>
-                                            {{ strtoupper($order->user->firstname . ' ' . $order->user->lastname) }}
+                                            {{ $order->user ? strtoupper($order->user->firstname.' '.$order->user->lastname) : 'USUARIO ELIMINADO' }}
                                         </td>
                                         <td>
                                             <span class="badge bg-light-{{ $order->condition->slug }} text-primary rounded-3 py-2 fw-semibold">

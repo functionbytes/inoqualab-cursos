@@ -277,6 +277,242 @@ class AnalyticsController extends Controller
         }
     }
 
+    public function operatingSystems(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.os.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions'],
+                dimensions: ['operatingSystem'],
+                maxResults: 10,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            $total = $rows->sum('sessions');
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'os' => $r['operatingSystem'] ?? 'Unknown',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'percentage' => $total > 0 ? round(($r['sessions'] / $total) * 100, 1) : 0,
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'operatingSystems');
+        }
+    }
+
+    public function trafficSources(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.traffic_sources.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions'],
+                dimensions: ['sessionSource', 'sessionMedium'],
+                maxResults: 50,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            $total = $rows->sum('sessions');
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'source' => $r['sessionSource'] ?? '(direct)',
+                'medium' => $r['sessionMedium'] ?? '(none)',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'percentage' => $total > 0 ? round(($r['sessions'] / $total) * 100, 1) : 0,
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'trafficSources');
+        }
+    }
+
+    public function landingPages(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.landing_pages.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions', 'bounceRate'],
+                dimensions: ['landingPagePlusQueryString'],
+                maxResults: 50,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'page' => $r['landingPagePlusQueryString'] ?? '/',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'bounce_rate' => round((float) ($r['bounceRate'] ?? 0) * 100, 1),
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'landingPages');
+        }
+    }
+
+    public function exitPages(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            // GA4 no expone una métrica nativa de "página de salida"; se aproxima
+            // con las páginas por sesiones/vistas (pagePath), el proxy estándar.
+            $rows = Cache::remember("analytics.exit_pages.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions', 'screenPageViews'],
+                dimensions: ['pagePath'],
+                maxResults: 50,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'page' => $r['pagePath'] ?? '/',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'pageviews' => (int) ($r['screenPageViews'] ?? 0),
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'exitPages');
+        }
+    }
+
+    public function channelTrend(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.channel_trend.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions'],
+                dimensions: ['date', 'sessionDefaultChannelGroup'],
+                maxResults: 2000,
+            ));
+
+            $dates = $rows->pluck('date')->unique()->sort()->values();
+            $channels = $rows->pluck('sessionDefaultChannelGroup')->filter()->unique()->values();
+
+            // Índice (date|channel => sessions) para no recorrer $rows por cada celda.
+            $lookup = [];
+            foreach ($rows as $r) {
+                $lookup[($r['date'] ?? '').'|'.($r['sessionDefaultChannelGroup'] ?? '')] = (int) ($r['sessions'] ?? 0);
+            }
+
+            $series = $channels->map(fn ($channel) => [
+                'name' => $channel,
+                'data' => $dates->map(fn ($date) => $lookup[$date.'|'.$channel] ?? 0)->toArray(),
+            ])->values()->toArray();
+
+            return response()->json(['success' => true, 'data' => [
+                'dates' => $dates->map(fn ($d) => $this->formatDate($d))->toArray(),
+                'series' => $series,
+            ]]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'channelTrend');
+        }
+    }
+
+    public function hourlyHeatmap(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.hourly_heatmap.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions'],
+                dimensions: ['dayOfWeek', 'hour'],
+                maxResults: 200,
+            ));
+
+            // GA4 dayOfWeek: 0=Domingo .. 6=Sábado; hour: 00..23.
+            $days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            $matrix = array_fill(0, 7, array_fill(0, 24, 0));
+
+            foreach ($rows as $r) {
+                $day = (int) ($r['dayOfWeek'] ?? -1);
+                $hour = (int) ($r['hour'] ?? -1);
+                if ($day >= 0 && $day <= 6 && $hour >= 0 && $hour <= 23) {
+                    $matrix[$day][$hour] = (int) ($r['sessions'] ?? 0);
+                }
+            }
+
+            return response()->json(['success' => true, 'data' => [
+                'days' => $days,
+                'matrix' => $matrix,
+            ]]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'hourlyHeatmap');
+        }
+    }
+
+    public function searchTerms(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            $rows = Cache::remember("analytics.search_terms.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions', 'screenPageViews'],
+                dimensions: ['searchTerm'],
+                maxResults: 50,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            $total = $rows->sum('sessions');
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'term' => $r['searchTerm'] ?? '-',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'pageviews' => (int) ($r['screenPageViews'] ?? 0),
+                'percentage' => $total > 0 ? round(($r['sessions'] / $total) * 100, 1) : 0,
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'searchTerms');
+        }
+    }
+
+    public function userFlow(Request $request): JsonResponse
+    {
+        $this->bootAnalytics();
+        try {
+            $range = $request->input('range', 'last_7_days');
+            $period = $this->getPeriod($range);
+
+            // GA4 Data API no expone la página de salida por sesión; el flujo se
+            // construye sobre las páginas de entrada (landing) con su rebote. La
+            // columna "salida" no está disponible vía API y se marca con "—".
+            $rows = Cache::remember("analytics.user_flow.{$range}", 3600, fn () => Analytics::get(
+                period: $period,
+                metrics: ['sessions', 'bounceRate'],
+                dimensions: ['landingPagePlusQueryString'],
+                maxResults: 50,
+                orderBy: [OrderBy::metric('sessions', true)],
+            ));
+
+            return response()->json(['success' => true, 'data' => $rows->map(fn ($r) => [
+                'landing' => $r['landingPagePlusQueryString'] ?? '/',
+                'exit' => '—',
+                'sessions' => (int) ($r['sessions'] ?? 0),
+                'bounce_rate' => round((float) ($r['bounceRate'] ?? 0) * 100, 1),
+            ])->values()->toArray()]);
+        } catch (\Exception $e) {
+            return $this->errorResponse($e, 'userFlow');
+        }
+    }
+
     private function getPeriod(string $range): Period
     {
         return match ($range) {

@@ -47,6 +47,7 @@ class InscriptionsMassivesController extends Controller
         $distributor = Distributor::id($request->distributor);
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
         $method = OrderMethod::slug('credit');
@@ -164,6 +165,20 @@ class InscriptionsMassivesController extends Controller
                 }
 
                 $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+
+                if ($tariff === null) {
+                    $errors[] = [
+                        'enterprise_enroll' => $enterprise->id,
+                        'course_enroll' => $course->id,
+                        'customer_enroll' => $user->id,
+                        'customer_identification' => $user->identification,
+                        'course' => $course->title,
+                        'message' => 'El curso no tiene una tarifa asignada para este distribuidor.',
+                    ];
+
+                    continue;
+                }
+
                 $condition = OrderCondition::slug('payment');
                 $type = OrderType::slug('services');
                 $method = OrderMethod::slug('credit');
@@ -179,6 +194,7 @@ class InscriptionsMassivesController extends Controller
                 $order->transaction = null;
                 $order->payment_at = now()->setTimezone('America/Bogota');
                 $order->total_discount_amount = 0;
+                $order->total_after_discount = $tariff;
                 $order->total_before_discount = $tariff;
                 $order->total_tax_amount = 0;
                 $order->total_order_amount = $tariff;

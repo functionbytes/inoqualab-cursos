@@ -154,7 +154,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/users/check/identification', [EnterpriseUserController::class, 'check'])->name('support.enterprises.users.check');
         Route::post('/users/reports/generate', [EnterpriseUserController::class, 'generate'])->name('support.enterprises.users.reports.generate');
         Route::post('/users/inscriptions/store', [EnterpriseInscriptionsController::class, 'store'])->name('support.enterprises.inscriptions.store');
-        Route::post('/users/inscriptions/enroll', [EnterpriseInscriptionsController::class, 'enroll'])->name('support.enterprises.inscriptions.enroll');
+        Route::post('/users/inscriptions/enroll', [EnterpriseInscriptionsController::class, 'enroll'])->name('support.enterprises.inscriptions.enroll')->middleware('throttle:10,1');
 
         Route::post('/users/reassign/single', [EnterpriseReassignController::class, 'reassignSingle'])->name('support.enterprises.users.reassign.single');
         Route::post('/users/reassign/all', [EnterpriseReassignController::class, 'reassignAll'])->name('support.enterprises.users.reassign.all');
@@ -192,6 +192,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
 
         Route::delete('/users/courses/destroy/{enterprice}/{course}', [EnterpriseCourseController::class, 'destroy'])->name('support.enterprises.courses.destroy');
         Route::get('/users/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('support.enterprises.courses.reasign');
+        Route::post('/users/courses/reasign/action', [EnterpriseCourseController::class, 'includes'])->name('support.enterprises.action.reasign');
         Route::get('/users/courses/reports/{enterprises}/{course}', [EnterpriseCourseController::class, 'report'])->name('support.enterprises.courses.reports');
         Route::get('/users/courses/view/{enterprises}/{course}', [EnterpriseCourseController::class, 'view'])->name('support.enterprises.courses.view');
 
@@ -261,14 +262,14 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
 
         Route::get('/inscriptions/massive/{slack}', [DistributorsInscriptionsMassivesController::class, 'index'])->name('support.distributors.inscriptions.massives');
         Route::post('/inscriptions/massive/store', [DistributorsInscriptionsMassivesController::class, 'store'])->name('support.distributors.inscriptions.massives.store');
-        Route::post('/inscriptions/massive/enroll', [DistributorsInscriptionsMassivesController::class, 'enroll'])->name('support.distributors.inscriptions.massives.enroll');
+        Route::post('/inscriptions/massive/enroll', [DistributorsInscriptionsMassivesController::class, 'enroll'])->name('support.distributors.inscriptions.massives.enroll')->middleware('throttle:10,1');
 
         Route::post('/inscriptions/massive/get/users', [DistributorsInscriptionsMassivesController::class, 'getUsers'])->name('support.distributors.inscriptions.massives.get.users');
         Route::post('/inscriptions/massive/get/courses', [DistributorsInscriptionsMassivesController::class, 'getCourses'])->name('support.distributors.inscriptions.massives.get.courses');
 
         Route::get('/inscriptions/{slack}', [DistributorsInscriptionsController::class, 'index'])->name('support.distributors.inscriptions');
         Route::post('/inscriptions/store', [DistributorsInscriptionsController::class, 'store'])->name('support.distributors.inscriptions.store');
-        Route::post('/inscriptions/enroll', [DistributorsInscriptionsController::class, 'enroll'])->name('support.distributors.inscriptions.enroll');
+        Route::post('/inscriptions/enroll', [DistributorsInscriptionsController::class, 'enroll'])->name('support.distributors.inscriptions.enroll')->middleware('throttle:10,1');
 
         Route::post('/inscriptions/get/users', [DistributorsInscriptionsController::class, 'getUsers'])->name('support.distributors.inscriptions.get.users');
         Route::post('/inscriptions/get/courses', [DistributorsInscriptionsController::class, 'getCourses'])->name('support.distributors.inscriptions.get.courses');

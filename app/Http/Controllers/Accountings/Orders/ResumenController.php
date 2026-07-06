@@ -48,10 +48,11 @@ class ResumenController extends Controller
         ];
 
         $orders = Order::filterOrders($filters);
-        $distributor = Distributor::id($request->distributor);
-        $enterprise = Enterprise::id($request->enterprise);
-
-        $enterprise != null ? $enterprise : null;
+        // "0" ("Todas") o vacío significa "sin filtro": Distributor::id()/Enterprise::id()
+        // abortan con 404 si el id no existe, así que aquí se resuelve solo cuando
+        // el filtro es real (evita 404 en el caso más común: reporte sin filtrar).
+        $distributor = $request->distributor ? Distributor::id($request->distributor) : null;
+        $enterprise = $request->enterprise ? Enterprise::id($request->enterprise) : null;
 
         return view('accountings.views.orders.resumen.resumen')->with([
             'orders' => $orders,

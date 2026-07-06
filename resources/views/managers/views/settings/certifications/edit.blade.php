@@ -11,7 +11,7 @@
 
                     {{ csrf_field() }}
 
-                    <input type="hidden" id="description" name="description" value="{!! $certification->description  !!}">
+                    <textarea class="d-none" id="description" name="description">{!! clean($certification->description, 'content') !!}</textarea>
                     <input type="hidden" id="id" name="id" value="{{ $certification->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $certification->slack }}">
                     <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
@@ -23,7 +23,7 @@
                             <h5 class="mb-0">Cerificado</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Actualiza la imagen del certificado si deseas reemplazarla.
                         </p>
                         <div class="dropzone dz-clickable dz-started" id="thumbnail">
                             <div class="fallback">
@@ -39,7 +39,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Actualiza los datos de la certificación. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">
@@ -65,7 +65,7 @@
                             <div class="mb-3">
                                 <label class="col-form-label">Descripción</label>
                                 <div class="quill-wrapper">
-                                    <div id="descriptions">{!! $certification->description !!}</div>
+                                    <div id="descriptions">{!! clean($certification->description, 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>

@@ -15,8 +15,10 @@ class UpdatePaymentsSettingsRequest extends FormRequest
     {
         return [
             'wompi_public_key' => ['required', 'string', 'max:255'],
-            'wompi_integrity_secret' => ['required', 'string', 'max:255'],
-            'wompi_events_secret' => ['required', 'string', 'max:255'],
+            // Secretos enmascarados: vacío = conservar el guardado (el controller
+            // solo actualiza si se envía un valor nuevo).
+            'wompi_integrity_secret' => ['nullable', 'string', 'max:255'],
+            'wompi_events_secret' => ['nullable', 'string', 'max:255'],
         ];
     }
 

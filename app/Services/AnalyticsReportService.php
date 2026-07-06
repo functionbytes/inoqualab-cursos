@@ -148,7 +148,7 @@ class AnalyticsReportService
 
         try {
             foreach ($rows as $row) {
-                fputcsv($handle, $row);
+                fputcsv($handle, $row, ',', '"', '\\');
             }
         } finally {
             fclose($handle);

@@ -35,7 +35,7 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                     <tr>
-                        <th>Titulo</th>
+                        <th>Título</th>
                         <th>Fecha</th>
                         <th>Acciones</th>
                     </tr>
@@ -75,7 +75,7 @@
             </div>
             @if ($documents->total() > 0)
             <div class="result-body ">
-                <span>Mostrar {{ $documents->firstItem() }}-{{ $documents->lastItem() }} de {{ $documents->total() }} resultados</span>
+                <span>Mostrando {{ $documents->firstItem() }}-{{ $documents->lastItem() }} de {{ $documents->total() }} resultados</span>
                 <nav>
                     {{ $documents->appends(request()->input())->links() }}
                 </nav>

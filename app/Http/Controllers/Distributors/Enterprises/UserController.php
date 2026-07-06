@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Distributors\Enterprises;
 
 use App\Exports\Distributors\IncomesExport;
+use App\Exports\Distributors\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorEnterprise;
@@ -65,60 +66,6 @@ class UserController extends Controller
             'available' => $available,
             'searchKey' => $searchKey,
         ]);
-    }
-
-    public function reassign($slack)
-    {
-
-        $user = $this->managedUser($slack);
-        $enterprise = $user->getEnterprise();
-
-        $distributor = app('distributor');
-        $enterprises = $distributor->enterprises;
-        $enterprises->prepend('', '');
-        $enterprises = $enterprises->pluck('title', 'slack');
-
-        $enterprises = $enterprises->forget($enterprise->slack);
-
-        return view('distributors.views.enterprises.users.users.reassign')->with([
-            'user' => $user,
-            'enterprises' => $enterprises,
-            'enterprise' => $enterprise,
-        ]);
-
-    }
-
-    public function reassignUser(Request $request)
-    {
-
-        $user = $this->managedUser($request->slack);
-        $newEnterprise = $this->managedEnterprise($request->enterprise);
-
-        if (! $user || ! $newEnterprise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuario o empresa no encontrados.']);
-        }
-
-        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
-
-        if ($enterpriseUser) {
-
-            $enterpriseUser->enterprise_id = $newEnterprise->id;
-            $enterpriseUser->save();
-
-            return response()->json([
-                'success' => true,
-                'enterprise' => $newEnterprise->slack,
-                'message' => 'Usuario reasignado a la nueva empresa correctamente.',
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'No se encontró la relación del usuario con la empresa.',
-        ]);
-
     }
 
     public function create($slack)
@@ -242,18 +189,6 @@ class UserController extends Controller
         return response()->json(['success' => true, 'message' => '']);
     }
 
-    public function users($slack)
-    {
-
-        $enterprise = $this->managedEnterprise($slack);
-        $users = $enterprise->users;
-
-        return view('distributors.views.enterprises.users.users.index')->with([
-            'enterprise' => $enterprise,
-            'users' => $users,
-        ]);
-    }
-
     public function courses($slack)
     {
 
@@ -304,8 +239,11 @@ class UserController extends Controller
     public function generate(Request $request)
     {
 
+        // Ownership: la empresa debe pertenecer al distribuidor autenticado
+        // (evita descargar el reporte de usuarios de una empresa ajena).
+        // UsersExport necesita el modelo (llama $this->enterprise->users()), no un id crudo.
         $modalitie = $request->modalitie;
-        $enterprise = $request->enterprise;
+        $enterprise = app('distributor')->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
 
         return Excel::download(new UsersExport($enterprise, $modalitie), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }
@@ -313,13 +251,16 @@ class UserController extends Controller
     public function incoming(Request $request)
     {
 
+        // Ownership: la empresa debe pertenecer al distribuidor autenticado
+        // (evita descargar el reporte de ingresos de una empresa ajena).
+        $enterprise = app('distributor')->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
+
         $course = $request->course;
-        $enterprise = $request->enterprise;
         $date = explode(' - ', $request->range);
         $start = Carbon::parse($date[0])->startOfDay();
         $end = Carbon::parse($date[1])->endOfDay();
 
-        return Excel::download(new IncomesExport($enterprise, $course, $start, $end), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
+        return Excel::download(new IncomesExport($enterprise->id, $course, $start, $end), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }
 
     public function check(Request $request)
@@ -332,7 +273,18 @@ class UserController extends Controller
             if ($enterpriseUser) {
                 $enterprise = Enterprise::find($enterpriseUser->enterprise_id);
 
-                if ($enterprise) {
+                // Ownership: si la empresa del usuario NO pertenece al distribuidor
+                // autenticado, no revelar el nombre de la empresa ni del distribuidor
+                // ajeno (evita mapear la cartera de clientes de un competidor).
+                $managed = $enterprise && app('distributor')->enterprises()->where('enterprises.id', $enterprise->id)->exists();
+
+                if (! $managed) {
+                    $response = [
+                        'success' => true,
+                        'message' => 'Este usuario ya está registrado en otra empresa.',
+                        'enterprise' => null,
+                    ];
+                } else {
                     $distributorEnterprise = DistributorEnterprise::where('enterprise_id', $enterprise->id)->first();
 
                     if ($distributorEnterprise) {
@@ -343,7 +295,7 @@ class UserController extends Controller
                             'success' => true,
                             'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
                             'enterprise' => $enterprise->title,
-                            'distributor' => $distributor->title, // Información del distribuidor
+                            'distributor' => $distributor?->title, // Información del distribuidor
                             'url' => route('distributor.enterprises.users', ['slack' => $enterprise->slack]),
                         ];
 

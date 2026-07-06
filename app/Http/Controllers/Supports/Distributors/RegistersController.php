@@ -51,7 +51,9 @@ class RegistersController extends Controller
             $user->identification = $request->identification;
             $user->email = $request->email;
             $user->address = $request->address;
-            $user->password = $request->filled('password') ? $request->password : $request->identification;
+            // Sin password explícita, un valor aleatorio (no la identificación,
+            // un dato semi-público) — el cliente la establece vía "olvidé mi contraseña".
+            $user->password = $request->filled('password') ? $request->password : Str::random(16);
             $user->available = 1;
             $user->role = 'customer';
             $user->terms = 1;
@@ -97,8 +99,8 @@ class RegistersController extends Controller
                             'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
                             'enterprise' => $enterprise->title,
                             'distributor' => $distributor->title,
-                            'url_reassign' => route('distributor.enterprises.users.reassign', ['slack' => $user->slack]),
-                            'url_enterprise' => route('distributor.enterprises.users', ['slack' => $enterprise->slack]),
+                            'url_reassign' => route('support.enterprises.users.reassign', ['slack' => $user->slack]),
+                            'url_enterprise' => route('support.enterprises.users', ['slack' => $enterprise->slack]),
 
                         ];
 

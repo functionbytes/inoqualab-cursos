@@ -13,7 +13,7 @@ class NewsletterCampaign extends Model
     protected $fillable = [
         'uid', 'name', 'subject', 'preheader', 'content',
         'status', 'recipients_count', 'sent_count', 'failed_count',
-        'started_at', 'sent_at', 'created_by',
+        'started_at', 'sent_at', 'created_by', 'newsletter_list_id',
     ];
 
     protected function casts(): array
@@ -47,5 +47,11 @@ class NewsletterCampaign extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Lista destino (null = enviar a todos los suscriptores). */
+    public function list(): BelongsTo
+    {
+        return $this->belongsTo(NewsletterList::class, 'newsletter_list_id');
     }
 }

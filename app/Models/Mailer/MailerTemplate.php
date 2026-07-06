@@ -93,7 +93,28 @@ class MailerTemplate extends Model
     public function getAvailableVariables(): array
     {
         if ($this->variables && is_array($this->variables)) {
-            return $this->variables;
+            // La columna guarda a veces una lista plana de strings
+            // (["SITE_NAME", ...]) y a veces el formato estructurado
+            // ([['name'=>..., 'required'=>...]]). Se normaliza a estructurado
+            // para que isComplete()/getMissingVariables()/preview no revienten
+            // con "Cannot access offset of type string on string".
+            return array_map(function ($variable) {
+                if (is_array($variable)) {
+                    return [
+                        'name' => $variable['name'] ?? '',
+                        'required' => $variable['required'] ?? false,
+                        'description' => $variable['description'] ?? '',
+                        'category' => $variable['category'] ?? 'general',
+                    ];
+                }
+
+                return [
+                    'name' => (string) $variable,
+                    'required' => false,
+                    'description' => '',
+                    'category' => 'general',
+                ];
+            }, $this->variables);
         }
 
         return self::defaultVariables($this->module);

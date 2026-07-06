@@ -54,7 +54,10 @@ class AuthorizationTest extends TestCase
         $user = User::factory()->customer()->create();
         $this->assertTrue($user->hasRole('customer'));
 
-        $user->update(['role' => 'manager']);
+        // 'role' no está en $fillable (evita mass assignment): se cambia por
+        // propiedad directa, igual que lo hace el código de producción.
+        $user->role = 'manager';
+        $user->save();
 
         $this->assertTrue($user->fresh()->hasRole('manager'));
         $this->assertFalse($user->fresh()->hasRole('customer'));

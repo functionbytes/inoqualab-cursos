@@ -92,7 +92,8 @@ class CheckoutController extends Controller
 
         // El scope slack() devuelve el Builder (no null) cuando no hay match,
         // por eso se comprueba el tipo concreto antes de usar el item.
-        if ($item instanceof Bundle || $item instanceof Course) {
+        // Rechazar items no disponibles (mismo guard que CartController::add).
+        if (($item instanceof Bundle || $item instanceof Course) && $item->available == 1) {
             $cart = session('cart', []);
             $key = $type.'_'.$slack;
 
@@ -437,6 +438,12 @@ class CheckoutController extends Controller
      */
     private function couponUsableNow($coupon, $user): bool
     {
+        // Cupón pausado/retirado: el path de consumo (POST directo a /generate) era
+        // el único que no verificaba available → un cupón deshabilitado seguía canjeable.
+        if (! $coupon->available) {
+            return false;
+        }
+
         $date = date('Y-m-d');
 
         if ($coupon->start_date && $coupon->start_date > $date) {
@@ -673,6 +680,9 @@ class CheckoutController extends Controller
             $order->total_discount_amount = $discount;
             $order->total_tax_amount = 0;
             $order->total_order_amount = $total;
+            // Las vistas de contabilidad/manager/soporte muestran este campo como el
+            // monto; sin asignarlo, toda venta del storefront aparecía en $0.
+            $order->total_after_discount = $total;
             $order->transaction = $isFree ? 'FREE' : null;
             $order->payment_at = $isFree ? $now : null;
             $order->coupon_id = $couponModel?->id;

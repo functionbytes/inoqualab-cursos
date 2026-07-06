@@ -332,6 +332,93 @@ INNER),
             ],
 
             /* ------------------------------------------------------------------ */
+            /* INSCRIPCIONES — CROSS-SELL POST-COMPLETACIÓN (REMARKETING) */
+            /* ------------------------------------------------------------------ */
+            [
+                'key' => 'inscriptions.completed',
+                'name' => 'Curso completado (recomendaciones)',
+                'subject' => '¡Felicidades por completar {COURSE_TITLE}! 🎓',
+                'description' => 'Se envía al alumno al día siguiente de completar un curso, recomendándole otros cursos para incentivar una nueva compra.',
+                'variables' => [
+                    'CUSTOMER_FIRSTNAME' => 'Nombre del usuario',
+                    'COURSE_TITLE' => 'Título del curso completado',
+                    'RECOMMENDED_COURSES' => 'Bloque de cursos recomendados (generado automáticamente)',
+                    'CATALOG_URL' => 'Enlace al catálogo de cursos',
+                ],
+                'content' => $this->wrap(<<<'INNER'
+<tr><td style="padding:30px 20px 10px;background:#FFFFFF;text-align:center;">
+  <h2 style="color:#081A28;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;margin:0 0 6px;">
+    ¡FELICIDADES, {CUSTOMER_FIRSTNAME}!
+  </h2>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 6px;">
+    Has completado con éxito el curso <strong>{COURSE_TITLE}</strong>.
+  </p>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 20px;">
+    Sigue potenciando tu perfil profesional. Estos cursos podrían interesarte:
+  </p>
+</td></tr>
+<tr><td style="padding:0 20px 10px;background:#FFFFFF;">
+  {RECOMMENDED_COURSES}
+</td></tr>
+<tr><td style="padding:10px 20px 30px;background:#FFFFFF;text-align:center;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background-color:#008bce;padding:12px 30px;border-radius:4px;">
+        <a href="{CATALOG_URL}" style="color:#FFFFFF;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-decoration:none;text-transform:uppercase;">
+          VER TODO EL CATÁLOGO
+        </a>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+INNER),
+            ],
+
+            /* ------------------------------------------------------------------ */
+            /* INSCRIPCIONES — ACCESO POR VENCER (recordatorio/renovación) */
+            /* ------------------------------------------------------------------ */
+            [
+                'key' => 'inscriptions.access_expiring',
+                'name' => 'Acceso al curso por vencer',
+                'subject' => 'Tu acceso a {COURSE_TITLE} vence pronto ⏳',
+                'description' => 'Se envía cuando el acceso del alumno a un curso está por caducar sin haberlo completado, para que lo termine o renueve.',
+                'variables' => [
+                    'CUSTOMER_FIRSTNAME' => 'Nombre del usuario',
+                    'COURSE_TITLE' => 'Título del curso',
+                    'EXPIRY_DATE' => 'Fecha de vencimiento del acceso',
+                    'RENEW_URL' => 'Enlace para renovar/comprar de nuevo el curso',
+                    'CATALOG_URL' => 'Enlace al catálogo de cursos',
+                ],
+                'content' => $this->wrap(<<<'INNER'
+<tr><td style="padding:30px 20px 10px;background:#FFFFFF;text-align:center;">
+  <h2 style="color:#081A28;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:24px;font-weight:700;margin:0 0 6px;">
+    HOLA, {CUSTOMER_FIRSTNAME}
+  </h2>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 6px;">
+    Tu acceso al curso <strong>{COURSE_TITLE}</strong> vence el <strong>{EXPIRY_DATE}</strong>.
+  </p>
+  <p style="color:#555555;font-size:14px;line-height:22px;margin:0 0 20px;">
+    No pierdas tu avance: renueva tu acceso para terminar el curso y obtener tu certificado.
+  </p>
+</td></tr>
+<tr><td style="padding:10px 20px 30px;background:#FFFFFF;text-align:center;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background-color:#008bce;padding:12px 30px;border-radius:4px;">
+        <a href="{RENEW_URL}" style="color:#FFFFFF;font-family:'Poppins',Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-decoration:none;text-transform:uppercase;">
+          RENOVAR MI ACCESO
+        </a>
+      </td>
+    </tr>
+  </table>
+  <p style="color:#8D9DB5;font-size:12px;line-height:20px;margin:16px 0 0;">
+    ¿Buscas algo nuevo? <a href="{CATALOG_URL}" style="color:#008bce;text-decoration:none;">Explora el catálogo completo</a>.
+  </p>
+</td></tr>
+INNER),
+            ],
+
+            /* ------------------------------------------------------------------ */
             /* INSCRIPCIONES — NOTIFICACIÓN AL ESTUDIANTE */
             /* ------------------------------------------------------------------ */
             [

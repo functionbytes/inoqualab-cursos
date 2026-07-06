@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Enterprises\Users;
 
 use App\Exports\Enterprises\UsersExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Enterprises\UpdateEnterpriseUserRequest;
 use App\Models\Enterprise\Enterprise;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -22,13 +23,13 @@ class UsersController extends Controller
         $enterprise = app('enterprise');
         $users = $enterprise->users()->latest();
 
-        if (strpos($searchKey, '-')) {
+        if (str_contains($searchKey ?? '', '-')) {
             $startDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->startOfDay();
             $endDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->endOfDay();
             $users->whereBetween('users.updated_at', [$startDate, $endDate]);
         }
 
-        $users->when(! strpos($searchKey, '-'), function ($query) use ($searchKey) {
+        $users->when(! str_contains($searchKey ?? '', '-'), function ($query) use ($searchKey) {
             $query->where('users.firstname', 'like', '%'.$searchKey.'%')
                 ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
                 ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')
@@ -81,7 +82,7 @@ class UsersController extends Controller
 
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateEnterpriseUserRequest $request): JsonResponse
     {
         // Ownership: solo usuarios de la empresa autenticada (evita IDOR por slack).
         $user = app('enterprise')->users()->where('users.slack', $request->slack)->firstOrFail();
@@ -93,7 +94,7 @@ class UsersController extends Controller
         $user->address = $request->address;
         $user->company = $request->company;
         $user->available = $request->available;
-        $request->password != null ? $user->password = $request->password : null;
+        $request->filled('password') ? $user->password = $request->password : null;
         $user->update();
 
         return response()->json([
@@ -103,7 +104,7 @@ class UsersController extends Controller
 
     }
 
-    public function report($slack): View
+    public function report(): View
     {
 
         $enterprise = app('enterprise');
@@ -118,8 +119,7 @@ class UsersController extends Controller
 
         return view('enterprises.views.users.users.report')->with([
             'modalities' => $modalities,
-            'enterprises' => $enterprise,
-            'enterprises' => $enterprise,
+            'enterprise' => $enterprise,
         ]);
 
     }

@@ -29,6 +29,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'newsletters', 'incoming-mails', 'contacts', 'documents', 'instructions',
         'analytics', 'roles', 'certifications', 'categories', 'reviews',
         'sliders', 'trusteds', 'seo', 'activity',
+        // Dominios de panel sin entidad de negocio propia: sin estos, el permiso
+        // que EnforcePanelPermission deriva de sus rutas no existe -> fail-open.
+        'dashboard', 'profile', 'notifications', 'mail_templates', 'migration',
     ];
 
     /**
@@ -37,22 +40,32 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     private const ROLE_GRANTS = [
         'accounting' => [
-            'invoices.*', 'orders.*', 'distributors.view', 'distributors.update',
-            'enterprises.view', 'enterprises.update', 'analytics.view',
+            // Contabilidad es consulta financiera de solo lectura salvo lo que
+            // su propio controller implementa realmente: crear/editar facturas
+            // (consolidar órdenes) y editar el estado de pago de una orden.
+            // Sin .delete/.manage ni distributors/enterprises.update: esas
+            // vistas son 100% read-only (inputs disabled) y no hay destroy().
+            'invoices.view', 'invoices.create', 'invoices.update',
+            'orders.view', 'orders.update',
+            'distributors.view', 'enterprises.view', 'analytics.view',
+            'dashboard.view', 'profile.view', 'profile.update',
         ],
         'support' => [
             'users.*', 'contacts.*', 'faqs.*', 'instructions.*', 'documents.*',
             'incoming-mails.*', 'departments.view', 'inscriptions.view',
             'distributors.*', 'enterprises.*', 'settings.view', 'settings.update',
+            'dashboard.view', 'notifications.view', 'certificates.view',
         ],
         'distributor' => [
             'courses.view', 'inscriptions.*', 'enterprises.*', 'staff.*',
             'registers.*', 'orders.view', 'invoices.view',
             'settings.view', 'settings.update',
+            'dashboard.view', 'certificates.view',
         ],
         'enterprise' => [
             'courses.view', 'users.view', 'users.update', 'inscriptions.view',
-            'certificates.view', 'staff.view', 'documents.view', 'enterprises.view',
+            'certificates.view', 'staff.view', 'documents.view', 'enterprises.view', 'enterprises.update',
+            'dashboard.view', 'profile.view', 'profile.update',
         ],
         'customer' => [
             'courses.view', 'orders.view', 'invoices.view', 'quizzes.view',
@@ -74,8 +87,10 @@ class RolesAndPermissionsSeeder extends Seeder
             }
         }
 
-        // Permisos de settings (transversales).
-        foreach (['view', 'update'] as $action) {
+        // Permisos de settings (transversales). Incluye create/delete porque
+        // favicon/logo/metadata tienen rutas store (POST) y delete (DELETE)
+        // que antes derivaban un permiso inexistente -> fail-open.
+        foreach (['view', 'create', 'update', 'delete'] as $action) {
             Permission::firstOrCreate(['name' => "settings.{$action}", 'guard_name' => 'web']);
         }
 

@@ -1203,7 +1203,7 @@ $(document).ready(function () {
                     {
                         label: 'Impresiones',
                         data: data.impressions,
-                        borderColor: '#90bb13',
+                        borderColor: '#008bcd',
                         backgroundColor: 'rgba(177, 1, 0, 0.1)',
                         tension: 0.3,
                         fill: true,
@@ -1268,7 +1268,7 @@ $(document).ready(function () {
         $appearance = old('appearance', $campaign->appearance ?? []);
         $bgColor = $appearance['background_color'] ?? '#ffffff';
         $textColor = $appearance['text_color'] ?? '#000000';
-        $primaryColor = $appearance['primary_color'] ?? '#90bb13';
+        $primaryColor = $appearance['primary_color'] ?? '#008bcd';
         $position = $appearance['position'] ?? 'center';
         $fontSize = $appearance['font_size'] ?? 'medium';
     @endphp

@@ -17,9 +17,10 @@
                         <p class="mb-0 text-muted">Gestiona los anuncios visibles para los estudiantes</p>
                     </div>
                     <div class="ms-auto">
-                        <a href="{{ route('manager.courses.announcements.create', $course->slack) }}" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" id="btnNewAnnouncement"
+                                data-bs-toggle="modal" data-bs-target="#announcement-modal">
                             Nuevo anuncio
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -45,10 +46,9 @@
                         @php
                             $activeFilters = (int)(($available ?? '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders me-1"></i>
-                            Filtros
+                            <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
@@ -99,8 +99,8 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
-                                                        <a class="dropdown-item"
-                                                           href="{{ route('manager.courses.announcements.edit', $announcement->slack) }}">
+                                                        <a class="dropdown-item btn-edit-announcement" href="#"
+                                                           data-slack="{{ $announcement->slack }}">
                                                             Editar
                                                         </a>
                                                     </li>
@@ -142,9 +142,9 @@
                                 Ver todos
                             </a>
                         @else
-                            <a href="{{ route('manager.courses.announcements.create', $course->slack) }}" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#announcement-modal">
                                 Nuevo anuncio
-                            </a>
+                            </button>
                         @endif
                     </div>
                 @endif
@@ -192,6 +192,44 @@
         </div>
     </div>
 
+    {{-- Crear / Editar anuncio --}}
+    <div class="modal fade" id="announcement-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="announcementModalTitle">Nuevo anuncio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="announcementSlack" value="">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Título <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="announcementTitle" maxlength="100" placeholder="Ingresar título">
+                        <label id="announcementTitle-error" class="error d-none"></label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                        <select class="select2 form-control" id="announcementAvailable">
+                            @foreach($availables as $optId => $optLabel)
+                                <option value="{{ $optId }}">{{ $optLabel }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Detalle</label>
+                        <div class="quill-wrapper">
+                            <div id="announcementDescription"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer flex-column">
+                    <button type="button" id="btnSaveAnnouncement" class="btn btn-primary w-100 mb-2">Guardar</button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('managers.includes.delete')
 
 @endsection
@@ -220,6 +258,136 @@ $(function () {
         $('#delete-modal .modal-title').text($btn.data('title'));
         $('#delete-form').attr('action', $btn.data('url'));
         $('#delete-modal').modal('show');
+    });
+
+    // ── Crear / Editar anuncio (modal) ────────────────────────────────────────
+    var announcementQuill = null;
+    var announcementMode = 'create';
+
+    function initAnnouncementQuill() {
+        if (announcementQuill) return;
+        announcementQuill = new Quill('#announcementDescription', {
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link'],
+                    ['clean'],
+                ],
+            },
+            placeholder: 'Escriba aquí...',
+            theme: 'snow',
+        });
+    }
+
+    // El script global (select2.init.js) ya auto-inicializa ".select2" en
+    // documentReady SIN dropdownParent (el select vive oculto dentro del modal
+    // en ese momento) — su dropdown terminaría flotando sobre <body> en vez del
+    // modal. Por eso se destruye esa instancia y se re-crea con las opciones
+    // correctas cada vez que el modal se abre.
+    function initAnnouncementSelect2() {
+        var $select = $('#announcementAvailable');
+        if ($select.hasClass('select2-hidden-accessible')) $select.select2('destroy');
+        $select.select2({ dropdownParent: $('#announcement-modal'), width: '100%' });
+    }
+
+    function resetAnnouncementForm() {
+        $('#announcementSlack').val('');
+        $('#announcementTitle').val('').removeClass('is-invalid');
+        $('#announcementAvailable').val('1').trigger('change');
+        if (announcementQuill) announcementQuill.setText('');
+    }
+
+    // Abrir en modo "crear"
+    $('#btnNewAnnouncement, .btn-new-announcement').on('click', function () {
+        announcementMode = 'create';
+        $('#announcementModalTitle').text('Nuevo anuncio');
+    });
+
+    $('#announcement-modal').on('shown.bs.modal', function () {
+        initAnnouncementQuill();
+        initAnnouncementSelect2();
+        if (announcementMode === 'create') {
+            resetAnnouncementForm();
+        }
+    });
+
+    // Abrir en modo "editar": trae los datos vía AJAX y precarga el modal.
+    $(document).on('click', '.btn-edit-announcement', function (e) {
+        e.preventDefault();
+        var slack = $(this).data('slack');
+
+        $.getJSON("{{ url('panel/courses/announcements/edit') }}/" + slack, function (data) {
+            announcementMode = 'edit';
+            $('#announcementModalTitle').text('Editar anuncio');
+            $('#announcement-modal').modal('show');
+
+            var applyData = function () {
+                initAnnouncementQuill();
+                initAnnouncementSelect2();
+                $('#announcementSlack').val(data.slack);
+                $('#announcementTitle').val(data.title);
+                $('#announcementAvailable').val(String(data.available)).trigger('change');
+                announcementQuill.root.innerHTML = data.description || '';
+            };
+
+            if ($('#announcement-modal').hasClass('show')) {
+                applyData();
+            } else {
+                $('#announcement-modal').one('shown.bs.modal', applyData);
+            }
+        }).fail(function () {
+            toastr.error('No se pudo cargar el anuncio.');
+        });
+    });
+
+    // Guardar (crear o actualizar según el modo)
+    $('#btnSaveAnnouncement').on('click', function () {
+        var title = $.trim($('#announcementTitle').val());
+        if (!title) {
+            $('#announcementTitle').addClass('is-invalid');
+            toastr.warning('El título es obligatorio.');
+            return;
+        }
+
+        var description = announcementQuill ? announcementQuill.root.innerHTML.replace('<p><br></p>', '') : '';
+        var isEdit = announcementMode === 'edit';
+        var url = isEdit
+            ? "{{ route('manager.courses.announcements.update') }}"
+            : "{{ route('manager.courses.announcements.store') }}";
+
+        var payload = {
+            title: title,
+            description: description,
+            available: $('#announcementAvailable').val(),
+            course: "{{ $course->slack }}",
+        };
+        if (isEdit) payload.slack = $('#announcementSlack').val();
+
+        var $btn = $(this).prop('disabled', true);
+        var originalText = $btn.text();
+        $btn.text('Guardando...');
+
+        $.ajax({
+            url: url,
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken },
+            data: payload,
+            success: function (res) {
+                $btn.prop('disabled', false).text(originalText);
+                if (res.success) {
+                    $('#announcement-modal').modal('hide');
+                    toastr.success(res.message);
+                    setTimeout(function () { location.reload(); }, 800);
+                } else {
+                    toastr.warning(res.message || 'No se pudo guardar.');
+                }
+            },
+            error: function () {
+                $btn.prop('disabled', false).text(originalText);
+                toastr.error('Ocurrió un error al guardar el anuncio.');
+            },
+        });
     });
 
 });

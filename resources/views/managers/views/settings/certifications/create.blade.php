@@ -23,7 +23,7 @@
                             <h5 class="mb-0">Cerificado</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Sube la imagen del certificado. El formato recomendado es JPG o PNG.
                         </p>
                         <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
@@ -38,7 +38,7 @@
                             <h5 class="mb-0">Crear certificación</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos de la certificación. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
                         </p>
                         <div class="row">
 

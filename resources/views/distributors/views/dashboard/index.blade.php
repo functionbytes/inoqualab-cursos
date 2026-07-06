@@ -9,7 +9,7 @@
                     <div class="col-sm-7">
                         <div class="mb-7 mt-6">
                             <h2 class="fw-semibold mb-1 text-uppercase">Bienvenido!</h2>
-                            <p class="text-black">El perfil de Administrador permite gestionar empresas, usuarios, inscripciones y reportes, ofreciendo control total sobre la plataforma para optimizar la experiencia educativa.</p>
+                            <p class="text-black">Como distribuidor puedes gestionar tus empresas, matricular estudiantes y hacer seguimiento a sus inscripciones, pedidos y facturas desde un solo lugar.</p>
                         </div>
                     </div>
                     <div class="col-sm-5">

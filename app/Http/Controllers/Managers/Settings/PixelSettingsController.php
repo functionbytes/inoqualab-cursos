@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Managers\Settings\UpdatePixelSettingsRequest;
 
 class PixelSettingsController extends Controller
 {
@@ -15,7 +15,7 @@ class PixelSettingsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdatePixelSettingsRequest $request)
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
 

@@ -40,7 +40,7 @@
                     <div class="card">
                         <div class="card-body pb-0 mb-xxl-2 pb-1">
                             <p class="mb-1 fs-5">Clientes</p>
-                            <h4 class="fw-semibold fs-7">{{ $users }}</h4>
+                            <h4 class="fw-semibold fs-7">{{ $usercustomers }}</h4>
 
                         </div>
                         <div class="customers4" id="customers4"></div>
@@ -59,8 +59,8 @@
                 <div class="col-sm-4">
                     <div class="card">
                         <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Empresas</p>
-                            <h4 class="fw-semibold fs-7">{{ $enterprises }}</h4>
+                            <p class="mb-1 fs-5">Pedidos</p>
+                            <h4 class="fw-semibold fs-7">{{ $orders }}</h4>
 
                         </div>
                         <div class="customers6" id="customers6"></div>
@@ -135,7 +135,7 @@
                                 <div class="d-sm-flex d-block align-items-center justify-content-between mb-7">
                                     <div class="mb-3 mb-sm-0">
                                         <h5 class="card-title fw-semibold">Solicitudes contacto</h5>
-                                        <p class="card-subtitle mb-0">Detalle de las ultimas solicitudes de soporte</p>
+                                        <p class="card-subtitle mb-0">Detalle de las últimas solicitudes de soporte</p>
                                     </div>
                                 </div>
                                 <div class="table-responsive">

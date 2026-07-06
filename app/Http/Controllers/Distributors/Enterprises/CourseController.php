@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Distributors\Enterprises;
 
+use App\Exports\Distributors\CoursesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\Inscription;
-use App\Models\Invoice\InvoiceCondition;
-use App\Models\Method;
-use App\Models\Order\Order;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\InscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -183,7 +181,7 @@ class CourseController extends Controller
 
     }
 
-    public function includes(Request $request)
+    public function includes(Request $request, InscriptionService $inscriptions)
     {
 
         // Ownership: empresa del distribuidor + curso asignado a esa empresa.
@@ -192,42 +190,20 @@ class CourseController extends Controller
         abort_unless($enterprise->courses()->where('courses.id', $course->id)->exists(), 404);
         $users = explode(',', $request->users);
 
-        DB::transaction(function () use ($enterprise, $course, $users) {
-            foreach ($users as $user) {
-                $validate = User::identification($user);
+        foreach ($users as $user) {
+            $validate = User::identification($user);
 
-                // Solo se matricula a usuarios que pertenecen a la empresa.
-                if (! $enterprise->users()->where('users.id', $validate->id)->exists()) {
-                    continue;
-                }
-
-                $condition = InvoiceCondition::slug('pagada');
-                $method = Method::slug('acuerdo');
-
-                $order = new Order;
-                $order->slack = $this->generate_slack('users');
-                $order->subtotal = 0;
-                $order->discount = 0;
-                $order->total = 0;
-                $order->transaction = null;
-                $order->condition_id = $condition->id;
-                $order->method_id = $method->id;
-                $order->course_id = $course->id;
-                $order->user_id = $validate->id;
-                $order->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-                $order->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-                $order->payment_at = Carbon::now()->setTimezone('America/Bogota');
-                $order->save();
-
-                $include = new Inscription;
-                $include->user_id = $validate->id;
-                $include->course_id = $course->id;
-                $include->order_id = $order->id;
-                $include->culminated = 0;
-                $include->culminated_at = null;
-                $include->save();
+            if (! $validate instanceof User) {
+                continue;
             }
-        });
+
+            // Solo se matricula a usuarios que pertenecen a la empresa.
+            if (! $enterprise->users()->where('users.id', $validate->id)->exists()) {
+                continue;
+            }
+
+            $inscriptions->enrollSimple($validate, $course);
+        }
 
         return response()->json($enterprise->slack);
     }
@@ -255,11 +231,13 @@ class CourseController extends Controller
 
     public function generate(Request $request)
     {
-        $enterprise = $request->enterprise;
+        // Ownership: la empresa debe pertenecer al distribuidor autenticado
+        // (evita descargar el reporte de progreso de una empresa ajena).
+        $enterprise = app('distributor')->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
         $course = $request->course;
         $modalitie = $request->modalitie;
 
-        return Excel::download(new CoursesExport($course, $enterprise, $modalitie), 'REPORTE CURSO '.date('Y-m-d').'.xlsx');
+        return Excel::download(new CoursesExport($course, $enterprise->id, $modalitie), 'REPORTE CURSO '.date('Y-m-d').'.xlsx');
     }
 
     public function destroy($enterprise, $course)

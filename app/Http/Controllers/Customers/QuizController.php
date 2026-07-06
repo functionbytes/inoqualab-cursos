@@ -22,6 +22,7 @@ class QuizController extends Controller
         $user = app('customer');
         $lesson = CourseLesson::findOrFail($id);
         $inscription = $this->resolveInscription($user, $lesson->course_id);
+        $this->assertInscriptionActive($inscription);
         $this->assertLessonAccessible($lesson, $inscription, $user->id);
         $topic = $lesson->quiztopic;
         abort_unless($topic, 404, 'Cuestionario no configurado.');
@@ -209,6 +210,7 @@ class QuizController extends Controller
         $user = app('customer');
         $lesson = CourseLesson::findOrFail($request->lesson);
         $inscription = $this->resolveInscription($user, $lesson->course_id);
+        $this->assertInscriptionActive($inscription);
 
         // Impide marcar lecciones fuera de orden por POST (desbloquearía el examen).
         $this->assertLessonAccessible($lesson, $inscription, $user->id);
@@ -247,6 +249,10 @@ class QuizController extends Controller
         if ($nextLesson !== 'true') {
             return redirect()->route($nextLesson->type_id == 6 ? 'customers.courses.quiz' : 'customers.courses.lesion', $nextLesson->id);
         } elseif (count($inscription->progress) == count($lessons)) {
+            // Curso completado con un quiz como última lección: crear el examen
+            // igual que lo hace el flujo de lecciones normales (dead-end si no).
+            $exam = $exam ?: $this->ensureExamCreated($inscription, $course);
+
             if ($exam && $exam->score < $this->passingScoreFor($exam)) {
                 return redirect()->route('customers.courses.exam', $course->slack);
             }

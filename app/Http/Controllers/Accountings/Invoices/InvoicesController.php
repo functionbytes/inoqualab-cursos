@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Accountings\Invoices;
 
 use App\Events\Invoices\InvoiceCreated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Accountings\StoreInvoiceRequest;
+use App\Http\Requests\Accountings\UpdateInvoiceRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Invoice\Invoice;
 use App\Models\Invoice\InvoiceCondition;
@@ -139,7 +141,7 @@ class InvoicesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateInvoiceRequest $request)
     {
 
         $invoice = Invoice::slack($request->slack);
@@ -183,7 +185,7 @@ class InvoicesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreInvoiceRequest $request)
     {
 
         $method = $request->methods ?? null;
@@ -248,12 +250,10 @@ class InvoicesController extends Controller
                             $coursesItems[$itemType][$itemId] = [
                                 'quantity' => 0,
                                 'total_amount' => 0,
-                                'amount' => 0,
                                 'course_id' => $itemId,
                             ];
                         }
 
-                        $coursesItems[$itemType][$itemId]['amount'] = $orderItem->amount;
                         $coursesItems[$itemType][$itemId]['quantity'] += $orderItemCount;
                         $coursesItems[$itemType][$itemId]['total_amount'] += $orderItemAmount;
                     }
@@ -282,7 +282,8 @@ class InvoicesController extends Controller
                     $itemInvoice->course_id = $data['course_id'];
                     $itemInvoice->invoice_id = $invoice->id;
                     $itemInvoice->quantity = $data['quantity'];
-                    $itemInvoice->subtotal = $data['amount'];
+                    // La tabla invoice_items tiene subtotal/total (no 'amount'); sin descuento por línea, total = subtotal.
+                    $itemInvoice->subtotal = $data['total_amount'];
                     $itemInvoice->total = $data['total_amount'];
                     $itemInvoice->created_at = now();
                     $itemInvoice->updated_at = now();

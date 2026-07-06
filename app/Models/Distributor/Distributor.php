@@ -111,11 +111,6 @@ class Distributor extends Model
         return $this->hasMany('App\Models\Invoice\Invoice', 'distributor_id')->orderBy('created_at', 'desc');
     }
 
-    public function ordersDistributor(): HasMany
-    {
-        return $this->hasMany('App\Models\Order\Order', 'distributor_id')->orderBy('created_at', 'desc');
-    }
-
     public function ordersActitity(): HasMany
     {
         return $this->hasMany('App\Models\Order\OrderActivity', 'distributor_id')->orderBy('created_at', 'desc');

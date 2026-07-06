@@ -9,10 +9,7 @@ use App\Http\Middleware\IsCustomer;
 use App\Http\Middleware\IsDistributor;
 use App\Http\Middleware\IsEnterprise;
 use App\Http\Middleware\IsManager;
-use App\Http\Middleware\IsProfile;
 use App\Http\Middleware\IsSupport;
-use App\Http\Middleware\IsUpgrade;
-use App\Http\Middleware\IsVerified;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\TrackSeo404;
@@ -63,6 +60,16 @@ return Application::configure(basePath: dirname(__DIR__))
             'payments/wompi/webhook',
         ]);
 
+        // Modo mantenimiento: el panel de administración y el login quedan
+        // accesibles para que el manager pueda desactivarlo (evita auto-lockout;
+        // toma abajo el sitio público, no el back-office).
+        $middleware->preventRequestsDuringMaintenance(except: [
+            'panel',
+            'panel/*',
+            'login',
+            'logout',
+        ]);
+
         $middleware->trustProxies(
             at: '127.0.0.1',
             headers: Request::HEADER_X_FORWARDED_FOR |
@@ -77,13 +84,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.basic' => AuthenticateWithBasicAuth::class,
             'auth.session' => AuthenticateSession::class,
             'guest' => RedirectIfAuthenticated::class,
-            'verified' => IsVerified::class,
             'manager' => IsManager::class,
             'support' => IsSupport::class,
             'enterprise' => IsEnterprise::class,
-            'upgrade' => IsUpgrade::class,
             'customers' => IsCustomer::class,
-            'profile' => IsProfile::class,
             'distributor' => IsDistributor::class,
             'accounting' => IsAccountings::class,
             'session' => CheckSession::class,

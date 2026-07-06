@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Str;
@@ -11,13 +12,43 @@ class MantenanceSettingsController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user()->can('settings.view'), 403);
 
-        $secret = Str::random(20);
+        // Asegura que exista una llave persistida antes de pintar la vista:
+        // la vista NUNCA recibe el valor real (se revela via AJAX) para no
+        // exponerlo en texto plano en el HTML de la respuesta.
+        $this->currentSecret();
 
-        return view('managers.views.settings.maintenance.setting')->with([
-            'secret' => $secret,
+        return view('managers.views.settings.maintenance.setting');
+    }
+
+    /**
+     * Devuelve la llave secreta vigente. Se consume via AJAX desde el botón
+     * "Revelar"/"Copiar" — nunca se imprime directamente en el HTML de index().
+     */
+    public function secret(): JsonResponse
+    {
+        abort_unless(auth()->user()->can('settings.view'), 403);
+
+        return response()->json([
+            'value' => $this->currentSecret(),
         ]);
+    }
 
+    /**
+     * Devuelve la llave secreta persistida, generando y guardando una nueva
+     * solo la primera vez (nunca se regenera en cada GET).
+     */
+    private function currentSecret(): string
+    {
+        $secret = setting('maintenance_mode_value');
+
+        if (blank($secret)) {
+            $secret = Str::random(32);
+            updateSettings(['maintenance_mode_value' => $secret]);
+        }
+
+        return $secret;
     }
 
     public function update(Request $request)
@@ -25,6 +56,16 @@ class MantenanceSettingsController extends Controller
         abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->maintenance_mode == 'true') {
+
+            // Un secreto vacío dejaría el sitio sin bypass usable; se exige uno
+            // válido (mínimo 8 chars, sin espacios) antes de bajar el sitio.
+            $request->validate([
+                'maintenance_mode_value' => ['required', 'string', 'min:8', 'regex:/^\S+$/'],
+            ], [
+                'maintenance_mode_value.required' => 'La llave de acceso es obligatoria para activar el mantenimiento.',
+                'maintenance_mode_value.min' => 'La llave de acceso debe tener al menos 8 caracteres.',
+                'maintenance_mode_value.regex' => 'La llave de acceso no puede contener espacios.',
+            ]);
 
             $data['maintenance_mode'] = $request->maintenance_mode;
             $data['maintenance_mode_value'] = $request->maintenance_mode_value;

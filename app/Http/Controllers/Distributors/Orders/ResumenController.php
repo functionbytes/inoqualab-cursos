@@ -29,14 +29,17 @@ class ResumenController extends Controller
 
         $filters = [
             'enterprise' => $request->enterprise,
-            'distributor' => $request->distributor,
+            // SIEMPRE el distribuidor autenticado: nunca confiar en un id del
+            // request (sin esto, omitir el parámetro devolvía las 44K órdenes
+            // de TODOS los distribuidores en vez de solo las propias).
+            'distributor' => app('distributor')->id,
             'search' => $request->search,
             'range' => $request->range,
         ];
 
         $orders = Order::filterOrders($filters);
 
-        if ($request->enterprise !== '0') {
+        if ($request->enterprise && $request->enterprise !== '0') {
             $enterprise = Enterprise::id($request->enterprise)->title;
             $enterprise_id = Enterprise::id($request->enterprise)->id;
         } else {

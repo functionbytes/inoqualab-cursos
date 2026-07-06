@@ -26,12 +26,26 @@ class IncomesExport implements FromQuery, Responsable, WithHeadings, WithMapping
 
     private $end;
 
+    /** Catálogos precargados (id => title) para no consultar por cada fila del export. */
+    private array $methods;
+
+    private array $distributors;
+
+    private array $enterprises;
+
+    private array $courses;
+
     public function __construct($enterprise, $course, $start, $end)
     {
         $this->enterprise = $enterprise;
         $this->course = $course;
         $this->start = $start;
         $this->end = $end;
+
+        $this->methods = OrderMethod::pluck('title', 'id')->all();
+        $this->distributors = Distributor::pluck('title', 'id')->all();
+        $this->enterprises = Enterprise::pluck('title', 'id')->all();
+        $this->courses = Course::pluck('title', 'id')->all();
     }
 
     public function query()
@@ -83,10 +97,10 @@ class IncomesExport implements FromQuery, Responsable, WithHeadings, WithMapping
             $row->inscription_enroll_expire,
             $row->inscription_enroll_culminated != null ? $row->inscription_enroll_culminated : 'NO FINALIZADO',
             $row->order_payment_at,
-            strtoupper(OrderMethod::id($row->order_method)->title),
-            strtoupper(Course::id($row->inscription_course)->title),
-            $row->orders_activity_distributor != null ? strtoupper(Distributor::id($row->orders_activity_distributor)->title) : '',
-            $row->orders_activity_enterprise != null ? strtoupper(Enterprise::id($row->orders_activity_enterprise)->title) : '',
+            strtoupper($this->methods[$row->order_method] ?? ''),
+            strtoupper($this->courses[$row->inscription_course] ?? ''),
+            $row->orders_activity_distributor != null ? strtoupper($this->distributors[$row->orders_activity_distributor] ?? '') : '',
+            $row->orders_activity_enterprise != null ? strtoupper($this->enterprises[$row->orders_activity_enterprise] ?? '') : '',
             strtoupper($row->firstname),
             strtoupper($row->lastname),
             $row->identification == null ? '' : $row->identification,

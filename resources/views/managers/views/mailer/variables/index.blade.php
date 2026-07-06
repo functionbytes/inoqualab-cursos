@@ -285,7 +285,8 @@
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
                 <form id="delete-form" method="POST" action="">
-                     ('DELETE')
+                    @csrf
+                    @method('DELETE')
                     <button type="submit" class="btn btn-primary w-100 mb-2">Confirmar eliminación</button>
                     <button type="button" class="btn btn-dark w-100" data-bs-dismiss="modal">Cancelar</button>
                 </form>

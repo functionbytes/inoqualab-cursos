@@ -11,9 +11,6 @@
 
                     {{ csrf_field() }}
 
-
-                    <input id="distributor" name="distributor" type="hidden" value="{{ $distributor->id }}">
-
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">
                             <h5 class="mb-0"> Resumen de ordenes</h5>
@@ -130,7 +127,6 @@
 
                     var query = {
                         range: $("#range").val(),
-                        distributor: $("#distributor").val(),
                         enterprise: $("#enterprise").val(),
                         type : $("#type").val(),
                         methods : $("#method").val(),

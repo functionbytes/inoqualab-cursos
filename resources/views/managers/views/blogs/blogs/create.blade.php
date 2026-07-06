@@ -39,7 +39,7 @@
                             <h5 class="mb-0">Crear noticias</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos de la noticia. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
                         </p>
                         <div class="row">
 
@@ -88,7 +88,7 @@
 
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label">Contenido</label>
+                                    <label class="col-form-label">Descripción</label>
                                     <div class="quill-wrapper">
                                         <div  id="descriptions"></div>
                                         <label id="description-error" class="error d-none" for="description"></label>
@@ -98,7 +98,7 @@
 
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label">Descripción</label>
+                                    <label class="col-form-label">Contenido</label>
                                     <div class="quill-wrapper">
                                         <div  id="contents"></div>
                                     </div>

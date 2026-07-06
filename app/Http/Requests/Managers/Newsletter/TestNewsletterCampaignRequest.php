@@ -8,7 +8,7 @@ class TestNewsletterCampaignRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('newsletters.view');
+        return $this->user()->can('newsletters.update');
     }
 
     public function rules(): array

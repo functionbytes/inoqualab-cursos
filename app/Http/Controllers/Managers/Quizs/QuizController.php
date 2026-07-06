@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Managers\Quizs;
 
+use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Quizs\StoreQuizRequest;
+use App\Http\Requests\Managers\Quizs\UpdateQuizRequest;
 use App\Models\Course\Course;
 use App\Models\Quiz\QuizTopic;
 use Illuminate\Http\Request;
 
 class QuizController extends Controller
 {
+    use BuildsAssessmentForms;
+
     public function index(Request $request, $slack)
     {
 
@@ -17,7 +22,7 @@ class QuizController extends Controller
         $available = $request->available;
         $lesson = $request->lesson;
 
-        $lessons = $course->lessons()->quizzes()->get();
+        $lessons = $course->lessons()->quizzes()->get(['id', 'title']);
         $quizs = QuizTopic::query()->where('course_id', $course->id);
 
         if ($searchKey) {
@@ -34,6 +39,8 @@ class QuizController extends Controller
 
         $quizs = $quizs->paginate(paginationNumber());
 
+        $lessonOptions = $course->lessons()->get()->prepend('', '')->pluck('title', 'id');
+
         return view('managers.views.quizs.quizs.index')->with([
             'course' => $course,
             'quizs' => $quizs,
@@ -41,37 +48,13 @@ class QuizController extends Controller
             'lesson' => $lesson,
             'available' => $available,
             'searchKey' => $searchKey,
+            'availables' => $this->availableOptions(true),
+            'types' => $this->assessmentTypes(withBlank: true),
+            'lessonOptions' => $lessonOptions,
         ]);
     }
 
-    public function create($slack)
-    {
-
-        $course = Course::slack($slack);
-        $lessons = $course->lessons()->get();
-        $lessons->prepend('', '');
-        $lessons = $lessons->pluck('title', 'id');
-
-        $availables = $this->availableOptions(true);
-
-        $types = collect([
-            ['id' => '1', 'label' => 'SELECCIÓN MULTIPLE'],
-            ['id' => '0', 'label' => 'FALSO O VERDADERO'],
-        ]);
-
-        $types->prepend('', '');
-        $types = $types->pluck('label', 'id');
-
-        return view('managers.views.quizs.quizs.create')->with([
-            'course' => $course,
-            'availables' => $availables,
-            'lessons' => $lessons,
-            'types' => $types,
-        ]);
-
-    }
-
-    public function store(Request $request)
+    public function store(StoreQuizRequest $request)
     {
         abort_unless(auth()->user()->can('quizzes.create'), 403);
 
@@ -99,35 +82,29 @@ class QuizController extends Controller
 
     }
 
+    /**
+     * Datos del quiz para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
-
         $topic = QuizTopic::slack($slack);
-        $course = $topic->course;
 
-        $class = $course->lessons()->quizzes()->get();
-        $class = $class->pluck('title', 'id');
-
-        $availables = $this->availableOptions();
-
-        $types = collect([
-            ['id' => '1', 'label' => 'Selección Multiple'],
-            ['id' => '0', 'label' => 'Falso - Verdadero'],
+        return response()->json([
+            'slack' => $topic->slack,
+            'title' => $topic->title,
+            'lesson_id' => $topic->lesson_id,
+            'type' => (int) $topic->type,
+            'duration' => (int) $topic->quiz_again,
+            'day' => $topic->due_days,
+            'timer' => $topic->timer,
+            'question' => $topic->show_ans,
+            'mark' => $topic->per_q_mark,
+            'available' => (int) $topic->available,
+            'description' => $topic->description,
         ]);
-
-        $types = $types->pluck('label', 'id');
-
-        return view('managers.views.quizs.quizs.edit')->with([
-            'topic' => $topic,
-            'course' => $course,
-            'class' => $class,
-            'availables' => $availables,
-            'types' => $types,
-        ]);
-
     }
 
-    public function update(Request $request)
+    public function update(UpdateQuizRequest $request)
     {
         abort_unless(auth()->user()->can('quizzes.update'), 403);
 

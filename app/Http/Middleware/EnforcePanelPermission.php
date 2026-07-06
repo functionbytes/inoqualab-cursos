@@ -39,6 +39,12 @@ class EnforcePanelPermission
         'order' => 'orders',
         'mails' => 'incoming-mails',
         'departaments' => 'departments',
+        'certificate' => 'certificates',
+        'enterprise' => 'enterprises',
+        // ResultsController opera sobre el modelo Certificate (resultados de examen
+        // de un certificado): sin este alias, 'results' no existe en el catálogo
+        // de permisos y EnforcePanelPermission deja pasar sin comprobar nada.
+        'results' => 'certificates',
     ];
 
     /** Sufijo de acción de ruta -> verbo de permiso. */
@@ -52,7 +58,7 @@ class EnforcePanelPermission
 
     public function handle(Request $request, Closure $next): Response
     {
-        $permission = $this->permissionForRoute($request->route()?->getName());
+        $permission = $this->permissionForRoute($request->route()?->getName(), $request->isMethodSafe());
 
         if ($permission !== null && $this->permissionExists($permission)) {
             if (! $request->user()?->can($permission)) {
@@ -63,7 +69,7 @@ class EnforcePanelPermission
         return $next($request);
     }
 
-    private function permissionForRoute(?string $routeName): ?string
+    private function permissionForRoute(?string $routeName, bool $isReadOnlyRequest): ?string
     {
         if ($routeName === null) {
             return null;
@@ -77,7 +83,12 @@ class EnforcePanelPermission
 
         $domain = self::DOMAIN_ALIASES[$parts[1]] ?? $parts[1];
         $action = end($parts);
-        $verb = self::ACTION_MAP[$action] ?? 'view';
+
+        // Sufijos de acción no mapeados: si el método HTTP es de escritura
+        // (POST/PUT/PATCH/DELETE), no degradar a `.view` — exigir `.update`.
+        // Evita que rutas mutantes sin sufijo reconocido (enroll, reasign,
+        // toggle, send, importation...) queden autorizadas como lectura.
+        $verb = self::ACTION_MAP[$action] ?? ($isReadOnlyRequest ? 'view' : 'update');
 
         return "{$domain}.{$verb}";
     }

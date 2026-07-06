@@ -76,9 +76,9 @@ class ResultsController extends Controller
         $certificate = Certificate::slack($slack);
         $this->assertEnterpriseUser($certificate->user_id);
         $exam = $certificate->exam;
-        $answers = $certificate->exam?->answers;
-        $wrongs = $certificate->exam?->answers()?->wrong()->count();
-        $corrects = $certificate->exam?->answers()?->correct()->count();
+        $answers = $certificate->exam?->answers()->with('question')->get();
+        $wrongs = $answers?->where('approved', 0)->count();
+        $corrects = $answers?->where('approved', 1)->count();
 
         return view('enterprises.views.users.results.view')->with([
             'certificate' => $certificate,

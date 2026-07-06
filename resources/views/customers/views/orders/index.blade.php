@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @include('customers.includes.card', ['title' => 'Ordenes'])
+    @include('customers.includes.card', ['title' => 'Órdenes'])
 
     <div class="widget-content searchable-container list">
         
@@ -96,7 +96,7 @@
             </div>
             @if ($orders->total() > 0)
             <div class="result-body ">
-                <span>Mostrar {{ $orders->firstItem() }}-{{ $orders->lastItem() }} de {{ $orders->total() }} resultados</span>
+                <span>Mostrando {{ $orders->firstItem() }}-{{ $orders->lastItem() }} de {{ $orders->total() }} resultados</span>
                 <nav>
                     {{ $orders->appends(request()->input())->links() }}
                 </nav>

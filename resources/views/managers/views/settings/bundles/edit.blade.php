@@ -17,8 +17,8 @@
 
                     <input type="hidden" id="id" name="id" value="{{ $bundle->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $bundle->slack }}">
-                    <textarea style="display: none"  id="meta_description" name="meta_description">{!! $bundle->meta_description !!}</textarea>
-                    <textarea style="display: none"  id="description" name="description">{!! $bundle->description !!}</textarea>
+                    <textarea class="d-none" id="meta_description" name="meta_description">{!! clean($bundle->meta_description, 'content') !!}</textarea>
+                    <textarea class="d-none" id="description" name="description">{!! clean($bundle->description, 'content') !!}</textarea>
                     <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
                     <input type="hidden" id="edit" name="edit" value="true">
                     <input type="hidden" id="thumbnail" name="thumbnail">
@@ -44,7 +44,7 @@
                             <h5 class="mb-0">Crear paquete</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Actualiza los datos del paquete. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
                         <div class="row">
                             <div class="col-12">
@@ -100,7 +100,7 @@
                                     <label  class="control-label col-form-label">Descripción</label>
 
                                     <div class="quill-wrapper">
-                                        <div  id="descriptions">{!! $bundle->description !!}</div>
+                                        <div  id="descriptions">{!! clean($bundle->description, 'content') !!}</div>
                                     </div>
                                     <label id="description-error" class="error d-none" for="description"></label>
                                 </div>

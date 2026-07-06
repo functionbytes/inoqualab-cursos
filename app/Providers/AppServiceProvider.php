@@ -143,6 +143,11 @@ class AppServiceProvider extends ServiceProvider
         // Sincroniza la columna `role` (legacy) con los roles de Spatie.
         User::observe(UserRoleObserver::class);
 
+        // superadmin autoriza siempre, incluso si un permiso nuevo se crea en
+        // código antes de re-sembrar `RolesAndPermissionsSeeder` (sin esto,
+        // superadmin dependería de tener el permiso ya sincronizado en BD).
+        Gate::before(fn (User $user) => $user->role === 'superadmin' ? true : null);
+
         $this->registerPolicies();
         $this->registerCatalogCacheInvalidation();
     }

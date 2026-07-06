@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Documents\StoreDocumentRequest;
+use App\Http\Requests\Managers\Settings\Documents\UpdateDocumentRequest;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -61,7 +63,7 @@ class DocumentsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDocumentRequest $request)
     {
         abort_unless(auth()->user()->can('documents.update'), 403);
 
@@ -79,7 +81,7 @@ class DocumentsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreDocumentRequest $request)
     {
         abort_unless(auth()->user()->can('documents.create'), 403);
 
@@ -140,6 +142,7 @@ class DocumentsController extends Controller
 
     public function storeFiles(Request $request)
     {
+        abort_unless(auth()->user()->can('documents.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
             $document = Document::slack($request->documents);
@@ -152,7 +155,12 @@ class DocumentsController extends Controller
 
     public function deleteFiles($id)
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('documents.delete'), 403);
+
+        Media::where('id', $id)
+            ->where('model_type', Document::class)
+            ->where('collection_name', 'files')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }

@@ -17,7 +17,7 @@
               <h5 class="mb-0">Crear categoria</h5>
             </div>
             <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+              Completa los datos de la categoría de curso. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
             </p>
             <div class="row">
               <div class="col-6">

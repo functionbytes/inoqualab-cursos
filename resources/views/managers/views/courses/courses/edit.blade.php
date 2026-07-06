@@ -27,7 +27,7 @@
                                 <h5 class="mb-0">Imagen</h5>
                             </div>
                             <p class="card-subtitle mb-3 mt-3">
-                                Este espacio está diseñado para que puedas actualizar y modificar la foto de tu perfil es necesario actualizar para mantener tus datos al día.
+                                Cambia la imagen de portada del curso si lo necesitas. Se mostrará en el catálogo y en la página del curso.
                             </p>
                             <div class="dropzone dz-clickable" id="thumbnail">
                                 <div class="fallback">
@@ -43,14 +43,18 @@
                             <h5 class="mb-0">Editar curso</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Actualiza los datos del curso. Los cambios se reflejarán de inmediato en el catálogo y en la página pública del curso.
                         </p>
 
                         <div class="row">
 
                             <div class="col-12">
+                                <div class="form-section-title"><i class="fas fa-circle-info"></i> Información general</div>
+                            </div>
+
+                            <div class="col-12">
                                 <div class="mb-3">
-                                        <label  class="control-label col-form-label">Titulo</label>
+                                        <label  class="control-label col-form-label">Titulo <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="title"  name="title" value="{{ $course->title }}"  placeholder="Ingresar titulo">
                                 </div>
                             </div>
@@ -58,13 +62,14 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Video</label>
-                                        <input type="text" class="form-control" id="film"  name="film" value="{{ $course->film }}"  placeholder="Ingresar video">
+                                        <input type="text" class="form-control" id="film"  name="film" value="{{ $course->film }}"  placeholder="Ej: https://www.youtube.com/watch?v=...">
+                                        <small class="form-text text-muted">Enlace de YouTube o Vimeo para el video de vista previa del curso (opcional)</small>
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                        <label  class="control-label col-form-label">Duración</label>
+                                        <label  class="control-label col-form-label">Duración <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="duration"  name="duration" value="{{ $course->duration }}"  placeholder="Ingresar duración">
                                         <small class="form-text text-muted">Horas totales del curso</small>
                                 </div>
@@ -72,15 +77,19 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                        <label  class="control-label col-form-label">Dias</label>
+                                        <label  class="control-label col-form-label">Dias <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="day"  name="day" value="{{ $course->day }}"  placeholder="Ingresar dias">
                                         <small class="form-text text-muted">Días de acceso al contenido</small>
                                 </div>
                             </div>
 
+                            <div class="col-12">
+                                <div class="form-section-title"><i class="fas fa-tag"></i> Precio y promoción</div>
+                            </div>
+
                             <div class="col-6">
                                 <div class="mb-3">
-                                        <label  class="control-label col-form-label">Precio</label>
+                                        <label  class="control-label col-form-label">Precio <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control" id="price"  name="price" value="{{ $course->price }}"  placeholder="Ej: 75000">
                                         <small class="form-text text-muted">Precio en COP</small>
                                 </div>
@@ -94,9 +103,13 @@
                                 </div>
                             </div>
 
+                            <div class="col-12">
+                                <div class="form-section-title"><i class="fas fa-certificate"></i> Certificación y categoría</div>
+                            </div>
+
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Certificador</label>
+                                    <label class="control-label col-form-label">Certificador <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('certification', $certifications, $course->certification_id , ['class' => 'select2 form-control','id' => 'certification']) !!}
                                     </div>
@@ -106,7 +119,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Certificador</label>
+                                    <label class="control-label col-form-label">Entidad certificadora <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('certifier', $certifiers, $course->certifier_id , ['class' => 'select2 form-control','id' => 'certifier']) !!}
                                     </div>
@@ -116,9 +129,9 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Categoria</label>
+                                    <label class="control-label col-form-label">Categoria <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        {!! Form::select('categorie', $categories, $course->category_id , ['class' => 'select2 form-control','id' => 'categorie']) !!}
+                                        {!! Form::select('categorie', $categories, $course->categorie_id , ['class' => 'select2 form-control','id' => 'categorie']) !!}
                                     </div>
                                     <label id="categorie-error" class="error d-none" for="categorie"></label>
                                 </div>
@@ -126,7 +139,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Certificación</label>
+                                    <label class="control-label col-form-label">Certificación <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('certificate', $conditions, $course->certificate  , ['class' => 'select2 form-control','id' => 'certificate']) !!}
                                     </div>
@@ -134,9 +147,13 @@
                                 </div>
                             </div>
 
+                            <div class="col-12">
+                                <div class="form-section-title"><i class="fas fa-sliders"></i> Visibilidad y configuración</div>
+                            </div>
+
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Destacado</label>
+                                    <label class="control-label col-form-label">Destacado <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('featured', $conditions, $course->featured , ['class' => 'select2 form-control','id' => 'featured']) !!}
                                     </div>
@@ -169,7 +186,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Website</label>
+                                    <label class="control-label col-form-label">Website <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('website', $conditions, $course->website , ['class' => 'select2 form-control','id' => 'website']) !!}
                                     </div>
@@ -179,7 +196,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Pago</label>
+                                    <label class="control-label col-form-label">Pago <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('payment', $conditions, $course->payment , ['class' => 'select2 form-control','id' => 'payment']) !!}
                                     </div>
@@ -189,7 +206,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Examenes</label>
+                                    <label class="control-label col-form-label">Examen <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('exam', $conditions, $course->exam , ['class' => 'select2 form-control','id' => 'exam']) !!}
                                     </div>
@@ -199,7 +216,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Promocion</label>
+                                    <label class="control-label col-form-label">Promocion <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('promotion', $conditions, $course->promotion , ['class' => 'select2 form-control','id' => 'promotion']) !!}
                                     </div>
@@ -209,12 +226,16 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Estado</label>
+                                    <label class="control-label col-form-label">Estado <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         {!! Form::select('available', $availables, $course->available , ['class' => 'select2 form-control','id' => 'available']) !!}
                                     </div>
                                     <label id="available-error" class="error d-none" for="available"></label>
                                 </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-section-title"><i class="fas fa-align-left"></i> Contenido descriptivo</div>
                             </div>
 
                             <div class="col-12">
@@ -326,7 +347,7 @@
                         },
                         number: true,
                         min: 1,
-                        max: 100,
+                        max: 1000000,
                     },
                     short: {
                         required: false,
@@ -434,7 +455,7 @@
                         required: "Debe ingresar un descuento si hay promoción activa.",
                         number: 'Solo se puede ingresar números.',
                         min: "Debe ser mínimo de 1.",
-                        max: "Debe ser máximo de 100.",
+                        max: "Debe ser máximo de 1000000.",
                     },
                     certifier: {
                         required: "Es necesario un opción.",
@@ -641,140 +662,7 @@
             }
         });
 
-        var toolbarOptions = [
-            ['bold', 'italic', 'underline', 'strike'],
-            ['blockquote', 'code-block'],
-            [{ 'header': 1 }, { 'header': 2 }],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'script': 'sub' }, { 'script': 'super' }],
-            [{ 'indent': '-1' }, { 'indent': '+1' }],
-            [{ 'direction': 'rtl' }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [ 'link', 'image', 'video' ],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-
-            ['clean']
-        ];
-
-
-        var toolbarOption = [
-            ['clean']
-        ];
-
-
-        var who = new Quill('#whos', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-
-        who.on('selection-change', function (range, oldRange, source) {
-            if (range === null && oldRange !== null) {
-                $('body').removeClass('overlay-disabled');
-            } else if (range !== null && oldRange === null) {
-                $('body').addClass('overlay-disabled');
-            }
-        });
-
-        who.on('text-change', function(delta, oldDelta, source) {
-            $('#who').text(who.container.firstChild.innerHTML);
-        });
-
-
-
-        var learn = new Quill('#learns', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-
-        learn.on('selection-change', function (range, oldRange, source) {
-            if (range === null && oldRange !== null) {
-                $('body').removeClass('overlay-disabled');
-            } else if (range !== null && oldRange === null) {
-                $('body').addClass('overlay-disabled');
-            }
-        });
-
-        learn.on('text-change', function(delta, oldDelta, source) {
-            $('#learn').text(learn.container.firstChild.innerHTML);
-        });
-
-
-
-        var short = new Quill('#shorts', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-
-        short.on('selection-change', function (range, oldRange, source) {
-            if (range === null && oldRange !== null) {
-                $('body').removeClass('overlay-disabled');
-            } else if (range !== null && oldRange === null) {
-                $('body').addClass('overlay-disabled');
-            }
-        });
-
-        short.on('text-change', function(delta, oldDelta, source) {
-            $('#short').text(short.container.firstChild.innerHTML);
-        });
-
-
-        var requirement = new Quill('#requirements', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-
-        requirement.on('selection-change', function (range, oldRange, source) {
-            if (range === null && oldRange !== null) {
-                $('body').removeClass('overlay-disabled');
-            } else if (range !== null && oldRange === null) {
-                $('body').addClass('overlay-disabled');
-            }
-        });
-
-        requirement.on('text-change', function(delta, oldDelta, source) {
-            $('#requirement').text(requirement.container.firstChild.innerHTML);
-        });
-
-
-        var detail = new Quill('#details', {
-            modules: {
-                toolbar: toolbarOptions
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-
-        detail.on('selection-change', function (range, oldRange, source) {
-            if (range === null && oldRange !== null) {
-                $('body').removeClass('overlay-disabled');
-            } else if (range !== null && oldRange === null) {
-                $('body').addClass('overlay-disabled');
-            }
-        });
-
-        detail.on('text-change', function(delta, oldDelta, source) {
-            $('#detail').text(detail.container.firstChild.innerHTML);
-        });
+        @include("managers.views.courses.courses._quill-editors")
 
 
 

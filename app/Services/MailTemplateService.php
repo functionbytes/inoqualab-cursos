@@ -43,12 +43,15 @@ class MailTemplateService
      */
     private function globalVariables(): array
     {
+        // settings es una tabla key/value: usar el helper setting($clave). NO
+        // getSetting()->page_email (getSetting() no acepta args y devuelve el
+        // modelo Setting completo, así que esas "columnas" siempre eran null).
         return [
-            'SITE_NAME' => getSetting()->page_title ?? config('app.name'),
+            'SITE_NAME' => setting('page_title') ?: config('app.name'),
             'SITE_URL' => rtrim(getUrl(), '/'),
             'LOGO_URL' => getLogo(),
-            'SUPPORT_EMAIL' => getSetting()->page_email ?? '',
-            'SUPPORT_PHONE' => getSetting()->page_phone ?? '',
+            'SUPPORT_EMAIL' => setting('page_email') ?: '',
+            'SUPPORT_PHONE' => setting('page_phone') ?: '',
             'CURRENT_YEAR' => date('Y'),
         ];
     }

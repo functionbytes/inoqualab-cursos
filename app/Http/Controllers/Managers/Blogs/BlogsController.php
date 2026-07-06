@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\StoreBlogRequest;
+use App\Http\Requests\Managers\Blogs\UpdateBlogRequest;
 use App\Models\Blog\Blog;
 use App\Models\Blog\BlogCategorie;
 use App\Models\Blog\BlogTag;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BlogsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $searchKey = $request->search;
         $available = $request->available;
@@ -38,8 +45,9 @@ class BlogsController extends Controller
 
     }
 
-    public function create()
+    public function create(): View
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $categories = BlogCategorie::latest()->get();
         $categories->prepend('', '');
@@ -58,8 +66,9 @@ class BlogsController extends Controller
 
     }
 
-    public function view($slug)
+    public function view($slug): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $blog = Blog::slug($slug);
         $categorie = $blog->categorie_id;
@@ -80,8 +89,9 @@ class BlogsController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $blog = Blog::slack($slack);
 
@@ -106,26 +116,29 @@ class BlogsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateBlogRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.update'), 403);
+        $data = $request->validated();
 
-        $blog = Blog::slack($request->slack);
-        $blog->title = Str::upper($request->title);
-        $blog->slug = Str::slug($request->title, '-');
-        $blog->content = $request->contents;
-        $blog->description = $request->description;
-        $blog->date_at = $request->date;
-        $blog->categorie_id = $request->categorie;
-        $blog->available = $request->available;
-        $blog->update();
+        $blog = Blog::slack($data['slack']);
 
-        if ($request->has('tags')) {
-            $tagIds = array_filter(explode(',', $request->tags));
-            $blog->tags()->sync($tagIds);
-        } else {
-            $blog->tags()->detach();
-        }
+        DB::transaction(function () use ($data, $blog) {
+            $blog->title = Str::upper($data['title']);
+            $blog->slug = Str::slug($data['title'], '-');
+            $blog->content = $data['contents'];
+            $blog->description = $data['description'];
+            $blog->date_at = $data['date'];
+            $blog->categorie_id = $data['categorie'];
+            $blog->available = $data['available'];
+            $blog->update();
+
+            if (! empty($data['tags'])) {
+                $tagIds = array_filter(explode(',', $data['tags']));
+                $blog->tags()->sync($tagIds);
+            } else {
+                $blog->tags()->detach();
+            }
+        });
 
         return response()->json([
             'success' => true,
@@ -135,25 +148,28 @@ class BlogsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreBlogRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.create'), 403);
+        $data = $request->validated();
 
         $blog = new Blog;
-        $blog->title = Str::upper($request->title);
-        $blog->slack = $this->generate_slack('blogs');
-        $blog->slug = Str::slug($request->title, '-');
-        $blog->description = $request->description;
-        $blog->content = $request->contents;
-        $blog->available = $request->available;
-        $blog->categorie_id = $request->categorie;
-        $blog->date_at = $request->date;
-        $blog->save();
 
-        if ($request->has('tags')) {
-            $tagIds = array_filter(explode(',', $request->tags));
-            $blog->tags()->attach($tagIds);
-        }
+        DB::transaction(function () use ($data, $blog) {
+            $blog->title = Str::upper($data['title']);
+            $blog->slack = $this->generate_slack('blogs');
+            $blog->slug = Str::slug($data['title'], '-');
+            $blog->description = $data['description'];
+            $blog->content = $data['contents'];
+            $blog->available = $data['available'];
+            $blog->categorie_id = $data['categorie'];
+            $blog->date_at = $data['date'];
+            $blog->save();
+
+            if (! empty($data['tags'])) {
+                $tagIds = array_filter(explode(',', $data['tags']));
+                $blog->tags()->attach($tagIds);
+            }
+        });
 
         return response()->json([
             'success' => true,
@@ -163,7 +179,7 @@ class BlogsController extends Controller
 
     }
 
-    public function destroy($slack)
+    public function destroy($slack): RedirectResponse
     {
         abort_unless(auth()->user()->can('blogs.delete'), 403);
 
@@ -174,8 +190,9 @@ class BlogsController extends Controller
 
     }
 
-    public function getThumbnails($slack)
+    public function getThumbnails($slack): JsonResponse
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $blog = Blog::slack($slack);
 
@@ -204,8 +221,13 @@ class BlogsController extends Controller
 
     }
 
-    public function storeThumbnails(Request $request)
+    public function storeThumbnails(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
+
+        $request->validate([
+            'file' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ]);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
             $blog = Blog::slack(Str::remove('"', $request->blog));
@@ -217,10 +239,14 @@ class BlogsController extends Controller
         return response()->json(['status' => 'error', 'message' => 'Archivo no válido.'], 422);
     }
 
-    public function deleteThumbnails($id)
+    public function deleteThumbnails($id): JsonResponse
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
-        Media::find($id)->delete();
+        Media::where('id', $id)
+            ->where('model_type', Blog::class)
+            ->where('collection_name', 'thumbnail')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
 

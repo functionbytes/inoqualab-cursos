@@ -125,7 +125,11 @@ class RolesController extends Controller
             $role->update(['name' => $data['name']]);
         }
 
-        $role->syncPermissions($this->permissionsFrom($request));
+        // Los roles protegidos (superadmin, etc.) no cambian sus permisos desde
+        // esta pantalla: evita que un holder de roles.update reescriba superadmin.
+        if (! $isProtected) {
+            $role->syncPermissions($this->mergedPermissionsFor($request, $role));
+        }
 
         $this->forgetCache();
 
@@ -188,9 +192,29 @@ class RolesController extends Controller
 
     private function permissionsFrom(Request $request)
     {
-        return Permission::whereIn('id', $request->input('permissions', []))
+        $requested = Permission::whereIn('id', $request->input('permissions', []))
             ->where('guard_name', 'web')
             ->get();
+
+        // Techo de privilegios: no se pueden otorgar permisos que el actor no
+        // posee (evita que quien tenga roles.create/update se auto-eleve a superadmin).
+        $actor = auth()->user();
+
+        return $requested->filter(fn ($permission) => $actor->can($permission->name))->values();
+    }
+
+    /**
+     * Set de permisos a sincronizar en update(): conserva los permisos actuales
+     * que el actor NO puede otorgar (para no quitárselos a un rol más poderoso) y
+     * añade los solicitados que sí puede otorgar. Impide escalar Y despojar.
+     */
+    private function mergedPermissionsFor(Request $request, Role $role)
+    {
+        $actor = auth()->user();
+
+        $preserved = $role->permissions->filter(fn ($permission) => ! $actor->can($permission->name));
+
+        return $preserved->merge($this->permissionsFrom($request))->unique('id')->values();
     }
 
     private function forgetCache(): void

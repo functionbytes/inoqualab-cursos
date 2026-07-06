@@ -14,7 +14,7 @@
 | Notificaciones | toastr.js | `toastr.success()`, `toastr.error()` |
 | Tablas complejas | DevExpress jQuery | dxDataGrid, dxScheduler |
 | Selectores | select2 | NUNCA `theme: 'bootstrap-5'` |
-| Color primario | `#90bb13` | Rojo oscuro, todos los módulos |
+| Color primario | `#008bcd` | Rojo oscuro, todos los módulos |
 | CSS inline | PROHIBIDO | Siempre clases CSS |
 
 ---
@@ -23,7 +23,7 @@
 
 ```css
 /* === Colores base === */
---hd-primary:        #90bb13;   /* Rojo principal — acciones primarias, highlights */
+--hd-primary:        #008bcd;   /* Rojo principal — acciones primarias, highlights */
 --hd-primary-dark:   #7b0000;   /* Hover/active del primario */
 --hd-primary-light:  #fdf0f0;   /* Fondos sutiles de primario */
 
@@ -50,7 +50,7 @@
 /* === Plataformas sociales === */
 --hd-facebook:       #1877f2;
 --hd-instagram:      linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
---hd-whatsapp:       #25d366;
+--hd-whatsapp:       #008bcd;
 
 /* === Layout === */
 --hd-sidebar-width:    260px;

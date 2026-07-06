@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Exports\Managers\CoursesExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\ImportCoursesRequest;
 use App\Imports\Managers\CoursesImport;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
-use App\Models\ExamAnswer;
+use App\Models\Exam\ExamAnswer;
 use App\Models\Inscription;
 use App\Models\Order\Order;
-use App\Models\QuizAnswer;
+use App\Models\Quiz\QuizAnswer;
 use App\Models\User;
 use App\Services\InscriptionService;
 use App\Structure\Courses;
@@ -32,6 +33,7 @@ class CourseController extends Controller
 
     public function index(Request $request, $slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $searchKey = $request->search;
         $enterprise = Enterprise::slack($slack);
@@ -54,6 +56,8 @@ class CourseController extends Controller
 
     public function create($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
+
         $enterprise = Enterprise::slack($slack);
 
         $courses = $enterprise->courses;
@@ -115,6 +119,7 @@ class CourseController extends Controller
 
     public function user(Request $request, $slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $searchKey = $request->search;
 
@@ -129,6 +134,7 @@ class CourseController extends Controller
 
     public function view(Request $request, $enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $searchKey = $request->search;
         $culminate = $request->culminate;
@@ -187,6 +193,7 @@ class CourseController extends Controller
 
     public function progress($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $order = Order::with(['progress', 'user', 'course.lessons'])->slack($slack);
         $progress = $order->progress;
@@ -206,6 +213,8 @@ class CourseController extends Controller
 
     public function reasign($enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $enterprise = Enterprise::slack($enterprise);
         $courses = $enterprise->courses;
         $course = Course::slack($course);
@@ -236,25 +245,39 @@ class CourseController extends Controller
 
     public function actionReasign(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
         $enterprise = Enterprise::id($request->enterprise);
         $old = Course::id($request->old);
         $new = Course::id($request->course);
         $users = $request->users;
 
+        // La asociación con el curso vive en Inscription (orders.course_id no
+        // existe), así que la reasignación opera sobre inscripciones, no orders.
         DB::transaction(function () use ($enterprise, $old, $new, $users) {
-            if ($users[0] == 0) {
-                $allUsers = EnterpriseCourse::users($enterprise->id, $old->id);
-                foreach ($allUsers as $user) {
-                    foreach (Order::validates($user->id, $old->id) as $order) {
-                        $this->reassignOrder($order, $new);
-                    }
+            $memberIds = $enterprise->users()->pluck('users.id');
+
+            if ($users[0] === '0') {
+                $inscriptions = Inscription::where('course_id', $old->id)->whereIn('user_id', $memberIds)->get();
+                foreach ($inscriptions as $inscription) {
+                    $this->reassignInscription($inscription, $new);
                 }
-            } else {
-                foreach ($users as $identifier) {
-                    $user = User::identification($identifier);
-                    foreach (Order::finds($user->id, $old->id) as $order) {
-                        $this->reassignOrder($order, $new);
-                    }
+
+                return;
+            }
+
+            foreach ($users as $identifier) {
+                $user = User::identification($identifier);
+
+                // Sin esto, se podía reasignar (y borrar respuestas de examen/quiz)
+                // de un usuario que no pertenece a $enterprise (IDOR).
+                if (! $memberIds->contains($user->id)) {
+                    continue;
+                }
+
+                $inscriptions = Inscription::where('user_id', $user->id)->where('course_id', $old->id)->get();
+                foreach ($inscriptions as $inscription) {
+                    $this->reassignInscription($inscription, $new);
                 }
             }
         });
@@ -262,34 +285,29 @@ class CourseController extends Controller
         return redirect()->route('manager.enterprises.courses.view', [$enterprise->slack, $old->slack]);
     }
 
-    private function reassignOrder(Order $order, Course $new): void
+    private function reassignInscription(Inscription $inscription, Course $new): void
     {
-        $order->course_id = $new->id;
-        $order->save();
+        $inscription->course_id = $new->id;
+        $inscription->save();
 
-        $certificate = $order->certificate;
+        $certificate = $inscription->certificate;
         if ($certificate !== null) {
             $certificate->course_id = $new->id;
             $certificate->save();
         }
 
-        $coursing = $order->coursing;
-        if ($coursing !== null) {
-            $coursing->course_id = $new->id;
-            $coursing->save();
-        }
-
-        foreach ($order->quizs as $quiz) {
-            QuizAnswer::quiz($quiz->id)->each->delete();
+        foreach ($inscription->quizs as $quiz) {
+            QuizAnswer::where('quiz_id', $quiz->id)->delete();
             $quiz->delete();
         }
 
-        foreach ($order->exam as $exam) {
+        $exam = $inscription->exam;
+        if ($exam !== null) {
             if ($exam->score >= 80) {
                 $exam->course_id = $new->id;
                 $exam->save();
             } else {
-                ExamAnswer::order($order->id)->each->delete();
+                ExamAnswer::where('exam_id', $exam->id)->delete();
                 $exam->delete();
             }
         }
@@ -318,6 +336,8 @@ class CourseController extends Controller
 
     public function insert($enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);
 
@@ -333,6 +353,8 @@ class CourseController extends Controller
 
     public function postponeCourses($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $order = Order::slack($slack);
         $user = $order->user;
         $enterprise = $user->relations;
@@ -348,6 +370,8 @@ class CourseController extends Controller
 
     public function postponeUsers($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $inscription = Inscription::slack($slack);
         $user = $inscription->user;
         $enterprise = $user->enterprise;
@@ -363,8 +387,11 @@ class CourseController extends Controller
 
     public function actionCourses(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
         $date_var = explode(' - ', $request->range);
+        abort_unless(count($date_var) === 2, 422, 'Rango de fechas invalido.');
+
         $inscription = Inscription::slack($request->inscription);
         $inscription->enroll_start = date('Y-m-d', strtotime($date_var[0]));
         $inscription->enroll_expire = date('Y-m-d', strtotime($date_var[1]));
@@ -375,7 +402,11 @@ class CourseController extends Controller
 
     public function actionUsers(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
         $date_var = explode(' - ', $request->range);
+        abort_unless(count($date_var) === 2, 422, 'Rango de fechas invalido.');
+
         $order = Order::slack($request->order);
         $order->enroll_start = date('Y-m-d', strtotime($date_var[0]));
         $order->enroll_expire = date('Y-m-d', strtotime($date_var[1]));
@@ -387,17 +418,21 @@ class CourseController extends Controller
 
     public function includes(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
         $enterprise = Enterprise::slack($request->enterprise);
         $course = Course::slack($request->course);
         $identifications = explode(',', $request->users);
 
-        $this->inscriptionService->enrollSimpleBulk($identifications, $course);
+        $this->inscriptionService->enrollSimpleBulk($identifications, $course, $enterprise);
 
         return response()->json($enterprise->slack);
     }
 
     public function report($enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);
 
@@ -418,6 +453,8 @@ class CourseController extends Controller
 
     public function generate(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $enterprise = $request->enterprise;
         $course = $request->course;
         $modalitie = $request->modalitie;
@@ -427,6 +464,8 @@ class CourseController extends Controller
 
     public function import($enterprise, $course)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
+
         $enterprise = Enterprise::slack($enterprise);
         $course = Course::slack($course);
 
@@ -436,26 +475,24 @@ class CourseController extends Controller
         ]);
     }
 
-    public function importation(Request $request)
+    public function importation(ImportCoursesRequest $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
-        $enterprise = Enterprise::slack($request->enterprise);
-        $course = Course::slack($request->course);
+        $enterprise = Enterprise::slack($request->validated('enterprise'));
+        $course = Course::slack($request->validated('course'));
 
-        if ($request->file('file')) {
+        try {
+            Excel::import(new CoursesImport($enterprise->slack, $course->slack), $request->file('file'));
+        } catch (ValidationException $e) {
 
-            try {
-                Excel::import(new CoursesImport($enterprise->slack, $course->slack), request()->file('file'));
-            } catch (ValidationException $e) {
+            $failures = $e->failures();
 
-                $failures = $e->failures();
-
-                return view('managers.views.enterprisesusers.response')->with([
-                    'error_message' => $e->getMessage(),
-                    'failures' => $failures,
-                    'enterprise' => $enterprise,
-                ]);
-            }
+            return view('managers.views.enterprisesusers.response')->with([
+                'error_message' => $e->getMessage(),
+                'failures' => $failures,
+                'enterprise' => $enterprise,
+            ]);
         }
 
         return redirect()->route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]);
@@ -469,6 +506,7 @@ class CourseController extends Controller
         $course = Course::slack($course);
 
         $inscription = EnterpriseCourse::validate($enterprise->id, $course->id);
+        abort_if($inscription === null, 404);
         $inscription->delete();
 
         return redirect()->route('manager.enterprises.courses', $enterprise->slack);
@@ -476,6 +514,8 @@ class CourseController extends Controller
 
     public function destroys($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.delete'), 403);
+
         $inscription = Inscription::slack($slack);
         $inscription->delete();
 

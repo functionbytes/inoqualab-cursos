@@ -32,7 +32,7 @@
                                 <div class="col-md-12">
                                     <div class="padding-30 sm-padding-5">
 
-                                        {!! Form::open(['route' => ['enterprises.users.generate'], 'method' => 'POST', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
+                                        {!! Form::open(['route' => ['enterprise.users.generate'], 'method' => 'POST', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
                                         {{ csrf_field() }}
 
                                         <input name="enterprise" type="hidden" value="{{ $enterprise->id }}">
@@ -51,7 +51,7 @@
                                                     <div
                                                         class="form-group form-group-default form-group-default-select2 required">
                                                         <label>Estado</label>
-                                                        {!! Form::select('modalitie', $listmodalities, null, ['class' => 'full-width', 'id' => 'modalitie', 'data-init-plugin' => 'select2', 'required']) !!}
+                                                        {!! Form::select('modalitie', $modalities, null, ['class' => 'full-width', 'id' => 'modalitie', 'data-init-plugin' => 'select2', 'required']) !!}
                                                     </div>
                                                     <label id="modalitie-error" class="error d-none" for="modalitie"></label>
                                                 </div>

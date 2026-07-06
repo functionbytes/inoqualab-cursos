@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Supports\Users;
 
 use App\Events\Auth\Password\ForgotPasswordCreated;
 use App\Events\Auth\Password\ResetPasswordCreated;
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Supports\Concerns\RestrictsManageableUsers;
 use App\Http\Requests\Supports\Users\StoreUserRequest;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;

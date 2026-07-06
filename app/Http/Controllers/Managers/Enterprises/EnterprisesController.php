@@ -43,6 +43,7 @@ class EnterprisesController extends Controller
 
     public function create()
     {
+        abort_unless(auth()->user()->can('enterprises.create'), 403);
 
         $availables = $this->availableOptions();
 
@@ -54,6 +55,7 @@ class EnterprisesController extends Controller
 
     public function edit($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -135,6 +137,7 @@ class EnterprisesController extends Controller
 
     public function navegation($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
 
@@ -146,6 +149,7 @@ class EnterprisesController extends Controller
 
     public function inscriptions($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
         $users = $enterprise->users()->available()->get();
@@ -163,12 +167,14 @@ class EnterprisesController extends Controller
 
     public function generate(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
         $enterprise = Enterprise::slack($request->enterprise);
         $course = Course::id($request->course);
 
         $identifications = array_filter(array_map('trim', explode(',', $request->users)));
 
-        $this->inscriptionService->enrollSimpleBulk($identifications, $course);
+        $this->inscriptionService->enrollSimpleBulk($identifications, $course, $enterprise);
 
         return response()->json([
             'success' => true,

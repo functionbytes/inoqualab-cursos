@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorCourse;
-use App\Models\Enterprise\Enterprise;
 use App\Models\Inscription;
 use App\Models\Order\Order;
 use App\Models\Order\OrderActivity;
@@ -26,7 +25,8 @@ class InscriptionsController extends Controller
     public function index($slack)
     {
 
-        $enterprise = Enterprise::slack($slack);
+        // Ownership: solo empresas del distribuidor autenticado (evita IDOR por slack).
+        $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
         $users = $enterprise->users()->available()->get();
         $courses = $enterprise->courses()->available()->get();
         $users = $users->pluck('identification', 'identification');
@@ -46,12 +46,17 @@ class InscriptionsController extends Controller
     public function enroll(Request $request)
     {
 
-        $enterprise = Enterprise::id($request->enterprise);
+        // Ownership: empresa del distribuidor + usuario perteneciente a esa empresa.
+        $distributor = app('distributor');
+        $enterprise = $distributor->enterprises()->where('enterprises.id', $request->enterprise)->firstOrFail();
         $course = Course::id($request->course);
         $user = User::id($request->user);
-        $distributor = app('distributor');
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404);
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
+
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
         $method = OrderMethod::slug('credit');
@@ -134,11 +139,12 @@ class InscriptionsController extends Controller
     public function store(Request $request)
     {
 
-        $enterprise = Enterprise::slack($request->enterprise);
-        $course = Course::id($request->course);
+        // Ownership: NUNCA el distribuidor del request; empresa y usuario del distribuidor autenticado.
         $distributor = app('distributor');
-
+        $enterprise = $distributor->enterprises()->where('enterprises.slack', $request->enterprise)->firstOrFail();
+        $course = Course::id($request->course);
         $user = User::identification($request->user);
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404);
 
         $existingInscription = Inscription::existingInscription($user->id, $course->id)->first();
 
@@ -161,6 +167,9 @@ class InscriptionsController extends Controller
         }
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
+
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
         $method = OrderMethod::slug('credit');
@@ -244,7 +253,9 @@ class InscriptionsController extends Controller
     {
 
         if ($request->enterprise != null) {
-            $courses = Enterprise::slack($request->enterprise)->courses;
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
+            $courses = $enterprise ? $enterprise->courses : collect();
             $formatted_courses = [];
             $formatted_courses[] = ['id' => '', 'text' => ''];
             foreach ($courses as $course) {
@@ -261,7 +272,9 @@ class InscriptionsController extends Controller
     {
 
         if ($request->enterprise != null) {
-            $users = Enterprise::slack($request->enterprise)->users;
+            // Ownership: solo empresas del distribuidor autenticado.
+            $enterprise = app('distributor')->enterprises()->where('enterprises.slack', $request->enterprise)->first();
+            $users = $enterprise ? $enterprise->users : collect();
 
             $formatted_users = [];
             $formatted_users[] = ['id' => '', 'text' => ''];

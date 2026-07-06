@@ -2,94 +2,62 @@
 
 @section('content')
 
-    <div class="page-content-wrapper ">
-       
-        <div class="content ">
+    <div class="row">
+        <div class="col-lg-12 d-flex align-items-stretch">
+            <div class="card w-100">
+                <form id="formReport" role="form" onSubmit="return false">
+                    {{ csrf_field() }}
+                    <input type="hidden" id="enterprise" name="enterprise" value="{{ $enterprise->id }}">
 
-           
-            <div class=" container-fluid   container-fixed-lg">
+                    <div class="card-body border-top">
+                        <div class="d-flex no-block align-items-center mb-3">
+                            <h5 class="mb-0">Reporte de usuarios — {{ $enterprise->title }}</h5>
+                        </div>
+                        <p class="card-subtitle mb-3">
+                            Selecciona el estado y descarga el reporte en Excel.
+                        </p>
 
-
-                <div id="rootwizard" class="m-t-50">
-                    <div class="tab-content">
-
-                        <div class="pane padding-20 sm-no-padding">
-
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('distributor.dashboard') }}">Dashboard</a>
-                                </li>
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('distributor.enterprises') }}">Usuarios</a>
-                                </li>
-                                <li class="breadcrumb-item active">Exportar
-                                </li>
-                            </ul>
-
-
-
-                            <div class="row row-same-height">
-                                <div class="col-md-12">
-                                    <div class="padding-30 sm-padding-5">
-
-                                        {!! Form::open(['route' => ['enterprises.users.generate'], 'method' => 'POST', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
-                                        {{ csrf_field() }}
-
-                                        <input name="enterprise" type="hidden" value="{{ $enterprise->id }}">
-
-                                        <div class="form-group-attached">
-                                            <div class="row clearfix">
-                                                <div class="col-sm-12">
-                                                    <div class="form-group form-group-default disabled">
-                                                        <label>EMPRESA</label>
-                                                        {!! Form::text('enterprises', $enterprise->title, ['class' => 'form-control' . ($errors->has('firstname') ? ' is-invalid' : ''), 'disabled']) !!}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row clearfix">
-                                                <div class="col-sm-12">
-                                                    <div
-                                                        class="form-group form-group-default form-group-default-select2 required">
-                                                        <label>Estado</label>
-                                                        {!! Form::select('modalitie', $listmodalities, null, ['class' => 'full-width', 'id' => 'modalitie', 'data-init-plugin' => 'select2', 'required']) !!}
-                                                    </div>
-                                                    <label id="modalitie-error" class="error d-none" for="modalitie"></label>
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                        <div class="row m-t-25">
-                                            <div class="col-xl-12">
-                                                {!! Form::submit(__('Guardar'), ['class' => 'btn btn-primary pull-right btn-lg btn-block']) !!}
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-
-                                    {!! Form::close() !!}
-
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Estado</label>
+                                    {!! Form::select('modalitie', $modalities, null, ['class' => 'select2 form-control', 'id' => 'modalitie']) !!}
+                                    <label id="modalitie-error" class="error d-none" for="modalitie"></label>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                </div>
+                    <div class="col-12">
+                        <div class="action-form border-top mt-4">
+                            <div class="text-center p-3">
+                                <button type="submit" class="btn btn-primary px-4 w-100">
+                                    <i class="fas fa-download me-1"></i> Descargar reporte
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        
     </div>
-    
-    </div>
-
 
 @endsection
 
 @push('scripts')
-
-    <script type="text/javascript">
-
-    </script>
-
+<script>
+$(document).ready(function() {
+    $("#formReport").validate({
+        rules: { modalitie: { required: true } },
+        messages: { modalitie: { required: "Selecciona un estado." } },
+        submitHandler: function() {
+            var query = {
+                modalitie: $("#modalitie").val(),
+                enterprise: $("#enterprise").val(),
+            };
+            window.location = "{{ route('distributor.enterprises.users.generate') }}?" + $.param(query);
+        }
+    });
+});
+</script>
 @endpush

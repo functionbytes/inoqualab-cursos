@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Managers;
 
 use App\Models\Coupon\Coupon;
+use Carbon\Carbon;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,6 +14,44 @@ class UpdateCouponRequest extends FormRequest
     {
         // La ruta del panel (middleware manager + panel.permission) ya autoriza.
         return $this->user() !== null;
+    }
+
+    /**
+     * `date_var` llega como "m/d/Y - m/d/Y" desde el date-range-picker y el
+     * controller lo trocea con explode(' - ', ...). Validamos aquí el rango
+     * completo para no persistir un cupón con la fecha final anterior a la
+     * de inicio.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $dateVar = $this->input('date_var');
+
+            if (! $dateVar) {
+                return;
+            }
+
+            $parts = explode(' - ', $dateVar);
+
+            if (count($parts) !== 2) {
+                $validator->errors()->add('date_var', 'El rango de fechas no es válido.');
+
+                return;
+            }
+
+            try {
+                $start = Carbon::createFromFormat('m/d/Y', trim($parts[0]));
+                $end = Carbon::createFromFormat('m/d/Y', trim($parts[1]));
+            } catch (\Exception) {
+                $validator->errors()->add('date_var', 'El formato de fecha no es válido.');
+
+                return;
+            }
+
+            if (! $end->greaterThan($start)) {
+                $validator->errors()->add('date_var', 'La fecha final debe ser posterior a la fecha de inicio.');
+            }
+        });
     }
 
     public function rules(): array

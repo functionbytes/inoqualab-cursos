@@ -33,8 +33,8 @@
                     <div class="card-body">
                         <div class="d-sm-flex d-block align-items-center justify-content-between mb-7">
                             <div class="mb-3 mb-sm-0">
-                                <h5 class="card-title fw-semibold">Resporte usuarios</h5>
-                                <p class="card-subtitle mb-0">Detalle de las ultias solcitudes de soporte</p>
+                                <h5 class="card-title fw-semibold">Usuarios recientes</h5>
+                                <p class="card-subtitle mb-0">Últimos usuarios registrados en tu empresa</p>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -43,7 +43,7 @@
                                     <tr class="text-muted fw-semibold">
                                         <th scope="col">Identificación</th>
                                         <th scope="col">Cliente</th>
-                                        <th scope="col">Correo electronico</th>
+                                        <th scope="col">Correo electrónico</th>
                                         <th scope="col">Fecha</th>
                                     </tr>
                                 </thead>

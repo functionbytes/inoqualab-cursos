@@ -9,6 +9,7 @@ use App\Http\Requests\Managers\Newsletter\UpdateNewsletterCampaignRequest;
 use App\Jobs\Newsletter\SendNewsletterCampaignJob;
 use App\Models\Newsletter;
 use App\Models\NewsletterCampaign;
+use App\Models\NewsletterList;
 use App\Services\Mailer\MailerTemplateRendererService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class NewsletterCampaignController extends Controller
     {
         return view('managers.views.newsletter.campaigns.form', [
             'campaign' => null,
+            'lists' => NewsletterList::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -73,7 +75,10 @@ class NewsletterCampaignController extends Controller
     {
         $campaign->load('creator');
 
-        return view('managers.views.newsletter.campaigns.form', compact('campaign'));
+        return view('managers.views.newsletter.campaigns.form', [
+            'campaign' => $campaign,
+            'lists' => NewsletterList::where('is_active', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function update(UpdateNewsletterCampaignRequest $request, NewsletterCampaign $campaign): JsonResponse
@@ -108,7 +113,9 @@ class NewsletterCampaignController extends Controller
             return response()->json(['message' => 'Solo se pueden enviar campañas en estado borrador.'], 422);
         }
 
-        $recipientsCount = Newsletter::query()->subscribed()->count();
+        $recipientsCount = $campaign->newsletter_list_id
+            ? $campaign->list->subscribers()->where('newsletters.is_active', true)->count()
+            : Newsletter::query()->subscribed()->count();
 
         if ($recipientsCount === 0) {
             return response()->json(['message' => 'No hay suscriptores activos para enviar la campaña.'], 422);

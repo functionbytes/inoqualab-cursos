@@ -17,19 +17,13 @@
                         </p>
 
                         <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label class="form-label">Distribuidor</label>
-                                    {!! Form::select('distributor', $distributors, null, ['class' => 'select2 form-control', 'id' => 'distributor']) !!}
-                                </div>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Método de pago</label>
                                     {!! Form::select('method', $methods, null, ['class' => 'select2 form-control', 'id' => 'method']) !!}
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Condición</label>
                                     {!! Form::select('condition', $conditions, null, ['class' => 'select2 form-control', 'id' => 'condition']) !!}
@@ -60,7 +54,6 @@ $(document).ready(function() {
     $("#formReport").submit(function(e) {
         e.preventDefault();
         var query = {
-            distributor: $("#distributor").val(),
             method: $("#method").val(),
             condition: $("#condition").val(),
         };

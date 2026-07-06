@@ -26,6 +26,7 @@ class ExamController extends Controller
         $course = Course::slack($slack);
         abort_unless($course instanceof Course, 404);
         $inscription = $this->resolveInscription($user, $course->id);
+        $this->assertInscriptionActive($inscription);
         // A3: el examen final solo se habilita con todas las lecciones culminadas
         $this->assertExamAccessible($course, $inscription);
         $topic = $course->examtopic;
@@ -64,6 +65,9 @@ class ExamController extends Controller
         $topic = ExamTopic::id($id);
         abort_unless($topic instanceof ExamTopic, 404);
         $exam = Exam::where('id', $request->exam)->where('user_id', $user->id)->firstOrFail();
+
+        $inscription = $this->resolveInscription($user, $exam->course_id);
+        $this->assertInscriptionActive($inscription);
 
         $exam->answers()->delete();
 
@@ -111,6 +115,7 @@ class ExamController extends Controller
         $exam = Exam::where('id', $id)->where('user_id', $user->id)->firstOrFail();
 
         $inscription = $this->resolveInscription($user, $exam->course_id);
+        $this->assertInscriptionActive($inscription);
         $topic = $exam->topic;
         $course = $exam->course;
         $answers = $exam->answers;

@@ -64,7 +64,7 @@
                             <div class="mb-3">
                                 <label class="control-label col-form-label">Descripción</label>
                                 <div class="border rounded p-3 bg-light">
-                                    {!! $certifier->description !!}
+                                    {!! clean($certifier->description, 'content') !!}
                                 </div>
                             </div>
                         </div>

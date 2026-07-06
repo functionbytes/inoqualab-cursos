@@ -132,8 +132,8 @@
                                     <label for="newsletter_mailjet_api_secret" class="form-label fw-semibold">API Secret</label>
                                     <input type="password" class="form-control" id="newsletter_mailjet_api_secret"
                                            name="newsletter_mailjet_api_secret"
-                                           value="{{ setting('newsletter_mailjet_api_secret') }}"
-                                           placeholder="••••••••">
+                                           autocomplete="new-password"
+                                           placeholder="{{ setting('newsletter_mailjet_api_secret') ? '•••••••• (guardado — deja vacío para conservarlo)' : '••••••••' }}">
                                 </div>
                             </div>
                             <div class="col-md-12">

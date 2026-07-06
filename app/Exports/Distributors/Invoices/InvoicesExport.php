@@ -26,6 +26,11 @@ class InvoicesExport implements FromQuery, Responsable, WithHeadings, WithMappin
 
     private $end;
 
+    /** Catálogos precargados (id => title) para no consultar por cada fila del export. */
+    private array $methods;
+
+    private array $conditions;
+
     public function __construct($distributor, $method, $condition, $start, $end)
     {
         $this->distributor = $distributor;
@@ -33,6 +38,9 @@ class InvoicesExport implements FromQuery, Responsable, WithHeadings, WithMappin
         $this->condition = $condition;
         $this->start = $start;
         $this->end = $end;
+
+        $this->methods = InvoiceMethod::pluck('title', 'id')->all();
+        $this->conditions = InvoiceCondition::pluck('title', 'id')->all();
     }
 
     public function query()
@@ -80,8 +88,8 @@ class InvoicesExport implements FromQuery, Responsable, WithHeadings, WithMappin
             $row->number,
             $row->reference,
             $row->nit,
-            strtoupper(InvoiceMethod::id($row->method_id)->label),
-            strtoupper(InvoiceCondition::id($row->condition_id)->label),
+            strtoupper($this->methods[$row->method_id] ?? ''),
+            strtoupper($this->conditions[$row->condition_id] ?? ''),
             date('Y-m-d', strtotime($row->from_at)),
             date('Y-m-d', strtotime($row->to_at)),
             date('Y-m-d', strtotime($row->payment_at)),

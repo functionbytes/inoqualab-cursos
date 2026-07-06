@@ -8,8 +8,6 @@ use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorCourse;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Inscription;
-use App\Models\Invoice\InvoiceCondition;
-use App\Models\Method;
 use App\Models\Order\Order;
 use App\Models\Order\OrderActivity;
 use App\Models\Order\OrderCondition;
@@ -185,36 +183,58 @@ class InscriptionService
 
     /**
      * Enroll a user into a course via the simple enterprise includes flow.
-     * Creates Order + Inscription with zero-cost condition/method (no OrderItem, no OrderActivity).
+     * Creates Order + OrderItem + Inscription a costo cero (sin OrderActivity ni tarifa).
      */
     public function enrollSimple(User $user, Course $course): Inscription
     {
-        $condition = InvoiceCondition::slug('pagada');
-        $method = Method::slug('acuerdo');
+        $condition = OrderCondition::slug('payment');
+        $type = OrderType::slug('services');
+        $method = OrderMethod::slug('credit');
         $now = Carbon::now()->setTimezone(self::TIMEZONE);
 
         $order = new Order;
         $order->slack = $this->generateSlack('orders');
-        $order->subtotal = 0;
-        $order->discount = 0;
-        $order->total = 0;
-        $order->transaction = null;
-        $order->condition_id = $condition->id;
-        $order->method_id = $method->id;
-        $order->course_id = $course->id;
+        $order->number = $this->generateNumber('orders');
+        $order->reference = 'FAC'.$order->number;
         $order->user_id = $user->id;
-        $order->enroll_start = $now;
-        $order->enroll_expire = (clone $now)->addMonths(3);
+        $order->type_id = $type->id;
+        $order->method_id = $method->id;
+        $order->condition_id = $condition->id;
+        $order->transaction = null;
         $order->payment_at = $now;
+        $order->total_discount_amount = 0;
+        $order->total_after_discount = 0;
+        $order->total_before_discount = 0;
+        $order->total_tax_amount = 0;
+        $order->total_order_amount = 0;
+        $order->created_at = $now;
+        $order->updated_at = $now;
+
+        $orderItem = new OrderItem;
+        $orderItem->slack = $this->generateSlack('order_items');
+        $orderItem->item_id = $course->id;
+        $orderItem->item_type = Course::class;
+        $orderItem->quantity = 1;
+        $orderItem->amount = 0;
+        $orderItem->created_at = $now;
+        $orderItem->updated_at = $now;
 
         $inscription = new Inscription;
+        $inscription->slack = $this->generateSlack('inscriptions');
         $inscription->user_id = $user->id;
         $inscription->course_id = $course->id;
+        $inscription->percent = 0;
+        $inscription->enroll_start = $now;
+        $inscription->enroll_expire = (clone $now)->addMonths(3);
+        $inscription->enroll_culminated = null;
         $inscription->culminated = 0;
-        $inscription->culminated_at = null;
+        $inscription->created_at = $now;
+        $inscription->updated_at = $now;
 
-        return DB::transaction(function () use ($order, $inscription) {
+        return DB::transaction(function () use ($order, $orderItem, $inscription) {
             $order->save();
+            $orderItem->order_id = $order->id;
+            $orderItem->save();
             $inscription->order_id = $order->id;
             $inscription->save();
 
@@ -225,14 +245,24 @@ class InscriptionService
     /**
      * Bulk enroll via the simple flow (no tariff, no OrderActivity).
      *
+     * Solo matricula identificaciones que pertenecen a $enterprise: sin este
+     * filtro, cualquier identificación válida en el sistema (de otra empresa o
+     * de un cliente público) podía matricularse gratis (IDOR).
+     *
      * @param  array<string>  $userIdentifications
      * @return Collection<int, Inscription>
      */
-    public function enrollSimpleBulk(array $userIdentifications, Course $course): Collection
+    public function enrollSimpleBulk(array $userIdentifications, Course $course, Enterprise $enterprise): Collection
     {
+        $memberIdentifications = $enterprise->users()->pluck('users.identification');
+
         $inscriptions = collect();
 
         foreach ($userIdentifications as $identification) {
+            if (! $memberIdentifications->contains($identification)) {
+                continue;
+            }
+
             $user = User::identification($identification);
             $inscriptions->push($this->enrollSimple($user, $course));
         }

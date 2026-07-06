@@ -1,7 +1,7 @@
 # Prompt de Rediseño — Módulo Helpdesk (Core)
 
 > **IMPORTANTE**: Leer `SHARED-DESIGN-SYSTEM.md` antes de procesar este prompt.  
-> Stack: Bootstrap 5.3 + jQuery + Font Awesome 6 + color primario `#90bb13`. SIN Livewire, SIN Alpine.
+> Stack: Bootstrap 5.3 + jQuery + Font Awesome 6 + color primario `#008bcd`. SIN Livewire, SIN Alpine.
 
 ---
 

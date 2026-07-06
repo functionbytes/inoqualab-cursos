@@ -18,6 +18,7 @@ class StoreNewsletterCampaignRequest extends FormRequest
             'subject' => ['required', 'string', 'max:255'],
             'preheader' => ['nullable', 'string', 'max:255'],
             'content' => ['required', 'string'],
+            'newsletter_list_id' => ['nullable', 'integer', 'exists:newsletter_lists,id'],
         ];
     }
 

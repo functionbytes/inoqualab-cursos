@@ -88,10 +88,9 @@
                         @php
                             $activeFilters = (int)(($available ?? '') !== '') + (int)(($website ?? '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders me-1"></i>
-                            Filtros
+                            <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
@@ -115,7 +114,6 @@
                                         <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
                                     <th>Título</th>
-                                    <th>Categoría</th>
                                     <th class="text-center">Público</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Actualización</th>
@@ -131,9 +129,6 @@
                                         </td>
                                         <td>
                                             <div class="fw-semibold">{{ Str::words($course->title, 8, '...') }}</div>
-                                        </td>
-                                        <td>
-                                            <span class="text-muted">{{ $course->categorie->title }}</span>
                                         </td>
                                         <td class="text-center">
                                             @if($course->website)

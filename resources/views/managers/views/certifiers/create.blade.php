@@ -57,7 +57,7 @@
                             <h5 class="mb-0">Crear capacitador</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos del capacitador. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
 
                         <div class="row">
@@ -95,7 +95,7 @@
                             <div class="col-12">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Profesión</label>
-                                        <input type="text" class="form-control" id="profession"  name="profession" value="" placeholder="Ingresar profección">
+                                        <input type="text" class="form-control" id="profession"  name="profession" value="" placeholder="Ingresar profesión">
                                 </div>
                             </div>
 

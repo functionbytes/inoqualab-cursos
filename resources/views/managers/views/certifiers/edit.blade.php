@@ -58,7 +58,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Actualiza los datos del capacitador. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">
@@ -87,7 +87,7 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Profección</label>
-                                        <input type="text" class="form-control" id="profession"  name="profession" value="{{ $certifier->profession }}" placeholder="Ingresar profección">
+                                        <input type="text" class="form-control" id="profession"  name="profession" value="{{ $certifier->profession }}" placeholder="Ingresar profesión">
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
                                     <div class="mb-3">
                                         <label class="col-form-label">Descripción</label>
                                         <div class="quill-wrapper">
-                                            <div id="descriptions">{!! $certifier->description !!}</div>
+                                            <div id="descriptions">{!! clean($certifier->description, 'content') !!}</div>
                                         </div>
                                         <label id="description-error" class="error d-none" for="description"></label>
                                     </div>

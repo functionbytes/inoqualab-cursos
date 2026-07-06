@@ -19,10 +19,12 @@ class OrdersController extends Controller
         $type = $request->type;
         $method = $request->methods;
 
-        $orders = Distributor::slack($slack)->orders()->latest()->with('condition');
-        $methods = OrderMethod::latest()->get();
-        $conditions = OrderCondition::latest()->get();
-        $types = OrderType::latest()->get();
+        // Distributor::orders() apunta a OrderActivity (sin condition/method/type);
+        // ordersActititys() es la relación correcta hacia Order (hasManyThrough).
+        $orders = Distributor::slack($slack)->ordersActititys()->latest()->with(['condition', 'method', 'type']);
+        $methods = OrderMethod::latest()->get()->pluck('title', 'id');
+        $conditions = OrderCondition::latest()->get()->pluck('title', 'id');
+        $types = OrderType::latest()->get()->pluck('title', 'id');
 
         if ($searchKey) {
             $orders = $orders->where('slack', 'like', '%'.$searchKey.'%');

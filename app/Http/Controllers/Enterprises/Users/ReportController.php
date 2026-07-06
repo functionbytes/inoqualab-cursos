@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Enterprises\Users;
 
 use App\Exports\Enterprises\CoursesExport;
 use App\Http\Controllers\Controller;
-use App\Models\Course\Course;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,7 +15,9 @@ class ReportController extends Controller
 
         $user = User::auth();
         $enterprise = app('enterprise');
-        $course = Course::slack($slack);
+        // Ownership: el curso debe estar asignado a la empresa autenticada
+        // (evita ver metadata de cursos ajenos o no publicados).
+        $course = $enterprise->courses()->where('courses.slack', $slack)->firstOrFail();
 
         $listmodalities = collect([
             ['id' => '0', 'title' => 'Todos'],

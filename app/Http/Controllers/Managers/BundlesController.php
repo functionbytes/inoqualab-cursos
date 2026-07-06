@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\StoreBundleRequest;
+use App\Http\Requests\Managers\UpdateBundleRequest;
 use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
 use Carbon\Carbon;
@@ -77,7 +79,7 @@ class BundlesController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateBundleRequest $request)
     {
         abort_unless(auth()->user()->can('bundles.update'), 403);
 
@@ -110,7 +112,7 @@ class BundlesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreBundleRequest $request)
     {
         abort_unless(auth()->user()->can('bundles.create'), 403);
 

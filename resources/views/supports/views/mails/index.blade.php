@@ -142,7 +142,7 @@
                                             </li>
                                             @if($mail->status === 'processed' && $mail->order)
                                                 <li>
-                                                    <a class="dropdown-item" href="{{ route('support.enterprises.orders.view', $mail->order->slack) }}">Ver orden</a>
+                                                    <a class="dropdown-item" href="{{ route('support.users.orders.view', $mail->order->slack) }}">Ver orden</a>
                                                 </li>
                                             @endif
                                             @if($mail->status !== 'ignored')

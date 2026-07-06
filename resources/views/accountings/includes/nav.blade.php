@@ -18,7 +18,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-house"></i>
+              <i class="fa-solid fa-house"></i>
             </span>
             <span class="hide-menu">Inicio</span>
           </a>
@@ -26,7 +26,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('accounting.distributors') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-users"></i>
             </span>
             <span class="hide-menu">Distribuidores</span>
           </a>
@@ -36,7 +36,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('accounting.invoices') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-file-invoice"></i>
             </span>
             <span class="hide-menu">Facturas</span>
           </a>
@@ -45,7 +45,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('accounting.orders') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-receipt"></i>
             </span>
             <span class="hide-menu">Ordenes</span>
           </a>
@@ -53,7 +53,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{ route('accounting.profile') }}" aria-expanded="false">
             <span>
-              <i class="fa-duotone fa-gear-code"></i>
+              <i class="fa-solid fa-gear"></i>
             </span>
             <span class="hide-menu">Configuración</span>
           </a>

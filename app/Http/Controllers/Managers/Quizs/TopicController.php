@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Managers\Quizs;
 
+use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Quizs\StoreQuizQuestionRequest;
+use App\Http\Requests\Managers\Quizs\UpdateQuizQuestionRequest;
 use App\Models\Quiz\QuizQuestion;
 use App\Models\Quiz\QuizTopic;
 use Illuminate\Http\Request;
 
 class TopicController extends Controller
 {
+    use BuildsAssessmentForms;
+
     public function index(Request $request, $slack)
     {
 
@@ -36,52 +41,13 @@ class TopicController extends Controller
             'questions' => $questions,
             'available' => $available,
             'searchKey' => $searchKey,
+            'availables' => $this->availableOptions(),
+            'answers' => $this->assessmentAnswers($topic->type),
         ]);
 
     }
 
-    public function create($slack)
-    {
-
-        $topic = QuizTopic::slack($slack);
-        $course = $topic->course;
-
-        $availables = $this->availableOptions();
-
-        $answers = collect([]);
-
-        if ($topic->type == 0) {
-
-            $answers = collect([
-                ['id' => 'true', 'title' => 'Verdadero'],
-                ['id' => 'false', 'title' => 'Falso'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        if ($topic->type == 1) {
-
-            $answers = collect([
-                ['id' => 'a', 'title' => 'A'],
-                ['id' => 'b', 'title' => 'B'],
-                ['id' => 'c', 'title' => 'C'],
-                ['id' => 'd', 'title' => 'D'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        return view('managers.views.quizs.topics.create')->with([
-            'course' => $course,
-            'topic' => $topic,
-            'availables' => $availables,
-            'answers' => $answers,
-        ]);
-
-    }
-
-    public function store(Request $request)
+    public function store(StoreQuizQuestionRequest $request)
     {
         abort_unless(auth()->user()->can('quizzes.create'), 403);
 
@@ -92,21 +58,8 @@ class TopicController extends Controller
         $question->topic_id = $topic->id;
         $question->lesson_id = $topic->lesson_id;
         $question->type = $topic->type;
-
         $question->available = $request->available;
-
-        if ($topic->type == 1) {
-
-            $question->a = $request->a;
-            $question->b = $request->b;
-            $question->c = $request->c;
-            $question->d = $request->d;
-            $question->answer = $request->answer;
-
-        } else {
-
-            $question->answer = $request->answer;
-        }
+        $this->applyAnswerFields($question, $topic->type, $request);
 
         $question->save();
 
@@ -117,48 +70,26 @@ class TopicController extends Controller
 
     }
 
+    /**
+     * Datos de la pregunta para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
-
         $question = QuizQuestion::slack($slack);
-        $topic = $question->topic;
 
-        $availables = $this->availableOptions();
-
-        $answers = collect([]);
-
-        if ($question->type == 0) {
-
-            $answers = collect([
-                ['id' => 'true', 'title' => 'Verdadero'],
-                ['id' => 'false', 'title' => 'Falso'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        if ($question->type == 1) {
-
-            $answers = collect([
-                ['id' => 'a', 'title' => 'A'],
-                ['id' => 'b', 'title' => 'B'],
-                ['id' => 'c', 'title' => 'C'],
-                ['id' => 'd', 'title' => 'D'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        return view('managers.views.quizs.topics.edit')->with([
-            'topic' => $topic,
-            'question' => $question,
-            'availables' => $availables,
-            'answers' => $answers,
+        return response()->json([
+            'slack' => $question->slack,
+            'question' => $question->question,
+            'available' => (int) $question->available,
+            'answer' => $question->answer,
+            'a' => $question->a,
+            'b' => $question->b,
+            'c' => $question->c,
+            'd' => $question->d,
         ]);
-
     }
 
-    public function update(Request $request)
+    public function update(UpdateQuizQuestionRequest $request)
     {
         abort_unless(auth()->user()->can('quizzes.update'), 403);
 
@@ -166,16 +97,7 @@ class TopicController extends Controller
         $topic = $question->topic;
         $question->question = $request->question;
         $question->available = $request->available;
-
-        if ($topic->type == 1) {
-            $question->a = $request->a;
-            $question->b = $request->b;
-            $question->c = $request->c;
-            $question->d = $request->d;
-            $question->answer = $request->answer;
-        } else {
-            $question->answer = $request->answer;
-        }
+        $this->applyAnswerFields($question, $topic->type, $request);
 
         $question->update();
 

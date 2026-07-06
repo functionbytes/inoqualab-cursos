@@ -43,7 +43,9 @@ class AlertsMails extends Mailable
             'CONTACT_URL' => $this->contactUrl,
         ]);
 
-        return $this->to(getSetting()->page_email)
+        // settings es key/value: setting('page_email'). getSetting()->page_email
+        // devolvía null → la alerta de contacto se enviaba a un destinatario vacío.
+        return $this->to(setting('page_email'))
             ->subject($data['subject'])
             ->html($data['html']);
     }

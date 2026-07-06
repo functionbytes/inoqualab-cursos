@@ -17,7 +17,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Selecciona el distribuidor, la empresa, la condición, el método de pago y el rango de fechas para generar el reporte de órdenes.
                         </p>
 
                         <div class="row">

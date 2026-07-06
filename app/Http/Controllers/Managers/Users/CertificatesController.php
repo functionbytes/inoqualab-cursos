@@ -46,9 +46,9 @@ class CertificatesController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
-        $pdf = \Pdf::loadView('managers.views.users.certificates.download', compact('certificate'))->setPaper('a4', 'landscape');
+        $this->authorize('view', $certificate);
 
-        return $pdf->stream();
+        return $this->streamCertificate($certificate);
 
     }
 
@@ -56,32 +56,10 @@ class CertificatesController extends Controller
     {
 
         $order = Order::slack($slack);
-        $certificate = $order->certificate;
+        $certificate = $order->certificate ?? $this->generateCertificateFor($order);
+        $this->authorize('view', $certificate);
 
-        if ($certificate == null) {
-
-            $certificate = new Certificate;
-            $certificate->slack = $this->generate_slack('certificates');
-            $certificate->course_id = $order->course_id;
-            $certificate->user_id = $order->user_id;
-            $certificate->order_id = $order->order_id;
-            $certificate->start_at = $order->culminated_at;
-            $certificate->end_at = Carbon::parse($order->culminated_at)->addMonths(12);
-            $certificate->created_at = $order->culminated_at;
-            $certificate->updated_at = $order->culminated_at;
-            $certificate->save();
-
-            $pdf = \Pdf::loadView('managers.views.users.certificates.download', compact('certificate'))->setPaper('a4', 'landscape');
-
-            return $pdf->stream();
-
-        } else {
-
-            $pdf = \Pdf::loadView('managers.views.users.certificates.download', compact('certificate'))->setPaper('a4', 'landscape');
-
-            return $pdf->stream();
-
-        }
+        return $this->streamCertificate($certificate);
 
     }
 
@@ -89,9 +67,9 @@ class CertificatesController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
-        $pdf = \Pdf::loadView('managers.views.users.certificates.download', compact('certificate'))->setPaper('a4', 'landscape');
+        $this->authorize('view', $certificate);
 
-        return $pdf->stream();
+        return $this->streamCertificate($certificate);
 
     }
 
@@ -99,10 +77,40 @@ class CertificatesController extends Controller
     {
 
         $user = User::slack($slack);
+        $this->authorize('view', $user);
+
         $certificates = $user->certificates;
         $pdf = \Pdf::loadView('managers.views.users.certificates.broad', compact('certificates'))->setPaper('a4', 'landscape');
 
         return $pdf->stream();
 
+    }
+
+    /**
+     * Verificación explícita de propiedad/permiso por controlador (defensa en
+     * profundidad): no depender únicamente del permiso derivado por
+     * EnforcePanelPermission a partir del nombre de ruta.
+     */
+    private function generateCertificateFor(Order $order): Certificate
+    {
+        $certificate = new Certificate;
+        $certificate->slack = $this->generate_slack('certificates');
+        $certificate->course_id = $order->course_id;
+        $certificate->user_id = $order->user_id;
+        $certificate->order_id = $order->order_id;
+        $certificate->start_at = $order->culminated_at;
+        $certificate->end_at = Carbon::parse($order->culminated_at)->addMonths(12);
+        $certificate->created_at = $order->culminated_at;
+        $certificate->updated_at = $order->culminated_at;
+        $certificate->save();
+
+        return $certificate;
+    }
+
+    private function streamCertificate(Certificate $certificate)
+    {
+        return \Pdf::loadView('managers.views.users.certificates.download', compact('certificate'))
+            ->setPaper('a4', 'landscape')
+            ->stream();
     }
 }

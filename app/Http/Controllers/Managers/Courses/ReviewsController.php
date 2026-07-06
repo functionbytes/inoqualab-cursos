@@ -10,6 +10,8 @@ class ReviewsController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.view'), 403);
+
         $searchKey = $request->search;
         $rating = $request->rating;
 

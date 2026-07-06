@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Enterprises\Enterprises;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course\Course;
 use App\Models\Inscription;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,7 +47,9 @@ class CoursesController extends Controller
         $year = $request->year;
         $culminated = $request->culminated;
         $enterprise = app('enterprise');
-        $course = Course::slack($slack);
+        // Ownership: el curso debe estar asignado a la empresa autenticada
+        // (evita ver/enumerar metadata de cursos ajenos o no publicados).
+        $course = $enterprise->courses()->where('courses.slack', $slack)->firstOrFail();
 
         $baseQuery = fn () => User::query()
             ->join('enterprise_user', fn ($j) => $j->on('users.id', '=', 'enterprise_user.user_id'))
@@ -121,7 +122,9 @@ class CoursesController extends Controller
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
-        $class = $course->lessons;
+        $class = $course->lessons()->with('chapter')->get();
+        // Set de lecciones ya culminadas, para no consultar CourseProgress::validate() por cada fila.
+        $completedLessons = $progress->where('culminated', 1)->pluck('lesson_id')->filter()->flip();
 
         return view('enterprises.views.enterprises.courses.progress')->with([
             'user' => $user,
@@ -129,6 +132,7 @@ class CoursesController extends Controller
             'progress' => $progress,
             'class' => $class,
             'inscription' => $inscription,
+            'completedLessons' => $completedLessons,
         ]);
 
     }

@@ -35,6 +35,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected static $recordEvents = ['deleted', 'updated', 'created'];
 
+    // 'role' se asigna siempre por propiedad directa ($user->role = ...), nunca
+    // por mass assignment: mantenerlo fuera de $fillable cierra la vía de
+    // escalada de privilegios si algún endpoint futuro hiciera create/update($request->all()).
     protected $fillable = [
         'slack',
         'firstname',
@@ -50,7 +53,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'validation',
         'page',
         'setting',
-        'role',
         'company',
         'detail',
         'user_img',
@@ -133,20 +135,6 @@ class User extends Authenticatable implements MustVerifyEmail
             ->get();
 
         return $bundles;
-    }
-
-    public function purchases()
-    {
-        $orders = Order::where('status', '=', 1)
-            ->where('user_id', '=', $this->id)
-            ->pluck('id');
-        $courses_id = OrderItem::whereIn('order_id', $orders)
-            ->pluck('item_id');
-        $purchases = Course::where('published', '=', 1)
-            ->whereIn('id', $courses_id)
-            ->get();
-
-        return $purchases;
     }
 
     public function findForPassport($user)

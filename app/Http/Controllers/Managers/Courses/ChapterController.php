@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Managers\Courses;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Course\CourseChapter;
-use App\Models\Course\CourseLesson;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ChapterController extends Controller
@@ -18,7 +19,9 @@ class ChapterController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $chapters = CourseChapter::query()->where('course_id', $course->id);
+        // orderBy position: la paginación sin ORDER BY es no-determinista y la
+        // columna "Posición" quedaba cosmética.
+        $chapters = CourseChapter::query()->where('course_id', $course->id)->orderBy('position');
 
         if ($searchKey) {
             $chapters = $chapters->where('title', 'like', '%'.$searchKey.'%');
@@ -35,6 +38,8 @@ class ChapterController extends Controller
             'chapters' => $chapters,
             'available' => $available,
             'searchKey' => $searchKey,
+            'availables' => $this->availableOptions(),
+            'nextPosition' => count($course->chapters) + 1,
         ]);
 
     }
@@ -61,37 +66,20 @@ class ChapterController extends Controller
 
     }
 
-    public function create($slack)
-    {
-
-        $course = Course::slack($slack);
-        $chapters = $course->chapters;
-        $position = count($chapters) + 1;
-
-        $availables = $this->availableOptions();
-
-        return view('managers.views.courses.chapters.create')->with([
-            'course' => $course,
-            'position' => $position,
-            'availables' => $availables,
-        ]);
-
-    }
-
+    /**
+     * Datos del tema para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
-
         $chapter = CourseChapter::slack($slack);
-        $course = $chapter->course;
 
-        $availables = $this->availableOptions();
-
-        return view('managers.views.courses.chapters.edit')->with([
-            'course' => $course,
-            'chapter' => $chapter,
-            'availables' => $availables,
+        return response()->json([
+            'slack' => $chapter->slack,
+            'title' => $chapter->title,
+            'description' => $chapter->description,
+            'position' => $chapter->position,
+            'available' => (int) $chapter->available,
         ]);
-
     }
 
     public function update(Request $request)
@@ -117,10 +105,68 @@ class ChapterController extends Controller
         abort_unless(auth()->user()->can('courses.delete'), 403);
 
         $chapter = CourseChapter::slack($slack);
-        CourseLesson::where('chapter_id', $chapter->id)->delete();
-        $chapter->delete();
+        $courseId = $chapter->course_id;
+
+        DB::transaction(function () use ($chapter, $courseId) {
+            // Borrado por modelo (no mass-delete): dispara los eventos Eloquent
+            // para que Spatie MediaLibrary limpie los archivos/registros de media
+            // de cada lección en vez de dejarlos huérfanos.
+            $chapter->lessons()->get()->each->delete();
+            $chapter->delete();
+
+            // Renumera 1..N el resto de capítulos para no dejar huecos de posición.
+            CourseChapter::where('course_id', $courseId)
+                ->orderBy('position')->orderBy('id')->get(['id'])
+                ->each(function ($remaining, $index) {
+                    $remaining->update(['position' => $index + 1]);
+                });
+        });
 
         return back();
 
+    }
+
+    /**
+     * Reordena los capítulos visibles (drag&drop): permuta entre los ids
+     * recibidos las posiciones que ya ocupaban.
+     */
+    public function reorder(Request $request): JsonResponse
+    {
+        abort_unless(auth()->user()->can('courses.update'), 403);
+
+        $data = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $first = CourseChapter::find($data['ids'][0]);
+        if (! $first) {
+            return response()->json(['success' => true, 'message' => 'Sin cambios.']);
+        }
+
+        // Renumera toda la secuencia de capítulos del curso 1..N aplicando el
+        // nuevo sub-orden de la página visible (auto-sana duplicados).
+        $all = CourseChapter::where('course_id', $first->course_id)
+            ->orderBy('position')->orderBy('id')->pluck('id')->all();
+
+        $slots = [];
+        foreach ($data['ids'] as $id) {
+            $idx = array_search($id, $all, true);
+            if ($idx !== false) {
+                $slots[] = $idx;
+            }
+        }
+        sort($slots);
+        foreach ($slots as $j => $slot) {
+            $all[$slot] = $data['ids'][$j];
+        }
+
+        DB::transaction(function () use ($all) {
+            foreach ($all as $index => $id) {
+                CourseChapter::where('id', $id)->update(['position' => $index + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Orden actualizado.']);
     }
 }

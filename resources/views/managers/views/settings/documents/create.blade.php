@@ -23,7 +23,7 @@
                             <h5 class="mb-0">Documento</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Adjunta el archivo del documento. Se aceptan formatos PDF, JPG o PNG.
                         </p>
                         <div class="dropzone dz-clickable" id="files">
                             <div class="fallback">
@@ -38,7 +38,7 @@
                             <h5 class="mb-0">Crear documento</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos del documento. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
                         <div class="row">
 

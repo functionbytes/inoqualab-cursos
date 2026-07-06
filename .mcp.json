@@ -8,6 +8,23 @@
                 "--browserUrl",
                 "http://127.0.0.1:9222"
             ]
+        },
+        "redis": {
+            "command": "npx",
+            "args": [
+                "--yes",
+                "mcp-redis"
+            ],
+            "env": {
+                "REDIS_URL": "redis://:6cWRY1PUmiwYciQxJXkg@localhost:6379"
+            }
+        },
+        "context7": {
+            "command": "npx",
+            "args": [
+                "--yes",
+                "@upstash/context7-mcp@latest"
+            ]
         }
     }
 }

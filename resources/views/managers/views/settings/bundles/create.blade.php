@@ -41,7 +41,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte  <mark><code>introducir</code></mark> nueva información de manera sencilla y estructurada. A continuación, se presentan varios campos que deberás completar con los datos requeridos.
+                            Completa los datos del paquete. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
                         <div class="row">
 

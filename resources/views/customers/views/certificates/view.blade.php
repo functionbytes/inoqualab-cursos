@@ -8,7 +8,7 @@
     $duration = $course['duration'] ?? null;
     $hours = $duration ? ($duration == 1 ? '1 hora' : $duration . ' horas') : null;
     $code = strtoupper($certificate->slack);
-    $issued = certificate_date($certificate->end_at ?? $certificate->start_at);
+    $issued = certificate_date($certificate->start_at ?? $certificate->end_at);
     $certifierName = trim(($certifier->firstname ?? '') . ' ' . ($certifier->lastname ?? ''));
     $certifierRole = strip_tags($certifier->description ?? 'Dirección académica');
     // Marca de agua: primeras letras del curso

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -77,5 +78,18 @@ class OrdersController extends Controller
         return view('distributors.views.orders.orders.view')->with([
             'order' => $order,
         ]);
+    }
+
+    public function print($slack)
+    {
+        // Ownership: misma relación que view()/index() (evita IDOR por slack).
+        $order = app('distributor')->ordersActititys()
+            ->where('orders.slack', $slack)
+            ->firstOrFail();
+
+        $pdf = Pdf::loadView('distributors.views.orders.orders.print', compact('order'))
+            ->setPaper('A4', 'portrait');
+
+        return $pdf->download('order-details.pdf');
     }
 }

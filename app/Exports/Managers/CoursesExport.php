@@ -30,20 +30,19 @@ class CoursesExport implements FromQuery, Responsable, WithHeadings, WithMapping
     public function query()
     {
 
+        // La matrícula real vive en inscriptions (no existe tabla course_user).
         $users = DB::table('users')
             ->join('enterprise_user', function ($join) {
                 $join->on('users.id', '=', 'enterprise_user.user_id');
             })->where('enterprise_user.enterprise_id', '=', $this->enterprise)
-            ->join('course_user', function ($join) {
-                $join->on('users.id', '=', 'course_user.user_id');
-            })->join('orders', function ($join) {
-                $join->on('orders.id', '=', 'course_user.order_id');
-            })->where('course_user.course_id', '=', $this->course);
+            ->join('inscriptions', function ($join) {
+                $join->on('users.id', '=', 'inscriptions.user_id');
+            })->where('inscriptions.course_id', '=', $this->course);
 
         if ($this->modalitie == '1') {
-            $users->where('course_user.culminated', '=', 1);
+            $users->where('inscriptions.culminated', '=', 1);
         } elseif ($this->modalitie == '2') {
-            $users->where('course_user.culminated', '=', 0);
+            $users->where('inscriptions.culminated', '=', 0);
         }
 
         return $users->select(
@@ -52,16 +51,16 @@ class CoursesExport implements FromQuery, Responsable, WithHeadings, WithMapping
             'users.lastname',
             'users.available',
             'users.identification',
-            'course_user.id',
-            'orders.enroll_start',
-            'orders.enroll_expire',
-            'course_user.percent',
-            'course_user.order_id',
-            'course_user.updated_at',
-            'course_user.culminated_at',
-            'course_user.culminated',
-            'course_user.created_at'
-        )->orderBy('culminated_at', 'desc');
+            'inscriptions.id',
+            'inscriptions.enroll_start',
+            'inscriptions.enroll_expire',
+            'inscriptions.percent',
+            'inscriptions.order_id',
+            'inscriptions.updated_at',
+            'inscriptions.enroll_culminated as culminated_at',
+            'inscriptions.culminated',
+            'inscriptions.created_at'
+        )->orderBy('inscriptions.enroll_culminated', 'desc');
 
     }
 

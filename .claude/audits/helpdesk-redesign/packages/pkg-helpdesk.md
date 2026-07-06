@@ -34,7 +34,7 @@ modules/Helpdesk/resources/css/conversations.css            ← layout + compone
 - NO usar `style=""` inline
 - NO usar React, Alpine, Livewire
 - Todos los iconos: Font Awesome 6 (`fas fa-*`, `far fa-*`, `fab fa-*`)
-- Color primario: `#90bb13`
+- Color primario: `#008bcd`
 - Fuente monospace para timestamps/IDs: JetBrains Mono
 
 ## Componentes críticos del inbox

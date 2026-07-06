@@ -11,7 +11,7 @@
 
                     {{ csrf_field() }}
 
-                    <input type="hidden" id="description" name="description" value="{!! $testimonie->description !!}">
+                    <textarea class="d-none" id="description" name="description">{!! clean($testimonie->description, 'content') !!}</textarea>
                     <input type="hidden" id="id" name="id" value="{{ $testimonie->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $testimonie->slack }}">
                     <input type="hidden" id="edit" name="edit" value="true">
@@ -22,7 +22,7 @@
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Actualiza los datos del testimonio. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">
@@ -54,7 +54,7 @@
                             <div class="mb-3">
                                 <label class="col-form-label">Testimonio</label>
                                 <div class="quill-wrapper">
-                                    <div  id="descriptions">{!! $testimonie->description !!}</div>
+                                    <div  id="descriptions">{!! clean($testimonie->description, 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                              </div>

@@ -26,12 +26,13 @@ class UsersExport implements FromQuery, Responsable, WithHeadings, WithMapping, 
     public function query()
     {
 
-        if ($this->modalitie == '0') {
-            $users = $this->enterprise->users()->orderBy('firstname', 'desc');
-        } elseif ($this->modalitie == '1') {
-            $users = $this->enterprise->users()->available()->orderBy('firstname', 'desc');
+        if ($this->modalitie == '1') {
+            $users = $this->enterprise->users()->available();
         } elseif ($this->modalitie == '2') {
-            $users = $this->enterprise->users()->disabled()->orderBy('firstname', 'desc');
+            // User no tiene scopeDisabled(); "Inactivos" es simplemente available = 0.
+            $users = $this->enterprise->users()->where('users.available', 0);
+        } else {
+            $users = $this->enterprise->users();
         }
 
         return $users->orderBy('firstname', 'desc');

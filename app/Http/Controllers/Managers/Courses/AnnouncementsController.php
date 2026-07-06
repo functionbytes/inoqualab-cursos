@@ -33,20 +33,7 @@ class AnnouncementsController extends Controller
             'announcements' => $announcements,
             'available' => $available,
             'searchKey' => $searchKey,
-        ]);
-
-    }
-
-    public function create($slack)
-    {
-
-        $course = Course::slack($slack);
-
-        $availables = $this->availableOptions();
-
-        return view('managers.views.courses.announcements.create')->with([
-            'course' => $course,
-            'availables' => $availables,
+            'availables' => $this->availableOptions(),
         ]);
 
     }
@@ -72,20 +59,19 @@ class AnnouncementsController extends Controller
 
     }
 
+    /**
+     * Datos del anuncio para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
-
         $announcement = CourseAnnouncement::slack($slack);
-        $course = $announcement->course;
 
-        $availables = $this->availableOptions();
-
-        return view('managers.views.courses.announcements.edit')->with([
-            'course' => $course,
-            'announcement' => $announcement,
-            'availables' => $availables,
+        return response()->json([
+            'slack' => $announcement->slack,
+            'title' => $announcement->title,
+            'description' => $announcement->description,
+            'available' => (int) $announcement->available,
         ]);
-
     }
 
     public function update(Request $request)

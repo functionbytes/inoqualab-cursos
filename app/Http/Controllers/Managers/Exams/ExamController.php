@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Managers\Exams;
 
+use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Exams\StoreExamRequest;
+use App\Http\Requests\Managers\Exams\UpdateExamRequest;
 use App\Models\Course\Course;
 use App\Models\Exam\ExamTopic;
 use Illuminate\Http\Request;
@@ -10,6 +13,8 @@ use Illuminate\Support\Str;
 
 class ExamController extends Controller
 {
+    use BuildsAssessmentForms;
+
     public function index(Request $request, $slack)
     {
 
@@ -35,31 +40,12 @@ class ExamController extends Controller
             'exams' => $exams,
             'available' => $available,
             'searchKey' => $searchKey,
+            'availables' => $this->availableOptions(true),
+            'types' => $this->assessmentTypes(withBlank: true),
         ]);
     }
 
-    public function create($slack)
-    {
-        $course = Course::slack($slack);
-
-        $availables = $this->availableOptions();
-
-        $types = collect([
-            ['id' => '1', 'label' => 'Selección Multiple'],
-            ['id' => '0', 'label' => 'Falso - Verdadero'],
-        ]);
-
-        $types = $types->pluck('label', 'id');
-
-        return view('managers.views.exams.exams.create')->with([
-            'course' => $course,
-            'availables' => $availables,
-            'types' => $types,
-        ]);
-
-    }
-
-    public function store(Request $request)
+    public function store(StoreExamRequest $request)
     {
         abort_unless(auth()->user()->can('exams.create'), 403);
 
@@ -87,29 +73,28 @@ class ExamController extends Controller
 
     }
 
+    /**
+     * Datos del examen para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
         $topic = ExamTopic::slack($slack);
-        $course = $topic->course;
 
-        $availables = $this->availableOptions();
-
-        $types = collect([
-            ['id' => '1', 'label' => 'Selección Multiple'],
-            ['id' => '0', 'label' => 'Falso - Verdadero'],
-        ]);
-
-        $types = $types->pluck('label', 'id');
-
-        return view('managers.views.exams.exams.edit')->with([
-            'topic' => $topic,
-            'course' => $course,
-            'availables' => $availables,
-            'types' => $types,
+        return response()->json([
+            'slack' => $topic->slack,
+            'title' => $topic->title,
+            'type' => (int) $topic->type,
+            'duration' => (int) $topic->quiz_again,
+            'day' => $topic->due_days,
+            'timer' => $topic->timer,
+            'question' => $topic->show_ans,
+            'mark' => $topic->per_q_mark,
+            'available' => (int) $topic->available,
+            'description' => $topic->description,
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateExamRequest $request)
     {
         abort_unless(auth()->user()->can('exams.update'), 403);
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Trusteds\StoreTrustedRequest;
+use App\Http\Requests\Managers\Settings\Trusteds\UpdateTrustedRequest;
 use App\Models\Trusted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -64,9 +66,9 @@ class TrustedsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateTrustedRequest $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('trusteds.update'), 403);
 
         $trusted = Trusted::id($request->id);
         $trusted->title = $request->title;
@@ -83,9 +85,9 @@ class TrustedsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreTrustedRequest $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('trusteds.create'), 403);
 
         $trusted = new Trusted;
         $trusted->slack = $this->generate_slack('trusteds');
@@ -105,7 +107,7 @@ class TrustedsController extends Controller
 
     public function destroy($slack)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('trusteds.delete'), 403);
 
         $trusted = Trusted::slack($slack);
         $trusted->delete();
@@ -146,7 +148,7 @@ class TrustedsController extends Controller
 
     public function storeThumbnails(Request $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('trusteds.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
 
@@ -161,9 +163,12 @@ class TrustedsController extends Controller
 
     public function deleteThumbnails($id)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('trusteds.delete'), 403);
 
-        Media::find($id)->delete();
+        Media::where('id', $id)
+            ->where('model_type', Trusted::class)
+            ->where('collection_name', 'thumbnail')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }

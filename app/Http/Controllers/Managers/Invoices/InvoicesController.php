@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Managers\Invoices;
 
 use App\Events\Invoices\InvoiceCreated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\StoreInvoiceRequest;
+use App\Http\Requests\Managers\UpdateInvoiceRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Invoice\Invoice;
 use App\Models\Invoice\InvoiceCondition;
@@ -18,6 +20,7 @@ class InvoicesController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Invoice::class);
 
         $searchKey = $request->search;
         $condition = $request->condition;
@@ -59,6 +62,8 @@ class InvoicesController extends Controller
 
         $invoice = Invoice::slack($slack);
 
+        $this->authorize('view', $invoice);
+
         return view('managers.views.invoices.invoices.print')->with([
             'invoice' => $invoice,
         ]);
@@ -70,6 +75,8 @@ class InvoicesController extends Controller
 
         $invoice = Invoice::slack($slack);
 
+        $this->authorize('view', $invoice);
+
         return view('managers.views.invoices.invoices.view')->with([
             'invoice' => $invoice,
         ]);
@@ -80,6 +87,8 @@ class InvoicesController extends Controller
     {
 
         $invoice = Invoice::slack($slack);
+
+        $this->authorize('view', $invoice);
 
         $detailsInvoice = $invoice->details()->with('course', 'enterprise')->get();
 
@@ -126,6 +135,8 @@ class InvoicesController extends Controller
 
         $invoice = Invoice::slack($slack);
 
+        $this->authorize('update', $invoice);
+
         $methods = InvoiceMethod::latest()->get();
         $methods->prepend('', '');
         $methods = $methods->pluck('title', 'id');
@@ -142,18 +153,16 @@ class InvoicesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateInvoiceRequest $request)
     {
-        abort_unless(auth()->user()->can('invoices.update'), 403);
-
         $invoice = Invoice::with('distributor')->slack($request->slack);
 
-        if ($request->condition == 4) {
-            $invoice->payment_at = Carbon::parse($request->payment);
-        } elseif ($request->condition == 2) {
-
-        } elseif ($request->condition == 3) {
-        }
+        // La condicion 4 ("Pagada") es la unica que conserva payment_at; cualquier
+        // otra condicion debe limpiarla para no dejar una factura no-pagada con
+        // una fecha de pago residual de un estado anterior.
+        $invoice->payment_at = (int) $request->condition === 4
+            ? Carbon::parse($request->payment)
+            : null;
 
         $invoice->condition_id = $request->condition;
         $invoice->method_id = $request->methods;
@@ -172,6 +181,7 @@ class InvoicesController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Invoice::class);
 
         $distributors = Distributor::latest()->get();
         $distributors->prepend('', '');
@@ -193,15 +203,23 @@ class InvoicesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreInvoiceRequest $request)
     {
-        abort_unless(auth()->user()->can('invoices.create'), 403);
-
         $method = $request->methods ?? null;
         $condition = $request->condition ?? null;
-        $date = explode(' - ', $request->range);
-        $startDate = Carbon::parse($date[0])->startOfDay();
-        $endDate = Carbon::parse($date[1])->endOfDay();
+
+        // El rango debe venir como "fecha_inicio - fecha_fin".
+        $date = explode(' - ', (string) $request->range);
+        if (count($date) !== 2) {
+            return response()->json(['success' => false, 'message' => 'Selecciona un rango de fechas válido.']);
+        }
+
+        try {
+            $startDate = Carbon::parse($date[0])->startOfDay();
+            $endDate = Carbon::parse($date[1])->endOfDay();
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'El rango de fechas ingresado no es válido.']);
+        }
 
         $distributor = Distributor::slack($request->distributor);
         $items = $distributor->orders()->date($startDate, $endDate)->with('order.items')->get();
@@ -246,9 +264,11 @@ class InvoicesController extends Controller
 
                             $itemType = $orderItem->item_type;
                             $itemId = $orderItem->item_id;
-                            $itemPrice = $orderItem->amount;
                             $orderItemCount = $orderItem->quantity;
-                            $orderItemAmount = $itemPrice * $orderItemCount;
+                            // OrderItem::amount YA es el total de linea (unit * qty, ver
+                            // helpers.php::cartCheckoutLines()); no volver a multiplicar
+                            // por cantidad o el desglose queda inflado para qty > 1.
+                            $orderItemAmount = $orderItem->amount;
 
                             if (! isset($coursesItems[$itemType])) {
                                 $coursesItems[$itemType] = [];

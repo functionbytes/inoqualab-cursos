@@ -50,7 +50,7 @@
                     <div class="col-6">
                         <div class="mb-3">
                             <label  class="control-label col-form-label">Estado curso</label>
-                            <input type="text" class="form-control" id="enroll_start"  name="enroll_start" value="{{ $user->culminate == 1 ? 'Finalizado' : 'Pendiente' }}" disabled>
+                            <input type="text" class="form-control" id="enroll_start"  name="enroll_start" value="{{ $inscription->culminated == 1 ? 'Finalizado' : 'Pendiente' }}" disabled>
                         </div>
                     </div>
 

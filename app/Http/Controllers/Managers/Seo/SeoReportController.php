@@ -45,7 +45,7 @@ class SeoReportController extends Controller
                 'ID', 'Tipo', 'Modelo', 'Titulo SEO', 'Descripcion', 'Keywords',
                 'OG Titulo', 'OG Imagen', 'Twitter Card', 'Canonical URL',
                 'Robots', 'Score SEO', 'Grado', 'Ultima auditoria', 'Actualizado',
-            ]);
+            ], ',', '"', '\\');
 
             SeoMeta::with('seoable')->orderBy('seo_score', 'asc')->each(function ($meta) use ($handle) {
                 fputcsv($handle, [
@@ -64,13 +64,13 @@ class SeoReportController extends Controller
                     $meta->seo_grade ?? '',
                     $meta->seo_audited_at?->format('Y-m-d H:i') ?? '',
                     $meta->updated_at->format('Y-m-d H:i'),
-                ]);
+                ], ',', '"', '\\');
             });
 
             if ($format === 'full') {
-                fputcsv($handle, []);
-                fputcsv($handle, ['--- REDIRECCIONES ---']);
-                fputcsv($handle, ['Source Path', 'Target Path', 'Codigo', 'Activa', 'Hits']);
+                fputcsv($handle, [], ',', '"', '\\');
+                fputcsv($handle, ['--- REDIRECCIONES ---'], ',', '"', '\\');
+                fputcsv($handle, ['Source Path', 'Target Path', 'Codigo', 'Activa', 'Hits'], ',', '"', '\\');
 
                 SeoRedirect::orderBy('hits_count', 'desc')->each(function ($r) use ($handle) {
                     fputcsv($handle, [
@@ -79,7 +79,7 @@ class SeoReportController extends Controller
                         $r->status_code,
                         $r->is_active ? 'Si' : 'No',
                         $r->hits_count,
-                    ]);
+                    ], ',', '"', '\\');
                 });
             }
 

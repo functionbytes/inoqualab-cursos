@@ -16,8 +16,8 @@
                     <input type="hidden" id="slack" name="slack" value="{{ $blog->slack }}">
                     <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
                     <input type="hidden" id="edit" name="edit" value="true">
-                    <textarea style="display: none"  id="content" name="content">{!! $blog->content !!}</textarea>
-                    <textarea style="display: none"  id="description" name="description">{!! $blog->description !!}</textarea>
+                    <textarea class="d-none" id="content" name="content">{!! clean($blog->content, 'content') !!}</textarea>
+                    <textarea class="d-none" id="description" name="description">{!! clean($blog->description, 'content') !!}</textarea>
                     <input type="hidden" id="thumbnail" name="thumbnail">
 
                     <div class="card-body border-top">
@@ -43,7 +43,7 @@
                         </div>
 
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Actualiza los datos de la noticia. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
                         <div class="row">
@@ -97,19 +97,19 @@
 
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label">Contenido</label>
+                                    <label class="col-form-label">Descripción</label>
                                     <div class="quill-wrapper">
-                                        <div id="descriptions">{!! $blog->content !!}</div>
+                                        <div id="descriptions">{!! clean($blog->description, 'content') !!}</div>
                                         <label id="description-error" class="error d-none" for="description"></label>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label">Descripción</label>
+                                    <label class="col-form-label">Contenido</label>
                                     <div class="quill-wrapper">
-                                        <div id="contents">{!! $blog->description !!}</div>
+                                        <div id="contents">{!! clean($blog->content, 'content') !!}</div>
                                     </div>
                                     <label id="content-error" class="error d-none" for="content"></label>
                                 </div>

@@ -52,6 +52,7 @@ class InscriptionsController extends Controller
         abort_unless($distributor instanceof Distributor, 404);
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
         abort_unless($condition instanceof OrderCondition, 404);
         $type = OrderType::slug('services');
@@ -170,6 +171,7 @@ class InscriptionsController extends Controller
         }
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
         abort_unless($condition instanceof OrderCondition, 404);
         $type = OrderType::slug('services');
@@ -189,6 +191,7 @@ class InscriptionsController extends Controller
         $order->transaction = null;
         $order->payment_at = Carbon::now()->setTimezone('America/Bogota');
         $order->total_discount_amount = 0;
+        $order->total_after_discount = $tariff;
         $order->total_before_discount = $tariff;
         $order->total_tax_amount = 0;
         $order->total_order_amount = $tariff;

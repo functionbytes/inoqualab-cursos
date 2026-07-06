@@ -15,9 +15,10 @@
                         <p class="mb-0 text-muted">Gestiona las preguntas asociadas a este tema</p>
                     </div>
                     <div class="ms-auto">
-                        <a href="{{ route('manager.courses.quiz.questions.create', $topic->slack) }}" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary btn-new-question"
+                                data-bs-toggle="modal" data-bs-target="#question-modal">
                             Nueva pregunta
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -43,10 +44,9 @@
                         @php
                             $activeFilters = (int)(($available ?? '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0"
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders me-1"></i>
-                            Filtros
+                            <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
@@ -97,8 +97,8 @@
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
-                                                        <a class="dropdown-item"
-                                                           href="{{ route('manager.courses.quiz.questions.edit', $question->slack) }}">
+                                                        <a class="dropdown-item btn-edit-question" href="#"
+                                                           data-slack="{{ $question->slack }}">
                                                             Editar
                                                         </a>
                                                     </li>
@@ -140,9 +140,10 @@
                                 Ver todas
                             </a>
                         @else
-                            <a href="{{ route('manager.courses.quiz.questions.create', $topic->slack) }}" class="btn btn-primary">
+                            <button type="button" class="btn btn-primary btn-new-question"
+                                    data-bs-toggle="modal" data-bs-target="#question-modal">
                                 Nueva pregunta
-                            </a>
+                            </button>
                         @endif
                     </div>
                 @endif
@@ -190,13 +191,92 @@
         </div>
     </div>
 
+    {{-- Crear / Editar pregunta --}}
+    <div class="modal fade" id="question-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form id="formQuestion">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="questionModalTitle">Nueva pregunta</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="questionSlack" name="slack" value="">
+                        <input type="hidden" name="topic" value="{{ $topic->slack }}">
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Pregunta <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="question" name="question" maxlength="400" placeholder="Ingresar la pregunta">
+                                <label id="question-error" class="error d-none" for="question"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                                <select class="form-select" id="available" name="available">
+                                    @foreach($availables as $optId => $optLabel)
+                                        <option value="{{ $optId }}">{{ $optLabel }}</option>
+                                    @endforeach
+                                </select>
+                                <label id="available-error" class="error d-none" for="available"></label>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Respuesta(s) correcta(s) <span class="text-danger">*</span></label>
+                                @if($topic->type == 1)
+                                    <select class="form-select" id="answer" name="answer" multiple
+                                            data-placeholder="Selecciona una o más opciones">
+                                        @foreach($answers as $optId => $optLabel)
+                                            <option value="{{ $optId }}">{{ $optLabel }}</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <select class="form-select" id="answer" name="answer"
+                                            data-placeholder="Selecciona la opción correcta">
+                                        @foreach($answers as $optId => $optLabel)
+                                            <option value="{{ $optId }}">{{ $optLabel }}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
+                                <label id="answer-error" class="error d-none" for="answer"></label>
+                            </div>
+
+                            @if($topic->type == 1)
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">A <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="a" name="a" maxlength="200" placeholder="Ingresar la respuesta A">
+                                    <label id="a-error" class="error d-none" for="a"></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">B <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="b" name="b" maxlength="200" placeholder="Ingresar la respuesta B">
+                                    <label id="b-error" class="error d-none" for="b"></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">C <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="c" name="c" maxlength="200" placeholder="Ingresar la respuesta C">
+                                    <label id="c-error" class="error d-none" for="c"></label>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">D <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="d" name="d" maxlength="200" placeholder="Ingresar la respuesta D">
+                                    <label id="d-error" class="error d-none" for="d"></label>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="modal-footer flex-column">
+                        <button type="submit" class="btn btn-primary w-100 mb-2">Guardar</button>
+                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @include('managers.includes.delete')
 
 @endsection
-
-@push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
-@endpush
 
 @push('scripts')
 <script>
@@ -223,6 +303,147 @@ $(function () {
         $('#delete-modal .modal-title').text($btn.data('title'));
         $('#delete-form').attr('action', $btn.data('url'));
         $('#delete-modal').modal('show');
+    });
+
+    // ── Crear / Editar pregunta (modal) ───────────────────────────────────────
+    var questionMode = 'create';
+    var answerIsMultiple = {{ $topic->type == 1 ? 'true' : 'false' }};
+
+    // El script global (select2.init.js) ya auto-inicializa ".select2"/selects
+    // sin dropdownParent en documentReady (el modal está oculto en ese momento,
+    // su dropdown terminaría flotando sobre <body>). Por eso se destruye esa
+    // instancia y se re-crea con las opciones correctas cada vez que el modal se abre.
+    function initQuestionSelect2() {
+        [$('#available'), $('#answer')].forEach(function ($select) {
+            if ($select.hasClass('select2-hidden-accessible')) $select.select2('destroy');
+            $select.select2({
+                width: '100%',
+                dropdownParent: $('#question-modal'),
+                placeholder: $select.data('placeholder'),
+            });
+        });
+    }
+
+    var questionValidator = $('#formQuestion').validate({
+        ignore: '.ignore',
+        rules: {
+            question: { required: true, minlength: 3, maxlength: 400 },
+            available: { required: true },
+            answer: { required: true },
+            a: { required: answerIsMultiple, minlength: 3, maxlength: 200 },
+            b: { required: answerIsMultiple, minlength: 3, maxlength: 200 },
+            c: { required: answerIsMultiple, minlength: 3, maxlength: 200 },
+            d: { required: answerIsMultiple, minlength: 3, maxlength: 200 },
+        },
+        messages: {
+            question: { required: 'La pregunta es obligatoria.', minlength: 'Debe contener al menos 3 caracteres.', maxlength: 'Debe contener como máximo 400 caracteres.' },
+            available: { required: 'Selecciona un estado.' },
+            answer: { required: 'Selecciona la respuesta correcta.' },
+            a: { required: 'La respuesta A es obligatoria.', minlength: 'Debe contener al menos 3 caracteres.', maxlength: 'Debe contener como máximo 200 caracteres.' },
+            b: { required: 'La respuesta B es obligatoria.', minlength: 'Debe contener al menos 3 caracteres.', maxlength: 'Debe contener como máximo 200 caracteres.' },
+            c: { required: 'La respuesta C es obligatoria.', minlength: 'Debe contener al menos 3 caracteres.', maxlength: 'Debe contener como máximo 200 caracteres.' },
+            d: { required: 'La respuesta D es obligatoria.', minlength: 'Debe contener al menos 3 caracteres.', maxlength: 'Debe contener como máximo 200 caracteres.' },
+        },
+        errorPlacement: function (error, element) {
+            error.insertAfter(element).addClass('error').removeClass('d-none');
+        },
+        submitHandler: function (form) {
+            var formData = new FormData(form);
+
+            // El <select> de "answer" no se serializa automáticamente: si es múltiple,
+            // el navegador enviaría varias entradas con la misma key y el backend solo
+            // recibiría la última. Se recalcula y se une con comas explícitamente.
+            var answerValue = $('#answer').val();
+            formData.delete('answer');
+            formData.append('answer', Array.isArray(answerValue) ? answerValue.join(',') : (answerValue || ''));
+
+            var url = questionMode === 'edit'
+                ? "{{ route('manager.courses.quiz.questions.update') }}"
+                : "{{ route('manager.courses.quiz.questions.store') }}";
+
+            var $submitButton = $('#formQuestion button[type="submit"]').prop('disabled', true);
+            var submitOriginalText = $submitButton.text();
+            $submitButton.text('Guardando...');
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    $submitButton.prop('disabled', false).text(submitOriginalText);
+                    if (response.success) {
+                        $('#question-modal').modal('hide');
+                        toastr.success(response.message);
+                        setTimeout(function () { location.reload(); }, 800);
+                    } else {
+                        toastr.warning(response.message || 'No se pudo guardar.');
+                    }
+                },
+                error: function () {
+                    $submitButton.prop('disabled', false).text(submitOriginalText);
+                    toastr.error('Ocurrió un error al guardar la pregunta.');
+                },
+            });
+        },
+    });
+
+    function resetQuestionForm() {
+        $('#formQuestion')[0].reset();
+        questionValidator.resetForm();
+        $('#formQuestion .is-invalid').removeClass('is-invalid');
+        $('#questionSlack').val('');
+        $('#available').val('1').trigger('change');
+        $('#answer').val(answerIsMultiple ? [] : '').trigger('change');
+    }
+
+    function populateQuestionForm(data) {
+        $('#questionSlack').val(data.slack);
+        $('#question').val(data.question);
+        $('#available').val(String(data.available)).trigger('change');
+        $('#answer').val(answerIsMultiple ? (data.answer ? data.answer.split(',') : []) : data.answer).trigger('change');
+        $('#a').val(data.a || '');
+        $('#b').val(data.b || '');
+        $('#c').val(data.c || '');
+        $('#d').val(data.d || '');
+    }
+
+    // Abrir en modo "crear"
+    $(document).on('click', '.btn-new-question', function () {
+        questionMode = 'create';
+        $('#questionModalTitle').text('Nueva pregunta');
+    });
+
+    $('#question-modal').on('shown.bs.modal', function () {
+        initQuestionSelect2();
+        if (questionMode === 'create') resetQuestionForm();
+    });
+
+    // Abrir en modo "editar": trae los datos vía AJAX y precarga el modal.
+    $(document).on('click', '.btn-edit-question', function (e) {
+        e.preventDefault();
+        var slack = $(this).data('slack');
+
+        $.getJSON("{{ url('panel/courses/quiz/questions/edit') }}/" + slack, function (data) {
+            questionMode = 'edit';
+            $('#questionModalTitle').text('Editar pregunta');
+            $('#question-modal').modal('show');
+
+            var applyData = function () {
+                initQuestionSelect2();
+                populateQuestionForm(data);
+            };
+
+            if ($('#question-modal').hasClass('show')) {
+                applyData();
+            } else {
+                $('#question-modal').one('shown.bs.modal', applyData);
+            }
+        }).fail(function () {
+            toastr.error('No se pudo cargar la pregunta.');
+        });
     });
 
 });

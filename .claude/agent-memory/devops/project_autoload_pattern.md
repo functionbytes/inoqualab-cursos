@@ -1,17 +1,14 @@
 ---
-name: Module autoload registration pattern
-description: New nwidart modules are NOT auto-discovered in autoload — must be added manually to composer.json psr-4 and composer dump-autoload run
-type: project
+name: project-architecture-monolith
+description: Project is a monolith in app/ — no modules/ directory, no nwidart. This replaces the stale nwidart memory.
+metadata:
+  type: project
 ---
 
-This project does NOT use nwidart's built-in autoload scanning. Every new module requires a manual entry in the root `composer.json` `autoload.psr-4` section:
+This project uses a **domain monolith** architecture. There is no `modules/` directory and `nwidart/laravel-modules` is NOT installed.
 
-```json
-"Modules\\NewModule\\": "modules/NewModule/app/"
-```
+Code lives in `app/Http/Controllers/{Domain}/` organized by domain (Managers, Customers, Distributors, Enterprises, Supports, Accountings, Auth, Pages).
 
-After adding, run `composer dump-autoload --no-scripts` to regenerate.
+**Why:** The project was confirmed to never have used nwidart. The old memory referenced a previous investigation of a different codebase context. CLAUDE.md explicitly states "No existe `modules/`".
 
-**Why:** The project uses explicit psr-4 mappings in composer.json instead of nwidart's path-based discovery. Several modules were missing (Attention, Blog, Cache, Captcha, Cookie, Database, Helpdesk, Mailrelay, Reviews, Storage, Widget) causing a fatal `Class not found` on all requests when `modules_statuses.json` had them enabled.
-
-**How to apply:** Whenever a new module is created or enabled in `modules_statuses.json`, verify its namespace entry exists in `composer.json autoload.psr-4` before testing.
+**How to apply:** Never suggest `php artisan module:*` commands, never reference `Modules\` namespace, never look for `modules_statuses.json`. Route files live in `routes/{domain}.php`. Views live in `resources/views/`.

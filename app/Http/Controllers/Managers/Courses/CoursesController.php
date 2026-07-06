@@ -12,10 +12,10 @@ use App\Models\Course\Course;
 use App\Models\Course\CourseCategorie;
 use App\Models\Course\CourseChapter;
 use App\Models\Course\CourseLesson;
+use App\Models\Exam\ExamQuestion;
 use App\Models\Exam\ExamTopic;
-use App\Models\ExamQuestion;
+use App\Models\Quiz\QuizQuestion;
 use App\Models\Quiz\QuizTopic;
-use App\Models\QuizQuestion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,11 +47,19 @@ class CoursesController extends Controller
 
         $courses = $courses->paginate(paginationNumber());
 
+        // 4 counts en 1 query con agregación condicional (7→4 queries en el index).
+        $agg = Course::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden,
+             SUM(website = 1) website'
+        )->first();
+
         $stats = [
-            'total' => Course::count(),
-            'public' => Course::where('available', 1)->count(),
-            'hidden' => Course::where('available', 0)->count(),
-            'website' => Course::where('website', 1)->count(),
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+            'website' => (int) $agg->website,
         ];
 
         return view('managers.views.courses.courses.index')->with([
@@ -209,6 +217,8 @@ class CoursesController extends Controller
 
     public function action(Request $request)
     {
+        abort_unless(auth()->user()->can('courses.create'), 403);
+
         DB::transaction(function () use ($request) {
             $existingOpening = Course::slack($request->course);
 
@@ -275,7 +285,7 @@ class CoursesController extends Controller
                     $new_class = $class->replicate()->fill(
                         [
                             'course_id' => $newOpenening->id,
-                            'coursechapter_id' => $new_chapter->id,
+                            'chapter_id' => $new_chapter->id,
                             'video' => $newclassVideo,
                             'pdf' => $newclassPDF,
                             'zip' => $newclassZIP,
@@ -395,6 +405,8 @@ class CoursesController extends Controller
 
     public function storeThumbnails(StoreThumbnailRequest $request)
     {
+        abort_unless(auth()->user()->can('courses.update'), 403);
+
         if (! $request->hasFile('file') || ! $request->file('file')->isValid()) {
             return response()->json(['status' => 'error', 'message' => 'El archivo no es válido.'], 422);
         }
@@ -407,7 +419,14 @@ class CoursesController extends Controller
 
     public function deleteThumbnails($id)
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('courses.update'), 403);
+
+        // Solo media de la colección de thumbnails de cursos (evita borrar
+        // cualquier fila de `media` por id) y null-safe.
+        Media::where('id', $id)
+            ->where('model_type', Course::class)
+            ->where('collection_name', 'thumbnail')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }
@@ -419,6 +438,10 @@ class CoursesController extends Controller
             'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['integer', 'exists:courses,id'],
         ]);
+
+        // El borrado en masa exige el mismo permiso que destroy() (antes se saltaba).
+        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
+        abort_unless(auth()->user()->can($permission), 403);
 
         $query = Course::whereIn('id', $request->ids);
         $count = $query->count();
@@ -449,12 +472,16 @@ class CoursesController extends Controller
 
         $path = public_path("{$directory}/{$filename}");
 
-        if (! @file_get_contents($path)) {
+        // is_file en vez de file_get_contents: solo comprobar existencia, sin
+        // cargar el binario completo en memoria (eran 510 lecturas al duplicar).
+        if (! is_file($path)) {
             return null;
         }
 
         $extension = \File::extension($path);
-        $newName = 'duplicate'.time().'.'.$extension;
+        // uniqid en vez de time(): time() es por segundo → al duplicar cientos de
+        // archivos colisionan los nombres y File::copy se sobrescribe.
+        $newName = 'duplicate'.uniqid().'.'.$extension;
         \File::copy($path, public_path("{$directory}/{$newName}"));
 
         return $newName;

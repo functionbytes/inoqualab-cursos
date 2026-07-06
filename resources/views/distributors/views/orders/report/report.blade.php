@@ -8,7 +8,6 @@
             <div class="card w-100">
 
                 <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false">
-                    <input type="hidden" id="distributor" name="distributor" value="{{$distributor->id}}">
                     {{ csrf_field() }}
 
                     <div class="card-body border-top">
@@ -131,7 +130,6 @@
                     var query = {
                         range: $("#range").val(),
                         enterprise: $("#enterprise").val(),
-                        distributor: $("#distributor").val(),
                         type : $("#type").val(),
                         methods : $("#method").val(),
                         condition: $("#condition").val(),

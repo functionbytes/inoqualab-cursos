@@ -70,7 +70,7 @@
                             <div class="mb-3">
                                 <label class="control-label col-form-label">Contenido</label>
                                 <div class="border rounded p-3 bg-light">
-                                    {!! $blog->content !!}
+                                    {!! clean($blog->content, 'content') !!}
                                 </div>
                             </div>
                         </div>

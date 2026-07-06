@@ -12,6 +12,7 @@ class RatesController extends Controller
 {
     public function index($slack)
     {
+        abort_unless(auth()->user()->can('enterprises.view'), 403);
 
         $enterprise = Enterprise::slack($slack);
         $rates = $enterprise->rates;
@@ -25,15 +26,23 @@ class RatesController extends Controller
 
     public function update(Request $request)
     {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
 
         $enterprise = Enterprise::slack($request->slack);
 
-        DB::transaction(function () use ($request) {
+        DB::transaction(function () use ($request, $enterprise) {
             foreach ($request->courses as $id => $price) {
-                $course = EnterpriseCourse::find($id);
+                // Acotado por enterprise_id: sin esto, se podía enviar el id de una
+                // tarifa (enterprise_course) de OTRA empresa y sobreescribir su
+                // precio (IDOR).
+                $course = EnterpriseCourse::where('id', $id)
+                    ->where('enterprise_id', $enterprise->id)
+                    ->first();
+
                 if (! $course) {
                     continue;
                 }
+
                 $course->price = $price;
                 $course->save();
             }

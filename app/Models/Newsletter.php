@@ -6,6 +6,7 @@ use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Newsletter extends Model
 {
@@ -53,6 +54,13 @@ class Newsletter extends Model
             'is_active' => false,
             'unsubscribed_at' => now(),
         ]);
+    }
+
+    public function lists(): BelongsToMany
+    {
+        return $this->belongsToMany(NewsletterList::class, 'newsletter_list_subscriber')
+            ->withPivot('added_reason')
+            ->withTimestamps();
     }
 
     public function scopeSubscribed(Builder $query): Builder

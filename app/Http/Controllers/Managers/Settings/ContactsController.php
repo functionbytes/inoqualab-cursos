@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Contacts\UpdateContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,7 @@ class ContactsController extends Controller
 {
     public function index(Request $request)
     {
+        abort_unless(auth()->user()->can('contacts.view'), 403);
 
         $searchKey = $request->search;
         $reviewed = $request->reviewed;
@@ -40,6 +42,7 @@ class ContactsController extends Controller
 
     public function edit($slack)
     {
+        abort_unless(auth()->user()->can('contacts.update'), 403);
 
         $contact = Contact::slack($slack);
 
@@ -57,7 +60,7 @@ class ContactsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateContactRequest $request)
     {
         abort_unless(auth()->user()->can('contacts.update'), 403);
 

@@ -57,9 +57,16 @@ if (! function_exists('_settingsCache')) {
 }
 
 if (! function_exists('setting')) {
-    function setting($key)
+    function setting($key, $default = '')
     {
-        $value = _settingsCache()[$key] ?? '';
+        // Devuelve $default cuando la clave no existe o su valor es vacío/null:
+        // ~54 llamadas pasaban un default que antes se descartaba en silencio.
+        // El default '' preserva el comportamiento previo cuando no se pasa uno.
+        $value = _settingsCache()[$key] ?? null;
+
+        if ($value === null || $value === '') {
+            return $default;
+        }
 
         return is_numeric($value) ? $value + 0 : $value;
     }
@@ -158,11 +165,13 @@ if (! function_exists('cartCheckoutLines')) {
             }
         }
 
+        // Filtro available: un curso/paquete retirado tras agregarlo al carrito no
+        // debe cobrarse ni venderse (queda fuera de la colección → se salta).
         $courses = $courseSlacks
-            ? Course::whereIn('slack', $courseSlacks)->get()->keyBy('slack')
+            ? Course::whereIn('slack', $courseSlacks)->where('available', 1)->get()->keyBy('slack')
             : collect();
         $bundles = $bundleSlacks
-            ? Bundle::whereIn('slack', $bundleSlacks)->get()->keyBy('slack')
+            ? Bundle::whereIn('slack', $bundleSlacks)->where('available', 1)->get()->keyBy('slack')
             : collect();
 
         foreach ($cart as $ci) {
@@ -188,7 +197,9 @@ if (! function_exists('cartCheckoutLines')) {
                 continue;
             }
 
-            $qty = max(1, (int) ($ci['qty'] ?? 1));
+            // Un curso se matricula una sola vez por usuario: qty>1 cobraría N veces
+            // pero solo genera una inscripción. Se fuerza a 1 (los paquetes sí permiten qty).
+            $qty = $type === 'course' ? 1 : max(1, (int) ($ci['qty'] ?? 1));
             $amount = (float) $unit * $qty;
             $subtotal += $amount;
 
@@ -345,20 +356,27 @@ if (! function_exists('formatPrice')) {
         }
 
         if ($numberFormat) {
+            // getSetting() devuelve el modelo Setting completo (sin parámetros);
+            // "truncate_price"/"no_of_decimals" son claves individuales en la
+            // tabla settings (key/value), no atributos de ese modelo.
+            $noOfDecimals = (int) (Setting::where('key', 'no_of_decimals')->value('value') ?? 2);
+
             if ($truncate) {
-                if (getSetting('truncate_price') == 1 || $forceTruncate === true) {
+                $truncatePrice = (int) (Setting::where('key', 'truncate_price')->value('value') ?? 0);
+
+                if ($truncatePrice === 1 || $forceTruncate === true) {
                     if ($price < 1000000) {
-                        $price = number_format($price, getSetting('no_of_decimals'));
+                        $price = number_format($price, $noOfDecimals);
                     } elseif ($price < 1000000000) {
-                        $price = number_format($price / 1000000, getSetting('no_of_decimals')).'M';
+                        $price = number_format($price / 1000000, $noOfDecimals).'M';
                     } else {
-                        $price = number_format($price / 1000000000, getSetting('no_of_decimals')).'B';
+                        $price = number_format($price / 1000000000, $noOfDecimals).'B';
                     }
                 }
-            } elseif (getSetting('no_of_decimals') > 0) {
-                $price = number_format($price, getSetting('no_of_decimals'));
+            } elseif ($noOfDecimals > 0) {
+                $price = number_format($price, $noOfDecimals);
             } else {
-                $price = number_format($price, getSetting('no_of_decimals'), '.', ',');
+                $price = number_format($price, $noOfDecimals, '.', ',');
             }
         }
 

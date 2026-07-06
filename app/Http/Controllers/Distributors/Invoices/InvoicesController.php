@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Distributors\Invoices;
 
 use App\Exports\Distributors\Invoices\InvoicesExport;
 use App\Http\Controllers\Controller;
-use App\Models\Distributor\Distributor;
 use App\Models\Invoice\InvoiceCondition;
 use App\Models\Invoice\InvoiceMethod;
 use Carbon\Carbon;
@@ -22,7 +21,7 @@ class InvoicesController extends Controller
         $method = $request->methods;
 
         $distributor = app('distributor');
-        $invoices = $distributor->invoices();
+        $invoices = $distributor->invoices()->with(['distributor', 'condition', 'method']);
         $methods = InvoiceMethod::latest()->get();
         $conditions = InvoiceCondition::latest()->get();
 
@@ -115,10 +114,6 @@ class InvoicesController extends Controller
     public function report()
     {
 
-        $distributors = Distributor::get();
-        $distributors = $distributors->pluck('title', 'id');
-        $distributors->prepend('Todos', '0');
-
         $methods = InvoiceMethod::latest()->get();
         $methods = $methods->pluck('title', 'id');
         $methods->prepend('Todos', '0');
@@ -128,7 +123,6 @@ class InvoicesController extends Controller
         $conditions->prepend('Todos', '0');
 
         return view('distributors.views.invoices.invoices.report')->with([
-            'distributors' => $distributors,
             'methods' => $methods,
             'conditions' => $conditions,
         ]);
@@ -138,7 +132,9 @@ class InvoicesController extends Controller
     public function generate(Request $request)
     {
 
-        $distributor = $request->distributor;
+        // SIEMPRE el distribuidor autenticado: nunca confiar en un id del
+        // request (evita descargar la facturación de otro distribuidor).
+        $distributor = app('distributor')->id;
         $method = $request->methods;
         $condition = $request->condition;
         $date = explode(' - ', $request->range);

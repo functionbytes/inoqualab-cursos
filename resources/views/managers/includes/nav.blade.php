@@ -203,6 +203,22 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('manager.newsletter.lists.index') }}" aria-expanded="false">
+                                <span>
+                                  <i class="fas fa-circle"></i>
+                                </span>
+                                <span class="hide-menu">Listas</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{{ route('manager.newsletter.remarketing') }}" aria-expanded="false">
+                                <span>
+                                  <i class="fas fa-circle"></i>
+                                </span>
+                                <span class="hide-menu">Remarketing</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
                             <a class="sidebar-link" href="{{ route('manager.settings.newsletter') }}" aria-expanded="false">
                                 <span>
                                   <i class="fas fa-circle"></i>

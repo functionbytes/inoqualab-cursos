@@ -87,6 +87,60 @@ type: project
 
 12. **`CheckSlaBreachesCommand` and `SyncCompetitorMetricsCommand` not scheduled** — only `sync-comments` and `health-check` are in `routes/console.php`. SLA breaches and competitor metrics have no automated schedule.
 
+## Distributors & Managers Panel N+1 Audit (2026-06-10)
+
+### Fix 18 — N+1 in Distributors/Orders/OrdersController::index
+- **File**: `app/Http/Controllers/Distributors/Orders/OrdersController.php`
+- **Problem**: `$distributor->ordersActititys()->descending()` had no eager loading. View accessed `$order->user->identification`, `$order->user->firstname`, `$order->activity->enterprise->title` per row = 3 lazy queries × N orders.
+- **Fix**: Added `->with(['user', 'activity.enterprise'])` to the query builder chain.
+
+### Fix 19 — N+1 in Distributors/Users/CertificatesController::index
+- **File**: `app/Http/Controllers/Distributors/Users/CertificatesController.php`
+- **Problem**: `$user->certificates()->latest()` paginated with no eager loading. View accessed `$certificate->course->title` per row.
+- **Fix**: Added `->with('course')` to the relationship query before paginating.
+
+### Fix 20 — N+1 chain in Managers/Users/InscriptionsController::index
+- **File**: `app/Http/Controllers/Managers/Users/InscriptionsController.php`
+- **Problem**: `$user->orders` loaded all orders, then `flatMap(fn($order) => $order->inscriptions)` lazy-loaded inscriptions per order = N queries. View then accessed `$inscription->course->title` per row = another N queries.
+- **Fix**: Replaced the orders+flatMap chain with a direct `Inscription::query()->with('course')->where('user_id', $user->id)->latest()->get()` — 2 queries total instead of N+1+N.
+
+### Fix 21 — N+1 in Managers/Users/CertificatesController::index
+- **File**: `app/Http/Controllers/Managers/Users/CertificatesController.php`
+- **Problem**: `$user->certificates()->latest()` paginated with no eager loading. View accessed `$certificate->course->title` per row.
+- **Fix**: Added `->with('course')` to the relationship query before paginating.
+
+### Fix 22 — N+1 in Managers/Distributors/OrdersController::index
+- **File**: `app/Http/Controllers/Managers/Distributors/OrdersController.php`
+- **Problem**: `Distributor::slack($slack)->orders()->latest()` had no eager loading. View accessed `optional($order->condition)->title` per row.
+- **Fix**: Added `->with('condition')` to the query builder chain.
+
+## Supports Panel N+1 Audit (2026-06-10)
+
+### Fix 13 — N+1 in Distributors/Orders/OrdersController::index
+- **File**: `app/Http/Controllers/Supports/Distributors/Orders/OrdersController.php`
+- **Problem**: `$distributor->ordersActititys()?->descending()` loaded orders with no eager loading. View accessed `$order->user` and `$order->activity->enterprise` per row = 2 queries × N orders.
+- **Fix**: Added `->with(['user', 'activity.enterprise'])` to the paginated query.
+
+### Fix 14 — N+1 in Enterprises/UserController::index
+- **File**: `app/Http/Controllers/Supports/Enterprises/UserController.php`
+- **Problem**: `$enterprise->users()->orderBy(...)` without eager loading. View accessed `count($user->certificates)` and `count($user->inscriptions)` per row = 2 queries × N users.
+- **Fix**: Added `->with(['certificates', 'inscriptions'])` (not `withCount` — view uses `count()` on loaded collections).
+
+### Fix 15 — N+1 in ManagementController::users
+- **File**: `app/Http/Controllers/Supports/Users/ManagementController.php`
+- **Problem**: `$enterprise->users` (dynamic property) loaded users with no eager loading. Same view as Fix 14 with same `count($user->certificates)` / `count($user->inscriptions)` per row.
+- **Fix**: Replaced `$enterprise->users` with `$enterprise->users()->with(['certificates', 'inscriptions'])->get()`.
+
+### Fix 16 — N+1 in Users/UsersCoursesController::index
+- **File**: `app/Http/Controllers/Supports/Users/UsersCoursesController.php`
+- **Problem**: `$user->inscriptions()` paginated with no eager loading. View accessed `$inscription->course->title` per row.
+- **Fix**: Added `->with('course')` to the relationship query before paginating.
+
+### Fix 17 — N+1 chain in Users/InscriptionsController::index
+- **File**: `app/Http/Controllers/Supports/Users/InscriptionsController.php`
+- **Problem**: `$user->orders` (full load) then `flatMap(fn($order) => $order->inscriptions)` — lazy-loaded `inscriptions` per order = N queries. View then accessed `$inscription->course->title` per row = another N queries.
+- **Fix**: Replaced the orders+flatMap chain with a direct `Inscription::query()->with('course')->where('user_id', $user->id)` query — 2 queries total instead of N+1+N.
+
 ## Ecommerce Module Optimizations (2026-04-26)
 
 ### Fix 8 — N+1 in ProductController::show() relatedProducts

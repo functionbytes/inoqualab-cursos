@@ -74,58 +74,62 @@ class ManagementController extends Controller
         return redirect()->route('support.enterprises.users.managements.progress.view', $inscription->slack);
     }
 
-    public function reassign($slack)
+    public function quizView($slack)
     {
+        $inscription = Inscription::slack($slack);
+        abort_unless($inscription instanceof Inscription, 404);
 
-        $user = User::slack($slack);
-        $enterprise = $user->getEnterprise();
+        $quizs = $inscription->quizs()->with('lesson')->get();
 
-        $distributor = app('support');
-        $enterprises = $distributor->enterprises;
-        $enterprises->prepend('', '');
-        $enterprises = $enterprises->pluck('title', 'slack');
-
-        $enterprises = $enterprises->forget($enterprise->slack);
-
-        return view('supports.views.enterprises.users.users.reassign')->with([
-            'user' => $user,
-            'enterprises' => $enterprises,
-            'enterprise' => $enterprise,
+        return view('supports.views.users.managements.quizs')->with([
+            'inscription' => $inscription,
+            'course' => $inscription->course,
+            'user' => $inscription->user,
+            'quizs' => $quizs,
         ]);
-
     }
 
-    public function reassignUser(Request $request)
+    public function quizRestore($slack)
     {
+        $inscription = Inscription::slack($slack);
+        abort_unless($inscription instanceof Inscription, 404);
 
-        $user = User::slack($request->slack);
-        $newEnterprise = Enterprise::slack($request->enterprise);
-
-        if (! $user || ! $newEnterprise) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuario o empresa no encontrados.']);
+        // Reinicia los intentos: el quiz se recrea cuando el estudiante vuelve a entrar.
+        foreach ($inscription->quizs as $quiz) {
+            $quiz->answers()->delete();
+            $quiz->delete();
         }
 
-        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
+        return redirect()->route('support.enterprises.users.managements.quiz.view', $inscription->slack);
+    }
 
-        if ($enterpriseUser) {
+    public function examView($slack)
+    {
+        $inscription = Inscription::slack($slack);
+        abort_unless($inscription instanceof Inscription, 404);
 
-            $enterpriseUser->enterprise_id = $newEnterprise->id;
-            $enterpriseUser->save();
-
-            return response()->json([
-                'success' => true,
-                'enterprise' => $newEnterprise->slack,
-                'message' => 'Usuario reasignado a la nueva empresa correctamente.',
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'No se encontró la relación del usuario con la empresa.',
+        return view('supports.views.users.managements.exam')->with([
+            'inscription' => $inscription,
+            'course' => $inscription->course,
+            'user' => $inscription->user,
+            'exam' => $inscription->exam,
         ]);
+    }
 
+    public function examRestore($slack)
+    {
+        $inscription = Inscription::slack($slack);
+        abort_unless($inscription instanceof Inscription, 404);
+
+        // Mismo reinicio que el "intentar de nuevo" del aula: puntaje en cero y respuestas fuera.
+        $exam = $inscription->exam;
+
+        if ($exam) {
+            $exam->update(['correct' => 0, 'wrong' => 0, 'score' => 0]);
+            $exam->answers()->delete();
+        }
+
+        return redirect()->route('support.enterprises.users.managements.exam.view', $inscription->slack);
     }
 
     public function dashboard($slack)

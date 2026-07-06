@@ -632,7 +632,7 @@ class IncomingMailsController extends Controller
         return response()->streamDownload(function () use ($query) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM for Excel
-            fputcsv($handle, ['ID', 'Remitente', 'Asunto', 'Empresa', 'Confianza %', 'Estado', 'Recibido', 'Procesado']);
+            fputcsv($handle, ['ID', 'Remitente', 'Asunto', 'Empresa', 'Confianza %', 'Estado', 'Recibido', 'Procesado'], ',', '"', '\\');
 
             $query->chunk(250, function ($mails) use ($handle) {
                 foreach ($mails as $mail) {
@@ -645,7 +645,7 @@ class IncomingMailsController extends Controller
                         $mail->status,
                         $mail->received_at?->format('Y-m-d H:i:s') ?? '',
                         $mail->processed_at?->format('Y-m-d H:i:s') ?? '',
-                    ]);
+                    ], ',', '"', '\\');
                 }
             });
 

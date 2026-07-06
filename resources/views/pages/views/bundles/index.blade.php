@@ -56,7 +56,7 @@
                             $offPct = $showSave ? (int) round(($coursesSum - $bundle->price) / $coursesSum * 100) : 0;
                         @endphp
 
-                        <div class="plcard">
+                        <a class="plcard" href="{{ route('bundles.view', [$bundle->slug ?? $bundle->slack]) }}">
                             <div class="plcard-media">
                                 @if ($bundleThumb)
                                     <img src="{{ $bundleThumb->getFullUrl() }}" alt="{{ $bundle->title }}" loading="lazy"
@@ -93,12 +93,12 @@
                                             <span class="was">$ {{ number_format($coursesSum, 0, ',', '.') }} COP</span>
                                         @endif
                                     </span>
-                                    <a class="plcard-btn" href="{{ route('bundles.view', [$bundle->slug ?? $bundle->slack]) }}">
+                                    <span class="plcard-btn">
                                         Ver paquete <i class="fas fa-arrow-right"></i>
-                                    </a>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
             @endif

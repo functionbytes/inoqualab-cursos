@@ -1,0 +1,103 @@
+/* ============================================================
+   Detalle de paquete — coherente con el catálogo de cursos.
+   Scopeado bajo .bundle-page.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.bundle-page {
+  --navy: #0d1b2a;
+  --navy-2: #102536;
+  --navy-soft: #16304a;
+  --ink: #1b2a3a;
+  --muted: #6a7888;
+  --muted-2: #93a0ad;
+  --line: #e7ecf1;
+  --field: #f7f9fb;
+  --green: #008bcd;
+  --green-deep: #006fa3;
+  --shadow-soft: 0 6px 22px rgba(13,27,42,.07);
+  --ease: cubic-bezier(.22,.61,.36,1);
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: var(--ink);
+}
+.bundle-page * { box-sizing: border-box; }
+.bundle-page a { text-decoration: none; }
+.bundle-page .cx-container { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+/* Band */
+.bundle-page .band {
+  background:
+    radial-gradient(1100px 360px at 82% -40%, rgba(0,139,205,.16), transparent 60%),
+    linear-gradient(180deg, var(--navy), var(--navy-2));
+  color: #fff; position: relative; overflow: hidden;
+}
+.bundle-page .band .cx-container { position: relative; padding-top: 50px; padding-bottom: 56px; }
+.bundle-page .crumb { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--navy); font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 8px 16px; border-radius: 7px; }
+.bundle-page .crumb .sep { color: var(--muted-2); font-weight: 600; }
+.bundle-page .crumb .cur { color: var(--green-deep); }
+.bundle-page .band .b-tag { display: inline-block; margin-top: 18px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: var(--green); color: #fff; padding: 5px 12px; border-radius: 6px; }
+.bundle-page .band h1 { font-size: clamp(28px, 4.4vw, 44px); font-weight: 800; letter-spacing: -.02em; margin: 14px 0 0; color: #fff; max-width: 760px; }
+.bundle-page .band .lede { margin: 12px 0 0; color: rgba(255,255,255,.65); font-size: 15px; max-width: 620px; }
+.bundle-page .band .b-stats { display: flex; gap: 22px; margin-top: 20px; flex-wrap: wrap; }
+.bundle-page .band .b-stats span { display: inline-flex; align-items: center; gap: 8px; color: rgba(255,255,255,.85); font-size: 13.5px; font-weight: 600; }
+.bundle-page .band .b-stats svg { width: 16px; height: 16px; color: var(--green); }
+
+/* Layout */
+.bundle-page .bp-wrap { background: #f3f6f9; padding: 40px 0 72px; }
+.bundle-page .bp-layout { display: grid; grid-template-columns: 1fr 360px; gap: 30px; align-items: start; }
+
+/* Main */
+.bundle-page .bp-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-soft); padding: 28px 30px; }
+.bundle-page .bp-card + .bp-card { margin-top: 22px; }
+.bundle-page .bp-card h2 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+.bundle-page .bp-card h2 svg { width: 19px; height: 19px; color: var(--green-deep); }
+.bundle-page .bp-desc { color: var(--muted); font-size: 15px; line-height: 1.7; }
+.bundle-page .bp-desc p { margin: 0 0 10px; }
+
+/* Cursos incluidos */
+.bundle-page .bp-courses { display: flex; flex-direction: column; gap: 12px; }
+.bundle-page .bp-course { display: flex; align-items: center; gap: 14px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; transition: border-color .15s var(--ease), box-shadow .15s var(--ease); }
+.bundle-page .bp-course:hover { border-color: var(--green); box-shadow: var(--shadow-soft); }
+.bundle-page .bp-course .ic { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 10px; background: linear-gradient(150deg, var(--navy), var(--navy-soft)); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,.85); }
+.bundle-page .bp-course .ic img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.bundle-page .bp-course .ic svg { width: 20px; height: 20px; }
+.bundle-page .bp-course .tx { flex: 1; min-width: 0; }
+.bundle-page .bp-course .tt { font-size: 14.5px; font-weight: 700; color: var(--ink); display: block; }
+.bundle-page .bp-course .mm { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.bundle-page .bp-course .go { color: var(--green-deep); flex: 0 0 auto; }
+.bundle-page .bp-course .go svg { width: 18px; height: 18px; }
+
+/* Buy card */
+.bundle-page .bp-buy { position: sticky; top: 96px; background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 14px 40px rgba(13,27,42,.10); overflow: hidden; }
+.bundle-page .bp-buy-media { aspect-ratio: 16/10; overflow: hidden; background: var(--navy); }
+.bundle-page .bp-buy-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bundle-page .bp-buy .head { background: linear-gradient(150deg, var(--navy), var(--navy-soft)); color: #fff; padding: 22px 24px; }
+.bundle-page .bp-buy .head .lbl { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.bundle-page .bp-buy .head .price { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin-top: 4px; }
+.bundle-page .bp-buy .head .price small { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.7); }
+.bundle-page .bp-buy .body { padding: 20px 24px 24px; }
+.bundle-page .bp-buy .inc { list-style: none; padding: 0; margin: 0 0 18px; }
+.bundle-page .bp-buy .inc li { display: flex; align-items: flex-start; gap: 10px; font-size: 13.5px; color: var(--ink); font-weight: 600; padding: 7px 0; }
+.bundle-page .bp-buy .inc li svg { width: 17px; height: 17px; color: var(--green); flex: 0 0 auto; margin-top: 1px; }
+.bundle-page .bp-buy .btn-primary { width: 100%; background: var(--green); color: #fff; border: none; border-radius: 11px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: background .15s var(--ease); }
+.bundle-page .bp-buy .btn-primary:hover { background: var(--green-deep); }
+.bundle-page .bp-buy .btn-primary svg { width: 18px; height: 18px; }
+.bundle-page .bp-buy .btn-outline { width: 100%; margin-top: 10px; background: #fff; color: var(--navy); border: 2px solid var(--line); border-radius: 11px; padding: 12px; font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: border-color .15s var(--ease); }
+.bundle-page .bp-buy .btn-outline:hover { border-color: var(--navy); }
+.bundle-page .bp-buy .btn-outline svg { width: 17px; height: 17px; }
+.bundle-page .bp-buy .note { text-align: center; font-size: 12px; color: var(--muted-2); margin-top: 14px; }
+
+@media (max-width: 900px) {
+  .bundle-page .bp-layout { grid-template-columns: 1fr; }
+  .bundle-page .bp-buy { position: static; }
+}
+@media (max-width: 560px) {
+  .bundle-page .cx-container { padding: 0 18px; }
+}
+
+/* Ya adquirido */
+.bundle-page .bp-buy .buy-actions { display: flex; flex-direction: column; gap: 0; }
+.bundle-page .bp-buy .buy-primary { width: 100%; background: var(--green); color: #fff; border: none; border-radius: 11px; padding: 14px; font-size: 15px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; text-decoration: none; transition: background .15s; }
+.bundle-page .bp-buy .buy-primary:hover { background: var(--green-deep); color: #fff; }
+.bundle-page .bp-buy .buy-owned-note { display: block; text-align: center; font-size: 13px; font-weight: 600; color: #008bcd; margin-top: 12px; }
+.bundle-page .bp-buy .buy-owned-note i { margin-right: 4px; }

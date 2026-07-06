@@ -137,6 +137,7 @@ class CartController extends Controller
                     'slack' => $slack,
                     'qty' => $qty,
                     'line_total' => $price * $qty,
+                    'image' => session("cart.{$key}.image"),
                 ],
                 'cart_count' => cartUnits(),
                 'cart_total' => $this->cartTotal(),

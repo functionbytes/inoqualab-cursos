@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\UpdateDistributorRatesRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorCourse;
 use Illuminate\Http\Request;
@@ -24,25 +25,22 @@ class RatesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDistributorRatesRequest $request)
     {
         abort_unless(auth()->user()->can('distributors.update'), 403);
 
-        $distributor = Distributor::slack($request->slack);
+        $data = $request->validated();
+        $distributor = Distributor::slack($data['slack']);
 
-        if (! $distributor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Distribuidor no encontrado.',
-            ]);
-        }
-
-        DB::transaction(function () use ($request) {
-            foreach ($request->courses as $id => $price) {
+        DB::transaction(function () use ($data, $distributor) {
+            foreach ($data['courses'] as $id => $price) {
+                // Ownership: la tarifa debe pertenecer al distribuidor resuelto arriba,
+                // si no cualquier id de distributor_courses ajeno sobreescribe su precio.
                 $course = DistributorCourse::find($id);
-                if (! $course) {
+                if (! $course || $course->distributor_id !== $distributor->id) {
                     continue;
                 }
+
                 $course->price = $price;
                 $course->save();
             }

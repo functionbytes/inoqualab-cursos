@@ -20,7 +20,7 @@
 
         <div class="pnl-card">
             <div class="doc-empty">
-                <i class="fa-regular fa-folder-open" style="font-size:30px;display:block;margin-bottom:12px;"></i>
+                <i class="fa-solid fa-folder-open" style="font-size:30px;display:block;margin-bottom:12px;"></i>
                 Aún no tienes cursos asignados. Cuando te inscribas en una capacitación aparecerá aquí.
             </div>
         </div>
@@ -32,6 +32,7 @@
             <button type="button" data-f="progress" aria-pressed="false">En progreso</button>
             <button type="button" data-f="pending" aria-pressed="false">Pendientes</button>
             <button type="button" data-f="done" aria-pressed="false">Completados</button>
+            <button type="button" data-f="expired" aria-pressed="false">Vencidos</button>
         </div>
 
         <div class="pc-grid" id="cursosCards">
@@ -71,7 +72,7 @@
                     <div class="pc-body">
                         <div class="pc-top">
                             <span class="pc-year">{{ $year }}</span>
-                            <span class="pc-badge {{ $status }}">{{ $statusLabel }}</span>
+                            <span class="pc-badge st-{{ $status }}">{{ $statusLabel }}</span>
                         </div>
 
                         <div class="pc-title">{{ $course?->title ?? 'Curso' }}</div>
@@ -94,8 +95,8 @@
                                 <i class="fa-solid fa-download"></i> Ver certificado
                             </a>
                         @elseif($status === 'expired')
-                            <a class="pc-btn ghost" href="{{ $contentUrl }}">
-                                <i class="fa-solid fa-lock"></i> Acceso expirado
+                            <a class="pc-btn ghost" href="{{ route('checkout', ['course', $course->slack]) }}">
+                                <i class="fa-solid fa-rotate"></i> Renovar acceso
                             </a>
                         @else
                             <a class="pc-btn" href="{{ $contentUrl }}">

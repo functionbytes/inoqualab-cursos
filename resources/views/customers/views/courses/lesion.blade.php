@@ -202,7 +202,7 @@
                                 <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
                             </div>
                         @elseif ($exam != null && $percents >= 100)
-                            @if ($exam->score >= 80)
+                            @if ($certificate)
                                 <div class="side-card examen-card ready">
                                     <span class="ex-ic"><i class="fa-solid fa-award"></i></span>
                                     <span class="ex-info"><b>Examen final</b><span>¡Aprobado!</span></span>

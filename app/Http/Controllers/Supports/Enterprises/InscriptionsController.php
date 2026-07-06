@@ -53,6 +53,7 @@ class InscriptionsController extends Controller
         $distributor = $enterprise->distributor;
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
         $method = OrderMethod::slug('credit');
@@ -163,6 +164,7 @@ class InscriptionsController extends Controller
         }
 
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
+        abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
         $method = OrderMethod::slug('credit');

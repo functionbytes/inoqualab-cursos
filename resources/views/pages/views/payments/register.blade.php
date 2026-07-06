@@ -224,7 +224,7 @@
                                 @if($total <= 0)
                                     <i class="fas fa-graduation-cap"></i> Inscribirme gratis
                                 @else
-                                    <i class="fas fa-lock"></i> Realizar pago
+                                    REALIZAR PAGO
                                 @endif
                             </button>
 
@@ -561,7 +561,7 @@
                             $('#email-error').removeClass('d-none')
                                 .html('Este correo ya está registrado. <a href="{{ route('login') }}?email=' + em + '" style="text-decoration:underline;font-weight:700">Inicia sesión</a> para continuar tu compra.');
                             $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
-                                .html('<i class="fas fa-lock"></i> Realizar pago');
+                                .html('REALIZAR PAGO');
                             return;
                         }
 
@@ -578,12 +578,12 @@
                                         return;
                                     }
                                     $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
-                                        .html('<i class="fas fa-lock"></i> Realizar pago');
+                                        .html('REALIZAR PAGO');
                                     alert('No se pudo generar la orden. Intenta de nuevo.');
                                 },
                                 error: function (jqXHR) {
                                     $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
-                                        .html('<i class="fas fa-lock"></i> Realizar pago');
+                                        .html('REALIZAR PAGO');
                                     alert(jqXHR.status == 422 ? 'Tu carrito está vacío.' : 'Error al generar la orden de pago.');
                                 }
                             });
@@ -591,7 +591,7 @@
                     },
                     error: function (jqXHR) {
                         $('#addPayments').removeClass('btn-disabled-payment').prop('disabled', false)
-                            .html('<i class="fas fa-lock"></i> Realizar pago');
+                            .html('REALIZAR PAGO');
 
                         // Limpiar errores previos por campo
                         $('label.error').addClass('d-none').text('');

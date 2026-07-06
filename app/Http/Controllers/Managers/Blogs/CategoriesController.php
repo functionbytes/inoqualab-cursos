@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\StoreBlogCategoryRequest;
+use App\Http\Requests\Managers\Blogs\UpdateBlogCategoryRequest;
 use App\Models\Blog\BlogCategorie;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class CategoriesController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $searchKey = $request->search;
         $available = $request->available;
@@ -35,8 +41,9 @@ class CategoriesController extends Controller
 
     }
 
-    public function create()
+    public function create(): View
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $availables = $this->availableOptions();
 
@@ -46,8 +53,9 @@ class CategoriesController extends Controller
 
     }
 
-    public function view($slack)
+    public function view($slack): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $categorie = BlogCategorie::slack($slack);
 
@@ -57,8 +65,9 @@ class CategoriesController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $categorie = BlogCategorie::slack($slack);
 
@@ -71,14 +80,14 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateBlogCategoryRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.update'), 403);
+        $data = $request->validated();
 
-        $categorie = BlogCategorie::slack($request->slack);
-        $categorie->title = $request->title;
-        $categorie->slug = Str::slug($request->title, '-');
-        $categorie->available = $request->available;
+        $categorie = BlogCategorie::slack($data['slack']);
+        $categorie->title = $data['title'];
+        $categorie->slug = Str::slug($data['title'], '-');
+        $categorie->available = $data['available'];
         $categorie->update();
 
         return response()->json([
@@ -88,15 +97,15 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreBlogCategoryRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.create'), 403);
+        $data = $request->validated();
 
         $categorie = new BlogCategorie;
         $categorie->slack = $this->generate_slack('blog_categories');
-        $categorie->title = $request->title;
-        $categorie->slug = Str::slug($request->title, '-');
-        $categorie->available = $request->available;
+        $categorie->title = $data['title'];
+        $categorie->slug = Str::slug($data['title'], '-');
+        $categorie->available = $data['available'];
         $categorie->save();
 
         return response()->json([
@@ -106,7 +115,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function destroy($slack)
+    public function destroy($slack): RedirectResponse
     {
         abort_unless(auth()->user()->can('blogs.delete'), 403);
 

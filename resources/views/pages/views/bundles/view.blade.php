@@ -155,8 +155,8 @@
                             <input type="hidden" name="qty" value="1">
                             <input type="hidden" name="buy_now" id="bundleBuyNow" value="">
                             <div class="buy-actions">
-                                <button type="submit" class="buy-primary" id="btnBundleBuyNow"><i class="fa-solid fa-bolt"></i> Compra ahora</button>
-                                <button type="submit" class="buy-outline" id="btnBundleAddCart"><i class="fa-solid fa-cart-plus"></i> Agregar al carrito</button>
+                                <button type="submit" class="buy-primary" id="btnBundleBuyNow">Compra ahora</button>
+                                <button type="submit" class="buy-outline" id="btnBundleAddCart">Agregar al carrito</button>
                             </div>
                         </form>
                         <p style="text-align:center;font-size:12.5px;font-weight:600;margin:16px 0 0">Pago seguro · Acceso inmediato</p>

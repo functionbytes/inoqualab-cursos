@@ -16,9 +16,15 @@ class ResultsExport implements FromQuery, Responsable, WithHeadings, WithMapping
 
     private $exam;
 
+    /** Preguntas precargadas (id => enunciado) para no consultar por cada fila del export. */
+    private array $questions;
+
     public function __construct($exam)
     {
         $this->exam = $exam;
+
+        $questionIds = $exam?->answers()->pluck('question_id') ?? collect();
+        $this->questions = ExamQuestion::whereIn('id', $questionIds)->pluck('question', 'id')->all();
     }
 
     public function query()
@@ -30,7 +36,7 @@ class ResultsExport implements FromQuery, Responsable, WithHeadings, WithMapping
     {
 
         return [
-            ExamQuestion::id($row->question_id)->question,
+            $this->questions[$row->question_id] ?? '',
             $row->user_answer,
             $row->answer,
             $row->approved == 1 ? $result = 'Correcto' : $result = 'Incorrecto',

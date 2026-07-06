@@ -19,7 +19,7 @@
 
                     </div>
                     <p class="card-subtitle mb-3 mt-3">
-                        Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                        Actualiza el valor que pagará esta empresa por cada curso.
                     </p>
 
                     <div class="mb-4 row align-items-center">
@@ -39,7 +39,7 @@
                                         <div class="d-flex align-items-center">
                                             <div>
                                                 <h6 class="fw-semibold mb-1">{{ $rate->course->title }}</h6>
-                                                <p class="fs-2 mb-0 text-muted">{{ $rate->course->categorie->title }}</p>
+                                                <p class="fs-2 mb-0 text-muted">{{ $rate->course?->categorie?->title ?? 'Sin categoría' }}</p>
                                             </div>
                                         </div>
                                     </td>

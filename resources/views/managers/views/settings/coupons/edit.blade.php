@@ -32,17 +32,14 @@
                     <input type="hidden" id="id" name="id" value="{{ $coupon->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $coupon->slack }}">
                     <textarea class="d-none" id="description"
-                              name="description">{!! $coupon->description !!}</textarea>
+                              name="description">{!! clean($coupon->description, 'content') !!}</textarea>
 
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">
                             <h5 class="mb-0">Editar cupon</h5>
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para permitirte
-                            <mark><code>introducir</code></mark>
-                            nueva información de manera sencilla y estructurada. A continuación, se presentan varios
-                            campos que deberás completar con los datos requeridos.
+                            Actualiza los datos del cupón. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
                         <div class="row">
 
@@ -143,7 +140,7 @@
                                 <div class="mb-3">
                                     <label class="col-form-label">Contenido</label>
                                     <div class="quill-wrapper">
-                                        <div id="descriptions">{!! $coupon->description !!}</div>
+                                        <div id="descriptions">{!! clean($coupon->description, 'content') !!}</div>
                                     </div>
                                     <label id="description-error" class="error d-none" for="description"></label>
                                 </div>

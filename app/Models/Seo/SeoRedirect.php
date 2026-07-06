@@ -35,23 +35,43 @@ class SeoRedirect extends Model
     protected static function booted(): void
     {
         static::saving(function (self $redirect) {
-            if (! $redirect->is_regex && ! $redirect->is_wildcard) {
-                $redirect->source_path = strtolower(trim($redirect->source_path));
-                if (! str_starts_with($redirect->source_path, '/')) {
-                    $redirect->source_path = '/'.$redirect->source_path;
-                }
-            }
+            $redirect->source_path = static::normalizeSourcePath(
+                $redirect->source_path,
+                (bool) $redirect->is_regex,
+                (bool) $redirect->is_wildcard
+            );
 
-            if (
-                ! str_starts_with($redirect->target_path, '/')
-                && ! filter_var($redirect->target_path, FILTER_VALIDATE_URL)
-            ) {
-                $redirect->target_path = '/'.$redirect->target_path;
-            }
+            $redirect->target_path = static::normalizeTargetPath($redirect->target_path);
         });
 
         static::saved(fn () => static::clearCache());
         static::deleted(fn () => static::clearCache());
+    }
+
+    /**
+     * Normaliza el source_path tal como quedará persistido. Se expone como método
+     * público porque también lo usa SeoRedirectController para anticipar, ANTES de
+     * guardar, si un valor formaría un bucle/ciclo (ver RedirectChainDetector).
+     */
+    public static function normalizeSourcePath(string $path, bool $isRegex = false, bool $isWildcard = false): string
+    {
+        if ($isRegex || $isWildcard) {
+            return $path;
+        }
+
+        $path = strtolower(trim($path));
+
+        return str_starts_with($path, '/') ? $path : '/'.$path;
+    }
+
+    /** Normaliza el target_path tal como quedará persistido. */
+    public static function normalizeTargetPath(string $path): string
+    {
+        if (str_starts_with($path, '/') || filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return '/'.$path;
     }
 
     public function scopeActive($query)

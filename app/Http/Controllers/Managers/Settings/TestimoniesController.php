@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Testimonies\StoreTestimonieRequest;
+use App\Http\Requests\Managers\Settings\Testimonies\UpdateTestimonieRequest;
 use App\Models\Testimonie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -64,7 +66,7 @@ class TestimoniesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateTestimonieRequest $request)
     {
         abort_unless(auth()->user()->can('testimonies.update'), 403);
 
@@ -82,7 +84,7 @@ class TestimoniesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreTestimonieRequest $request)
     {
         abort_unless(auth()->user()->can('testimonies.create'), 403);
 

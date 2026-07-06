@@ -19,7 +19,7 @@ use App\Http\Controllers\Distributors\Users\CertificatesController;
 use App\Http\Controllers\Distributors\Users\ResultsController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor', 'panel.permission']], function () {
+Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('distributor.dashboard');
 
@@ -38,14 +38,17 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
 
         Route::get('/', [InscriptionsController::class, 'index'])->name('distributor.inscriptions');
         Route::post('/store', [InscriptionsController::class, 'store'])->name('distributor.inscriptions.store');
-        Route::post('/enroll', [InscriptionsController::class, 'enroll'])->name('distributor.inscriptions.enroll');
+        // enroll() es el "forzar inscripción" del modal de duplicado (bypassea a propósito
+        // el chequeo de store()); sin límite de tasa, un doble clic o replay genera órdenes
+        // e inscripciones duplicadas reales. Throttle en vez de repetir el chequeo de store().
+        Route::post('/enroll', [InscriptionsController::class, 'enroll'])->middleware('throttle:10,1')->name('distributor.inscriptions.enroll');
 
         Route::post('/get/users', [InscriptionsController::class, 'getUsers'])->name('distributor.inscriptions.get.users');
         Route::post('/get/courses', [InscriptionsController::class, 'getCourses'])->name('distributor.inscriptions.get.courses');
 
         Route::get('/massive', [InscriptionsMassivesController::class, 'index'])->name('distributor.inscriptions.massives');
         Route::post('/massive/store', [InscriptionsMassivesController::class, 'store'])->name('distributor.inscriptions.massives.store');
-        Route::post('/massive/enroll', [InscriptionsMassivesController::class, 'enroll'])->name('distributor.inscriptions.massives.enroll');
+        Route::post('/massive/enroll', [InscriptionsMassivesController::class, 'enroll'])->middleware('throttle:10,1')->name('distributor.inscriptions.massives.enroll');
 
         Route::post('/massive/get/users', [InscriptionsMassivesController::class, 'getUsers'])->name('distributor.inscriptions.massives.get.users');
         Route::post('/massive/get/courses', [InscriptionsMassivesController::class, 'getCourses'])->name('distributor.inscriptions.massives.get.courses');
@@ -80,15 +83,14 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
         Route::post('/users/update', [EnterpriseUserController::class, 'update'])->name('distributor.enterprises.users.update');
         Route::post('/users/store', [EnterpriseUserController::class, 'store'])->name('distributor.enterprises.users.store');
         Route::post('/users/check/identification', [EnterpriseUserController::class, 'check'])->name('distributor.enterprises.users.check');
-        Route::post('/users/reports/generate', [EnterpriseUserController::class, 'generate'])->name('distributor.enterprises.courses.generate');
         Route::post('/users/inscriptions/store', [EnterpriseInscriptionsController::class, 'store'])->name('distributor.enterprises.inscriptions.store');
-        Route::post('/users/inscriptions/enroll', [EnterpriseInscriptionsController::class, 'enroll'])->name('distributor.enterprises.inscriptions.enroll');
+        Route::post('/users/inscriptions/enroll', [EnterpriseInscriptionsController::class, 'enroll'])->middleware('throttle:10,1')->name('distributor.enterprises.inscriptions.enroll');
 
         Route::post('/users/reassign/single', [EnterpriseReassignController::class, 'reassignSingle'])->name('distributor.enterprises.users.reassign.single');
         Route::post('/users/reassign/all', [EnterpriseReassignController::class, 'reassignAll'])->name('distributor.enterprises.users.reassign.all');
         Route::get('/users/income/generate', [EnterpriseUserController::class, 'incoming'])->name('distributor.enterprises.users.incoming');
         Route::get('/users/reports/generate', [EnterpriseUserController::class, 'generate'])->name('distributor.enterprises.users.generate');
-        Route::get('/courses/reports/generate', [EnterpriseCourseController::class, 'generate'])->name('distributor.enterprises.courses.generate_2');
+        Route::get('/courses/reports/generate', [EnterpriseCourseController::class, 'generate'])->name('distributor.enterprises.courses.generate');
         Route::get('/users/create/{slack}', [EnterpriseUserController::class, 'create'])->name('distributor.enterprises.users.create');
         Route::get('/users/edit/{slack}', [EnterpriseUserController::class, 'edit'])->name('distributor.enterprises.users.edit');
         Route::get('/users/view/{slack}', [EnterpriseUserController::class, 'view'])->name('distributor.enterprises.users.view');
@@ -119,6 +121,7 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
 
         Route::delete('/users/courses/destroy/{enterprice}/{course}', [EnterpriseCourseController::class, 'destroy'])->name('distributor.enterprises.courses.destroy');
         Route::get('/users/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('distributor.enterprises.courses.reasign');
+        Route::post('/users/courses/reasign/action', [EnterpriseCourseController::class, 'includes'])->name('distributor.enterprises.action.reasign');
         Route::get('/users/courses/reports/{enterprises}/{course}', [EnterpriseCourseController::class, 'report'])->name('distributor.enterprises.courses.reports');
         Route::get('/users/courses/view/{enterprises}/{course}', [EnterpriseCourseController::class, 'view'])->name('distributor.enterprises.courses.view');
 

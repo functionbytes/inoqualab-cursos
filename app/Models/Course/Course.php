@@ -5,10 +5,10 @@ namespace App\Models\Course;
 use App\Http\Seo\HasSeo;
 use App\Http\Sitemap\HasSitemapItems;
 use App\Models\Concerns\HasFinders;
-use App\Models\Order\Order;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -159,15 +159,6 @@ class Course extends Model implements HasMedia
         return $query->where('title', 'like', '%'.$searchTerm.'%');
     }
 
-    public static function purchases($user)
-    {
-
-        $purchasedCourseIds = Order::where('condition_id', 1)->where('user_id', $user)->pluck('course_id');
-
-        return Course::whereIn('id', $purchasedCourseIds)->get();
-
-    }
-
     public function chapters(): HasMany
     {
         return $this->hasMany('App\Models\Course\CourseChapter', 'course_id')
@@ -217,9 +208,11 @@ class Course extends Model implements HasMedia
         return $this->hasOne('App\Models\Exam\ExamTopic', 'course_id')->where('available', 1);
     }
 
-    public function bundles()
+    public function bundles(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\Bundle\Bundle', 'bundle_courses');
+        // La tabla pivot real es bundle_course (no bundle_courses); coincide con
+        // el pivot por defecto que usa Bundle::courses().
+        return $this->belongsToMany('App\Models\Bundle\Bundle', 'bundle_course');
     }
 
     public function aliases(): HasMany

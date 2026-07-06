@@ -41,7 +41,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
+                                    <label class="control-label col-form-label">Condición pago</label>
                                     <div class="input-group">
                                         {!! Form::select('condition', $conditions, $order->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                     </div>
@@ -50,7 +50,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Condición pago</label>
+                                    <label class="control-label col-form-label">Metodo pago</label>
                                     <div class="input-group">
                                         {!! Form::select('method', $methods, $order->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
                                     </div>

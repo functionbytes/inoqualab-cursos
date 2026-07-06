@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers\Managers\Exams;
 
+use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Exams\StoreExamQuestionRequest;
+use App\Http\Requests\Managers\Exams\UpdateExamQuestionRequest;
 use App\Models\Exam\ExamQuestion;
 use App\Models\Exam\ExamTopic;
 use Illuminate\Http\Request;
 
 class TopicController extends Controller
 {
+    use BuildsAssessmentForms;
+
     public function index(Request $request, $slack)
     {
 
@@ -36,51 +41,12 @@ class TopicController extends Controller
             'questions' => $questions,
             'available' => $available,
             'searchKey' => $searchKey,
+            'availables' => $this->availableOptions(),
+            'answers' => $this->assessmentAnswers($topic->type),
         ]);
     }
 
-    public function create($slack)
-    {
-
-        $topic = ExamTopic::slack($slack);
-        $course = $topic->course;
-
-        $availables = $this->availableOptions();
-
-        $answers = collect([]);
-
-        if ($topic->type == 0) {
-
-            $answers = collect([
-                ['id' => 'true', 'title' => 'Verdadero'],
-                ['id' => 'false', 'title' => 'Falso'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        if ($topic->type == 1) {
-
-            $answers = collect([
-                ['id' => 'a', 'title' => 'A'],
-                ['id' => 'b', 'title' => 'B'],
-                ['id' => 'c', 'title' => 'C'],
-                ['id' => 'd', 'title' => 'D'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        return view('managers.views.exams.topics.create')->with([
-            'course' => $course,
-            'topic' => $topic,
-            'availables' => $availables,
-            'answers' => $answers,
-        ]);
-
-    }
-
-    public function store(Request $request)
+    public function store(StoreExamQuestionRequest $request)
     {
         abort_unless(auth()->user()->can('exams.create'), 403);
 
@@ -94,16 +60,7 @@ class TopicController extends Controller
         $question->topic_id = $topic->id;
         $question->type = $topic->type;
         $question->available = $request->available;
-
-        if ($topic->type == 1) {
-            $question->a = $request->a;
-            $question->b = $request->b;
-            $question->c = $request->c;
-            $question->d = $request->d;
-            $question->answer = $request->answer;
-        } else {
-            $question->answer = $request->answer;
-        }
+        $this->applyAnswerFields($question, $topic->type, $request);
 
         $question->save();
 
@@ -115,69 +72,34 @@ class TopicController extends Controller
 
     }
 
+    /**
+     * Datos de la pregunta para el modal de edición (fetch AJAX desde el listado).
+     */
     public function edit($slack)
     {
-
         $question = ExamQuestion::slack($slack);
-        $topic = $question->topic;
-        $course = $question->course;
 
-        $availables = $this->availableOptions();
-
-        $answers = collect([]);
-
-        if ($question->type == 0) {
-
-            $answers = collect([
-                ['id' => 'true', 'title' => 'Verdadero'],
-                ['id' => 'false', 'title' => 'Falso'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-        }
-
-        if ($question->type == 1) {
-
-            $answers = collect([
-                ['id' => 'a', 'title' => 'A'],
-                ['id' => 'b', 'title' => 'B'],
-                ['id' => 'c', 'title' => 'C'],
-                ['id' => 'd', 'title' => 'D'],
-            ]);
-
-            $answers = $answers->pluck('title', 'id');
-
-        }
-
-        return view('managers.views.exams.topics.edit')->with([
-            'topic' => $topic,
-            'question' => $question,
-            'availables' => $availables,
-            'course' => $course,
-            'answers' => $answers,
+        return response()->json([
+            'slack' => $question->slack,
+            'question' => $question->question,
+            'available' => (int) $question->available,
+            'answer' => $question->answer,
+            'a' => $question->a,
+            'b' => $question->b,
+            'c' => $question->c,
+            'd' => $question->d,
         ]);
-
     }
 
-    public function update(Request $request)
+    public function update(UpdateExamQuestionRequest $request)
     {
         abort_unless(auth()->user()->can('exams.update'), 403);
 
         $question = ExamQuestion::slack($request->slack);
         $topic = $question->topic;
         $question->question = $request->question;
-        $question->answer = $request->answer;
         $question->available = $request->available;
-
-        if ($topic->type == 1) {
-            $question->a = $request->a;
-            $question->b = $request->b;
-            $question->c = $request->c;
-            $question->d = $request->d;
-            $question->answer = $request->answer;
-        } else {
-            $question->answer = $request->answer;
-        }
+        $this->applyAnswerFields($question, $topic->type, $request);
 
         $question->update();
 

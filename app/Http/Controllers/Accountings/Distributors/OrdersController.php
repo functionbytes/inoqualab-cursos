@@ -19,25 +19,35 @@ class OrdersController extends Controller
         $type = $request->type;
         $method = $request->methods;
 
-        $orders = Distributor::slack($slack)->orders()->with(['user', 'condition', 'method', 'type']);
+        // orders_activity no tiene method_id/condition_id/type_id (viven en la orden
+        // relacionada); se filtra vía whereHas sobre order y se precarga anidado.
+        $orders = Distributor::slack($slack)->ordersActitity()->with(['order.user', 'order.condition', 'order.method', 'order.type']);
         $methods = OrderMethod::latest()->get();
         $conditions = OrderCondition::latest()->get();
         $types = OrderType::latest()->get();
 
         if ($searchKey) {
-            $orders = $orders->where('slack', 'like', '%'.$searchKey.'%');
+            $orders = $orders->whereHas('order', function ($query) use ($searchKey) {
+                $query->where('slack', 'like', '%'.$searchKey.'%');
+            });
         }
 
         if ($method) {
-            $orders = $orders->where('method_id', $method);
+            $orders = $orders->whereHas('order', function ($query) use ($method) {
+                $query->where('method_id', $method);
+            });
         }
 
         if ($condition) {
-            $orders = $orders->where('condition_id', $condition);
+            $orders = $orders->whereHas('order', function ($query) use ($condition) {
+                $query->where('condition_id', $condition);
+            });
         }
 
         if ($type) {
-            $orders = $orders->where('type_id', $type);
+            $orders = $orders->whereHas('order', function ($query) use ($type) {
+                $query->where('type_id', $type);
+            });
         }
 
         $orders = $orders->paginate(paginationNumber());

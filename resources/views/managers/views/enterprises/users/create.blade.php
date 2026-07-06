@@ -24,7 +24,7 @@
 
             </div>
             <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+              Completa los datos del nuevo usuario de la empresa. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
             </p>
 
             <div class="row">
@@ -255,7 +255,7 @@
           $submitButton.prop('disabled', true);
 
           $.ajax({
-            url: "{{ route('distributor.enterprises.users.store') }}",
+            url: "{{ route('manager.enterprises.users.store') }}",
             headers: {
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -267,7 +267,7 @@
 
               if(response.success == true){
 
-                var url = "{{ route('distributor.enterprises.users', $enterprise->slack) }}";
+                var url = "{{ route('manager.enterprises.users', $enterprise->slack) }}";
 
                 $("#firstname").val('');
                 $("#lastname").val('');

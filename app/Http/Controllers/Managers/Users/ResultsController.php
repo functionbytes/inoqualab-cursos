@@ -44,6 +44,8 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->authorize('view', $certificate);
+
         $exam = $certificate->exam;
         $answers = $certificate->exam?->answers;
         $wrongs = $certificate->exam?->answers()?->wrong()->count();
@@ -63,6 +65,8 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->authorize('view', $certificate);
+
         $exam = $certificate->exam;
         $user = $certificate->user;
         $answers = $certificate->exam?->answers();

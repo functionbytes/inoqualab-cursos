@@ -65,6 +65,6 @@ class FaqCategorie extends Model
 
     public function faqs(): HasMany
     {
-        return $this->hasMany('App\Models\Faq\Instruction', 'categorie_id');
+        return $this->hasMany('App\Models\Faq\Faq', 'category_id');
     }
 }

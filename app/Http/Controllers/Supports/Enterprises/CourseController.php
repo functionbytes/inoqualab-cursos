@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Supports\Enterprises;
 
+use App\Exports\Supports\CoursesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\Inscription;
-use App\Models\Invoice\InvoiceCondition;
-use App\Models\Method;
-use App\Models\Order\Order;
 use App\Models\User;
-use Carbon\Carbon;
+use App\Services\InscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -164,43 +162,29 @@ class CourseController extends Controller
 
     }
 
-    public function includes(Request $request)
+    public function includes(Request $request, InscriptionService $inscriptions)
     {
 
         $enterprise = Enterprise::slack($request->enterprise);
+        abort_unless($enterprise instanceof Enterprise, 404);
         $course = Course::slack($request->course);
+        abort_unless($enterprise->courses()->where('courses.id', $course->id)->exists(), 404);
         $users = explode(',', $request->users);
 
-        DB::transaction(function () use ($course, $users) {
-            foreach ($users as $user) {
-                $validate = User::identification($user);
-                $condition = InvoiceCondition::slug('pagada');
-                $method = Method::slug('acuerdo');
+        foreach ($users as $user) {
+            $validate = User::identification($user);
 
-                $order = new Order;
-                $order->slack = $this->generate_slack('users');
-                $order->subtotal = 0;
-                $order->discount = 0;
-                $order->total = 0;
-                $order->transaction = null;
-                $order->condition_id = $condition->id;
-                $order->method_id = $method->id;
-                $order->course_id = $course->id;
-                $order->user_id = $validate->id;
-                $order->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-                $order->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-                $order->payment_at = Carbon::now()->setTimezone('America/Bogota');
-                $order->save();
-
-                $include = new Inscription;
-                $include->user_id = $validate->id;
-                $include->course_id = $course->id;
-                $include->order_id = $order->id;
-                $include->culminated = 0;
-                $include->culminated_at = null;
-                $include->save();
+            if (! $validate instanceof User) {
+                continue;
             }
-        });
+
+            // Solo se matricula a usuarios que pertenecen a la empresa.
+            if (! $enterprise->users()->where('users.id', $validate->id)->exists()) {
+                continue;
+            }
+
+            $inscriptions->enrollSimple($validate, $course);
+        }
 
         return response()->json($enterprise->slack);
     }
@@ -242,6 +226,7 @@ class CourseController extends Controller
         $course = Course::slack($course);
 
         $inscription = EnterpriseCourse::validate($enterprise->id, $course->id);
+        abort_if($inscription === null, 404);
         $inscription->delete();
 
         return redirect()->route('support.supports.courses', $enterprise->slack);
@@ -277,11 +262,12 @@ class CourseController extends Controller
     public function assign($slack)
     {
 
-        $distributors = app('support');
-
         $enterprise = Enterprise::slack($slack);
         $distributor = $enterprise->distributor;
-        $courses = $distributor->courses;
+
+        // 143 de 252 empresas no tienen distribuidor asignado: sin catálogo de
+        // distribuidor del cual elegir, se ofrece el catálogo completo de cursos.
+        $courses = $distributor ? $distributor->courses : Course::available()->get();
         $course = $enterprise->courses;
 
         $courses = $courses->pluck('title', 'id');

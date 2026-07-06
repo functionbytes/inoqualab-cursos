@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Sliders\StoreSliderRequest;
+use App\Http\Requests\Managers\Settings\Sliders\UpdateSliderRequest;
 use App\Models\Slider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -82,9 +84,9 @@ class SlidersController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreSliderRequest $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('sliders.create'), 403);
 
         $slider = new Slider;
         $slider->slack = $this->generate_slack('sliders');
@@ -105,9 +107,9 @@ class SlidersController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateSliderRequest $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('sliders.update'), 403);
 
         $slider = Slider::slack($request->slack);
         $slider->title = $request->title;
@@ -129,7 +131,7 @@ class SlidersController extends Controller
 
     public function destroy($slack)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('sliders.delete'), 403);
 
         $slider = Slider::slack($slack);
         $slider->delete();
@@ -170,7 +172,7 @@ class SlidersController extends Controller
 
     public function storeThumbnails(Request $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('sliders.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
 
@@ -184,9 +186,12 @@ class SlidersController extends Controller
 
     public function deleteThumbnails($id)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
+        abort_unless(auth()->user()->can('sliders.delete'), 403);
 
-        Media::find($id)->delete();
+        Media::where('id', $id)
+            ->where('model_type', Slider::class)
+            ->where('collection_name', 'thumbnail')
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }

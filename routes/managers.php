@@ -46,12 +46,14 @@ use App\Http\Controllers\Managers\Mailer\MailerVariableController;
 use App\Http\Controllers\Managers\MailTemplates\MailTemplatesController;
 use App\Http\Controllers\Managers\NewsletterCampaignController;
 use App\Http\Controllers\Managers\NewsletterController;
+use App\Http\Controllers\Managers\NewsletterListController;
 use App\Http\Controllers\Managers\NotificationsController;
 use App\Http\Controllers\Managers\Orders\OrdersController;
 use App\Http\Controllers\Managers\Orders\ReportController as OrdersReportController;
 use App\Http\Controllers\Managers\Orders\ResumenController as OrdersResumenController;
 use App\Http\Controllers\Managers\Quizs\QuizController;
 use App\Http\Controllers\Managers\Quizs\TopicController as QuizTopicController;
+use App\Http\Controllers\Managers\RemarketingController;
 use App\Http\Controllers\Managers\ReportController;
 use App\Http\Controllers\Managers\Seo\GscController;
 use App\Http\Controllers\Managers\Seo\SchemaOrgController;
@@ -151,7 +153,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [TestimoniesController::class, 'store'])->name('manager.testimonies.store');
         Route::post('/update', [TestimoniesController::class, 'update'])->name('manager.testimonies.update');
         Route::get('/edit/{slack}', [TestimoniesController::class, 'edit'])->name('manager.testimonies.edit');
-        Route::get('/view/{slack}', [TestimoniesController::class, 'view'])->name('manager.testimonies.view');
         Route::delete('/destroy/{slack}', [TestimoniesController::class, 'destroy'])->name('manager.testimonies.destroy');
     });
 
@@ -162,7 +163,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [DepartmentsController::class, 'store'])->name('manager.departments.store');
         Route::post('/update', [DepartmentsController::class, 'update'])->name('manager.departments.update');
         Route::get('/edit/{slack}', [DepartmentsController::class, 'edit'])->name('manager.departments.edit');
-        Route::get('/view/{slack}', [DepartmentsController::class, 'view'])->name('manager.departaments.view');
         Route::delete('/destroy/{slack}', [DepartmentsController::class, 'destroy'])->name('manager.departments.destroy');
 
     });
@@ -189,7 +189,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [DistributorsController::class, 'store'])->name('manager.distributors.store');
         Route::post('/update', [DistributorsController::class, 'update'])->name('manager.distributors.update');
         Route::get('/edit/{slack}', [DistributorsController::class, 'edit'])->name('manager.distributors.edit');
-        Route::get('/view/{slack}', [DistributorsController::class, 'view'])->name('manager.distributors.view');
         Route::delete('/destroy/{slack}', [DistributorsController::class, 'destroy'])->name('manager.distributors.destroy');
         Route::get('/navegation/{slack}', [DistributorsController::class, 'navegation'])->name('manager.distributors.navegation');
 
@@ -208,7 +207,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/staff/create/{slack}', [DistributorStaffController::class, 'create'])->name('manager.distributors.staffs.create');
         Route::get('/staff/edit/{slack}', [DistributorStaffController::class, 'edit'])->name('manager.distributors.staffs.edit');
         Route::get('/staff/view/{slack}', [DistributorStaffController::class, 'view'])->name('manager.distributors.staffs.view');
-        Route::get('/staff/reports/{slack}', [DistributorStaffController::class, 'reports'])->name('manager.distributors.staffs.reports');
         Route::delete('/staff/destroy/{slack}', [DistributorStaffController::class, 'destroy'])->name('manager.distributors.staffs.destroy');
         Route::get('/staff/history/{slack}', [DistributorStaffController::class, 'history'])->name('manager.distributors.staffs.history');
 
@@ -224,9 +222,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [EnterprisesController::class, 'store'])->name('manager.enterprises.store');
         Route::post('/update', [EnterprisesController::class, 'update'])->name('manager.enterprises.update');
         Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('manager.enterprises.edit');
-        Route::get('/view/{slack}', [EnterprisesController::class, 'view'])->name('manager.enterprises.view');
         Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->name('manager.enterprises.destroy');
-        Route::get('/dashboard/{slack}', [EnterprisesController::class, 'dashboard'])->name('manager.enterprises.dashboard');
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('manager.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterprisesController::class, 'inscriptions'])->name('manager.enterprises.inscriptions');
 
@@ -248,7 +244,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
 
         Route::get('/users/create/{slack}', [EnterpriseUserController::class, 'create'])->name('manager.enterprises.users.create');
         Route::get('/users/edit/{slack}', [EnterpriseUserController::class, 'edit'])->name('manager.enterprises.users.edit');
-        Route::get('/users/view/{slack}', [EnterpriseUserController::class, 'view'])->name('manager.enterprises.users.view');
         Route::get('/users/postpone/{slack}', [EnterpriseCourseController::class, 'postponeUsers'])->name('manager.enterprises.postpone.users');
         Route::get('/users/reports/{slack}', [EnterpriseUserController::class, 'report'])->name('manager.enterprises.users.reports');
         Route::get('/users/import/{slack}', [EnterpriseUserController::class, 'import'])->name('manager.enterprises.users.import');
@@ -262,7 +257,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
 
         Route::get('/courses/progress/{user}', [EnterpriseCourseController::class, 'progress'])->name('manager.enterprises.courses.progress');
         Route::get('/courses/create/{slack}', [EnterpriseCourseController::class, 'create'])->name('manager.enterprises.courses.create');
-        Route::get('/courses/certificate/{slack}', [CertificatesController::class, 'view'])->name('manager.certificate.view');
         Route::get('/courses/orders/edit/{slack}', [OrdersController::class, 'edit'])->name('manager.order.edit');
         Route::get('/courses/certificate/download/{slack}', [CertificatesController::class, 'download'])->name('manager.certificate.download');
         Route::get('/courses/users/postpone/{slack}', [EnterpriseCourseController::class, 'postponeCourses'])->name('manager.enterprises.postpone.courses');
@@ -270,10 +264,9 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('manager.enterprises.courses.reasign');
         Route::get('/courses/insert/{enterprises}/{course}', [EnterpriseCourseController::class, 'insert'])->name('manager.enterprises.courses.insert');
         Route::get('/courses/reports/{enterprises}/{course}', [EnterpriseCourseController::class, 'report'])->name('manager.enterprises.courses.reports');
-        Route::get('/courses/notes/{enterprises}/{course}', [EnterpriseCourseController::class, 'notes'])->name('manager.enterprises.courses.notes');
         Route::get('/courses/view/{enterprises}/{course}', [EnterpriseCourseController::class, 'view'])->name('manager.enterprises.courses.view');
         Route::get('/courses/import/{enterprises}/{course}', [EnterpriseCourseController::class, 'import'])->name('manager.enterprises.courses.import');
-        Route::delete('/users/courses/destroy/{user}', [EnterpriseCourseController::class, 'destroyCourse'])->name('manager.enterprises.courses.user.destroy');
+        Route::delete('/users/courses/destroy/{slack}', [EnterpriseCourseController::class, 'destroys'])->name('manager.enterprises.courses.user.destroy');
     });
 
     Route::group(['prefix' => 'documents'], function () {
@@ -283,7 +276,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [DocumentsController::class, 'store'])->name('manager.documents.store');
         Route::post('/update', [DocumentsController::class, 'update'])->name('manager.documents.update');
         Route::get('/edit/{slack}', [DocumentsController::class, 'edit'])->name('manager.documents.edit');
-        Route::get('/view/{slack}', [DocumentsController::class, 'view'])->name('manager.documents.view');
         Route::delete('/destroy/{slack}', [DocumentsController::class, 'destroy'])->name('manager.documents.destroy');
 
         Route::post('/files', [DocumentsController::class, 'storeFiles'])->name('manager.documents.files');
@@ -295,10 +287,8 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
     Route::group(['prefix' => 'contacts'], function () {
 
         Route::get('/', [ContactsController::class, 'index'])->name('manager.contacts');
-        Route::get('/create', [ContactsController::class, 'create'])->name('manager.contacts.create');
         Route::post('/update', [ContactsController::class, 'update'])->name('manager.contacts.update');
         Route::get('/edit/{slack}', [ContactsController::class, 'edit'])->name('manager.contacts.edit');
-        Route::get('/view/{slack}', [ContactsController::class, 'view'])->name('manager.contacts.view');
         Route::delete('/destroy/{slack}', [ContactsController::class, 'destroy'])->name('manager.contacts.destroy');
 
     });
@@ -337,7 +327,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [TrustedsController::class, 'store'])->name('manager.trusteds.store');
         Route::post('/update', [TrustedsController::class, 'update'])->name('manager.trusteds.update');
         Route::get('/edit/{slack}', [TrustedsController::class, 'edit'])->name('manager.trusteds.edit');
-        Route::get('/view/{slack}', [TrustedsController::class, 'view'])->name('manager.trusteds.view');
         Route::delete('/destroy/{slack}', [TrustedsController::class, 'destroy'])->name('manager.trusteds.destroy');
 
         Route::post('/thumbnails', [TrustedsController::class, 'storeThumbnails'])->name('manager.trusteds.thumbnails');
@@ -353,7 +342,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [BundlesController::class, 'store'])->name('manager.bundles.store');
         Route::post('/update', [BundlesController::class, 'update'])->name('manager.bundles.update');
         Route::get('/edit/{slack}', [BundlesController::class, 'edit'])->name('manager.bundles.edit');
-        Route::get('/view/{slack}', [BundlesController::class, 'view'])->name('manager.bundles.view');
         Route::delete('/destroy/{slack}', [BundlesController::class, 'destroy'])->name('manager.bundles.destroy');
         Route::post('/toggle-available', [BundlesController::class, 'toggleAvailable'])->name('manager.bundles.toggle');
 
@@ -370,7 +358,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [SlidersController::class, 'store'])->name('manager.sliders.store');
         Route::post('/update', [SlidersController::class, 'update'])->name('manager.sliders.update');
         Route::get('/edit/{slack}', [SlidersController::class, 'edit'])->name('manager.sliders.edit');
-        Route::get('/view/{slack}', [SlidersController::class, 'view'])->name('manager.sliders.view');
         Route::delete('/destroy/{slack}', [SlidersController::class, 'destroy'])->name('manager.sliders.destroy');
         Route::post('/thumbnails', [SlidersController::class, 'storeThumbnails'])->name('manager.sliders.thumbnails');
         Route::delete('/delete/thumbnails/{id}', [SlidersController::class, 'deleteThumbnails'])->name('manager.sliders.thumbnails.delete');
@@ -453,7 +440,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/store', [CouponsController::class, 'store'])->name('manager.coupons.store');
         Route::post('/update', [CouponsController::class, 'update'])->name('manager.coupons.update');
         Route::get('/edit/{slack}', [CouponsController::class, 'edit'])->name('manager.coupons.edit');
-        Route::get('/view/{slack}', [CouponsController::class, 'view'])->name('manager.coupons.view');
         Route::delete('/destroy/{slack}', [CouponsController::class, 'destroy'])->name('manager.coupons.destroy');
 
     });
@@ -461,11 +447,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
     Route::group(['prefix' => 'orders'], function () {
 
         Route::get('/', [OrdersController::class, 'index'])->name('manager.orders');
-        Route::get('/get', [OrdersController::class, 'get'])->name('manager.orders.get');
-        Route::get('/create', [OrdersController::class, 'create'])->name('manager.orders.create');
-        Route::post('/store', [OrdersController::class, 'store'])->name('manager.orders.store');
         Route::post('/update', [OrdersController::class, 'update'])->name('manager.orders.update');
-        Route::get('/print/{slack}', [OrdersController::class, 'print'])->name('manager.orders.print');
         Route::get('/edit/{slack}', [OrdersController::class, 'edit'])->name('manager.orders.edit');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('manager.orders.view');
         Route::delete('/destroy/{slack}', [OrdersController::class, 'destroy'])->name('manager.orders.destroy');
@@ -515,6 +497,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/get/metadata/{id}', [MetaSettingsController::class, 'getMetas'])->name('manager.settings.metadata.get');
 
         Route::get('/maintenance', [MantenanceSettingsController::class, 'index'])->name('manager.settings.maintenance');
+        Route::get('/maintenance/secret', [MantenanceSettingsController::class, 'secret'])->name('manager.settings.maintenance.secret');
         Route::post('/maintenance/update', [MantenanceSettingsController::class, 'update'])->name('manager.settings.maintenance.update');
 
         Route::get('/pixel', [PixelSettingsController::class, 'index'])->name('manager.settings.pixel');
@@ -595,20 +578,16 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/', [UsersController::class, 'index'])->name('manager.users');
         Route::get('/create', [UsersController::class, 'create'])->name('manager.users.create');
         Route::post('/store', [UsersController::class, 'store'])->name('manager.users.store');
-        Route::post('/filters', [UsersController::class, 'filters'])->name('manager.users.filters');
         Route::post('/update', [UsersController::class, 'update'])->name('manager.users.update');
         Route::get('/edit/{slack}', [UsersController::class, 'edit'])->name('manager.users.edit');
         Route::get('/view/{slack}', [UsersController::class, 'view'])->name('manager.users.view');
         Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->name('manager.users.destroy');
-        Route::get('/dashboard/{slack}', [UsersController::class, 'dashboard'])->name('manager.users.dashboard');
         Route::get('/activitys/{slack}', [ActivitysController::class, 'index'])->name('manager.users.activitys');
-        Route::post('/reports/generate', [UsersController::class, 'generate'])->name('manager.users.generate');
 
         Route::get('/courses/{slack}', [EnterpriseCourseController::class, 'user'])->name('manager.enterprises.users.courses');
         Route::get('/orders/{slack}', [UsersController::class, 'orders'])->name('manager.users.orders');
-        Route::get('/inscriptions/{slack}', [UsersController::class, 'inscriptions'])->name('manager.users.inscriptions');
-        Route::get('/certifications/{slack}', [CertificatesController::class, 'index'])->name('manager.enterprises.users.certificates');
-        Route::get('/results/{slack}', [ResultsController::class, 'index'])->name('manager.enterprises.users.results');
+        Route::get('/certifications/{slack}', [CertificatesController::class, 'index'])->name('manager.users.certificates');
+        Route::get('/results/{slack}', [ResultsController::class, 'index'])->name('manager.users.results');
         Route::post('/activitys/lists', [ActivitysController::class, 'lists'])->name('manager.enterprises.users.lists');
         Route::get('/activitys/view/{slack}', [ActivitysController::class, 'view'])->name('manager.enterprises.activitys.view');
 
@@ -632,7 +611,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/duplicate/action', [CoursesController::class, 'action'])->name('manager.courses.action');
         Route::get('/duplicate/{slack}', [CoursesController::class, 'duplicate'])->name('manager.courses.duplicate');
         Route::get('/edit/{slack}', [CoursesController::class, 'edit'])->name('manager.courses.edit');
-        Route::get('/view/{slack}', [CoursesController::class, 'view'])->name('manager.courses.view');
         Route::delete('/destroy/{slack}', [CoursesController::class, 'destroy'])->name('manager.courses.destroy');
         Route::post('/bulk-action', [CoursesController::class, 'bulkAction'])->name('manager.courses.bulk-action');
         Route::get('/navegation/{slack}', [CoursesController::class, 'navegation'])->name('manager.courses.navegation');
@@ -650,62 +628,65 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::delete('/categories/destroy/{slack}', [CoursesCategoriesController::class, 'destroy'])->name('manager.categories.courses.destroy');
 
         Route::get('/lessons/{slack}', [CourseLessonsController::class, 'index'])->name('manager.courses.lessons');
-        Route::get('/lessons/create/{slack}', [CourseLessonsController::class, 'create'])->name('manager.courses.lessons.create');
         Route::post('/lessons/store', [CourseLessonsController::class, 'store'])->name('manager.courses.lessons.store');
         Route::post('/lessons/update', [CourseLessonsController::class, 'update'])->name('manager.courses.lessons.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/lessons/edit/{slack}', [CourseLessonsController::class, 'edit'])->name('manager.courses.lessons.edit');
         Route::delete('/lessons/destroy/{slack}', [CourseLessonsController::class, 'destroy'])->name('manager.courses.lessons.destroy');
+        Route::post('/lessons/reorder', [CourseLessonsController::class, 'reorder'])->name('manager.courses.lessons.reorder');
+        Route::post('/lessons/bulk-action', [CourseLessonsController::class, 'bulkAction'])->name('manager.courses.lessons.bulk-action');
 
         Route::get('/announcements/{slack}', [CourseAnnouncementsController::class, 'index'])->name('manager.courses.announcements');
-        Route::get('/announcements/create/{slack}', [CourseAnnouncementsController::class, 'create'])->name('manager.courses.announcements.create');
         Route::post('/announcements/store', [CourseAnnouncementsController::class, 'store'])->name('manager.courses.announcements.store');
         Route::post('/announcements/update', [CourseAnnouncementsController::class, 'update'])->name('manager.courses.announcements.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/announcements/edit/{slack}', [CourseAnnouncementsController::class, 'edit'])->name('manager.courses.announcements.edit');
         Route::delete('/announcements/destroy/{slack}', [CourseAnnouncementsController::class, 'destroy'])->name('manager.courses.announcements.destroy');
 
         Route::get('/chapters/{slack}', [CourseChapterController::class, 'index'])->name('manager.courses.chapters');
-        Route::get('/chapters/create/{slack}', [CourseChapterController::class, 'create'])->name('manager.courses.chapters.create');
         Route::post('/chapters/store', [CourseChapterController::class, 'store'])->name('manager.courses.chapters.store');
         Route::post('/chapters/update', [CourseChapterController::class, 'update'])->name('manager.courses.chapters.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/chapters/edit/{slack}', [CourseChapterController::class, 'edit'])->name('manager.courses.chapters.edit');
         Route::delete('/chapters/destroy/{slack}', [CourseChapterController::class, 'destroy'])->name('manager.courses.chapters.destroy');
+        Route::post('/chapters/reorder', [CourseChapterController::class, 'reorder'])->name('manager.courses.chapters.reorder');
 
         Route::get('/quiz/{slack}', [QuizController::class, 'index'])->name('manager.courses.quiz');
-        Route::get('/quiz/create/{slack}', [QuizController::class, 'create'])->name('manager.courses.quiz.create');
         Route::post('/quiz/store', [QuizController::class, 'store'])->name('manager.courses.quiz.store');
         Route::post('/quiz/update', [QuizController::class, 'update'])->name('manager.courses.quiz.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/quiz/edit/{slack}', [QuizController::class, 'edit'])->name('manager.courses.quiz.edit');
         Route::delete('/quiz/destroy/{slack}', [QuizController::class, 'destroy'])->name('manager.courses.quiz.destroy');
 
         Route::get('/quiz/questions/{slack}', [QuizTopicController::class, 'index'])->name('manager.courses.quiz.questions');
-        Route::get('/quiz/questions/create/{slack}', [QuizTopicController::class, 'create'])->name('manager.courses.quiz.questions.create');
         Route::post('/quiz/questions/store', [QuizTopicController::class, 'store'])->name('manager.courses.quiz.questions.store');
         Route::post('/quiz/questions/update', [QuizTopicController::class, 'update'])->name('manager.courses.quiz.questions.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/quiz/questions/edit/{slack}', [QuizTopicController::class, 'edit'])->name('manager.courses.quiz.questions.edit');
         Route::delete('/quiz/questions/destroy/{slack}', [QuizTopicController::class, 'destroy'])->name('manager.courses.quiz.questions.destroy');
 
         Route::get('/exam/{slack}', [ExamController::class, 'index'])->name('manager.courses.exam');
-        Route::get('/exam/create/{slack}', [ExamController::class, 'create'])->name('manager.courses.exam.create');
         Route::post('/exam/store', [ExamController::class, 'store'])->name('manager.courses.exam.store');
         Route::post('/exam/update', [ExamController::class, 'update'])->name('manager.courses.exam.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/exam/edit/{slack}', [ExamController::class, 'edit'])->name('manager.courses.exam.edit');
         Route::delete('/exam/destroy/{slack}', [ExamController::class, 'destroy'])->name('manager.courses.exam.destroy');
 
         Route::get('/exam/questions/{slack}', [ExamTopicController::class, 'index'])->name('manager.courses.exam.questions');
-        Route::get('/exam/questions/create/{slack}', [ExamTopicController::class, 'create'])->name('manager.courses.exam.questions.create');
         Route::post('/exam/questions/store', [ExamTopicController::class, 'store'])->name('manager.courses.exam.questions.store');
         Route::post('/exam/questions/update', [ExamTopicController::class, 'update'])->name('manager.courses.exam.questions.update');
+        // Crear/editar/eliminar se manejan en modal desde el listado; .edit devuelve JSON para poblarlo.
         Route::get('/exam/questions/edit/{slack}', [ExamTopicController::class, 'edit'])->name('manager.courses.exam.questions.edit');
         Route::delete('/exam/questions/destroy/{slack}', [ExamTopicController::class, 'destroy'])->name('manager.courses.exam.questions.destroy');
 
         Route::post('/reports/generate', [ReportController::class, 'generate'])->name('manager.courses.generate');
 
-        Route::get('/certifications/{slack}', [CertificatesController::class, 'broad'])->name('manager.enterprises.certificate.broad');
-        Route::get('/certificate/course/{slack}', [CertificatesController::class, 'course'])->name('manager.enterprises.certificate.course');
-        Route::get('/certificate/user/{slack}', [CertificatesController::class, 'user'])->name('manager.enterprises.certificate.user');
+        Route::get('/certifications/{slack}', [CertificatesController::class, 'broad'])->name('manager.certificate.broad');
+        Route::get('/certificate/course/{slack}', [CertificatesController::class, 'course'])->name('manager.certificate.course');
+        Route::get('/certificate/user/{slack}', [CertificatesController::class, 'user'])->name('manager.certificate.user');
 
-        Route::get('/results/view/{slack}', [ResultsController::class, 'view'])->name('manager.enterprises.results.view');
-        Route::get('/results/download/{slack}', [ResultsController::class, 'download'])->name('manager.enterprises.results.download');
+        Route::get('/results/view/{slack}', [ResultsController::class, 'view'])->name('manager.results.view');
+        Route::get('/results/download/{slack}', [ResultsController::class, 'download'])->name('manager.results.download');
 
     });
 
@@ -847,6 +828,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
             Route::get('/', [SeoAlertsController::class, 'index'])->name('index');
             Route::post('/{seoAlert}/acknowledge', [SeoAlertsController::class, 'acknowledge'])->name('acknowledge');
             Route::post('/acknowledge-all', [SeoAlertsController::class, 'acknowledgeAll'])->name('acknowledge-all');
+            Route::delete('/{seoAlert}', [SeoAlertsController::class, 'destroy'])->name('destroy');
         });
 
         // Plantillas SEO
@@ -931,6 +913,20 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::post('/{campaign}/retry', [NewsletterCampaignController::class, 'retry'])->name('retry');
     });
 
+    Route::get('/newsletter/remarketing', [RemarketingController::class, 'index'])->name('manager.newsletter.remarketing');
+
+    Route::prefix('newsletter/lists')->name('manager.newsletter.lists.')->group(function () {
+        Route::get('/', [NewsletterListController::class, 'index'])->name('index');
+        Route::get('/create', [NewsletterListController::class, 'create'])->name('create');
+        Route::post('/', [NewsletterListController::class, 'store'])->name('store');
+        Route::get('/{list}/members', [NewsletterListController::class, 'show'])->name('members');
+        Route::post('/{list}/members', [NewsletterListController::class, 'addMember'])->name('members.add');
+        Route::delete('/{list}/members/{newsletter}', [NewsletterListController::class, 'removeMember'])->name('members.remove');
+        Route::get('/{list}/edit', [NewsletterListController::class, 'edit'])->name('edit');
+        Route::put('/{list}', [NewsletterListController::class, 'update'])->name('update');
+        Route::delete('/{list}', [NewsletterListController::class, 'destroy'])->name('destroy');
+    });
+
     Route::prefix('newsletter')->name('manager.newsletter.')->group(function () {
         Route::get('/', [NewsletterController::class, 'index'])->name('index');
         Route::post('/', [NewsletterController::class, 'store'])->name('store');
@@ -944,26 +940,26 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
 
     // ─── Mailer ──────────────────────────────────────────────────────────────────
     // El nombre de ruta `mailers.*` no sigue la convención `manager.*`, así que
-    // EnforcePanelPermission no lo cubre. Mailer es infraestructura de Newsletter
-    // (sus escrituras ya exigen `newsletters.*`), por lo que se exige el permiso
-    // de lectura del newsletter para todo el grupo.
+    // EnforcePanelPermission no lo cubre. Mailer es infraestructura de Newsletter:
+    // el grupo exige lectura (`newsletters.view`) y cada acción de escritura
+    // exige además el verbo correspondiente (`newsletters.create/update/delete`).
     Route::prefix('settings/mailers')->name('mailers.')->middleware('can:newsletters.view')->group(function () {
 
         // Templates
         Route::prefix('templates')->name('templates.')->group(function () {
             Route::get('/', [MailerTemplateController::class, 'index'])->name('index');
             Route::get('/create', [MailerTemplateController::class, 'create'])->name('create');
-            Route::post('/', [MailerTemplateController::class, 'store'])->name('store');
+            Route::post('/', [MailerTemplateController::class, 'store'])->name('store')->middleware('can:newsletters.create');
             Route::get('/{uid}/edit', [MailerTemplateController::class, 'edit'])->name('edit');
-            Route::patch('/{uid}', [MailerTemplateController::class, 'update'])->name('update');
-            Route::delete('/{uid}', [MailerTemplateController::class, 'destroy'])->name('destroy');
+            Route::patch('/{uid}', [MailerTemplateController::class, 'update'])->name('update')->middleware('can:newsletters.update');
+            Route::delete('/{uid}', [MailerTemplateController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
             Route::get('/{uid}/preview', [MailerTemplateController::class, 'preview'])->name('preview');
             Route::post('/{uid}/preview-ajax', [MailerTemplateController::class, 'previewAjax'])->name('preview-ajax');
             Route::get('/{uid}/versions', [MailerTemplateController::class, 'versions'])->name('versions');
-            Route::post('/{uid}/versions/{version}/restore', [MailerTemplateController::class, 'restoreVersion'])->name('versions.restore');
-            Route::post('/{uid}/toggle-status', [MailerTemplateController::class, 'toggleStatus'])->name('toggle-status');
-            Route::post('/{uid}/send-test', [MailerTemplateController::class, 'sendTest'])->name('send-test');
-            Route::post('/bulk-action', [MailerTemplateController::class, 'bulkAction'])->name('bulk-action');
+            Route::post('/{uid}/versions/{version}/restore', [MailerTemplateController::class, 'restoreVersion'])->name('versions.restore')->middleware('can:newsletters.update');
+            Route::post('/{uid}/toggle-status', [MailerTemplateController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
+            Route::post('/{uid}/send-test', [MailerTemplateController::class, 'sendTest'])->name('send-test')->middleware('can:newsletters.update');
+            Route::post('/bulk-action', [MailerTemplateController::class, 'bulkAction'])->name('bulk-action')->middleware('can:newsletters.delete');
             Route::post('/format-html', [MailerTemplateController::class, 'formatHtml'])->name('format-html');
             Route::get('/{uid}/variables', [MailerTemplateController::class, 'variables'])->name('variables');
             Route::get('/variables-by-module', [MailerTemplateController::class, 'variablesByModule'])->name('variables-by-module');
@@ -973,14 +969,14 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::prefix('components')->name('components.')->group(function () {
             Route::get('/', [MailerComponentController::class, 'index'])->name('index');
             Route::get('/create', [MailerComponentController::class, 'create'])->name('create');
-            Route::post('/', [MailerComponentController::class, 'store'])->name('store');
+            Route::post('/', [MailerComponentController::class, 'store'])->name('store')->middleware('can:newsletters.create');
             Route::get('/{uid}/edit', [MailerComponentController::class, 'edit'])->name('edit');
-            Route::patch('/{uid}', [MailerComponentController::class, 'update'])->name('update');
-            Route::delete('/{uid}', [MailerComponentController::class, 'destroy'])->name('destroy');
+            Route::patch('/{uid}', [MailerComponentController::class, 'update'])->name('update')->middleware('can:newsletters.update');
+            Route::delete('/{uid}', [MailerComponentController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
             Route::get('/{uid}/preview', [MailerComponentController::class, 'preview'])->name('preview');
             Route::post('/{uid}/preview-ajax', [MailerComponentController::class, 'previewAjax'])->name('preview-ajax');
-            Route::post('/{uid}/duplicate', [MailerComponentController::class, 'duplicate'])->name('duplicate');
-            Route::post('/{uid}/toggle-status', [MailerComponentController::class, 'toggleStatus'])->name('toggle-status');
+            Route::post('/{uid}/duplicate', [MailerComponentController::class, 'duplicate'])->name('duplicate')->middleware('can:newsletters.create');
+            Route::post('/{uid}/toggle-status', [MailerComponentController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
             Route::get('/variables', [MailerComponentController::class, 'variables'])->name('variables');
         });
 
@@ -988,11 +984,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::prefix('variables')->name('variables.')->group(function () {
             Route::get('/', [MailerVariableController::class, 'index'])->name('index');
             Route::get('/create', [MailerVariableController::class, 'create'])->name('create');
-            Route::post('/', [MailerVariableController::class, 'store'])->name('store');
+            Route::post('/', [MailerVariableController::class, 'store'])->name('store')->middleware('can:newsletters.create');
             Route::get('/{variable}/edit', [MailerVariableController::class, 'edit'])->name('edit');
-            Route::patch('/{variable}', [MailerVariableController::class, 'update'])->name('update');
-            Route::delete('/{variable}', [MailerVariableController::class, 'destroy'])->name('destroy');
-            Route::post('/{variable}/toggle-status', [MailerVariableController::class, 'toggleStatus'])->name('toggle-status');
+            Route::patch('/{variable}', [MailerVariableController::class, 'update'])->name('update')->middleware('can:newsletters.update');
+            Route::delete('/{variable}', [MailerVariableController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
+            Route::post('/{variable}/toggle-status', [MailerVariableController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
             Route::get('/by-module', [MailerVariableController::class, 'getByModule'])->name('by-module');
             Route::get('/grouped-by-category', [MailerVariableController::class, 'getGroupedByCategory'])->name('grouped-by-category');
             Route::get('/available-keys', [MailerVariableController::class, 'getAvailableKeys'])->name('available-keys');
@@ -1003,12 +999,13 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
             Route::get('/documentation', [MailerEndpointController::class, 'documentation'])->name('documentation');
             Route::get('/', [MailerEndpointController::class, 'index'])->name('index');
             Route::get('/create', [MailerEndpointController::class, 'create'])->name('create');
-            Route::post('/', [MailerEndpointController::class, 'store'])->name('store');
+            Route::post('/', [MailerEndpointController::class, 'store'])->name('store')->middleware('can:newsletters.create');
             Route::get('/{endpoint}/edit', [MailerEndpointController::class, 'edit'])->name('edit');
-            Route::patch('/{endpoint}', [MailerEndpointController::class, 'update'])->name('update');
-            Route::delete('/{endpoint}', [MailerEndpointController::class, 'destroy'])->name('destroy');
+            Route::patch('/{endpoint}', [MailerEndpointController::class, 'update'])->name('update')->middleware('can:newsletters.update');
+            Route::delete('/{endpoint}', [MailerEndpointController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
             Route::get('/{endpoint}/logs', [MailerEndpointController::class, 'logs'])->name('logs');
-            Route::post('/{endpoint}/regenerate-token', [MailerEndpointController::class, 'regenerateToken'])->name('regenerate-token');
+            // Rotar el token invalida el actual: acción sensible, exige `update`.
+            Route::post('/{endpoint}/regenerate-token', [MailerEndpointController::class, 'regenerateToken'])->name('regenerate-token')->middleware('can:newsletters.update');
         });
 
     });

@@ -39,18 +39,25 @@ class RatesController extends Controller
         foreach ($request->courses as $id => $price) {
             $course = DistributorCourse::find($id);
 
-            if ($course) {
-                $course->price = $price;
-                $course->save();
-                $updated = true;
-            } else {
-
+            // Ownership: la tarifa debe pertenecer al distribuidor resuelto arriba,
+            // si no cualquier id de distributor_courses ajeno sobreescribe su precio.
+            if (! $course || $course->distributor_id !== $distributor->id) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Curso no encontrado: '.$id,
                 ]);
-
             }
+
+            if (! is_numeric($price) || $price < 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El precio ingresado no es válido.',
+                ]);
+            }
+
+            $course->price = $price;
+            $course->save();
+            $updated = true;
         }
 
         if ($updated) {

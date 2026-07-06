@@ -80,7 +80,8 @@ CREATE TABLE `activity_log` (
   PRIMARY KEY (`id`),
   KEY `subject` (`subject_type`,`subject_id`),
   KEY `causer` (`causer_type`,`causer_id`),
-  KEY `activity_log_log_name_index` (`log_name`)
+  KEY `activity_log_log_name_index` (`log_name`),
+  KEY `activity_log_created_at_index` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `analytics_report_schedules`;
@@ -112,6 +113,7 @@ CREATE TABLE `blog_categories` (
   `available` tinyint(1) DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `blog_categories_slug_index` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -141,6 +143,7 @@ CREATE TABLE `blog_tags` (
   `available` tinyint(1) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -228,6 +231,7 @@ CREATE TABLE `certificates` (
   KEY `certificates_certifier_id_foreign` (`certifier_id`),
   KEY `certificates_certification_id_foreign` (`certification_id`),
   KEY `certificates_user_id_course_id_inscription_id_exam_id_index` (`user_id`,`course_id`,`inscription_id`,`exam_id`),
+  KEY `certificates_slack_index` (`slack`),
   CONSTRAINT `certificates_certification_id_foreign` FOREIGN KEY (`certification_id`) REFERENCES `certifications` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `certificates_certifier_id_foreign` FOREIGN KEY (`certifier_id`) REFERENCES `certifiers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `certificates_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -265,6 +269,7 @@ CREATE TABLE `certifiers` (
   `description` text DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -419,6 +424,8 @@ CREATE TABLE `course_chapters` (
   PRIMARY KEY (`id`),
   KEY `fk_coursechapters_courses_idx` (`course_id`),
   KEY `course_chapters_available_index` (`available`),
+  KEY `course_chapters_slack_index` (`slack`),
+  KEY `course_chapters_course_avail_pos_index` (`course_id`,`available`,`position`),
   CONSTRAINT `fk_coursechapters_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -450,6 +457,8 @@ CREATE TABLE `course_lessons` (
   KEY `fk_courseclasses_types_idx` (`type_id`),
   KEY `fk_courseclasses_courses_idx` (`course_id`),
   KEY `course_lessons_available_index` (`available`),
+  KEY `course_lessons_slack_index` (`slack`),
+  KEY `course_lessons_course_avail_pos_index` (`course_id`,`available`,`position`),
   CONSTRAINT `fk_courseclasses_chapters_idx` FOREIGN KEY (`chapter_id`) REFERENCES `course_chapters` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_courseclasses_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_courseclasses_types_idx` FOREIGN KEY (`type_id`) REFERENCES `course_types` (`id`)
@@ -560,6 +569,8 @@ CREATE TABLE `courses` (
   KEY `courses_available_index` (`available`),
   KEY `courses_certification_id_index` (`certification_id`),
   KEY `courses_certifier_id_index` (`certifier_id`),
+  KEY `courses_slack_index` (`slack`),
+  KEY `courses_created_at_index` (`created_at`),
   CONSTRAINT `fk_courses_categories_idx` FOREIGN KEY (`categorie_id`) REFERENCES `course_categories` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -574,6 +585,7 @@ CREATE TABLE `departments` (
   `available` tinyint(4) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -831,9 +843,11 @@ CREATE TABLE `exam_questions` (
   `available` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_examquestions_topics_idx` (`topic_id`),
   KEY `fk_examquestions_courses_idx` (`course_id`),
+  KEY `exam_questions_slack_index` (`slack`),
   CONSTRAINT `fk_examquestions_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_examquestions_topics_idx` FOREIGN KEY (`topic_id`) REFERENCES `exam_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -857,8 +871,10 @@ CREATE TABLE `exam_topics` (
   `course_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_examtopics_courses_idx` (`course_id`),
+  KEY `exam_topics_slack_index` (`slack`),
   CONSTRAINT `fk_examtopics_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -913,6 +929,7 @@ CREATE TABLE `faq_categories` (
   `available` tinyint(4) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -929,6 +946,7 @@ CREATE TABLE `faqs` (
   `category_id` bigint(20) unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `faqs_category_id_foreign` (`category_id`),
   CONSTRAINT `faqs_category_id_foreign` FOREIGN KEY (`category_id`) REFERENCES `faq_categories` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1050,6 +1068,7 @@ CREATE TABLE `inscriptions` (
   KEY `inscriptions_order_id_foreign` (`order_id`),
   KEY `inscriptions_user_id_course_id_order_id_percent_culminated_index` (`user_id`,`course_id`,`order_id`,`percent`,`culminated`),
   KEY `inscriptions_culminated_expire_index` (`culminated`,`expire`),
+  KEY `inscriptions_slack_index` (`slack`),
   CONSTRAINT `inscriptions_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `inscriptions_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `inscriptions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1067,6 +1086,7 @@ CREATE TABLE `instruction_categories` (
   `available` tinyint(4) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1199,6 +1219,7 @@ CREATE TABLE `invoices` (
   KEY `invoices_method_id_foreign` (`method_id`),
   KEY `invoices_condition_id_foreign` (`condition_id`),
   KEY `invoice_indexes` (`distributor_id`,`method_id`,`condition_id`,`number`),
+  KEY `invoices_created_at_index` (`created_at`),
   CONSTRAINT `invoices_condition_id_foreign` FOREIGN KEY (`condition_id`) REFERENCES `invoice_condition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `invoices_distributor_id_foreign` FOREIGN KEY (`distributor_id`) REFERENCES `distributors` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `invoices_method_id_foreign` FOREIGN KEY (`method_id`) REFERENCES `invoice_method` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -1490,6 +1511,7 @@ DROP TABLE IF EXISTS `newsletter_campaigns`;
 CREATE TABLE `newsletter_campaigns` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `uid` char(36) NOT NULL,
+  `newsletter_list_id` bigint(20) unsigned DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `subject` varchar(255) NOT NULL,
   `preheader` varchar(255) DEFAULT NULL,
@@ -1508,7 +1530,43 @@ CREATE TABLE `newsletter_campaigns` (
   UNIQUE KEY `newsletter_campaigns_uid_unique` (`uid`),
   KEY `newsletter_campaigns_created_by_foreign` (`created_by`),
   KEY `newsletter_campaigns_status_index` (`status`),
-  CONSTRAINT `newsletter_campaigns_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+  KEY `newsletter_campaigns_newsletter_list_id_foreign` (`newsletter_list_id`),
+  CONSTRAINT `newsletter_campaigns_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `newsletter_campaigns_newsletter_list_id_foreign` FOREIGN KEY (`newsletter_list_id`) REFERENCES `newsletter_lists` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `newsletter_list_subscriber`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `newsletter_list_subscriber` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `newsletter_list_id` bigint(20) unsigned NOT NULL,
+  `newsletter_id` bigint(20) NOT NULL,
+  `added_reason` varchar(191) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `nls_subscriber_unique` (`newsletter_list_id`,`newsletter_id`),
+  KEY `newsletter_list_subscriber_newsletter_id_foreign` (`newsletter_id`),
+  CONSTRAINT `newsletter_list_subscriber_newsletter_id_foreign` FOREIGN KEY (`newsletter_id`) REFERENCES `newsletters` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `newsletter_list_subscriber_newsletter_list_id_foreign` FOREIGN KEY (`newsletter_list_id`) REFERENCES `newsletter_lists` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `newsletter_lists`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `newsletter_lists` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `slack` varchar(191) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `trigger` enum('manual','course_completed','certificate_expiring','course_access_expiring') NOT NULL DEFAULT 'manual',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `newsletter_lists_slack_unique` (`slack`),
+  KEY `newsletter_lists_trigger_index` (`trigger`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `newsletters`;
@@ -1641,6 +1699,7 @@ CREATE TABLE `orders` (
   `total_tax_amount` decimal(13,2) NOT NULL DEFAULT 0.00,
   `total_order_amount` decimal(13,2) NOT NULL DEFAULT 0.00,
   `payment_at` timestamp NULL DEFAULT NULL,
+  `reminded_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` varchar(45) DEFAULT NULL,
@@ -1654,6 +1713,8 @@ CREATE TABLE `orders` (
   KEY `orders_user_id_foreign` (`user_id`),
   KEY `orders_coupon_id_foreign` (`coupon_id`),
   KEY `orders_user_id_condition_id_index` (`user_id`,`condition_id`),
+  KEY `orders_method_id_condition_id_index` (`method_id`,`condition_id`),
+  KEY `orders_created_at_index` (`created_at`),
   CONSTRAINT `orders_condition_id_foreign` FOREIGN KEY (`condition_id`) REFERENCES `order_condition` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `orders_coupon_id_foreign` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `orders_method_id_foreign` FOREIGN KEY (`method_id`) REFERENCES `order_method` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -1715,6 +1776,23 @@ CREATE TABLE `password_resets` (
   `token` varchar(191) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   KEY `password_resets_email_index` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `payment_events`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `payment_events` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `transaction_id` varchar(191) NOT NULL,
+  `status` varchar(191) NOT NULL,
+  `reference` varchar(191) DEFAULT NULL,
+  `payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload`)),
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `payment_events_transaction_id_status_unique` (`transaction_id`,`status`),
+  KEY `payment_events_transaction_id_index` (`transaction_id`),
+  KEY `payment_events_reference_index` (`reference`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `payment_gateways`;
@@ -1814,9 +1892,11 @@ CREATE TABLE `quiz_questions` (
   `available` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_quizquestions_class_idx` (`lesson_id`),
   KEY `fk_quizquestions_topics_idx` (`topic_id`),
+  KEY `quiz_questions_slack_index` (`slack`),
   CONSTRAINT `fk_quizquestions_class_idx` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_quizquestions_topics_idx` FOREIGN KEY (`topic_id`) REFERENCES `quiz_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -1840,9 +1920,11 @@ CREATE TABLE `quiz_topics` (
   `type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_quiztopics_class_idx` (`lesson_id`),
   KEY `fk_quiztopics_courses_idx` (`course_id`),
+  KEY `quiz_topics_slack_index` (`slack`),
   CONSTRAINT `fk_quiztopics_class_idx` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_quiztopics_courses_idx` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
@@ -1875,6 +1957,21 @@ CREATE TABLE `quizs` (
   CONSTRAINT `fk_quizs_topics_idx` FOREIGN KEY (`topic_id`) REFERENCES `quiz_topics` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_quizs_users_idx` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `remarketing_runs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `remarketing_runs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `command` varchar(100) NOT NULL,
+  `cohort_date` date DEFAULT NULL,
+  `found` int(10) unsigned NOT NULL DEFAULT 0,
+  `sent` int(10) unsigned NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `remarketing_runs_command_created_at_index` (`command`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `reviewables`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -2561,5 +2658,16 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (263,'2026_06_11_30
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (264,'2026_06_10_181416_create_newsletter_campaigns_table',35);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (265,'2026_06_12_193744_create_permission_tables',36);
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (266,'2026_06_13_120000_add_performance_indexes',37);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (267,'2026_06_13_120000_add_reminded_at_to_orders_table',38);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (268,'2026_06_13_121000_create_payment_events_table',39);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (269,'2026_06_14_183645_add_soft_deletes_to_entities',40);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (271,'2026_06_23_010733_add_slack_indexes_to_inscriptions_and_certificates',41);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (273,'2026_06_23_025839_add_method_condition_index_to_orders',42);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (275,'2026_06_23_053233_add_created_at_index_to_activity_log',43);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (276,'2026_07_05_083414_add_created_at_index_to_orders_and_invoices',44);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (278,'2026_07_05_120000_create_newsletter_lists_tables',45);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (280,'2026_07_05_130000_add_builder_performance_indexes',46);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (281,'2026_07_05_140000_add_access_expiring_to_newsletter_lists_trigger',47);
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES (283,'2026_07_06_120000_create_remarketing_runs_table',48);
 COMMIT;
 SET AUTOCOMMIT=@OLD_AUTOCOMMIT;

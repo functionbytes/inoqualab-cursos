@@ -21,8 +21,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Nombre</label>
-                                <p class="form-control-plaintext border rounded px-3 py-2 bg-light">{{ $categorie->name }}</p>
+                                <label class="form-label fw-semibold">Título</label>
+                                <p class="form-control-plaintext border rounded px-3 py-2 bg-light">{{ $categorie->title }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -31,14 +31,6 @@
                                 <p class="form-control-plaintext border rounded px-3 py-2 bg-light">{{ $categorie->slug }}</p>
                             </div>
                         </div>
-                        @if($categorie->description)
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Descripción</label>
-                                <p class="form-control-plaintext border rounded px-3 py-2 bg-light">{{ $categorie->description }}</p>
-                            </div>
-                        </div>
-                        @endif
                     </div>
                 </div>
             </div>

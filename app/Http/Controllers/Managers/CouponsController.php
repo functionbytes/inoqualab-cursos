@@ -109,8 +109,11 @@ class CouponsController extends Controller
         $coupon->code = $request->code;
         $coupon->type = $request->type;
         $coupon->amount = $request->amount;
-        $coupon->bundle_ids = ! empty($request->bundles) ? $request->bundles : null;
-        $coupon->course_ids = ! empty($request->courses) ? $request->courses : null;
+        // courses[]/bundles[] llegan como arrays (select2 multiple); la columna es
+        // un longtext coma-separado que el carrito consume con explode(',', ...).
+        // Asignar el array directo persistía el literal 'Array'.
+        $coupon->bundle_ids = ! empty($request->bundles) ? implode(',', (array) $request->bundles) : null;
+        $coupon->course_ids = ! empty($request->courses) ? implode(',', (array) $request->courses) : null;
         $coupon->available = $request->available;
         $coupon->min_price = $request->min_price;
         $coupon->limit = $request->limit ?? 0;
@@ -144,8 +147,11 @@ class CouponsController extends Controller
         $coupon->code = $request->code;
         $coupon->type = $request->type;
         $coupon->amount = $request->amount;
-        $coupon->bundle_ids = ! empty($request->bundles) ? $request->bundles : null;
-        $coupon->course_ids = ! empty($request->courses) ? $request->courses : null;
+        // courses[]/bundles[] llegan como arrays (select2 multiple); la columna es
+        // un longtext coma-separado que el carrito consume con explode(',', ...).
+        // Asignar el array directo persistía el literal 'Array'.
+        $coupon->bundle_ids = ! empty($request->bundles) ? implode(',', (array) $request->bundles) : null;
+        $coupon->course_ids = ! empty($request->courses) ? implode(',', (array) $request->courses) : null;
         $coupon->available = $request->available;
         $coupon->min_price = $request->min_price;
         $coupon->limit = $request->limit ?? 0;

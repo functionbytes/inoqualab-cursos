@@ -32,10 +32,10 @@
                 $read_class = $progress;
                 $read_count = count($read_class);
 
-                if($read_count == 0){
+                if($total_count == 0){
                     $progres = 0;
                 }else{
-                    $progres = ($total_count / $read_count) * $total_per;
+                    $progres = ($read_count / $total_count) * $total_per;
                 }
 
             @endphp
@@ -82,7 +82,7 @@
                                     @foreach ($chapter as $key => $class)
 
                                         @php
-                                        $validate = App\Models\Course\CourseProgress::validate($class->id,$inscription->id,$user->id);
+                                        $validate = $completedLessons->has($class->id);
                                         @endphp
 
                                         <tr>

@@ -36,8 +36,8 @@
                             </div>
                             @if (count($certificates) > 1)
                                 <div class="col-auto">
-                                    <a href=" {{ route('distributors.certificate.broad', $user->slack) }}" class="btn btn-primary">
-                                        <i class="fa-light fa-file-certificate"></i>
+                                    <a href=" {{ route('support.enterprises.users.certificate.broad', $user->slack) }}" class="btn btn-primary">
+                                        <i class="fa-solid fa-certificate"></i>
                                     </a>
                                 </div>
                              @endif

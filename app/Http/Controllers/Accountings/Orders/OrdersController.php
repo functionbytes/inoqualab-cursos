@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accountings\Orders;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Accountings\UpdateOrderRequest;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
@@ -118,7 +119,7 @@ class OrdersController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateOrderRequest $request)
     {
 
         $order = Order::slack($request->slack);

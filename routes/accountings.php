@@ -16,7 +16,7 @@ use App\Http\Controllers\Accountings\Orders\ResumenController as OrdersResumenCo
 use App\Http\Controllers\Accountings\Settings\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', 'panel.permission']], function () {
+Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('accounting.dashboard');
 
@@ -27,16 +27,12 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
 
     Route::group(['prefix' => 'enterprises'], function () {
         Route::get('/', [EnterprisesController::class, 'index'])->name('accounting.enterprises');
-        Route::post('/update', [EnterprisesController::class, 'update'])->name('accounting.enterprises.update');
-        Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('accounting.enterprises.edit');
         Route::get('/view/{slack}', [EnterprisesController::class, 'view'])->name('accounting.enterprises.view');
         Route::get('/orders/{slack}', [EnterprisesOrdersController::class, 'index'])->name('accounting.enterprises.orders');
     });
 
     Route::group(['prefix' => 'distributors'], function () {
         Route::get('/', [DistributorsController::class, 'index'])->name('accounting.distributors');
-        Route::post('/update', [DistributorsController::class, 'update'])->name('accounting.distributors.update');
-        Route::get('/edit/{slack}', [DistributorsController::class, 'edit'])->name('accounting.distributors.edit');
         Route::get('/view/{slack}', [DistributorsController::class, 'view'])->name('accounting.distributors.view');
         Route::get('/invoices/{slack}', [DistributorsInvoicesController::class, 'index'])->name('accounting.distributors.invoices');
         Route::get('/orders/{slack}', [DistributorsOrdersController::class, 'index'])->name('accounting.distributors.orders');
@@ -49,14 +45,10 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
     Route::group(['prefix' => 'orders'], function () {
 
         Route::get('/', [OrdersController::class, 'index'])->name('accounting.orders');
-        Route::get('/get', [OrdersController::class, 'get'])->name('accounting.orders.get');
-        Route::get('/create', [OrdersController::class, 'create'])->name('accounting.orders.create');
-        Route::post('/store', [OrdersController::class, 'store'])->name('accounting.orders.store');
         Route::post('/update', [OrdersController::class, 'update'])->name('accounting.orders.update');
         Route::get('/print/{slack}', [OrdersController::class, 'print'])->name('accounting.orders.print');
         Route::get('/edit/{slack}', [OrdersController::class, 'edit'])->name('accounting.orders.edit');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('accounting.orders.view');
-        Route::delete('/destroy/{slack}', [OrdersController::class, 'destroy'])->name('accounting.orders.destroy');
 
         Route::get('/report', [OrdersReportController::class, 'report'])->name('accounting.orders.report');
         Route::get('/report/generate', [OrdersReportController::class, 'generate'])->name('accounting.orders.generate');
@@ -71,7 +63,6 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
     Route::group(['prefix' => 'invoices'], function () {
 
         Route::get('/', [InvoicesController::class, 'index'])->name('accounting.invoices');
-        Route::get('/get', [InvoicesController::class, 'get'])->name('accounting.invoices.get');
         Route::get('/create', [InvoicesController::class, 'create'])->name('accounting.invoices.create');
         Route::post('/store', [InvoicesController::class, 'store'])->name('accounting.invoices.store');
         Route::post('/update', [InvoicesController::class, 'update'])->name('accounting.invoices.update');
@@ -79,8 +70,6 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
         Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('accounting.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('accounting.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('accounting.invoices.details');
-
-        Route::delete('/destroy/{slack}', [InvoicesController::class, 'destroy'])->name('accounting.invoices.destroy');
 
         Route::get('/report', [InvoicesReportController::class, 'report'])->name('accounting.invoices.report');
         Route::get('/report/generate', [InvoicesReportController::class, 'generate'])->name('accounting.invoices.generate');

@@ -3,14 +3,20 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\StoreBlogTagRequest;
+use App\Http\Requests\Managers\Blogs\UpdateBlogTagRequest;
 use App\Models\Blog\BlogTag;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class TagsController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $searchKey = $request->search;
         $available = $request->available;
@@ -34,8 +40,9 @@ class TagsController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): View
     {
+        abort_unless(auth()->user()->can('blogs.create'), 403);
 
         $availables = $this->availableOptions();
 
@@ -45,8 +52,9 @@ class TagsController extends Controller
 
     }
 
-    public function view($slack)
+    public function view($slack): View
     {
+        abort_unless(auth()->user()->can('blogs.view'), 403);
 
         $tag = BlogTag::slack($slack);
 
@@ -56,8 +64,9 @@ class TagsController extends Controller
 
     }
 
-    public function edit($slack)
+    public function edit($slack): View
     {
+        abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $tag = BlogTag::slack($slack);
 
@@ -70,14 +79,14 @@ class TagsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateBlogTagRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.update'), 403);
+        $data = $request->validated();
 
-        $tag = BlogTag::slack($request->slack);
-        $tag->title = $request->title;
-        $tag->slug = Str::slug($request->title, '-');
-        $tag->available = $request->available;
+        $tag = BlogTag::slack($data['slack']);
+        $tag->title = $data['title'];
+        $tag->slug = Str::slug($data['title'], '-');
+        $tag->available = $data['available'];
         $tag->update();
 
         return response()->json([
@@ -87,15 +96,15 @@ class TagsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreBlogTagRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.create'), 403);
+        $data = $request->validated();
 
         $tag = new BlogTag;
-        $tag->slack = $this->generate_slack('blog_categories');
-        $tag->title = $request->title;
-        $tag->slug = Str::slug($request->title, '-');
-        $tag->available = $request->available;
+        $tag->slack = $this->generate_slack('blog_tags');
+        $tag->title = $data['title'];
+        $tag->slug = Str::slug($data['title'], '-');
+        $tag->available = $data['available'];
         $tag->save();
 
         return response()->json([
@@ -105,7 +114,7 @@ class TagsController extends Controller
 
     }
 
-    public function destroy($slack)
+    public function destroy($slack): RedirectResponse
     {
         abort_unless(auth()->user()->can('blogs.delete'), 403);
         $tag = BlogTag::slack($slack);

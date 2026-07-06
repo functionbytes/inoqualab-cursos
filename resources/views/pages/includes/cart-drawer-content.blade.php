@@ -35,12 +35,6 @@
                 $ciOff = $ciCompare ? round(($item['compare'] - $item['price']) / $item['compare'] * 100) : 0;
             @endphp
             <div class="cart-item" data-key="{{ $key }}" data-unit="{{ $item['price'] }}">
-                @if(!empty($item['image']))
-                    <div class="ci-thumb">
-                        <img src="{{ $item['image'] }}" alt="{{ $item['title'] }}"
-                             onerror="this.parentElement.style.display='none'">
-                    </div>
-                @endif
                 <div class="ci-main">
                     <div class="ci-tags">
                         <span class="ci-tag">{{ $item['type'] == 'bundle' ? 'Paquete' : 'Curso' }}</span>
@@ -92,7 +86,7 @@
             </div>
         @endif
         <p class="cart-foot-note">{{ $drawerDiscount > 0 ? 'Impuestos calculados en el pago.' : 'Cupones e impuestos se calculan en el pago.' }}</p>
-        <a class="cart-view" href="{{ route('cart.index') }}"><i class="fas fa-cart-shopping"></i> Ver carrito</a>
-        <a class="cart-cta" href="{{ route('checkout.cart') }}"><i class="fas fa-lock"></i> Finalizar compra <span class="arr">→</span></a>
+        <a class="cart-view" href="{{ route('cart.index') }}">Ver carrito</a>
+        <a class="cart-cta" href="{{ route('checkout.cart') }}">Finalizar compra <span class="arr">→</span></a>
     </div>
 @endif

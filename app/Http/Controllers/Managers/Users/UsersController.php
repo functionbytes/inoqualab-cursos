@@ -10,11 +10,16 @@ use App\Models\Order\Order;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
+    /** Roles asignables desde este panel (excluye 'superadmin', que no se toca desde aquí). */
+    private const ASSIGNABLE_ROLES = ['manager', 'customer', 'enterprise', 'distributor', 'accounting', 'support'];
+
     public function index(Request $request)
     {
 
@@ -48,16 +53,7 @@ class UsersController extends Controller
 
     public function create()
     {
-        $roles = collect([
-            ['id' => 'manager', 'title' => 'Administrador'],
-            ['id' => 'customer', 'title' => 'Cliente'],
-            ['id' => 'enterprise', 'title' => 'Empresa'],
-            ['id' => 'distributor', 'title' => 'Distribuidor'],
-            ['id' => 'accounting', 'title' => 'Contabilidad'],
-            ['id' => 'support', 'title' => 'Suporte'],
-        ]);
-
-        $roles = $roles->pluck('title', 'id');
+        $roles = $this->roleOptions();
 
         $enterprises = Enterprise::get();
         $enterprises->prepend('', '');
@@ -81,6 +77,12 @@ class UsersController extends Controller
     public function store(StoreUserRequest $request)
     {
         abort_unless(auth()->user()->can('users.create'), 403);
+        abort_unless(
+            $this->actorMayAssignRole($request->role),
+            403,
+            'No tienes privilegios suficientes para asignar este rol.'
+        );
+
         $user = new User;
         $user->slack = $this->generate_slack('users');
         $user->firstname = Str::upper($request->firstname);
@@ -108,20 +110,61 @@ class UsersController extends Controller
 
     }
 
-    public function view($slack)
+    /**
+     * Un manager (rol distinto de superadmin) no puede ver, editar, resetear
+     * password ni eliminar una cuenta superadmin: `users.update`/`users.delete`
+     * no distinguen el rol del objetivo, así que sin este guard un manager
+     * podría tomar el control de una cuenta superadmin.
+     */
+    private function guardNotSuperadmin(User $user): void
     {
-        $user = User::slack($slack);
+        abort_if(
+            $user->role === 'superadmin' && auth()->user()->role !== 'superadmin',
+            403,
+            'No tienes autorización para gestionar esta cuenta.'
+        );
+    }
 
-        $roles = collect([
+    /**
+     * Techo de rol: un actor no puede asignar un rol cuyo conjunto de permisos
+     * no esté totalmente contenido en el suyo propio. Mismo concepto que
+     * RolesController::permissionsFrom(), aplicado a nivel de rol completo en
+     * vez de permiso individual — evita que un manager con permisos
+     * restringidos (ej. sin roles.*) convierta a otro usuario en un rol más
+     * privilegiado del que él mismo posee.
+     */
+    private function actorMayAssignRole(string $role): bool
+    {
+        $actor = auth()->user();
+
+        if ($actor->role === 'superadmin') {
+            return true;
+        }
+
+        $rolePermissions = Role::where('name', $role)->where('guard_name', 'web')->first()?->permissions
+            ?? collect();
+
+        return $rolePermissions->every(fn ($permission) => $actor->can($permission->name));
+    }
+
+    private function roleOptions(): Collection
+    {
+        return collect([
             ['id' => 'manager', 'title' => 'Administrador'],
             ['id' => 'customer', 'title' => 'Cliente'],
             ['id' => 'enterprise', 'title' => 'Empresa'],
             ['id' => 'distributor', 'title' => 'Distribuidor'],
             ['id' => 'accounting', 'title' => 'Contabilidad'],
             ['id' => 'support', 'title' => 'Suporte'],
-        ]);
+        ])->pluck('title', 'id');
+    }
 
-        $roles = $roles->pluck('title', 'id');
+    public function view($slack)
+    {
+        $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
+
+        $roles = $this->roleOptions();
 
         $availables = $this->availableOptions();
 
@@ -136,17 +179,9 @@ class UsersController extends Controller
     public function edit($slack)
     {
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
 
-        $roles = collect([
-            ['id' => 'manager', 'title' => 'Administrador'],
-            ['id' => 'customer', 'title' => 'Cliente'],
-            ['id' => 'enterprise', 'title' => 'Empresa'],
-            ['id' => 'distributor', 'title' => 'Distribuidor'],
-            ['id' => 'accounting', 'title' => 'Contabilidad'],
-            ['id' => 'support', 'title' => 'Suporte'],
-        ]);
-
-        $roles = $roles->pluck('title', 'id');
+        $roles = $this->roleOptions();
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
@@ -180,10 +215,19 @@ class UsersController extends Controller
             return response()->json(['success' => false, 'message' => 'Usuario no encontrado.']);
         }
 
+        $this->guardNotSuperadmin($user);
+
         // El rol debe pertenecer a la lista permitida (evita roles inválidos o escalada).
-        $validRoles = ['manager', 'customer', 'enterprise', 'distributor', 'accounting', 'support'];
-        if (! in_array($request->role, $validRoles, true)) {
+        if (! in_array($request->role, self::ASSIGNABLE_ROLES, true)) {
             return response()->json(['success' => false, 'message' => 'El rol seleccionado no es válido.']);
+        }
+
+        // Techo de rol: el actor no puede asignar un rol con más privilegios que el suyo propio.
+        if (! $this->actorMayAssignRole($request->role)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No tienes privilegios suficientes para asignar este rol.',
+            ]);
         }
 
         // Validación de cambios en email o identificación
@@ -213,7 +257,9 @@ class UsersController extends Controller
         $user->address = $request->address;
         $user->company = $request->company;
         $user->role = $request->role;
-        $user->available = $request->available;
+        // Sin fallback, un `available` ausente en el payload pondría el campo en
+        // NULL en vez de conservar el valor existente.
+        $user->available = $request->filled('available') ? $request->available : $user->available;
         if ($request->password) {
             $user->password = $request->password;
         }
@@ -254,6 +300,7 @@ class UsersController extends Controller
     {
         abort_unless(auth()->user()->can('users.delete'), 403);
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
         $user->delete();
 
         return redirect()->route('manager.users');
@@ -265,7 +312,8 @@ class UsersController extends Controller
 
         $user = User::slack($slack);
 
-        $orders = $user->orders;
+        // La vista pagina ($orders->links()): debe ser un paginador, no la Collection de la relación.
+        $orders = $user->orders()->latest()->paginate(paginationNumber());
 
         return view('managers.views.users.users.orders')->with([
             'orders' => $orders,

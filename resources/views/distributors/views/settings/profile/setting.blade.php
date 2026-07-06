@@ -114,10 +114,7 @@
 @push('scripts')
 
     <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
         $(document).ready(function() {
-
 
             jQuery.validator.addMethod(
                 'emailExt',
@@ -145,7 +142,6 @@
                     },
                     identification: {
                         required: false,
-                        number: true,
                         minlength: 3,
                         maxlength: 100,
                     },
@@ -185,7 +181,6 @@
                     },
                     identification: {
                         required: "El parametro es necesario.",
-                        number: 'Solo se puede ingresar números.',
                         minlength: "Debe contener al menos 3 caracter",
                         maxlength: "Debe contener al menos 100 caracter",
                     },
@@ -216,11 +211,9 @@
                     var cellphone = $("#cellphone").val();
                     var email = $("#email").val();
                     var password = $("#password").val();
-                    var enterprise = $("#enterprise").val();
                     var address = $("#address").val();
 
                     formData.append('slack', slack);
-                    formData.append('enterprise', enterprise);
                     formData.append('firstname', firstname);
                     formData.append('lastname', lastname);
                     formData.append('identification', identification);
@@ -243,6 +236,8 @@
                         data: formData,
                         success: function(response) {
 
+                             $submitButton.prop('disabled', false);
+
                              if(response.success == true){
 
                                  toastr.success(response.message, "Operación exitosa", {
@@ -257,8 +252,6 @@
 
                             }else{
 
-                                 $submitButton.prop('disabled', false);
-
                                  toastr.warning("Se ha generado un error.", "Operación fallida", {
                                      closeButton: true,
                                      progressBar: true,
@@ -270,6 +263,29 @@
                                 $('.errors').html(error);
                             }
 
+                        },
+                        error: function(xhr) {
+
+                            $submitButton.prop('disabled', false);
+
+                            var messages = [];
+
+                            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                $.each(xhr.responseJSON.errors, function(field, errs) {
+                                    messages.push(errs[0]);
+                                });
+                            } else {
+                                messages.push('Se ha generado un error inesperado.');
+                            }
+
+                            toastr.warning("Revisa los datos del formulario.", "Operación fallida", {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-bottom-right"
+                            });
+
+                            $('.errors').removeClass('d-none');
+                            $('.errors').html(messages.join('<br>'));
                         }
                     });
 

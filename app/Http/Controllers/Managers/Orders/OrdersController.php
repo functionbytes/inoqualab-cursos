@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Orders;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\UpdateOrderRequest;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
@@ -15,6 +16,7 @@ class OrdersController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Order::class);
 
         $searchKey = $request->search;
         $condition = $request->condition;
@@ -71,6 +73,8 @@ class OrdersController extends Controller
 
         $order = Order::slack($slack);
 
+        $this->authorize('view', $order);
+
         return view('managers.views.orders.orders.view')->with([
             'order' => $order,
         ]);
@@ -80,6 +84,9 @@ class OrdersController extends Controller
     {
 
         $order = Order::slack($slack);
+
+        $this->authorize('update', $order);
+
         $course = $order->course;
 
         $methods = OrderMethod::latest()->get();
@@ -100,15 +107,16 @@ class OrdersController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateOrderRequest $request)
     {
-        abort_unless(auth()->user()->can('orders.update'), 403);
-
         $order = Order::slack($request->slack);
 
-        if ($request->condition == 4) {
-            $order->payment_at = Carbon::parse($request->payment);
-        }
+        // La condicion 4 ("Pagada") es la unica que conserva payment_at; cualquier
+        // otra condicion debe limpiarla para no dejar una orden no-pagada con
+        // una fecha de pago residual de un estado anterior.
+        $order->payment_at = (int) $request->condition === 4
+            ? Carbon::parse($request->payment)
+            : null;
 
         $order->condition_id = $request->condition;
         $order->method_id = $request->methods;
@@ -126,9 +134,10 @@ class OrdersController extends Controller
 
     public function destroy($slack)
     {
-        abort_unless(auth()->user()->can('orders.delete'), 403);
-        $user = null;
         $order = Order::slack($slack);
+
+        $this->authorize('delete', $order);
+
         $user = $order->user->slack;
         $order->delete();
 

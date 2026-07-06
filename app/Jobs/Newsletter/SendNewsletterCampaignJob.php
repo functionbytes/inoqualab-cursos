@@ -20,10 +20,18 @@ class SendNewsletterCampaignJob implements ShouldQueue
 
     public int $backoff = 60;
 
+    /** Tamaño de lote de envío. */
+    private const CHUNK_SIZE = 100;
+
+    /** Pausa entre lotes para no saturar/bloquear la cuenta del proveedor SMTP. */
+    private const CHUNK_THROTTLE_SECONDS = 2;
+
     public function __construct(
         private readonly NewsletterCampaign $campaign
     ) {
-        $this->onQueue(config('queue.connections.redis.queue', 'default'));
+        // Cola dedicada: una campaña grande no debe acaparar la cola `default`
+        // compartida con el resto de la app (notificaciones, confirmaciones...).
+        $this->onQueue('newsletter');
     }
 
     public function handle(): void
@@ -35,10 +43,15 @@ class SendNewsletterCampaignJob implements ShouldQueue
         $sent = 0;
         $failed = 0;
 
-        Newsletter::query()
-            ->subscribed()
-            ->orderBy('id')
-            ->chunk(100, function ($subscribers) use (&$sent, &$failed) {
+        // Lista destino: si la campaña tiene una, solo sus miembros (que sigan
+        // suscritos). Si no, a todos los suscriptores (comportamiento por defecto).
+        $query = $this->campaign->newsletter_list_id
+            ? $this->campaign->list->subscribers()->getQuery()->where('newsletters.is_active', true)
+            : Newsletter::query()->subscribed();
+
+        $query
+            ->orderBy('newsletters.id')
+            ->chunk(self::CHUNK_SIZE, function ($subscribers) use (&$sent, &$failed) {
                 foreach ($subscribers as $subscriber) {
                     try {
                         Mail::send(new NewsletterCampaignMail($this->campaign, $subscriber));
@@ -51,6 +64,12 @@ class SendNewsletterCampaignJob implements ShouldQueue
                             'error' => $e->getMessage(),
                         ]);
                     }
+                }
+
+                // Throttle entre lotes: solo si el lote vino lleno (probablemente
+                // hay más), evita pausar innecesariamente en el último lote.
+                if ($subscribers->count() === self::CHUNK_SIZE) {
+                    sleep(self::CHUNK_THROTTLE_SECONDS);
                 }
             });
 

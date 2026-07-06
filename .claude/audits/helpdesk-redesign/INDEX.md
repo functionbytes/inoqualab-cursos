@@ -2,7 +2,7 @@
 
 > Índice principal de todos los prompts de redesign generados para Claude Design.  
 > Fecha de generación: 2026-05-07  
-> Stack base: Bootstrap 5.3 + jQuery + Font Awesome 6 + color `#90bb13`
+> Stack base: Bootstrap 5.3 + jQuery + Font Awesome 6 + color `#008bcd`
 
 ---
 

@@ -16,7 +16,7 @@ class FaqsController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $faqs = Faq::descending();
+        $faqs = Faq::descending()->with('categorie');
 
         if ($searchKey) {
             $faqs = $faqs->where('title', 'like', '%'.$searchKey.'%');

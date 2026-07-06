@@ -259,7 +259,7 @@ class MailerTemplateRendererService
     public static function htmlToPlainText(string $html): string
     {
         $text = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $html);
-        $text = preg_replace('/<style[^>]*>.*?<\/style>/is', $text, '');
+        $text = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $text);
         $text = preg_replace('/<br\s*\/?>/i', "\n", $text);
         $text = preg_replace('/<p[^>]*>/i', "\n", $text);
         $text = strip_tags($text);

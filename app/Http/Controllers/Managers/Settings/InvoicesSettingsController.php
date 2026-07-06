@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Managers\Settings\UpdateInvoicesSettingsRequest;
 
 class InvoicesSettingsController extends Controller
 {
@@ -13,7 +13,7 @@ class InvoicesSettingsController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateInvoicesSettingsRequest $request)
     {
         abort_unless(auth()->user()->can('settings.update'), 403);
 

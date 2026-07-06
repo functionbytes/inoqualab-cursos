@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Managers\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\UpdateDistributorCoursesRequest;
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
-use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
@@ -27,22 +27,16 @@ class CourseController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDistributorCoursesRequest $request)
     {
         abort_unless(auth()->user()->can('distributors.update'), 403);
 
-        $distributor = Distributor::slack($request->slack);
-
-        if (! $distributor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Distribuidor no encontrado.',
-            ], 404);
-        }
+        $data = $request->validated();
+        $distributor = Distributor::slack($data['slack']);
 
         $currentCourses = $distributor->courses->pluck('id')->toArray();
 
-        $newCourses = $request->courses ? explode(',', $request->courses) : [];
+        $newCourses = $data['courses'];
 
         if (! empty($newCourses)) {
 
