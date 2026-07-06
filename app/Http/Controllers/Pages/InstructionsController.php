@@ -9,7 +9,7 @@ class InstructionsController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Instructivos')->setCanonical(url()->current());
 
         return view('pages.views.instructions.index')->with([
             'instructions' => Instruction::available()->get(),

@@ -18,6 +18,8 @@ class RegisterController extends Controller
 
     public function showRegisterForm()
     {
+        seo()->setTitle('Registro')->noindex(true);
+
         return view('auth.register');
     }
 
@@ -32,12 +34,16 @@ class RegisterController extends Controller
             'slack' => Str::uuid(),
             'email' => $request->email,
             'password' => $request->password,
-            'role' => 'customer',
             'available' => 1,
             'verified' => 0,
             'validation' => 0,
             'terms' => 1,
         ]);
+
+        // Asignación directa (no mass assignment): el registro público siempre
+        // crea clientes, sin importar lo que traiga el request.
+        $user->role = 'customer';
+        $user->save();
 
         event(new Registered($user));
 

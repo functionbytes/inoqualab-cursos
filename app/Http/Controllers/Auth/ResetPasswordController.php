@@ -22,6 +22,8 @@ class ResetPasswordController extends Controller
     {
         $user = User::where('slack', $slack)->firstOrFail();
 
+        seo()->setTitle('Restablecer contraseña')->noindex(true);
+
         return view('auth.passwords.reset')->with([
             'slack' => $slack,
             'email' => $user->email,
@@ -48,6 +50,8 @@ class ResetPasswordController extends Controller
         $user->sessions()->delete();
 
         event(new ResetPasswordCreated($user));
+
+        seo()->setTitle('Contraseña actualizada')->noindex(true);
 
         return view('auth.passwords.confirm')->with([
             'email' => $user->email,

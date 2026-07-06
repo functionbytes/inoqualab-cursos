@@ -14,7 +14,7 @@ class ContactsController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Contacto')->setCanonical(url()->current());
 
         return view('pages.views.contacts.index');
     }

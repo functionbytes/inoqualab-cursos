@@ -14,7 +14,7 @@ class BlogController extends Controller
     public function index(Request $request)
     {
 
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Blog')->setCanonical(url()->current());
 
         $searchKey = $request->search;
         $categorie = $request->categorie;
@@ -64,10 +64,17 @@ class BlogController extends Controller
 
         $blogImage = $blog->getFirstMediaUrl('thumbnail') ?: getMeta();
 
+        $schema = app(SchemaOrgService::class);
+
         seo()->loadFromModel($blog)
             ->setOgType('article')
             ->setOgImage($blogImage)
-            ->setSchema(app(SchemaOrgService::class)->article($blog));
+            ->setSchema($schema->article($blog))
+            ->addSchema($schema->breadcrumbs([
+                ['name' => 'Inicio', 'url' => url('/')],
+                ['name' => 'Blog', 'url' => route('blogs')],
+                ['name' => $blog->title, 'url' => url()->current()],
+            ]));
 
         $categories = BlogCategorie::select('id', 'title', 'slug')->orderBy('title')->get();
         $recents = Blog::latest()->limit(2)->get();

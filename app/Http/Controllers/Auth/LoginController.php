@@ -29,6 +29,8 @@ class LoginController extends Controller
             return redirect()->route($this->guard()->user()->redirect());
         }
 
+        seo()->setTitle('Ingresar')->noindex(true);
+
         return view('auth.login');
     }
 
@@ -83,6 +85,8 @@ class LoginController extends Controller
         if (! $this->guard()->user()->available) {
             $this->guard()->logout();
             $request->session()->invalidate();
+
+            seo()->setTitle('Cuenta deshabilitada')->noindex(true);
 
             return view('auth.disabled');
         }

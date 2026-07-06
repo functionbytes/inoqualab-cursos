@@ -12,13 +12,13 @@ class SchemaOrgService
             'name' => setting('seo_site_name', config('app.name')),
             'url' => url('/'),
             'logo' => getlogo(),
-            'sameAs' => array_filter([
-                setting('social_facebook', ''),
-                setting('social_instagram', ''),
-                setting('social_linkedin', ''),
-                setting('social_twitter', ''),
-                setting('social_youtube', ''),
-            ]),
+            'sameAs' => array_values(array_filter([
+                setting('social_media_facebook', ''),
+                setting('social_media_instagram', ''),
+                setting('social_media_linkedin', ''),
+                setting('social_media_twitter', ''),
+                setting('social_media_youtube', ''),
+            ])),
         ]);
     }
 
@@ -36,6 +36,30 @@ class SchemaOrgService
                 'url' => url('/'),
             ],
             'image' => $course->seoMeta?->og_image ?? '',
+        ]);
+    }
+
+    public function bundle(object $bundle, string $image = ''): array
+    {
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Course',
+            'name' => $bundle->title ?? '',
+            'description' => strip_tags($bundle->description ?? ''),
+            'url' => $bundle->url ?? url()->current(),
+            'provider' => [
+                '@type' => 'Organization',
+                'name' => setting('seo_site_name', config('app.name')),
+                'url' => url('/'),
+            ],
+            'image' => $image,
+            'offers' => $bundle->price ? [
+                '@type' => 'Offer',
+                'price' => (string) $bundle->price,
+                'priceCurrency' => 'COP',
+                'availability' => 'https://schema.org/InStock',
+                'url' => $bundle->url ?? url()->current(),
+            ] : null,
         ]);
     }
 

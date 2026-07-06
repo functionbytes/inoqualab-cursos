@@ -26,13 +26,17 @@ return [
     /*
      * Robots.txt por defecto (cuando no hay contenido guardado en BD).
      */
+    // La línea Sitemap la añade RobotsTxtController con el dominio real del entorno.
     'robots_txt_default' => implode("\n", [
         'User-agent: *',
         'Allow: /',
         'Disallow: /panel/',
+        'Disallow: /customer/',
+        'Disallow: /distributor/',
+        'Disallow: /enterprise/',
+        'Disallow: /support/',
+        'Disallow: /accounting/',
         'Disallow: /api/',
-        '',
-        'Sitemap: '.env('APP_URL', '').'/sitemap.xml',
     ]),
 
     /*

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class SeoService
 {
@@ -193,7 +194,11 @@ class SeoService
     {
         $appName = config('app.name');
         $title = strip_tags($this->title ?: setting('meta_title', $appName));
-        $desc = strip_tags($this->description ?: setting('meta_description', ''));
+        // Meta description: sin HTML, espacios colapsados y acotada (~160) para no exceder el snippet de buscadores.
+        $desc = Str::limit(
+            trim(preg_replace('/\s+/', ' ', strip_tags($this->description ?: setting('meta_description', '')))),
+            160
+        );
         $keywords = $this->keywords ?: setting('meta_keywords', '');
         $canonical = $this->canonical ?: url()->current();
         $ogImage = $this->ogImage ?: setting('seo_og_image_default', getMeta());
@@ -264,10 +269,14 @@ class SeoService
             }
         }
 
-        // Schema.org JSON-LD (uno por schema)
+        // Schema.org JSON-LD (uno por schema). JSON_HEX_TAG escapa los caracteres
+        // '<' y '>' a secuencias unicode (<, >): un valor con "</script>"
+        // ya no puede romper el tag e inyectar HTML/JS, y el JSON-LD sigue siendo
+        // valido, porque cualquier parser JSON decodifica esas secuencias al mismo
+        // caracter literal.
         foreach ($this->schemas as $schema) {
             if (! empty($schema)) {
-                $html .= '<script type="application/ld+json">'.json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES).'</script>'."\n";
+                $html .= '<script type="application/ld+json">'.json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP).'</script>'."\n";
             }
         }
 

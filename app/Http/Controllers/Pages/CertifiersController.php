@@ -9,7 +9,7 @@ class CertifiersController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Certificadores')->setCanonical(url()->current());
 
         $certifiers = Certifier::latest()->available()->get();
 

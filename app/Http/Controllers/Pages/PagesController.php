@@ -8,13 +8,15 @@ use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Faq\Faq;
 use App\Models\User;
+use App\Services\SchemaOrgService;
 use Illuminate\Support\Facades\Cache;
 
 class PagesController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url('/'));
+        seo()->setCanonical(url('/'))
+            ->setSchema(app(SchemaOrgService::class)->organization());
 
         // Catálogo del home: cambia con poca frecuencia y es la página de mayor
         // tráfico. Se invalida al guardar/borrar Course/Bundle/CourseCategorie
@@ -31,7 +33,7 @@ class PagesController extends Controller
 
     public function coming()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Próximamente')->setCanonical(url()->current());
 
         return view('pages.views.comings');
     }
@@ -43,7 +45,7 @@ class PagesController extends Controller
 
     public function about()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Sobre nosotros')->setCanonical(url()->current());
 
         return view('pages.views.about')->with([
             'enterprises' => Enterprise::count(),
@@ -53,23 +55,32 @@ class PagesController extends Controller
 
     public function faqs()
     {
-        seo()->setCanonical(url()->current());
+        $faqs = Faq::get();
+
+        seo()->setTitle('Preguntas frecuentes')
+            ->setCanonical(url()->current())
+            ->setSchema(app(SchemaOrgService::class)->faq(
+                $faqs->map(fn ($faq) => [
+                    'question' => $faq->title,
+                    'answer' => trim(preg_replace('/\s+/', ' ', strip_tags((string) $faq->description))),
+                ])->all()
+            ));
 
         return view('pages.views.faqs')->with([
-            'faqs' => Faq::get(),
+            'faqs' => $faqs,
         ]);
     }
 
     public function politics()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Política de privacidad')->setCanonical(url()->current());
 
         return view('pages.views.politics');
     }
 
     public function terms()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Términos y condiciones')->setCanonical(url()->current());
 
         return view('pages.views.terms');
     }

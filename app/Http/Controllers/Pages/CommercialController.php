@@ -8,7 +8,9 @@ class CommercialController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url()->current());
+        // La vista aún contiene contenido demo de la plantilla (sin contenido real del negocio):
+        // se marca noindex y se excluye del sitemap hasta tener contenido definitivo.
+        seo()->setTitle('Comercial')->setCanonical(url()->current())->noindex(true);
 
         return view('pages.views.commercials.index');
     }

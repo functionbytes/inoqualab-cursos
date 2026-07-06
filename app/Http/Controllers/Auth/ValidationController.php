@@ -10,6 +10,8 @@ class ValidationController extends Controller
 
     public function validation()
     {
+        seo()->setTitle('Verificación de cuenta')->noindex(true);
+
         return view('auth.validation');
     }
 }

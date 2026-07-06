@@ -12,6 +12,8 @@ class ForgotPasswordController extends Controller
 {
     public function showLinkRequest()
     {
+        seo()->setTitle('Recuperar contraseña')->noindex(true);
+
         return view('auth.passwords.email');
     }
 
@@ -52,6 +54,8 @@ class ForgotPasswordController extends Controller
         $user->save();
 
         event(new ForgotPasswordCreated($user));
+
+        seo()->setTitle('Correo enviado')->noindex(true);
 
         return view('auth.passwords.success')->with([
             'email' => $user->email,

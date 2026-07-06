@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Bundle\Bundle;
 use App\Models\Order\Order;
 use App\Models\Order\OrderItem;
+use App\Services\SchemaOrgService;
 
 class BundlesController extends Controller
 {
     public function index()
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Paquetes')->setCanonical(url()->current());
 
         $bundles = Bundle::available()->latest()->withCount('courses')->with(['courses' => fn ($q) => $q->with('media')->limit(1)])->get();
 
@@ -32,10 +33,18 @@ class BundlesController extends Controller
 
         $bundleImage = optional($bundle->courses()->first())->getFirstMediaUrl('thumbnail') ?: getMeta();
 
+        $schema = app(SchemaOrgService::class);
+
         seo()->loadFromModel($bundle->load('seoMeta'))
             ->setOgType('article')
             ->setOgImage($bundleImage)
-            ->setCanonical(url()->current());
+            ->setCanonical(url()->current())
+            ->addSchema($schema->bundle($bundle, $bundleImage))
+            ->addSchema($schema->breadcrumbs([
+                ['name' => 'Inicio', 'url' => url('/')],
+                ['name' => 'Paquetes', 'url' => route('bundles')],
+                ['name' => $bundle->title, 'url' => url()->current()],
+            ]));
 
         $courses = $bundle->courses()->orderBy('title', 'asc')->get();
 

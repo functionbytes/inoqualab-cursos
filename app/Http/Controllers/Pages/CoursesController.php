@@ -14,7 +14,7 @@ class CoursesController extends Controller
 {
     public function index(Request $request)
     {
-        seo()->setCanonical(url()->current());
+        seo()->setTitle('Cursos')->setCanonical(url()->current());
 
         $courses = Course::available()->latest()->website()
             ->with(['categorie', 'media'])
@@ -41,10 +41,17 @@ class CoursesController extends Controller
 
         $courseImage = $course->getFirstMediaUrl('thumbnail') ?: getMeta();
 
+        $schema = app(SchemaOrgService::class);
+
         seo()->loadFromModel($course)
             ->setOgType('article')
             ->setOgImage($courseImage)
-            ->setSchema(app(SchemaOrgService::class)->course($course));
+            ->setSchema($schema->course($course))
+            ->addSchema($schema->breadcrumbs([
+                ['name' => 'Inicio', 'url' => url('/')],
+                ['name' => 'Cursos', 'url' => route('courses')],
+                ['name' => $course->title, 'url' => url()->current()],
+            ]));
 
         $categorie = $course->categorie;
         $chapters = $course->chapters;
