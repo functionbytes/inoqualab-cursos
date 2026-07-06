@@ -1,4 +1,4 @@
-@extends('layouts.storefront')
+@extends('layouts.pages')
 
 @section('title', ($reason ?? null) === 'device' ? 'Sesión en otro dispositivo' : 'Sesión expirada')
 

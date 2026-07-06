@@ -31,7 +31,6 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::group(['prefix' => 'migration', 'middleware' => ['auth', 'manager']], function () {
 
-        Route::get('/', [MigrationController::class, 'index'])->name('manager.migration');
         Route::get('/users', [MigrationController::class, 'users'])->name('manager.migration.users');
         Route::get('/enterprises', [MigrationController::class, 'enterprises'])->name('manager.migration.enterprises');
         Route::get('/userenterprises', [MigrationController::class, 'userenterprises'])->name('manager.migration.userenterprises');
@@ -58,7 +57,13 @@ Route::group(['middleware' => ['web']], function () {
             return redirect()->route(auth()->user()->redirect());
         }
 
-        return view('auth.session-expired', ['reason' => $request->query('reason')]);
+        $reason = $request->query('reason');
+
+        seo()->noindex(true)->setTitle(
+            $reason === 'device' ? 'Sesión en otro dispositivo' : 'Sesión expirada'
+        );
+
+        return view('auth.session-expired', ['reason' => $reason]);
     })->name('session.expired');
     Route::get('/about', [PagesController::class, 'about'])->name('about');
     Route::get('/home', [PagesController::class, 'home'])->name('home');
