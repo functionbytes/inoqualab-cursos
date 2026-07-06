@@ -52,12 +52,34 @@ class CoursesController extends Controller
 
         rescue(fn () => Cache::put('inscription'.$user->slack, $inscription->slack, 6000), null, false);
 
+        // Precarga lecciones (con su tipo) por capítulo en una sola query: elimina el
+        // N+1 de $lesson->type->slug en el sidebar (misma técnica que lesion()).
+        $chapters = $course->chapters()->with(['lessons' => function ($q) {
+            $q->where('available', 1)->orderBy('position')->with('type');
+        }])->get();
+
+        // Set de lecciones culminadas y progreso por capítulo en 2 queries: evita el
+        // N+1 de CourseProgress::validate() y del count() por capítulo en la vista
+        // (mismo patrón ya aplicado en lesion()).
+        $completedLessonIds = $inscription->progress()
+            ->where('culminated', 1)
+            ->pluck('lesson_id')
+            ->all();
+
+        $chapterProgress = $inscription->progress()
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
         return view('customers.views.courses.content', [
             'course' => $course,
             'inscription' => $inscription,
             'exam' => $exam,
             'certificate' => $certificate,
-            'chapters' => $course->chapters,
+            'chapters' => $chapters,
+            'completedLessonIds' => $completedLessonIds,
+            'chapterProgress' => $chapterProgress,
             'announsments' => $course->announcements,
             'lessions' => $course->lessons,
             'percents' => $inscription->percent,

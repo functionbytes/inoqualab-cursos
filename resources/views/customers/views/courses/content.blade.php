@@ -69,8 +69,8 @@
                     @foreach ($chapters as $chapter)
                         @php
                             $progress = $inscription->progress();
-                            $progresschapters = $progress->chapters($chapter->id)->count();
-                            $countchapter = $chapter->lessons()->count();
+                            $progresschapters = $chapterProgress[$chapter->id] ?? 0;
+                            $countchapter = $chapter->lessons->count();
                             $isCurrentChapter = $chapter->id == $lastchapter;
                             $allDone = $countchapter > 0 && $progresschapters >= $countchapter;
                             $counter = 0;
@@ -93,7 +93,7 @@
                             <div class="collapse lv-mod-body {{ $isCurrentChapter ? 'show' : '' }}" id="lvmod{{ $chapter->id }}">
                                 @foreach ($chapter->lessons as $lesson)
                                     @php
-                                        $validate = App\Models\Course\CourseProgress::validate($lesson->id, $inscription->id, Auth::user()->id);
+                                        $validate = in_array($lesson->id, $completedLessonIds);
                                         $isCurrent = $lastlesson == $lesson->id && $percent < 100;
                                         $clickable = $validate == 1 || $counter == 0 || $isCurrent;
                                         $href = $lesson->type->slug == 'quiz'
@@ -359,8 +359,8 @@
                     @foreach ($chapters as $chapter)
                         @php
                             $progress = $inscription->progress();
-                            $progresschapters = $progress->chapters($chapter->id)->count();
-                            $countchapter = $chapter->lessons()->count();
+                            $progresschapters = $chapterProgress[$chapter->id] ?? 0;
+                            $countchapter = $chapter->lessons->count();
                             $isCurrentChapter = $chapter->id == $lastchapter;
                             $counter = 0;
                         @endphp
@@ -375,7 +375,7 @@
                                 <div class="lessons-list p-2 d-flex flex-column gap-2">
                                     @foreach ($chapter->lessons as $lesson)
                                         @php
-                                            $validate = App\Models\Course\CourseProgress::validate($lesson->id, $inscription->id, Auth::user()->id);
+                                            $validate = in_array($lesson->id, $completedLessonIds);
                                             $isCurrent = $lastlesson == $lesson->id && $percent < 100;
                                             $clickable = $validate == 1 || $counter == 0 || $isCurrent;
                                             $href = $lesson->type->slug == 'quiz'
