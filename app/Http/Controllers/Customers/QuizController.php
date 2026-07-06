@@ -48,6 +48,11 @@ class QuizController extends Controller
             $quiz->user_id = $user->id;
             $quiz->save();
         } else {
+            // No rehacer un quiz ya presentado que no admite reintentos: reabrir la URL
+            // borraba el intento y esquivaba el límite quiz_again. Se muestra el resultado.
+            if (! $topic->quiz_again && $quiz->answers()->exists()) {
+                return redirect()->route('customers.quiz.show', $quiz->id);
+            }
             $quiz->update(['correct' => 0, 'wrong' => 0, 'score' => 0]);
             $quiz->answers()->delete();
         }
@@ -157,7 +162,9 @@ class QuizController extends Controller
         $wrong = $quiz->answers()->where('approved', 0)->count();
         $correct = $quiz->answers()->where('approved', 1)->count();
 
-        $score = $count > 0 ? ($count == $correct ? 100 : round(100 - ($wrong / $count * 100), 2)) : 0;
+        // Nota = aciertos / total de preguntas. Las no respondidas cuentan como no-acierto
+        // (antes 100 - wrong/count daba 100 con 0 respuestas).
+        $score = $count > 0 ? round(($correct / $count) * 100, 2) : 0;
 
         $quiz->update([
             'wrong' => $wrong,
@@ -214,6 +221,14 @@ class QuizController extends Controller
 
         // Impide marcar lecciones fuera de orden por POST (desbloquearía el examen).
         $this->assertLessonAccessible($lesson, $inscription, $user->id);
+
+        // H3: si la lección es un cuestionario (type 6), exigir haberlo APROBADO antes de
+        // culminarla; si no, un POST directo a realized avanzaba aun con el quiz reprobado.
+        if ($lesson->type_id == 6 && ($quizTopic = $lesson->quiztopic)) {
+            $quiz = Quiz::where('lesson_id', $lesson->id)->where('user_id', $user->id)->first();
+            $passing = $quizTopic->show_ans > 0 ? round(($quizTopic->per_q_mark / $quizTopic->show_ans) * 100, 2) : 100;
+            abort_unless($quiz && $quiz->score >= $passing, 403, 'Debes aprobar el cuestionario para continuar.');
+        }
 
         $course = $inscription->course;
         $lessons = $course->lessons;

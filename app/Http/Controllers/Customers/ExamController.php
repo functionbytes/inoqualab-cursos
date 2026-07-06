@@ -49,6 +49,11 @@ class ExamController extends Controller
                 'score' => 0,
             ]);
         } else {
+            // No rehacer un examen ya presentado que no admite reintentos: reabrir la URL
+            // borraba el intento (y con ello el resultado). Se muestra el resultado previo.
+            if (! $topic->quiz_again && $exam->answers()->exists()) {
+                return redirect()->route('customers.exam.show', $exam->id);
+            }
             $exam->update(['correct' => 0, 'wrong' => 0, 'score' => 0]);
             $exam->answers()->delete();
         }
@@ -130,7 +135,9 @@ class ExamController extends Controller
             ->pluck('total', 'approved');
         $wrong = $counts[0] ?? 0;
         $correct = $counts[1] ?? 0;
-        $score = $count === $correct ? 100 : round(100 - ($wrong / $count * 100), 2);
+        // Nota = aciertos / total de preguntas del examen. Las no respondidas cuentan
+        // como no-acierto: sin respuestas -> 0 (antes daba 100 y emitía certificado).
+        $score = $count > 0 ? round(($correct / $count) * 100, 2) : 0;
 
         $certificate = DB::transaction(function () use ($exam, $inscription, $course, $user, $wrong, $correct, $score, $progress, $passingScore) {
             $exam->update(['wrong' => $wrong, 'correct' => $correct, 'score' => $score]);
