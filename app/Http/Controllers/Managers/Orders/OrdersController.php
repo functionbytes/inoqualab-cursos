@@ -87,8 +87,6 @@ class OrdersController extends Controller
 
         $this->authorize('update', $order);
 
-        $course = $order->course;
-
         $methods = OrderMethod::latest()->get();
         $methods = $methods->pluck('title', 'id');
 
@@ -100,7 +98,6 @@ class OrdersController extends Controller
 
         return view('managers.views.orders.orders.edit')->with([
             'order' => $order,
-            'course' => $course,
             'conditions' => $conditions,
             'methods' => $methods,
             'types' => $types,

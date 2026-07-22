@@ -130,6 +130,10 @@ class CoursesController extends Controller
             ->pluck('total', 'chapter_id')
             ->all();
 
+        // Lección anterior/siguiente: para el footer del reproductor (título y casos de borde)
+        $prevLesson = CourseProgress::prevNext($lessoning->id, 'prev');
+        $nextLesson = CourseProgress::prevNext($lessoning->id, 'next');
+
         return view('customers.views.courses.lesion')->with([
             'course' => $course,
             'classing' => $lessoning,
@@ -145,6 +149,8 @@ class CoursesController extends Controller
             'exam' => $exam,
             'completedLessonIds' => $completedLessonIds,
             'chapterProgress' => $chapterProgress,
+            'prevLesson' => $prevLesson,
+            'nextLesson' => $nextLesson,
 
         ]);
 

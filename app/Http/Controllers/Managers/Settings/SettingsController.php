@@ -15,8 +15,11 @@ class SettingsController extends Controller
     {
         abort_unless(auth()->user()->can('settings.view'), 403);
 
-        $logo = Setting::key('page_logo')->getMedia('logo')->count() > 0 ? true : false;
-        $favicon = Setting::key('page_favicon')->getMedia('favicon')->count() > 0 ? true : false;
+        // Setting::key() devuelve el Builder (no null) cuando no hay match, por
+        // el fallback `$scope(...) ?? $this` de Eloquent; firstOrCreate() evita
+        // el 500 (`getMedia` no existe en Builder) si la fila aun no existe.
+        $logo = Setting::firstOrCreate(['key' => 'page_logo'])->getMedia('logo')->count() > 0;
+        $favicon = Setting::firstOrCreate(['key' => 'page_favicon'])->getMedia('favicon')->count() > 0;
 
         return view('managers.views.settings.settings.setting')->with([
             'logo' => $logo,

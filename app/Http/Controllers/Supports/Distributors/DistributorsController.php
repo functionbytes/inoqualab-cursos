@@ -90,8 +90,34 @@ class DistributorsController extends Controller
 
     }
 
+    public function view($slack)
+    {
+
+        $distributor = Distributor::slack($slack);
+
+        return view('supports.views.distributors.distributors.view')->with([
+            'distributor' => $distributor,
+        ]);
+
+    }
+
     public function update(Request $request)
     {
+        // Sin esta validacion, un campo faltante (address/cellphone/nit/email/
+        // leading/supporting/available son NOT NULL en BD) lanza un 500 crudo
+        // de MySQL en vez de un 422 con mensaje claro.
+        $request->validate([
+            'title' => ['required', 'string', 'min:3', 'max:100'],
+            'address' => ['required', 'string', 'min:3', 'max:100'],
+            'cellphone' => ['required', 'string', 'min:6', 'max:10'],
+            'nit' => ['required', 'string', 'min:6', 'max:100'],
+            'email' => ['required', 'email'],
+            'leading' => ['required', 'string', 'min:3', 'max:100'],
+            'supporting' => ['required', 'string', 'min:3', 'max:100'],
+            'available' => ['required', 'in:0,1'],
+            'enterprise_generate' => ['nullable', 'in:0,1'],
+        ]);
+
         $distributor = Distributor::slack($request->slack);
 
         if (Distributor::where('email', $request->email)->where('id', '!=', $distributor->id)->exists()) {
@@ -122,6 +148,17 @@ class DistributorsController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => ['required', 'string', 'min:3', 'max:100'],
+            'address' => ['required', 'string', 'min:3', 'max:100'],
+            'cellphone' => ['required', 'string', 'min:6', 'max:10'],
+            'nit' => ['required', 'string', 'min:6', 'max:100'],
+            'email' => ['required', 'email'],
+            'leading' => ['required', 'string', 'min:3', 'max:100'],
+            'supporting' => ['required', 'string', 'min:3', 'max:100'],
+            'enterprise_generate' => ['nullable', 'in:0,1'],
+        ]);
+
         if (Distributor::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }

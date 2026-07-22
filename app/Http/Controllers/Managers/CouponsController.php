@@ -115,7 +115,7 @@ class CouponsController extends Controller
         $coupon->bundle_ids = ! empty($request->bundles) ? implode(',', (array) $request->bundles) : null;
         $coupon->course_ids = ! empty($request->courses) ? implode(',', (array) $request->courses) : null;
         $coupon->available = $request->available;
-        $coupon->min_price = $request->min_price;
+        $coupon->min_price = $request->min_price ?? 0;
         $coupon->limit = $request->limit ?? 0;
 
         if ($request->date_var) {
@@ -153,7 +153,7 @@ class CouponsController extends Controller
         $coupon->bundle_ids = ! empty($request->bundles) ? implode(',', (array) $request->bundles) : null;
         $coupon->course_ids = ! empty($request->courses) ? implode(',', (array) $request->courses) : null;
         $coupon->available = $request->available;
-        $coupon->min_price = $request->min_price;
+        $coupon->min_price = $request->min_price ?? 0;
         $coupon->limit = $request->limit ?? 0;
 
         if ($request->date_var) {

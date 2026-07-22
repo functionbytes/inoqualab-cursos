@@ -16,7 +16,9 @@ class ImportCoursesRequest extends FormRequest
         return [
             'enterprise' => ['required', 'string'],
             'course' => ['required', 'string'],
-            'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:2048'],
+            // 'txt' incluido porque los navegadores/clientes HTTP suelen subir
+            // archivos .csv con mime sniffed como text/plain.
+            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:2048'],
         ];
     }
 

@@ -12,8 +12,10 @@ class MetaSettingsController extends Controller
 {
     public function index()
     {
-
-        $meta = Setting::key('meta_image')->getMedia('meta')->count() > 0 ? true : false;
+        // Setting::key() devuelve el Builder (no null) cuando no hay match, por
+        // el fallback `$scope(...) ?? $this` de Eloquent; firstOrCreate() evita
+        // el 500 (`getMedia` no existe en Builder) si la fila aun no existe.
+        $meta = Setting::firstOrCreate(['key' => 'meta_image'])->getMedia('meta')->count() > 0;
 
         return view('managers.views.settings.metadata.setting')->with([
             'metadata' => $meta,

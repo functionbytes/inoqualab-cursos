@@ -28,7 +28,11 @@ class SettingsAuthorizationTest extends TestCase
 
     private function userWithoutPermissions(): User
     {
-        $user = User::factory()->customer()->create();
+        // role=manager para pasar el middleware IsManager (columna directa) y
+        // llegar al controller; sin permisos Spatie para probar el abort_unless
+        // interno. Con role=customer, IsManager redirige (302) antes de llegar
+        // ahí y el test nunca ejercita el fix real.
+        $user = User::factory()->manager()->create();
         $user->syncRoles([]);
         $user->syncPermissions([]);
         app(PermissionRegistrar::class)->forgetCachedPermissions();

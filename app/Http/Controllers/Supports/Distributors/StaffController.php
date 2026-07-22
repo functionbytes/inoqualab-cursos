@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Distributors;
 
+use App\Exports\Distributors\StaffExport;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Supports\Concerns\ValidatesUniqueUserFields;
@@ -12,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
@@ -109,6 +111,29 @@ class StaffController extends Controller
         return view('supports.views.distributors.staffs.history')->with([
             'user' => $user,
         ]);
+    }
+
+    public function reports($slack)
+    {
+        $distributor = Distributor::slack($slack);
+
+        return view('supports.views.distributors.staffs.reports')->with([
+            'distributor' => $distributor,
+        ]);
+    }
+
+    public function generate(Request $request)
+    {
+        $distributor = Distributor::slack($request->distributor);
+
+        $date = explode(' - ', $request->range);
+        $start = Carbon::parse($date[0])->startOfDay();
+        $end = Carbon::parse($date[1])->endOfDay();
+
+        return Excel::download(
+            new StaffExport($distributor, $request->available, $start, $end),
+            'Reporte Empleados.xlsx'
+        );
     }
 
     public function update(Request $request)

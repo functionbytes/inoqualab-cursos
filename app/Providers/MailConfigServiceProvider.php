@@ -10,8 +10,12 @@ class MailConfigServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // En local usamos siempre la config del .env (Mailpit, etc.)
-        if ($this->app->environment('local')) {
+        // En local y testing usamos siempre la config del .env/.env.testing
+        // (Mailpit, mailer 'array', etc.) — sobreescribir aquí con credenciales
+        // SMTP reales de BD rompería Mail::fake() y cualquier test que dispare
+        // un envío de correo (Mail::html() raw no pasa por una Mailable
+        // fake-eable de la misma forma, así que igual intentaría la conexión).
+        if ($this->app->environment(['local', 'testing'])) {
             return;
         }
 

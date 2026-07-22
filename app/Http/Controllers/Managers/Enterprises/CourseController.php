@@ -154,7 +154,7 @@ class CourseController extends Controller
                 'users.available',
                 'users.identification',
                 'inscriptions.id',
-                'orders.slack as slack',
+                'orders.slack as order_slack',
                 'inscriptions.enroll_start',
                 'inscriptions.enroll_expire',
                 'inscriptions.enroll_culminated',
@@ -358,13 +358,20 @@ class CourseController extends Controller
         $order = Order::slack($slack);
         $user = $order->user;
         $enterprise = $user->relations;
-        $course = $order->course;
+        // Order no tiene relación course() directa (checkout multi-item vía
+        // OrderItem, polimórfico item_type/item_id — OrderItem::course() usa
+        // la convención course_id que no existe en la tabla real, siempre
+        // null). Se deriva del primer item vía la relación polimórfica real.
+        $course = $order->items()->with('itemable')->first()?->itemable;
+        // enroll_start/enroll_expire viven en Inscription, no en Order.
+        $inscription = Inscription::where('order_id', $order->id)->first();
 
         return view('managers.views.enterprises.courses.postpone')->with([
             'user' => $user,
             'course' => $course,
             'order' => $order,
             'enterprise' => $enterprise,
+            'inscription' => $inscription,
         ]);
     }
 
@@ -407,11 +414,13 @@ class CourseController extends Controller
         $date_var = explode(' - ', $request->range);
         abort_unless(count($date_var) === 2, 422, 'Rango de fechas invalido.');
 
+        // Order no tiene columnas enroll_start/enroll_expire (viven en
+        // Inscription); se actualiza la inscripción asociada a esta orden.
         $order = Order::slack($request->order);
-        $order->enroll_start = date('Y-m-d', strtotime($date_var[0]));
-        $order->enroll_expire = date('Y-m-d', strtotime($date_var[1]));
-        $order->updated_at = Carbon::now()->setTimezone('America/Bogota');
-        $order->save();
+        $inscription = Inscription::where('order_id', $order->id)->firstOrFail();
+        $inscription->enroll_start = date('Y-m-d', strtotime($date_var[0]));
+        $inscription->enroll_expire = date('Y-m-d', strtotime($date_var[1]));
+        $inscription->save();
 
         return response()->json($order->slack);
     }

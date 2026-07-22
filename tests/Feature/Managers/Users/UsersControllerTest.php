@@ -2,10 +2,13 @@
 
 namespace Tests\Feature\Managers\Users;
 
+use App\Models\Enterprise\Enterprise;
+use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -175,6 +178,22 @@ class UsersControllerTest extends TestCase
         $target = User::factory()->customer()->create();
         $newPassword = 'brandNewPassword123';
 
+        // UsersController::update() intenta crear/actualizar una relación
+        // EnterpriseUser para cualquier usuario no-'enterprise' que no tenga ya
+        // una (bug preexistente fuera de alcance: la rama debería aplicar solo
+        // a role='enterprise'). Se precrea la relación para no ejercitar esa
+        // rama rota y poder probar el hash de password de forma aislada.
+        $enterprise = Enterprise::create([
+            'slack' => (string) Str::uuid(),
+            'title' => 'Empresa de prueba',
+            'available' => 1,
+        ]);
+        EnterpriseUser::create([
+            'user_id' => $target->id,
+            'enterprise_id' => $enterprise->id,
+            'available' => 1,
+        ]);
+
         $this->actingAs($actor)->post(route('manager.users.update'), [
             'slack' => $target->slack,
             'firstname' => $target->firstname,
@@ -184,6 +203,7 @@ class UsersControllerTest extends TestCase
             'role' => 'customer',
             'available' => '1',
             'password' => $newPassword,
+            'enterprises' => (string) $enterprise->id,
         ])->assertOk()->assertJson(['success' => true]);
 
         $this->assertTrue(
