@@ -51,6 +51,12 @@ class InscriptionsController extends Controller
         $distributor = Distributor::id($request->distributor);
         abort_unless($distributor instanceof Distributor, 404);
 
+        // Ownership: la empresa debe pertenecer al distribuidor y el usuario a la
+        // empresa (mismo patrón que los flujos self-service de Distributors). Sin
+        // esto, soporte podía matricular a cualquier usuario en cualquier empresa.
+        abort_unless($distributor->enterprises()->where('enterprises.id', $enterprise->id)->exists(), 404, 'La empresa no pertenece al distribuidor.');
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404, 'El usuario no pertenece a la empresa.');
+
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
         abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
@@ -88,18 +94,6 @@ class InscriptionsController extends Controller
         $orderitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $orderitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = new Inscription;
-        $inscription->slack = $this->generate_slack('inscriptions');
-        $inscription->user_id = $user->id;
-        $inscription->course_id = $course->id;
-        $inscription->percent = 0;
-        $inscription->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-        $inscription->enroll_culminated = null;
-        $inscription->culminated = 0;
-        $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
-
         $reportitem = new OrderActivity;
         $reportitem->slack = $this->generate_slack('orders_activity');
         $reportitem->distributor_id = $distributor->id;
@@ -114,19 +108,24 @@ class InscriptionsController extends Controller
         $reportitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $reportitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = DB::transaction(function () use ($order, $orderitem, $inscription, $reportitem) {
+        [$inscription, $isNew] = DB::transaction(function () use ($order, $orderitem, $reportitem, $user, $course) {
+            $now = Carbon::now()->setTimezone('America/Bogota');
             $order->save();
             $orderitem->order_id = $order->id;
             $orderitem->save();
-            $inscription->order_id = $order->id;
-            $inscription->save();
+            // Reutiliza la inscripción existente (extiende vigencia + renueva
+            // certificado) o crea una nueva. Evita inscripciones duplicadas.
+            [$inscription, $isNew] = $this->renewOrCreateInscription($user->id, $course->id, $order->id, $now);
             $reportitem->order_id = $order->id;
             $reportitem->save();
 
-            return $inscription;
+            return [$inscription, $isNew];
         });
 
-        InscriptionCreated::dispatch($inscription);
+        // El correo de bienvenida solo en creación nueva, no en renovación.
+        if ($isNew) {
+            InscriptionCreated::dispatch($inscription);
+        }
 
         return response()->json([
             'success' => true,
@@ -147,6 +146,10 @@ class InscriptionsController extends Controller
 
         $user = User::identification($request->user);
         abort_unless($user instanceof User, 404);
+
+        // Ownership: la empresa debe pertenecer al distribuidor y el usuario a la empresa.
+        abort_unless($distributor->enterprises()->where('enterprises.id', $enterprise->id)->exists(), 404, 'La empresa no pertenece al distribuidor.');
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404, 'El usuario no pertenece a la empresa.');
 
         $existingInscription = Inscription::existingInscription($user->id, $course->id)->first();
 
@@ -207,18 +210,6 @@ class InscriptionsController extends Controller
         $orderitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $orderitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = new Inscription;
-        $inscription->slack = $this->generate_slack('inscriptions');
-        $inscription->user_id = $user->id;
-        $inscription->course_id = $course->id;
-        $inscription->percent = 0;
-        $inscription->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-        $inscription->enroll_culminated = null;
-        $inscription->culminated = 0;
-        $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
-
         $reportitem = new OrderActivity;
         $reportitem->slack = $this->generate_slack('orders_activity');
         $reportitem->distributor_id = $distributor->id;
@@ -233,19 +224,24 @@ class InscriptionsController extends Controller
         $reportitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $reportitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = DB::transaction(function () use ($order, $orderitem, $inscription, $reportitem) {
+        [$inscription, $isNew] = DB::transaction(function () use ($order, $orderitem, $reportitem, $user, $course) {
+            $now = Carbon::now()->setTimezone('America/Bogota');
             $order->save();
             $orderitem->order_id = $order->id;
             $orderitem->save();
-            $inscription->order_id = $order->id;
-            $inscription->save();
+            // Reutiliza la inscripción existente (extiende vigencia + renueva
+            // certificado) o crea una nueva. Evita inscripciones duplicadas.
+            [$inscription, $isNew] = $this->renewOrCreateInscription($user->id, $course->id, $order->id, $now);
             $reportitem->order_id = $order->id;
             $reportitem->save();
 
-            return $inscription;
+            return [$inscription, $isNew];
         });
 
-        InscriptionCreated::dispatch($inscription);
+        // El correo de bienvenida solo en creación nueva, no en renovación.
+        if ($isNew) {
+            InscriptionCreated::dispatch($inscription);
+        }
 
         return response()->json([
             'success' => true,

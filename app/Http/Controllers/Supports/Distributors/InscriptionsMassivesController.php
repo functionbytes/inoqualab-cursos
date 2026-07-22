@@ -46,6 +46,10 @@ class InscriptionsMassivesController extends Controller
         $user = User::id($request->user);
         $distributor = Distributor::id($request->distributor);
 
+        // Ownership: la empresa debe pertenecer al distribuidor y el usuario a la empresa.
+        abort_unless($distributor->enterprises()->where('enterprises.id', $enterprise->id)->exists(), 404, 'La empresa no pertenece al distribuidor.');
+        abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404, 'El usuario no pertenece a la empresa.');
+
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
         abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
@@ -80,18 +84,6 @@ class InscriptionsMassivesController extends Controller
         $orderitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $orderitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = new Inscription;
-        $inscription->slack = $this->generate_slack('inscriptions');
-        $inscription->user_id = $user->id;
-        $inscription->course_id = $course->id;
-        $inscription->percent = 0;
-        $inscription->enroll_start = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->enroll_expire = Carbon::now()->setTimezone('America/Bogota')->addMonths(3);
-        $inscription->enroll_culminated = null;
-        $inscription->culminated = 0;
-        $inscription->created_at = Carbon::now()->setTimezone('America/Bogota');
-        $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
-
         $reportitem = new OrderActivity;
         $reportitem->slack = $this->generate_slack('orders_activity');
         $reportitem->distributor_id = $distributor->id;
@@ -106,19 +98,24 @@ class InscriptionsMassivesController extends Controller
         $reportitem->created_at = Carbon::now()->setTimezone('America/Bogota');
         $reportitem->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-        $inscription = DB::transaction(function () use ($order, $orderitem, $inscription, $reportitem) {
+        [$inscription, $isNew] = DB::transaction(function () use ($order, $orderitem, $reportitem, $user, $course) {
+            $now = Carbon::now()->setTimezone('America/Bogota');
             $order->save();
             $orderitem->order_id = $order->id;
             $orderitem->save();
-            $inscription->order_id = $order->id;
-            $inscription->save();
+            // Reutiliza la inscripción existente (extiende vigencia + renueva
+            // certificado) o crea una nueva. Evita inscripciones duplicadas.
+            [$inscription, $isNew] = $this->renewOrCreateInscription($user->id, $course->id, $order->id, $now);
             $reportitem->order_id = $order->id;
             $reportitem->save();
 
-            return $inscription;
+            return [$inscription, $isNew];
         });
 
-        InscriptionCreated::dispatch($inscription);
+        // El correo de bienvenida solo en creación nueva, no en renovación.
+        if ($isNew) {
+            InscriptionCreated::dispatch($inscription);
+        }
 
         return response()->json([
             'success' => true,
@@ -132,6 +129,9 @@ class InscriptionsMassivesController extends Controller
         $enterprise = Enterprise::slack($request->enterprise);
         $distributor = Distributor::slack($request->distributor);
 
+        // Ownership: la empresa debe pertenecer al distribuidor.
+        abort_unless($distributor->enterprises()->where('enterprises.id', $enterprise->id)->exists(), 404, 'La empresa no pertenece al distribuidor.');
+
         $courses = array_filter(array_map('trim', explode(',', $request->courses)));
         $users = array_reverse(array_filter(array_map('trim', explode(',', $request->users))));
 
@@ -142,6 +142,11 @@ class InscriptionsMassivesController extends Controller
         foreach ($users as $userId) {
 
             $user = User::identification($userId);
+
+            // Ownership: se omiten (sin abortar el lote) los usuarios ajenos a la empresa.
+            if (! $user instanceof User || ! $enterprise->users()->where('users.id', $user->id)->exists()) {
+                continue;
+            }
 
             foreach ($courses as $courseId) {
                 $course = Course::id($courseId);
