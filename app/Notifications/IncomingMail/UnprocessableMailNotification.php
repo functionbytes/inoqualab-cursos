@@ -27,8 +27,8 @@ class UnprocessableMailNotification extends Notification implements ShouldQueue
             'title' => 'Correo no procesable',
             'message' => "El correo \"{$this->mail->subject}\" de {$this->mail->from} no pudo procesarse: {$this->mail->error_log}",
             'entity_id' => $this->mail->id,
-            // TODO: replace '#' with route('incoming-mail.show', $this->mail) once the route exists
-            'action_url' => '#',
+            // Enlaza a la bandeja de correos entrantes (destinatarios: support/manager).
+            'action_url' => route('support.mails.show', $this->mail->slack),
         ];
     }
 }

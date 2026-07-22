@@ -15,7 +15,10 @@ class NotificationsController extends Controller
 
         $user = app('customer');
 
-        $notifications = $user->notifications()->paginate(10)->groupBy(function ($date) {
+        // groupBy() sobre un paginator descarta el paginador y devuelve una Collection:
+        // la vista no usa ->links(), así que la paginación no navegaba y solo se veían
+        // 10 notificaciones. Traemos las 50 más recientes (notifications() ya ordena desc).
+        $notifications = $user->notifications()->take(50)->get()->groupBy(function ($date) {
             return Carbon::parse($date->created_at)->format('Y-m-d');
         });
 
@@ -29,6 +32,10 @@ class NotificationsController extends Controller
     {
 
         $notification = Auth::user()->notifications()->where('id', $id)->firstOrFail();
+
+        // Abrir una notificación la marca como leída (antes quedaba como no leída
+        // aunque el usuario ya la hubiera visto, inflando el contador del badge).
+        $notification->markAsRead();
 
         return view('customers.views.livechat.view')->with([
             'notification' => $notification,
@@ -53,19 +60,17 @@ class NotificationsController extends Controller
 
         $status = $request->search;
 
+        // El include customers.includes.notification AGRUPA por su cuenta ($notifyItems):
+        // aquí se pasa la colección PLANA; agrupar antes provocaba un doble groupBy.
         if ($status) {
             $notifications = Auth::user()->notifications()->where(function ($query) use ($status) {
                 $query->where('data->title', 'LIKE', "%{$status}%")
                     ->orWhere('data->ticket_id', 'LIKE', "%{$status}%")
                     ->orWhere('data->mailsubject', 'LIKE', "%{$status}%")
                     ->orWhere('data->mailtext', 'LIKE', "%{$status}%");
-            })->get()->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('Y-m-d');
-            });
+            })->get();
         } else {
-            $notifications = Auth::user()->notifications()->paginate()->groupBy(function ($date) {
-                return Carbon::parse($date->created_at)->format('Y-m-d');
-            });
+            $notifications = Auth::user()->notifications()->take(50)->get();
         }
 
         $view = view('customers.includes.notification')->with([
