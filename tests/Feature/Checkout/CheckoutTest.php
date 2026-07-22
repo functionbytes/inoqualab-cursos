@@ -2,6 +2,10 @@
 
 namespace Tests\Feature\Checkout;
 
+use App\Http\Controllers\Pages\CheckoutController;
+use App\Mail\Customers\Orders\PendingMails;
+use App\Mail\Customers\Orders\VoidedMails;
+use App\Model\Wompi;
 use App\Models\Course\Course;
 use App\Models\Inscription;
 use App\Models\Order\Order;
@@ -399,5 +403,50 @@ class CheckoutTest extends TestCase
         $this->assertSame(0, (int) $order->total_order_amount);
         $this->assertSame($this->paidConditionId(), $order->condition_id);
         $this->assertSame(1, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
+    }
+
+    /**
+     * /payments/response reconsulta a Wompi en cada visita y reentra a
+     * processOrderStatus sin la idempotencia del webhook (PaymentEvent):
+     * el correo de "pendiente"/"rechazada" solo debe salir en la transición
+     * de estado, no en cada refresh de la página.
+     */
+    public function test_repeated_pending_status_sends_email_only_once(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse();
+        $order = $this->makeGeneratedOrder($user, $course, 'order-pending-mail', 50000);
+
+        $controller = app(CheckoutController::class);
+        $controller->processOrderStatus($order->slack, 'txn-pending-01', 'PENDING');
+        $controller->processOrderStatus($order->slack, 'txn-pending-01', 'PENDING');
+
+        // Los mailables implementan ShouldQueue: con Mail::fake quedan en "queued".
+        Mail::assertQueued(PendingMails::class, 1);
+
+        $controller->processOrderStatus($order->slack, 'txn-pending-01', 'DECLINED');
+        $controller->processOrderStatus($order->slack, 'txn-pending-01', 'DECLINED');
+
+        Mail::assertQueued(VoidedMails::class, 1);
+    }
+
+    /**
+     * El monto del widget debe redondearse al centavo: un cast directo
+     * (int)(66583.33*100) trunca a 6658332 por error de flotantes y la
+     * validación de monto de processOrderStatus rechazaría el pago aprobado.
+     */
+    public function test_wompi_widget_amount_rounds_to_nearest_cent(): void
+    {
+        $user = new User(['email' => 'w@test.com']);
+        $user->firstname = 'Test';
+        $user->lastname = 'User';
+
+        $wompi = new Wompi(66583.33, 'ref-round', $user);
+
+        $this->assertSame(6658333, $wompi->amount);
+        $this->assertSame((int) round(66583.33 * 100), $wompi->amount);
     }
 }

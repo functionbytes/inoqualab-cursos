@@ -41,15 +41,39 @@ if (! function_exists('updateSettings')) {
         foreach ($data as $key => $val) {
             Setting::updateOrCreate(['key' => $key], ['value' => $val]);
         }
+
+        // Mantiene el caché estático de setting() coherente dentro del mismo
+        // request/proceso: sin esto, un patrón leer-vacío→escribir→releer (ej.
+        // MantenanceSettingsController::currentSecret()) ve el caché poblado
+        // ANTES de esta escritura y sigue creyendo que está vacío, generando
+        // un valor nuevo en cada llamada dentro del mismo proceso.
+        _settingsCache($data);
     }
 }
 
 if (! function_exists('_settingsCache')) {
-    function _settingsCache(): array
+    function _settingsCache(?array $overrides = null, bool $reset = false): array
     {
         static $cache = null;
+
+        // El caché es estático a nivel de PROCESO PHP: sin este reset explícito,
+        // sobrevive entre tests distintos aunque RefreshDatabase reinicie la BD
+        // (ver tests/TestCase.php::setUp(), que lo llama antes de cada test).
+        // Solo marca sucio (null) y retorna: NO repuebla aquí mismo, porque
+        // muchos tests no migran la tabla settings y esta llamada correría
+        // antes de que exista, lanzando un QueryException espurio.
+        if ($reset) {
+            $cache = null;
+
+            return [];
+        }
+
         if ($cache === null) {
             $cache = Setting::query()->select('key', 'value')->pluck('value', 'key')->all();
+        }
+
+        if ($overrides !== null) {
+            $cache = array_merge($cache, $overrides);
         }
 
         return $cache;
@@ -76,7 +100,10 @@ if (! function_exists('removeCoupon')) {
     function removeCoupon()
     {
         if (isset($_COOKIE['coupon_code'])) {
-            setcookie('coupon_code', '', time() - 3600);
+            // Mismo path '/' con el que se creó en setCoupon(): sin él, el borrado
+            // usa el path de la URL actual (p.ej. /checkout/coupon) y la cookie
+            // original sobrevive — el cupón "quitado" se seguía consumiendo.
+            setcookie('coupon_code', '', time() - 3600, '/');
             unset($_COOKIE['coupon_code']);
         }
     }
@@ -85,10 +112,10 @@ if (! function_exists('removeCoupon')) {
 if (! function_exists('getCoupon')) {
     function getCoupon()
     {
-        if (request()->hasHeader('coupon_code')) {
-            return request()->header('coupon_code');
-        }
-
+        // Solo la cookie que setea checkCouponValidityForCart(): aceptar también
+        // un header arbitrario permitía evaluar cupones vía GET /checkout (sin
+        // throttle) esquivando el rate-limit de /checkout/coupon/apply, y ningún
+        // JS del sitio envía ese header.
         if (isset($_COOKIE['coupon_code'])) {
             return $_COOKIE['coupon_code'];
         }

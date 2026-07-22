@@ -411,21 +411,30 @@ class CheckoutController extends Controller
             }
 
         } elseif ($status === 'PENDING') {
+            // El correo solo se envía en la TRANSICIÓN a pendiente: cada refresh de
+            // /payments/response reconsulta a Wompi y reentra aquí, y sin este guard
+            // el cliente recibía un correo por cada recarga de la página.
+            $wasPending = $order->getOriginal('condition_id') === Condition::Pendiente->value;
             $order->condition_id = Condition::Pendiente->value;
             $order->save();
-            try {
-                Mail::send(new PendingMails($order));
-            } catch (\Throwable $e) {
-                Log::error('Fallo al encolar correo de orden pendiente', ['order' => $order->slack, 'error' => $e->getMessage()]);
+            if (! $wasPending) {
+                try {
+                    Mail::send(new PendingMails($order));
+                } catch (\Throwable $e) {
+                    Log::error('Fallo al encolar correo de orden pendiente', ['order' => $order->slack, 'error' => $e->getMessage()]);
+                }
             }
 
         } elseif (in_array($status, ['VOIDED', 'DECLINED', 'ERROR'])) {
+            $wasRejected = $order->getOriginal('condition_id') === Condition::Rechazada->value;
             $order->condition_id = Condition::Rechazada->value;
             $order->save();
-            try {
-                Mail::send(new VoidedMails($order));
-            } catch (\Throwable $e) {
-                Log::error('Fallo al encolar correo de orden rechazada', ['order' => $order->slack, 'error' => $e->getMessage()]);
+            if (! $wasRejected) {
+                try {
+                    Mail::send(new VoidedMails($order));
+                } catch (\Throwable $e) {
+                    Log::error('Fallo al encolar correo de orden rechazada', ['order' => $order->slack, 'error' => $e->getMessage()]);
+                }
             }
         }
     }
@@ -765,6 +774,9 @@ class CheckoutController extends Controller
         if ($order->condition_id === Condition::Pagada->value) {
             return redirect()->route('payments.status', [$order->slack, 'APPROVED']);
         }
+
+        // La vista recorre los items y necesita el curso/paquete de cada uno.
+        $order->loadMissing('items.itemable');
 
         $user = $order->user;
         $service = new WompiService;

@@ -26,7 +26,7 @@
                         @foreach($order->items as $it)
                             @php
                                 $isBundle = $it->item_type === \App\Models\Bundle\Bundle::class;
-                                $entity = $isBundle ? \App\Models\Bundle\Bundle::find($it->item_id) : \App\Models\Course\Course::find($it->item_id);
+                                $entity = $it->itemable;
                             @endphp
                             <div class="cp-item" style="grid-template-columns:1fr 150px;">
                                 <div class="cp-prod">

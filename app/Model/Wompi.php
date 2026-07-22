@@ -32,7 +32,10 @@ class Wompi
     {
         $service = new WompiService;
 
-        $amountInCents = (int) ($total * 100);
+        // round() y no cast directo: (int)(66583.33*100) trunca a 6658332 por el
+        // error de flotantes, y processOrderStatus valida contra (int) round(...);
+        // el pago APPROVED del widget quedaría rechazado por "monto incorrecto".
+        $amountInCents = (int) round($total * 100);
 
         $this->public = $service->getPublicKey();
         $this->reference = $slack;

@@ -35,7 +35,10 @@ class CartController extends Controller
 
         $type = $request->type;
         $slack = $request->slack;
-        $qty = max(1, min(10, (int) $request->input('qty', 1)));
+        // Un curso se matricula una sola vez por usuario: el checkout fuerza qty=1
+        // (cartCheckoutLines), así que el carrito debe mostrar lo mismo o el total
+        // del drawer no coincidiría con lo que realmente se cobra.
+        $qty = $type === 'course' ? 1 : max(1, min(10, (int) $request->input('qty', 1)));
 
         $item = $type === 'bundle'
             ? Bundle::where('slack', $slack)->first()
@@ -180,7 +183,10 @@ class CartController extends Controller
             return response()->json(['success' => false, 'message' => 'Producto no encontrado.'], 404);
         }
 
-        $cart[$request->key]['qty'] = (int) $request->qty;
+        // Misma regla que en add()/cartCheckoutLines: los cursos siempre qty=1.
+        $cart[$request->key]['qty'] = ($cart[$request->key]['type'] ?? null) === 'course'
+            ? 1
+            : (int) $request->qty;
         session(['cart' => $cart]);
 
         $item = $cart[$request->key];
