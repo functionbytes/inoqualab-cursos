@@ -263,6 +263,10 @@ class ExamController extends Controller
         $user = app('customer');
         $exam = Exam::where('id', $id)->where('user_id', $user->id)->firstOrFail();
 
+        // Revalidar acceso activo (consistente con store/finish): sin esto se podía
+        // resetear el examen aunque la inscripción hubiera expirado.
+        $this->assertInscriptionActive($this->resolveInscription($user, $exam->course_id));
+
         // A5: respetar la configuración del topic — si no permite reintentos, bloquear
         if ($exam->topic && ! $exam->topic->quiz_again) {
             return redirect()->route('customers.exam.show', $exam->id)

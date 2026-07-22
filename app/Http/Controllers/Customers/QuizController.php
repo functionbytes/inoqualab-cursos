@@ -287,6 +287,10 @@ class QuizController extends Controller
         // A2: solo el dueño puede reintentar su quiz
         $quiz = Quiz::where('id', $id)->where('user_id', $user->id)->firstOrFail();
 
+        // Revalidar acceso activo (consistente con store/finish): sin esto se podía
+        // resetear el quiz aunque la inscripción hubiera expirado.
+        $this->assertInscriptionActive($this->resolveInscription($user, $quiz->course_id));
+
         // A5: respetar la configuración del topic — si no permite reintentos, bloquear
         if ($quiz->topic && ! $quiz->topic->quiz_again) {
             return redirect()->route('customers.quiz.show', $quiz->id)
