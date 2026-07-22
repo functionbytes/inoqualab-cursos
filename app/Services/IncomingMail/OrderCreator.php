@@ -92,6 +92,14 @@ class OrderCreator
             foreach ($newCourses as $course) {
                 $tariff = DistributorCourse::tariff($course->id, $distributor->id);
 
+                // Sin tarifa el ítem quedaría en amount null y el total incompleto:
+                // se falla la transacción para que el processor marque el correo como
+                // no procesable y soporte lo revise, en vez de crear una orden con
+                // monto incorrecto en silencio (los enroll manuales también abortan).
+                if ($tariff === null) {
+                    throw new \RuntimeException("Curso sin tarifa para el distribuidor: {$course->title} (curso id={$course->id}, distribuidor id={$distributor->id})");
+                }
+
                 $item = new OrderItem;
                 $item->slack = $this->generateSlack(OrderItem::class);
                 $item->order_id = $order->id;
@@ -149,7 +157,10 @@ class OrderCreator
 
     private function resolveUser(array $payload, Enterprise $enterprise): User
     {
-        $existing = User::identification($payload['document'])->first();
+        // where() directo, NO el scope identification(): ese scope hace abort(404)
+        // cuando no hay match, lo que impedía crear alumnos nuevos (el caso normal
+        // de un correo entrante) — el flujo fallaba antes de llegar al insert.
+        $existing = User::where('identification', $payload['document'])->first();
 
         if ($existing !== null) {
             return $existing;
