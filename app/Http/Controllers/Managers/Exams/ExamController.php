@@ -7,8 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Exams\StoreExamRequest;
 use App\Http\Requests\Managers\Exams\UpdateExamRequest;
 use App\Models\Course\Course;
+use App\Models\Exam\Exam;
 use App\Models\Exam\ExamTopic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ExamController extends Controller
@@ -50,6 +52,7 @@ class ExamController extends Controller
         abort_unless(auth()->user()->can('exams.create'), 403);
 
         $course = Course::slack($request->course);
+        abort_unless($course instanceof Course, 404, 'El curso indicado no existe.');
 
         $topic = new ExamTopic;
         $topic->slack = $this->generate_slack('exam_topics');
@@ -79,6 +82,7 @@ class ExamController extends Controller
     public function edit($slack)
     {
         $topic = ExamTopic::slack($slack);
+        abort_unless($topic instanceof ExamTopic, 404);
 
         return response()->json([
             'slack' => $topic->slack,
@@ -99,6 +103,7 @@ class ExamController extends Controller
         abort_unless(auth()->user()->can('exams.update'), 403);
 
         $topic = ExamTopic::slack($request->slack);
+        abort_unless($topic instanceof ExamTopic, 404);
 
         $topic->title = $request->title;
         $topic->description = $request->description;
@@ -123,9 +128,20 @@ class ExamController extends Controller
     {
         abort_unless(auth()->user()->can('exams.delete'), 403);
         $topic = ExamTopic::slack($slack);
-        $topic->questions()->delete();
-        $topic->delete();
+        abort_unless($topic instanceof ExamTopic, 404);
 
-        return back();
+        // Bloquear el borrado de un examen que ya rindieron alumnos: soft-borrar el
+        // topic y sus preguntas dejaría los intentos históricos (exam_answers) sin
+        // sus preguntas, rompiendo la visualización de resultados.
+        if (Exam::where('topic_id', $topic->id)->exists()) {
+            return back()->with('error', 'No se puede eliminar: hay alumnos que ya rindieron este examen; se perderían los resultados de sus intentos.');
+        }
+
+        DB::transaction(function () use ($topic) {
+            $topic->questions()->delete();
+            $topic->delete();
+        });
+
+        return back()->with('success', 'Examen eliminado correctamente.');
     }
 }

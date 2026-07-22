@@ -7,8 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Quizs\StoreQuizRequest;
 use App\Http\Requests\Managers\Quizs\UpdateQuizRequest;
 use App\Models\Course\Course;
+use App\Models\Quiz\Quiz;
 use App\Models\Quiz\QuizTopic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuizController extends Controller
 {
@@ -59,6 +61,8 @@ class QuizController extends Controller
         abort_unless(auth()->user()->can('quizzes.create'), 403);
 
         $course = Course::slack($request->course);
+        abort_unless($course instanceof Course, 404, 'El curso indicado no existe.');
+
         $topic = new QuizTopic;
         $topic->slack = $this->generate_slack('quiz_topics');
         $topic->title = $request->title;
@@ -88,6 +92,7 @@ class QuizController extends Controller
     public function edit($slack)
     {
         $topic = QuizTopic::slack($slack);
+        abort_unless($topic instanceof QuizTopic, 404);
 
         return response()->json([
             'slack' => $topic->slack,
@@ -109,6 +114,8 @@ class QuizController extends Controller
         abort_unless(auth()->user()->can('quizzes.update'), 403);
 
         $topic = QuizTopic::slack($request->slack);
+        abort_unless($topic instanceof QuizTopic, 404);
+
         $topic->title = $request->title;
         $topic->description = $request->description;
         $topic->timer = $request->timer;
@@ -133,10 +140,20 @@ class QuizController extends Controller
         abort_unless(auth()->user()->can('quizzes.delete'), 403);
 
         $topic = QuizTopic::slack($slack);
-        $topic->questions()->delete();
-        $topic->delete();
+        abort_unless($topic instanceof QuizTopic, 404);
 
-        return back();
+        // Bloquear el borrado de un quiz que ya resolvieron alumnos: soft-borrar el
+        // topic y sus preguntas dejaría los intentos históricos sin sus preguntas.
+        if (Quiz::where('topic_id', $topic->id)->exists()) {
+            return back()->with('error', 'No se puede eliminar: hay alumnos que ya resolvieron este quiz; se perderían los resultados de sus intentos.');
+        }
+
+        DB::transaction(function () use ($topic) {
+            $topic->questions()->delete();
+            $topic->delete();
+        });
+
+        return back()->with('success', 'Quiz eliminado correctamente.');
 
     }
 }
