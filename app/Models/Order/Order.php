@@ -102,11 +102,6 @@ class Order extends Model
         return $this->hasMany('App\Models\Invoice\Invoice');
     }
 
-    public function distributor(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Distributor\Distributor', 'distributor_id');
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo('App\Models\User', 'user_id', 'id');

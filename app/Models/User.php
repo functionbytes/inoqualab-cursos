@@ -229,11 +229,6 @@ class User extends Authenticatable implements MustVerifyEmail
         )->withPivot('last_read');
     }
 
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Countrie', 'country_id', 'id');
-    }
-
     public function enterprise(): BelongsTo
     {
         return $this->belongsTo('App\Models\Enterprise\Enterprise', 'enterprise_id', 'id');
