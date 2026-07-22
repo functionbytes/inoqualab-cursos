@@ -21,6 +21,7 @@
 
                             <input type="hidden" name="slack" value="{{ $slack }}">
                             <input type="hidden" name="email" value="{{ $email }}">
+                            <input type="hidden" name="token" value="{{ $token }}">
                             @csrf
                             <div class="row g-4">
                                 <div class="col-md-12">

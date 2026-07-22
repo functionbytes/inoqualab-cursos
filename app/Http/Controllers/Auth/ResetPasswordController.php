@@ -6,6 +6,7 @@ use App\Events\Auth\Password\ResetPasswordCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -24,9 +25,13 @@ class ResetPasswordController extends Controller
 
         seo()->setTitle('Restablecer contraseña')->noindex(true);
 
+        // El token viaja al form (hidden) para atarlo al POST: la ruta GET está
+        // protegida con `signed`, pero el POST no, así que sin verificar el token
+        // ahí, conocer el slack + disparar un reset bastaba para tomar la cuenta.
         return view('auth.passwords.reset')->with([
             'slack' => $slack,
             'email' => $user->email,
+            'token' => $user->password_reset_token,
         ]);
     }
 
@@ -34,7 +39,17 @@ class ResetPasswordController extends Controller
     {
         $user = User::where('slack', $request->slack)->first();
 
-        if ($user === null || ! $user->password_reset_token) {
+        // Token ausente/no coincidente, o enlace de más de 24h: rechazar. hash_equals
+        // evita timing attacks; la ventana de 24h coincide con la del enlace firmado.
+        $tokenOk = $user !== null
+            && $user->password_reset_token
+            && hash_equals((string) $user->password_reset_token, (string) $request->token);
+
+        $notExpired = $user !== null
+            && $user->password_reset_last_tried_on
+            && Carbon::parse($user->password_reset_last_tried_on)->gt(Carbon::now()->subHours(24));
+
+        if (! $tokenOk || ! $notExpired) {
             return redirect()->route('password.confirm')->withErrors([
                 'email' => 'El enlace de recuperación ha expirado o ya fue utilizado.',
             ]);

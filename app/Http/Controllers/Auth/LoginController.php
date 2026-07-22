@@ -123,8 +123,11 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $this->guard()->logout();
+        // Capturar el usuario ANTES de logout(): después, $request->user() ya es
+        // null y el listener de UserLoggedOut recibiría null.
         $user = $request->user();
+
+        $this->guard()->logout();
 
         event(new UserLoggedOut($user));
 

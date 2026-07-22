@@ -3,12 +3,14 @@
 namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpgradeUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        // La ruta exige middleware auth; solo el propio usuario completa sus datos.
+        return $this->user() !== null;
     }
 
     public function rules(): array
@@ -17,10 +19,13 @@ class UpgradeUserRequest extends FormRequest
             'firstname' => ['required', 'string', 'min:2', 'max:200'],
             'lastname' => ['required', 'string', 'min:2', 'max:200'],
             'cellphone' => ['required', 'numeric', 'digits_between:8,20'],
-            'citie' => ['required', 'string'],
+            // La ciudad debe existir; el controller la mapea a citie_id.
+            'citie' => ['required', 'integer', 'exists:cities,id'],
             'address' => ['required', 'string', 'min:10', 'max:500'],
             'identification' => ['required', 'string', 'max:50'],
-            'email' => ['required', 'email', 'max:255'],
+            // Unicidad ignorando al propio usuario: sin esto un upgrade podía tomar
+            // el correo de otra cuenta.
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()?->id)],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ];
     }

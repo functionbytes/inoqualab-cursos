@@ -15,6 +15,7 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'slack' => ['required', 'string'],
+            'token' => ['required', 'string'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
     }
