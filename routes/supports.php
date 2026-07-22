@@ -254,11 +254,13 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/staff/create/{slack}', [DistributorStaffController::class, 'create'])->name('support.distributors.staffs.create');
         Route::get('/staff/edit/{slack}', [DistributorStaffController::class, 'edit'])->name('support.distributors.staffs.edit');
         Route::get('/staff/view/{slack}', [DistributorStaffController::class, 'view'])->name('support.distributors.staffs.view');
+        Route::get('/staff/reports/generate', [DistributorStaffController::class, 'generate'])->name('support.distributors.staffs.reports.generate');
         Route::get('/staff/reports/{slack}', [DistributorStaffController::class, 'reports'])->name('support.distributors.staffs.reports');
         Route::delete('/staff/destroy/{slack}', [DistributorStaffController::class, 'destroy'])->name('support.distributors.staffs.destroy');
         Route::get('/staff/history/{slack}', [DistributorStaffController::class, 'history'])->name('support.distributors.staffs.history');
 
         Route::get('/orders/{slack}', [DistributorsOrdersController::class, 'index'])->name('support.distributors.orders');
+        Route::get('/orders/view/{slack}', [DistributorsOrdersController::class, 'view'])->name('support.distributors.orders.view');
 
         Route::get('/inscriptions/massive/{slack}', [DistributorsInscriptionsMassivesController::class, 'index'])->name('support.distributors.inscriptions.massives');
         Route::post('/inscriptions/massive/store', [DistributorsInscriptionsMassivesController::class, 'store'])->name('support.distributors.inscriptions.massives.store');
@@ -307,7 +309,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::delete('/courses/destroy/{user}', [UsersCoursesController::class, 'destroy'])->name('support.users.courses.destroy');
 
         Route::get('/orders/{slack}', [UsersOrdersController::class, 'index'])->name(name: 'support.users.orders.index');
-        Route::post('/orders/update', [UsersOrdersController::class, 'update'])->name('support.certifications.update');
+        Route::post('/orders/update', [UsersOrdersController::class, 'update'])->name('support.users.orders.update');
         Route::get('/orders/view/{slack}', [UsersOrdersController::class, 'view'])->name('support.users.orders.view');
         Route::get('/orders/edit/{slack}', [UsersOrdersController::class, 'edit'])->name('support.users.orders.edit');
         Route::get('/orders/print/{slack}', [UsersOrdersController::class, 'print'])->name('support.users.orders.print');

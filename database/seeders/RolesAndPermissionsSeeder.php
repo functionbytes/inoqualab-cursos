@@ -31,7 +31,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'sliders', 'trusteds', 'seo', 'activity',
         // Dominios de panel sin entidad de negocio propia: sin estos, el permiso
         // que EnforcePanelPermission deriva de sus rutas no existe -> fail-open.
-        'dashboard', 'profile', 'notifications', 'mail_templates', 'migration',
+        'dashboard', 'profile', 'notifications', 'mail_templates',
     ];
 
     /**

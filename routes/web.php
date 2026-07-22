@@ -7,7 +7,6 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\UpgradeController;
 use App\Http\Controllers\Auth\ValidationController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\Managers\MigrationController;
 use App\Http\Controllers\Managers\Seo\SeoWebVitalsController;
 use App\Http\Controllers\Pages\BlogController;
 use App\Http\Controllers\Pages\BundlesController;
@@ -28,20 +27,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['web']], function () {
-
-    // Migración de datos legacy: endpoints sensibles (escriben en masa). Se añade
-    // panel.permission (exige migration.view) y throttle. TODO: convertir a POST.
-    Route::group(['prefix' => 'migration', 'middleware' => ['auth', 'manager', 'panel.permission', 'throttle:10,1']], function () {
-
-        Route::get('/users', [MigrationController::class, 'users'])->name('manager.migration.users');
-        Route::get('/enterprises', [MigrationController::class, 'enterprises'])->name('manager.migration.enterprises');
-        Route::get('/userenterprises', [MigrationController::class, 'userenterprises'])->name('manager.migration.userenterprises');
-        Route::get('/coursesenterprises', [MigrationController::class, 'coursesenterprises'])->name('manager.migration.coursesenterprises');
-        Route::get('/orders', [MigrationController::class, 'orders'])->name('manager.migration.orders');
-
-        Route::get('/coursesprogress', [MigrationController::class, 'coursesprogress'])->name('manager.migration.coursesprogress');
-
-    });
 
     Route::get('/', [PagesController::class, 'index'])->name('index');
 
@@ -86,7 +71,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/newsletters/confirm/{token}', [NewslettersController::class, 'confirm'])->name('newsletters.confirm');
     Route::get('/newsletters/unsubscribe/{slack}', [NewslettersController::class, 'unsubscribe'])->name('newsletters.unsubscribe');
     Route::get('/ajax/newsletter/popup', [NewslettersController::class, 'ajaxPopup'])->name('newsletters.ajax-popup')->middleware('throttle:60,1');
-    Route::post('/upgrade/store', [UpgradeController::class, 'store'])->name('upgrade.store')->middleware('throttle:10,1');
+    Route::post('/upgrade/store', [UpgradeController::class, 'store'])->name('upgrade.store')->middleware(['auth', 'throttle:10,1']);
 
     Route::get('/clear', function () {
         Artisan::call('dump-autoload');
@@ -165,7 +150,7 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('/', [ContactsController::class, 'index'])->name('contacts');
         Route::get('/success/{slug}', [ContactsController::class, 'success'])->name('contacts.success');
-        Route::post('/store', [ContactsController::class, 'storage'])->name('contacts.store');
+        Route::post('/store', [ContactsController::class, 'storage'])->name('contacts.store')->middleware('throttle:5,1');
     });
 
     Route::group(['prefix' => 'password'], function () {
