@@ -91,11 +91,13 @@ class InvoicesController extends Controller
         $details = [];
 
         foreach ($groupedDetails as $enterpriseId => $courses) {
-            $enterprise = $courses->first()->first()->enterprise->title;
+            // Null-safe: una empresa/curso eliminado no debe tumbar la vista
+            // (mismo guard que la versión de Managers).
+            $enterprise = $courses->first()->first()->enterprise?->title ?? 'Empresa';
             $totalEnterprise = 0;
 
             foreach ($courses as $courseId => $detail) {
-                $course = $detail->first()->course->title;
+                $course = $detail->first()->course?->title ?? 'Curso';
                 $quantity = $detail->sum('quantity');
                 $amount = $detail->sum('amount');
 
@@ -148,9 +150,8 @@ class InvoicesController extends Controller
 
         if ($request->condition == 4) {
             $invoice->payment_at = Carbon::parse($request->payment);
-        } elseif ($request->condition == 2) {
-
-        } elseif ($request->condition == 3) {
+        } else {
+            $invoice->payment_at = null;
         }
 
         $invoice->condition_id = $request->condition;
@@ -240,7 +241,9 @@ class InvoicesController extends Controller
                         $itemId = $orderItem->item_id;
                         $itemPrice = $orderItem->amount;
                         $orderItemCount = $orderItem->quantity;
-                        $orderItemAmount = $itemPrice * $orderItemCount;
+                        // $orderItem->amount ya es el total de línea (no el precio unitario) —
+                        // multiplicarlo por quantity infla el monto en bundles con qty > 1.
+                        $orderItemAmount = $itemPrice;
 
                         if (! isset($coursesItems[$itemType])) {
                             $coursesItems[$itemType] = [];

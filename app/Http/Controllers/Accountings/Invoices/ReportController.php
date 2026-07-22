@@ -34,9 +34,20 @@ class ReportController extends Controller
         $distributor = $request->distributor;
         $method = $request->methods;
         $condition = $request->condition;
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+
+        // El rango debe venir como "fecha_inicio - fecha_fin" (mismo guard que
+        // la versión de Managers: sin él, un rango malformado da un 500).
+        $date = explode(' - ', (string) $request->range);
+        if (count($date) !== 2) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        try {
+            $start = Carbon::parse($date[0])->startOfDay();
+            $end = Carbon::parse($date[1])->endOfDay();
+        } catch (\Exception $e) {
+            return back()->with('error', 'El rango de fechas no es válido.');
+        }
 
         return Excel::download(new InvoicesExport($distributor, $method, $condition, $start, $end), 'Reporte Facturación.xlsx');
 

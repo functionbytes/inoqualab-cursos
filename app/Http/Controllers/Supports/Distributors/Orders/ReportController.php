@@ -22,7 +22,7 @@ class ReportController extends Controller
 
         $enterprises = ['0' => 'Todas'] + $enterprises;
 
-        return view('supports.views.enterprises.orders.report.index')->with([
+        return view('supports.views.distributors.orders.report.report')->with([
             'enterprises' => $enterprises,
             'distributor' => $distributor,
         ]);

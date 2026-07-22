@@ -90,10 +90,11 @@ class InvoicesExport implements FromQuery, Responsable, WithHeadings, WithMappin
             $row->nit,
             strtoupper($this->methods[$row->method_id] ?? ''),
             strtoupper($this->conditions[$row->condition_id] ?? ''),
-            date('Y-m-d', strtotime($row->from_at)),
-            date('Y-m-d', strtotime($row->to_at)),
-            date('Y-m-d', strtotime($row->payment_at)),
-            date('Y-m-d', strtotime($row->created_at)),
+            // Null-safe: una fecha nula (factura sin pagar) daba "1969-12-31".
+            $row->from_at ? date('Y-m-d', strtotime($row->from_at)) : '',
+            $row->to_at ? date('Y-m-d', strtotime($row->to_at)) : '',
+            $row->payment_at ? date('Y-m-d', strtotime($row->payment_at)) : '',
+            $row->created_at ? date('Y-m-d', strtotime($row->created_at)) : '',
         ];
     }
 
