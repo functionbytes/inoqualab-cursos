@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Managers\Users;
 
+use App\Enums\OrderCondition as Condition;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Users\StoreUserRequest;
 use App\Models\Enterprise\Enterprise;
@@ -106,6 +107,7 @@ class UsersController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Se ha creado correctamente',
+            'slack' => $user->slack,
         ]);
 
     }
@@ -323,12 +325,31 @@ class UsersController extends Controller
 
     public function destroyOrders($slack)
     {
-        $user = null;
+        // La ruta se llama manager.enterprises.users.orders.destroy, por lo que
+        // EnforcePanelPermission deriva 'enterprises.delete' — un guard explícito
+        // de 'orders.delete' evita que un rol con enterprises.* borre órdenes.
+        abort_unless(auth()->user()->can('orders.delete'), 403);
+
         $order = Order::slack($slack);
-        $user = $order->user->slack;
+
+        // El scope slack() devuelve el Builder cuando no hay match.
+        if (! $order instanceof Order) {
+            return redirect()->route('manager.users');
+        }
+
+        $userSlack = $order->user?->slack;
+
+        // FK en cascada (orders → inscriptions → certificates): no permitir borrar
+        // una orden pagada, arrastraría matrículas y certificados del alumno.
+        if ($order->condition_id === Condition::Pagada->value) {
+            return redirect()
+                ->route('manager.users.orders', $userSlack ?? '')
+                ->with('error', 'No se puede eliminar una orden pagada: arrastraría en cascada las matrículas y certificados del alumno.');
+        }
+
         $order->delete();
 
-        return redirect()->route('manager.users.orders', $user);
+        return redirect()->route('manager.users.orders', $userSlack ?? '');
 
     }
 }

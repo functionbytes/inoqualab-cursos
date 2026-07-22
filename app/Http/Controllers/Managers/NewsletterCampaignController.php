@@ -137,6 +137,10 @@ class NewsletterCampaignController extends Controller
 
     public function test(TestNewsletterCampaignRequest $request, NewsletterCampaign $campaign): JsonResponse
     {
+        // Envía correo a una dirección arbitraria: sin este guard, cualquier holder
+        // de rol manager sin newsletters.update podía usarlo como relay de correo.
+        abort_unless(auth()->user()->can('newsletters.update'), 403);
+
         $data = $request->validated();
 
         try {
@@ -154,7 +158,7 @@ class NewsletterCampaignController extends Controller
             $subject = MailerTemplateRendererService::replaceVariables($campaign->subject, $variables);
             $html = MailerTemplateRendererService::renderContentWithWrapper($campaign->content, $variables);
 
-            Mail::mailer('smtp')->html($html, fn ($msg) => $msg->to($data['email'])->subject('[PRUEBA] '.$subject));
+            Mail::html($html, fn ($msg) => $msg->to($data['email'])->subject('[PRUEBA] '.$subject));
         } catch (\Throwable $e) {
             return response()->json(['message' => 'Error al enviar: '.$e->getMessage()], 422);
         }
@@ -171,6 +175,8 @@ class NewsletterCampaignController extends Controller
 
     public function duplicate(NewsletterCampaign $campaign): JsonResponse
     {
+        abort_unless(auth()->user()->can('newsletters.create'), 403);
+
         $copy = NewsletterCampaign::create([
             'uid' => Str::uuid(),
             'name' => 'Copia de '.$campaign->name,
@@ -190,6 +196,8 @@ class NewsletterCampaignController extends Controller
 
     public function retry(NewsletterCampaign $campaign): JsonResponse
     {
+        abort_unless(auth()->user()->can('newsletters.update'), 403);
+
         if (! $campaign->isFailed()) {
             return response()->json(['message' => 'Solo se pueden reintentar campañas fallidas.'], 422);
         }

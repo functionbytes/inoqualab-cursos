@@ -176,6 +176,7 @@ class BundlesController extends Controller
 
     public function storeThumbnails(Request $request)
     {
+        abort_unless(auth()->user()->can('bundles.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
 
@@ -190,14 +191,26 @@ class BundlesController extends Controller
 
     public function deleteThumbnails($id)
     {
-        Media::find($id)->delete();
+        abort_unless(auth()->user()->can('bundles.delete'), 403);
+
+        Media::where('id', $id)
+            ->where('model_type', Bundle::class)
+            ->first()?->delete();
 
         return response()->json(['status' => 'success']);
     }
 
     public function toggleAvailable(Request $request): JsonResponse
     {
+        abort_unless(auth()->user()->can('bundles.update'), 403);
+
         $bundle = Bundle::slack($request->slack);
+
+        // El scope slack() devuelve el Builder cuando no hay match.
+        if (! $bundle instanceof Bundle) {
+            return response()->json(['success' => false, 'message' => 'Paquete no encontrado.'], 404);
+        }
+
         $bundle->available = $bundle->available ? 0 : 1;
         $bundle->save();
 
