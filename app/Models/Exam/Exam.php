@@ -53,11 +53,6 @@ class Exam extends Model
         return $this->belongsTo('App\Models\Exam\ExamTopic', 'topic_id', 'id');
     }
 
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Order\Order', 'order_id', 'id');
-    }
-
     public function answers(): HasMany
     {
         return $this->hasMany('App\Models\Exam\ExamAnswer', 'exam_id');

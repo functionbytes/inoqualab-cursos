@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Managers\Users;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
-use App\Models\Order\Order;
+use App\Models\Inscription;
 use App\Models\User;
 use App\Models\Users\Certificate;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class CertificatesController extends Controller
@@ -55,8 +54,19 @@ class CertificatesController extends Controller
     public function user($slack)
     {
 
-        $order = Order::slack($slack);
-        $certificate = $order->certificate ?? $this->generateCertificateFor($order);
+        // Las vistas enlazan esta ruta con el slack de la INSCRIPCIÓN (mismo
+        // contrato que Supports\Users\CertificatesController::user). La versión
+        // anterior lo trataba como Order del esquema legacy mono-item y
+        // fabricaba un Certificate con columnas inexistentes (500 garantizado,
+        // y además emitía certificados sin examen aprobado).
+        $inscription = Inscription::slack($slack);
+
+        abort_unless($inscription instanceof Inscription, 404);
+
+        $certificate = $inscription->certificate;
+
+        abort_unless($certificate instanceof Certificate, 404, 'El alumno aún no tiene certificado emitido para este curso.');
+
         $this->authorize('view', $certificate);
 
         return $this->streamCertificate($certificate);
@@ -84,27 +94,6 @@ class CertificatesController extends Controller
 
         return $pdf->stream();
 
-    }
-
-    /**
-     * Verificación explícita de propiedad/permiso por controlador (defensa en
-     * profundidad): no depender únicamente del permiso derivado por
-     * EnforcePanelPermission a partir del nombre de ruta.
-     */
-    private function generateCertificateFor(Order $order): Certificate
-    {
-        $certificate = new Certificate;
-        $certificate->slack = $this->generate_slack('certificates');
-        $certificate->course_id = $order->course_id;
-        $certificate->user_id = $order->user_id;
-        $certificate->order_id = $order->order_id;
-        $certificate->start_at = $order->culminated_at;
-        $certificate->end_at = Carbon::parse($order->culminated_at)->addMonths(12);
-        $certificate->created_at = $order->culminated_at;
-        $certificate->updated_at = $order->culminated_at;
-        $certificate->save();
-
-        return $certificate;
     }
 
     private function streamCertificate(Certificate $certificate)

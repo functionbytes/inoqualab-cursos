@@ -67,11 +67,6 @@ class Quiz extends Model
         return $this->belongsTo('App\Models\Course\Course', 'course_id', 'id');
     }
 
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Order\Order', 'order_id', 'id');
-    }
-
     public function inscription(): BelongsTo
     {
         return $this->belongsTo('App\Models\Inscription', 'inscription_id', 'id');

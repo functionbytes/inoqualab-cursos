@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Customers\Concerns\ResolvesInscription;
 use App\Models\Course\Course;
+use App\Models\Course\CourseLesson;
 use App\Models\Course\CourseReview;
 use App\Models\Exam\Exam;
 use App\Models\Exam\ExamAnswer;
@@ -30,13 +31,43 @@ class ExamController extends Controller
         // A3: el examen final solo se habilita con todas las lecciones culminadas
         $this->assertExamAccessible($course, $inscription);
         $topic = $course->examtopic;
-        $chapters = $course->chapter;
         $class = $course->lessons;
         $count = $topic->show_ans;
         $progress = $inscription->progress;
         $questions = $topic->questions->shuffle()->take($count);
 
+        // Datos del rail de capítulos/lecciones (mismo patrón que CoursesController::lesion)
+        $chapters = $course->chapters()->with(['lessons' => function ($q) {
+            $q->where('available', 1)->orderBy('position')->with('type');
+        }])->get();
+
+        $completedLessonIds = $inscription->progress()
+            ->where('culminated', 1)
+            ->pluck('lesson_id')
+            ->all();
+
+        $chapterProgress = $inscription->progress()
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
+        $totalClass = $course->lessons()->count();
+        $completedClass = count($completedLessonIds);
+        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $lastchapter = null;
+        $lastlesson = null;
+        $percent = $inscription->percent;
+        $percents = $inscription->percent;
+
         $exam = $inscription->exam;
+        $certificate = ($exam && $exam->score >= $this->passingScoreFor($exam)) ? $inscription->certificate : null;
+
+        // Última lección del curso: destino del botón "Anterior" (no hay lección "siguiente" tras el examen)
+        $lastCourseLesson = CourseLesson::where('course_id', $course->id)
+            ->where('available', 1)
+            ->orderByDesc('position')
+            ->first();
 
         if ($exam === null) {
             $exam = Exam::create([
@@ -60,7 +91,11 @@ class ExamController extends Controller
 
         return view('customers.views.exams.exam', compact(
             'course', 'class', 'chapters', 'progress',
-            'topic', 'questions', 'exam', 'user', 'count'
+            'topic', 'questions', 'exam', 'user', 'count',
+            'inscription', 'completedLessonIds', 'chapterProgress',
+            'totalClass', 'completedClass', 'progressPercentage',
+            'lastchapter', 'lastlesson', 'percent', 'percents', 'certificate',
+            'lastCourseLesson'
         ));
     }
 
@@ -83,7 +118,14 @@ class ExamController extends Controller
 
         for ($i = 1; $i <= $count; $i++) {
             $question = ExamQuestion::id($unique_question[$i]);
-            abort_unless($question instanceof ExamQuestion, 404);
+            // Los question_id llegan como inputs hidden manipulables: exigir que la
+            // pregunta pertenezca AL TOPIC de este examen evita que un alumno
+            // sustituya IDs por preguntas de otro topic/curso cuya respuesta conoce
+            // y así apruebe de forma fraudulenta (mismo riesgo que el fix fb41023).
+            abort_unless(
+                $question instanceof ExamQuestion && (int) $question->topic_id === (int) $topic->id,
+                404
+            );
             $answerCustomer = (array) $request->answer[$i];
             $isMultiple = str_contains($question->answer, ',');
 
@@ -177,9 +219,42 @@ class ExamController extends Controller
             ->where('course_id', $course->id)
             ->first();
 
+        // Datos del rail de capítulos/lecciones (mismo patrón que CoursesController::lesion)
+        $chapters = $course->chapters()->with(['lessons' => function ($q) {
+            $q->where('available', 1)->orderBy('position')->with('type');
+        }])->get();
+
+        $completedLessonIds = $inscription->progress()
+            ->where('culminated', 1)
+            ->pluck('lesson_id')
+            ->all();
+
+        $chapterProgress = $inscription->progress()
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
+        $totalClass = $course->lessons()->count();
+        $completedClass = count($completedLessonIds);
+        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $lastchapter = null;
+        $lastlesson = null;
+        $percent = $inscription->percent;
+        $percents = $inscription->percent;
+
+        // Última lección del curso: destino del botón "Anterior" (no hay lección "siguiente" tras el examen)
+        $lastCourseLesson = CourseLesson::where('course_id', $course->id)
+            ->where('available', 1)
+            ->orderByDesc('position')
+            ->first();
+
         return view('customers.views.exams.finish', compact(
             'user', 'course', 'topic', 'wrong', 'correct',
-            'answers', 'score', 'count', 'certificate', 'exam', 'userReview', 'passingScore'
+            'answers', 'score', 'count', 'certificate', 'exam', 'userReview', 'passingScore',
+            'lastCourseLesson', 'inscription',
+            'chapters', 'completedLessonIds', 'chapterProgress', 'totalClass', 'completedClass',
+            'progressPercentage', 'lastchapter', 'lastlesson', 'percent', 'percents'
         ));
     }
 

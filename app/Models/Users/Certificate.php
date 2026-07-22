@@ -20,11 +20,14 @@ class Certificate extends Model implements HasMedia
 
     protected static $recordEvents = ['deleted', 'updated', 'created'];
 
+    // OJO: la tabla certificates NO tiene columna order_id; y sin inscription_id
+    // aquí, Certificate::create() (ExamController) la descartaba en silencio y el
+    // certificado quedaba huérfano de su inscripción (rompe Inscription->certificate).
     protected $fillable = [
         'slack',
         'user_id',
         'course_id',
-        'order_id',
+        'inscription_id',
         'exam_id',
         'certifier_id',
         'certification_id',
@@ -74,11 +77,6 @@ class Certificate extends Model implements HasMedia
     public function course(): BelongsTo
     {
         return $this->belongsTo('App\Models\Course\Course', 'course_id', 'id');
-    }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Order\Order', 'order_id', 'id');
     }
 
     public function exam(): BelongsTo

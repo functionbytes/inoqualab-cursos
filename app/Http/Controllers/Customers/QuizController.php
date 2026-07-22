@@ -29,10 +29,39 @@ class QuizController extends Controller
 
         $count = $topic->show_ans;
         $course = $lesson->course;
-        $chapters = $course->chapter;
         $questions = $topic->questions->shuffle()->take($count);
 
         $progress = $inscription->progress;
+
+        // Datos del rail de capítulos/lecciones (mismo patrón que CoursesController::lesion)
+        $chapters = $course->chapters()->with(['lessons' => function ($q) {
+            $q->where('available', 1)->orderBy('position')->with('type');
+        }])->get();
+
+        $completedLessonIds = $inscription->progress()
+            ->where('culminated', 1)
+            ->pluck('lesson_id')
+            ->all();
+
+        $chapterProgress = $inscription->progress()
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
+        $totalClass = $course->lessons()->count();
+        $completedClass = count($completedLessonIds);
+        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $lastchapter = $lesson->chapter_id;
+        $lastlesson = $lesson->id;
+        $percent = $inscription->percent;
+        $percents = $inscription->percent;
+        $exam = $inscription->exam;
+        $certificate = ($exam && $exam->score >= $this->passingScoreFor($exam)) ? $inscription->certificate : null;
+
+        // Navegación libre entre lecciones del curso (independiente de responder el quiz)
+        $prevLesson = CourseProgress::prevNext($lesson->id, 'prev');
+        $nextLesson = CourseProgress::prevNext($lesson->id, 'next');
 
         $quiz = Quiz::where('lesson_id', $lesson->id)->where('user_id', $user->id)->first();
 
@@ -70,6 +99,20 @@ class QuizController extends Controller
             'user' => $user,
             'quiz' => $quiz,
             'count' => $count,
+            'inscription' => $inscription,
+            'completedLessonIds' => $completedLessonIds,
+            'chapterProgress' => $chapterProgress,
+            'totalClass' => $totalClass,
+            'completedClass' => $completedClass,
+            'progressPercentage' => $progressPercentage,
+            'lastchapter' => $lastchapter,
+            'lastlesson' => $lastlesson,
+            'percent' => $percent,
+            'percents' => $percents,
+            'exam' => $exam,
+            'certificate' => $certificate,
+            'prevLesson' => $prevLesson,
+            'nextLesson' => $nextLesson,
         ]);
 
     }
@@ -87,7 +130,13 @@ class QuizController extends Controller
         $userAnswers = $request->answer ?? [];
 
         // A1: la calificación se hace contra la respuesta almacenada en BD, nunca contra el cliente
-        $questions = QuizQuestion::findMany($questionIds)->keyBy('id');
+        // A3: los question_id son inputs hidden manipulables; se restringen AL TOPIC de este quiz
+        // para que no se puedan calificar preguntas de otro topic (las ajenas se descartan en
+        // processQuizAnswers vía el continue cuando $questions->get() devuelve null).
+        $questions = QuizQuestion::whereIn('id', $questionIds)
+            ->where('topic_id', $topic->id)
+            ->get()
+            ->keyBy('id');
         $answers = $this->processQuizAnswers($topic, $quiz, $questionIds, $userAnswers, $questions);
 
         QuizAnswer::insert($answers);
@@ -173,6 +222,33 @@ class QuizController extends Controller
         ]);
 
         $nextLesson = CourseProgress::prevNext($lesson->id, 'next');
+        $prevLesson = CourseProgress::prevNext($lesson->id, 'prev');
+
+        // Datos del rail de capítulos/lecciones (mismo patrón que CoursesController::lesion)
+        $chapters = $course->chapters()->with(['lessons' => function ($q) {
+            $q->where('available', 1)->orderBy('position')->with('type');
+        }])->get();
+
+        $completedLessonIds = $inscription->progress()
+            ->where('culminated', 1)
+            ->pluck('lesson_id')
+            ->all();
+
+        $chapterProgress = $inscription->progress()
+            ->selectRaw('chapter_id, count(*) as total')
+            ->groupBy('chapter_id')
+            ->pluck('total', 'chapter_id')
+            ->all();
+
+        $totalClass = $course->lessons()->count();
+        $completedClass = count($completedLessonIds);
+        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $lastchapter = $lesson->chapter_id;
+        $lastlesson = $lesson->id;
+        $percent = $inscription->percent;
+        $percents = $inscription->percent;
+        $examModel = $inscription->exam;
+        $certificate = ($examModel && $examModel->score >= $this->passingScoreFor($examModel)) ? $inscription->certificate : null;
 
         return view('customers.views.quizs.finish', [
             'user' => $user,
@@ -184,8 +260,21 @@ class QuizController extends Controller
             'correct' => $correct,
             'score' => $score,
             'count' => $count,
+            'chapters' => $chapters,
+            'completedLessonIds' => $completedLessonIds,
+            'chapterProgress' => $chapterProgress,
+            'totalClass' => $totalClass,
+            'completedClass' => $completedClass,
+            'progressPercentage' => $progressPercentage,
+            'lastchapter' => $lastchapter,
+            'lastlesson' => $lastlesson,
+            'percent' => $percent,
+            'percents' => $percents,
+            'exam' => $examModel,
+            'certificate' => $certificate,
             'passingScore' => $passingScore,
             'nextLesson' => $nextLesson,
+            'prevLesson' => $prevLesson,
             'quiz' => $quiz,
         ]);
 
