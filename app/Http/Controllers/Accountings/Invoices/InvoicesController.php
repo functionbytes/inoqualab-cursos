@@ -228,11 +228,16 @@ class InvoicesController extends Controller
             $invoice->created_at = Carbon::now()->setTimezone('America/Bogota');
             $invoice->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
+            $seenOrders = [];
+
             foreach ($items as $item) {
 
                 $order = $item->order;
 
-                if ($order) {
+                // Una orden puede tener varias OrderActivity (una por curso): se
+                // agrega su total y sus ítems UNA sola vez para no inflar la factura.
+                if ($order && ! isset($seenOrders[$order->id])) {
+                    $seenOrders[$order->id] = true;
                     $total += $order->total_order_amount;
 
                     foreach ($order->items as $orderItem) {
@@ -294,11 +299,15 @@ class InvoicesController extends Controller
                 }
             }
 
+            $seenDetails = [];
+
             foreach ($items as $item) {
                 $order = $item->order;
                 $enterprise_id = $item->enterprise_id;
 
-                if ($order) {
+                // Misma deduplicación por orden.
+                if ($order && ! isset($seenDetails[$order->id])) {
+                    $seenDetails[$order->id] = true;
                     foreach ($order->items as $orderItem) {
                         $itemDetail = new InvoiceDetails;
                         $itemDetail->slack = $this->generate_slack('invoice_details');
