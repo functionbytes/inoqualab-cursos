@@ -48,6 +48,8 @@
 <div class="page-wrapper" id="main-wrapper" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed"
     data-header-position="fixed" data-layout="horizontal">
 
+    <div class="dark-transparent" onclick="document.getElementById('main-wrapper').classList.remove('show-sidebar')"></div>
+
     @include ('customers.includes.nav')
 
     <!-- Main wrapper -->

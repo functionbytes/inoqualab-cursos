@@ -145,7 +145,7 @@
                     $submitButton.prop('disabled', true);
 
                     $.ajax({
-                        url: "/manager/testimonies/store",
+                        url: "{{ route('manager.testimonies.store') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

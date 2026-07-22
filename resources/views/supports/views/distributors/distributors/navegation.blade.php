@@ -6,7 +6,7 @@
 
                 <div class="row justify-content-center navegation-content">
                     <div class="col-lg-12 text-center">
-                        <span class="fw-bolder text-uppercase fs-2 d-block mb-1">EMPRESA</span>
+                        <span class="fw-bolder text-uppercase fs-2 d-block mb-1">DISTRIBUIDOR</span>
                             <h3 class="fw-bolder mb-0 fs-8 lh-base">{{ $distributor->title }}</h3>
                     </div>
                 </div>

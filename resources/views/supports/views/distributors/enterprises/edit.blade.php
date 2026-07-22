@@ -19,7 +19,7 @@
               <h5 class="mb-0">Editar empresa</h5>
             </div>
             <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
             </p>
 
             <div class="row">
@@ -217,8 +217,13 @@
                       });
 
                       setTimeout(function() {
-                          let slack = @json($distributor->slack);
-                          window.location.href = "{{ route('support.distributors.enterprises', ':slack') }}".replace(':slack', slack);
+                          // La empresa puede no tener distribuidor asociado (ver EnterpriseController::destroy).
+                          // Sin este fallback, $distributor->slack lanza un 500 al renderizar la vista.
+                          let slack = @json($distributor->slack ?? null);
+                          let url = slack
+                              ? "{{ route('support.distributors.enterprises', ':slack') }}".replace(':slack', slack)
+                              : "{{ route('support.enterprises') }}";
+                          window.location.href = url;
                       }, 4000);
 
 

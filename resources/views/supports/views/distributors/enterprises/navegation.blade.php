@@ -31,7 +31,7 @@
                                     <div class="my-4">
                                         <i class="font-navegation fa-duotone fa-solid fa-user-tie-hair"></i>
                                     </div>
-                                    <h4 class="fw-bolder  text-uppercase mb-3">Empleados teacher</h4>
+                                    <h4 class="fw-bolder  text-uppercase mb-3">Empleados</h4>
                                 </div>
                             </a>
                         </div>

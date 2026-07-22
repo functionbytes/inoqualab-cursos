@@ -33,6 +33,11 @@
                                 </button>
                             </div>
                             <div class="col-auto">
+                                <a href="{{ route('support.distributors.staffs.reports', $distributor->slack) }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reporte">
+                                    <i class="fa-duotone fa-file-chart-column"></i>
+                                </a>
+                            </div>
+                            <div class="col-auto">
                                 <a href="{{ route('support.distributors.staffs.create', $distributor->slack) }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Crear">
                                     <i class="fa-duotone fa-plus"></i>
                                 </a>

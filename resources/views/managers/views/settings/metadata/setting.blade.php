@@ -270,8 +270,8 @@
 
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
-                                url: "{{ route('manager.certifiers.thumbnails.delete', ':id') }}".replace(':id', file.id),
+                                type: 'DELETE',
+                                url: "{{ route('manager.settings.metadata.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');
                                 }

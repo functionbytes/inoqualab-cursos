@@ -139,7 +139,7 @@
 
                                     <li>
                                         <a class="dropdown-item d-flex align-items-center gap-3"
-                                            href="{{ route('manager.enterprises.postpone.courses', $user->userSlack) }}">
+                                            href="{{ route('manager.enterprises.postpone.courses', $user->order_slack) }}">
                                             Ampliar
                                         </a>
                                     </li>

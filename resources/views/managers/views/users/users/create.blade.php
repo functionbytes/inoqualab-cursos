@@ -291,7 +291,7 @@
                     $submitButton.prop('disabled', true);
 
                     $.ajax({
-                        url: "/manager/users/store",
+                        url: "{{ route('manager.users.store') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
@@ -312,7 +312,7 @@
                                 });
 
                                 setTimeout(function() {
-                                    window.location.href = "{{ route('manager.users.inscriptions',$user->slack) }}";
+                                    window.location.href = "{{ route('manager.users.inscriptions', ':slack') }}".replace(':slack', response.slack);
                                 }, 2000);
 
                             }else{

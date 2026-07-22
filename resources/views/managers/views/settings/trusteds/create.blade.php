@@ -172,7 +172,7 @@
           $submitButton.prop('disabled', true);
 
           $.ajax({
-            url: "/manager/trusteds/store",
+            url: "{{ route('manager.trusteds.store') }}",
             headers: {
               'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
@@ -269,8 +269,8 @@
                         $("#formTrusted").validate().element("#thumbnail");
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
-                                url: "{{ route('manager.sliders.thumbnails.delete', ':id') }}".replace(':id', file.id),
+                                type: 'DELETE',
+                                url: "{{ route('manager.trusteds.thumbnails.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');
                                 }

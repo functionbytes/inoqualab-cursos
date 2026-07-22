@@ -23,14 +23,18 @@
                                     administrador
                                 @elseif($user->role == 'customer')
                                     cliente
-                                @elseif($user->role == 'enterprises')
+                                @elseif($user->role == 'enterprise')
                                     empresa
+                                @elseif($user->role == 'distributor')
+                                    distribuidor
+                                @elseif($user->role == 'accounting')
+                                    contabilidad
                                 @endif
                             </h5>
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
                         </p>
 
                         <div class="row">
@@ -81,7 +85,7 @@
                                     <input type="password" class="form-control" id="password"  name="password" value="" placeholder="Ingresar contraseña">
                                 </div>
                             </div>
-                            <div class="col-6 divEnterprise {{ $user->role == 'customer' or $user->role == 'customer' ? '' : 'd-none' }}">
+                            <div class="col-6 divEnterprise {{ $user->role == 'customer' || $user->role == 'enterprise' ? '' : 'd-none' }}">
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Empresa</label>
                                     <div class="input-group">

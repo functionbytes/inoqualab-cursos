@@ -13190,10 +13190,11 @@ input[data-autocompleted] {
 
 
 .notification.errors {
-  background: #e7f0fe;
+  background: #fdecea;
   border-radius: 4px;
   padding: 11px 16px;
-  color: #000d1c;
+  color: #7a1f16;
+  border: 1px solid #f5c6c0;
 }
 .notification.errors p {
   margin: 0;
@@ -13306,10 +13307,14 @@ input:-webkit-autofill, input:-webkit-autofill:focus {
 
 
 .account__form label.error {
-  color: #081A28;
+  color: #c0392b;
   font-weight: 700;
   font-size: 14px;
   margin-top: 3px;
+  display: block;
+}
+.account__form .form-control.error {
+  border-color: #c0392b;
 }
 
 

@@ -285,7 +285,7 @@
                     $submitButton.prop('disabled', true);
 
                     $.ajax({
-                        url: "/manager/users/update",
+                        url: "{{ route('manager.users.update') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

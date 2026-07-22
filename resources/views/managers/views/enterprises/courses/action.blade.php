@@ -83,8 +83,8 @@
 
 
             $('.daterange').daterangepicker({
-                startDate: {{date('d/m/Y', strtotime($inscription->enroll_start))}},
-                endDate: {{date('d/m/Y', strtotime($inscription->enroll_expire))}},
+                startDate: "{{ date('m/d/Y', strtotime($inscription->enroll_start)) }}",
+                endDate: "{{ date('m/d/Y', strtotime($inscription->enroll_expire)) }}",
                 locale: {
                     format: 'MM/DD/YYYY'
                 }
@@ -115,7 +115,7 @@
                     formData.append('range', range);
 
                     $.ajax({
-                        url: "/manager/enterprises/users/courses/action",
+                        url: "{{ route('manager.enterprises.courses.action') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

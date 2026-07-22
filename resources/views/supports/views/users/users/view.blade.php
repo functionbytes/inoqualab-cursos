@@ -21,14 +21,18 @@
                                     administrador
                                 @elseif($user->role == 'customer')
                                     cliente
-                                @elseif($user->role == 'enterprises')
+                                @elseif($user->role == 'enterprise')
                                     empresa
+                                @elseif($user->role == 'distributor')
+                                    distribuidor
+                                @elseif($user->role == 'accounting')
+                                    contabilidad
                                 @endif
                             </h5>
 
                         </div>
                         <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
                         </p>
 
                                         <div class="row">
@@ -71,14 +75,24 @@
                                             </div>
                                             <div class="col-6">
                                                 <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Dirección</label>
-                                                    <input type="text" class="form-control" id="address" name="address" value="{{ $user->available ? 'Activo' : 'Inactivo' }}" placeholder="Ingresar dirección" disabled>
+                                                    <label  class="control-label col-form-label">Estado</label>
+                                                    <input type="text" class="form-control" id="available" name="available" value="{{ $user->available ? 'Activo' : 'Inactivo' }}" disabled>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="mb-3">
                                                     <label  class="control-label col-form-label">Perfil</label>
-                                                    <input type="text" class="form-control" id="address" name="address" value="{{ $user->role ? $user->role : 'Sin rol' }}" placeholder="Ingresar dirección" disabled>
+                                                    @php
+                                                        $roleLabels = [
+                                                            'manager' => 'Administrador',
+                                                            'customer' => 'Cliente',
+                                                            'enterprise' => 'Empresa',
+                                                            'distributor' => 'Empleado distribuidor',
+                                                            'support' => 'Soporte',
+                                                            'accounting' => 'Contabilidad',
+                                                        ];
+                                                    @endphp
+                                                    <input type="text" class="form-control" id="role" name="role" value="{{ $roleLabels[$user->role] ?? 'Sin rol' }}" disabled>
                                                 </div>
                                             </div>
 

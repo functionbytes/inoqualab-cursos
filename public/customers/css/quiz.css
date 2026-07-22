@@ -60,6 +60,7 @@
 }
 
 .step-count .current-step { color: #7fd0ff; }
+.step-count .total-step { color: rgba(255, 255, 255, .6) !important; }
 
 /* Opciones tipo radio personalizadas */
 .container_radio.version_2 {
@@ -163,3 +164,8 @@ a#finish.owl {
 a#finish.owl:hover { background: var(--q-navy); }
 
 .middle-actions { border-color: var(--q-line) !important; }
+
+@media (max-width: 640px) {
+    .content-header .step-count { width: auto; flex-shrink: 0; font-size: 14px; padding: 6px 12px; white-space: nowrap; }
+    .step-count .current-step, .step-count .total-step { font-size: 14px; }
+}

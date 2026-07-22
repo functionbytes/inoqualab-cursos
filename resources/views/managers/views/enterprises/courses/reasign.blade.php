@@ -114,7 +114,7 @@
                     formData.append('user', user);
 
                     $.ajax({
-                        url: "/manager/enterprises/courses/action/reasign",
+                        url: "{{ route('manager.enterprises.action.reasign') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

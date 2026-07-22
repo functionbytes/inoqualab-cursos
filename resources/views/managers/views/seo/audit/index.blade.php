@@ -595,7 +595,7 @@ $(function () {
                     '<td class="text-center"><span class="badge bg-' + (row.issues_count > 0 ? 'danger' : 'light text-dark border') + '">' + (row.issues_count ?? 0) + '</span></td>' +
                     '<td class="text-center"><span class="badge bg-success">' + (row.passed_count ?? 0) + '</span></td>' +
                     '<td class="text-center">' +
-                    (row.meta_id ? '<a href="' + '{{ url("/manager/seo/metas") }}/' + row.meta_id + '/edit" class="btn btn-sm btn-light">Ver meta</a>' : '—') +
+                    (row.meta_id ? '<a href="' + '{{ route('manager.seo.metas.edit', ':id') }}'.replace(':id', row.meta_id) + '" class="btn btn-sm btn-light">Ver meta</a>' : '—') +
                     '</td>' +
                     '</tr>'
                 );

@@ -79,6 +79,9 @@
                       <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.distributors.navegation', $distributor->slack) }}">Dashboard</a>
                     </li>
                     <li>
+                      <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.distributors.view', $distributor->slack) }}">Ver</a>
+                    </li>
+                    <li>
                       <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.distributors.edit', $distributor->slack) }}">Editar</a>
                     </li>
                     <li>

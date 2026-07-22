@@ -150,7 +150,7 @@
 
 
                     $.ajax({
-                        url: "/manager/testimonies/update",
+                        url: "{{ route('manager.testimonies.update') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

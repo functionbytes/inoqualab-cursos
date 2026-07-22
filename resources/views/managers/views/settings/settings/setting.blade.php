@@ -671,7 +671,7 @@
 
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
+                                type: 'DELETE',
                                 url: "{{ route('manager.settings.logo.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');
@@ -764,7 +764,7 @@
 
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
+                                type: 'DELETE',
                                 url: "{{ route('manager.settings.favicon.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');

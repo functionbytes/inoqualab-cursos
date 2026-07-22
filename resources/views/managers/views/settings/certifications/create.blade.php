@@ -263,7 +263,7 @@
 
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
+                                type: 'DELETE',
                                 url: "{{ route('manager.certifications.thumbnails.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');

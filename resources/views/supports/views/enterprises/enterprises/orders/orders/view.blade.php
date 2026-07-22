@@ -1,6 +1,6 @@
 @extends('layouts.managers')
 @section('content')
-    @include('distributors.includes.card', ['title' => 'Detalle orden '. $order->slack])
+    @include('supports.includes.card', ['title' => 'Detalle orden '. $order->slack])
     <div class="row">
         <div class="col-lg-12 ">
             <div class="checkout">

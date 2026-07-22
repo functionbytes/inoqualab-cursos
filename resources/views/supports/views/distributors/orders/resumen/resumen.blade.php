@@ -1,7 +1,7 @@
 @extends('layouts.managers')
 
 @section('content')
-    @include('distributors.includes.card', ['title' => 'Resumen de ordenes '])
+    @include('supports.includes.card', ['title' => 'Resumen de ordenes '])
     <div class="widget-content searchable-container list">
 
         <div class="card card-body">

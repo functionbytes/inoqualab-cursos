@@ -104,7 +104,7 @@
                     formData.append('slack', slack);
 
                     $.ajax({
-                        url: "/manager/enterprises/users/importation",
+                        url: "{{ route('manager.enterprises.users.importation') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

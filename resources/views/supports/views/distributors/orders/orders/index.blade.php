@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @include('distributors.includes.card', ['title' => 'Ordenes'])
+    @include('supports.includes.card', ['title' => 'Ordenes'])
 
     <div class="widget-content searchable-container list">
         
@@ -83,7 +83,7 @@
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
                                             <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.orders.view',$order->slack) }}">Visualizar</a>
+                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.distributors.orders.view',$order->slack) }}">Visualizar</a>
                                             </li>
                                     </ul>
                                 </div>

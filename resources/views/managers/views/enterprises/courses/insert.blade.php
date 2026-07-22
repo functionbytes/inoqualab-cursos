@@ -100,7 +100,7 @@
                     formData.append('course', course);
 
                     $.ajax({
-                        url: "/manager/enterprises/courses/users/include",
+                        url: "{{ route('manager.enterprises.courses.include') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

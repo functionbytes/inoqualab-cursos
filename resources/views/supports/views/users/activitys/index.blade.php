@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @include('supports.includes.card', ['title' => 'Actividades - ' . $user->name])
+    @include('supports.includes.card', ['title' => 'Actividades - ' . $user->firstname . ' ' . $user->lastname])
 
     <div class="widget-content searchable-container list">
 

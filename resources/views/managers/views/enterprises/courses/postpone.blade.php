@@ -83,16 +83,12 @@
 
 
             $('.daterange').daterangepicker({
-                startDate: {{date('d/m/Y', strtotime($order->enroll_start))}},
-                endDate: {{date('d/m/Y', strtotime($order->enroll_expire))}},
+                startDate: "{{ date('m/d/Y', strtotime($inscription->enroll_start)) }}",
+                endDate: "{{ date('m/d/Y', strtotime($inscription->enroll_expire)) }}",
                 locale: {
                     format: 'MM/DD/YYYY'
                 }
             });
-            $(".daterange").data().daterangepicker.startDate = moment( {{ $order->enroll_start}}, datepicker.data().daterangepicker.format );
-            $(".daterange").data().daterangepicker.endDate = moment( {{ $order->enroll_expire}}, datepicker.data().daterangepicker.format );
-            $(".daterange").data().daterangepicker.updateCalendars();
-            $("#reportrange").data('daterangepicker').setStartDate(startDate);
 
             $("#formAction").validate({
                 submit: false,
@@ -118,7 +114,7 @@
                     formData.append('range', range);
 
                     $.ajax({
-                        url: "/manager/enterprises/courses/users/action",
+                        url: "{{ route('manager.enterprises.courses.users') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

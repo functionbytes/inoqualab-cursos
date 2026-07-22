@@ -39,7 +39,7 @@
                         <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up"
                             aria-labelledby="drop1">
                            <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="50" alt="" />
+                                <img src="/managers/images/profile/profile.jpg" class="rounded-circle" width="50" height="50" alt="" />
                                 <div class="ms-3">
                                     <h5 class="mb-1 fs-3 text-uppercase">{{ Str::words(Auth::user()->firstname ,1,'') }} {{ Str::words(Auth::user()->lastname,1,'') }} </h5>
                                     <span class="mb-0 d-block text-dark">

@@ -13,7 +13,7 @@
 
           <input type="hidden" id="id" name="id" value="{{ $user->id }}">
           <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
-          <input type="hidden" id="distributor" name="enterprise" value="{{ $distributor->slack }}">
+          <input type="hidden" id="distributor" name="enterprise" value="{{ $distributor->slack ?? '' }}">
           <input type="hidden" id="edit" name="edit" value="true">
 
           <div class="card-body border-top">
@@ -21,7 +21,7 @@
               <h5 class="mb-0">Editar empleado</h5>
             </div>
             <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos <mark><code>campos</code></mark> que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
             </p>
 
             <div class="row">
@@ -262,8 +262,14 @@
                     });
 
                     setTimeout(function() {
-                        let slack = @json($distributor->slack);
-                        window.location.href = "{{ route('support.distributors.staffs', ':slack') }}".replace(':slack', slack);
+                        // El empleado puede haber quedado sin distribuidor asociado (registro
+                        // huerfano en distributor_staff) — sin este fallback, $distributor->slack
+                        // lanza un 500 al renderizar la vista.
+                        let slack = @json($distributor->slack ?? null);
+                        let url = slack
+                            ? "{{ route('support.distributors.staffs', ':slack') }}".replace(':slack', slack)
+                            : "{{ route('support.distributors') }}";
+                        window.location.href = url;
                     }, 2000);
 
                 }else{

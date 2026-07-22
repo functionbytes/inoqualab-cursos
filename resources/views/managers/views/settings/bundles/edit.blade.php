@@ -403,7 +403,7 @@
                             $("#formBundles").validate().element("#thumbnail");
                             if (file.id) {
                                 $.ajax({
-                                    type: 'GET',
+                                    type: 'DELETE',
                                     url: "{{ route('manager.bundles.thumbnails.delete', ':id') }}".replace(':id', file.id),
                                     success: function(result) {
                                         $("#status").val('false');

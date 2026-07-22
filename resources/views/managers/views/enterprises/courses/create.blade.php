@@ -107,7 +107,7 @@
                     formData.append('user', user);
 
                     $.ajax({
-                        url: "/manager/enterprises/courses/create/store",
+                        url: "{{ route('manager.enterprises.courses.store') }}",
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },

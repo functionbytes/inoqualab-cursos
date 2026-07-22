@@ -5,7 +5,7 @@
 
 @section('content')
 
-    @include('distributors.includes.card', ['title' => "Progreso - " . $course->title ])
+    @include('supports.includes.card', ['title' => "Progreso - " . $course->title ])
 
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12">

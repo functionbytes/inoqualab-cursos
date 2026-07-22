@@ -2,6 +2,7 @@
 
 @section('content')
 
+    @include('supports.includes.card', ['title' => 'Ordenes - ' . $user->firstname . ' ' . $user->lastname])
 
     <div class="widget-content searchable-container list">
         
@@ -61,11 +62,17 @@
                                         <i class="fas fa-ellipsis-vertical fs-5"></i>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-
                                         <li>
-
+                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.orders.view', $order->slack) }}">Visualizar</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.orders.edit', $order->slack) }}">Editar</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.orders.print', $order->slack) }}" target="_blank">Imprimir</a>
+                                        </li>
+                                        <li>
                                             <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('support.users.orders.destroy',$order->slack) }}">Eliminar</a>
-
                                         </li>
                                     </ul>
                                 </div>

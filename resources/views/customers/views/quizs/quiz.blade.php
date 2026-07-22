@@ -21,557 +21,242 @@
     <meta name="robots" content="all">
 @endsection
 @push('css')
-    <link rel="stylesheet" href="{{ url('/customers/css/quiz.css') }}">
+    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}">
 @endpush
 @section('content')
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card rounded-2 overflow-hidden">
-                <div class="position-relative">
-                    <div class="card-body p-4 justify-content-center row">
-                    <div class="col-md-10 col-sm-12 text-center">
-                        <span class="badge text-bg-light fs-2 rounded-4 py-1 px-2 lh-sm  mt-3">
-                             QUIZ
-                        </span>
-                    <h2 class="fs-9 fw-semibold mb-4">{{ Str::upper($lesson->title) }}</h2>
+@if(setting('aula_version') == '2')
+    <div class="lv">
+        <div class="lv-shell">
+            @include('customers.partials.views.courses.rail')
+            <main class="lv-main">
+                <div class="lv-content">
+                    <div class="lv-quiz">
+                        <div class="quiz-wrap">
+                            @include('customers.partials.views.quizs.quiz-questions')
+                        </div>
                     </div>
                 </div>
-                <div class="card-body border-top p-4">
-                    <div class="lesion-content-wrapper rbt-article-content-wrapper">
-
-                        <div class="content">
-                            <div class="progress mb-3" style="height: 6px;" aria-label="Progreso">
-                                <div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-
-                            <div id="question_block" class="question-block">
-
-                                <input type="hidden" id="type" name="type" value="{{ $topic->type }}">
-                                <input type="hidden" id="id" name="id" value="{{ $topic->id }}">
-
-                                @php
-                                    
-                                    $users = $answers;
-                                    $que_count = $questions->count();
-                                    $count = 1;
-
-                                @endphp
-
-
-                                @if ($topic->type == 0)
-                                    <div class="question" id="question-div">
-                                        <form action="{{ route('customers.quiz.store', $topic->id) }}" method="POST"
-                                              id="question-form">
-
-                                            {{ csrf_field() }}
-
-                                            @php
-                                                $count = 1;
-                                            @endphp
-
-                                            <div class="row justify-content-center">
-
-                                                <input type="hidden" id="quiz" name="quiz" value="{{ $quiz->id }}">
-
-                                                <input type="hidden" id="question_id[{{ $count }}]" name="question_id[{{ $count }}]" value="{{ $questions[0]['id'] }}">
-
-                                                <div id="more_quiz0">
-                                                    <div class="jumbotron" id="quiz1">
-                                                        <div class="middle-answer row">
-                                                            <div class="step">
-                                                                <div class="form-group">
-                                                                    <div class="content-header">
-                                                                        <h3 class="main_question">
-                                                                            <i class="fas fa-arrow-right"></i>
-                                                                            {{ $questions[0]['question'] }}
-                                                                        </h3>
-                                                                        <span class="step-count">
-                                                                <span id="quizNumber"
-                                                                      class="current-step">{{ $count }}</span>
-                                                                /
-                                                                <span
-                                                                        class="total-step">{{ $que_count }}</span>
-                                                            </span>
-                                                                    </div>
-
-                                                                    <div class="form-group">
-                                                                        <label class="container_radio version_2">
-                                                                            <input type="radio"
-                                                                                   name="answer[{{ $count }}]" value="true"
-                                                                                   class="required">
-                                                                            Verdadero
-                                                                            <span class="checkmark"></span>
-                                                                        </label>
-                                                                        <label class="container_radio version_2">
-                                                                            <input type="radio"
-                                                                                   name="answer[{{ $count }}]"
-                                                                                   value="false" class="required">
-                                                                            Falso
-                                                                            <span class="checkmark"></span>
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                @foreach ($questions as $key => $question)
-
-                                                    @if ($key > 0)
-
-                                                        <div style="display: none;" id="more_quiz{{ $key }}">
-
-                                                            <div class="jumbotron" id="quiz{{ $key + 1 }}">
-                                                                <div class="middle-answer row">
-
-                                                                    <input type="hidden" id="question_id[{{ $count }}]" name="question_id[{{ $count }}]" value="{{ $question['id'] }}">
-
-                                                                    <div class="step">
-                                                                        <div class="content-header">
-                                                                            <h3 class="main_question">
-                                                                                <i class="fas fa-arrow-right"></i>
-                                                                                {{ $question['question'] }}
-                                                                            </h3>
-                                                                            <span class="step-count">
-                                                                                <span id="quizNumber"
-                                                                                      class="current-step">{{ $count }}</span> /
-                                                                                <span class="total-step">{{ $que_count }}</span>
-                                                                            </span>
-                                                                        </div>
-                                                                        <div class="form-group">
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="radio" name="answer[{{ $count }}]"  value="true" class="required">
-                                                                                Verdadero
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="radio" name="answer[{{ $count }}]" value="false" class="required">
-                                                                                Falso
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                    @endif
-
-                                                    @php
-                                                        $count++;
-                                                    @endphp
-
-                                                @endforeach
-
-
-                                                <div class="p-4 border-top mt-3 pb-0  middle-actions">
-                                                    <div class="row text-center owl-nav">
-                                                        <div class="col-6">
-                                                            <a id="prev" class="owl" value="1" style="display: none;">
-                                                                <i class="fa-duotone fa-arrow-left"></i>
-                                                            </a>
-                                                        </div>
-
-                                                        @if ($que_count >= 2)
-                                                            <div class="col-6">
-                                                                <a id="next" class="owl" value="0">
-                                                                    <i class="fa-duotone fa-arrow-right"></i>
-                                                                </a>
-                                                            </div>
-                                                        @endif
-
-                                                        @if ($que_count == 1)
-                                                            <div class="col-12">
-                                                                <a id="finish"  class="owl">
-                                                                    <i class="fa-duotone fa-flag-checkered me-1 fs-6"></i>
-                                                                    Finalizar
-                                                                </a>
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                </div>
-
-
-                                            </div>
-
-                                        </form>
-                                    </div>
-                                @endif
-
-                                @if ($topic->type == 1)
-                                    <div id="question_block" class="question-block">
-                                        <div class="question" id="question-div">
-                                            <form action="{{ route('customers.quiz.store', $topic->id) }}" method="POST"
-                                                  id="question-form">
-
-                                                {{ csrf_field() }}
-
-                                                @php
-                                                    $count = 1;
-                                                @endphp
-
-                                                <div class="row justify-content-center">
-
-                                                    <input type="hidden" id="quiz" name="quiz" value="{{ $quiz->id }}">
-                                                    <input type="hidden" id="question_id[{{ $count }}]"
-                                                           name="question_id[{{ $count }}]" value="{{ $questions[0]['id'] }}">
-
-                                                    <div id="more_quiz0">
-
-                                                        <div class="jumbotron" id="quiz1">
-                                                            <div class="middle-answer row">
-                                                                <div class="step">
-                                                                    <div class="form-group">
-
-                                                                        <div class="content-header">
-                                                                            <h3 class="main_question">
-                                                                                <i class="fas fa-arrow-right"></i>
-                                                                                {{ $questions[0]['question'] }}
-                                                                            </h3>
-                                                                            <span class="step-count">
-                                                                        <span id="quizNumber"
-                                                                              class="current-step">{{ $count }}</span> /
-                                                                        <span class="total-step">{{ $que_count }}</span>
-                                                                    </span>
-                                                                        </div>
-
-                                                                        <div class="form-group examps">
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="checkbox"
-                                                                                       name="answer[{{ $count }}][]" value="a"
-                                                                                       class="required">
-                                                                                {{ $questions[0]['a'] }}
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="checkbox"
-                                                                                       name="answer[{{ $count }}][]" value="b"
-                                                                                       class="required">
-                                                                                {{ $questions[0]['b'] }}
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="checkbox"
-                                                                                       name="answer[{{ $count }}][]" value="c"
-                                                                                       class="required">
-                                                                                {{ $questions[0]['c'] }}
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                            <label class="container_radio version_2">
-                                                                                <input type="checkbox"
-                                                                                       name="answer[{{ $count }}][]" value="d"
-                                                                                       class="required">
-                                                                                {{ $questions[0]['d'] }}
-                                                                                <span class="checkmark"></span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-
-                                                    @foreach ($questions as $key => $question)
-
-                                                        @if ($key > 0)
-
-                                                            <div style="display: none;" id="more_quiz{{ $key }}">
-
-                                                                <div class="jumbotron" id="quiz{{ $key + 1 }}">
-                                                                    <div class="middle-answer row">
-
-                                                                        <input type="hidden" id="question_id[{{ $count }}]"
-                                                                               name="question_id[{{ $count }}]"
-                                                                               value="{{ $question['id'] }}">
-
-                                                                        <div class="step">
-
-                                                                            <div class="content-header">
-                                                                                <h3 class="main_question">
-                                                                                    <i class="fas fa-arrow-right"></i>
-                                                                                    {{ $question['question'] }}
-                                                                                </h3>
-                                                                                <span class="step-count">
-                                                                            <span id="quizNumber"
-                                                                                  class="current-step">{{ $count }}</span>
-                                                                            /
-                                                                            <span
-                                                                                    class="total-step">{{ $que_count }}</span>
-                                                                        </span>
-                                                                            </div>
-
-                                                                            <div class="form-group examps">
-                                                                                <label class="container_radio version_2">
-                                                                                    <input type="checkbox"
-                                                                                           name="answer[{{ $count }}][]"
-                                                                                           value="a" class="required">
-                                                                                    {{ $question['a'] }}
-                                                                                    <span class="checkmark"></span>
-                                                                                </label>
-                                                                                <label class="container_radio version_2">
-                                                                                    <input type="checkbox"
-                                                                                           name="answer[{{ $count }}][]"
-                                                                                           value="b" class="required">
-                                                                                    {{ $question['b'] }}
-                                                                                    <span class="checkmark"></span>
-                                                                                </label>
-                                                                                <label class="container_radio version_2">
-                                                                                    <input type="checkbox"
-                                                                                           name="answer[{{ $count }}][]"
-                                                                                           value="c" class="required">
-                                                                                    {{ $question['c'] }}
-                                                                                    <span class="checkmark"></span>
-                                                                                </label>
-                                                                                <label class="container_radio version_2">
-                                                                                    <input type="checkbox"
-                                                                                           name="answer[{{ $count }}][]"
-                                                                                           value="d" class="required">
-                                                                                    {{ $question['d'] }}
-                                                                                    <span class="checkmark"></span>
-                                                                                </label>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                        @endif
-
-                                                        @php
-                                                            $count++;
-                                                        @endphp
-
-                                                    @endforeach
-
-                                                    <div class="p-4 border-top mt-3  middle-actions">
-
-                                                        <div class="row text-center owl-nav">
-
-                                                            <div class="col-6">
-                                                                <a id="prev" class="owl" value="1" style="display: none;">
-                                                                    <i class="fa-duotone fa-arrow-left"></i>
-                                                                </a>
-                                                            </div>
-
-                                                            @if ($que_count >= 2)
-
-                                                                <div class="col-6">
-                                                                    <a id="next" class="owl" value="0">
-                                                                        <i class="fa-duotone fa-arrow-right"></i>
-                                                                    </a>
-                                                                </div>
-                                                            @endif
-
-                                                            @if ($que_count == 1)
-
-                                                                <div class="col-12">
-                                                                    <a id="finish"  class="owl">
-                                                                        <i class="fa-duotone fa-flag-checkered me-1 fs-6"></i>
-                                                                        Finalizar
-                                                                    </a>
-                                                                </div>
-                                                            @endif
-
-                                                        </div>
-
-                                                    </div>
-
-
-                                                </div>
-
-
-                                            </form>
-                                        </div>
-                                    </div>
-                                @endif
-
-                            </div>
-
-
-                        </div>
-
-
-
+            </main>
+        </div>
+    </div>
+@else
+    <div class="aula">
+        <div class="aula-grid">
+            <div class="lesson-panel">
+                <div class="lp-body">
+                    <div class="quiz-wrap">
+                        @include('customers.partials.views.quizs.quiz-questions')
                     </div>
                 </div>
             </div>
+            @include('customers.partials.views.courses.rail')
         </div>
-
     </div>
+@endif
+
+<div class="modal fade" id="quizConfirmModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <p class="mb-0">¿Deseas finalizar y enviar tus respuestas? No podrás cambiarlas.</p>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pt-0">
+                <button type="button" class="btn ar-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn ar-primary" id="quizConfirmAccept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
+@push('css')
+<style>
+    .quiz-native-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .quiz-foot.lv-foot { padding: 26px 0 0; margin-top: 10px; max-width: 100%; }
+    #quizConfirmModal .ar-primary, #quizConfirmModal .ar-secondary { width: auto; padding: 11px 22px; }
+</style>
+@endpush
 
-        @push('scripts')
-            <script type="text/javascript">
-                var totalques = 0;
+@push('scripts')
+    <script type="text/javascript">
+        var totalques = 0;
 
+        $(document).ready(function() {
 
-                $(document).ready(function() {
+            totalques = $('.quiz-step').length;
 
-                    totalques = $('.jumbotron').length;
+            var i = 1;
+            var count = 0;
 
-                    var i = 1;
-                    var count = 0;
+            // Marca visualmente la opción seleccionada (radio: única selección; checkbox: múltiple)
+            $(document).on('change', '.quiz-native-input', function() {
+                var $input = $(this);
+                var $opt = $input.closest('.quiz-opt');
+                if ($input.attr('type') === 'radio') {
+                    $opt.closest('.quiz-options').find('.quiz-opt').removeClass('sel');
+                }
+                $opt.toggleClass('sel', $input.is(':checked'));
+                $('#quizAnswerError').hide();
+            });
 
-                    // D1: confirmar el envío y evitar dobles envíos del cuestionario
-                    var quizSubmitting = false;
-                    $('#question-form').on('submit', function(e) {
-                        if (quizSubmitting) { e.preventDefault(); return; }
-                        if (!confirm('¿Deseas finalizar y enviar tus respuestas? No podrás cambiarlas.')) {
-                            e.preventDefault();
-                            return;
-                        }
-                        quizSubmitting = true;
-                        $('#next').css('pointer-events', 'none').html('<i class="fa-duotone fa-spinner fa-spin"></i>');
-                    });
+            // D1: confirmar el envío (modal propio, no el confirm() nativo del navegador) y evitar dobles envíos
+            var quizConfirmed = false;
+            var quizConfirmModal = new bootstrap.Modal(document.getElementById('quizConfirmModal'));
+            $('#question-form').on('submit', function(e) {
+                if (quizConfirmed) { return; }
+                e.preventDefault();
+                quizConfirmModal.show();
+            });
+            $('#quizConfirmAccept').on('click', function() {
+                quizConfirmed = true;
+                quizConfirmModal.hide();
+                $('#next').css('pointer-events', 'none').html('<i class="fa-solid fa-spinner fa-spin"></i>');
+                $('#question-form').submit();
+            });
 
-                    $('#next').click(function() {
+            $('#next').click(function() {
 
+                var totalques = $('.quiz-step').length;
+                var type = $('#type').val();
+                var x = $('#next').val();
+                var y = $('#prev').val();
 
-                        var totalques = $('.jumbotron').length;
-                        var type = $('#type').val();
-                        var x = $('#next').val();
-                        var y = $('#prev').val();
+                if (type == 0) {
 
-                        if (type == 0) {
+                    var numberNotChecked = $('#more_quiz' + count).find('input[type="radio"]:checked').length;
 
+                    if (numberNotChecked > 0) {
 
-                            var numberNotChecked = $('#more_quiz' + count).find('input[type="radio"]:checked')
-                                .length;
+                        $('#quizAnswerError').hide();
 
+                        i++;
+                        x++;
 
-                            if (numberNotChecked > 0) {
+                        $('#prev').show();
 
+                        if (x < totalques) {
 
-                                i++;
-                                x++;
+                            var z = x - 1;
 
-                                $('#prev').show();
+                            $('#more_quiz' + x).show('fast');
+                            $('#more_quiz' + z).hide('fast');
+                            $('#next').val(x);
+                            $('#prev').val(x);
 
-                                if (x < totalques) {
-
-                                    var z = x - 1;
-
-                                    $('#more_quiz' + x).show('fast');
-                                    $('#more_quiz' + z).hide('fast');
-                                    $('#next').val(x);
-                                    $('#prev').val(x);
-
-
-                                    if (i == totalques) {
-                                        $('#next').attr('type', 'submit');
-                                    }
-
-                                }
-
-                                if (x == totalques) {
-                                    $('#question-form').submit();
-                                }
-
-                                progres = (x / totalques) * 100;
-                                $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                                count++;
-
+                            if (i == totalques) {
+                                $('#next').attr('type', 'submit');
                             }
 
                         }
 
-                        if (type == 1) {
-
-
-                            $('#prev').show();
-
-
-                            var numberNotChecked = $('#more_quiz' + count).find('input:checkbox:not(":checked")')
-                                .length;
-
-                            if (numberNotChecked != 4) {
-
-                                i++;
-                                x++;
-
-                                $('#prev').show();
-
-                                if (x < totalques) {
-
-                                    var z = x - 1;
-
-                                    $('#more_quiz' + x).show('fast');
-                                    $('#more_quiz' + z).hide('fast');
-                                    $('#next').val(x);
-                                    $('#prev').val(x);
-
-
-                                    if (i == totalques) {
-                                        $('#next').attr('type', 'submit');
-                                    }
-
-                                }
-
-                                if (x == totalques)
-                                    $('#question-form').submit();
-                            }
-
-                            progres = (x / totalques) * 100;
-                            $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                            count++;
-
-
-
-                        }
-
-                        if (x == 1) {
-                            $('#prev').show();
-                        }
-
-                    });
-
-                    $('#prev').click(function() {
-
-                        i--;
-                        count--;
-
-                        var totalques = $('.jumbotron').length;
-                        var x = $('#next').val();
-                        var y = $('#prev').val();
-
-                        $('#next').removeAttr('type');
-
-                        $('#next').show();
-
-                        y--;
-
-                        if (y == 0) {
-                            $('#next').val(0);
-                            $('#prev').val(1);
-                            $('#prev').hide();
-                        } else {
-                            $('#next').val(y);
-                            $('#prev').val(y);
-                        }
-
-                        $('#more_quiz' + y).show('fast');
-                        $('#more_quiz' + x).hide();
-
-
-                        progres = (x / totalques) * 100;
-                        $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                    });
-
-                    // Quiz de una sola pregunta: "Finalizar" envía directo (no hay botón "siguiente").
-                    $('#finish').click(function() {
-                        if ($('#more_quiz0').find('input:checked').length > 0) {
+                        if (x == totalques) {
                             $('#question-form').submit();
                         }
-                    });
 
+                        progres = (x / totalques) * 100;
+                        $('#progressbar').css('width', progres + '%');
 
-                });
-            </script>
+                        count++;
 
-    @endpush
+                    } else {
+                        $('#quizAnswerError').show();
+                    }
+
+                }
+
+                if (type == 1) {
+
+                    $('#prev').show();
+
+                    var numberNotChecked = $('#more_quiz' + count).find('input:checkbox:not(":checked")').length;
+
+                    if (numberNotChecked != 4) {
+
+                        $('#quizAnswerError').hide();
+
+                        i++;
+                        x++;
+
+                        $('#prev').show();
+
+                        if (x < totalques) {
+
+                            var z = x - 1;
+
+                            $('#more_quiz' + x).show('fast');
+                            $('#more_quiz' + z).hide('fast');
+                            $('#next').val(x);
+                            $('#prev').val(x);
+
+                            if (i == totalques) {
+                                $('#next').attr('type', 'submit');
+                            }
+
+                        }
+
+                        if (x == totalques)
+                            $('#question-form').submit();
+
+                        progres = (x / totalques) * 100;
+                        $('#progressbar').css('width', progres + '%');
+
+                        count++;
+                    } else {
+                        $('#quizAnswerError').show();
+                    }
+
+                }
+
+                if (x == 1) {
+                    $('#prev').show();
+                }
+
+            });
+
+            $('#prev').click(function() {
+
+                $('#quizAnswerError').hide();
+
+                i--;
+                count--;
+
+                var totalques = $('.quiz-step').length;
+                var x = $('#next').val();
+                var y = $('#prev').val();
+
+                $('#next').removeAttr('type');
+
+                $('#next').show();
+
+                y--;
+
+                if (y == 0) {
+                    $('#next').val(0);
+                    $('#prev').val(1);
+                    $('#prev').hide();
+                } else {
+                    $('#next').val(y);
+                    $('#prev').val(y);
+                }
+
+                $('#more_quiz' + y).show('fast');
+                $('#more_quiz' + x).hide();
+
+                progres = (x / totalques) * 100;
+                $('#progressbar').css('width', progres + '%');
+
+            });
+
+            // Quiz de una sola pregunta: "Finalizar" envía directo (no hay botón "siguiente").
+            $('#finish').click(function() {
+                if ($('#more_quiz0').find('input:checked').length > 0) {
+                    $('#quizAnswerError').hide();
+                    $('#question-form').submit();
+                } else {
+                    $('#quizAnswerError').show();
+                }
+            });
+
+        });
+    </script>
+@endpush

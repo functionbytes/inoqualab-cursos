@@ -274,7 +274,7 @@
                         $("#formDocuments").validate().element("#files");
                         if (file.id) {
                             $.ajax({
-                                type: 'GET',
+                                type: 'DELETE',
                                 url: "{{ route('manager.documents.files.delete', ':id') }}".replace(':id', file.id),
                                 success: function(result) {
                                     $("#status").val('false');
