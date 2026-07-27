@@ -383,9 +383,13 @@ class ManagementController extends Controller
 
         $course = $request->course;
         $enterprise = $request->enterprise;
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+        $range = parse_date_range($request->range);
+
+        if ($range === null) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        [$start, $end] = $range;
 
         return Excel::download(new IncomesExport($enterprise, $course, $start, $end), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }

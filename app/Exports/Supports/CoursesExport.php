@@ -29,14 +29,15 @@ class CoursesExport implements FromQuery, Responsable, WithHeadings, WithMapping
 
     public function query()
     {
-
-        if ($this->modalitie == '0') {
-            return EnterpriseCourse::exportUsers($this->enterprise, $this->course)->take(9999999);
-        } elseif ($this->modalitie == '1') {
-            return EnterpriseCourse::exportTerminated($this->enterprise, $this->course)->take(9999999);
-        } elseif ($this->modalitie == '2') {
-            return EnterpriseCourse::exportEarring($this->enterprise, $this->course)->take(9999999);
-        }
+        // Sin `default` el método devolvía null cuando la modalidad no era
+        // 0/1/2 (p. ej. al entrar a la URL de generación sin parámetros), y
+        // FromQuery reventaba con "__clone method called on non-object".
+        // '0' (todos los usuarios) es el listado más amplio y sirve de base.
+        return match ((string) $this->modalitie) {
+            '1' => EnterpriseCourse::exportTerminated($this->enterprise, $this->course)->take(9999999),
+            '2' => EnterpriseCourse::exportEarring($this->enterprise, $this->course)->take(9999999),
+            default => EnterpriseCourse::exportUsers($this->enterprise, $this->course)->take(9999999),
+        };
     }
 
     public function map($row): array

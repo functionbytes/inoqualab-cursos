@@ -624,3 +624,34 @@ if (! function_exists('schema_org')) {
         return app(SchemaOrgService::class);
     }
 }
+
+if (! function_exists('parse_date_range')) {
+    /**
+     * Trocea el rango "dd/mm/YYYY - dd/mm/YYYY" que emiten los daterangepicker
+     * del panel y devuelve [inicio, fin] normalizados al día completo.
+     *
+     * Los informes hacían `explode(' - ', $request->range)` y accedían a
+     * `$date[1]` a pelo: entrar a la URL de generación sin el parámetro (o con
+     * un valor suelto) reventaba con "Undefined array key 1" y un 500. Aquí se
+     * devuelve null y el llamador decide qué responder.
+     *
+     * @return array{0: Carbon, 1: Carbon}|null
+     */
+    function parse_date_range(?string $range): ?array
+    {
+        $parts = array_map('trim', explode(' - ', (string) $range));
+
+        if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+            return null;
+        }
+
+        try {
+            $start = Carbon::parse($parts[0])->startOfDay();
+            $end = Carbon::parse($parts[1])->endOfDay();
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $start->lessThanOrEqualTo($end) ? [$start, $end] : [$end->startOfDay(), $start->endOfDay()];
+    }
+}

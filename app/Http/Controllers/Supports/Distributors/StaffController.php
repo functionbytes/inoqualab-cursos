@@ -126,9 +126,13 @@ class StaffController extends Controller
     {
         $distributor = Distributor::slack($request->distributor);
 
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+        $range = parse_date_range($request->range);
+
+        if ($range === null) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        [$start, $end] = $range;
 
         return Excel::download(
             new StaffExport($distributor, $request->available, $start, $end),

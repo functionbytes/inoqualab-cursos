@@ -76,7 +76,10 @@ class UserController extends Controller
     {
 
         $user = $this->guardManageableUser(User::slack($slack));
+
+        // La vista pinta $enterprise->title; sin empresa asociada daba 500.
         $enterprise = $user->relations;
+        abort_if($enterprise === null, 404);
 
         return view('supports.views.enterprises.users.users.view')->with([
             'user' => $user,
@@ -88,7 +91,11 @@ class UserController extends Controller
     {
 
         $user = $this->guardManageableUser(User::slack($slack));
+
+        // Sin empresa asociada la ficha no tiene sentido: la vista pinta
+        // $enterprise->id y reventaba con "Attempt to read property on null".
         $enterprise = $user->relations;
+        abort_if($enterprise === null, 404);
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
@@ -248,9 +255,14 @@ class UserController extends Controller
 
         $course = $request->course;
         $enterprise = $request->enterprise;
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+
+        $range = parse_date_range($request->range);
+
+        if ($range === null) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        [$start, $end] = $range;
 
         return Excel::download(new IncomesExport($enterprise, $course, $start, $end), 'REPORTE USUARIOS '.date('Y-m-d').'.xlsx');
     }

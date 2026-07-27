@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Distributors\Orders;
 
 use App\Exports\Distributors\Orders\OrdersExport;
 use App\Http\Controllers\Controller;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -30,9 +29,13 @@ class ReportController extends Controller
         // request (evita descargar órdenes de otro distribuidor).
         $distributor = app('distributor')->id;
         $enterprise = $request->enterprise;
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+        $range = parse_date_range($request->range);
+
+        if ($range === null) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        [$start, $end] = $range;
 
         return Excel::download(new OrdersExport($enterprise, $distributor, $start, $end), 'Reporte Ordenes.xlsx');
 

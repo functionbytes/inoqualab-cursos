@@ -6,7 +6,6 @@ use App\Exports\Distributors\Invoices\InvoicesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice\InvoiceCondition;
 use App\Models\Invoice\InvoiceMethod;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -137,9 +136,13 @@ class InvoicesController extends Controller
         $distributor = app('distributor')->id;
         $method = $request->methods;
         $condition = $request->condition;
-        $date = explode(' - ', $request->range);
-        $start = Carbon::parse($date[0])->startOfDay();
-        $end = Carbon::parse($date[1])->endOfDay();
+        $range = parse_date_range($request->range);
+
+        if ($range === null) {
+            return back()->with('error', 'Selecciona un rango de fechas válido para generar el reporte.');
+        }
+
+        [$start, $end] = $range;
 
         return Excel::download(new InvoicesExport($distributor, $method, $condition, $start, $end), 'Reporte Facturación.xlsx');
 

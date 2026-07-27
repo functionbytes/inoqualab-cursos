@@ -45,11 +45,32 @@ class InscriptionsController extends Controller
 
     public function action(Request $request)
     {
+        // Aquí NO sirve parse_date_range(): este picker emite DD/MM/YYYY y el
+        // helper usa Carbon::parse, que leería 05/03/2026 como mayo en vez de
+        // marzo. Se mantiene createFromFormat y solo se añade el guard.
         $date_var = explode(' - ', $request->range);
+
+        if (count($date_var) !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Selecciona un rango de fechas válido.',
+            ], 422);
+        }
+
+        try {
+            $start = Carbon::createFromFormat('d/m/Y', trim($date_var[0]))->format('Y-m-d');
+            $expire = Carbon::createFromFormat('d/m/Y', trim($date_var[1]))->format('Y-m-d');
+        } catch (\Throwable) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El rango de fechas no es válido.',
+            ], 422);
+        }
+
         $inscription = Inscription::slack($request->inscription);
 
-        $inscription->enroll_start = Carbon::createFromFormat('d/m/Y', trim($date_var[0]))->format('Y-m-d');
-        $inscription->enroll_expire = Carbon::createFromFormat('d/m/Y', trim($date_var[1]))->format('Y-m-d');
+        $inscription->enroll_start = $start;
+        $inscription->enroll_expire = $expire;
         $inscription->updated_at = Carbon::now()->setTimezone('America/Bogota');
         $inscription->culminated = 0;
         $inscription->expire = 0;
