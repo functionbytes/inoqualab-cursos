@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Orders;
 
-use App\Http\Controllers\Pages\CheckoutController;
 use App\Enums\OrderCondition;
+use App\Http\Controllers\Pages\CheckoutController;
 use App\Models\Order\Order;
 use App\Services\WompiService;
 use Carbon\Carbon;

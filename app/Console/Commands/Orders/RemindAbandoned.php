@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands\Orders;
 
-use App\Mail\Customers\Orders\AbandonedOrderMail;
 use App\Enums\OrderCondition;
+use App\Mail\Customers\Orders\AbandonedOrderMail;
 use App\Models\Order\Order;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
