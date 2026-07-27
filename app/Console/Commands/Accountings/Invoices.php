@@ -31,8 +31,23 @@ class Invoices extends Command
 
         $distributors = Distributor::available()->get();
 
-        $condition = InvoiceCondition::slug('generada');
-        $method = InvoiceMethod::slug('credit');
+        // Los scopes slug() abortan con un 404 HTTP, que en consola sale como
+        // NotFoundHttpException y no dice nada útil. Aquí se consulta directo
+        // para poder explicar qué falta y salir con código de error.
+        $condition = InvoiceCondition::where('slug', 'generada')->first();
+        $method = InvoiceMethod::where('slug', 'credit')->first();
+
+        if ($condition === null || $method === null) {
+            $this->error('Falta un catálogo obligatorio para facturar:');
+            if ($condition === null) {
+                $this->error("  - invoice_condition con slug 'generada'");
+            }
+            if ($method === null) {
+                $this->error("  - invoice_method con slug 'credit'");
+            }
+
+            return self::FAILURE;
+        }
 
         foreach ($distributors as $distributor) {
 
@@ -120,6 +135,7 @@ class Invoices extends Command
             }
         }
 
+        return self::SUCCESS;
     }
 
     public function generate_slack($table)
