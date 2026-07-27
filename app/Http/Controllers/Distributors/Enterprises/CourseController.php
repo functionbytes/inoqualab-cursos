@@ -18,14 +18,24 @@ use Maatwebsite\Excel\Facades\Excel;
 class CourseController extends Controller
 {
     /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
-    private function managedEnterprise(string $slack): Enterprise
+    private function managedEnterprise(?string $slack): Enterprise
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
     }
 
     /** Inscripción cuyo usuario pertenece a una empresa del distribuidor, o 404. */
-    private function managedInscription(string $slack): Inscription
+    private function managedInscription(?string $slack): Inscription
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         $enterpriseIds = app('distributor')->enterprises()->pluck('enterprises.id')->all();
 
         return Inscription::where('slack', $slack)

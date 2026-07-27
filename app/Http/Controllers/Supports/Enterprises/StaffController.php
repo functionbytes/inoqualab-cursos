@@ -69,7 +69,11 @@ class StaffController extends Controller
     {
         $user = $this->guardManageableUser(User::slack($slack));
 
+        // $enterprise->distributor sobre null reventaba antes de llegar a la
+        // vista: sin empresa asociada no hay ficha de staff que editar.
         $enterprise = $user->relationsEnterprises;
+        abort_if($enterprise === null, 404);
+
         $distributor = $enterprise->distributor;
 
         $availables = collect([

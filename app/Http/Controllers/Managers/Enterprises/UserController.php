@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers\Enterprises;
 use App\Exports\Managers\IncomesExport;
 use App\Exports\Managers\UsersExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\ImportUsersRequest;
 use App\Imports\Managers\UsersImport;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
@@ -73,7 +74,11 @@ class UserController extends Controller
 
         $user = User::slack($slack);
 
+        // Sin empresa asociada (usuario huérfano o empresa borrada) esta ficha
+        // no tiene sentido: la vista pinta $enterprise->slack y reventaba con
+        // "Attempt to read property on null".
         $enterprise = $user->relations;
+        abort_if($enterprise === null, 404);
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],

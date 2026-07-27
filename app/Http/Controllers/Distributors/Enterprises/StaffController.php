@@ -15,14 +15,24 @@ use Illuminate\Support\Str;
 class StaffController extends Controller
 {
     /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
-    private function managedEnterprise(string $slack): Enterprise
+    private function managedEnterprise(?string $slack): Enterprise
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
     }
 
     /** Usuario que es staff de una empresa del distribuidor autenticado, o 404. */
-    private function managedStaff(string $slack): User
+    private function managedStaff(?string $slack): User
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         $enterpriseIds = app('distributor')->enterprises()->pluck('enterprises.id')->all();
 
         return User::where('slack', $slack)

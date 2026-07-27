@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Distributors\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Distributors\UpdateDistributorProfileRequest;
+use App\Http\Requests\Distributors\UpdateDistributorSettingsRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -47,7 +48,7 @@ class SettingsController extends Controller
 
     }
 
-    public function updateDistributor(Request $request): JsonResponse
+    public function updateDistributor(UpdateDistributorSettingsRequest $request): JsonResponse
     {
         // Ajustes: SIEMPRE el distribuidor autenticado, nunca el slack del request.
         $distributor = app('distributor');

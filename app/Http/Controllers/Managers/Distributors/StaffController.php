@@ -75,7 +75,10 @@ class StaffController extends Controller
 
         $user = $this->guardManageableUser(User::slack($slack));
 
+        // La vista pinta $distributor->slack: sin distribuidor asociado esta
+        // ficha de staff no existe realmente y daba 500.
         $distributor = $user->relationsDistributor;
+        abort_if($distributor === null, 404);
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],

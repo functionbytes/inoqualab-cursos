@@ -11,8 +11,13 @@ use Illuminate\Http\Request;
 class ReassignController extends Controller
 {
     /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
-    private function managedEnterprise(string $slack): Enterprise
+    private function managedEnterprise(?string $slack): Enterprise
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         return app('distributor')->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
     }
 
@@ -23,8 +28,13 @@ class ReassignController extends Controller
     }
 
     /** Usuario que pertenece (enterprise_user) a una empresa del distribuidor, o 404. */
-    private function managedUser(string $slack): User
+    private function managedUser(?string $slack): User
     {
+        // El slack llega de un POST sin validar: sin este guard, pasar
+        // null a un parámetro `string` lanzaba TypeError y devolvía un
+        // 500 en vez de un 404 limpio.
+        abort_if($slack === null || $slack === '', 404);
+
         $enterpriseIds = $this->distributorEnterpriseIds();
 
         return User::where('slack', $slack)
