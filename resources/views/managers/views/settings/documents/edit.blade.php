@@ -11,7 +11,9 @@
 
                     {{ csrf_field() }}
 
-                    <input type="hidden" id="description" name="description" value="{!! $document->description  !!}">
+                    {{-- Escapado: en un atributo, {!! !!} rompe el value con la
+                         primera comilla doble del contenido. --}}
+                    <input type="hidden" id="description" name="description" value="{{ $document->description }}">
                     <input type="hidden" id="id" name="id" value="{{ $document->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $document->slack }}">
                     <input type="hidden" id="status" name="status" value="{{ $file }}">

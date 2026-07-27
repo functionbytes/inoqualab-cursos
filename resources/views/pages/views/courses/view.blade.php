@@ -141,7 +141,7 @@
                     @if ($course->short != null)
                         <div class="cs-block">
                             <h2>De qué trata este curso</h2>
-                            {!! $course->short !!}
+                            {!! clean($course->short, 'content') !!}
                         </div>
                     @endif
 
@@ -150,7 +150,7 @@
                         <div class="cs-rule"></div>
                         <div class="cs-block">
                             <h2>¿Qué aprenderás?</h2>
-                            <div class="cs-learn">{!! $course->learn !!}</div>
+                            <div class="cs-learn">{!! clean($course->learn, 'content') !!}</div>
                         </div>
                     @endif
 
@@ -217,7 +217,7 @@
                                 <div class="name">{{ $course->certifier->firstname }} {{ $course->certifier->lastname }}</div>
                                 <span class="role">{{ $course->certifier->profession }}</span>
                                 @if ($course->certifier->description != null)
-                                    <div class="info">{!! $course->certifier->description !!}</div>
+                                    <div class="info">{!! clean($course->certifier->description, 'content') !!}</div>
                                 @endif
                             </div>
                         </div>

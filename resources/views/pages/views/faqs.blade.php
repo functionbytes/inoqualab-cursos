@@ -42,7 +42,7 @@
                                          aria-labelledby="heading{{ $faq->id }}"
                                          data-parent="#faqAccordion">
                                         <div class="card-body">
-                                            <p>{!! $faq->description !!}</p>
+                                            <p>{!! clean($faq->description, 'content') !!}</p>
                                         </div>
                                     </div>
                                 </div>

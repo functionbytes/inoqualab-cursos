@@ -12,7 +12,9 @@
                     {{ csrf_field() }}
 
                     <input type="hidden" id="slack" name="slack" value="{{ $faq->slack }}">
-                    <input type="hidden" id="description" name="description" value="{!! $faq->description !!}">
+                    {{-- Escapado: en un atributo, {!! !!} rompe el value con la
+                         primera comilla doble del contenido. --}}
+                    <input type="hidden" id="description" name="description" value="{{ $faq->description }}">
 
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">
@@ -54,7 +56,7 @@
                             <div class="col-12">
                                 <label class="control-label col-form-label">Descripción</label>
                                 <div class="">
-                                    <div id="descriptions">{!! $faq->description !!}</div>
+                                    <div id="descriptions">{!! clean($faq->description, 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>

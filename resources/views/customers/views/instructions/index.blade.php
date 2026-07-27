@@ -42,7 +42,7 @@
                             <h2 class="fw-bolder fs-14 mb-0 mt-1 mb-2">
                                 <a href="{{ route('customers.instructions.view', $instruction->slack) }}">{{ $instruction->title }}</a>
                             </h2>
-                            {!! $instruction->short !!}
+                            {!! clean($instruction->short, 'content') !!}
                             @isset($instruction->tags)
                                 <div class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex ">

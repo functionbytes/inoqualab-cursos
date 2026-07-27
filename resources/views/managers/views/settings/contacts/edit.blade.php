@@ -11,7 +11,10 @@
 
                     {{ csrf_field() }}
 
-                    <input type="hidden" id="description" name="description" value="{!! $contact->description !!}">
+                    {{-- Dentro de un atributo hay que escapar: con {!! !!} cualquier
+                         comilla doble de la descripción cortaba el value y volcaba
+                         el resto del HTML como atributos del input. --}}
+                    <input type="hidden" id="description" name="description" value="{{ $contact->description }}">
                     <input type="hidden" id="id" name="id" value="{{ $contact->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $contact->slack }}">
                     <input type="hidden" id="statuSignatures" name="statuSignatures" value="true">

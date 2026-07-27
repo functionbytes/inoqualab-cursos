@@ -12,8 +12,8 @@
                     {{ csrf_field() }}
 
                     <input type="hidden" id="slack" name="slack" value="{{ $instruction->slack }}">
-                    <textarea class="d-none" id="short" name="short">{!! $instruction->short !!}</textarea>
-                    <textarea class="d-none" id="description" name="description">{!! $instruction->description !!}</textarea>
+                    <textarea class="d-none" id="short" name="short">{!! clean($instruction->short, 'content') !!}</textarea>
+                    <textarea class="d-none" id="description" name="description">{!! clean($instruction->description, 'content') !!}</textarea>
                     
                     <div class="card-body border-top">
                         <div class="d-flex no-block align-items-center">
@@ -64,14 +64,14 @@
                             <div class="col-12">
                                 <label class="control-label col-form-label">Descripcion corta</label>
                                 <div>
-                                    <div id="shorts">{!! $instruction->short !!}</div>
+                                    <div id="shorts">{!! clean($instruction->short, 'content') !!}</div>
                                 </div>
                                 <label id="short-error" class="error d-none" for="short"></label>
                             </div>
                             <div class="col-12 mt-3">
                                 <label class="control-label col-form-label">Descripción</label>
                                 <div>
-                                    <div id="descriptions">{!! $instruction->description !!}</div>
+                                    <div id="descriptions">{!! clean($instruction->description, 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>

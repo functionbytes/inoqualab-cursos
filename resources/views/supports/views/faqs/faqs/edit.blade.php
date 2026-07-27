@@ -54,7 +54,7 @@
                             <div class="col-12">
                                 <label class="control-label col-form-label">Descripción</label>
                                 <div class="">
-                                    <div id="descriptions">{!! $faq->description !!}</div>
+                                    <div id="descriptions">{!! clean($faq->description, 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>

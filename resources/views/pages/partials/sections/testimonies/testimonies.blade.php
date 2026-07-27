@@ -41,7 +41,7 @@
                                     <h4>{{ $testimony->firstname }} {{ $testimony->lastname }}</h4>
                                     <span>Estudiante</span>
                                 </div>
-                                <p>{!! $testimony->description !!}</p>
+                                <p>{!! clean($testimony->description, 'content') !!}</p>
                                 <div class="ratting">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>

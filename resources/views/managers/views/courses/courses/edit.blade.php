@@ -13,11 +13,11 @@
 
                     <input type="hidden" id="id" name="id" value="{{ $course->id }}">
                     <input type="hidden" id="slack" name="slack" value="{{ $course->slack }}">
-                    <textarea style="display: none"  id="who" name="who">{!! $course->who !!}</textarea>
-                    <textarea style="display: none"  id="learn" name="learn">{!! $course->learn !!}</textarea>
-                    <textarea style="display: none"  id="short" name="short">{!! $course->short !!}</textarea>
-                    <textarea style="display: none"  id="requirement" name="requirement">{!! $course->requirement !!}</textarea>
-                    <textarea style="display: none"  id="detail" name="detail">{!! $course->detail !!}</textarea>
+                    <textarea style="display: none"  id="who" name="who">{!! clean($course->who, 'content') !!}</textarea>
+                    <textarea style="display: none"  id="learn" name="learn">{!! clean($course->learn, 'content') !!}</textarea>
+                    <textarea style="display: none"  id="short" name="short">{!! clean($course->short, 'content') !!}</textarea>
+                    <textarea style="display: none"  id="requirement" name="requirement">{!! clean($course->requirement, 'content') !!}</textarea>
+                    <textarea style="display: none"  id="detail" name="detail">{!! clean($course->detail, 'content') !!}</textarea>
                     <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
                     <input type="hidden" id="edit" name="edit" value="true">
                     <input type="hidden" id="thumbnail" name="thumbnail">
@@ -242,7 +242,7 @@
                                 <div class="mb-3">
                                     <label class="col-form-label">Descripcion</label>
                                     <div class="quill-wrapper">
-                                        <div  id="shorts">{!! $course->short !!}</div>
+                                        <div  id="shorts">{!! clean($course->short, 'content') !!}</div>
                                     </div>
                                     <label id="short-error" class="error d-none" for="short"></label>
                                 </div>
@@ -252,7 +252,7 @@
                                 <div class="mb-3">
                                     <label class="col-form-label">Detalle</label>
                                     <div class="quill-wrapper">
-                                        <div  id="details">{!! $course->detail !!}</div>
+                                        <div  id="details">{!! clean($course->detail, 'content') !!}</div>
                                     </div>
                                     <label id="detail-error" class="error d-none" for="detail"></label>
                                 </div>
@@ -262,7 +262,7 @@
                                     <div class="mb-3">
                                         <label class="col-form-label">Lo que aprenderas</label>
                                         <div class="quill-wrapper">
-                                            <div  id="learns">{!! $course->learn !!}</div>
+                                            <div  id="learns">{!! clean($course->learn, 'content') !!}</div>
                                         </div>
                                         <label id="learn-error" class="error d-none" for="learn"></label>
                                     </div>
@@ -272,7 +272,7 @@
                                 <div class="mb-3">
                                     <label class="col-form-label">Para quien es el curso</label>
                                     <div class="quill-wrapper">
-                                        <div  id="whos">{!! $course->who !!}</div>
+                                        <div  id="whos">{!! clean($course->who, 'content') !!}</div>
                                     </div>
                                     <label id="who-error" class="error d-none" for="who"></label>
                                 </div>
@@ -282,7 +282,7 @@
                                 <div class="mb-3">
                                     <label class="col-form-label">Requerimientos</label>
                                     <div class="quill-wrapper">
-                                        <div  id="requirements">{!! $course->requirement !!}</div>
+                                        <div  id="requirements">{!! clean($course->requirement, 'content') !!}</div>
                                     </div>
                                     <label id="requirement-error" class="error d-none" for="requirement"></label>
                                 </div>
