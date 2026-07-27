@@ -52,10 +52,19 @@ class CourseLesson extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('audio')->singleFile();
-        $this->addMediaCollection('image')->singleFile();
-        $this->addMediaCollection('zip')->singleFile();
-        $this->addMediaCollection('pdf')->singleFile();
+        // El disco 'media' apunta a public_path('media'): sin acceptsMimeTypes
+        // cualquier archivo (incluido .php) acabaría dentro del webroot.
+        $this->addMediaCollection('audio')->singleFile()
+            ->acceptsMimeTypes(['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm']);
+
+        $this->addMediaCollection('image')->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
+        $this->addMediaCollection('zip')->singleFile()
+            ->acceptsMimeTypes(['application/zip', 'application/x-zip-compressed', 'multipart/x-zip']);
+
+        $this->addMediaCollection('pdf')->singleFile()
+            ->acceptsMimeTypes(['application/pdf']);
     }
 
     public function getActivitylogOptions(): LogOptions

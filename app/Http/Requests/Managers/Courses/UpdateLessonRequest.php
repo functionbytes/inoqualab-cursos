@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Managers\Courses;
 
+use App\Http\Requests\Managers\Courses\Concerns\ValidatesLessonFile;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateLessonRequest extends FormRequest
 {
+    use ValidatesLessonFile;
+
     public function authorize(): bool
     {
         return $this->user()->can('lessons.update');
@@ -20,7 +23,7 @@ class UpdateLessonRequest extends FormRequest
             // (incluye TEXTO=7); un 'in:1..6' rechazaría ese tipo válido.
             'type' => ['required', 'exists:course_types,id'],
             'position' => ['nullable', 'integer', 'min:0'],
-            'file' => ['nullable', 'file', 'max:512000'],
+            'file' => $this->fileRules(),
             'url' => ['nullable', 'string', 'max:2048'],
             'size' => ['nullable'],
             'duration' => ['nullable', 'string', 'max:255'],
@@ -39,9 +42,8 @@ class UpdateLessonRequest extends FormRequest
             'chapter.required' => 'El tema es obligatorio.',
             'type.required' => 'El tipo de lección es obligatorio.',
             'type.in' => 'El tipo de lección no es válido.',
-            'file.file' => 'El archivo adjunto no es válido.',
-            'file.max' => 'El archivo no puede superar los 500 MB.',
             'url.max' => 'El enlace no puede superar los 2048 caracteres.',
+            ...$this->fileMessages(),
         ];
     }
 

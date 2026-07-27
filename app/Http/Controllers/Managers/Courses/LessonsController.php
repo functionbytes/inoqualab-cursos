@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileUnacceptableForCollection;
 
 class LessonsController extends Controller
 {
@@ -143,34 +144,43 @@ class LessonsController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $course, $mediaCollections) {
-            $lesson = new CourseLesson;
-            $lesson->course_id = $course->id;
-            $lesson->slack = $this->generate_slack('course_lessons');
-            $lesson->chapter_id = $request->chapter;
-            $lesson->title = Str::upper($request->title);
-            $lesson->medition = $request->medition;
-            $lesson->position = $request->position;
-            $lesson->detail = $request->detail;
-            $lesson->available = $request->available;
-            $lesson->type_id = $request->type;
-            $lesson->save();
+        try {
+            DB::transaction(function () use ($request, $course, $mediaCollections) {
+                $lesson = new CourseLesson;
+                $lesson->course_id = $course->id;
+                $lesson->slack = $this->generate_slack('course_lessons');
+                $lesson->chapter_id = $request->chapter;
+                $lesson->title = Str::upper($request->title);
+                $lesson->medition = $request->medition;
+                $lesson->position = $request->position;
+                $lesson->detail = $request->detail;
+                $lesson->available = $request->available;
+                $lesson->type_id = $request->type;
+                $lesson->save();
 
-            if ($request->type == '1') {
-                $lesson->url = $request->url;
-                $lesson->platform = $request->platform;
-                $lesson->medition = $request->duration;
-            } elseif (isset($mediaCollections[$request->type]) && $request->hasFile('file')) {
-                $collectionName = $mediaCollections[$request->type];
-                $lesson->clearMediaCollection($collectionName);
-                $media = $lesson->addMediaFromRequest('file')->toMediaCollection($collectionName);
-                $lesson->size = round($media->size / 1048576, 2);
-            } else {
-                $lesson->clearMediaCollection();
-            }
+                if ($request->type == '1') {
+                    $lesson->url = $request->url;
+                    $lesson->platform = $request->platform;
+                    $lesson->medition = $request->duration;
+                } elseif (isset($mediaCollections[$request->type]) && $request->hasFile('file')) {
+                    $collectionName = $mediaCollections[$request->type];
+                    $lesson->clearMediaCollection($collectionName);
+                    $media = $lesson->addMediaFromRequest('file')->toMediaCollection($collectionName);
+                    $lesson->size = round($media->size / 1048576, 2);
+                } else {
+                    $lesson->clearMediaCollection();
+                }
 
-            $lesson->save();
-        });
+                $lesson->save();
+            });
+        } catch (FileUnacceptableForCollection $e) {
+            // Última defensa tras el `mimes:` del Form Request: si el tipo real
+            // del archivo no encaja con la colección, 422 en lugar de un 500.
+            return response()->json([
+                'success' => false,
+                'message' => 'El archivo no es válido para este tipo de clase.',
+            ], 422);
+        }
 
         return response()->json([
             'success' => true,
@@ -210,38 +220,45 @@ class LessonsController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request, $lesson, $previousType, $mediaCollections) {
-            $lesson->chapter_id = $request->chapter;
-            $lesson->title = Str::upper($request->title);
-            $lesson->position = $request->position;
-            $lesson->detail = $request->detail;
-            $lesson->available = $request->available;
+        try {
+            DB::transaction(function () use ($request, $lesson, $previousType, $mediaCollections) {
+                $lesson->chapter_id = $request->chapter;
+                $lesson->title = Str::upper($request->title);
+                $lesson->position = $request->position;
+                $lesson->detail = $request->detail;
+                $lesson->available = $request->available;
 
-            if ($request->type == '1') {
-                if ($previousType !== 1 && isset($mediaCollections[$previousType])) {
-                    $lesson->clearMediaCollection($mediaCollections[$previousType]);
+                if ($request->type == '1') {
+                    if ($previousType !== 1 && isset($mediaCollections[$previousType])) {
+                        $lesson->clearMediaCollection($mediaCollections[$previousType]);
+                    }
+
+                    $lesson->url = $request->url;
+                    $lesson->platform = $request->platform;
+                    $lesson->medition = $request->duration;
+                } else {
+                    // Eliminar colección anterior si cambió el tipo
+                    if ((int) $request->type !== $previousType && isset($mediaCollections[$previousType])) {
+                        $lesson->clearMediaCollection($mediaCollections[$previousType]);
+                    }
+
+                    if (isset($mediaCollections[$request->type]) && $request->hasFile('file')) {
+                        $collectionName = $mediaCollections[$request->type];
+                        $lesson->clearMediaCollection($collectionName);
+                        $media = $lesson->addMediaFromRequest('file')->toMediaCollection($collectionName);
+                        $lesson->size = round($media->size / 1048576, 2);
+                    }
                 }
 
-                $lesson->url = $request->url;
-                $lesson->platform = $request->platform;
-                $lesson->medition = $request->duration;
-            } else {
-                // Eliminar colección anterior si cambió el tipo
-                if ((int) $request->type !== $previousType && isset($mediaCollections[$previousType])) {
-                    $lesson->clearMediaCollection($mediaCollections[$previousType]);
-                }
-
-                if (isset($mediaCollections[$request->type]) && $request->hasFile('file')) {
-                    $collectionName = $mediaCollections[$request->type];
-                    $lesson->clearMediaCollection($collectionName);
-                    $media = $lesson->addMediaFromRequest('file')->toMediaCollection($collectionName);
-                    $lesson->size = round($media->size / 1048576, 2);
-                }
-            }
-
-            $lesson->type_id = $request->type;
-            $lesson->update();
-        });
+                $lesson->type_id = $request->type;
+                $lesson->update();
+            });
+        } catch (FileUnacceptableForCollection $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El archivo no es válido para este tipo de clase.',
+            ], 422);
+        }
 
         return response()->json([
             'success' => true,
