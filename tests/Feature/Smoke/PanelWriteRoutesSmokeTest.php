@@ -23,6 +23,16 @@ use Tests\TestCase;
  * una tabla mal escrita, y dos rutas apuntando a métodos inexistentes.
  *
  * Complementa PanelRoutesSmokeTest, que cubre el lado de lectura.
+ *
+ * ⚠️ Este barrido tiene efectos fuera de la base de datos. Las acciones de
+ * `manager.seo.robots.*` y `manager.settings.seo` hacen
+ * `File::put(public_path('robots.txt'), ...)`, así que ejecutarlo REESCRIBE ese
+ * archivo con el contenido por defecto. RefreshDatabase revierte la BD, no el
+ * disco. En CI da igual (contenedor efímero); en local conviene saberlo.
+ *
+ * Y ojo: si `public/robots.txt` llega a existir, el servidor web sirve el
+ * archivo estático y la ruta dinámica `/robots.txt` deja de aplicarse — dos
+ * fuentes de verdad para lo mismo.
  */
 class PanelWriteRoutesSmokeTest extends TestCase
 {
