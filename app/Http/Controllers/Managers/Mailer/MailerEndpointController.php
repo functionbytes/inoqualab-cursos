@@ -193,8 +193,17 @@ class MailerEndpointController extends Controller
             }
         }
 
-        if (! isset($payload['email']) && ! isset($payload['recipient_email'])) {
+        $recipient = $payload['email'] ?? $payload['recipient_email'] ?? null;
+
+        if ($recipient === null) {
             return $this->jsonError('missing_email', 'Recipient email is required (field: email or recipient_email)', 422);
+        }
+
+        // El formato se validaba solo dentro del job: la API respondía 202
+        // "encolado" y el envío moría después en silencio, así que quien
+        // integraba veía un éxito que nunca llegaba a destino.
+        if (! is_string($recipient) || ! filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            return $this->jsonError('invalid_email', 'Recipient email is not a valid address', 422);
         }
 
         try {

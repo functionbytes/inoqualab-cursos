@@ -83,6 +83,53 @@ class MailerEndpointApiTest extends TestCase
         Queue::assertNotPushed(SendEndpointEmailJob::class);
     }
 
+    public function test_send_rejects_a_malformed_recipient(): void
+    {
+        // El formato se validaba solo dentro del job: la API devolvía 202
+        // "encolado" y el envío moría después sin que el cliente se enterara.
+        Queue::fake();
+        $endpoint = $this->endpoint();
+
+        $this->postJson(route('api.mailer.send', $endpoint->slug), [
+            'api_token' => $endpoint->api_token,
+            'order_id' => 'A-1',
+            'email' => 'esto-no-es-un-correo',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('error', 'invalid_email');
+
+        Queue::assertNotPushed(SendEndpointEmailJob::class);
+    }
+
+    public function test_send_rejects_a_non_string_recipient(): void
+    {
+        // Un array en el campo email hacía estallar filter_var dentro del job.
+        Queue::fake();
+        $endpoint = $this->endpoint();
+
+        $this->postJson(route('api.mailer.send', $endpoint->slug), [
+            'api_token' => $endpoint->api_token,
+            'order_id' => 'A-1',
+            'email' => ['a@b.com', 'otro@b.com'],
+        ])->assertStatus(422);
+
+        Queue::assertNotPushed(SendEndpointEmailJob::class);
+    }
+
+    public function test_send_accepts_the_alternative_recipient_field(): void
+    {
+        Queue::fake();
+        $endpoint = $this->endpoint();
+
+        $this->postJson(route('api.mailer.send', $endpoint->slug), [
+            'api_token' => $endpoint->api_token,
+            'order_id' => 'A-1',
+            'recipient_email' => 'alumno@example.com',
+        ])->assertStatus(202);
+
+        Queue::assertPushed(SendEndpointEmailJob::class);
+    }
+
     public function test_send_returns_404_for_unknown_endpoint(): void
     {
         $this->withHeaders(['X-API-Token' => 'x'])
