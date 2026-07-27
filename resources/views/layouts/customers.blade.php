@@ -29,13 +29,13 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- Este layout venía heredando la lista de librerías del panel de gestión.
+         El portal del alumno no usa select2, quill, dropzone ni daterangepicker
+         en ninguna de sus 35 vistas (verificado también en las partials y en los
+         JS del tema), así que se quitan: eran ~570 KB por página. --}}
     <link rel="stylesheet" href="{{ url('managers/libs/owl.carousel/dist/assets/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/libs/select2/dist/css/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/libs/quill/dist/quill.snow.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/toastr/toastr.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/fontawesome/fontawesome.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/libs/dropzone/dist/min/dropzone.min.css') }}">
-    <link rel="stylesheet" href="{{ url('managers/libs/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/bootstrap/dist/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url('customers/css/style.css') }}">
 
@@ -75,13 +75,7 @@
 <!-- core files -->
 
 
-<script src="{{ url('managers/libs/bootstrap-material-datetimepicker/node_modules/moment/moment.js') }}" type="text/javascript"></script>
-<script src="{{ url('managers/libs/select2/dist/js/select2.min.js') }}" type="text/javascript"></script>
-<script src="{{ url('managers/libs/jquery-validation/dist/jquery.validate.min.js') }}" type="text/javascript"></script>
-<script src="{{ url('managers/libs/dropzone/dist/dropzone.js') }}" type="text/javascript"></script>
-<script src="{{ url('managers/libs/quill/dist/quill.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/libs/toastr/toastr.min.js') }}" type="text/javascript"></script>
-<script src="{{ url('managers/js/forms/select2.init.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/app.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/app.minisidebar.init.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/app-style-switcher.js') }}" type="text/javascript"></script>

@@ -3,7 +3,7 @@
  * Copyright 2011-2023 The Bootstrap Authors
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
-@import "../libs/simplebar/dist/simplebar.min.css"; @import "icons/crypto-icons/cryptocoins.css"; @import "icons/tabler-icons/tabler-icons.min.css"; @import "icons/flag-icon-css/flag-icon.min.css"; @import "icons/font-awesome/css/fontawesome-all.css"; :root, [data-bs-theme=light] {
+@import "icons/font-awesome/css/fontawesome-all.css"; :root, [data-bs-theme=light] {
     --bs-blue: #008bce;
     --bs-indigo: #6610f2;
     --bs-purple: #6f42c1;
