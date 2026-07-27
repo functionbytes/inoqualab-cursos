@@ -32,9 +32,15 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'customers', 'ses
 
     Route::group(['prefix' => 'courses'], function () {
 
+        // Los parámetros llevan el nombre de lo que realmente reciben. Varios
+        // se llamaban {slug} sin serlo: /content/ toma el slack de la
+        // inscripción y /content/lesion/ el id numérico de la lección, lo que
+        // hacía perder tiempo cada vez que alguien construía una URL a mano.
+        // Todos los enlaces pasan el valor por posición, así que renombrarlos
+        // no afecta a ninguna llamada a route().
         Route::get('/', [CoursesController::class, 'index'])->name('customers.courses');
-        Route::get('/content/{slug}', [CoursesController::class, 'content'])->name('customers.courses.content');
-        Route::get('/content/lesion/{slug}', [CoursesController::class, 'lesion'])->name('customers.courses.lesion');
+        Route::get('/content/{inscription}', [CoursesController::class, 'content'])->name('customers.courses.content');
+        Route::get('/content/lesion/{lesson}', [CoursesController::class, 'lesion'])->name('customers.courses.lesion');
         Route::get('/content/player/{lesson}', [CoursesController::class, 'player'])->name('customers.courses.player');
         Route::post('/content/lesion/realized', [CoursesController::class, 'realized'])->name('customers.courses.realized')->middleware('throttle:30,1');
         Route::post('/content/lesion/prev', [CoursesController::class, 'prev'])->name('customers.courses.prev');
@@ -45,15 +51,19 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'customers', 'ses
         Route::get('/certificate/download/{slack}', [CertificateController::class, 'download'])->name('customers.certificate.download')->middleware('throttle:30,1');
 
         Route::post('/content/quiz/realized', [QuizController::class, 'realized'])->name('customers.quiz.realized')->middleware('throttle:20,1');
-        Route::get('/content/quiz/{slug}', [QuizController::class, 'quiz'])->name('customers.courses.quiz');
-        Route::get('/content/quiz/finish/{id}', [QuizController::class, 'finish'])->name('customers.quiz.show');
-        Route::get('/content/quiz/tryagain/{slug}', [QuizController::class, 'tryagain'])->name('customers.quiz.tryagain');
-        Route::post('/content/quiz/store/{id}', [QuizController::class, 'store'])->name('customers.quiz.store')->middleware('throttle:20,1');
+        Route::get('/content/quiz/{lesson}', [QuizController::class, 'quiz'])->name('customers.courses.quiz');
+        Route::get('/content/quiz/finish/{quiz}', [QuizController::class, 'finish'])->name('customers.quiz.show');
+        Route::get('/content/quiz/tryagain/{quiz}', [QuizController::class, 'tryagain'])->name('customers.quiz.tryagain');
+        // El segmento de URL llega al controller pero no se usa: store() toma el
+        // quiz de $request->quiz y valida que sea del usuario autenticado.
+        Route::post('/content/quiz/store/{lesson}', [QuizController::class, 'store'])->name('customers.quiz.store')->middleware('throttle:20,1');
 
-        Route::get('/content/exam/{slug}', [ExamController::class, 'exam'])->name('customers.courses.exam');
-        Route::get('/content/exam/finish/{id}', [ExamController::class, 'finish'])->name('customers.exam.show');
-        Route::get('/content/exam/tryagain/{slug}', [ExamController::class, 'tryagain'])->name('customers.exam.tryagain');
-        Route::post('/content/exam/store/{id}', [ExamController::class, 'store'])->name('customers.exam.store')->middleware('throttle:20,1');
+        // Este sí recibe el slack del curso, no un id.
+        Route::get('/content/exam/{course}', [ExamController::class, 'exam'])->name('customers.courses.exam');
+        Route::get('/content/exam/finish/{exam}', [ExamController::class, 'finish'])->name('customers.exam.show');
+        Route::get('/content/exam/tryagain/{exam}', [ExamController::class, 'tryagain'])->name('customers.exam.tryagain');
+        // Recibe el id del ExamTopic, no el del curso ni el del examen.
+        Route::post('/content/exam/store/{topic}', [ExamController::class, 'store'])->name('customers.exam.store')->middleware('throttle:20,1');
     });
 
     Route::group(['prefix' => 'documents'], function () {
