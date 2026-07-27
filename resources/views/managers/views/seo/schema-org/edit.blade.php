@@ -82,7 +82,10 @@
                                       id="schema_custom"
                                       class="form-control font-monospace"
                                       rows="15"
-                                      placeholder='{"@context":"https://schema.org","@type":"Course","name":"..."}'>{{ $currentSchema ? json_encode($currentSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
+                                      {{-- @@context escapado: @context es una directiva real de Blade
+                                           (CompilesContexts) y sin escapar abría un if sin @endcontext,
+                                           dejando la vista con un error de sintaxis fatal. --}}
+                                      placeholder='{"@@context":"https://schema.org","@@type":"Course","name":"..."}'>{{ $currentSchema ? json_encode($currentSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '' }}</textarea>
                             <div id="schema-validation-result" class="mt-2"></div>
                         </div>
 
@@ -164,7 +167,7 @@
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-circle-check text-success me-1"></i>
-                            Incluye siempre <code>@context</code> y <code>@type</code>
+                            Incluye siempre <code>@@context</code> y <code>@@type</code>
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-circle-check text-success me-1"></i>

@@ -1,97 +1,53 @@
 @extends('layouts.pages')
 
-@section('title', 'Inicio')
-
 @section('content')
-<!-- Course Left Start -->
-<form action="{{ Request::fullUrl() }}" method="GET">
-<section class="course-left-area py-70">
-    <div class="container">
-        <div class="row large-gap">
-         <div class="col-lg-12">
-                <div class="bundle-grids">
-                        <div class="shop-shorter mb-40 wow fadeInUp delay-0-2s">
 
-                            <div class="sort-text">
-                                <span>Mostrar {{ $bundles->firstItem() }}-{{ $bundles->lastItem() }} de {{ $bundles->total() }} resultados</span>
-                            </div>
-                            <ul class="grid-list">
-                                <li><a href="#"><i class="fas fa-list-ul"></i></a></li>
-                                <li><a href="#" class="active"><i class="fas fa-border-all"></i></a></li>
-                            </ul>
-                        </div>
+    {{-- Esta vista era una copia sin adaptar de bundles/index: iteraba $bundles
+         paginado, una variable que InstructionsController::index() nunca pasa
+         (envía 'instructions' sin paginar), así que /instructions reventaba en
+         cada visita. Reescrita sobre los datos reales del controller. --}}
 
-                    <div class="bundle-items">
-                        <div class="row">
-                            @foreach ($bundles as $bundle)
-                                <div class="col-lg-6 col-sm-12 item  ">
-                                    <div class="bundle-item wow fadeInUp delay-0-2s">
-                                                <div class="bundle-head d-flex justify-content-between align-items-center flex-wrap">
-                                                    <div class="bundle-title">
-                                                        <a href="{{ route('bundles.view', $bundle->slack) }}">
-                                                            <div class="title d-flex align-items-center g-12">
-                                                                <h4 class="name"> {{ $bundle->title }}</h4>
-                                                            </div>
-                                                            <p class="info">{{ $bundle->courses->count() }} Coursos</p>
-                                                        </a>
-                                                    </div>
-                                                    <div class="bundle-price">
-                                                        <p class="price text-dark">${{ number_format($bundle->price) }}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="bundle-body ">
-                                                    <ul>
-                                                        @foreach ($bundle->courses as $course)
-                                                        <li>
-                                                            <div class="sbundle-item">
-                                                                <div class="sbundle-title">
-                                                                <a  href="{{ route('courses.view', $course->slack) }}" target="_blank">
-                                                                    <div class="content">
-                                                                        <div class="img">
-                                                                            <img loading="lazy" src="{{ count($course->getMedia('thumbnail'))>0 ? $course->getfirstMedia('thumbnail')->getfullUrl() : asset('/pages/images/courses/default.jpg') }}" alt="{{ $course->title }}"
-                                                                 onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
-                                                                        </div>
-                                                                        <h3 class="fw-400 title">{{ $course->title }}</h3>
-                                                                    </div>
-                                                                </a>
-                                                                </div>
+    <section class="instructions-section wow fadeInUp delay-0-2s padding-top padding-bottom">
+        <div class="container">
 
-                                                                <div class="sbundle-price">
-                                                                    <div class="price fw-400 text-16px text-muted">${{ number_format($course->price) }}</div>
-                                                                </div>
-                                                            </div>
-                                                        </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                                <div class="bundle-footer ">
-                                                    <div class="row">
-                                                        <div class="col-6">
-                                                            <a href="{{ route('bundles.view', $bundle->slack) }}"  class="bundle-foot">Detalle paquete</a>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <a href="{{ route('checkout', ['bundle',$bundle->slack]) }}" class="bundle-foot">${{ number_format($bundle->price) }} Comprar ahora</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="row justify-content-center">
-                            <ul class="pagination flex-wrap mt-20">
-                                <nav>
-                                    {{ $bundles->appends(request()->input())->links() }}
-                                </nav>
+            <div class="section-title pb-50 text-center">
+                <span class="sub-title mb-1">Centro de ayuda</span>
+                <h2>Instructivos</h2>
+            </div>
 
-                            </ul>
-                        </div>
-                        </div>
+            @if ($instructions->isEmpty())
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center">
+                        <p>Todavía no hay instructivos publicados.</p>
                     </div>
                 </div>
-            </div>
-      
+            @else
+                <div class="row">
+                    @foreach ($instructions as $instruction)
+                        <div class="col-lg-6">
+                            <div class="instruction-item wow fadeInUp delay-0-2s mb-30">
+                                @isset($instruction->categorie)
+                                    <span class="sub-title">{{ $instruction->categorie->title }}</span>
+                                @endisset
+
+                                <h4>
+                                    <a href="{{ route('instructions.view', $instruction->slug) }}">
+                                        {{ $instruction->title }}
+                                    </a>
+                                </h4>
+
+                                {!! clean($instruction->short, 'content') !!}
+
+                                <a href="{{ route('instructions.view', $instruction->slug) }}" class="theme-btn style-three mt-15">
+                                    Leer instructivo
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
         </div>
-    </div>
-</section></form>
+    </section>
+
 @endsection

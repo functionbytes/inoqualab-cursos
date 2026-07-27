@@ -30,7 +30,10 @@
                                 <div class="col-md-12">
                                     <div class="padding-30 sm-padding-5">
 
-                                        {!! Form::open(['route' => ['enterprises.courses.generate'], 'method' => 'POST', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
+                                        {{-- La ruta es `support.enterprises.courses.generate`. Con el nombre
+                                             en plural y sin prefijo de portal, Blade lanzaba
+                                             RouteNotFoundException al renderizar y la página no cargaba. --}}
+                                        {!! Form::open(['route' => ['support.enterprises.courses.generate'], 'method' => 'GET', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
                                         {{ csrf_field() }}
 
                                         <input name="course" type="hidden" value="{{ $course->id }}">
