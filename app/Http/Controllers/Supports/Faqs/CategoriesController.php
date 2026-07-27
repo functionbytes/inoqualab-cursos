@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Faqs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Faqs\StoreFaqCategoryRequest;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -86,11 +87,14 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreFaqCategoryRequest $request)
     {
 
         $categorie = new FaqCategorie;
-        $categorie->slack = $this->generate_slack('faqs_categories');
+        // La tabla es `faq_categories` (singular): con 'faqs_categories'
+        // generate_slack consultaba una tabla inexistente y crear una categoría
+        // desde soporte reventaba con "Base table or view not found".
+        $categorie->slack = $this->generate_slack('faq_categories');
         $categorie->title = $request->title;
         $categorie->slug = Str::slug($request->title, '-');
         $categorie->available = $request->available;

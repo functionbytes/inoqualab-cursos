@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Departments\StoreDepartmentRequest;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Str;
@@ -77,7 +78,7 @@ class DepartmentsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreDepartmentRequest $request)
     {
         abort_unless(auth()->user()->can('departments.create'), 403);
 

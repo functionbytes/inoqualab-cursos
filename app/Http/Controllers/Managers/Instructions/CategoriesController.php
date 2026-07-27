@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Instructions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Instructions\StoreInstructionCategoryRequest;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -79,7 +80,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreInstructionCategoryRequest $request)
     {
         abort_unless(auth()->user()->can('instructions.create'), 403);
 

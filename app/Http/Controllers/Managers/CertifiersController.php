@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Certifiers\StoreCertifierFileRequest;
+use App\Http\Requests\Managers\Certifiers\StoreCertifierRequest;
 use App\Models\Certifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -96,7 +97,7 @@ class CertifiersController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreCertifierRequest $request)
     {
         abort_unless(auth()->user()->can('certifiers.create'), 403);
 

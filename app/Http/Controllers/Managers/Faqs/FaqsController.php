@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Faqs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Faqs\StoreFaqRequest;
 use App\Models\Faq\Faq;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\Request;
@@ -68,7 +69,7 @@ class FaqsController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreFaqRequest $request)
     {
         abort_unless(auth()->user()->can('faqs.create'), 403);
 

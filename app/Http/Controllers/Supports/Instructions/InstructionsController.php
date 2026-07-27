@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Instructions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Instructions\StoreInstructionRequest;
 use App\Models\Instruction\Instruction;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\JsonResponse;
@@ -80,7 +81,7 @@ class InstructionsController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreInstructionRequest $request): JsonResponse
     {
 
         $instruction = new Instruction;

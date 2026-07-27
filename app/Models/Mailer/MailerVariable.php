@@ -12,6 +12,24 @@ class MailerVariable extends Model
 
     protected $table = 'mailer_variables';
 
+    /** Categorías disponibles: valor guardado => etiqueta para los selects. */
+    public const CATEGORIES = [
+        'user' => 'Usuario',
+        'site' => 'Sitio',
+        'company' => 'Empresa',
+        'date' => 'Fecha',
+        'links' => 'Enlaces',
+        'order' => 'Orden',
+        'newsletter' => 'Newsletter',
+    ];
+
+    /** Módulos disponibles: valor guardado => etiqueta para los selects. */
+    public const MODULES = [
+        'core' => 'General',
+        'orders' => 'Órdenes',
+        'newsletter' => 'Newsletter',
+    ];
+
     protected $fillable = [
         'uid', 'key', 'name', 'description', 'example_value',
         'category', 'module', 'is_system', 'is_enabled',

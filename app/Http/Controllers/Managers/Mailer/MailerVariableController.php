@@ -44,7 +44,13 @@ class MailerVariableController extends Controller
 
     public function create(): View
     {
-        return view('managers.views.mailer.variables.create');
+        // Las vistas create/edit recorren $categories y $modules como
+        // valor => etiqueta; sin pasarlos, la pantalla moría con
+        // "Undefined variable $categories".
+        return view('managers.views.mailer.variables.create', [
+            'categories' => MailerVariable::CATEGORIES,
+            'modules' => MailerVariable::MODULES,
+        ]);
     }
 
     public function store(StoreMailerVariableRequest $request): RedirectResponse
@@ -66,7 +72,11 @@ class MailerVariableController extends Controller
 
     public function edit(MailerVariable $variable): View
     {
-        return view('managers.views.mailer.variables.edit', compact('variable'));
+        return view('managers.views.mailer.variables.edit', [
+            'variable' => $variable,
+            'categories' => MailerVariable::CATEGORIES,
+            'modules' => MailerVariable::MODULES,
+        ]);
     }
 
     public function update(UpdateMailerVariableRequest $request, MailerVariable $variable): RedirectResponse

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Instructions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Instructions\StoreInstructionCategoryRequest;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -91,7 +92,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreInstructionCategoryRequest $request): JsonResponse
     {
 
         $categorie = new InstructionCategorie;
