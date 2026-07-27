@@ -6,7 +6,10 @@
             @foreach ($categories as $categorie)
                 <li>
                     <a href="{{ route('blogs.categories', [$categorie->slug]) }}">{{ $categorie->title }}
-                        <span >({{ count($categorie->blogs) }})</span>
+                        {{-- blogs_count viene del withCount del controller (solo publicados).
+                             `count($categorie->blogs)` cargaba la relación entera por cada
+                             categoría: una consulta extra por fila del widget. --}}
+                        <span>({{ $categorie->blogs_count ?? 0 }})</span>
                     </a>
                 </li>
             @endforeach

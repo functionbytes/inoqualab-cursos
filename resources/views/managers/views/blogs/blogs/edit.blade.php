@@ -89,7 +89,11 @@
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Tags</label>
                                     <div class="input-group">
-                                        {!! Form::select('tags[]', $tags, $blog->tags, ['class' => 'select2 form-control'  , 'multiple' => 'multiple' , 'id' => 'tags']) !!}
+                                        {{-- Form::select espera IDs, no modelos: al pasarle la colección
+                                             $blog->tags no preseleccionaba nada, y como el JS envía lo que
+                                             haya en el select, guardar sin tocar las etiquetas las borraba
+                                             todas (update() hace detach() cuando llega vacío). --}}
+                                        {!! Form::select('tags[]', $tags, $selectedTags, ['class' => 'select2 form-control'  , 'multiple' => 'multiple' , 'id' => 'tags']) !!}
                                     </div>
                                     <label id="tags-error" class="error d-none" for="tags"></label>
                                 </div>

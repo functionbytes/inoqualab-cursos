@@ -5,11 +5,10 @@
             @foreach ($recents as $recent)
                 <li>
                     <div class="image">
-                        @if ($recent->image != null)
-                            <img src="{{ asset('/pages/images/blog/' . $recent- loading="lazy">image) }}" alt="image">
-                        @else
-                            <img src="{{ asset('/pages/images/blog/default.jpg') }}" alt="image" loading="lazy">
-                        @endif
+                        {{-- La tabla blogs no tiene columna `image`: la portada vive en
+                             Media Library (colección thumbnail), igual que en BlogController. --}}
+                        <img src="{{ $recent->getFirstMediaUrl('thumbnail') ?: asset('/pages/images/blog/default.jpg') }}"
+                             alt="{{ $recent->title }}" loading="lazy">
                     </div>
                     <div class="content">
                         <h6><a href="{{ route('blogs.view', $recent->slug) }}">{{ substr(strip_tags($recent->title), 0, 400) }}</a></h6>

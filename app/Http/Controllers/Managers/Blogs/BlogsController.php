@@ -94,6 +94,7 @@ class BlogsController extends Controller
         abort_unless(auth()->user()->can('blogs.update'), 403);
 
         $blog = Blog::slack($slack);
+        $blog->load('tags');
 
         $categories = BlogCategorie::latest()->available()->get();
         $categories->prepend('', '');
@@ -110,6 +111,9 @@ class BlogsController extends Controller
             'blog' => $blog,
             'categories' => $categories,
             'tags' => $tags,
+            // Solo los ids: es lo que Form::select necesita para marcar las
+            // opciones ya asignadas al post.
+            'selectedTags' => $blog->tags->pluck('id')->all(),
             'availables' => $availables,
             'thumbnail' => $thumbnail,
         ]);

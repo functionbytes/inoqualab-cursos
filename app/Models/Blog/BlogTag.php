@@ -63,6 +63,11 @@ class BlogTag extends Model
 
     public function blogs(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\Blog\Blog')->withTimestamps();
+        // Sin declarar tabla y claves, Laravel infería `blog_blog_tag` con
+        // `blog_tag_id`: la tabla real es `blog_tag` con `tag_id`, así que la
+        // relación nunca funcionó (rompía también el filtro por etiqueta del
+        // listado). Es el espejo de Blog::tags(), que sí estaba bien puesta.
+        // Sin withTimestamps(): la tabla pivote solo tiene id, tag_id y blog_id.
+        return $this->belongsToMany('App\Models\Blog\Blog', 'blog_tag', 'tag_id', 'blog_id');
     }
 }

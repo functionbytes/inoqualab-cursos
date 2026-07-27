@@ -10,12 +10,11 @@
     <!-- Start Single Card  -->
     <div class="rbt-card card-list variation-02 rbt-hover mt--30">
         <div class="rbt-card-img">
-            <<a href="{{ route('blogs.view',$recent->slug) }}">
-                @if($recent->thumbnail!=null)
-                    <img src="{{ asset('/pages/images/blog/'.$recent- loading="lazy">thumbnail) }}" alt="image">
-                @else
-                    <img src="{{ asset('/pages/images/blog/default.jpg') }}" alt="image" loading="lazy">
-                @endif
+            <a href="{{ route('blogs.view',$recent->slug) }}">
+                {{-- La tabla blogs no tiene columna `thumbnail`: la portada vive en
+                     Media Library, igual que en BlogController. --}}
+                <img src="{{ $recent->getFirstMediaUrl('thumbnail') ?: asset('/pages/images/blog/default.jpg') }}"
+                     alt="{{ $recent->title }}" loading="lazy">
             </a>
         </div>
         <div class="rbt-card-body">
