@@ -87,7 +87,6 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('/', [CertifiersController::class, 'index'])->name('certifiers');
         Route::get('/{slug}', [CertifiersController::class, 'view'])->name('certifiers.view');
-        Route::post('/filters', [CertifiersController::class, 'filters'])->name('certifiers.filters')->middleware('throttle:30,1');
     });
 
     Route::group(['prefix' => 'blogs'], function () {
@@ -149,7 +148,6 @@ Route::group(['middleware' => ['web']], function () {
     Route::group(['prefix' => 'contacts'], function () {
 
         Route::get('/', [ContactsController::class, 'index'])->name('contacts');
-        Route::get('/success/{slug}', [ContactsController::class, 'success'])->name('contacts.success');
         Route::post('/store', [ContactsController::class, 'storage'])->name('contacts.store')->middleware('throttle:5,1');
     });
 

@@ -65,7 +65,6 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/store', [DocumentsController::class, 'store'])->name('support.documents.store');
         Route::post('/update', [DocumentsController::class, 'update'])->name('support.documents.update');
         Route::get('/edit/{slack}', [DocumentsController::class, 'edit'])->name('support.documents.edit');
-        Route::get('/view/{slack}', [DocumentsController::class, 'view'])->name('support.documents.view');
         Route::delete('/destroy/{slack}', [DocumentsController::class, 'destroy'])->name('support.documents.destroy');
 
         Route::post('/files', [DocumentsController::class, 'storeFiles'])->name('support.documents.files');
@@ -140,7 +139,6 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/update', [EnterprisesController::class, 'update'])->name('support.enterprises.update');
         Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('support.enterprises.edit');
         Route::get('/reassign/{slack}', [EnterpriseReassignController::class, 'all'])->name('support.enterprises.reassign');
-        Route::get('/view/{slack}', [EnterprisesController::class, 'view'])->name('support.enterprises.view');
         Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->name('support.enterprises.destroy');
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('support.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterpriseInscriptionsController::class, 'index'])->name('support.enterprises.inscriptions');
@@ -180,15 +178,12 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/users/courses/progress/{user}', [EnterpriseCourseController::class, 'progress'])->name('support.enterprises.courses.progress');
         Route::get('/users/courses/details/{slack}', [EnterpriseCourseController::class, 'details'])->name('support.enterprises.courses.details');
         Route::get('/users/certifications/{slack}', [CertificatesController::class, 'index'])->name('support.enterprises.users.certificates');
-        Route::get('/users/courses/certificate/{slack}', [CertificatesController::class, 'view'])->name('support.certificate.view');
         Route::get('/users/results/view/{slack}', [ResultsController::class, 'view'])->name('support.enterprises.users.results.view');
         Route::get('/users/results/download/{slack}', [ResultsController::class, 'download'])->name('support.enterprises.users.results.download');
         Route::delete('/users/courses/destroy/{user}', [EnterpriseCourseController::class, 'destroyInscription'])->name('support.enterprises.courses.user.destroy');
         Route::get('/users/certificate/user/{slack}', [CertificatesController::class, 'user'])->name('support.enterprises.users.certificate.user');
         Route::get('/users/certificate/broad/{slack}', [CertificatesController::class, 'broad'])->name('support.enterprises.users.certificate.broad');
         Route::get('/users/certificate/course/{slack}', [CertificatesController::class, 'course'])->name('support.enterprises.users.certificate.course');
-
-        Route::get('/users/courses/certificate/download/{slack}', [CertificatesController::class, 'download'])->name('support.certificate.download');
 
         Route::delete('/users/courses/destroy/{enterprice}/{course}', [EnterpriseCourseController::class, 'destroy'])->name('support.enterprises.courses.destroy');
         Route::get('/users/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('support.enterprises.courses.reasign');
@@ -287,21 +282,18 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/', [UsersController::class, 'index'])->name('support.users');
         Route::get('/create', [UsersController::class, 'create'])->name('support.users.create');
         Route::post('/store', [UsersController::class, 'store'])->name('support.users.store');
-        Route::post('/filters', [UsersController::class, 'filters'])->name('support.users.filters');
         Route::post('/update', [UsersController::class, 'update'])->name('support.users.update');
         Route::get('/edit/{slack}', [UsersController::class, 'edit'])->name('support.users.edit');
         Route::get('/view/{slack}', [UsersController::class, 'view'])->name('support.users.view');
         Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->name('support.users.destroy');
         Route::get('/navegation/{slack}', [UsersController::class, 'navegation'])->name('support.users.navegation');
-        Route::post('/reports/generate', [UsersController::class, 'generate'])->name('support.users.generate');
 
         Route::post('/information/update', [UsersController::class, 'information'])->name('support.users.information');
         Route::post('/notification/update', [UsersController::class, 'notification'])->name('support.users.notification');
         Route::post('/forgotpassword/update', [UsersController::class, 'forgotpassword'])->name('support.users.forgotpassword')->middleware('throttle:10,1');
         Route::post('/resetpassword/update', [UsersController::class, 'resetpassword'])->name('support.users.resetpassword')->middleware('throttle:10,1');
 
-        Route::get('/courses/{slack}', [UsersCoursesController::class, 'index'])->name(name: 'support.users.courses.index');
-        Route::get('/courses/view/{slack}', [UsersCoursesController::class, 'view'])->name('support.users.courses.view');
+        Route::get('/courses/{slack}', [UsersCoursesController::class, 'index'])->name('support.users.courses.index');
         Route::get('/courses/certifications/{slack}', [UsersCertificatesController::class, 'index'])->name('support.users.courses.certificates');
         Route::get('/courses/results/{slack}', [ResultsController::class, 'index'])->name('support.users.courses.results');
 
