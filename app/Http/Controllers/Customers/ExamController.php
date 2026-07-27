@@ -181,7 +181,7 @@ class ExamController extends Controller
         // como no-acierto: sin respuestas -> 0 (antes daba 100 y emitía certificado).
         $score = $count > 0 ? round(($correct / $count) * 100, 2) : 0;
 
-        $certificate = DB::transaction(function () use ($exam, $inscription, $course, $user, $wrong, $correct, $score, $progress, $passingScore) {
+        $certificate = DB::transaction(function () use ($exam, $inscription, $course, $user, $wrong, $correct, $score, $passingScore) {
             $exam->update(['wrong' => $wrong, 'correct' => $correct, 'score' => $score]);
 
             if ($score < $passingScore) {
@@ -204,11 +204,20 @@ class ExamController extends Controller
                 ]);
             }
 
+            // Se cuentan lecciones DISTINTAS y se capa a 100, igual que en
+            // CoursesController::createOrUpdateProgress. Sin esto, una inscripción
+            // con progreso duplicado (course_progress no tiene índice único sobre
+            // inscription_id + lesson_id) terminaba con porcentajes imposibles:
+            // en la base hay una inscripción marcada al 531,25 %.
             $lessons = $course->lessons()->count();
+            $completadas = $inscription->progress()->distinct()->count('lesson_id');
+
             $inscription->update([
                 'enroll_culminated' => Carbon::now(),
                 'culminated' => 1,
-                'percent' => $lessons > 0 ? round(($progress->count() / $lessons) * 100, 2) : 100,
+                'percent' => $lessons > 0
+                    ? min(100, round(($completadas / $lessons) * 100, 2))
+                    : 100,
             ]);
 
             return $certificate;
