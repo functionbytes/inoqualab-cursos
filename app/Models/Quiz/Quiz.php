@@ -7,17 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * Sin LogsActivity a propósito: 433k filas en activity_log que duplicaban el
+ * intento de quiz ya persistido aquí (con wrong/correct/score). Ninguna
+ * interfaz consultaba ese audit trail. Ver [CourseProgress] por el mismo motivo.
+ */
 class Quiz extends Model
 {
     use HasFactory,
-        HasFinders, LogsActivity;
+        HasFinders;
 
     protected $table = 'quizs';
-
-    protected static $recordEvents = ['deleted', 'updated', 'created'];
 
     protected $fillable = [
         'id',
@@ -33,11 +34,6 @@ class Quiz extends Model
         'created_at',
         'updated_at',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logOnlyDirty()->logFillable()->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
-    }
 
     public function scopeId($query, $id)
     {

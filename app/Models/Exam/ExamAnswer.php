@@ -5,12 +5,15 @@ namespace App\Models\Exam;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * Sin LogsActivity a propósito: 68k filas en activity_log copiando la respuesta
+ * que esta misma tabla ya guarda de forma inmutable. La integridad del examen se
+ * apoya en exam_answers, no en el audit trail. Ver [CourseProgress].
+ */
 class ExamAnswer extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory;
 
     protected $table = 'exam_answers';
 
@@ -27,14 +30,6 @@ class ExamAnswer extends Model
         'created_at',
         'updated_at',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnlyDirty()
-            ->logFillable()
-            ->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
-    }
 
     public function scopeCourses($query, $id)
     {

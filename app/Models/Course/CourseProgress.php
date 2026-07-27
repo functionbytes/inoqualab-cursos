@@ -6,17 +6,19 @@ use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * Sin LogsActivity a propósito: auditar el avance lección a lección generaba
+ * 599k filas en activity_log (el mayor emisor de la tabla, ~770 MB en total)
+ * duplicando lo que ya guarda esta misma tabla. Ninguna interfaz lo consultaba
+ * — ActivitysController solo filtra por Enterprise/User/Distributor/Order/Invoice.
+ */
 class CourseProgress extends Model
 {
     use HasFactory,
-        HasFinders , LogsActivity;
+        HasFinders;
 
     protected $table = 'course_progress';
-
-    protected static $recordEvents = ['deleted', 'updated', 'created'];
 
     protected $fillable = [
         'user_id',
@@ -28,11 +30,6 @@ class CourseProgress extends Model
         'created_at',
         'updated_at',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logOnlyDirty()->logFillable()->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
-    }
 
     public function scopeId($query, $id)
     {

@@ -80,10 +80,11 @@
                     </tbody>
                 </table>
             </div>
-            @if($activities->count() > 0)
+            @if($activities->total() > 0)
                 <div class="result-body">
-                    <span>{{ $activities->count() }} resultado(s)</span>
+                    <span>{{ $activities->total() }} resultado(s)</span>
                 </div>
+                {{ $activities->links() }}
             @endif
         </div>
 

@@ -17,8 +17,6 @@ class ActivitysController extends Controller
 
         $user = User::slack($slack);
 
-        $query = Activity::causedBy($user);
-
         $models = [
             'Enterprise' => 'Empresas',
             'User' => 'Usuarios',
@@ -27,26 +25,38 @@ class ActivitysController extends Controller
             'Invoice' => 'Facturas',
         ];
 
-        $activitiesFilter = $query->orderBy('created_at', 'desc')->get()
-            ->groupBy(function ($activity) {
-                return class_basename($activity->subject_type);
-            });
+        // Antes se ejecutaba ->get() DOS veces sobre activity_log (más de un
+        // millón de filas) sin límite, y los filtros de abajo se aplicaban al
+        // query DESPUÉS de haberlo ejecutado, así que no tenían ningún efecto.
+        $base = Activity::causedBy($user);
 
-        $activities = $query->orderBy('created_at', 'desc')->get();
-
-        if ($propertySearch) {
-            $query->where('properties->'.$propertySearch, '!=', null);
-        }
-
-        if ($modelSearch) {
-            $model = 'App\\Models\\'.$modelSearch;
-        }
+        // Contadores por modelo en una sola consulta agregada. El cálculo previo
+        // hacía `$activities->has('Enterprise')` sobre una colección plana (no
+        // agrupada), de modo que todos los contadores salían siempre 0.
+        $grouped = (clone $base)
+            ->selectRaw('subject_type, COUNT(*) as total')
+            ->groupBy('subject_type')
+            ->pluck('total', 'subject_type')
+            ->mapWithKeys(fn ($total, $type) => [class_basename((string) $type) => (int) $total]);
 
         $counts = [];
-
         foreach ($models as $key => $friendlyName) {
-            $counts[$key] = $activities->has($key) ? $activities[$key]->count() : 0;
+            $counts[$key] = $grouped[$key] ?? 0;
         }
+
+        $query = (clone $base);
+
+        if ($modelSearch) {
+            $query->where('subject_type', 'App\\Models\\'.$modelSearch);
+        }
+
+        if ($propertySearch) {
+            $query->whereNotNull('properties->'.$propertySearch);
+        }
+
+        $activities = $query->latest()
+            ->paginate(paginationNumber())
+            ->withQueryString();
 
         return view('supports.views.users.activitys.index')->with([
             'user' => $user,
@@ -68,7 +78,11 @@ class ActivitysController extends Controller
             $query->where('subject_type', 'like', '%'.$request->model.'%');
         }
 
-        $activities = $query->orderBy('created_at', 'desc')->get();
+        // Sin límite, este endpoint AJAX serializaba el historial entero del
+        // causer desde una tabla de más de un millón de filas.
+        $activities = $query->latest()
+            ->limit((int) $request->input('limit', 100))
+            ->get();
 
         return response()->json([
             'success' => true,
