@@ -24,8 +24,10 @@
     <!--====== Nice Select ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/nice-select.min.css') }}">
     <link rel="stylesheet" href="{{ url('/pages/css/select2.min.css') }}">
-    <!--====== jQuery UI ======-->
-    <link rel="stylesheet" href="{{ url('/pages/css/jquery-ui.min.css') }}">
+    {{-- jQuery UI retirado: en el template solo lo usaba el slider del filtro
+         de precio (.price-slider-range en script.js), un elemento que ninguna
+         vista de este proyecto pinta y cuyo bloque va protegido por un if.
+         Eran 283 KB en cada visita anónima. --}}
     <!--====== Animate ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/animate.min.css') }}">
     <link rel="stylesheet" href="{{ url('/pages/css/slick.min.css') }}">
@@ -92,8 +94,6 @@
     <script src="{{ url('pages/js/appear.min.js') }}" type="text/javascript"></script>
     <!--====== Slick ======-->
     <script src="{{ url('pages/js/slick.min.js') }}" type="text/javascript"></script>
-    <!--====== jQuery UI ======-->
-    <script src="{{ url('pages/js/jquery-ui.min.js') }}" type="text/javascript"></script>
     <!--====== Isotope ======-->
     <script src="{{ url('pages/js/isotope.pkgd.min.js') }}" type="text/javascript"></script>
         <script src="{{ url('managers/libs/toastr/toastr.min.js') }}" type="text/javascript"></script>
