@@ -52,8 +52,15 @@ class SeoSettingsController extends Controller
 
         updateSettings(['robots_txt' => $content]);
 
-        // Nginx sirve /robots.txt como fichero estático — escribir en public/ para que lo encuentre
-        File::put(public_path('robots.txt'), $content);
+        // La fuente de verdad es el ajuste: /robots.txt lo sirve
+        // RobotsTxtController, que genera la línea Sitemap con el dominio real
+        // del entorno. Escribir además public/robots.txt era contraproducente:
+        // el servidor sirve el estático ANTES de llegar a la ruta, así que la
+        // dinámica quedaba muerta y el sitemap congelado. Si el archivo quedó
+        // de antes, se borra para devolver el control a la ruta.
+        if (File::exists(public_path('robots.txt'))) {
+            File::delete(public_path('robots.txt'));
+        }
 
         return response()->json([
             'success' => true,

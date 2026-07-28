@@ -48,18 +48,14 @@ class SeoRobotsController extends Controller
             'robots_txt' => ['required', 'string'],
         ]);
 
-        // Escribir el archivo primero (operación que puede fallar); solo si
-        // tiene éxito se persiste en settings, para no desincronizar BD y disco.
-        try {
-            File::put(public_path('robots.txt'), $request->robots_txt);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo escribir el archivo robots.txt. Verifica los permisos del directorio public.',
-            ], 500);
-        }
-
+        // La fuente de verdad es el ajuste: /robots.txt lo sirve
+        // RobotsTxtController, que además genera la línea Sitemap con el dominio
+        // real del entorno. Antes se escribía también public/robots.txt, y ese
+        // archivo estático se servía ANTES que la ruta, dejándola inservible y
+        // congelando el dominio del sitemap al del momento de guardar.
         updateSettings(['robots_txt' => $request->robots_txt]);
+
+        $this->descartarArchivoEstatico();
 
         return response()->json([
             'success' => true,
@@ -71,21 +67,30 @@ class SeoRobotsController extends Controller
     {
         $default = "User-agent: *\nAllow: /\nDisallow: /panel/\nDisallow: /manager/\n\nSitemap: ".url('/sitemap.xml');
 
-        try {
-            File::put(public_path('robots.txt'), $default);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo escribir el archivo robots.txt. Verifica los permisos del directorio public.',
-            ], 500);
-        }
-
         updateSettings(['robots_txt' => $default]);
+
+        $this->descartarArchivoEstatico();
 
         return response()->json([
             'success' => true,
             'message' => 'robots.txt restablecido al contenido por defecto.',
             'content' => $default,
         ]);
+    }
+
+    /**
+     * Borra public/robots.txt si quedó de la versión anterior.
+     *
+     * Mientras ese archivo exista, el servidor web lo sirve como estático y
+     * nunca se llega a la ruta dinámica, así que editar desde el panel no
+     * tendría ningún efecto visible.
+     */
+    private function descartarArchivoEstatico(): void
+    {
+        $ruta = public_path('robots.txt');
+
+        if (File::exists($ruta)) {
+            File::delete($ruta);
+        }
     }
 }

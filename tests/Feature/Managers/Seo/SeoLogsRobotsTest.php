@@ -51,25 +51,30 @@ class SeoLogsRobotsTest extends TestCase
         $this->assertSame(1, SeoRedirect::where('target_path', '/pagina-nueva')->count());
     }
 
-    public function test_robots_update_succeeds_when_file_writes(): void
+    public function test_robots_update_persists_the_setting(): void
     {
-        File::shouldReceive('put')->once()->andReturnTrue();
-
+        // El robots.txt ya no se escribe en disco: la fuente de verdad es el
+        // ajuste y lo sirve RobotsTxtController. Ver RobotsTxtSourceOfTruthTest.
         $this->actingAs($this->manager)
             ->postJson(route('manager.seo.robots.update'), ['robots_txt' => "User-agent: *\nDisallow: /panel/"])
             ->assertOk()
             ->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('settings', ['key' => 'robots_txt']);
     }
 
-    public function test_robots_update_reports_file_write_failure(): void
+    public function test_robots_update_no_longer_depends_on_disk(): void
     {
-        // El fix envuelve File::put en try/catch: un fallo de disco devuelve 500
-        // con mensaje claro en vez de un error crudo, sin desincronizar.
-        File::shouldReceive('put')->once()->andThrow(new \RuntimeException('disk full'));
+        // Antes un fallo de escritura devolvía 500. Al quitar el archivo
+        // estático, guardar no puede fallar por disco: solo se comprueba si
+        // quedó un robots.txt de la versión anterior para borrarlo.
+        File::shouldReceive('put')->never();
+        File::shouldReceive('exists')->andReturnFalse();
+        File::shouldReceive('delete')->never();
 
         $this->actingAs($this->manager)
             ->postJson(route('manager.seo.robots.update'), ['robots_txt' => 'User-agent: *'])
-            ->assertStatus(500)
-            ->assertJson(['success' => false]);
+            ->assertOk()
+            ->assertJson(['success' => true]);
     }
 }
