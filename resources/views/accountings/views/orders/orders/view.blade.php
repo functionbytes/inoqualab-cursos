@@ -46,13 +46,14 @@
                                                         <address>
                                                             <br>
                                                             @if( $order->activity !=null)
+                                                                {{-- distributor/enterprise pueden haberse borrado (soft delete) después de la orden --}}
                                                                 <p class="mt-0 mb-0 ">
                                                                     <span>Distribuidor :</span>
-                                                                    <strong>{{Str::upper($order->activity->distributor->title)}}</strong>
+                                                                    <strong>{{Str::upper($order->activity->distributor->title ?? 'N/D')}}</strong>
                                                                 </p>
                                                                 <p class="mt-0 mb-0 ">
                                                                     <span>Empresa :</span>
-                                                                    <strong>{{Str::upper($order->activity->enterprise->title)}}</strong>
+                                                                    <strong>{{Str::upper($order->activity->enterprise->title ?? 'N/D')}}</strong>
                                                                 </p>
                                                                 @if( $order->activity->staff !=null)
                                                                 <p class="mt-0 mb-0 ">

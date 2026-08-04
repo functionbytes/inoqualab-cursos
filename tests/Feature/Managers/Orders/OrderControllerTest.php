@@ -158,4 +158,33 @@ class OrderControllerTest extends TestCase
         $this->assertEquals(1, $order->condition_id);
         $this->assertNull($order->payment_at);
     }
+
+    // ── destroy(): nombre de ruta correcto + cliente soft-eliminado ─────
+
+    public function test_destroy_redirects_to_manager_users_orders(): void
+    {
+        $order = $this->makeOrder(1);
+
+        // Antes usaba route('managers.users.orders', ...) -- "managers" en
+        // plural no existe (la convención real es manager.*, singular) y
+        // esto lanzaba RouteNotFoundException en cualquier borrado exitoso.
+        $this->actingAs($this->manager)
+            ->delete(route('manager.orders.destroy', $order->slack))
+            ->assertRedirect(route('manager.users.orders', $order->user->slack));
+
+        $this->assertSoftDeleted('orders', ['id' => $order->id]);
+    }
+
+    public function test_destroy_redirects_safely_when_customer_was_soft_deleted(): void
+    {
+        $order = $this->makeOrder(1);
+        $order->user->delete(); // soft delete
+
+        // Sin el guard, $order->user->slack sobre null revienta con 500.
+        $this->actingAs($this->manager)
+            ->delete(route('manager.orders.destroy', $order->slack))
+            ->assertRedirect(route('manager.users'));
+
+        $this->assertSoftDeleted('orders', ['id' => $order->id]);
+    }
 }

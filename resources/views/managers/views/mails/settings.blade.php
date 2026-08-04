@@ -63,7 +63,8 @@
                             <tbody id="rules-tbody">
                                 @forelse($rules as $rule)
                                     <tr id="rule-row-{{ $rule->id }}">
-                                        <td class="fw-semibold">{{ $rule->enterprise->title }}</td>
+                                        {{-- La empresa puede haberse borrado (soft delete) después de crear la regla --}}
+                                        <td class="fw-semibold">{{ $rule->enterprise->title ?? 'Empresa eliminada' }}</td>
                                         <td class="text-center">
                                             <span class="badge bg-primary rounded-3 py-1 px-2">≥ {{ $rule->min_confidence }}%</span>
                                         </td>

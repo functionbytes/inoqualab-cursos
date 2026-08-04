@@ -45,17 +45,18 @@
                                                         <address>
                                                             <br>
                                                             @if( $order->activity !=null)
+                                                                {{-- distributor/enterprise/staff pueden haberse borrado (soft delete) después de la orden --}}
                                                                 <p class="mt-0 mb-0 ">
                                                                     <span>Distribuidor :</span>
-                                                                    <strong>{{Str::upper($order->activity->distributor->title)}}</strong>
+                                                                    <strong>{{Str::upper($order->activity->distributor->title ?? 'N/D')}}</strong>
                                                                 </p>
                                                                 <p class="mt-0 mb-0 ">
                                                                     <span>Empresa :</span>
-                                                                    <strong>{{Str::upper($order->activity->enterprise->title)}}</strong>
+                                                                    <strong>{{Str::upper($order->activity->enterprise->title ?? 'N/D')}}</strong>
                                                                 </p>
                                                                 <p class="mt-0 mb-0 ">
                                                                     <span>Encargado :</span>
-                                                                    <strong>{{Str::upper($order->activity->staff->firstname)}} {{Str::upper($order->activity->staff->lastname)}}</strong>
+                                                                    <strong>{{Str::upper($order->activity->staff->firstname ?? 'N/D')}} {{Str::upper($order->activity->staff->lastname ?? '')}}</strong>
                                                                 </p>
                                                             @endif
                                                             <p class="mt-0 mb-0">

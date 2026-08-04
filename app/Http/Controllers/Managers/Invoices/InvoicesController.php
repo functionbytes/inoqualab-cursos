@@ -173,7 +173,9 @@ class InvoicesController extends Controller
             'message' => 'Success',
             'data' => [
                 'slack' => $invoice->slack,
-                'distributor' => $invoice->distributor->slack,
+                // El distribuidor puede haberse borrado (soft delete) después
+                // de emitir la factura.
+                'distributor' => $invoice->distributor?->slack,
             ],
         ]);
 

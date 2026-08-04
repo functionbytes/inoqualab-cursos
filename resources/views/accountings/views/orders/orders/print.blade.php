@@ -110,8 +110,9 @@
             <td class="col-half">
                 <h4 class="fw-semibold">Distribuidor</h4>
                 @if($order->activity != null)
-                    <p><strong>Distribuidor :</strong> {{ Str::upper($order->activity->distributor->title) }}</p>
-                    <p><strong>Empresa :</strong> {{ Str::upper($order->activity->enterprise->title) }}</p>
+                    {{-- distributor/enterprise pueden haberse borrado (soft delete) después de la orden --}}
+                    <p><strong>Distribuidor :</strong> {{ Str::upper($order->activity->distributor->title ?? 'N/D') }}</p>
+                    <p><strong>Empresa :</strong> {{ Str::upper($order->activity->enterprise->title ?? 'N/D') }}</p>
                     @if($order->activity->staff != null)
                         <p><strong>Encargado :</strong> {{ Str::upper($order->activity->staff->firstname) }} {{ Str::upper($order->activity->staff->lastname) }}</p>
                     @endif

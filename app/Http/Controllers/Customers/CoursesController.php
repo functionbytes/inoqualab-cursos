@@ -367,7 +367,10 @@ class CoursesController extends Controller
         $exam = $this->ensureExamCreated($inscription, $inscription->course);
 
         if ($exam && $exam->score < $this->passingScoreFor($exam)) {
-            return redirect()->route('customers.courses.exam', $inscription->course->slack);
+            // El curso puede haberse borrado (soft delete) tras la inscripción.
+            return $inscription->course
+                ? redirect()->route('customers.courses.exam', $inscription->course->slack)
+                : redirect()->route('customers.courses');
         }
 
         return redirect()->route('customers.courses.content', $inscription->slack);

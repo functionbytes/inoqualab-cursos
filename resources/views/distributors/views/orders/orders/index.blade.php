@@ -65,13 +65,14 @@
                                 <span class="usr-email-addr" >{{$order->reference }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" >{{ Str::upper($order->user->identification) }}</span>
+                                {{-- El cliente puede haberse borrado (soft delete) después de la orden --}}
+                                <span class="usr-email-addr" >{{ Str::upper($order->user->identification ?? '—') }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" >{{ Str::upper($order->user->firstname . ' ' . $order->user->lastname) }}</span>
+                                <span class="usr-email-addr" >{{ Str::upper(trim(($order->user->firstname ?? 'Usuario eliminado') . ' ' . ($order->user->lastname ?? ''))) }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" >{{ Str::upper($order->activity->enterprise->title) }}</span>
+                                <span class="usr-email-addr" >{{ Str::upper($order->activity?->enterprise?->title ?? 'N/D') }}</span>
                             </td>
                             <td>
                                 <span class="usr-ph-no" >{{ date('Y-m-d', strtotime($order->updated_at)) }}</span>

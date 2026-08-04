@@ -8,6 +8,7 @@ use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -76,6 +77,10 @@ class OrdersController extends Controller
 
         $order = Order::slack($slack);
 
+        // El cliente puede haberse borrado (soft delete) después de la orden;
+        // la vista lee $order->user->firstname sin null-check.
+        abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
+
         return view('accountings.views.orders.orders.view')->with([
             'order' => $order,
         ]);
@@ -85,6 +90,9 @@ class OrdersController extends Controller
     public function print($slack)
     {
         $order = Order::slack($slack);
+
+        // Mismo guard que view(): el PDF también lee $order->user sin null-check.
+        abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
 
         // Load the view and pass the data to it
         $pdf = Pdf::loadView('accountings.views.orders.orders.print', compact('order'))

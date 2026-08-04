@@ -135,10 +135,16 @@ class OrdersController extends Controller
 
         $this->authorize('delete', $order);
 
-        $user = $order->user->slack;
+        // El cliente puede haberse borrado (soft delete) antes que la orden;
+        // sin el guard, ->slack sobre null revienta. El nombre de ruta también
+        // estaba mal (managers.* plural no existe; la convención es manager.*).
+        $userSlack = $order->user?->slack;
+
         $order->delete();
 
-        return redirect()->route('managers.users.orders', $user);
+        return $userSlack
+            ? redirect()->route('manager.users.orders', $userSlack)
+            : redirect()->route('manager.users');
 
     }
 }

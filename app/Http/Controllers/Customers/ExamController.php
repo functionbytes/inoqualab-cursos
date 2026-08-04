@@ -285,6 +285,9 @@ class ExamController extends Controller
         $exam->update(['wrong' => 0, 'correct' => 0, 'score' => 0]);
         $exam->answers()->delete();
 
-        return redirect()->route('customers.courses.exam', $exam->course->slack);
+        // El curso puede haberse borrado (soft delete) después de crear el examen.
+        return $exam->course
+            ? redirect()->route('customers.courses.exam', $exam->course->slack)
+            : redirect()->route('customers.courses');
     }
 }

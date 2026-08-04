@@ -68,11 +68,13 @@ class InvoicesController extends Controller
         $details = [];
 
         foreach ($groupedDetails as $enterpriseId => $courses) {
-            $enterprise = $courses->first()->first()->enterprise->title;
+            // La empresa/el curso del detalle pueden haberse borrado (soft
+            // delete) después de emitirse la factura.
+            $enterprise = $courses->first()->first()->enterprise->title ?? 'N/D';
             $totalEnterprise = 0;
 
             foreach ($courses as $courseId => $detail) {
-                $course = $detail->first()->course->title;
+                $course = $detail->first()->course->title ?? 'N/D';
                 $quantity = $detail->sum('quantity');
                 $amount = $detail->sum('amount');
 
