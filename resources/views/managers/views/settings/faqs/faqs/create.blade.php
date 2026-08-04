@@ -79,8 +79,6 @@
 
 @push('scripts')
 
-    @push('scripts')
-
         <script type="text/javascript">
 
 

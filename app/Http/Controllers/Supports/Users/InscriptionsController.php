@@ -31,6 +31,11 @@ class InscriptionsController extends Controller
     {
         $inscription = Inscription::slack($slack);
         $user = $inscription->user;
+
+        // El cliente puede haberse borrado (soft delete) después de crear la
+        // inscripción; sin este guard, ->enterprise sobre null tira un 500.
+        abort_unless($user instanceof User, 404, 'El cliente de esta inscripción ya no existe.');
+
         $enterprise = $user->enterprise;
         $course = $inscription->course;
 

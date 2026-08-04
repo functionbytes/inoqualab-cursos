@@ -15,13 +15,15 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
- * Barrido de los cuatro portales que no cubren los otros smoke tests:
- * customers, distributor, enterprise y accounting. Ninguna ruta debe dar 5xx.
+ * Barrido de los cinco portales que no cubren los otros smoke tests:
+ * customers, distributor, enterprise, accounting y support. Ninguna ruta
+ * debe dar 5xx.
  *
  * A diferencia del panel de manager, estos portales exigen que el usuario tenga
  * una entidad asociada (distribuidor, empresa) y la resuelven vía
  * `app('distributor')` / `app('enterprise')`, así que la siembra tiene que
- * montar esas relaciones o el barrido solo vería 403.
+ * montar esas relaciones o el barrido solo vería 403. `support` es la
+ * excepción: IsSupport solo exige `role === 'support'`, sin entidad propia.
  */
 class PortalRoutesSmokeTest extends TestCase
 {
@@ -59,8 +61,9 @@ class PortalRoutesSmokeTest extends TestCase
             'distributor' => User::factory()->create(['role' => 'distributor']),
             'enterprise' => User::factory()->create(['role' => 'enterprise']),
             'accounting' => User::factory()->create(['role' => 'accounting']),
+            'support' => User::factory()->create(['role' => 'support']),
         ];
-        foreach (['distributor' => 'distributor', 'enterprise' => 'enterprise', 'accounting' => 'accounting'] as $k => $role) {
+        foreach (['distributor' => 'distributor', 'enterprise' => 'enterprise', 'accounting' => 'accounting', 'support' => 'support'] as $k => $role) {
             try {
                 $this->users[$k]->assignRole($role);
             } catch (\Throwable) {
