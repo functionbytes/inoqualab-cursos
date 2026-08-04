@@ -2,12 +2,22 @@
 
 namespace Tests\Feature\Smoke;
 
+use App\Models\Contact;
 use App\Models\Course\Course;
 use App\Models\Course\CourseChapter;
 use App\Models\Distributor\Distributor;
+use App\Models\Document;
 use App\Models\Enterprise\Enterprise;
+use App\Models\Faq\Faq;
+use App\Models\Faq\FaqCategorie;
 use App\Models\Inscription;
+use App\Models\Instruction\Instruction;
+use App\Models\Instruction\InstructionCategorie;
+use App\Models\Invoice\Invoice;
+use App\Models\Mail\IncomingMail;
+use App\Models\Order\Order;
 use App\Models\User;
+use Database\Seeders\CatalogsSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -92,6 +102,50 @@ class PortalRoutesSmokeTest extends TestCase
             'created_at' => now(), 'updated_at' => now(),
         ]);
 
+        // Catálogos base que orders/invoices exigen por FK (order_type,
+        // order_method, order_condition, invoice_method, invoice_condition).
+        $this->seed(CatalogsSeeder::class);
+
+        $order = Order::create([
+            'slack' => Str::random(10),
+            'number' => 'ORD-'.Str::random(6),
+            'reference' => Str::random(8),
+            'user_id' => $customer->id,
+            'type_id' => DB::table('order_type')->value('id'),
+            'method_id' => DB::table('order_method')->value('id'),
+            'condition_id' => DB::table('order_condition')->value('id'),
+        ]);
+
+        $invoice = Invoice::create([
+            'slack' => Str::random(10),
+            'number' => 'INV-'.Str::random(6),
+            'distributor_id' => $distributor->id,
+            'method_id' => DB::table('invoice_method')->value('id'),
+            'condition_id' => DB::table('invoice_condition')->value('id'),
+        ]);
+
+        $document = Document::create(['slack' => Str::random(10), 'title' => 'Documento', 'available' => 1]);
+        $contact = Contact::create([
+            'slack' => Str::random(10),
+            'firstname' => 'Ana', 'lastname' => 'Prueba',
+            'email' => 'contacto@example.com', 'cellphone' => '3000000000',
+            'message' => 'Mensaje de prueba del barrido de rutas.',
+        ]);
+
+        $instructionCategory = InstructionCategorie::create(['slack' => Str::random(10), 'title' => 'Cat', 'slug' => Str::random(8)]);
+        $instruction = Instruction::create([
+            'slack' => Str::random(10), 'title' => 'Instructivo', 'slug' => Str::random(8),
+            'category_id' => $instructionCategory->id,
+        ]);
+
+        $faqCategory = FaqCategorie::create(['slack' => Str::random(10), 'title' => 'Cat', 'slug' => Str::random(8)]);
+        $faq = Faq::create([
+            'slack' => Str::random(10), 'title' => 'Pregunta', 'slug' => Str::random(8),
+            'category_id' => $faqCategory->id,
+        ]);
+
+        $incomingMail = IncomingMail::factory()->create();
+
         $this->bag = [
             'courses' => $course->slack, 'course' => $course->slack,
             'enterprises' => $enterprise->slack, 'enterprise' => $enterprise->slack,
@@ -101,6 +155,17 @@ class PortalRoutesSmokeTest extends TestCase
             'inscription' => $inscription->slack, 'inscriptions' => $inscription->slack,
             'content' => $inscription->slack,
             'lesson' => $lesson, 'lesion' => $lesson,
+            'orders' => $order->slack, 'order' => $order->slack,
+            'invoices' => $invoice->slack, 'invoice' => $invoice->slack,
+            'documents' => $document->slack,
+            'contacts' => $contact->slack,
+            'instructions' => $instruction->slack,
+            'faqs' => $faq->slack,
+            // Colisiona con instruction categories si alguna ruta usa el mismo
+            // segmento 'categories'; en el peor caso resuelve la entidad
+            // equivocada y devuelve 404 (no 500), así que sigue siendo seguro.
+            'categories' => $instructionCategory->slack,
+            'mails' => $incomingMail->slack,
         ];
     }
 

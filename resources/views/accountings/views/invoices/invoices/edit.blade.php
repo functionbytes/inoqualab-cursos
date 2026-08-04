@@ -178,7 +178,10 @@
                                     positionClass: "toast-bottom-right"
                                 });
                                 setTimeout(function() {
-                                    window.location.href = "{{ route('accounting.distributors.invoices', '') }}/" + distributor;
+                                    // accounting.distributors.invoices exige {slack}; el distributor solo
+                                    // se conoce tras la respuesta AJAX, así que se arma con la URL base
+                                    // (route('...', '') lanzaba "Missing required parameter").
+                                    window.location.href = "{{ url('accounting/distributors/invoices') }}/" + distributor;
                                 }, 2000);
                             }else{
 

@@ -164,7 +164,11 @@ class DocumentsController extends Controller
 
     public function deleteFiles($id)
     {
-        Media::find($id)->delete();
+        $media = Media::find($id);
+
+        abort_unless($media instanceof Media, 404, 'El archivo ya no existe.');
+
+        $media->delete();
 
         return response()->json(['status' => 'success']);
     }

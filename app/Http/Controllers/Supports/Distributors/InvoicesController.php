@@ -73,6 +73,10 @@ class InvoicesController extends Controller
 
         $invoice = Invoice::slack($slack);
 
+        // El distribuidor puede haberse borrado (soft delete) después de emitir
+        // la factura; la vista lee $invoice->distributor->title sin null-check.
+        abort_unless($invoice->distributor instanceof Distributor, 404, 'El distribuidor de esta factura ya no existe.');
+
         $detailsInvoice = $invoice->details()->with('course', 'enterprise')->get();
 
         $groupedDetails = $detailsInvoice->groupBy(function ($item) {
@@ -117,6 +121,11 @@ class InvoicesController extends Controller
     {
 
         $invoice = Invoice::slack($slack);
+
+        // Mismo guard que detail(): el distribuidor puede haberse borrado
+        // (soft delete) después de emitir la factura.
+        abort_unless($invoice->distributor instanceof Distributor, 404, 'El distribuidor de esta factura ya no existe.');
+
         $orders = $invoice->orders;
 
         return view('supports.views.distributors.invoices.invoices.view')->with([

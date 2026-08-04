@@ -43,9 +43,13 @@ class OrdersController extends Controller
         // una orden pagada eliminaría la matrícula del alumno Y su certificado
         // emitido, sin forma de deshacerlo. Primero hay que cambiarla de estado.
         if ($order->condition_id === Condition::Pagada->value) {
-            return redirect()
-                ->route('support.users.orders.index', $userSlack ?? '')
-                ->with('error', 'No se puede eliminar una orden pagada: arrastraría en cascada las matrículas y certificados del alumno. Cambia primero su condición.');
+            // support.users.orders.index exige {slack}; pasar '' cuando el
+            // cliente ya no existe (soft delete) lanzaba UrlGenerationException.
+            $destino = $userSlack
+                ? redirect()->route('support.users.orders.index', $userSlack)
+                : redirect()->route('support.users');
+
+            return $destino->with('error', 'No se puede eliminar una orden pagada: arrastraría en cascada las matrículas y certificados del alumno. Cambia primero su condición.');
         }
 
         $order->delete();
@@ -62,6 +66,10 @@ class OrdersController extends Controller
     {
 
         $order = Order::slack($slack);
+
+        // El cliente puede haberse borrado (soft delete) después de la orden;
+        // la vista lee $order->user->firstname sin null-check.
+        abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
 
         return view('supports.views.distributors.orders.orders.view')->with([
             'order' => $order,

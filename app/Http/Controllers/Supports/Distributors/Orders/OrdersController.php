@@ -8,6 +8,7 @@ use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -73,6 +74,10 @@ class OrdersController extends Controller
     {
 
         $order = Order::slack($slack);
+
+        // El cliente puede haberse borrado (soft delete) después de la orden;
+        // la vista lee $order->user->firstname sin null-check.
+        abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
 
         return view('supports.views.distributors.orders.orders.view')->with([
             'order' => $order,
