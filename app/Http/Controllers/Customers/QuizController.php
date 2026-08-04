@@ -11,6 +11,7 @@ use App\Models\Quiz\QuizAnswer;
 use App\Models\Quiz\QuizQuestion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuizController extends Controller
 {
@@ -328,20 +329,28 @@ class QuizController extends Controller
         $chapter = $lesson->chapter;
         $exam = $inscription->exam;
 
-        $progress = $inscription->progress()
-            ->where('lesson_id', $lesson->id)
-            ->first();
+        // createOrFirst (no firstOrCreate) para que sea seguro ante concurrencia
+        // real: si dos requests llegan a la vez para la misma (inscription_id,
+        // lesson_id), la perdedora del INSERT recibe la violación del índice
+        // único y createOrFirst la resuelve releyendo la fila ganadora, en vez
+        // de reventar con un 500 (firstOrCreate no captura esa excepción).
+        DB::transaction(function () use ($inscription, $lesson, $user, $course, $chapter, $lessons) {
+            $progress = CourseProgress::query()->createOrFirst(
+                [
+                    'inscription_id' => $inscription->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
+                    'user_id' => $user->id,
+                    'course_id' => $course->id,
+                    'chapter_id' => $chapter->id,
+                    'culminated' => 1,
+                ]
+            );
 
-        if (! $progress) {
-
-            $progress = $inscription->progress()->create([
-                'lesson_id' => $lesson->id,
-                'user_id' => $user->id,
-                'course_id' => $course->id,
-                'chapter_id' => $chapter->id,
-                'inscription_id' => $inscription->id,
-                'culminated' => 1,
-            ]);
+            if (! $progress->wasRecentlyCreated) {
+                return;
+            }
 
             $lessonsCount = count($lessons);
             $inscription->update([
@@ -349,8 +358,7 @@ class QuizController extends Controller
                     ? round((count($inscription->progress) * (100 / $lessonsCount)), 2)
                     : 0,
             ]);
-
-        }
+        });
 
         $nextLesson = CourseProgress::prevNext($lesson->id, 'next');
 

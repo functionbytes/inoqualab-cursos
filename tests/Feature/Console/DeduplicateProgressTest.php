@@ -6,24 +6,43 @@ use App\Models\Course\Course;
 use App\Models\Course\CourseChapter;
 use App\Models\Inscription;
 use App\Models\User;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
- * course_progress no tiene índice único sobre (inscription_id, lesson_id), así
- * que una misma lección puede registrarse varias veces para la misma matrícula.
- * En producción eso ha dejado 413k filas sobrantes de 598k — el 69% de la tabla —
- * y porcentajes de avance imposibles, como una inscripción al 531,25 %.
+ * course_progress ahora tiene índice único sobre (inscription_id, lesson_id)
+ * — ver migración 2026_08_04_120000_make_course_progress_inscription_lesson_unique
+ * — que es justo lo que impedía que se volvieran a acumular los duplicados que
+ * este comando limpia (llegó a haber 413k filas sobrantes de 598k, el 69% de la
+ * tabla, y una inscripción marcada al 531,25 %).
+ *
+ * Como el índice ya bloquea los duplicados a nivel de base de datos, para poder
+ * seguir probando la lógica de limpieza hay que quitarlo temporalmente y simular
+ * el estado "legado" en el que corrió el comando la primera vez. El ALTER TABLE
+ * hace commit implícito en MySQL, así que esta clase no confía en el rollback
+ * transaccional de RefreshDatabase para su propia data: limpia explícitamente
+ * en tearDown() y repone el índice para no afectar a otros tests.
  */
 class DeduplicateProgressTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const INDICE = 'course_progress_inscription_id_lesson_id_unique';
+
     private Inscription $inscripcion;
 
     private array $lecciones = [];
+
+    private int $capituloId;
+
+    private int $cursoId;
+
+    private int $usuarioId;
 
     protected function setUp(): void
     {
@@ -32,6 +51,10 @@ class DeduplicateProgressTest extends TestCase
         $curso = Course::factory()->create();
         $capitulo = CourseChapter::factory()->create(['course_id' => $curso->id]);
         $usuario = User::factory()->create(['role' => 'customer']);
+
+        $this->cursoId = $curso->id;
+        $this->capituloId = $capitulo->id;
+        $this->usuarioId = $usuario->id;
 
         DB::table('course_types')->insertOrIgnore([['id' => 7, 'title' => 'TEXTO', 'slug' => 'texto']]);
 
@@ -47,6 +70,38 @@ class DeduplicateProgressTest extends TestCase
             'user_id' => $usuario->id,
             'course_id' => $curso->id,
         ]);
+
+        // Simula el estado legado (sin índice) para poder sembrar duplicados.
+        // Hace commit implícito: por eso la limpieza en tearDown() es manual.
+        Schema::table('course_progress', function (Blueprint $table) {
+            $table->dropUnique(self::INDICE);
+        });
+    }
+
+    protected function tearDown(): void
+    {
+        DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->delete();
+        DB::table('inscriptions')->where('id', $this->inscripcion->id)->delete();
+        DB::table('course_lessons')->whereIn('id', $this->lecciones)->delete();
+        DB::table('course_chapters')->where('id', $this->capituloId)->delete();
+        DB::table('courses')->where('id', $this->cursoId)->delete();
+        DB::table('users')->where('id', $this->usuarioId)->delete();
+
+        if (! $this->tieneIndiceUnico()) {
+            Schema::table('course_progress', function (Blueprint $table) {
+                $table->unique(['inscription_id', 'lesson_id'], self::INDICE);
+            });
+        }
+
+        parent::tearDown();
+    }
+
+    private function tieneIndiceUnico(): bool
+    {
+        return count(DB::select(
+            'SHOW INDEX FROM `course_progress` WHERE Key_name = ?',
+            [self::INDICE]
+        )) > 0;
     }
 
     private function registrarProgreso(int $leccion, int $veces = 1): void
@@ -72,7 +127,7 @@ class DeduplicateProgressTest extends TestCase
             ->expectsOutputToContain('filas a eliminar')
             ->assertSuccessful();
 
-        $this->assertSame(5, DB::table('course_progress')->count(), 'La simulación borró filas.');
+        $this->assertSame(5, DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->count(), 'La simulación borró filas.');
     }
 
     public function test_apply_keeps_one_row_per_lesson(): void
@@ -83,7 +138,7 @@ class DeduplicateProgressTest extends TestCase
 
         $this->artisan('courses:deduplicate-progress --apply')->assertSuccessful();
 
-        $this->assertSame(3, DB::table('course_progress')->count());
+        $this->assertSame(3, DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->count());
 
         foreach (array_slice($this->lecciones, 0, 3) as $leccion) {
             $this->assertSame(
@@ -98,11 +153,11 @@ class DeduplicateProgressTest extends TestCase
     {
         // El primer registro es el que dice cuándo completó la lección de verdad.
         $this->registrarProgreso($this->lecciones[0], 3);
-        $primero = DB::table('course_progress')->min('id');
+        $primero = DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->min('id');
 
         $this->artisan('courses:deduplicate-progress --apply')->assertSuccessful();
 
-        $this->assertSame($primero, DB::table('course_progress')->min('id'));
+        $this->assertSame($primero, DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->min('id'));
     }
 
     public function test_it_recalculates_percentages_over_one_hundred(): void
@@ -132,6 +187,24 @@ class DeduplicateProgressTest extends TestCase
             ->expectsOutputToContain('Nada que limpiar')
             ->assertSuccessful();
 
-        $this->assertSame(4, DB::table('course_progress')->count());
+        $this->assertSame(4, DB::table('course_progress')->where('inscription_id', $this->inscripcion->id)->count());
+    }
+
+    /**
+     * Regresión del propio fix: una vez repuesto el índice único (en tearDown de
+     * los demás tests), un segundo insert para la misma (inscription_id,
+     * lesson_id) debe rechazarse a nivel de base de datos, no solo del ORM.
+     */
+    public function test_unique_index_blocks_new_duplicates_once_restored(): void
+    {
+        Schema::table('course_progress', function (Blueprint $table) {
+            $table->unique(['inscription_id', 'lesson_id'], self::INDICE);
+        });
+
+        $this->registrarProgreso($this->lecciones[0], 1);
+
+        $this->expectException(UniqueConstraintViolationException::class);
+
+        $this->registrarProgreso($this->lecciones[0], 1);
     }
 }

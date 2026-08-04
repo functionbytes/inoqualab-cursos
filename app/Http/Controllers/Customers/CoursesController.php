@@ -325,36 +325,40 @@ class CoursesController extends Controller
         return back()->with('success', '¡Gracias por calificar este curso!');
     }
 
-    private function createOrUpdateProgress($user, $course, $lesson, $inscription)
+    private function createOrUpdateProgress($user, $course, $lesson, $inscription): void
     {
-
-        $progress = $inscription->progress()->where('lesson_id', $lesson->id)->first();
-
-        if (! $progress) {
-
-            // B6: avance + recálculo de porcentaje en una sola transacción
-            DB::transaction(function () use ($user, $course, $lesson, $inscription) {
-                CourseProgress::create([
+        // B6: avance + recálculo de porcentaje en una sola transacción.
+        // createOrFirst (no firstOrCreate) para que sea seguro ante concurrencia
+        // real: si dos requests llegan a la vez para la misma (inscription_id,
+        // lesson_id), la perdedora del INSERT recibe la violación del índice
+        // único y createOrFirst la resuelve releyendo la fila ganadora, en vez
+        // de reventar con un 500 (firstOrCreate no captura esa excepción).
+        DB::transaction(function () use ($user, $course, $lesson, $inscription) {
+            $progress = CourseProgress::query()->createOrFirst(
+                [
+                    'inscription_id' => $inscription->id,
+                    'lesson_id' => $lesson->id,
+                ],
+                [
                     'user_id' => $user->id,
                     'course_id' => $course->id,
                     'chapter_id' => $lesson->chapter_id,
-                    'inscription_id' => $inscription->id,
-                    'lesson_id' => $lesson->id,
                     'culminated' => 1,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                ]
+            );
 
-                $totalLessons = $course->lessons()->count();
-                $completedLessons = $inscription->progress()->count();
-                $percent = $totalLessons > 0
-                    ? min(100, round(($completedLessons / $totalLessons) * 100, 2))
-                    : 100;
+            if (! $progress->wasRecentlyCreated) {
+                return;
+            }
 
-                $inscription->update(['percent' => $percent]);
-            });
-        }
+            $totalLessons = $course->lessons()->count();
+            $completedLessons = $inscription->progress()->count();
+            $percent = $totalLessons > 0
+                ? min(100, round(($completedLessons / $totalLessons) * 100, 2))
+                : 100;
 
+            $inscription->update(['percent' => $percent]);
+        });
     }
 
     private function handleCourseCompletion($inscription)
