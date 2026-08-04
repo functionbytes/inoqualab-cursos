@@ -114,8 +114,11 @@ class MailerComponentController extends Controller
 
     public function previewAjax(Request $request, string $uid): JsonResponse
     {
+        // findOrFail() fuera del try/catch, igual que duplicate() más abajo:
+        // si el uid no existe debe ser un 404 normal, no un 500.
+        $component = MailerLayout::where('uid', $uid)->firstOrFail();
+
         try {
-            $component = MailerLayout::where('uid', $uid)->firstOrFail();
             $content = $request->input('content', $component->content ?? '');
             $html = MailerTemplateRendererService::replaceVariables($content, []);
 

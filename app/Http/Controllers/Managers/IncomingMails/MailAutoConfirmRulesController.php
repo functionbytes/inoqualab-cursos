@@ -61,9 +61,10 @@ class MailAutoConfirmRulesController extends Controller
         ]);
     }
 
-    public function toggle(int $id): JsonResponse
+    // Route model binding en vez de (int $id): un {id} no numérico (URL
+    // manipulada a mano, bug de JS) tiraba TypeError/500 en vez de un 404 limpio.
+    public function toggle(MailAutoConfirmRule $rule): JsonResponse
     {
-        $rule = MailAutoConfirmRule::findOrFail($id);
         $rule->is_active = ! $rule->is_active;
         $rule->save();
 
@@ -74,10 +75,10 @@ class MailAutoConfirmRulesController extends Controller
         ]);
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy(MailAutoConfirmRule $rule): JsonResponse
     {
         abort_unless(auth()->user()->can('incoming-mails.delete'), 403);
-        MailAutoConfirmRule::findOrFail($id)->delete();
+        $rule->delete();
 
         return response()->json(['success' => true, 'message' => 'Regla eliminada.']);
     }

@@ -555,8 +555,8 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
 
         Route::get('/mails', [MailAutoConfirmRulesController::class, 'index'])->name('manager.settings.mails');
         Route::post('/mails/rules', [MailAutoConfirmRulesController::class, 'store'])->name('manager.settings.mails.rules.store');
-        Route::patch('/mails/rules/{id}/toggle', [MailAutoConfirmRulesController::class, 'toggle'])->name('manager.settings.mails.rules.toggle');
-        Route::delete('/mails/rules/{id}', [MailAutoConfirmRulesController::class, 'destroy'])->name('manager.settings.mails.rules.destroy');
+        Route::patch('/mails/rules/{rule}/toggle', [MailAutoConfirmRulesController::class, 'toggle'])->name('manager.settings.mails.rules.toggle');
+        Route::delete('/mails/rules/{rule}', [MailAutoConfirmRulesController::class, 'destroy'])->name('manager.settings.mails.rules.destroy');
 
     });
 

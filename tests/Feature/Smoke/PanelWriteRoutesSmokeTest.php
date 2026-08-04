@@ -2,12 +2,10 @@
 
 namespace Tests\Feature\Smoke;
 
-use App\Models\Course\Course;
-use App\Models\Distributor\Distributor;
-use App\Models\Enterprise\Enterprise;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Smoke\Concerns\SeedsPanelEntities;
 use Tests\TestCase;
 
 /**
@@ -16,6 +14,12 @@ use Tests\TestCase;
  * Una ruta bien construida responde 422 (validación), 302 (redirect con
  * errores) o 403/404. Un 500 significa que el controller lee $request->algo
  * sin validarlo antes y se lo pasa directo a la base de datos.
+ *
+ * Comparte la siembra con PanelRoutesSmokeTest vía SeedsPanelEntities: antes
+ * tenía su propio bag con solo 4 entidades y saltaba ~106 rutas de escritura
+ * por no poder resolver sus parámetros (destroy/update de orders, invoices,
+ * documents, faqs, instructions...) — el mismo tipo de hueco que en
+ * PortalRoutesSmokeTest ya dio bugs reales al cerrarlo.
  *
  * Encontró de una tacada: nueve `store()` sin Form Request que insertaban NULL
  * en columnas NOT NULL, un Form Request type-hinted sin importar (la
@@ -36,33 +40,21 @@ use Tests\TestCase;
  */
 class PanelWriteRoutesSmokeTest extends TestCase
 {
-    use RefreshDatabase;
+    use RefreshDatabase, SeedsPanelEntities;
 
     public function test_no_write_route_returns_a_server_error(): void
     {
         $this->seed(RolesAndPermissionsSeeder::class);
+        $this->seedEntities();
 
         $manager = User::factory()->manager()->create();
         $support = User::factory()->create(['role' => 'support']);
         $support->syncRoles(['support']);
 
-        // Entidades por si alguna ruta resuelve un parámetro de URL
-        $course = Course::factory()->create();
-        $enterprise = Enterprise::factory()->create();
-        $distributor = Distributor::factory()->create();
-        $customer = User::factory()->create(['role' => 'customer']);
-
-        $bag = [
-            'courses' => $course->slack, 'course' => $course->slack,
-            'enterprises' => $enterprise->slack, 'enterprise' => $enterprise->slack,
-            'distributors' => $distributor->slack, 'distributor' => $distributor->slack,
-            'users' => $customer->slack, 'user' => $customer->slack,
-            'staffs' => $customer->slack,
-        ];
-
         $bad = [];
         $ok = 0;
         $skipped = 0;
+        $skippedList = [];
 
         foreach (app('router')->getRoutes() as $route) {
             $methods = array_diff($route->methods(), ['GET', 'HEAD', 'OPTIONS']);
@@ -83,19 +75,7 @@ class PanelWriteRoutesSmokeTest extends TestCase
             $url = $uri;
             $unresolved = false;
             foreach ($m[1] as $param) {
-                $segments = explode('/', $uri);
-                $value = null;
-                foreach ($segments as $i => $s) {
-                    if (str_contains($s, '{'.$param)) {
-                        for ($j = $i - 1; $j >= 0; $j--) {
-                            if (isset($bag[$segments[$j]])) {
-                                $value = $bag[$segments[$j]];
-                                break 2;
-                            }
-                        }
-                    }
-                }
-                $value ??= $bag[$param] ?? null;
+                $value = $this->resolve($uri, $param);
                 if ($value === null) {
                     $unresolved = true;
                     break;
@@ -104,6 +84,7 @@ class PanelWriteRoutesSmokeTest extends TestCase
             }
             if ($unresolved) {
                 $skipped++;
+                $skippedList[] = sprintf('%-46s /%s', $name, $uri);
 
                 continue;
             }
@@ -132,11 +113,12 @@ class PanelWriteRoutesSmokeTest extends TestCase
             [],
             $bad,
             sprintf(
-                "%d ruta(s) de escritura responden 5xx al recibir un payload vacío:\n\n%s\n\n(%d rutas OK, %d saltadas por no poder resolver sus parámetros)",
+                "%d ruta(s) de escritura responden 5xx al recibir un payload vacío:\n\n%s\n\n(%d rutas OK, %d saltadas por no poder resolver sus parámetros:\n%s)",
                 count($bad),
                 implode("\n", $bad),
                 $ok,
-                $skipped
+                $skipped,
+                implode("\n", $skippedList)
             )
         );
 

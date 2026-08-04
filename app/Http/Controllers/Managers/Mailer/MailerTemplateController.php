@@ -148,9 +148,13 @@ class MailerTemplateController extends Controller
 
     public function previewAjax(Request $request, string $uid): JsonResponse
     {
-        try {
-            $template = MailerTemplate::where('uid', $uid)->with('layout')->firstOrFail();
+        // findOrFail() fuera del try/catch: si el uid no existe (plantilla
+        // borrada, URL inválida), debe ser un 404 normal de Laravel, no un
+        // 500 -- el catch de abajo es demasiado amplio y también atrapaba
+        // ModelNotFoundException.
+        $template = MailerTemplate::where('uid', $uid)->with('layout')->firstOrFail();
 
+        try {
             $overrideLayoutId = $request->input('layout_id');
             $customContent = $request->input('content');
             $customSubject = $request->input('subject');
