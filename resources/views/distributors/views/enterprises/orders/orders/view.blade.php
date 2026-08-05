@@ -20,12 +20,12 @@
                                                         <address>
                                                             <h4>Para</h4>
                                                             <h6 class="fw-bold invoice-customer">
-                                                                {{Str::ucfirst(Str::lower($order->user->firstname))}}
-                                                                {{ Str::lower($order->user->lastname)}}
+                                                                {{Str::ucfirst(Str::lower(($order->user->firstname ?? 'N/D')))}}
+                                                                {{ Str::lower(($order->user->lastname ?? ''))}}
                                                             </h6>
 
-                                                            <p class="mt-0 mb-0 {{ $order->user->address !=null ? '' : 'd-none' }}">
-                                                                {{Str::ucfirst(Str::lower($order->user->address))}}
+                                                            <p class="mt-0 mb-0 {{ ($order->user->address ?? null) !=null ? '' : 'd-none' }}">
+                                                                {{Str::ucfirst(Str::lower(($order->user->address ?? '')))}}
                                                             </p>
                                                             <p class="mt-0 mb-0">
                                                                 <span>Orden :</span>

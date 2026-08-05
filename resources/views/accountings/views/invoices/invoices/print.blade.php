@@ -23,11 +23,11 @@
                                                             <h4 class="mb-3">Para</h4>
                                                             <h6 class="mt-0 mb-0 fw-bold invoice-customer">
                                                                 <span>Distribuidor :</span>
-                                                                <strong>{{Str::ucfirst(Str::lower($invoice->distributor->title))}}</strong>
+                                                                <strong>{{Str::ucfirst(Str::lower(($invoice->distributor->title ?? 'N/D')))}}</strong>
                                                             </h6>
-                                                            <p class="mt-0 mb-0 {{ $invoice->distributor->address !=null ? '' : 'd-none' }}">
+                                                            <p class="mt-0 mb-0 {{ ($invoice->distributor->address ?? null) !=null ? '' : 'd-none' }}">
                                                                 <span>Dirección :</span>
-                                                                <strong>{{Str::ucfirst(Str::lower($invoice->distributor->address))}}</strong>
+                                                                <strong>{{Str::ucfirst(Str::lower(($invoice->distributor->address ?? '')))}}</strong>
                                                             </p>
                                                             <p class="mt-0 mb-0">
                                                                 <span>Referencia :</span>
@@ -70,7 +70,8 @@
 
                                                                 <td class="border-bottom-0">
                                                                     <div class="d-flex align-items-center gap-3">
-                                                                            <h6 class="fw-semibold fs-2 mb-0">{{ $item->course->title }}</h6>
+                                                                            {{-- El curso puede haberse borrado (soft delete) después de emitir la factura --}}
+                                                                            <h6 class="fw-semibold fs-2 mb-0">{{ $item->course->title ?? 'Curso eliminado' }}</h6>
                                                                     </div>
                                                                 </td>
                                                                 <td class="border-bottom-0">

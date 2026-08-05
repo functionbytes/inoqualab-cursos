@@ -93,7 +93,8 @@
                                 <span class="usr-email-addr" data-email="{{$item->order->slack }}">{{$item->order->slack }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" data-email="{{ $item->order->user->firstname . ' ' . $item->order->user->lastname  }}">{{$item->order->user->firstname . ' ' . $item->order->user->lastname }}</span>
+                                {{-- El cliente puede haberse borrado (soft delete) después de la orden --}}
+                                <span class="usr-email-addr" data-email="{{ ($item->order->user->firstname ?? 'N/D') . ' ' . ($item->order->user->lastname ?? '')  }}">{{ ($item->order->user->firstname ?? 'N/D') . ' ' . ($item->order->user->lastname ?? '') }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light-{{$item->order->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">

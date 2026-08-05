@@ -238,4 +238,44 @@ class InvoiceControllerTest extends TestCase
         $this->assertEquals(1, $invoice->condition_id);
         $this->assertNull($invoice->payment_at);
     }
+
+    // ── Bug: distribuidor/cliente soft-eliminado tras la factura/orden ──────
+
+    public function test_pdf_returns_404_when_distributor_was_soft_deleted(): void
+    {
+        $distributor = Distributor::factory()->create();
+        $invoice = $this->makeInvoice($distributor, 1);
+        $distributor->delete(); // soft delete
+
+        // Antes: $invoice->distributor->title sobre null -> 500 al generar el PDF.
+        $this->actingAs($this->accountant)
+            ->get(route('accounting.invoices.pdf', $invoice->slack))
+            ->assertNotFound();
+    }
+
+    public function test_order_view_returns_404_when_customer_was_soft_deleted(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer', 'available' => 1]);
+
+        $order = Order::create([
+            'slack' => 'ord-'.uniqid(),
+            'number' => (Order::max('number') ?? 0) + 1,
+            'reference' => 'ORD-'.uniqid(),
+            'user_id' => $customer->id,
+            'type_id' => OrderType::where('slug', 'online')->first()->id,
+            'method_id' => OrderMethod::where('slug', 'card')->first()->id,
+            'condition_id' => OrderCondition::where('slug', 'payment')->first()->id,
+            'total_before_discount' => 50000,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => 50000,
+        ]);
+
+        $customer->delete(); // soft delete
+
+        // Antes: $order->user->firstname sobre null -> 500 en la vista de detalle.
+        $this->actingAs($this->accountant)
+            ->get(route('accounting.orders.view', $order->slack))
+            ->assertNotFound();
+    }
 }

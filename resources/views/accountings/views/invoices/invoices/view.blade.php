@@ -23,11 +23,11 @@
                                                             <h4 class="mb-3">Para</h4>
                                                             <h6 class="mt-0 mb-0 fw-bold invoice-customer">
                                                                 <span>Distribuidor :</span>
-                                                                <strong>{{Str::upper($invoice->distributor->title)}}</strong>
+                                                                <strong>{{Str::upper(($invoice->distributor->title ?? 'N/D'))}}</strong>
                                                             </h6>
-                                                            <p class="mt-0 mb-0 {{ $invoice->distributor->address !=null ? '' : 'd-none' }}">
+                                                            <p class="mt-0 mb-0 {{ ($invoice->distributor->address ?? null) !=null ? '' : 'd-none' }}">
                                                                 <span>Dirección :</span>
-                                                                <strong>{{Str::upper($invoice->distributor->address)}}</strong>
+                                                                <strong>{{Str::upper(($invoice->distributor->address ?? ''))}}</strong>
                                                             </p>
                                                             <p class="mt-0 mb-0">
                                                                 <span>Referencia :</span>

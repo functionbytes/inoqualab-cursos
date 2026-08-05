@@ -65,10 +65,10 @@
                                 <span class="usr-email-addr" >{{$order->reference }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" >{{ Str::upper($order->user->identification) }}</span>
+                                <span class="usr-email-addr" >{{ Str::upper(($order->user->identification ?? 'N/D')) }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr" >{{ Str::upper($order->user->firstname . ' ' . $order->user->lastname) }}</span>
+                                <span class="usr-email-addr" >{{ Str::upper(($order->user->firstname ?? 'N/D') . ' ' . ($order->user->lastname ?? '')) }}</span>
                             </td>
                             <td>
                                 <span class="usr-email-addr" >{{ Str::upper($order->activity->enterprise->title) }}</span>

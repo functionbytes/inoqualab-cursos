@@ -14,12 +14,12 @@
                         <div class="col-md-6">
                             <p class="mb-1"><span class="fw-semibold">Orden:</span> {{ $order->slack }}</p>
                             <p class="mb-1"><span class="fw-semibold">Cliente:</span>
-                                {{ Str::ucfirst(Str::lower($order->user->firstname)) }}
-                                {{ Str::ucfirst(Str::lower($order->user->lastname)) }}
+                                {{ Str::ucfirst(Str::lower(($order->user->firstname ?? 'N/D'))) }}
+                                {{ Str::ucfirst(Str::lower(($order->user->lastname ?? ''))) }}
                             </p>
-                            @if($order->user->address)
+                            @if(($order->user->address ?? ''))
                                 <p class="mb-1"><span class="fw-semibold">Dirección:</span>
-                                    {{ Str::ucfirst(Str::lower($order->user->address)) }}
+                                    {{ Str::ucfirst(Str::lower(($order->user->address ?? ''))) }}
                                 </p>
                             @endif
                         </div>

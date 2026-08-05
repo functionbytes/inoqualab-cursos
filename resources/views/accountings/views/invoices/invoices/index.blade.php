@@ -85,7 +85,7 @@
                                 <span class="usr-email-addr" >{{$invoice->reference }}</span>
                             </td>
                             <td>
-                                <span class="usr-email-addr">{{$invoice->distributor->title}}</span>
+                                <span class="usr-email-addr">{{($invoice->distributor->title ?? 'N/D')}}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light-{{$invoice->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">

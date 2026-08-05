@@ -23,19 +23,19 @@
                                                             <h4 class="mb-3">Para</h4>
                                                             <h6 class="mt-0 mb-0 fw-bold invoice-customer">
                                                                 <span>Cliente :</span>
-                                                                <strong>{{Str::upper($order->user->firstname)}} {{Str::upper($order->user->lastname)}}</strong>
+                                                                <strong>{{Str::upper(($order->user->firstname ?? 'N/D'))}} {{Str::upper(($order->user->lastname ?? ''))}}</strong>
                                                             </h6>
                                                             <h6 class="mt-0 mb-0 fw-bold invoice-customer">
                                                                 <span>Indentificación :</span>
-                                                                <strong>{{Str::upper(Str::lower($order->user->identification))}}</strong>
+                                                                <strong>{{Str::upper(Str::lower(($order->user->identification ?? 'N/D')))}}</strong>
                                                             </h6>
-                                                            <p class="mt-0 mb-0 {{ $order->user->address !=null ? '' : 'd-none' }}">
+                                                            <p class="mt-0 mb-0 {{ ($order->user->address ?? null) !=null ? '' : 'd-none' }}">
                                                                 <span>Dirección :</span>
-                                                                <strong>{{Str::upper(Str::lower($order->user->address))}}</strong>
+                                                                <strong>{{Str::upper(Str::lower(($order->user->address ?? '')))}}</strong>
                                                             </p>
-                                                            <p class="mt-0 mb-0 {{ $order->user->cellphone !=null ? '' : 'd-none' }}">
+                                                            <p class="mt-0 mb-0 {{ ($order->user->cellphone ?? null) !=null ? '' : 'd-none' }}">
                                                                 <span>Celular :</span>
-                                                                <strong>{{Str::upper(Str::lower($order->user->cellphone))}}</strong>
+                                                                <strong>{{Str::upper(Str::lower(($order->user->cellphone ?? '')))}}</strong>
                                                             </p>
 
                                                         </address>

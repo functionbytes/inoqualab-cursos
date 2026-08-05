@@ -100,10 +100,10 @@
             <!-- Customer Info Column -->
             <td class="col-half">
                 <h4 class="fw-semibold">Para</h4>
-                <p><strong>Cliente :</strong> {{ Str::upper(Str::lower($order->user->firstname)) }} {{ Str::upper(Str::lower($order->user->lastname)) }}</p>
-                <p><strong>Indentificación :</strong> {{ Str::upper(Str::lower($order->user->identification)) }}</p>
-                <p class="{{ $order->user->address != null ? '' : 'd-none' }}"><strong>Dirección :</strong> {{ Str::upper(Str::lower($order->user->address)) }}</p>
-                <p class="{{ $order->user->cellphone != null ? '' : 'd-none' }}"><strong>Celular :</strong> {{ Str::upper(Str::lower($order->user->cellphone)) }}</p>
+                <p><strong>Cliente :</strong> {{ Str::upper(Str::lower(($order->user->firstname ?? 'N/D'))) }} {{ Str::upper(Str::lower(($order->user->lastname ?? ''))) }}</p>
+                <p><strong>Indentificación :</strong> {{ Str::upper(Str::lower(($order->user->identification ?? 'N/D'))) }}</p>
+                <p class="{{ ($order->user->address ?? null) !=null ? '' : 'd-none' }}"><strong>Dirección :</strong> {{ Str::upper(Str::lower(($order->user->address ?? ''))) }}</p>
+                <p class="{{ ($order->user->cellphone ?? null) !=null ? '' : 'd-none' }}"><strong>Celular :</strong> {{ Str::upper(Str::lower(($order->user->cellphone ?? ''))) }}</p>
             </td>
 
             <!-- Distributor Info Column -->

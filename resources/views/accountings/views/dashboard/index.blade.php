@@ -141,7 +141,8 @@
                                                 <div class="d-flex align-items-center">
                                                     <div>
                                                         <h6 class="fw-semibold mb-1">{{ Str::words( $invoice->reference)  }}</h6>
-                                                        <p class="fs-2 mb-0 text-muted">{{$invoice->distributor->title}}</p>
+                                                        {{-- El distribuidor puede haberse borrado (soft delete) después de emitir la factura --}}
+                                                        <p class="fs-2 mb-0 text-muted">{{ $invoice->distributor->title ?? 'N/D' }}</p>
                                                     </div>
                                                 </div>
                                             </td>

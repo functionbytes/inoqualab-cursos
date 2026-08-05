@@ -99,7 +99,7 @@
                             </td>
 
                             <td>
-                                <span class="usr-email-addr" >{{strtoupper($order->user->firstname . ' ' . $order->user->lastname) }}</span>
+                                <span class="usr-email-addr" >{{strtoupper(($order->user->firstname ?? 'N/D') . ' ' . ($order->user->lastname ?? '')) }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light-{{$order->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">

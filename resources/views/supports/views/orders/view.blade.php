@@ -25,13 +25,13 @@
                                                             </p>
                                                             <h6 class="fw-bold invoice-customer mb-0">
                                                                 <span class="fw-semibold mb-0">Cliente :</span>
-                                                                {{Str::ucfirst(Str::lower($order->user->firstname))}}
-                                                                {{ Str::lower($order->user->lastname)}}
+                                                                {{Str::ucfirst(Str::lower(($order->user->firstname ?? 'N/D')))}}
+                                                                {{ Str::lower(($order->user->lastname ?? ''))}}
                                                             </h6>
 
-                                                            <p class="mt-0 mb-0 {{ $order->user->address !=null ? '' : 'd-none' }}">
+                                                            <p class="mt-0 mb-0 {{ ($order->user->address ?? null) !=null ? '' : 'd-none' }}">
                                                                 <span class="fw-semibold mb-0">Dirección :</span>
-                                                                {{Str::ucfirst(Str::lower($order->user->address))}}
+                                                                {{Str::ucfirst(Str::lower(($order->user->address ?? '')))}}
                                                             </p>
                                                             <p class="mt-0 mb-0">
                                                                 <span class="fw-semibold mb-0">Fecha de la factura :</span>
