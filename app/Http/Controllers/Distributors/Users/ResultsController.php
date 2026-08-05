@@ -92,6 +92,9 @@ class ResultsController extends Controller
         $certificate = Certificate::slack($slack);
         $this->assertManagedUser($certificate->user_id);
         $course = $certificate->course;
+        // El curso puede haberse borrado (soft delete) después de emitirse
+        // el certificado; la vista lee $course->title sin null-check.
+        abort_unless($course instanceof Course, 404, 'El curso de este certificado ya no existe.');
         $exam = $certificate->exam;
         $answers = $certificate->exam?->answers;
         $wrongs = $certificate->exam?->answers()?->wrong()->count();
@@ -116,6 +119,11 @@ class ResultsController extends Controller
         $course = $certificate->course;
         $exam = $certificate->exam;
         $user = $certificate->user;
+
+        // El curso/cliente pueden haberse borrado (soft delete) después de
+        // emitirse el certificado; sin esto revienta al armar el nombre del archivo.
+        abort_unless($course instanceof Course, 404, 'El curso de este certificado ya no existe.');
+        abort_unless($user instanceof User, 404, 'El usuario de este certificado ya no existe.');
 
         return Excel::download(new ResultsExport($exam), $course->title.' - '.$user->identification.'.xlsx');
 

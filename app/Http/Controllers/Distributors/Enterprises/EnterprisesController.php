@@ -161,12 +161,14 @@ class EnterprisesController extends Controller
         $enterprise = $distributor->enterprises()->where('enterprises.slack', $slack)->first();
 
         if (! $enterprise) {
-            return redirect()->route('manager.enterprises')->with('error', 'Empresa no encontrada o no autorizada.');
+            // Bug: redirigía a manager.enterprises (dominio Managers) en vez
+            // de la ruta equivalente de este portal.
+            return redirect()->route('distributor.enterprises')->with('error', 'Empresa no encontrada o no autorizada.');
         }
 
         $enterprise->delete();
 
-        return redirect()->route('manager.enterprises');
+        return redirect()->route('distributor.enterprises');
     }
 
     public function navegation($slack)

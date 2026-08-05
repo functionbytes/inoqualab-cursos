@@ -262,7 +262,10 @@ class CourseController extends Controller
             $inscription->delete();
         }
 
-        return redirect()->route('manager.enterprises.courses', $enterprise->slack);
+        // Bug: redirigía a manager.enterprises.courses (dominio Managers) en
+        // vez de la ruta equivalente de este portal -- un distribuidor sin
+        // rol manager caía en el middleware IsManager y terminaba en /validation.
+        return redirect()->route('distributor.enterprises.courses', $enterprise->slack);
     }
 
     public function destroyInscription($slack)

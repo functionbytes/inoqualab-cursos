@@ -105,6 +105,10 @@ class ReassignController extends Controller
         $user = $this->managedUser($slack);
         $enterprise = $user->getEnterprise();
 
+        // La empresa puede haberse borrado (soft delete) después de asociar
+        // al usuario; getEnterprise() devuelve null en ese caso.
+        abort_unless($enterprise instanceof Enterprise, 404, 'La empresa de este usuario ya no existe.');
+
         $distributor = app('distributor');
         $enterprises = $distributor->enterprises;
         $enterprises->prepend('', '');

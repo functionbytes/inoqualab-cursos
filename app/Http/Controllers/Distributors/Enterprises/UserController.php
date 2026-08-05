@@ -102,6 +102,10 @@ class UserController extends Controller
         $user = $this->managedUser($slack);
         $enterprise = $user->relations;
 
+        // La empresa puede haberse borrado (soft delete) después de asociar
+        // al usuario; la vista lee $enterprise->title sin null-check.
+        abort_unless($enterprise instanceof Enterprise, 404, 'La empresa de este usuario ya no existe.');
+
         return view('distributors.views.enterprises.users.users.view')->with([
             'user' => $user,
             'enterprise' => $enterprise,
@@ -113,6 +117,10 @@ class UserController extends Controller
 
         $user = $this->managedUser($slack);
         $enterprise = $user->relations;
+
+        // La empresa puede haberse borrado (soft delete) después de asociar
+        // al usuario; la vista lee $enterprise->id/slack sin null-check.
+        abort_unless($enterprise instanceof Enterprise, 404, 'La empresa de este usuario ya no existe.');
 
         $availables = collect([
             ['id' => '1', 'label' => 'Activo'],
