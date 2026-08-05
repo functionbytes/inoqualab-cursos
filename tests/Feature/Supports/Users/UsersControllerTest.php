@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Supports\Users;
 
+use App\Models\Enterprise\Enterprise;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -205,5 +206,53 @@ class UsersControllerTest extends TestCase
         $customer->refresh();
         $this->assertSame(1, (int) $customer->newsletter_notification);
         $this->assertSame(0, (int) $customer->order_notification);
+    }
+
+    // ── Bug: store()/update() leían $request->enterprise (singular) pero el ──
+    // ── <select id="enterprises"> del formulario envía 'enterprises' (plural) ──
+
+    public function test_store_sets_enterprise_id_for_an_enterprise_role_user(): void
+    {
+        $enterprise = Enterprise::factory()->create();
+
+        $response = $this->actingAs($this->support)
+            ->post(route('support.users.store'), [
+                'firstname' => 'Staff',
+                'lastname' => 'Empresa',
+                'email' => 'staff.empresa@example.test',
+                'identification' => '111222333',
+                'role' => 'enterprise',
+                'enterprises' => $enterprise->id,
+                'password' => 'password123',
+            ]);
+
+        $response->assertOk()->assertJson(['success' => true]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'staff.empresa@example.test',
+            'role' => 'enterprise',
+            'enterprise_id' => $enterprise->id,
+        ]);
+    }
+
+    public function test_update_sets_enterprise_id_for_an_enterprise_role_user(): void
+    {
+        $enterprise = Enterprise::factory()->create();
+        $staff = User::factory()->create(['role' => 'enterprise', 'enterprise_id' => null]);
+
+        $this->actingAs($this->support)
+            ->post(route('support.users.update'), [
+                'slack' => $staff->slack,
+                'firstname' => $staff->firstname,
+                'lastname' => $staff->lastname,
+                'email' => $staff->email,
+                'identification' => $staff->identification,
+                'role' => 'enterprise',
+                'enterprises' => $enterprise->id,
+                'available' => 1,
+            ])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertSame($enterprise->id, $staff->fresh()->enterprise_id);
     }
 }

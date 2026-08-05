@@ -160,6 +160,9 @@ class DocumentsController extends Controller
             return response()->json(['status' => 'success', 'document' => $document->slack]);
         }
 
+        // Sin esto, una petición sin archivo (o con uno inválido) no devolvía
+        // nada -- el cliente AJAX espera siempre un JSON con 'status'.
+        return response()->json(['status' => 'error', 'message' => 'Selecciona un archivo válido.'], 422);
     }
 
     public function deleteFiles($id)

@@ -244,7 +244,10 @@ class ManagementController extends Controller
             $user->identification = $request->identification;
             $user->email = $request->email;
             $user->address = $request->address;
-            $request->filled('password') ? $user->password = $request->password : $user->password = $request->identification;
+            // Sin password explícita, un valor aleatorio (no la identificación,
+            // un dato semi-público) — el cliente la establece vía "olvidé mi
+            // contraseña". Mismo fix ya aplicado en Distributors/Registers/RegistersController::store().
+            $user->password = $request->filled('password') ? $request->password : Str::random(16);
             $user->role = 'customer';
             $user->available = 1;
             $user->terms = 1;

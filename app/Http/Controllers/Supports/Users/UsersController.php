@@ -97,7 +97,10 @@ class UsersController extends Controller
         $user->setting = 1;
         $user->validation = 1;
         $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
-        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprise : null;
+        // El <select id="enterprises"> del formulario envía la clave 'enterprises'
+        // (plural), no 'enterprise': leerla en singular dejaba enterprise_id
+        // siempre null para cualquier usuario staff creado con rol 'enterprise'.
+        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprises : null;
         $user->save();
 
         return response()->json([
@@ -248,7 +251,10 @@ class UsersController extends Controller
         }
 
         if ($request->role == 'enterprise') {
-            $user->enterprise_id = $request->enterprise;
+            // Mismo bug que en store(): el <select id="enterprises"> envía
+            // 'enterprises' (plural); leer 'enterprise' (singular) borraba
+            // enterprise_id en cada guardado de un usuario staff.
+            $user->enterprise_id = $request->enterprises;
         } elseif ($request->role == 'customer') {
             $enterprise = $user->relation;
             if ($enterprise) {
