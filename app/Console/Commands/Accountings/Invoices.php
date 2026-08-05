@@ -11,6 +11,7 @@ use App\Models\Invoice\InvoiceMethod;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Invoices extends Command
@@ -53,85 +54,119 @@ class Invoices extends Command
 
             $items = $distributor->orders()->date($startDate, $endDate)->get();
 
-            if ($items->count() > 0) {
+            if ($items->count() === 0) {
+                continue;
+            }
 
-                $coursesItems = [];
-                $total = 0;
+            try {
+                DB::transaction(function () use ($distributor, $items, $method, $condition, $startDate, $endDate) {
+                    $coursesItems = [];
+                    $total = 0;
 
-                $invoice = new Invoice;
-                $invoice->slack = $this->generate_slack('invoices');
-                $invoice->number = $this->generate_number('invoices');
-                $invoice->reference = setting('invoice_default').$invoice->number;
-                $invoice->method_id = $method->id;
-                $invoice->condition_id = $condition->id;
-                $invoice->distributor_id = $distributor->id;
-                $invoice->payment_at = null;
-                $invoice->notes = '';
-                $invoice->available = 1;
-                $invoice->from_at = $startDate;
-                $invoice->to_at = $endDate;
-                $invoice->created_at = Carbon::now()->setTimezone('America/Bogota');
-                $invoice->updated_at = Carbon::now()->setTimezone('America/Bogota');
+                    $invoice = new Invoice;
+                    $invoice->slack = $this->generate_slack('invoices');
+                    $invoice->number = $this->generate_number('invoices');
+                    $invoice->reference = setting('invoice_default').$invoice->number;
+                    $invoice->method_id = $method->id;
+                    $invoice->condition_id = $condition->id;
+                    $invoice->distributor_id = $distributor->id;
+                    $invoice->payment_at = null;
+                    $invoice->notes = '';
+                    $invoice->available = 1;
+                    $invoice->from_at = $startDate;
+                    $invoice->to_at = $endDate;
+                    $invoice->created_at = Carbon::now()->setTimezone('America/Bogota');
+                    $invoice->updated_at = Carbon::now()->setTimezone('America/Bogota');
 
-                foreach ($items as $item) {
+                    // Una orden puede tener varias OrderActivity (una por curso
+                    // matriculado): sin deduplicar por order->id, su total y sus
+                    // ítems se sumaban una vez POR CADA curso, inflando la factura.
+                    // Mismo patrón ya corregido en el flujo manual equivalente
+                    // (Managers\Invoices\InvoicesController::store()).
+                    $seenOrders = [];
 
-                    $order = $item->order;
+                    foreach ($items as $item) {
 
-                    if ($order) {
+                        $order = $item->order;
 
-                        $total += $order->total_order_amount;
+                        if ($order && ! isset($seenOrders[$order->id])) {
+                            $seenOrders[$order->id] = true;
+                            $total += $order->total_order_amount;
 
-                        foreach ($order->items as $orderItem) {
+                            foreach ($order->items as $orderItem) {
 
-                            $itemType = $orderItem->item_type;
-                            $itemId = $orderItem->item_id;
-                            $itemPrice = $orderItem->amount;
+                                $itemType = $orderItem->item_type;
+                                $itemId = $orderItem->item_id;
+                                // OrderItem::amount YA es el total de línea (unit * qty);
+                                // no volver a multiplicar por cantidad.
+                                $itemAmount = $orderItem->amount;
 
-                            if (! isset($coursesItems[$itemType])) {
-                                $coursesItems[$itemType] = [];
+                                if (! isset($coursesItems[$itemType])) {
+                                    $coursesItems[$itemType] = [];
+                                }
+
+                                if (! isset($coursesItems[$itemType][$itemId])) {
+                                    $coursesItems[$itemType][$itemId] = [
+                                        'quantity' => 0,
+                                        'total_amount' => 0,
+                                        'course_id' => $itemId,
+                                    ];
+                                }
+
+                                $coursesItems[$itemType][$itemId]['quantity'] += $orderItem->quantity;
+                                $coursesItems[$itemType][$itemId]['total_amount'] += $itemAmount;
+
                             }
+                        }
 
-                            if (! isset($coursesItems[$itemType][$itemId])) {
-                                $coursesItems[$itemType][$itemId] = [
-                                    'quantity' => 0,
-                                    'total_amount' => 0,
-                                    'course_id' => 0,
-                                ];
-                            }
+                        // Todas las actividades se marcan como facturadas (no solo
+                        // la primera de cada orden), para que scopeDate() no las
+                        // vuelva a traer el próximo mes.
+                        $item->invoiced = 1;
+                        $item->invoiced_at = Carbon::now()->setTimezone('America/Bogota');
+                        $item->save();
+                    }
 
-                            $coursesItems[$itemType][$itemId]['quantity'] += $orderItem->quantity;
-                            $coursesItems[$itemType][$itemId]['total_amount'] += $itemPrice;
-                            $coursesItems[$itemType][$itemId]['course_id'] = $itemId;
+                    $invoice->total_discount_amount = 0;
+                    $invoice->total_after_discount = $total;
+                    $invoice->total_before_discount = $total;
+                    $invoice->total_tax_amount = 0;
+                    $invoice->total_invoices_amount = $total;
+                    $invoice->save();
 
+                    foreach ($coursesItems as $itemType => $itemsById) {
+
+                        foreach ($itemsById as $itemId => $data) {
+
+                            $itemInvoice = new InvoiceItem;
+                            $itemInvoice->slack = $this->generate_slack('invoice_items');
+                            $itemInvoice->course_id = $data['course_id'];
+                            $itemInvoice->invoice_id = $invoice->id;
+                            $itemInvoice->quantity = $data['quantity'];
+                            // invoice_items tiene subtotal/total, no 'amount' -- esa
+                            // columna no existe: guardar ahí tiraba un QueryException
+                            // real ("Unknown column 'amount'") en cada ejecución con
+                            // ítems, sin ninguna alerta salvo el log del scheduler.
+                            $itemInvoice->subtotal = $data['total_amount'];
+                            $itemInvoice->total = $data['total_amount'];
+                            $itemInvoice->created_at = now();
+                            $itemInvoice->updated_at = now();
+                            $itemInvoice->save();
                         }
                     }
-                }
 
-                $invoice->total_discount_amount = 0;
-                $invoice->total_after_discount = $total;
-                $invoice->total_before_discount = $total;
-                $invoice->total_tax_amount = 0;
-                $invoice->total_invoices_amount = $total;
-                $invoice->save();
+                    event(new InvoiceCreated($invoice));
 
-                foreach ($coursesItems as $itemType => $itemsById) {
-
-                    foreach ($itemsById as $itemId => $data) {
-
-                        $itemInvoice = new InvoiceItem;
-                        $itemInvoice->slack = $this->generate_slack('invoice_items');
-                        $itemInvoice->course_id = $data['course_id'];
-                        $itemInvoice->invoice_id = $invoice->id;
-                        $itemInvoice->quantity = $data['quantity'];
-                        $itemInvoice->amount = $data['total_amount'];
-                        $itemInvoice->created_at = now();
-                        $itemInvoice->updated_at = now();
-                        $itemInvoice->save();
-                    }
-                }
-
-                event(new InvoiceCreated($invoice));
-
+                    $this->info("Factura generada para distribuidor #{$distributor->id}: {$invoice->slack} (total: {$total}).");
+                });
+            } catch (\Throwable $e) {
+                // Un distribuidor con datos raros no debe abortar la facturación
+                // del resto: se registra y se sigue con el siguiente.
+                Log::error('invoices:generate falló para un distribuidor', [
+                    'distributor_id' => $distributor->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $this->error("Distribuidor #{$distributor->id}: {$e->getMessage()}");
             }
         }
 

@@ -29,7 +29,7 @@ class InvoiceListener implements ShouldQueue
 
     public function handleMailReport(InvoiceCreated $event): void
     {
-        $accountings = User::activeUsersWithRole('accounting');
+        $accountings = User::activeUsersWithRole('accounting')->get();
 
         foreach ($accountings as $accounting) {
             $mail = new ReportsMails($event->invoice, $accounting);
