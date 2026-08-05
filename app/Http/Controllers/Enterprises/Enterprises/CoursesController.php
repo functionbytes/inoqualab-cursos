@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Enterprises\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course\Course;
 use App\Models\Inscription;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -122,6 +123,8 @@ class CoursesController extends Controller
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
+        // El curso puede haberse borrado (soft delete) después de la inscripción.
+        abort_unless($course instanceof Course, 404, 'El curso de esta inscripción ya no existe.');
         $class = $course->lessons()->with('chapter')->get();
         // Set de lecciones ya culminadas, para no consultar CourseProgress::validate() por cada fila.
         $completedLessons = $progress->where('culminated', 1)->pluck('lesson_id')->filter()->flip();
@@ -144,6 +147,8 @@ class CoursesController extends Controller
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
+        // El curso puede haberse borrado (soft delete) después de la inscripción.
+        abort_unless($course instanceof Course, 404, 'El curso de esta inscripción ya no existe.');
         $class = $course->lessons;
 
         return view('enterprises.views.enterprises.courses.details')->with([

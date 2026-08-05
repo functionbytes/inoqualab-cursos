@@ -23,13 +23,22 @@ class UsersController extends Controller
         $enterprise = app('enterprise');
         $users = $enterprise->users()->latest();
 
+        // Un apellido compuesto ("López-Restrepo") también contiene un guion:
+        // sin este guard, Carbon::createFromFormat con un texto que no es
+        // fecha lanzaba InvalidArgumentException -> 500 en cualquier búsqueda así.
+        $isDateSearch = false;
         if (str_contains($searchKey ?? '', '-')) {
-            $startDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->startOfDay();
-            $endDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->endOfDay();
-            $users->whereBetween('users.updated_at', [$startDate, $endDate]);
+            try {
+                $startDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->startOfDay();
+                $endDate = Carbon::createFromFormat('Y-m-d', str_replace('"', '', $searchKey))->endOfDay();
+                $users->whereBetween('users.updated_at', [$startDate, $endDate]);
+                $isDateSearch = true;
+            } catch (\Exception) {
+                // No era una fecha válida: se busca como texto normal más abajo.
+            }
         }
 
-        $users->when(! str_contains($searchKey ?? '', '-'), function ($query) use ($searchKey) {
+        $users->when(! $isDateSearch, function ($query) use ($searchKey) {
             $query->where('users.firstname', 'like', '%'.$searchKey.'%')
                 ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
                 ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')

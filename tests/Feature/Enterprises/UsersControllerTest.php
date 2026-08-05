@@ -1,0 +1,60 @@
+<?php
+
+namespace Tests\Feature\Enterprises;
+
+use App\Models\Enterprise\Enterprise;
+use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
+
+/**
+ * El portal enterprise no tenía NINGÚN test dedicado (solo cobertura indirecta
+ * vía PortalRoutesSmokeTest). Regresión de UsersController::index(): cualquier
+ * búsqueda con un guion que no fuera una fecha ISO ("López-Restrepo", apellido
+ * compuesto) tiraba 500 -- Carbon::createFromFormat('Y-m-d', ...) lanza
+ * InvalidArgumentException sobre texto que no es fecha.
+ */
+class UsersControllerTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $enterpriseStaff;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $enterprise = Enterprise::factory()->create();
+        $this->enterpriseStaff = User::factory()->create(['role' => 'enterprise']);
+        DB::table('enterprise_staff')->insert([
+            'enterprise_id' => $enterprise->id,
+            'user_id' => $this->enterpriseStaff->id,
+        ]);
+    }
+
+    public function test_search_with_a_hyphen_that_is_not_a_date_does_not_500(): void
+    {
+        // Antes: Carbon::createFromFormat('Y-m-d', 'López-Restrepo') lanzaba
+        // InvalidArgumentException sin capturar.
+        $this->actingAs($this->enterpriseStaff)
+            ->get(route('enterprise.users', ['search' => 'López-Restrepo']))
+            ->assertOk();
+    }
+
+    public function test_search_with_a_valid_date_range_filters_by_updated_at(): void
+    {
+        $this->actingAs($this->enterpriseStaff)
+            ->get(route('enterprise.users', ['search' => '2026-01-15']))
+            ->assertOk();
+    }
+
+    public function test_search_without_hyphen_filters_by_text(): void
+    {
+        $this->actingAs($this->enterpriseStaff)
+            ->get(route('enterprise.users', ['search' => 'Ana']))
+            ->assertOk();
+    }
+}

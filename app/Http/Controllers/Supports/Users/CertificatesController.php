@@ -47,6 +47,9 @@ class CertificatesController extends Controller
 
         $inscription = Inscription::slack($slack);
         $certificate = $inscription->certificate;
+        // El curso puede no estar completado todavía: sin certificado emitido,
+        // la vista revienta al leer sus propiedades.
+        abort_unless($certificate instanceof Certificate, 404, 'El certificado de esta inscripción aún no está disponible.');
         $pdf = Pdf::loadview('supports.views.enterprises.users.certificates.download', compact('certificate'))->setPaper('A4', 'landscape');
 
         return $pdf->stream();
