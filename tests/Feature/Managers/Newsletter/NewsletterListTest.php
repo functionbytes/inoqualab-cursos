@@ -148,6 +148,30 @@ class NewsletterListTest extends TestCase
         $this->assertDatabaseMissing('newsletter_lists', ['id' => $list->id]);
     }
 
+    public function test_list_with_a_campaign_cannot_be_deleted(): void
+    {
+        // newsletter_campaigns.newsletter_list_id tiene nullOnDelete(): sin
+        // este guard, borrar la lista dejaba la campaña con list_id NULL, y
+        // NewsletterCampaignController::send() trata "sin lista" como
+        // "enviar a TODOS los suscriptores" -- una campaña segmentada
+        // terminaría enviándose a toda la base en silencio.
+        $list = $this->manualList();
+        NewsletterCampaign::create([
+            'uid' => (string) Str::uuid(),
+            'name' => 'Campaña ligada a la lista',
+            'subject' => 'Asunto',
+            'content' => '<p>hola</p>',
+            'status' => 'draft',
+            'newsletter_list_id' => $list->id,
+        ]);
+
+        $this->actingAs($this->manager)
+            ->delete(route('manager.newsletter.lists.destroy', $list->id))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('newsletter_lists', ['id' => $list->id]);
+    }
+
     public function test_add_by_email_is_idempotent_and_tags_source(): void
     {
         $list = $this->manualList();

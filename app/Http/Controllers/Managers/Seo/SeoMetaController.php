@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Models\Blog\Blog;
+use App\Models\Bundle\Bundle;
+use App\Models\Certifier;
+use App\Models\Course\Course;
+use App\Models\Instruction\Instruction;
 use App\Models\Seo\SeoMeta;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -222,13 +226,17 @@ class SeoMetaController extends Controller
                 'og_image', 'og_type', 'twitter_card', 'twitter_title', 'twitter_description',
                 'twitter_image', 'canonical_url', 'robots'];
 
-            // Build type map from all registered Eloquent models
-            $typeMap = [];
-            foreach (get_declared_classes() as $class) {
-                if (is_subclass_of($class, Model::class)) {
-                    $typeMap[class_basename($class)] = $class;
-                }
-            }
+            // get_declared_classes() solo devuelve clases ya autocargadas en
+            // ESTA request -- no determinista, dependía de qué otro código
+            // se hubiera ejecutado antes por casualidad. Whitelist explícita
+            // (mismos 5 modelos que usan HasSeo), igual que SeoOrphanController.
+            $typeMap = [
+                'Course' => Course::class,
+                'Blog' => Blog::class,
+                'Bundle' => Bundle::class,
+                'Instruction' => Instruction::class,
+                'Certifier' => Certifier::class,
+            ];
 
             while (($row = fgetcsv($handle)) !== false) {
                 try {

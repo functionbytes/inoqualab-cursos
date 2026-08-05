@@ -119,6 +119,15 @@ class NewsletterListController extends Controller
             return back()->with('error', 'Las listas dinámicas del sistema no se pueden eliminar.');
         }
 
+        // newsletter_campaigns.newsletter_list_id tiene nullOnDelete(): borrar
+        // la lista deja la campaña con list_id NULL, y
+        // NewsletterCampaignController::send() trata "sin lista" como "enviar
+        // a TODOS los suscriptores" -- una campaña segmentada terminaría
+        // enviándose a toda la base en silencio.
+        if ($list->campaigns()->exists()) {
+            return back()->with('error', 'No se puede eliminar: hay campañas asociadas a esta lista. Elimínalas o desvincúlalas primero.');
+        }
+
         $list->delete();
 
         return redirect()->route('manager.newsletter.lists.index')->with('success', 'Lista eliminada correctamente.');

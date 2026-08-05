@@ -6,6 +6,7 @@ use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Lista/segmento de suscriptores para campañas. Las listas con `trigger`
@@ -33,6 +34,11 @@ class NewsletterList extends Model
         return $this->belongsToMany(Newsletter::class, 'newsletter_list_subscriber')
             ->withPivot('added_reason')
             ->withTimestamps();
+    }
+
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(NewsletterCampaign::class, 'newsletter_list_id');
     }
 
     /** Listas dinámicas (gestionadas por eventos), excluye las manuales. */

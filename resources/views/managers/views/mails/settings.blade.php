@@ -140,7 +140,7 @@ $(document).ready(function () {
 
         var $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...');
         $.ajax({
-            url: '{{ route("manager.settings.mails.rules.store") }}',
+            url: '{{ route("manager.mails.rules.store") }}',
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             contentType: 'application/json',

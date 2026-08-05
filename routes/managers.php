@@ -553,10 +553,15 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.pe
         Route::get('/modules', [ModulesSettingsController::class, 'index'])->name('manager.settings.modules');
         Route::post('/modules/update', [ModulesSettingsController::class, 'update'])->name('manager.settings.modules.update');
 
-        Route::get('/mails', [MailAutoConfirmRulesController::class, 'index'])->name('manager.settings.mails');
-        Route::post('/mails/rules', [MailAutoConfirmRulesController::class, 'store'])->name('manager.settings.mails.rules.store');
-        Route::patch('/mails/rules/{rule}/toggle', [MailAutoConfirmRulesController::class, 'toggle'])->name('manager.settings.mails.rules.toggle');
-        Route::delete('/mails/rules/{rule}', [MailAutoConfirmRulesController::class, 'destroy'])->name('manager.settings.mails.rules.destroy');
+        // Nombradas manager.mails.* (no manager.settings.mails.*) a propósito:
+        // EnforcePanelPermission deriva el dominio del 2º segmento del nombre
+        // de ruta. Con "settings" ahí, exigía settings.create/delete -- que
+        // 'support' no tiene -- en vez de incoming-mails.create/delete, que
+        // el propio controller comprueba y que 'support' SÍ tiene completo.
+        Route::get('/mails', [MailAutoConfirmRulesController::class, 'index'])->name('manager.mails');
+        Route::post('/mails/rules', [MailAutoConfirmRulesController::class, 'store'])->name('manager.mails.rules.store');
+        Route::patch('/mails/rules/{rule}/toggle', [MailAutoConfirmRulesController::class, 'toggle'])->name('manager.mails.rules.toggle');
+        Route::delete('/mails/rules/{rule}', [MailAutoConfirmRulesController::class, 'destroy'])->name('manager.mails.rules.destroy');
 
     });
 

@@ -199,7 +199,9 @@ class IncomingMailsController extends Controller
             return response()->json([]);
         }
 
-        $enterprise = Enterprise::id($request->enterprise_id);
+        // where()->first(), no Enterprise::id() (que aborta 404 con una página
+        // cruda): este endpoint AJAX espera JSON.
+        $enterprise = Enterprise::where('id', $request->enterprise_id)->first();
 
         if (! $enterprise instanceof Enterprise) {
             return response()->json([]);
@@ -251,7 +253,10 @@ class IncomingMailsController extends Controller
 
     public function confirm(Request $request, $slack): JsonResponse
     {
-        $mail = IncomingMail::slack($slack);
+        // where()->first() en vez de IncomingMail::slack() (que aborta 404 con
+        // una página cruda): este endpoint AJAX espera JSON, y el check de
+        // abajo necesita que $mail pueda ser null para que se ejecute.
+        $mail = IncomingMail::where('slack', $slack)->first();
 
         if (! $mail instanceof IncomingMail) {
             return response()->json(['success' => false, 'message' => 'Correo no encontrado.']);
@@ -373,7 +378,8 @@ class IncomingMailsController extends Controller
 
     public function discard($slack): JsonResponse
     {
-        $mail = IncomingMail::slack($slack);
+        // where()->first(), no IncomingMail::slack() -- ver comentario en confirm().
+        $mail = IncomingMail::where('slack', $slack)->first();
 
         if (! $mail instanceof IncomingMail) {
             return response()->json(['success' => false, 'message' => 'Correo no encontrado.']);
@@ -414,7 +420,8 @@ class IncomingMailsController extends Controller
 
     public function reparse($slack): JsonResponse
     {
-        $mail = IncomingMail::slack($slack);
+        // where()->first(), no IncomingMail::slack() -- ver comentario en confirm().
+        $mail = IncomingMail::where('slack', $slack)->first();
 
         if (! $mail instanceof IncomingMail) {
             return response()->json(['success' => false, 'message' => 'Correo no encontrado.']);
@@ -515,7 +522,8 @@ class IncomingMailsController extends Controller
 
     public function preview($slack): JsonResponse
     {
-        $mail = IncomingMail::slack($slack);
+        // where()->first(), no IncomingMail::slack() -- ver comentario en confirm().
+        $mail = IncomingMail::where('slack', $slack)->first();
 
         if (! $mail instanceof IncomingMail) {
             return response()->json(['success' => false]);
@@ -564,7 +572,8 @@ class IncomingMailsController extends Controller
         }
 
         if ($type === 'enterprise') {
-            $enterprise = Enterprise::id($targetId);
+            // where()->first(), no Enterprise::id() -- ver comentario en getCourses().
+            $enterprise = Enterprise::where('id', $targetId)->first();
             if (! $enterprise instanceof Enterprise) {
                 return response()->json(['success' => false, 'message' => 'Empresa no encontrada.']);
             }
@@ -582,7 +591,8 @@ class IncomingMailsController extends Controller
         }
 
         if ($type === 'course') {
-            $course = Course::id($targetId);
+            // where()->first(), no Course::id() -- ver comentario en getCourses().
+            $course = Course::where('id', $targetId)->first();
             if (! $course instanceof Course) {
                 return response()->json(['success' => false, 'message' => 'Curso no encontrado.']);
             }

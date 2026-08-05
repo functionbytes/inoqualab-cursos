@@ -21,7 +21,7 @@
                                 data-bs-toggle="tooltip" title="Alias faltantes (últimos 30 días)">
                             <i class="fas fa-key"></i>
                         </button>
-                        <a href="{{ route('manager.settings.mails') }}" class="btn btn-outline-secondary"
+                        <a href="{{ route('manager.mails') }}" class="btn btn-outline-secondary"
                            data-bs-toggle="tooltip" title="Configuración de correos">
                             <i class="fas fa-gear"></i>
                         </a>
