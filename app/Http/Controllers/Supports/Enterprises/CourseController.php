@@ -229,7 +229,9 @@ class CourseController extends Controller
         abort_if($inscription === null, 404);
         $inscription->delete();
 
-        return redirect()->route('support.supports.courses', $enterprise->slack);
+        // Bug: 'support.supports.courses' no existe como ruta -- RouteNotFoundException
+        // garantizada en cada borrado exitoso.
+        return redirect()->route('support.enterprises.courses', $enterprise->slack);
     }
 
     public function destroyInscription($slack)

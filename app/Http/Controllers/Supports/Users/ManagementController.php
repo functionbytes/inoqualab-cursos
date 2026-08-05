@@ -366,7 +366,9 @@ class ManagementController extends Controller
             }
         }
 
-        return redirect()->route('support.supports.users', $enterprise->slack);
+        // Bug: 'support.supports.users' no existe como ruta -- RouteNotFoundException
+        // garantizada al importar correctamente.
+        return redirect()->route('support.enterprises.users', $enterprise->slack);
     }
 
     public function generate(Request $request)
@@ -398,53 +400,66 @@ class ManagementController extends Controller
     {
         $user = User::where('identification', $request->identification)->first();
 
-        if ($user) {
-            $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
-
-            if ($enterpriseUser) {
-                $enterprise = Enterprise::find($enterpriseUser->enterprise_id);
-
-                if ($enterprise) {
-                    $distributorEnterprise = DistributorEnterprise::where('enterprise_id', $enterprise->id)->first();
-
-                    if ($distributorEnterprise) {
-
-                        $distributor = Distributor::find($distributorEnterprise->distributor_id);
-
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
-                            'enterprise' => $enterprise->title,
-                            'distributor' => $distributor->title,
-                            'url' => route('distributor.supports.users', ['slack' => $enterprise->slack]),
-                        ]);
-
-                    } else {
-
-                        return response()->json([
-                            'success' => true,
-                            'message' => 'Este usuario ya está registrado en la empresa: '.$enterprise->title.', pero no está asignado a ningún distribuidor.',
-                            'enterprise' => $enterprise->title,
-                            'distributor' => null,
-                        ]);
-
-                    }
-                }
-            } else {
-
-                return response()->json(['success' => true,
-                    'message' => 'Este usuario ya está registrado pero no está asignado a ninguna empresa.',
-                    'enterprise' => null,
-                ]);
-            }
-        } else {
-
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Este usuario no está registrado.',
             ]);
-
         }
 
+        $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
+
+        if (! $enterpriseUser) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Este usuario ya está registrado pero no está asignado a ninguna empresa.',
+                'enterprise' => null,
+            ]);
+        }
+
+        // Registro huérfano (enterprise_id sin fila en enterprises): antes
+        // dejaba caer el método sin ningún return (sin el "else" de este if).
+        $enterprise = Enterprise::find($enterpriseUser->enterprise_id);
+
+        if (! $enterprise) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Este usuario ya está registrado pero su empresa asignada ya no existe.',
+                'enterprise' => null,
+            ]);
+        }
+
+        $distributorEnterprise = DistributorEnterprise::where('enterprise_id', $enterprise->id)->first();
+
+        if (! $distributorEnterprise) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Este usuario ya está registrado en la empresa: '.$enterprise->title.', pero no está asignado a ningún distribuidor.',
+                'enterprise' => $enterprise->title,
+                'distributor' => null,
+            ]);
+        }
+
+        // Mismo huérfano posible en distributor_id: sin esto, ->title sobre null.
+        $distributor = Distributor::find($distributorEnterprise->distributor_id);
+
+        if (! $distributor) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Este usuario ya está registrado en la empresa: '.$enterprise->title.', pero su distribuidor asignado ya no existe.',
+                'enterprise' => $enterprise->title,
+                'distributor' => null,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
+            'enterprise' => $enterprise->title,
+            'distributor' => $distributor->title,
+            // Bug: 'distributor.supports.users' no existe como ruta -- RouteNotFoundException
+            // garantizada al llegar aquí.
+            'url' => route('support.enterprises.users', ['slack' => $enterprise->slack]),
+        ]);
     }
 }

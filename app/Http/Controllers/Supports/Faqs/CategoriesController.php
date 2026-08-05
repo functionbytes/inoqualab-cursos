@@ -113,7 +113,9 @@ class CategoriesController extends Controller
         $categorie = FaqCategorie::slack($slack);
         $categorie->delete();
 
-        return redirect()->route('support.categories.blogs');
+        // Bug: 'support.categories.blogs' no existe como ruta -- RouteNotFoundException
+        // garantizada en cada borrado exitoso.
+        return redirect()->route('support.faqs.categories');
 
     }
 }
