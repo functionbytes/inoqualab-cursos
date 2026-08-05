@@ -155,6 +155,11 @@ class CourseController extends Controller
                 'users.identification',
                 'inscriptions.id',
                 'orders.slack as order_slack',
+                // CertificatesController::user() y CourseController::progress()
+                // esperan el slack de la INSCRIPCIÓN, no del usuario; sin esto
+                // los links "Certificado"/"Reporte" de la vista pasaban
+                // $user->slack y siempre daban 404 o 500.
+                'inscriptions.slack as inscription_slack',
                 'inscriptions.enroll_start',
                 'inscriptions.enroll_expire',
                 'inscriptions.enroll_culminated',
@@ -195,10 +200,16 @@ class CourseController extends Controller
     {
         abort_unless(auth()->user()->can('enterprises.view'), 403);
 
-        $order = Order::with(['progress', 'user', 'course.lessons'])->slack($slack);
-        $progress = $order->progress;
-        $user = $order->user;
-        $course = $order->course;
+        // Order no tiene relaciones progress()/course() (checkout multi-item):
+        // Order::with(['progress', 'course.lessons']) lanzaba
+        // RelationNotFoundException siempre, 500 garantizado. La vista enlaza
+        // esta ruta con el slack de la INSCRIPCIÓN (mismo contrato que
+        // CertificatesController::user()), no de la orden ni del usuario.
+        $inscription = Inscription::slack($slack);
+        $progress = $inscription->progress;
+        $user = $inscription->user;
+        $course = $inscription->course;
+        abort_unless($course instanceof Course, 404, 'El curso de esta inscripción ya no existe.');
         $class = $course->lessons;
 
         return view('managers.views.enterprisesprogress.index')->with([
@@ -206,7 +217,7 @@ class CourseController extends Controller
             'course' => $course,
             'progress' => $progress,
             'class' => $class,
-            'order' => $order,
+            'inscription' => $inscription,
         ]);
 
     }

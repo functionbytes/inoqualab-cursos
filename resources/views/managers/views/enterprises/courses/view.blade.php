@@ -124,7 +124,7 @@
                                     @if ($user->enroll_culminated != null)
                                     <li>
                                             <a class="dropdown-item d-flex align-items-center gap-3"
-                                                href="{{ route('manager.certificate.user', $user->slack) }}">
+                                                href="{{ route('manager.certificate.user', $user->inscription_slack) }}">
                                                 Certificado
                                             </a>
                                         </li>
@@ -132,7 +132,7 @@
 
                                     <li>
                                         <a class="dropdown-item d-flex align-items-center gap-3"
-                                            href="{{ route('manager.enterprises.courses.progress', $user->slack) }}">
+                                            href="{{ route('manager.enterprises.courses.progress', $user->inscription_slack) }}">
                                             Reporte
                                         </a>
                                     </li>

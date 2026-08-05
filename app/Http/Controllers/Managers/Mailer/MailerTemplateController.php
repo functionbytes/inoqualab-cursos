@@ -304,9 +304,12 @@ class MailerTemplateController extends Controller
 
     public function variables(string $uid): JsonResponse
     {
-        try {
-            $template = MailerTemplate::where('uid', $uid)->firstOrFail();
+        // firstOrFail() fuera del try/catch: un uid inexistente debe ser un
+        // 404 normal, no un 500 -- el catch de abajo era demasiado amplio y
+        // también atrapaba ModelNotFoundException (mismo bug de previewAjax()).
+        $template = MailerTemplate::where('uid', $uid)->firstOrFail();
 
+        try {
             return response()->json([
                 'success' => true,
                 'variables' => MailerVariableService::getGroupedForModule($template->module),

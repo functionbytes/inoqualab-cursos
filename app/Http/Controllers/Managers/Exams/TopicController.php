@@ -6,6 +6,7 @@ use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Exams\StoreExamQuestionRequest;
 use App\Http\Requests\Managers\Exams\UpdateExamQuestionRequest;
+use App\Models\Course\Course;
 use App\Models\Exam\ExamQuestion;
 use App\Models\Exam\ExamTopic;
 use Illuminate\Http\Request;
@@ -52,6 +53,8 @@ class TopicController extends Controller
 
         $topic = ExamTopic::slack($request->topic);
         $course = $topic->course;
+        // El curso puede haberse borrado (soft delete) después de crear el topic.
+        abort_unless($course instanceof Course, 404, 'El curso de este topic ya no existe.');
 
         $question = new ExamQuestion;
         $question->slack = $this->generate_slack('exam_questions');

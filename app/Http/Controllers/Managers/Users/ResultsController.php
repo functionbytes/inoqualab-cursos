@@ -71,6 +71,10 @@ class ResultsController extends Controller
         $user = $certificate->user;
         $answers = $certificate->exam?->answers();
 
+        // El cliente puede haberse borrado (soft delete) después de emitirse
+        // el certificado; sin esto revienta al armar el nombre del archivo.
+        abort_unless($user instanceof User, 404, 'El usuario de este certificado ya no existe.');
+
         return Excel::download(new ResultsExport($exam, $answers), $user->identification.'.xlsx');
 
     }

@@ -118,13 +118,7 @@ class CouponsController extends Controller
         $coupon->min_price = $request->min_price ?? 0;
         $coupon->limit = $request->limit ?? 0;
 
-        if ($request->date_var) {
-            $date_var = explode(' - ', $request->date_var);
-            if (count($date_var) == 2) {
-                $coupon->start_date = date('Y-m-d', strtotime($date_var[0]));
-                $coupon->end_date = date('Y-m-d', strtotime($date_var[1]));
-            }
-        }
+        $this->applyDateRange($coupon, $request->date_var);
 
         $coupon->update();
 
@@ -156,13 +150,7 @@ class CouponsController extends Controller
         $coupon->min_price = $request->min_price ?? 0;
         $coupon->limit = $request->limit ?? 0;
 
-        if ($request->date_var) {
-            $date_var = explode(' - ', $request->date_var);
-            if (count($date_var) == 2) {
-                $coupon->start_date = date('Y-m-d', strtotime($date_var[0]));
-                $coupon->end_date = date('Y-m-d', strtotime($date_var[1]));
-            }
-        }
+        $this->applyDateRange($coupon, $request->date_var);
 
         $coupon->save();
 
@@ -182,5 +170,33 @@ class CouponsController extends Controller
         $coupon->delete();
 
         return redirect()->route('manager.coupons');
+    }
+
+    /**
+     * strtotime() no lanza excepción con texto que no es fecha: devuelve
+     * false, y date('Y-m-d', false) guardaba silenciosamente "1970-01-01"
+     * en vez de dejar el rango sin tocar.
+     */
+    private function applyDateRange(Coupon $coupon, ?string $range): void
+    {
+        if (! $range) {
+            return;
+        }
+
+        $dateVar = explode(' - ', $range);
+
+        if (count($dateVar) !== 2) {
+            return;
+        }
+
+        $start = strtotime($dateVar[0]);
+        $end = strtotime($dateVar[1]);
+
+        if ($start === false || $end === false) {
+            return;
+        }
+
+        $coupon->start_date = date('Y-m-d', $start);
+        $coupon->end_date = date('Y-m-d', $end);
     }
 }

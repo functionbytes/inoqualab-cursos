@@ -9,7 +9,7 @@
                     <div class="d-flex no-block align-items-center mb-4">
                         <h5 class="mb-0">Progreso — {{ $user->firstname }} {{ $user->lastname }}</h5>
                         <div class="ms-auto">
-                            <a href="{{ route('manager.enterprises.courses.view', [$order->enterprise->slack ?? '', $course->slack]) }}" class="btn btn-light btn-sm">
+                            <a href="{{ route('manager.enterprises.courses.view', [$user->relations?->slack ?? '', $course->slack]) }}" class="btn btn-light btn-sm">
                                 <i class="fas fa-arrow-left me-1"></i> Volver
                             </a>
                         </div>
@@ -28,7 +28,7 @@
                             <div class="card bg-light border-0">
                                 <div class="card-body">
                                     <p class="text-muted mb-1 small">Progreso general</p>
-                                    <h6 class="mb-0">{{ $order->percent ?? 0 }}%</h6>
+                                    <h6 class="mb-0">{{ $inscription->percent ?? 0 }}%</h6>
                                 </div>
                             </div>
                         </div>
@@ -36,7 +36,7 @@
                             <div class="card bg-light border-0">
                                 <div class="card-body">
                                     <p class="text-muted mb-1 small">Estado</p>
-                                    <h6 class="mb-0">{{ $order->culminated ? 'Culminado' : 'En progreso' }}</h6>
+                                    <h6 class="mb-0">{{ $inscription->culminated ? 'Culminado' : 'En progreso' }}</h6>
                                 </div>
                             </div>
                         </div>

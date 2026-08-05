@@ -7,6 +7,7 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\Enterprise\EnterpriseUser;
 use App\Models\Inscription;
+use App\Models\Order\Order;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
@@ -152,6 +153,83 @@ class EnterprisesSecurityTest extends TestCase
             'user_id' => $member->id,
             'course_id' => $course->id,
         ]);
+    }
+
+    // ── Bug: CourseController::progress() usaba Order::with(['progress', ─────
+    // ── 'course.lessons']) -- relaciones inexistentes en Order, 500 siempre ──
+
+    public function test_progress_page_renders_instead_of_500(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $enterprise = $this->createEnterprise();
+        $course = Course::factory()->create();
+        $member = $this->attachMember($enterprise, 'ID-'.Str::random(8));
+
+        $order = Order::create([
+            'slack' => 'ord-'.Str::random(8),
+            'number' => (Order::max('number') ?? 0) + 1,
+            'reference' => 'ORD-'.Str::random(6),
+            'user_id' => $member->id,
+            'type_id' => OrderType::where('slug', 'services')->first()->id,
+            'method_id' => OrderMethod::where('slug', 'credit')->first()->id,
+            'condition_id' => 4,
+            'total_before_discount' => 0,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => 0,
+        ]);
+
+        $inscription = Inscription::factory()->create([
+            'user_id' => $member->id,
+            'course_id' => $course->id,
+            'order_id' => $order->id,
+        ]);
+
+        // Antes: Order::with(['progress', 'user', 'course.lessons'])->slack(...)
+        // -- ni "progress" ni "course" son relaciones de Order -- lanzaba
+        // RelationNotFoundException siempre, sin importar el estado de los datos.
+        $this->actingAs($manager)
+            ->get(route('manager.enterprises.courses.progress', $inscription->slack))
+            ->assertOk();
+    }
+
+    public function test_enterprise_course_view_links_to_the_inscription_slack_not_the_user_slack(): void
+    {
+        $manager = User::factory()->manager()->create();
+
+        $enterprise = $this->createEnterprise();
+        $course = Course::factory()->create();
+        $member = $this->attachMember($enterprise, 'ID-'.Str::random(8));
+
+        $order = Order::create([
+            'slack' => 'ord-'.Str::random(8),
+            'number' => (Order::max('number') ?? 0) + 1,
+            'reference' => 'ORD-'.Str::random(6),
+            'user_id' => $member->id,
+            'type_id' => OrderType::where('slug', 'services')->first()->id,
+            'method_id' => OrderMethod::where('slug', 'credit')->first()->id,
+            'condition_id' => 4,
+            'total_before_discount' => 0,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => 0,
+        ]);
+
+        $inscription = Inscription::factory()->create([
+            'user_id' => $member->id,
+            'course_id' => $course->id,
+            'order_id' => $order->id,
+        ]);
+
+        // Antes: el listado generaba el link con $user->slack, que
+        // CourseController::progress()/CertificatesController::user() no
+        // podían resolver (esperan el slack de la inscripción).
+        $this->actingAs($manager)
+            ->get(route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]))
+            ->assertOk()
+            ->assertSee(route('manager.enterprises.courses.progress', $inscription->slack), false)
+            ->assertDontSee(route('manager.enterprises.courses.progress', $member->slack), false);
     }
 
     public function test_import_rejects_invalid_file_type(): void
