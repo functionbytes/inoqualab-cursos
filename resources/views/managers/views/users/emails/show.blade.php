@@ -31,10 +31,14 @@
                 </div>
                 <div class="card-body p-0 bg-light">
                     <div class="d-flex justify-content-center p-4" id="previewWrapper">
-                        <div id="previewContainer"
-                             style="width:100%;max-width:100%;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.1);border-radius:8px;overflow:hidden;transition:max-width .3s ease;">
-                            {!! $log->body_html !!}
-                        </div>
+                        {{-- body_html es el HTML EXACTO de cualquier correo saliente (capturado
+                        indiscriminadamente por LogMailSent), incluidas plantillas/campañas
+                        editables por managers -- no se purifica a propósito (por diseño esta
+                        vista muestra el contenido exacto enviado). Se aísla en un iframe
+                        sandboxeado sin allow-scripts en vez de inyectarlo en el DOM del panel,
+                        para que ningún <script> embebido pueda ejecutarse. --}}
+                        <iframe id="previewContainer" sandbox="allow-same-origin"
+                                style="width:100%;max-width:100%;min-height:400px;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.1);border-radius:8px;border:0;transition:max-width .3s ease;"></iframe>
                     </div>
                 </div>
                 <div class="card-footer bg-light border-top">
@@ -158,6 +162,17 @@
 @push('scripts')
 <script>
 $(document).ready(function () {
+    var previewFrame = document.getElementById('previewContainer');
+    previewFrame.srcdoc = @json($log->body_html ?? '');
+    previewFrame.addEventListener('load', function () {
+        try {
+            var height = previewFrame.contentDocument.documentElement.scrollHeight;
+            previewFrame.style.height = Math.max(height, 400) + 'px';
+        } catch (e) {
+            // Si el navegador bloquea el acceso al documento, se queda con min-height.
+        }
+    });
+
     $('#btnDesktopView').on('click', function () {
         $('#previewContainer').css('max-width', '100%');
         $('#btnDesktopView, #btnMobileView').removeClass('active');
