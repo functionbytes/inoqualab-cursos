@@ -102,7 +102,12 @@ class UsersController extends Controller
         $user->email = $request->email;
         $user->address = $request->address;
         $user->company = $request->company;
-        $user->available = $request->available;
+        // El form de edit.blade.php no tiene ningún campo `available`: sin
+        // este filled(), cada guardado normal (celular, dirección, etc.)
+        // mandaba available=null y lo dejaba así -- NULL se evalúa como
+        // falso en LoginController/CheckSession, bloqueando el login del
+        // empleado sin que la empresa lo hubiera pedido.
+        $request->filled('available') ? $user->available = $request->boolean('available') : null;
         $request->filled('password') ? $user->password = $request->password : null;
         $user->update();
 

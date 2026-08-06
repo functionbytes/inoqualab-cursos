@@ -57,4 +57,51 @@ class UsersControllerTest extends TestCase
             ->get(route('enterprise.users', ['search' => 'Ana']))
             ->assertOk();
     }
+
+    // ── Regresión: update() ponía available=null en cualquier guardado ──────
+    // ── porque edit.blade.php no tiene ningún campo `available` ─────────────
+
+    public function test_update_does_not_clear_available_when_the_field_is_not_sent(): void
+    {
+        $employee = User::factory()->create(['role' => 'customer', 'available' => 1]);
+        DB::table('enterprise_user')->insert([
+            'enterprise_id' => DB::table('enterprise_staff')->where('user_id', $this->enterpriseStaff->id)->value('enterprise_id'),
+            'user_id' => $employee->id,
+        ]);
+
+        $this->actingAs($this->enterpriseStaff)
+            ->postJson(route('enterprise.users.update'), [
+                'slack' => $employee->slack,
+                'firstname' => $employee->firstname,
+                'lastname' => $employee->lastname,
+                'email' => $employee->email,
+                // available deliberadamente ausente, como manda el form real.
+            ])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertSame(1, (int) $employee->fresh()->available);
+    }
+
+    public function test_update_sets_available_when_the_field_is_explicitly_sent(): void
+    {
+        $employee = User::factory()->create(['role' => 'customer', 'available' => 1]);
+        DB::table('enterprise_user')->insert([
+            'enterprise_id' => DB::table('enterprise_staff')->where('user_id', $this->enterpriseStaff->id)->value('enterprise_id'),
+            'user_id' => $employee->id,
+        ]);
+
+        $this->actingAs($this->enterpriseStaff)
+            ->postJson(route('enterprise.users.update'), [
+                'slack' => $employee->slack,
+                'firstname' => $employee->firstname,
+                'lastname' => $employee->lastname,
+                'email' => $employee->email,
+                'available' => 0,
+            ])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $this->assertSame(0, (int) $employee->fresh()->available);
+    }
 }

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\UpdateEnterpriseRatesRequest;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RatesController extends Controller
@@ -24,14 +24,18 @@ class RatesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateEnterpriseRatesRequest $request)
     {
-        abort_unless(auth()->user()->can('enterprises.update'), 403);
+        // Sin Form Request, `courses` no tenía ninguna validación de precio
+        // (a diferencia del controller gemelo Distributors/RatesController,
+        // que sí exige numeric|min:0) -- se podía guardar un precio negativo
+        // o no numérico en enterprise_course, corrompiendo cualquier cálculo
+        // de comisión/factura que lo use.
+        $data = $request->validated();
+        $enterprise = Enterprise::slack($data['slack']);
 
-        $enterprise = Enterprise::slack($request->slack);
-
-        DB::transaction(function () use ($request, $enterprise) {
-            foreach ($request->courses as $id => $price) {
+        DB::transaction(function () use ($data, $enterprise) {
+            foreach ($data['courses'] as $id => $price) {
                 // Acotado por enterprise_id: sin esto, se podía enviar el id de una
                 // tarifa (enterprise_course) de OTRA empresa y sobreescribir su
                 // precio (IDOR).

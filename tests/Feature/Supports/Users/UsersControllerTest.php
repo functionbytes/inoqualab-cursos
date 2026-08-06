@@ -208,6 +208,24 @@ class UsersControllerTest extends TestCase
         $this->assertSame(0, (int) $customer->order_notification);
     }
 
+    // ── Bug: notification() era el único mutador del controller sin el guard ──
+    // ── guardManageableUser() -- un support podía tocar notificaciones de un ──
+    // ── manager/support sin verificación de rol ────────────────────────────
+
+    public function test_support_cannot_change_notification_preferences_of_a_manager_account(): void
+    {
+        $target = User::factory()->manager()->create();
+
+        $this->actingAs($this->support)
+            ->post(route('support.users.notification'), [
+                'slack' => $target->slack,
+                'newsletter_notification' => 'true',
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(0, (int) $target->fresh()->newsletter_notification);
+    }
+
     // ── Bug: store()/update() leían $request->enterprise (singular) pero el ──
     // ── <select id="enterprises"> del formulario envía 'enterprises' (plural) ──
 

@@ -424,7 +424,11 @@ class UsersController extends Controller
     public function notification(Request $request)
     {
 
-        $user = User::slack($request->slack);
+        // Único mutador del controller que no pasaba por este guard: un
+        // support podía alterar las preferencias de notificación de un
+        // manager/support sin ninguna verificación de rol, a diferencia de
+        // update/information/resetpassword/destroy que sí lo exigen.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         $user->newsletter_notification = $request->newsletter_notification == 'true' ? 1 : 0;
         $user->order_notification = $request->order_notification == 'true' ? 1 : 0;

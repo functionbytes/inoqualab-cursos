@@ -10,6 +10,7 @@ use App\Models\Course\Course;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
@@ -96,13 +97,16 @@ class BundlesController extends Controller
         $bundle->expire_at = Carbon::parse($request->expire_at);
         $bundle->update();
 
-        $bundle->courses()->detach();
+        // detach()+attach() en loop, sin transacción y sin validar que los
+        // ids existan: un id inexistente/borrado a mitad de la lista tiraba
+        // QueryException por la FK de bundle_course, dejando el bundle SIN
+        // NINGÚN curso (detach() ya se había ejecutado y confirmado). sync()
+        // es una sola operación atómica, y se filtra contra cursos reales.
+        $courseIds = $this->resolveCourseIds($request->courses);
 
-        if ($request->courses != null) {
-            foreach (explode(',', $request->courses) as $key => $id) {
-                $bundle->courses()->attach($key, ['course_id' => $id]);
-            }
-        }
+        DB::transaction(function () use ($bundle, $courseIds) {
+            $bundle->courses()->sync($courseIds);
+        });
 
         return response()->json([
             'success' => true,
@@ -110,6 +114,18 @@ class BundlesController extends Controller
             'message' => 'Se actualizo el paquete correctamente',
         ]);
 
+    }
+
+    /** Ids de curso válidos a partir de un string "1,2,3" (ignora ids inexistentes). */
+    private function resolveCourseIds(?string $courses): array
+    {
+        if ($courses === null || $courses === '') {
+            return [];
+        }
+
+        $ids = array_filter(explode(',', $courses), fn ($id) => $id !== '');
+
+        return Course::query()->whereIn('id', $ids)->pluck('id')->all();
     }
 
     public function store(StoreBundleRequest $request)
@@ -130,10 +146,10 @@ class BundlesController extends Controller
         $bundle->expire_at = Carbon::parse($request->expire_at);
         $bundle->save();
 
-        if ($request->courses != null) {
-            foreach (explode(',', $request->courses) as $key => $id) {
-                $bundle->courses()->attach($key, ['course_id' => $id]);
-            }
+        $courseIds = $this->resolveCourseIds($request->courses);
+
+        if (! empty($courseIds)) {
+            $bundle->courses()->attach($courseIds);
         }
 
         return response()->json([

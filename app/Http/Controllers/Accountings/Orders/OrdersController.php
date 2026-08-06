@@ -132,9 +132,12 @@ class OrdersController extends Controller
 
         $order = Order::slack($request->slack);
 
-        if ($request->condition == 4) {
-            $order->payment_at = Carbon::parse($request->payment);
-        }
+        // La condicion 4 ("Pagada") es la unica que conserva payment_at; cualquier
+        // otra condicion debe limpiarla para no dejar una orden no-pagada con
+        // una fecha de pago residual de un estado anterior.
+        $order->payment_at = (int) $request->condition === 4
+            ? Carbon::parse($request->payment)
+            : null;
 
         $order->condition_id = $request->condition;
         $order->method_id = $request->methods;

@@ -321,7 +321,16 @@ class CourseController extends Controller
 
         $currentCourses = $enterprise->courses->pluck('id')->toArray();
 
-        $newCourses = $request->courses ? explode(',', $request->courses) : [];
+        $requestedCourses = $request->courses ? explode(',', $request->courses) : [];
+
+        // Bypass de facturación: sin este filtro, un distribuidor podía
+        // asignar a su empresa CUALQUIER curso del catálogo global (no solo
+        // los de su propio catálogo contratado en distributor_courses), y
+        // ese curso quedaba disponible para matricular gratis vía
+        // includes()/InscriptionService::enrollSimple() sin pasar nunca por
+        // DistributorCourse::tariff() ni generar una Order con importe > 0.
+        $distributorCourseIds = app('distributor')->courses()->pluck('courses.id')->map(fn ($id) => (string) $id)->all();
+        $newCourses = array_values(array_intersect($requestedCourses, $distributorCourseIds));
 
         if (! empty($newCourses)) {
 
