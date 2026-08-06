@@ -47,9 +47,20 @@ class NewsletterList extends Model
         return $query->where('trigger', '!=', 'manual');
     }
 
-    public function scopeTrigger($query, string $trigger)
+    /**
+     * Busca la lista dinámica activa para un trigger. Deliberadamente NO es
+     * un scope Eloquent (scopeX): Builder::callScope() hace
+     * `return $scope(...) ?? $this` -- si esto terminara en ->first() como
+     * scope y no hubiera ninguna lista para el trigger (->first() = null),
+     * Eloquent reemplaza ese null por el propio Builder en silencio.
+     * NewsletterList::trigger('x') devolvía entonces un Builder, no null, y
+     * $list?->addByEmail(...) explotaba con BadMethodCallException porque el
+     * operador null-safe no detecta un Builder -- abortando el comando
+     * entero, no solo el paso de lista.
+     */
+    public static function forTrigger(string $trigger): ?self
     {
-        return $query->where('trigger', $trigger)->where('is_active', true)->first();
+        return static::query()->where('trigger', $trigger)->where('is_active', true)->first();
     }
 
     /**

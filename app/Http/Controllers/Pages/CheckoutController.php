@@ -507,8 +507,78 @@ class CheckoutController extends Controller
                         foreach ($bundle->courses as $course) {
                             $this->enrollCourse($order, $course->id);
                         }
+                    } else {
+                        // Bundle borrado físicamente (no tiene SoftDeletes):
+                        // sin este log, el ítem se saltaba en silencio y la
+                        // orden quedaba pagada sin ninguna matrícula de este
+                        // bundle, sin ninguna traza de por qué.
+                        Log::warning('CheckoutController: bundle referenciado por una orden ya no existe', [
+                            'order' => $order->slack,
+                            'bundle_id' => $item->item_id,
+                        ]);
                     }
                 }
+            }
+        });
+    }
+
+    /**
+     * Cursos que la orden debería tener matriculados (directos + expandidos
+     * de bundles) pero que el usuario aún no tiene. Usado por
+     * orders:repair-enrollments para no descartar órdenes con matrícula
+     * PARCIAL: el chequeo original solo miraba si existía ALGUNA inscripción
+     * de la orden, así que una orden con un curso matriculado y un bundle sin
+     * matricular (por fallo parcial o bundle borrado) escapaba para siempre.
+     *
+     * @return array<int, int>
+     */
+    public function missingCourseIdsForOrder(Order $order): array
+    {
+        $order->loadMissing('items');
+
+        $courseIds = $order->items->where('item_type', Course::class)->pluck('item_id');
+
+        $bundleIds = $order->items->where('item_type', Bundle::class)->pluck('item_id');
+
+        if ($bundleIds->isNotEmpty()) {
+            $bundles = Bundle::with('courses')->whereIn('id', $bundleIds)->get()->keyBy('id');
+
+            foreach ($bundleIds as $bundleId) {
+                $bundle = $bundles->get($bundleId);
+
+                if (! $bundle) {
+                    continue;
+                }
+
+                $courseIds = $courseIds->merge($bundle->courses->pluck('id'));
+            }
+        }
+
+        $courseIds = $courseIds->unique()->values();
+
+        if ($courseIds->isEmpty()) {
+            return [];
+        }
+
+        $enrolled = Inscription::where('user_id', $order->user_id)
+            ->whereIn('course_id', $courseIds)
+            ->pluck('course_id');
+
+        return $courseIds->diff($enrolled)->values()->all();
+    }
+
+    /**
+     * Matricula únicamente los cursos indicados (no toca los que ya
+     * existen), para no re-disparar la renovación de cursos que la orden ya
+     * tenía correctamente matriculados.
+     *
+     * @param  array<int, int>  $courseIds
+     */
+    public function enrollMissingCourses(Order $order, array $courseIds): void
+    {
+        DB::transaction(function () use ($order, $courseIds) {
+            foreach ($courseIds as $courseId) {
+                $this->enrollCourse($order, $courseId);
             }
         });
     }

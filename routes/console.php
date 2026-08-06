@@ -17,13 +17,13 @@ Schedule::command('orders:cleanup-abandoned')->daily();
 // Red de seguridad: repara matrículas de órdenes pagadas cuyo enrolamiento falló.
 Schedule::command('orders:repair-enrollments')->hourly()->withoutOverlapping();
 // Aviso de renovación de certificados: 30 y 7 días antes del vencimiento.
-Schedule::command('certificates:notify-expiring --days=30')->dailyAt('08:00');
-Schedule::command('certificates:notify-expiring --days=7')->dailyAt('08:05');
+Schedule::command('certificates:notify-expiring --days=30')->dailyAt('08:00')->withoutOverlapping();
+Schedule::command('certificates:notify-expiring --days=7')->dailyAt('08:05')->withoutOverlapping();
 // Cross-sell post-completación: recomienda nuevos cursos a quien completó ayer.
-Schedule::command('courses:notify-completed --days=1')->dailyAt('09:30');
+Schedule::command('courses:notify-completed --days=1')->dailyAt('09:30')->withoutOverlapping();
 
 // Recordatorio de acceso por vencer (7 días antes, sin completar) → renovar.
-Schedule::command('courses:notify-expiring-access --days=7')->dailyAt('09:15');
+Schedule::command('courses:notify-expiring-access --days=7')->dailyAt('09:15')->withoutOverlapping();
 Schedule::command('mail:fetch-orders')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('mails:reparse-failed')->hourly()->withoutOverlapping();
 Schedule::command('analytics:dispatch-schedules')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();

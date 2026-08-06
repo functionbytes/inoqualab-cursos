@@ -22,13 +22,22 @@ class NotifyExpiringAccess extends Command
         $days = (int) $this->option('days');
         $target = Carbon::today()->addDays($days)->toDateString();
 
+        // Guarda contra doble disparo (reintento manual, cron duplicado):
+        // sin esto, correr el comando dos veces para el mismo día de cohorte
+        // reenvía el recordatorio a todos los accesos por vencer ese día.
+        if (RemarketingRun::where('command', 'courses:notify-expiring-access')->where('cohort_date', $target)->exists()) {
+            $this->warn("Ya se ejecutó courses:notify-expiring-access para la cohorte {$target}. Nada que hacer.");
+
+            return self::SUCCESS;
+        }
+
         // Solo accesos que vencen ese día y que aún NO se completaron.
         $inscriptions = Inscription::with(['user', 'course'])
             ->whereDate('enroll_expire', $target)
             ->where('culminated', 0)
             ->get();
 
-        $list = NewsletterList::trigger('course_access_expiring');
+        $list = NewsletterList::forTrigger('course_access_expiring');
 
         $sent = 0;
         foreach ($inscriptions as $inscription) {

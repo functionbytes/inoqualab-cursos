@@ -7,6 +7,7 @@ use App\Models\AnalyticsReportSchedule;
 use App\Services\AnalyticsReportService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class DispatchAnalyticsSchedulesCommand extends Command
 {
@@ -42,12 +43,25 @@ class DispatchAnalyticsSchedulesCommand extends Command
 
         AnalyticsReportSchedule::query()->due()->chunk(50, function ($schedules) use (&$count) {
             foreach ($schedules as $schedule) {
-                GenerateAnalyticsReport::dispatchForSchedule($schedule);
+                // Un schedule con datos raros no debe bloquear el resto: si
+                // esto revienta sin capturarse, next_run_at nunca avanza para
+                // este schedule y chunk() aborta también los siguientes --
+                // el mismo schedule "envenenado" vuelve a fallar cada 15
+                // minutos, para siempre, bloqueando a todos los de ID mayor.
+                try {
+                    GenerateAnalyticsReport::dispatchForSchedule($schedule);
 
-                $schedule->update(['next_run_at' => $this->service->calculateNextRun($schedule->frequency)]);
+                    $schedule->update(['next_run_at' => $this->service->calculateNextRun($schedule->frequency)]);
 
-                $this->line("  -> [{$schedule->frequency}] {$schedule->name} -> {$schedule->email}");
-                $count++;
+                    $this->line("  -> [{$schedule->frequency}] {$schedule->name} -> {$schedule->email}");
+                    $count++;
+                } catch (\Throwable $e) {
+                    Log::error('analytics:dispatch-schedules falló para un schedule', [
+                        'schedule_id' => $schedule->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    $this->error("Schedule #{$schedule->id} ({$schedule->name}): {$e->getMessage()}");
+                }
             }
         });
 

@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Courses;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -95,7 +96,14 @@ class DeduplicateProgress extends Command
         $this->info('Eliminadas '.number_format($borradas).' filas.');
 
         $this->info('Recalculando porcentajes afectados…');
-        $corregidas = $this->recalcularPorcentajes();
+        // No basta con recalcular las que quedaron > 100: una inscripción con
+        // duplicados puede haber quedado inflada pero <= 100 (p. ej. 5
+        // lecciones reales de 10 mostradas como 7 por duplicados = 70%) y
+        // eso nunca se corregía. Se recalculan TODAS las inscripciones que
+        // tenían algún grupo duplicado, más las que quedaron > 100 por otra
+        // causa.
+        $inscripcionesAfectadas = $grupos->pluck('inscription_id')->unique()->values();
+        $corregidas = $this->recalcularPorcentajes($inscripcionesAfectadas);
         $this->info('Corregidas '.number_format($corregidas).' inscripciones.');
 
         $this->newLine();
@@ -105,13 +113,22 @@ class DeduplicateProgress extends Command
         return self::SUCCESS;
     }
 
-    /** Recalcula el avance de las matrículas cuyo porcentaje quedó fuera de rango. */
-    private function recalcularPorcentajes(): int
+    /**
+     * Recalcula el avance de las matrículas que tenían grupos duplicados
+     * (percent inflado, con o sin pasar de 100) y de cualquier otra que haya
+     * quedado > 100 por una causa distinta.
+     */
+    private function recalcularPorcentajes(Collection $inscripcionesAfectadas): int
     {
         $corregidas = 0;
 
         DB::table('inscriptions')
-            ->whereRaw('CAST(percent AS DECIMAL(10,2)) > 100')
+            ->where(function ($query) use ($inscripcionesAfectadas) {
+                $query->whereRaw('CAST(percent AS DECIMAL(10,2)) > 100');
+                if ($inscripcionesAfectadas->isNotEmpty()) {
+                    $query->orWhereIn('id', $inscripcionesAfectadas);
+                }
+            })
             ->orderBy('id')
             ->chunkById(200, function ($inscripciones) use (&$corregidas) {
                 foreach ($inscripciones as $i) {

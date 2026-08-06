@@ -22,11 +22,20 @@ class NotifyExpiring extends Command
         $days = (int) $this->option('days');
         $target = Carbon::today()->addDays($days)->toDateString();
 
+        // Guarda contra doble disparo (reintento manual, cron duplicado):
+        // sin esto, correr el comando dos veces para el mismo día de cohorte
+        // reenvía el correo de renovación a todos los certificados de ese día.
+        if (RemarketingRun::where('command', 'certificates:notify-expiring')->where('cohort_date', $target)->exists()) {
+            $this->warn("Ya se ejecutó certificates:notify-expiring para la cohorte {$target}. Nada que hacer.");
+
+            return self::SUCCESS;
+        }
+
         $certificates = Certificate::with(['user', 'course'])
             ->whereDate('end_at', $target)
             ->get();
 
-        $list = NewsletterList::trigger('certificate_expiring');
+        $list = NewsletterList::forTrigger('certificate_expiring');
 
         $sent = 0;
         foreach ($certificates as $certificate) {

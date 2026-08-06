@@ -52,7 +52,7 @@ class RemarketingCommandsTest extends TestCase
         $this->artisan('courses:notify-completed', ['--days' => 1])->assertExitCode(0);
 
         Mail::assertQueued(CompletedCourseMail::class, 1);
-        $this->assertSame(1, NewsletterList::trigger('course_completed')->subscribers()->count());
+        $this->assertSame(1, NewsletterList::forTrigger('course_completed')->subscribers()->count());
         $this->assertDatabaseHas('remarketing_runs', [
             'command' => 'courses:notify-completed',
             'found' => 1,
@@ -94,7 +94,7 @@ class RemarketingCommandsTest extends TestCase
         $this->artisan('courses:notify-expiring-access', ['--days' => 7])->assertExitCode(0);
 
         Mail::assertQueued(AccessExpiringMail::class, 1);
-        $this->assertSame(1, NewsletterList::trigger('course_access_expiring')->subscribers()->count());
+        $this->assertSame(1, NewsletterList::forTrigger('course_access_expiring')->subscribers()->count());
     }
 
     public function test_purchase_removes_subscriber_from_dynamic_lists(): void
@@ -103,7 +103,7 @@ class RemarketingCommandsTest extends TestCase
         Mail::fake();
 
         $user = User::factory()->create(['email' => 'buyer@example.com']);
-        $list = NewsletterList::trigger('course_completed');
+        $list = NewsletterList::forTrigger('course_completed');
         $list->addByEmail($user->email, $user->firstname, 'test');
         $this->assertSame(1, $list->subscribers()->count());
 

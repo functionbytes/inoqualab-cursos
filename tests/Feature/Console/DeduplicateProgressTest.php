@@ -177,6 +177,28 @@ class DeduplicateProgressTest extends TestCase
         $this->assertSame(75.0, $percent, '3 de 4 lecciones son el 75 %.');
     }
 
+    /**
+     * Regresión: antes solo se recalculaba percent cuando quedaba > 100.
+     * Una inscripción con duplicados puede quedar inflada SIN pasar de 100
+     * (aquí: 2 de 4 lecciones reales = 50 %, pero un percent legado de 75 %
+     * nunca se corregía porque 75 <= 100) y eso nunca se detectaba.
+     */
+    public function test_it_recalculates_inflated_percentages_that_stay_under_one_hundred(): void
+    {
+        // Solo 2 lecciones completadas de 4 (con duplicados) = 50 % real.
+        $this->registrarProgreso($this->lecciones[0], 3);
+        $this->registrarProgreso($this->lecciones[1], 2);
+
+        // percent legado, inflado por los duplicados, pero sin pasar de 100.
+        DB::table('inscriptions')->where('id', $this->inscripcion->id)->update(['percent' => '75']);
+
+        $this->artisan('courses:deduplicate-progress --apply')->assertSuccessful();
+
+        $percent = (float) DB::table('inscriptions')->where('id', $this->inscripcion->id)->value('percent');
+
+        $this->assertSame(50.0, $percent, '2 de 4 lecciones son el 50 %, no el 75 % legado.');
+    }
+
     public function test_it_does_nothing_when_there_is_no_duplication(): void
     {
         foreach ($this->lecciones as $leccion) {

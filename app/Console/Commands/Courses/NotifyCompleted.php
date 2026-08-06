@@ -27,12 +27,21 @@ class NotifyCompleted extends Command
         $days = max(1, (int) $this->option('days'));
         $target = Carbon::today()->subDays($days)->toDateString();
 
+        // Guarda contra doble disparo (reintento manual, cron duplicado):
+        // sin esto, correr el comando dos veces para el mismo día de cohorte
+        // reenvía la recomendación a todos los alumnos que completaron ese día.
+        if (RemarketingRun::where('command', 'courses:notify-completed')->where('cohort_date', $target)->exists()) {
+            $this->warn("Ya se ejecutó courses:notify-completed para la cohorte {$target}. Nada que hacer.");
+
+            return self::SUCCESS;
+        }
+
         $inscriptions = Inscription::with(['user', 'course'])
             ->where('culminated', 1)
             ->whereDate('enroll_culminated', $target)
             ->get();
 
-        $list = NewsletterList::trigger('course_completed');
+        $list = NewsletterList::forTrigger('course_completed');
 
         $sent = 0;
         foreach ($inscriptions as $inscription) {

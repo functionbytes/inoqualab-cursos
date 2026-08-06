@@ -30,7 +30,10 @@ class AutoNotificationdeletes extends Command
         $days = (int) setting('AUTO_NOTIFICATION_DELETE_DAYS') ?: 30;
         $deleted = 0;
 
-        User::with('notifications')->chunk(200, function ($users) use ($days, &$deleted) {
+        // withTrashed(): User usa SoftDeletes, así que sin esto el scope
+        // global excluye usuarios eliminados y sus notificaciones nunca se
+        // purgaban -- se acumulaban indefinidamente en la tabla.
+        User::withTrashed()->with('notifications')->chunk(200, function ($users) use ($days, &$deleted) {
             foreach ($users as $user) {
                 foreach ($user->notifications as $notification) {
                     if ($notification->read_at && $notification->read_at->addDays($days)->lte(now())) {
