@@ -35,6 +35,10 @@ class ResetPasswordListener implements ShouldQueue
 
     public function failed(ResetPasswordCreated $event, \Throwable $exception): void
     {
-        Log::error('Listener failed: '.static::class, ['error' => $exception->getMessage()]);
+        Log::error('Listener failed: '.static::class, [
+            'user_id' => $event->user->id,
+            'user_email' => $event->user->email,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }

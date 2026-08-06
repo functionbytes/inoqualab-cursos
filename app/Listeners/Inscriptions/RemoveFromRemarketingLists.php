@@ -42,6 +42,10 @@ class RemoveFromRemarketingLists implements ShouldQueue
 
     public function failed(InscriptionCreated $event, \Throwable $exception): void
     {
-        Log::error('Listener failed: '.static::class, ['error' => $exception->getMessage()]);
+        Log::error('Listener failed: '.static::class, [
+            'inscription_id' => $event->inscription->id,
+            'inscription_slack' => $event->inscription->slack,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }

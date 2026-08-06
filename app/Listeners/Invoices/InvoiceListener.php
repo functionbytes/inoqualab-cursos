@@ -39,6 +39,10 @@ class InvoiceListener implements ShouldQueue
 
     public function failed(InvoiceCreated $event, \Throwable $exception): void
     {
-        Log::error('Listener failed: '.static::class, ['error' => $exception->getMessage()]);
+        Log::error('Listener failed: '.static::class, [
+            'invoice_id' => $event->invoice->id,
+            'invoice_slack' => $event->invoice->slack,
+            'error' => $exception->getMessage(),
+        ]);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Models\MailLog;
 use App\Models\User;
 use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\Mime\Email;
 use Throwable;
 
@@ -51,8 +52,15 @@ class LogMailSent
                     'sent_at' => now(),
                 ]);
             }
-        } catch (Throwable) {
-            // Never let logging break the mail send flow
+        } catch (Throwable $e) {
+            // Nunca dejar que el logging rompa el envío del correo -- pero un
+            // catch totalmente silencioso significaba que un fallo de
+            // MailLog::create() (ej. body_html con bytes inválidos) borraba
+            // el registro de auditoría sin dejar ni rastro en los logs,
+            // justo lo contrario de para qué existe este listener.
+            Log::warning('LogMailSent falló al registrar un correo enviado', [
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

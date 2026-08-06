@@ -17,6 +17,7 @@ use App\Models\Order\OrderType;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -190,8 +191,33 @@ class InscriptionService
     /**
      * Enroll a user into a course via the simple enterprise includes flow.
      * Creates Order + OrderItem + Inscription a costo cero (sin OrderActivity ni tarifa).
+     *
+     * Es el único punto de entrada realmente alcanzable de matrícula gratis
+     * (includes() en Supports/Distributors\Enterprises\CourseController, y
+     * enrollSimpleBulk() en Managers) -- a diferencia del método muerto
+     * enrollIfNotDuplicate(), este NO tenía ningún chequeo de duplicados:
+     * un doble-click en "matricular", o incluir la misma identificación dos
+     * veces en un bulk, creaba una Order+Inscription nueva cada vez, sin
+     * límite. El lock cierra también la ventana de carrera entre dos
+     * peticiones concurrentes para el mismo par usuario+curso (el chequeo y
+     * la creación ya no pueden intercalarse).
      */
     public function enrollSimple(User $user, Course $course): Inscription
+    {
+        $lock = Cache::lock("enroll-simple:{$user->id}:{$course->id}", 10);
+
+        return $lock->block(5, function () use ($user, $course) {
+            $existing = Inscription::existingInscription($user->id, $course->id)->first();
+
+            if ($existing !== null) {
+                return $existing;
+            }
+
+            return $this->createSimpleEnrollment($user, $course);
+        });
+    }
+
+    private function createSimpleEnrollment(User $user, Course $course): Inscription
     {
         $condition = OrderCondition::slug('payment');
         $type = OrderType::slug('services');
