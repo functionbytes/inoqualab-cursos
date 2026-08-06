@@ -35,7 +35,13 @@ trait GeneratesSlackAndNumber
     protected function generateNumber(string $modelClass): int
     {
         $table = (new $modelClass)->getTable();
-        $lastId = DB::table($table)->max('id');
+
+        // lockForUpdate serializa la asignación del número entre transacciones
+        // concurrentes (mismo patrón ya usado en CheckoutController::generate()
+        // para evitar números duplicados bajo carga) -- solo tiene efecto si se
+        // llama DENTRO de una transacción abierta, como hacen los callers de
+        // este trait.
+        $lastId = DB::table($table)->lockForUpdate()->max('id');
 
         return $lastId ? $lastId + 1 : 1;
     }

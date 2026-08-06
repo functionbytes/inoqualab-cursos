@@ -104,7 +104,12 @@ use App\Http\Controllers\Managers\Users\ResultsController;
 use App\Http\Controllers\Managers\Users\UsersController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'panel.permission']], function () {
+// 'session' faltaba aquí (los otros 4 portales SÍ lo tienen): sin él, una
+// cuenta manager deshabilitada seguía con sesión activa en /panel/* (nada
+// llamaba Auth::logout()), y el mecanismo "última sesión gana" (expulsar al
+// resto de dispositivos en el siguiente login) tampoco aplicaba al panel de
+// mayor privilegio del sistema.
+Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('manager.dashboard');
 

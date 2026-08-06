@@ -33,6 +33,16 @@ class InscriptionListener implements ShouldQueue
     {
         $inscription = $event->inscription;
         $email = $inscription->user->email;
+
+        // Usuarios creados desde correos entrantes (OrderCreator::resolveUser())
+        // no siempre tienen email -- sin este guard, el constructor de
+        // InscriptionsMails tira TypeError (su propiedad $email es string, no
+        // nullable) al asignarle null, y el job falla en silencio en la cola
+        // 'emails' (ShouldQueue), visible solo en failed_jobs.
+        if (! $email) {
+            return;
+        }
+
         $mail = new InscriptionsMails($inscription);
         Mail::to($email)->queue($mail);
     }

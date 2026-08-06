@@ -46,7 +46,18 @@ class OrderCreator
             throw new \RuntimeException("Empresa sin distribuidor: {$enterprise->title} (id={$enterprise->id})");
         }
 
-        return DB::transaction(function () use ($payload, $enterprise, $distributor, $courses, $staffId) {
+        // Inscripciones creadas dentro de la transacción: el evento se
+        // despacha DESPUÉS de que la transacción confirme (ver más abajo),
+        // no dentro. config('queue.connections.*.after_commit') es false en
+        // este proyecto y los listeners de InscriptionCreated no declaran
+        // $afterCommit -- con un worker rápido, el listener podía correr
+        // antes del commit y no ver aún la fila, o ver la orden con el total
+        // todavía en 0 (total_after_discount se termina de calcular después
+        // del foreach). Mismo patrón ya correcto en
+        // InscriptionService::enroll(), que despacha fuera de su transacción.
+        $newInscriptions = [];
+
+        $order = DB::transaction(function () use ($payload, $enterprise, $distributor, $courses, $staffId, &$newInscriptions) {
             // Resolve user and determine which courses are genuinely new inside
             // the transaction so a failure does not leave an orphan user/order.
             $user = $this->resolveUser($payload, $enterprise);
@@ -141,7 +152,7 @@ class OrderCreator
                 $activity->updated_at = $now;
                 $activity->save();
 
-                InscriptionCreated::dispatch($inscription);
+                $newInscriptions[] = $inscription;
 
                 $total += $tariff;
             }
@@ -153,6 +164,12 @@ class OrderCreator
 
             return $order;
         });
+
+        foreach ($newInscriptions as $inscription) {
+            InscriptionCreated::dispatch($inscription);
+        }
+
+        return $order;
     }
 
     private function resolveUser(array $payload, Enterprise $enterprise): User

@@ -44,8 +44,12 @@ class InscriptionService
 
         $order = new Order;
         $order->slack = $this->generateSlack('orders');
-        $order->number = $this->generateNumber('orders');
-        $order->reference = 'FAC'.$order->number;
+        // number/reference se calculan DENTRO de la transacción (justo antes
+        // del save() más abajo): generateNumber() usa lockForUpdate(), que
+        // solo serializa la asignación si corre dentro de la misma
+        // transacción que hace el insert -- calcularlo aquí afuera dejaba una
+        // ventana donde dos matrículas concurrentes podían calcular el mismo
+        // número antes de que ninguna de las dos confirmara.
         $order->user_id = $user->id;
         $order->type_id = $type->id;
         $order->method_id = $method->id;
@@ -96,6 +100,8 @@ class InscriptionService
         $activity->updated_at = $now;
 
         $inscription = DB::transaction(function () use ($order, $orderItem, $inscription, $activity) {
+            $order->number = $this->generateNumber('orders');
+            $order->reference = 'FAC'.$order->number;
             $order->save();
             $orderItem->order_id = $order->id;
             $orderItem->save();
@@ -194,8 +200,7 @@ class InscriptionService
 
         $order = new Order;
         $order->slack = $this->generateSlack('orders');
-        $order->number = $this->generateNumber('orders');
-        $order->reference = 'FAC'.$order->number;
+        // number/reference se calculan DENTRO de la transacción, ver enroll().
         $order->user_id = $user->id;
         $order->type_id = $type->id;
         $order->method_id = $method->id;
@@ -232,6 +237,8 @@ class InscriptionService
         $inscription->updated_at = $now;
 
         return DB::transaction(function () use ($order, $orderItem, $inscription) {
+            $order->number = $this->generateNumber('orders');
+            $order->reference = 'FAC'.$order->number;
             $order->save();
             $orderItem->order_id = $order->id;
             $orderItem->save();
@@ -282,7 +289,11 @@ class InscriptionService
 
     private function generateNumber(string $table): int
     {
-        $lastId = DB::table($table)->max('id');
+        // lockForUpdate serializa la asignación del número entre transacciones
+        // concurrentes (mismo patrón ya usado en CheckoutController::generate()
+        // para evitar números duplicados bajo carga) -- solo tiene efecto si se
+        // llama DENTRO de una transacción abierta.
+        $lastId = DB::table($table)->lockForUpdate()->max('id');
 
         return $lastId ? $lastId + 1 : 1;
     }
