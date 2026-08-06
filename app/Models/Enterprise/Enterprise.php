@@ -76,9 +76,14 @@ class Enterprise extends Model
         return $query->where('available', 1);
     }
 
-    public function scopeCode($query, $code)
+    /**
+     * Método estático (no scope local) para no caer en el antipatrón de
+     * Eloquent donde un `null` devuelto por un scope es reemplazado por el
+     * propio Builder (`$result ?? $this` en Builder::callScope()).
+     */
+    public static function byCode(string $code): ?self
     {
-        return $query->where('code', $code)->first();
+        return static::where('code', $code)->first();
     }
 
     public function distributor(): HasOneThrough

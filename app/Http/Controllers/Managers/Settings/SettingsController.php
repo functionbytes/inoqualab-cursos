@@ -15,9 +15,11 @@ class SettingsController extends Controller
     {
         abort_unless(auth()->user()->can('settings.view'), 403);
 
-        // Setting::key() devuelve el Builder (no null) cuando no hay match, por
-        // el fallback `$scope(...) ?? $this` de Eloquent; firstOrCreate() evita
-        // el 500 (`getMedia` no existe en Builder) si la fila aun no existe.
+        // firstOrCreate() evita el 500 ("getMedia no existe en...") si la fila
+        // aun no existe -- mismo motivo por el que se eliminó el scope
+        // Setting::key() (ver Setting.php): un scope que termina en ->first()
+        // hace que Eloquent devuelva el propio Builder (no null) cuando no hay
+        // match, por el fallback `$scope(...) ?? $this`.
         $logo = Setting::firstOrCreate(['key' => 'page_logo'])->getMedia('logo')->count() > 0;
         $favicon = Setting::firstOrCreate(['key' => 'page_favicon'])->getMedia('favicon')->count() > 0;
 
@@ -102,7 +104,7 @@ class SettingsController extends Controller
 
     private function getSettingMedia(string $slack, string $collection): JsonResponse
     {
-        $setting = Setting::key($slack);
+        $setting = Setting::firstOrCreate(['key' => $slack]);
         $images = [];
 
         foreach ($setting->getMedia($collection) as $media) {
@@ -122,7 +124,7 @@ class SettingsController extends Controller
     private function storeSettingMedia(Request $request, string $collection): JsonResponse
     {
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
-            $setting = Setting::key($request->setting);
+            $setting = Setting::firstOrCreate(['key' => $request->setting]);
             $setting->addMediaFromRequest('file')->toMediaCollection($collection);
 
             return response()->json(['status' => 'success', 'setting' => $setting->key]);

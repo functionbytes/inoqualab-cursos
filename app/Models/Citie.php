@@ -10,11 +10,14 @@ class Citie extends Model
 {
     protected $table = 'cities';
 
+    // La tabla no tiene created_at/updated_at (dato geográfico de referencia,
+    // sembrado por import, nunca por la app): sin esto, cualquier create()
+    // futuro tira QueryException por columna inexistente.
+    public $timestamps = false;
+
     protected $fillable = [
         'title',
         'state_id',
-        'created_at',
-        'updated_at',
     ];
 
     public function scopeDescending($query)

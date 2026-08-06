@@ -9,13 +9,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Inscription extends Model
 {
+    // La tabla ya tenía `deleted_at` sin que el modelo usara SoftDeletes:
+    // destroy() (UsersCoursesController) hacía HARD DELETE real en vez de
+    // soft-delete, perdiendo el historial de matrícula de forma irreversible.
     use HasFactory,
-        HasFinders, LogsActivity;
+        HasFinders, LogsActivity, SoftDeletes;
 
     protected $table = 'inscriptions';
 

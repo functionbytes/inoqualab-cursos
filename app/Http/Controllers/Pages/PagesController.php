@@ -40,7 +40,19 @@ class PagesController extends Controller
 
     public function home()
     {
-        return redirect()->route(User::auth()->redirect());
+        // route('home') se usa como "volver al inicio" desde varias vistas
+        // públicas (confirmación/baja de newsletter, cuenta deshabilitada,
+        // verificación de email) donde el visitante NO está autenticado.
+        // User::auth() es Auth::user(), que ahí es null -- sin este guard,
+        // ->redirect() sobre null era un error fatal ("Call to a member
+        // function redirect() on null") en vez de llevarlo al home público.
+        $user = User::auth();
+
+        if ($user === null) {
+            return redirect()->route('index');
+        }
+
+        return redirect()->route($user->redirect());
     }
 
     public function about()

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -17,8 +18,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Bundle extends Model implements HasMedia
 {
+    // La tabla ya tenía `deleted_at` (incluso con índice, desde su creación)
+    // sin que el modelo usara SoftDeletes: destroy() (Managers\BundlesController)
+    // hacía HARD DELETE real en vez de soft-delete.
     use HasFactory,
-        HasFinders, HasSeo, HasSitemapItems, InteractsWithMedia, LogsActivity;
+        HasFinders, HasSeo, HasSitemapItems, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $table = 'bundles';
 

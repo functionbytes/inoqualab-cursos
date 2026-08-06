@@ -68,7 +68,11 @@ class SeoMeta extends Model
 
     public function isFollowable(): bool
     {
-        return str_contains(strtolower((string) $this->robots), 'follow');
+        // "noindex,nofollow" CONTIENE la subcadena "follow", así que un
+        // str_contains simple daba true justo cuando el editor pedía "nofollow".
+        $robots = strtolower((string) $this->robots);
+
+        return str_contains($robots, 'follow') && ! str_contains($robots, 'nofollow');
     }
 
     public function hasAbTest(): bool

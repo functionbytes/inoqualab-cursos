@@ -12,9 +12,11 @@ class MetaSettingsController extends Controller
 {
     public function index()
     {
-        // Setting::key() devuelve el Builder (no null) cuando no hay match, por
-        // el fallback `$scope(...) ?? $this` de Eloquent; firstOrCreate() evita
-        // el 500 (`getMedia` no existe en Builder) si la fila aun no existe.
+        // firstOrCreate() evita el 500 ("getMedia no existe en...") si la fila
+        // aun no existe -- mismo motivo por el que se eliminó el scope
+        // Setting::key() (ver Setting.php): un scope que termina en ->first()
+        // hace que Eloquent devuelva el propio Builder (no null) cuando no hay
+        // match, por el fallback `$scope(...) ?? $this`.
         $meta = Setting::firstOrCreate(['key' => 'meta_image'])->getMedia('meta')->count() > 0;
 
         return view('managers.views.settings.metadata.setting')->with([
@@ -44,7 +46,7 @@ class MetaSettingsController extends Controller
         abort_unless(auth()->user()->can('settings.update'), 403);
 
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
-            $setting = Setting::key($request->setting);
+            $setting = Setting::firstOrCreate(['key' => $request->setting]);
             $setting->addMediaFromRequest('file')->toMediaCollection('meta');
 
             return response()->json(['status' => 'success', 'setting' => $setting->slack]);
@@ -68,7 +70,7 @@ class MetaSettingsController extends Controller
     public function getMetas($slack)
     {
 
-        $setting = Setting::key($slack);
+        $setting = Setting::firstOrCreate(['key' => $slack]);
 
         $images = $setting->getMedia('meta')->map(function ($thumbnail) {
             return [

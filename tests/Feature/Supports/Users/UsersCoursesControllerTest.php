@@ -87,4 +87,20 @@ class UsersCoursesControllerTest extends TestCase
 
         $this->assertNull(Inscription::find($inscription->id));
     }
+
+    // ── Regresión: Inscription no usaba SoftDeletes pese a que la tabla ya ──
+    // ── tenía deleted_at -- destroy() hacía HARD DELETE real, perdiendo el ──
+    // ── historial de matrícula sin posibilidad de recuperarlo ────────────
+
+    public function test_destroy_soft_deletes_the_inscription_instead_of_removing_it(): void
+    {
+        $customer = User::factory()->customer()->create();
+        $inscription = Inscription::factory()->for($customer)->create();
+
+        $this->actingAs($this->support)
+            ->delete(route('support.users.courses.destroy', $inscription->slack))
+            ->assertRedirect();
+
+        $this->assertSoftDeleted('inscriptions', ['id' => $inscription->id]);
+    }
 }

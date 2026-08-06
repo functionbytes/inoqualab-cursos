@@ -37,9 +37,11 @@ trait HasSeo
 
     public function isFollowable(): bool
     {
-        $robots = $this->loadedSeoMeta()?->robots ?? 'index,follow';
+        // "noindex,nofollow" CONTIENE la subcadena "follow", así que un
+        // str_contains simple daba true justo cuando el editor pedía "nofollow".
+        $robots = strtolower($this->loadedSeoMeta()?->robots ?? 'index,follow');
 
-        return str_contains(strtolower($robots), 'follow');
+        return str_contains($robots, 'follow') && ! str_contains($robots, 'nofollow');
     }
 
     public function updateSeoMeta(array $data): SeoMeta

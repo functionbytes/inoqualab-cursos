@@ -51,4 +51,21 @@ class BlogPublicPagesTest extends TestCase
     {
         $this->get(route('blogs.view', 'no-existe-este-post'))->assertNotFound();
     }
+
+    /**
+     * Regresión: index() usaba $request->categorie directo en un
+     * where('categorie_id', $categorie) sin validar tipo. No tira 500 (PDO
+     * no revienta con un array como binding), pero sí produce un filtrado
+     * incorrecto e impredecible (ni el listado completo ni el filtrado por
+     * categoría) -- confirmado comparando el conteo antes/después del fix.
+     * Con is_numeric(), un ?categorie[]=1 simplemente se ignora como filtro.
+     */
+    public function test_index_with_an_array_categorie_param_ignores_the_filter(): void
+    {
+        Blog::factory()->count(3)->create();
+
+        $response = $this->get(route('blogs', ['categorie' => ['1']]))->assertOk();
+
+        $response->assertViewHas('blogs', fn ($blogs) => $blogs->total() === 3);
+    }
 }

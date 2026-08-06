@@ -95,4 +95,19 @@ class BundlesControllerTest extends TestCase
 
         $this->assertSame([$courseB->id], $bundle->courses()->pluck('courses.id')->all());
     }
+
+    // ── Regresión: Bundle no usaba SoftDeletes pese a que la tabla ya tenía ──
+    // ── deleted_at (con índice, desde su creación) -- destroy() hacía HARD ──
+    // ── DELETE real en vez de soft-delete ─────────────────────────────────
+
+    public function test_destroy_soft_deletes_the_bundle_instead_of_removing_it(): void
+    {
+        $bundle = $this->makeBundle();
+
+        $this->actingAs($this->manager)
+            ->delete(route('manager.bundles.destroy', $bundle->slack))
+            ->assertRedirect(route('manager.bundles'));
+
+        $this->assertSoftDeleted('bundles', ['id' => $bundle->id]);
+    }
 }

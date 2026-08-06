@@ -14,9 +14,18 @@ class State extends Model
 
     protected $table = 'states';
 
+    // La tabla no tiene created_at/updated_at (dato geográfico de referencia,
+    // sembrado por import, nunca por la app): sin esto, cualquier create()
+    // futuro tira QueryException por columna inexistente.
+    public $timestamps = false;
+
+    // La columna real es `countrie_id` (coincide con la FK de countrie()) --
+    // 'country_id' no existe en la tabla; nadie crea States vía mass
+    // assignment hoy, pero el primer create(['country_id' => ...]) hubiera
+    // tirado un QueryException por columna inexistente.
     protected $fillable = [
         'title',
-        'country_id',
+        'countrie_id',
         'created_at',
         'updated_at',
     ];

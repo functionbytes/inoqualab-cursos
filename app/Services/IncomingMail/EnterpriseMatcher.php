@@ -12,7 +12,7 @@ class EnterpriseMatcher
      * Attempt to match an Enterprise by code and/or name.
      *
      * Strategy (first match wins):
-     * 1. Direct code lookup via Enterprise::scopeCode
+     * 1. Direct code lookup via Enterprise::byCode()
      * 2. Alias lookup (alias_type='code', normalized_value = normalize(code))
      * 3. Alias lookup (alias_type='name', normalized_value = normalize(name))
      * 4. Fuzzy LIKE on enterprises.title (normalized)
@@ -20,9 +20,9 @@ class EnterpriseMatcher
     public function match(?string $code, ?string $name): ?Enterprise
     {
         if ($code !== null && $code !== '') {
-            $enterprise = Enterprise::code($code);
+            $enterprise = Enterprise::byCode($code);
 
-            if ($enterprise instanceof Enterprise) {
+            if ($enterprise !== null) {
                 return $enterprise;
             }
 

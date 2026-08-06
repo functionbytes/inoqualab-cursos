@@ -7,13 +7,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Invoice extends Model
 {
+    // La tabla ya tenía `deleted_at` sin que el modelo usara SoftDeletes: dato
+    // contable, el más grave para perder con un hard-delete si algún día se
+    // agrega un destroy() (hoy no existe ninguno en Managers/Accountings).
     use HasFactory,
-        HasFinders, LogsActivity;
+        HasFinders, LogsActivity, SoftDeletes;
 
     protected $table = 'invoices';
 

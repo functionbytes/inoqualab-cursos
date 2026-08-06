@@ -73,11 +73,6 @@ class Coupon extends Model
         return $model;
     }
 
-    public function scopeCode($query, $code)
-    {
-        return $query->where('code', $code)->first();
-    }
-
     public function orders(): HasMany
     {
         return $this->hasMany('App\Models\Order\Order', 'coupon_id', 'id');

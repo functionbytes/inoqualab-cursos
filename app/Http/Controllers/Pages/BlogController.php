@@ -46,7 +46,10 @@ class BlogController extends Controller
             $blogs = $blogs->where('title', 'like', '%'.$searchKey.'%');
         }
 
-        if ($request->categorie != null) {
+        // is_numeric() antes de usarlo en el where: un ?categorie[]=1 (array
+        // en vez de escalar) llegaba directo a la query y podía tirar una
+        // excepción de binding sin controlar en vez de ignorar el filtro.
+        if ($categorie !== null && is_numeric($categorie)) {
             $blogs = $blogs->where('categorie_id', $categorie);
         }
 

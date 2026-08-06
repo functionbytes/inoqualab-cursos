@@ -21,11 +21,6 @@ class Setting extends Model implements HasMedia
         'key', 'value',
     ];
 
-    public function scopeKey($query, $key)
-    {
-        return $query->where('key', $key)->first();
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()->logOnly(['name', 'text']);
