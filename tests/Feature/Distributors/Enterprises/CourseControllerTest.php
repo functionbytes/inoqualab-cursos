@@ -8,6 +8,9 @@ use App\Models\Distributor\DistributorCourse;
 use App\Models\Distributor\DistributorEnterprise;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
+use App\Models\Order\OrderCondition;
+use App\Models\Order\OrderMethod;
+use App\Models\Order\OrderType;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -119,6 +122,45 @@ class CourseControllerTest extends TestCase
         $this->assertDatabaseMissing('enterprise_course', [
             'enterprise_id' => $this->enterprise->id,
             'course_id' => $notContracted->id,
+        ]);
+    }
+
+    // ── Regresión: includes() (matrícula masiva vía lista de identificaciones) ──
+    // ── llamaba a User::identification(), que aborta 404 si no hay match -- ──
+    // ── una identificación con typo abortaba TODO el lote a mitad de camino ──
+
+    public function test_includes_enrolls_valid_users_even_with_an_invalid_identification_in_the_list(): void
+    {
+        // Requeridos por InscriptionService::enrollSimple() -> createSimpleEnrollment().
+        OrderCondition::firstOrCreate(['slug' => 'payment'], ['slack' => 'oc-payment', 'title' => 'Pagada']);
+        OrderType::firstOrCreate(['slug' => 'services'], ['slack' => 'ot-services', 'title' => 'Servicios']);
+        OrderMethod::firstOrCreate(['slug' => 'credit'], ['slack' => 'om-credit', 'title' => 'Crédito']);
+
+        $course = Course::factory()->create();
+        EnterpriseCourse::create(['course_id' => $course->id, 'enterprise_id' => $this->enterprise->id]);
+
+        $user = User::factory()->create(['identification' => 'VALID'.uniqid()]);
+        DB::table('enterprise_user')->insert([
+            'user_id' => $user->id,
+            'enterprise_id' => $this->enterprise->id,
+            'available' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($this->distributorStaff)
+            ->postJson(route('distributor.enterprises.action.reasign'), [
+                'enterprise' => $this->enterprise->slack,
+                'course' => $course->slack,
+                // 'NO-EXISTE' no pertenece a ningún usuario -- antes del fix,
+                // esto abortaba con 404 crudo antes de matricular a $user.
+                'users' => 'NO-EXISTE,'.$user->identification,
+            ])
+            ->assertOk();
+
+        $this->assertDatabaseHas('inscriptions', [
+            'user_id' => $user->id,
+            'course_id' => $course->id,
         ]);
     }
 }

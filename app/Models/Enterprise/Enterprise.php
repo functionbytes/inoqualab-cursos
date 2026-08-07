@@ -100,7 +100,11 @@ class Enterprise extends Model
 
     public function staffs(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\User', 'enterprise_staff')->withPivot('enterprise_id')->orderBy('updated_at', 'desc');
+        // orderBy calificado con la tabla: users y enterprise_staff tienen
+        // ambas 'updated_at' -- sin calificar, un where()->exists() sobre esta
+        // relación revienta con "Column 'updated_at' in ORDER BY is ambiguous"
+        // (MySQL, no SQLite) en vez de devolver el resultado.
+        return $this->belongsToMany('App\Models\User', 'enterprise_staff')->withPivot('enterprise_id')->orderBy('users.updated_at', 'desc');
     }
 
     public function users(): BelongsToMany
@@ -110,7 +114,13 @@ class Enterprise extends Model
 
     public function courses(): BelongsToMany
     {
-        return $this->belongsToMany('App\Models\Course\Course', 'enterprise_course')->withPivot('enterprise_id')->orderBy('updated_at', 'desc');
+        // orderBy calificado con la tabla: courses y enterprise_course tienen
+        // ambas 'updated_at' -- sin calificar, un where()->exists() sobre esta
+        // relación revienta con "Column 'updated_at' in ORDER BY is ambiguous"
+        // (MySQL, no SQLite) en vez de devolver el resultado. Bug real: rompía
+        // includes() (matrícula masiva de Distributors/Supports\Enterprises\CourseController)
+        // para cualquier empresa con al menos un curso asignado.
+        return $this->belongsToMany('App\Models\Course\Course', 'enterprise_course')->withPivot('enterprise_id')->orderBy('courses.updated_at', 'desc');
     }
 
     public function rates(): HasMany

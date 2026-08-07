@@ -278,7 +278,16 @@ class CourseController extends Controller
             }
 
             foreach ($users as $identifier) {
-                $user = User::identification($identifier);
+                // User::identification() aborta con 404 si no hay match -- dentro
+                // de este loop (envuelto en DB::transaction()), una sola
+                // identificación con typo hacía abortar TODA la reasignación
+                // masiva con un 404 crudo, revirtiendo lo ya reasignado en esta
+                // misma corrida. Se omite igual que un usuario ajeno a la empresa.
+                $user = User::where('identification', $identifier)->first();
+
+                if (! $user) {
+                    continue;
+                }
 
                 // Sin esto, se podía reasignar (y borrar respuestas de examen/quiz)
                 // de un usuario que no pertenece a $enterprise (IDOR).

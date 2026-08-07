@@ -201,7 +201,13 @@ class CourseController extends Controller
         $users = explode(',', $request->users);
 
         foreach ($users as $user) {
-            $validate = User::identification($user);
+            // User::identification() aborta con 404 si no hay match -- eso hacía
+            // que el "! $validate instanceof User" de abajo fuera código muerto
+            // inalcanzable: una identificación con typo abortaba la matrícula
+            // masiva COMPLETA con un 404 crudo a mitad de camino, dejando las
+            // inscripciones ya creadas por iteraciones previas hechas y el
+            // resto del lote sin procesar.
+            $validate = User::where('identification', $user)->first();
 
             if (! $validate instanceof User) {
                 continue;
