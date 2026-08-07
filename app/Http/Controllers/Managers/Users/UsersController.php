@@ -3,6 +3,12 @@
 namespace App\Http\Controllers\Managers\Users;
 
 use App\Enums\OrderCondition as Condition;
+use App\Events\Auth\UserCreated;
+use App\Events\Auth\UserDeactivated;
+use App\Events\Auth\UserDeleted;
+use App\Events\Auth\UserPasswordChanged;
+use App\Events\Auth\UserReactivated;
+use App\Events\Auth\UserUpdated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Users\StoreUserRequest;
 use App\Models\Enterprise\Enterprise;
@@ -103,6 +109,8 @@ class UsersController extends Controller
         $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
         $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprise : null;
         $user->save();
+
+        UserCreated::dispatch($user);
 
         return response()->json([
             'success' => true,
@@ -251,6 +259,12 @@ class UsersController extends Controller
             }
         }
 
+        // Estado previo, capturado antes de sobrescribir: sin esto no hay forma
+        // de distinguir "se desactivó/reactivó" de "se guardó sin cambios" tras
+        // el save(), ni de saber si el password realmente cambió.
+        $wasAvailable = (int) $user->available;
+        $passwordChanged = $request->filled('password');
+
         // Actualización de datos del usuario
         $user->firstname = Str::upper($request->firstname);
         $user->lastname = Str::upper($request->lastname);
@@ -292,6 +306,17 @@ class UsersController extends Controller
 
         $user->save();
 
+        UserUpdated::dispatch($user);
+
+        if ($passwordChanged) {
+            UserPasswordChanged::dispatch($user);
+        }
+
+        $isAvailable = (int) $user->available;
+        if ($isAvailable !== $wasAvailable) {
+            $isAvailable === 1 ? UserReactivated::dispatch($user) : UserDeactivated::dispatch($user);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Se ha actualizado correctamente',
@@ -304,6 +329,8 @@ class UsersController extends Controller
         $user = User::slack($slack);
         $this->guardNotSuperadmin($user);
         $user->delete();
+
+        UserDeleted::dispatch($user);
 
         return redirect()->route('manager.users');
 

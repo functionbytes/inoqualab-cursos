@@ -17,59 +17,74 @@ use Illuminate\Support\Facades\Log;
 
 class UserEventListener
 {
+    /**
+     * Contexto mínimo de auditoría para cualquier evento con ->user: sin esto,
+     * el log era un string fijo sin id/email, inútil para reconstruir qué pasó.
+     */
+    private function context($event): array
+    {
+        $user = $event->user ?? null;
+
+        return [
+            'user_id' => $user->id ?? null,
+            'email' => $user->email ?? null,
+            'actor_id' => auth()->id(),
+        ];
+    }
+
     public function onCreated($event)
     {
-        Log::info('User Created');
+        Log::info('User Created', $this->context($event));
     }
 
     public function onUpdated($event)
     {
-        Log::info('User Updated');
+        Log::info('User Updated', $this->context($event));
     }
 
     public function onDeleted($event)
     {
-        Log::info('User Deleted');
+        Log::info('User Deleted', $this->context($event));
     }
 
     public function onConfirmed($event)
     {
-        Log::info('User Confirmed');
+        Log::info('User Confirmed', $this->context($event));
     }
 
     public function onUnconfirmed($event)
     {
-        Log::info('User Unconfirmed');
+        Log::info('User Unconfirmed', $this->context($event));
     }
 
     public function onPasswordChanged($event)
     {
-        Log::info('User Password Changed');
+        Log::info('User Password Changed', $this->context($event));
     }
 
     public function onDeactivated($event)
     {
-        Log::info('User Deactivated');
+        Log::info('User Deactivated', $this->context($event));
     }
 
     public function onReactivated($event)
     {
-        Log::info('User Reactivated');
+        Log::info('User Reactivated', $this->context($event));
     }
 
     public function onSocialDeleted($event)
     {
-        Log::info('User Social Deleted');
+        Log::info('User Social Deleted', $this->context($event));
     }
 
     public function onPermanentlyDeleted($event)
     {
-        Log::info('User Permanently Deleted');
+        Log::info('User Permanently Deleted', $this->context($event));
     }
 
     public function onRestored($event)
     {
-        Log::info('User Restored');
+        Log::info('User Restored', $this->context($event));
     }
 
     public function subscribe($events)

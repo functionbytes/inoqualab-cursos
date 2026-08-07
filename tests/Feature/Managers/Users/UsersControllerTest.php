@@ -2,11 +2,18 @@
 
 namespace Tests\Feature\Managers\Users;
 
+use App\Events\Auth\UserCreated;
+use App\Events\Auth\UserDeactivated;
+use App\Events\Auth\UserDeleted;
+use App\Events\Auth\UserPasswordChanged;
+use App\Events\Auth\UserReactivated;
+use App\Events\Auth\UserUpdated;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
@@ -232,5 +239,125 @@ class UsersControllerTest extends TestCase
         ]);
 
         $this->assertNotSame('ocupado@test.com', $target->fresh()->email);
+    }
+
+    // ── Regresión: eventos de auditoría App\Events\Auth\User* existían con ──
+    // ── listener ya armado (App\Listeners\User\UserEventListener) pero ──────
+    // ── nunca se disparaban desde ningún controller -- se conectaron en los ──
+    // ── puntos reales de mutación de UsersController (store/update/destroy) ──
+
+    public function test_store_dispatches_user_created(): void
+    {
+        Event::fake([UserCreated::class]);
+        $actor = User::factory()->manager()->create();
+
+        $this->actingAs($actor)->post(route('manager.users.store'), [
+            'firstname' => 'Nuevo',
+            'lastname' => 'Cliente',
+            'email' => 'nuevo.cliente@test.com',
+            'role' => 'customer',
+            'password' => 'password123',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        Event::assertDispatched(UserCreated::class, function ($event) {
+            return $event->user->email === 'nuevo.cliente@test.com';
+        });
+    }
+
+    public function test_update_dispatches_user_updated_but_not_password_or_availability_events_when_unchanged(): void
+    {
+        Event::fake([UserUpdated::class, UserPasswordChanged::class, UserDeactivated::class, UserReactivated::class]);
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->customer()->create(['available' => 1]);
+
+        $this->actingAs($actor)->post(route('manager.users.update'), [
+            'slack' => $target->slack,
+            'firstname' => $target->firstname,
+            'lastname' => $target->lastname,
+            'email' => $target->email,
+            'identification' => $target->identification,
+            'role' => 'manager',
+            'available' => '1',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        Event::assertDispatched(UserUpdated::class);
+        Event::assertNotDispatched(UserPasswordChanged::class);
+        Event::assertNotDispatched(UserDeactivated::class);
+        Event::assertNotDispatched(UserReactivated::class);
+    }
+
+    public function test_update_dispatches_user_password_changed_only_when_password_sent(): void
+    {
+        Event::fake([UserPasswordChanged::class]);
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->customer()->create(['available' => 1]);
+
+        $this->actingAs($actor)->post(route('manager.users.update'), [
+            'slack' => $target->slack,
+            'firstname' => $target->firstname,
+            'lastname' => $target->lastname,
+            'email' => $target->email,
+            'identification' => $target->identification,
+            'role' => 'manager',
+            'available' => '1',
+            'password' => 'otraPassword123',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        Event::assertDispatched(UserPasswordChanged::class);
+    }
+
+    public function test_update_dispatches_user_deactivated_when_available_flips_to_zero(): void
+    {
+        Event::fake([UserDeactivated::class, UserReactivated::class]);
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->customer()->create(['available' => 1]);
+
+        $this->actingAs($actor)->post(route('manager.users.update'), [
+            'slack' => $target->slack,
+            'firstname' => $target->firstname,
+            'lastname' => $target->lastname,
+            'email' => $target->email,
+            'identification' => $target->identification,
+            'role' => 'manager',
+            'available' => '0',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        Event::assertDispatched(UserDeactivated::class);
+        Event::assertNotDispatched(UserReactivated::class);
+    }
+
+    public function test_update_dispatches_user_reactivated_when_available_flips_to_one(): void
+    {
+        Event::fake([UserDeactivated::class, UserReactivated::class]);
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->customer()->create(['available' => 0]);
+
+        $this->actingAs($actor)->post(route('manager.users.update'), [
+            'slack' => $target->slack,
+            'firstname' => $target->firstname,
+            'lastname' => $target->lastname,
+            'email' => $target->email,
+            'identification' => $target->identification,
+            'role' => 'manager',
+            'available' => '1',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        Event::assertDispatched(UserReactivated::class);
+        Event::assertNotDispatched(UserDeactivated::class);
+    }
+
+    public function test_destroy_dispatches_user_deleted(): void
+    {
+        Event::fake([UserDeleted::class]);
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->customer()->create();
+
+        $this->actingAs($actor)
+            ->delete(route('manager.users.destroy', $target->slack))
+            ->assertRedirect(route('manager.users'));
+
+        Event::assertDispatched(UserDeleted::class, function ($event) use ($target) {
+            return $event->user->id === $target->id;
+        });
     }
 }

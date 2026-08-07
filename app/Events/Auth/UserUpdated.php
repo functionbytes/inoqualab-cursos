@@ -2,6 +2,7 @@
 
 namespace App\Events\Auth;
 
+use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
@@ -9,7 +10,7 @@ use Illuminate\Queue\SerializesModels;
  */
 class UserUpdated
 {
-    use SerializesModels;
+    use Dispatchable, SerializesModels;
 
     public $user;
 
