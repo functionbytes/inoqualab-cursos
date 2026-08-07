@@ -289,18 +289,23 @@ class CourseController extends Controller
 
         $currentCourses = $enterprise->courses->pluck('id')->toArray();
 
-        $newCourses = $request->courses ? explode(',', $request->courses) : [];
+        $requestedCourses = $request->courses ? explode(',', $request->courses) : [];
+        // Sin Form Request aquí: se filtra contra ids de curso reales antes de
+        // sync() (no había ninguna validación de existencia sobre estos ids).
+        $newCourses = Course::query()->whereIn('id', $requestedCourses)->pluck('id')->all();
 
         if (! empty($newCourses)) {
 
             $toDetach = array_diff($currentCourses, $newCourses);
-            $enterprise->courses()->detach($toDetach);
 
-            foreach ($newCourses as $id) {
-                if (! in_array($id, $currentCourses)) {
-                    $enterprise->courses()->attach($id);
-                }
-            }
+            // sync() en una sola operación atómica dentro de una transacción:
+            // el detach()+attach() en loop suelto podía dejar a la empresa
+            // con MENOS cursos que antes y ninguno nuevo si un attach() a
+            // mitad de camino fallaba (mismo patrón ya corregido en
+            // BundlesController::update()).
+            DB::transaction(function () use ($enterprise, $newCourses) {
+                $enterprise->courses()->sync($newCourses);
+            });
 
             return response()->json([
                 'success' => true,

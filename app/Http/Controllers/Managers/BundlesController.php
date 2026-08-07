@@ -144,13 +144,20 @@ class BundlesController extends Controller
         $bundle->meta_keywords = $request->meta_keywords;
         $bundle->start_date = Carbon::parse($request->start_date);
         $bundle->expire_at = Carbon::parse($request->expire_at);
-        $bundle->save();
 
         $courseIds = $this->resolveCourseIds($request->courses);
 
-        if (! empty($courseIds)) {
-            $bundle->courses()->attach($courseIds);
-        }
+        // Riesgo residual (condición de carrera: un curso borrado entre
+        // resolveCourseIds() y el attach()) menor que en update(), pero real
+        // -- sin transacción, el bundle quedaba creado sin sus cursos si el
+        // attach() fallaba.
+        DB::transaction(function () use ($bundle, $courseIds) {
+            $bundle->save();
+
+            if (! empty($courseIds)) {
+                $bundle->courses()->attach($courseIds);
+            }
+        });
 
         return response()->json([
             'success' => true,

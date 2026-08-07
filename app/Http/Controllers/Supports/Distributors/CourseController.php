@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Distributor\Distributor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CourseController extends Controller
 {
@@ -41,18 +42,24 @@ class CourseController extends Controller
 
         $currentCourses = $distributor->courses->pluck('id')->toArray();
 
-        $newCourses = $request->courses ? explode(',', $request->courses) : [];
+        $requestedCourses = $request->courses ? explode(',', $request->courses) : [];
+        // Sin Form Request aquí: se filtra contra ids de curso reales antes de
+        // sync() (mismo motivo que Distributors\Enterprises\CourseController,
+        // no había ninguna validación de existencia sobre estos ids).
+        $newCourses = Course::query()->whereIn('id', $requestedCourses)->pluck('id')->all();
 
         if (! empty($newCourses)) {
 
             $toDetach = array_diff($currentCourses, $newCourses);
-            $distributor->courses()->detach($toDetach);
 
-            foreach ($newCourses as $id) {
-                if (! in_array($id, $currentCourses)) {
-                    $distributor->courses()->attach($id);
-                }
-            }
+            // sync() en una sola operación atómica dentro de una transacción:
+            // el detach()+attach() en loop suelto podía dejar al distribuidor
+            // con MENOS cursos que antes y ninguno nuevo si un attach() a
+            // mitad de camino fallaba (mismo patrón ya corregido en
+            // BundlesController::update()).
+            DB::transaction(function () use ($distributor, $newCourses) {
+                $distributor->courses()->sync($newCourses);
+            });
 
             $response = [
                 'success' => true,

@@ -148,6 +148,46 @@ class DistributorAssignmentsTest extends TestCase
         ]);
     }
 
+    // ── Regresión: detach()+attach() en loop suelto (sin transacción) ──────
+    // ── se reemplazó por sync() atómico -- se verifica el comportamiento ───
+    // ── de "reemplazo" (el curso/empresa anterior se quita, no se acumula) ──
+
+    public function test_updating_courses_replaces_the_previous_assignment_not_accumulates(): void
+    {
+        $old = Course::factory()->create();
+        $new = Course::factory()->create();
+        $this->distributor->courses()->attach($old->id);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.distributors.courses.update'), [
+                'slack' => $this->distributor->slack,
+                'courses' => (string) $new->id,
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertDatabaseMissing('distributor_courses', ['distributor_id' => $this->distributor->id, 'course_id' => $old->id]);
+        $this->assertDatabaseHas('distributor_courses', ['distributor_id' => $this->distributor->id, 'course_id' => $new->id]);
+    }
+
+    public function test_updating_enterprises_replaces_the_previous_assignment_not_accumulates(): void
+    {
+        $old = $this->createEnterprise();
+        $new = $this->createEnterprise();
+        $this->distributor->enterprises()->attach($old->id);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.distributors.enterprises.update'), [
+                'slack' => $this->distributor->slack,
+                'enterprises' => (string) $new->id,
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertDatabaseMissing('distributor_enterprises', ['distributor_id' => $this->distributor->id, 'enterprise_id' => $old->id]);
+        $this->assertDatabaseHas('distributor_enterprises', ['distributor_id' => $this->distributor->id, 'enterprise_id' => $new->id]);
+    }
+
     public function test_unauthorized_user_cannot_update_courses(): void
     {
         $restrictedManager = User::factory()->manager()->create();

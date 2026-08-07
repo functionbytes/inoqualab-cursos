@@ -201,18 +201,23 @@ class EnterpriseController extends Controller
 
         $currentEnterprises = $distributor->enterprises->pluck('id')->toArray();
 
-        $newEnterprises = $request->enterprises ? explode(',', $request->enterprises) : [];
+        $requestedEnterprises = $request->enterprises ? explode(',', $request->enterprises) : [];
+        // Sin Form Request aquí: se filtra contra ids de empresa reales antes
+        // de sync() (no había ninguna validación de existencia sobre estos ids).
+        $newEnterprises = Enterprise::query()->whereIn('id', $requestedEnterprises)->pluck('id')->all();
 
         if (! empty($newEnterprises)) {
 
             $toDetach = array_diff($currentEnterprises, $newEnterprises);
-            $distributor->enterprises()->detach($toDetach);
 
-            foreach ($newEnterprises as $id) {
-                if (! in_array($id, $currentEnterprises)) {
-                    $distributor->enterprises()->attach($id);
-                }
-            }
+            // sync() en una sola operación atómica dentro de una transacción:
+            // el detach()+attach() en loop suelto podía dejar al distribuidor
+            // con MENOS empresas que antes y ninguna nueva si un attach() a
+            // mitad de camino fallaba (mismo patrón ya corregido en
+            // BundlesController::update()).
+            DB::transaction(function () use ($distributor, $newEnterprises) {
+                $distributor->enterprises()->sync($newEnterprises);
+            });
 
             return response()->json([
                 'success' => true,

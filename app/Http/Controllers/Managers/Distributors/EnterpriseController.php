@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Distributors\UpdateDistributorEnterprisesRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Enterprise\Enterprise;
+use Illuminate\Support\Facades\DB;
 
 class EnterpriseController extends Controller
 {
@@ -41,13 +42,15 @@ class EnterpriseController extends Controller
         if (! empty($newEnterprises)) {
 
             $toDetach = array_diff($currentEnterprises, $newEnterprises);
-            $distributor->enterprises()->detach($toDetach);
 
-            foreach ($newEnterprises as $id) {
-                if (! in_array($id, $currentEnterprises)) {
-                    $distributor->enterprises()->attach($id);
-                }
-            }
+            // sync() en una sola operación atómica dentro de una transacción:
+            // el detach()+attach() en loop suelto podía dejar al distribuidor
+            // con MENOS empresas que antes y ninguna nueva si un attach() a
+            // mitad de camino fallaba (mismo patrón ya corregido en
+            // BundlesController::update()).
+            DB::transaction(function () use ($distributor, $newEnterprises) {
+                $distributor->enterprises()->sync($newEnterprises);
+            });
 
             return response()->json([
                 'success' => true,

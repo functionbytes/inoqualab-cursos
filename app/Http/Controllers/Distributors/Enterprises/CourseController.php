@@ -335,13 +335,17 @@ class CourseController extends Controller
         if (! empty($newCourses)) {
 
             $toDetach = array_diff($currentCourses, $newCourses);
-            $enterprise->courses()->detach($toDetach);
 
-            foreach ($newCourses as $id) {
-                if (! in_array($id, $currentCourses)) {
-                    $enterprise->courses()->attach($id);
-                }
-            }
+            // sync() en una sola operación atómica dentro de una transacción:
+            // el detach()+attach() en loop suelto podía dejar a la empresa
+            // con un subconjunto de cursos desincronizado (ni lo pedido ni lo
+            // que tenía antes) si un attach() a mitad de camino fallaba --
+            // mismo patrón ya corregido en BundlesController::update(), con
+            // el agravante aquí de que ya hay lógica de facturación encima
+            // (filtro $distributorCourseIds).
+            DB::transaction(function () use ($enterprise, $newCourses) {
+                $enterprise->courses()->sync($newCourses);
+            });
 
             return response()->json([
                 'success' => true,
