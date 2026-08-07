@@ -12,11 +12,11 @@
                     {{ csrf_field() }}
 
 
-                    <textarea class="d-none" type="hidden"  id="page_description" name="page_description">{!!  setting('page_description')   !!}</textarea>
-                    <textarea class="d-none" type="hidden"  id="page_politic" name="page_politic">{!! setting('page_politic')  !!}</textarea>
-                    <textarea class="d-none" type="hidden"  id="page_term" name="page_term">{!! setting('page_term')  !!}</textarea>
-                    <input  type="hidden" id="page_logo" name="page_logo" value="{!! setting('page_logo') !!}">
-                    <input  type="hidden" id="page_favicon" name="page_favicon" value="{!! setting('page_favicon') !!}">
+                    <textarea class="d-none" type="hidden"  id="page_description" name="page_description">{!! clean(setting('page_description'), 'content') !!}</textarea>
+                    <textarea class="d-none" type="hidden"  id="page_politic" name="page_politic">{!! clean(setting('page_politic'), 'content') !!}</textarea>
+                    <textarea class="d-none" type="hidden"  id="page_term" name="page_term">{!! clean(setting('page_term'), 'content') !!}</textarea>
+                    <input  type="hidden" id="page_logo" name="page_logo" value="{{ setting('page_logo') }}">
+                    <input  type="hidden" id="page_favicon" name="page_favicon" value="{{ setting('page_favicon') }}">
                     <input  type="hidden" id="id" name="id" value="{{ $setting->id }}">
                     <input  type="hidden" id="statuLogo" name="statuLogo" value="{{ $logo }}">
                     <input  type="hidden" id="statuFavicon" name="statuFavicon" value="{{ $favicon}}">
@@ -173,7 +173,7 @@
                                         <label class="control-label col-form-label">Politicas de privacidad</label>
                                         <div class="">
                                             <div class="quill-wrapper">
-                                                <div  id="politics">{!! setting('page_politic')  !!}</div>
+                                                <div  id="politics">{!! clean(setting('page_politic'), 'content') !!}</div>
                                             </div>
                                             <label id="politic-error" class="error d-none" for="politic"></label>
                                         </div>
@@ -183,7 +183,7 @@
                                         <label class="control-label col-form-label">Terminos y condiciones</label>
                                         <div class="">
                                             <div class="quill-wrapper">
-                                                <div  id="terms">{!! setting('page_term')  !!}</div>
+                                                <div  id="terms">{!! clean(setting('page_term'), 'content') !!}</div>
                                             </div>
                                             <label id="term-error" class="error d-none" for="term"></label>
                                         </div>
@@ -193,7 +193,7 @@
                                         <label class="control-label col-form-label">Descripción</label>
                                         <div class="">
                                             <div class="quill-wrapper">
-                                                <div  id="descriptions">{!! setting('page_description')  !!}</div>
+                                                <div  id="descriptions">{!! clean(setting('page_description'), 'content') !!}</div>
                                             </div>
                                             <label id="description-error" class="error d-none" for="description"></label>
                                         </div>

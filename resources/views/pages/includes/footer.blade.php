@@ -127,7 +127,7 @@
         <div class="sf-grid">
             <div class="sf-col">
                 @if (setting('page_description'))
-                    <div class="sf-about">{!! setting('page_description') !!}</div>
+                    <div class="sf-about">{!! clean(setting('page_description'), 'content') !!}</div>
                 @endif
 
                 @if(setting('social_media_facebook') || setting('social_media_instagram') || setting('social_media_twitter') || setting('social_media_linkedin') || setting('social_media_youtube') || setting('page_whatsapp'))

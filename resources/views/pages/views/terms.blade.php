@@ -24,7 +24,7 @@
                 <div class="term-details-wrap">
                     <div class="term-content-wrap">
                         <div class="term-content">
-                            {!! setting("page_term") !!}
+                            {!! clean(setting('page_term'), 'content') !!}
                         </div>
 
                     </div>

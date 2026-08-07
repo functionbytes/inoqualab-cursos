@@ -8,8 +8,8 @@
                 <form id="formMetadata" enctype="multipart/form-data" role="form" onSubmit="return false">
                     {{ csrf_field() }}
 
-                    <input type="hidden" id="meta_description" name="meta_description" value="{!! setting('meta_description') !!}">
-                    <input type="hidden" id="slack" name="slack" value="{!! setting('meta_image') !!}">
+                    <input type="hidden" id="meta_description" name="meta_description" value="{{ setting('meta_description') }}">
+                    <input type="hidden" id="slack" name="slack" value="{{ setting('meta_image') }}">
                     <input type="hidden" id="statuMetas" name="statuMetas" value="{{ $metadata }}">
                     <input type="hidden" id="statuEdit" name="statuEdit" value="true">
                     <input type="hidden" id="metadata" name="metadata">
@@ -55,7 +55,7 @@
                             <div class="col-12 mt-3">
                                 <label class="control-label col-form-label">Descripción</label>
                                 <div class="">
-                                    <div id="descriptions">{!! setting('meta_description') !!}</div>
+                                    <div id="descriptions">{!! clean(setting('meta_description'), 'content') !!}</div>
                                 </div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>

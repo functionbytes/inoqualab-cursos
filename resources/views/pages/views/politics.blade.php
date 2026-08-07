@@ -24,7 +24,7 @@
                     <div class="term-details-wrap">
                         <div class="term-content-wrap">
                             <div class="term-content">
-                                {!! setting("page_politic") !!}
+                                {!! clean(setting('page_politic'), 'content') !!}
                             </div>
 
                         </div>
