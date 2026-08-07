@@ -75,7 +75,18 @@ class ReassignController extends Controller
 
         foreach ($users as $identification) {
 
-            $user = User::identification($identification);
+            // User::identification() aborta con 404 si no hay match -- correcto
+            // para una búsqueda puntual, pero dentro de este loop masivo una
+            // sola identificación con typo o de un usuario ya borrado hacía
+            // reventar el request completo a mitad de camino: las
+            // reasignaciones previas quedaban guardadas (sin transacción) y las
+            // siguientes sin procesar, sin ningún feedback claro. Se omite
+            // igual que ya se omite un usuario que no pertenece al distribuidor.
+            $user = User::where('identification', $identification)->first();
+
+            if (! $user) {
+                continue;
+            }
 
             // Solo reasigna usuarios que YA pertenecen a una empresa del distribuidor.
             $enterpriseUser = EnterpriseUser::where('user_id', $user->id)

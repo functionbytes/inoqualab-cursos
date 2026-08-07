@@ -137,7 +137,24 @@ class InscriptionsMassivesController extends Controller
 
         foreach ($users as $userId) {
 
-            $user = User::identification($userId);
+            // User::identification() (y Course::id() más abajo) abortan con 404
+            // si no hay match -- dentro de este loop masivo, una sola
+            // identificación con typo abortaba el request COMPLETO con un 404
+            // crudo, dejando las matrículas/órdenes YA creadas por iteraciones
+            // previas (cada una con su propia DB::transaction()) y el resto del
+            // lote sin procesar, en vez de sumarse a $errors[] como el resto de
+            // fallos que esta misma función ya reporta con gracia.
+            $user = User::where('identification', $userId)->first();
+
+            if (! $user) {
+                $errors[] = [
+                    'enterprise_enroll' => $enterprise->id,
+                    'customer_identification' => $userId,
+                    'message' => 'No existe ningún usuario con esa identificación.',
+                ];
+
+                continue;
+            }
 
             // Solo se matricula a usuarios que pertenecen a la empresa del distribuidor.
             if (! $enterprise->users()->where('users.id', $user->id)->exists()) {
@@ -145,7 +162,20 @@ class InscriptionsMassivesController extends Controller
             }
 
             foreach ($courses as $courseId) {
-                $course = Course::id($courseId);
+                $course = Course::where('id', $courseId)->first();
+
+                if (! $course) {
+                    $errors[] = [
+                        'enterprise_enroll' => $enterprise->id,
+                        'course_enroll' => $courseId,
+                        'customer_name' => $user->firstname.' '.$user->lastname,
+                        'customer_enroll' => $user->id,
+                        'customer_identification' => $user->identification,
+                        'message' => 'No existe ningún curso con ese id.',
+                    ];
+
+                    continue;
+                }
 
                 $existingInscription = Inscription::existingInscription($user->id, $course->id)->first();
 

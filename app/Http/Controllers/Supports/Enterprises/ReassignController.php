@@ -44,7 +44,12 @@ class ReassignController extends Controller
 
         foreach ($users as $identification) {
 
-            $user = User::identification($identification);
+            // User::identification() aborta con 404 si no hay match -- eso hacía
+            // que el chequeo "!$user" de abajo fuera código muerto inalcanzable:
+            // una identificación con typo abortaba el request COMPLETO con un
+            // 404 crudo en vez de devolver el JSON de error ya escrito para
+            // este caso (con el mensaje que sí identifica cuál falló).
+            $user = User::where('identification', $identification)->first();
 
             if (! $user || ! $newEnterprise) {
 
