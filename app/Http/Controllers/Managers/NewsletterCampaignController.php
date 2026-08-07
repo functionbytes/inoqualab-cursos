@@ -202,11 +202,13 @@ class NewsletterCampaignController extends Controller
             return response()->json(['message' => 'Solo se pueden reintentar campañas fallidas.'], 422);
         }
 
+        // sent_count/failed_count/last_sent_newsletter_id NO se resetean:
+        // SendNewsletterCampaignJob retoma desde ese checkpoint. Antes se
+        // reseteaban a 0 aquí, así que el reintento repetía la lista
+        // completa desde el principio y reenviaba a quien ya había recibido
+        // el correo en el intento fallido.
         $campaign->update([
             'status' => 'draft',
-            'recipients_count' => 0,
-            'sent_count' => 0,
-            'failed_count' => 0,
             'started_at' => null,
             'sent_at' => null,
         ]);

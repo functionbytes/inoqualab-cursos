@@ -36,8 +36,13 @@ class AnalyticsReportService
             ->toArray();
 
         $topReferrers = Analytics::fetchTopReferrers($period, 10)
+            // fetchTopReferrers() pide la dimensión 'pageReferrer' a GA4 (ver
+            // Analytics::fetchTopReferrers() en el paquete), así que la clave
+            // en cada fila es 'pageReferrer', no 'sessionSource' -- esa clave
+            // nunca existe en el resultado, así que TODAS las filas caían al
+            // fallback 'Direct' sin importar la fuente real del tráfico.
             ->map(fn ($item) => [
-                'source' => $item['sessionSource'] ?? 'Direct',
+                'source' => $item['pageReferrer'] ?? 'Direct',
                 'views' => (int) ($item['screenPageViews'] ?? 0),
             ])
             ->toArray();

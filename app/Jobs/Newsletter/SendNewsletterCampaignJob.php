@@ -40,14 +40,25 @@ class SendNewsletterCampaignJob implements ShouldQueue
             return;
         }
 
-        $sent = 0;
-        $failed = 0;
+        // Retomar desde el checkpoint (reintento tras timeout): sin esto,
+        // reintentar una campaña que ya envió parte de la lista repetía el
+        // recorrido completo desde el principio y reenviaba a quien ya
+        // había recibido el correo. Los contadores parten de lo YA enviado
+        // en corridas anteriores, no de 0, para que el total final sea
+        // acumulado y no se pierda el progreso previo al reintentar.
+        $sent = $this->campaign->sent_count ?? 0;
+        $failed = $this->campaign->failed_count ?? 0;
+        $lastSentId = $this->campaign->last_sent_newsletter_id;
 
         // Lista destino: si la campaña tiene una, solo sus miembros (que sigan
         // suscritos). Si no, a todos los suscriptores (comportamiento por defecto).
         $query = $this->campaign->newsletter_list_id
             ? $this->campaign->list->subscribers()->getQuery()->where('newsletters.is_active', true)
             : Newsletter::query()->subscribed();
+
+        if ($lastSentId !== null) {
+            $query->where('newsletters.id', '>', $lastSentId);
+        }
 
         $query
             ->orderBy('newsletters.id')
@@ -65,6 +76,15 @@ class SendNewsletterCampaignJob implements ShouldQueue
                         ]);
                     }
                 }
+
+                // Checkpoint tras CADA lote (no solo al final): si el job
+                // timeoutea a mitad de camino, un reintento retoma desde
+                // aquí en vez de repetir todo lo ya enviado.
+                $this->campaign->update([
+                    'sent_count' => $sent,
+                    'failed_count' => $failed,
+                    'last_sent_newsletter_id' => $subscribers->last()->id,
+                ]);
 
                 // Throttle entre lotes: solo si el lote vino lleno (probablemente
                 // hay más), evita pausar innecesariamente en el último lote.
