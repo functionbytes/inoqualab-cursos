@@ -570,14 +570,14 @@ $(document).ready(function () {
                 $('#testEmailResult')
                     .removeClass('d-none alert-danger')
                     .addClass('alert alert-success')
-                    .html('<i class="fas fa-check-circle me-2"></i>' + data.message);
+                    .html('<i class="fas fa-check-circle me-2"></i>' + escHtml(data.message));
             },
             error: function (xhr) {
                 var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al enviar el correo';
                 $('#testEmailResult')
                     .removeClass('d-none alert-success')
                     .addClass('alert alert-danger')
-                    .html('<i class="fas fa-exclamation-circle me-2"></i>' + msg);
+                    .html('<i class="fas fa-exclamation-circle me-2"></i>' + escHtml(msg));
             },
             complete: function () {
                 $btn.prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i>Enviar prueba');

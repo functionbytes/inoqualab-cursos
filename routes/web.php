@@ -142,7 +142,11 @@ Route::group(['middleware' => ['web']], function () {
         Route::get('/pay/{slack}', [CheckoutController::class, 'pay'])->name('payments.pay');
         Route::get('/sandbox/{slack}', [CheckoutController::class, 'sandbox'])->name('payments.sandbox')->middleware('throttle:20,1');
         Route::get('/simulate/{reference}/{status}', [CheckoutController::class, 'simulate'])->name('checkout.simulate')->middleware('throttle:10,1');
-        Route::post('/wompi/webhook', [CheckoutController::class, 'webhook'])->name('payments.wompi.webhook');
+        // A diferencia de sus rutas hermanas (response/sandbox/simulate), esta no
+        // tenía throttle: sin firma válida el request se rechaza rápido, pero cada
+        // intento igual computa un hash SHA256 y consulta logs -- sin límite es una
+        // vía de DoS barata frente a un endpoint público sin CSRF.
+        Route::post('/wompi/webhook', [CheckoutController::class, 'webhook'])->name('payments.wompi.webhook')->middleware('throttle:60,1');
     });
 
     Route::group(['prefix' => 'contacts'], function () {

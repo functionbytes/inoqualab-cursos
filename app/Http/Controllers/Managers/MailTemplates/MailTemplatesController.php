@@ -72,9 +72,13 @@ class MailTemplatesController extends Controller
                     ->subject('[PRUEBA] '.$renderedSubject);
             });
 
+            // La regla 'email' (RFCValidation) acepta HTML en el local-part si va
+            // entre comillas ("<img src=x onerror=...>"@dominio.com pasa la
+            // validación) -- e() evita que ese HTML se refleje crudo en la vista,
+            // que inserta este mensaje con .html() sin escapar.
             return response()->json([
                 'success' => true,
-                'message' => 'Correo de prueba enviado a '.$request->test_email,
+                'message' => 'Correo de prueba enviado a '.e($request->test_email),
             ]);
         } catch (\Exception $e) {
             return response()->json([

@@ -123,4 +123,28 @@ class ScheduledCommandsTest extends TestCase
             'Hay comandos en el scheduler sin cubrir aquí: '.$sinCubrir->implode(', ')
         );
     }
+
+    /**
+     * Regresión: invoices:generate corría mensualmente sin withoutOverlapping().
+     * Relanzarlo a mano mientras el cron también corría podía generar facturas
+     * duplicadas por distribuidor (ver también lockForUpdate() en Invoices::handle()).
+     */
+    public function test_invoices_generate_has_overlap_protection(): void
+    {
+        $schedule = app(Schedule::class);
+
+        $event = collect($schedule->events())->first(
+            fn ($e) => str_contains($e->command, 'invoices:generate')
+        );
+
+        $this->assertNotNull($event, 'invoices:generate ya no está en el scheduler.');
+
+        $reflection = new \ReflectionProperty($event, 'withoutOverlapping');
+        $reflection->setAccessible(true);
+
+        $this->assertTrue(
+            $reflection->getValue($event),
+            'invoices:generate debe tener withoutOverlapping() -- sin él, dos corridas solapadas duplican facturas.'
+        );
+    }
 }

@@ -52,14 +52,20 @@ class Invoices extends Command
 
         foreach ($distributors as $distributor) {
 
-            $items = $distributor->orders()->date($startDate, $endDate)->get();
-
-            if ($items->count() === 0) {
-                continue;
-            }
-
             try {
-                DB::transaction(function () use ($distributor, $items, $method, $condition, $startDate, $endDate) {
+                DB::transaction(function () use ($distributor, $method, $condition, $startDate, $endDate) {
+                    // lockForUpdate() + fetch dentro de la transacción: si el
+                    // comando se ejecuta dos veces solapadas (relanzado a mano
+                    // mientras el cron mensual también corre), sin esto ambas
+                    // corridas podían leer el mismo lote de OrderActivity
+                    // invoiced=0 antes de que cualquiera hiciera commit, generando
+                    // dos facturas duplicadas para el mismo distribuidor y periodo.
+                    $items = $distributor->orders()->date($startDate, $endDate)->lockForUpdate()->get();
+
+                    if ($items->count() === 0) {
+                        return;
+                    }
+
                     $coursesItems = [];
                     $total = 0;
 

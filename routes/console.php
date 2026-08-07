@@ -8,7 +8,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('invoices:generate')->monthlyOn(1, '08:00');
+// withoutOverlapping(): sin esto, relanzar el comando a mano mientras el cron
+// mensual también corre podía generar facturas duplicadas por distribuidor
+// (ver también el lockForUpdate() añadido en Invoices::handle()).
+Schedule::command('invoices:generate')->monthlyOn(1, '08:00')->withoutOverlapping();
 Schedule::command('notification:autodelete')->daily();
 Schedule::command('customers:inactive_delete')->daily();
 Schedule::command('orders:reconcile-pending')->everyFifteenMinutes()->withoutOverlapping();

@@ -15,6 +15,7 @@ use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -185,5 +186,72 @@ class GenerateDistributorInvoicesTest extends TestCase
         // duplicada para lo mismo.
         $this->artisan('invoices:generate')->assertSuccessful();
         $this->assertDatabaseCount('invoices', 1);
+    }
+
+    /**
+     * Regresión de concurrencia: sin lockForUpdate(), dos corridas solapadas
+     * del comando (relanzado a mano mientras el cron mensual también corre)
+     * podían leer el mismo lote de OrderActivity invoiced=0 antes de que
+     * cualquiera hiciera commit, generando dos facturas duplicadas. Se
+     * verifica que la query de lectura de OrderActivity realmente incluya
+     * "for update" -- sin depender de simular la concurrencia real, que
+     * PHPUnit en un solo proceso no puede reproducir de forma fiable.
+     */
+    public function test_reads_pending_activities_with_lock_for_update(): void
+    {
+        $this->seedCatalogs();
+
+        $distributor = Distributor::factory()->create();
+        $enterprise = Enterprise::factory()->create();
+        $customer = User::factory()->create(['role' => 'customer']);
+        $course = Course::factory()->create();
+
+        [$typeId, $methodId, $conditionId] = $this->orderCatalogIds();
+
+        $order = Order::create([
+            'slack' => 'ord-'.uniqid(),
+            'number' => (Order::max('number') ?? 0) + 1,
+            'reference' => 'ORD-'.uniqid(),
+            'user_id' => $customer->id,
+            'type_id' => $typeId,
+            'method_id' => $methodId,
+            'condition_id' => $conditionId,
+            'total_before_discount' => 30000,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => 30000,
+        ]);
+
+        OrderItem::create([
+            'slack' => 'oi-'.uniqid(),
+            'order_id' => $order->id,
+            'item_id' => $course->id,
+            'item_type' => Course::class,
+            'quantity' => 1,
+            'amount' => 30000,
+        ]);
+
+        OrderActivity::create([
+            'slack' => Str::random(8),
+            'order_id' => $order->id,
+            'course_id' => $course->id,
+            'distributor_id' => $distributor->id,
+            'enterprise_id' => $enterprise->id,
+            'item_type' => Distributor::class,
+            'id_type' => $distributor->id,
+            'relation_id' => 0,
+            'invoiced' => 0,
+        ]);
+
+        $sawLockForUpdate = false;
+        DB::listen(function ($query) use (&$sawLockForUpdate) {
+            if (str_contains(strtolower($query->sql), 'orders_activity') && str_contains(strtolower($query->sql), 'for update')) {
+                $sawLockForUpdate = true;
+            }
+        });
+
+        $this->artisan('invoices:generate')->assertSuccessful();
+
+        $this->assertTrue($sawLockForUpdate, 'La query que lee OrderActivity pendientes de facturar debe usar lockForUpdate().');
     }
 }

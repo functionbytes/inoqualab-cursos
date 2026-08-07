@@ -118,8 +118,14 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Sesión expirada.'], 419);
             }
-            // Para POST guardamos el referer (la página GET que originó el form)
-            if ($referer = $request->header('referer')) {
+            // Para POST guardamos el referer (la página GET que originó el form) --
+            // solo si es del mismo host: el Referer lo controla el cliente, y sin
+            // validar esto redirect()->intended() (llamado tras el login) podía
+            // reenviar a una URL externa arbitraria (open redirect vía un POST
+            // cross-site, ej. un <form> autoenviado desde un dominio ajeno, que
+            // dispara este handler al fallar la verificación CSRF).
+            $refererHost = ($referer = $request->header('referer')) ? parse_url($referer, PHP_URL_HOST) : null;
+            if ($refererHost !== null && $refererHost === $request->getHost()) {
                 $request->session()->put('url.intended', $referer);
             }
 
