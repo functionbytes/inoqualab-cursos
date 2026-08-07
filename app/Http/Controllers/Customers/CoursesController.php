@@ -170,6 +170,14 @@ class CoursesController extends Controller
             abort(403);
         }
 
+        // A3 (mismo guard que lesion()/realized()): sin esto, esta ruta -- una
+        // GET directa a /content/player/{lesson} -- permitía ver el video de
+        // CUALQUIER lección del curso saltándose el orden, aunque lesion() y
+        // realized() sí lo bloquean. El player es la única forma de reproducir
+        // el video real (lesion() solo lo embebe), así que sin este guard el
+        // bloqueo de las otras dos rutas no protegía nada.
+        $this->assertLessonAccessible($lesson, $inscription, $user->id);
+
         $rawUrl = $lesson->url ?? '';
         $platform = $lesson->platform;
 
