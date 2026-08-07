@@ -12,10 +12,23 @@ class SeoAuditService
     public function auditUrl(string $url): array
     {
         try {
-            $this->validatePublicUrl($url);
+            $resolvedIp = $this->validatePublicUrl($url);
+
+            // CURLOPT_RESOLVE fija la conexión a la IP YA validada arriba, sin
+            // volver a resolver el hostname. Sin esto, validatePublicUrl()
+            // resuelve el DNS una vez para chequear que la IP no es privada,
+            // pero el Http::get() de abajo hace su PROPIA resolución DNS por
+            // separado -- un dominio con TTL bajo (DNS rebinding) puede
+            // apuntar a una IP pública en el primer lookup (pasa el guard) y
+            // a 127.0.0.1 / red interna en el segundo, logrando SSRF pese a
+            // la validación.
+            $parsed = parse_url($url);
+            $host = $parsed['host'];
+            $port = $parsed['port'] ?? (($parsed['scheme'] ?? 'http') === 'https' ? 443 : 80);
 
             $response = Http::timeout(15)
                 ->withHeaders(['User-Agent' => 'Mozilla/5.0 (compatible; SeoAuditBot/1.0)'])
+                ->withOptions(['curl' => [CURLOPT_RESOLVE => ["{$host}:{$port}:{$resolvedIp}"]]])
                 ->get($url);
 
             if (! $response->successful()) {
@@ -486,7 +499,8 @@ class SeoAuditService
         };
     }
 
-    private function validatePublicUrl(string $url): void
+    /** @return string La IP pública validada, para fijar la conexión real vía CURLOPT_RESOLVE. */
+    private function validatePublicUrl(string $url): string
     {
         $parsed = parse_url($url);
         if (! in_array($parsed['scheme'] ?? '', ['http', 'https'], true)) {
@@ -500,6 +514,8 @@ class SeoAuditService
         if ($isPrivate) {
             throw new \RuntimeException('No se permiten URLs de redes privadas');
         }
+
+        return $ip;
     }
 
     private function checkReadability(string $text): array

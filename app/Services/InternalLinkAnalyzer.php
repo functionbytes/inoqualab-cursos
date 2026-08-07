@@ -12,8 +12,9 @@ class InternalLinkAnalyzer
     {
         $inboundLinks = [];
         $scanned = 0;
+        $scannedUrls = $urls->take(30);
 
-        foreach ($urls->take(30) as $url) {
+        foreach ($scannedUrls as $url) {
             try {
                 $response = Http::timeout(8)->get($url);
                 if ($response->ok()) {
@@ -34,7 +35,14 @@ class InternalLinkAnalyzer
             $scanned++;
         }
 
-        $orphans = $urls->filter(fn ($url) => ! isset($inboundLinks[$url]))->values();
+        // Los enlaces entrantes solo se conocen para páginas ENLAZADAS DESDE
+        // las primeras 30 (únicas escaneadas como fuente): calcular
+        // "huérfanas" contra $urls completo marcaba sistemáticamente como
+        // huérfana cualquier URL fuera de esas 30, tuviera o no enlaces
+        // entrantes reales desde páginas nunca escaneadas -- en un sitio de
+        // 200 URLs, ~170 salían "huérfanas" solo por no haberse revisado.
+        // Se limita el chequeo al mismo subconjunto realmente escaneado.
+        $orphans = $scannedUrls->filter(fn ($url) => ! isset($inboundLinks[$url]))->values();
 
         return [
             'orphans' => $orphans->take($limit)->toArray(),
