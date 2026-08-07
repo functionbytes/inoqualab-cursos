@@ -57,7 +57,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'dashboard.view', 'notifications.view', 'certificates.view',
         ],
         'distributor' => [
-            'courses.view', 'inscriptions.*', 'enterprises.*', 'staff.*',
+            'courses.view',
+            // Sin inscriptions.manage: ChecksOwnership (usado por InscriptionPolicy)
+            // bypasea el ownership check para cualquier actor con el permiso
+            // '{alias}.manage' -- si esa Policy llega a cablearse a un controller,
+            // '.manage' le daría a CUALQUIER distribuidor acceso a las
+            // inscripciones de TODOS los distribuidores, no solo las propias.
+            'inscriptions.view', 'inscriptions.create', 'inscriptions.update', 'inscriptions.delete',
+            'enterprises.*', 'staff.*',
             'registers.*', 'orders.view', 'invoices.view',
             'settings.view', 'settings.update',
             'dashboard.view', 'certificates.view',

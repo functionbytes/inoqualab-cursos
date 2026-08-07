@@ -86,22 +86,19 @@
         <script src="{{ url('managers/libs/select2/dist/js/select2.min.js') }}" type="text/javascript"></script>
         <script src="{{ url('managers/libs/jquery-validation/dist/jquery.validate.min.js') }}" type="text/javascript"></script>
 
+    @if(setting('google_analytics_enable') === 'true' && setting('google_analytics_measurement_id'))
+    {{-- Google tag (gtag.js) GA4 -- mismo patrón que layouts/pages.blade.php. El
+    snippet anterior era Universal Analytics con un tracking ID ajeno (residuo del
+    template comercial) enviando pageviews a una propiedad de GA que no es de este
+    proyecto; UA además dejó de recolectar datos desde julio 2023. --}}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ setting('google_analytics_measurement_id') }}"></script>
     <script>
-        (function(i, s, o, g, r, a, m) {
-            i['GoogleAnalyticsObject'] = r;
-            i[r] = i[r] || function() {
-                (i[r].q = i[r].q || []).push(arguments)
-            }, i[r].l = 1 * new Date();
-            a = s.createElement(o),
-                m = s.getElementsByTagName(o)[0];
-            a.async = 1;
-            a.src = g;
-            m.parentNode.insertBefore(a, m)
-        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-
-        ga('create', 'UA-216062153-1', 'auto');
-        ga('send', 'pageview');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', '{{ setting('google_analytics_measurement_id') }}');
     </script>
+    @endif
 
 
     <script>
