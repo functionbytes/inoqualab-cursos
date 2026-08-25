@@ -1032,8 +1032,8 @@
 .cfg-jump svg { width: 15px; height: 15px; color: var(--green-deep); }
 
 .cfg-warn {
-    font-size: 12.5px; font-weight: 700; color: var(--amber); background: var(--amber-soft);
-    border: 1px solid #f0ddb0; border-radius: 9px; padding: 9px 13px; margin-top: 12px;
+    font-size: 12.5px; font-weight: 700; color: var(--muted); background: var(--field);
+    border: 1px solid var(--line); border-radius: 9px; padding: 9px 13px; margin-top: 12px;
 }
 
 .pw-toggle.is-on { color: var(--green-deep); }
@@ -1071,17 +1071,54 @@
 .sb-progress .bar i { display: block; height: 100%; width: var(--p, 0%); border-radius: 4px; background: var(--green); }
 .sb-progress .note { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.45); margin-top: 8px; }
 
-/* Pestanas dentro de la banda oscura: el subrayado las ata al carnet en vez
-   de flotar como una pastilla suelta sobre el fondo gris. */
-.sb-tabs { display: flex; gap: 2px; overflow-x: auto; }
+/* Pestanas: son el pie de la banda oscura, no una tira flotando dentro. La
+   fila sangra hasta los bordes del carnet (anula el padding lateral del hero
+   y lo devuelve como propio, para que el texto siga en el mismo eje) y se
+   separa del carnet con una linea, asi se lee como parte del header.
+   El hero lleva overflow:hidden para que este pie herede su radio inferior. */
+.sb-tabs {
+    display: flex; gap: 0; overflow-x: auto;
+    margin: 0 -15px; padding: 0;
+    background: rgba(255,255,255,.03);
+    border-top: 1px solid rgba(255,255,255,.08);
+    /* Si las pestanas no caben, la fila se desliza; la barra de scroll sobre
+       el fondo oscuro se ve como una raya sucia bajo los rotulos. */
+    scrollbar-width: none;
+}
+.sb-tabs::-webkit-scrollbar { display: none; }
+
+/* El padding horizontal del boton vale justo el del hero: asi el rotulo de la
+   primera pestana cae en el mismo eje que el breadcrumb y el avatar, y la
+   fila se lee como el pie del carnet en lugar de como una barra aparte. */
 .sb-tabs button {
-    font-size: 13px; font-weight: 800; padding: 14px 20px; white-space: nowrap;
+    position: relative;
+    font-size: 13px; font-weight: 800; padding: 15px; white-space: nowrap;
     border: none; background: transparent; color: rgba(255,255,255,.5);
     cursor: pointer; font-family: inherit;
-    transition: color .15s var(--ease), box-shadow .15s var(--ease);
+    transition: color .15s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease);
 }
-.sb-tabs button:hover { color: rgba(255,255,255,.8); }
-.sb-tabs button.is-active { color: #fff; box-shadow: inset 0 -3px 0 var(--green); }
+
+/* Separador fino entre pestanas: sin el, cuatro rotulos grises seguidos se
+   leen como una sola frase. */
+.sb-tabs button + button::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 1px; height: 16px; background: rgba(255,255,255,.10);
+}
+
+.sb-tabs button:hover { color: rgba(255,255,255,.85); background: rgba(255,255,255,.04); }
+
+/* El outline del navegador es oscuro y sobre la banda navy no se ve. */
+.sb-tabs button:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+
+/* La activa se levanta del resto por fondo y por la barra inferior, que
+   apoya contra el borde de la banda. */
+.sb-tabs button.is-active {
+    color: #fff;
+    background: rgba(255,255,255,.07);
+    box-shadow: inset 0 -3px 0 var(--green);
+}
+.sb-tabs button.is-active::before,
+.sb-tabs button.is-active + button::before { opacity: 0; }
 
 .sb-stack [data-panel][hidden] { display: none; }
 
@@ -1448,7 +1485,10 @@
 
 /* Campo sin rellenar que bloquea certificados o facturas. */
 .field label .lb-warn { color: var(--amber); font-weight: 700; }
-.field .control.is-missing { border-color: #f0ddb0; background: var(--amber-soft); }
+/* Campo pendiente: sin el ambar la senal la lleva el borde. El resto de la
+   ficha son campos de borde claro, asi que uno firme se distingue solo, y el
+   readonly conserva su fondo (un fondo blanco lo haria parecer editable). */
+.field .control.is-missing { border-color: var(--muted-2); }
 
 .pnl-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .pnl-actions .hint { font-size: 12.5px; font-weight: 700; color: var(--muted-2); }
@@ -1505,6 +1545,8 @@
        15px a cada lado). */
     margin: -24px -15px 0;
     padding: 0 15px;
+    /* Recorta el pie de pestanas al radio inferior de la banda. */
+    overflow: hidden;
 }
 .sb-crumb {
     height: 62px; display: flex; align-items: center;
@@ -1516,25 +1558,49 @@
 .sb-body [data-panel][hidden] { display: none; }
 
 .sb-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
-.sb-narrow { max-width: 720px; display: flex; flex-direction: column; gap: 20px; }
+/* Mismo ancho que la columna de contenido de .sb-split (aside 320px + gap
+   24px): asi las tarjetas no cambian de tamano al saltar de pestana. */
+.sb-narrow { max-width: calc(100% - 344px); display: flex; flex-direction: column; gap: 20px; }
 
 .sb-aside { display: flex; flex-direction: column; gap: 18px; }
 
+/* Antes iba en ambar. En gris del sistema, lo pendiente se marca por peso de
+   texto (--ink frente al --muted de lo ya resuelto) en vez de por color. */
 .sb-todo {
-    background: var(--amber-soft); border: 1px solid #f0ddb0; border-radius: 18px; padding: 22px;
+    background: var(--field); border: 1px solid var(--line); border-radius: 18px; padding: 22px;
+    /* El fondo de la pagina ya es gris: sin la sombra la tarjeta se disuelve
+       en el, y es justo la que avisa de que faltan datos. */
+    box-shadow: var(--shadow-soft);
 }
 .sb-todo h4 { font-size: 14px; font-weight: 800; color: var(--ink); margin: 0 0 9px; }
-.sb-todo p { font-size: 12.5px; font-weight: 600; color: #7a6635; line-height: 1.6; margin: 0 0 16px; }
+.sb-todo p { font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.6; margin: 0 0 16px; }
 .sb-todo .items { display: flex; flex-direction: column; gap: 10px; }
 .sb-todo .item { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 700; }
 .sb-todo .item svg { width: 15px; height: 15px; flex: 0 0 auto; }
-.sb-todo .item.is-pending { color: #7a6635; }
-.sb-todo .item.is-pending svg { color: var(--amber); }
+.sb-todo .item.is-pending { color: var(--ink); }
+.sb-todo .item.is-pending svg { color: var(--muted); }
 .sb-todo .item.is-done { color: var(--muted); }
 .sb-todo .item.is-done svg { color: var(--green); }
 
+/* Antes era un titulo, un parrafo y un boton de salir. Ahora dice tambien de
+   que sesion habla: el punto vivo la marca como abierta y las dos filas dan
+   el dispositivo y desde cuando, que es lo que se necesita para decidir si
+   cerrarla. */
 .sb-session { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
-.sb-session h4 { font-size: 14px; font-weight: 800; color: var(--ink); margin: 0 0 10px; }
+.sb-session-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+.sb-session h4 { font-size: 14px; font-weight: 800; color: var(--ink); margin: 0; }
+.sb-session .dot {
+    width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
+    background: var(--green); box-shadow: 0 0 0 3px rgba(0,139,205,.16);
+}
+.sb-session-meta { margin: 0 0 14px; padding: 0; }
+.sb-session-meta > div {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid var(--line-2);
+}
+.sb-session-meta > div:first-child { border-top: 1px solid var(--line-2); }
+.sb-session-meta dt { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0; }
+.sb-session-meta dd { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0; text-align: right; }
 .sb-session p { font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.65; margin: 0; }
 .sb-logout {
     display: block; width: 100%; margin-top: 16px;
@@ -1568,6 +1634,8 @@
 
 @media (max-width: 1100px) {
     .sb-split { grid-template-columns: 1fr; }
+    /* Sin aside al lado, el hueco reservado para el ya no tiene sentido. */
+    .sb-narrow { max-width: 100%; }
 }
 
 @media (max-width: 600px) {
@@ -1594,3 +1662,22 @@
 .cfg-page .pnl-save:hover,
 .sb-page .pnl-save:hover { transform: none; }
 .pnl-actions .pnl-save { margin-top: 0; }
+
+
+/* ============ Header del portal cliente ============ */
+.cx-avatar { display: inline-flex; }
+.cx-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line); transition: border-color .15s var(--ease); }
+.cx-avatar:hover img { border-color: var(--green); }
+
+/* En móvil: una sola fila limpia -> [menú] [logo centrado] [avatar] */
+@media (max-width: 1199px) {
+    .app-header { border-bottom: 1px solid var(--line); background: #fff; }
+    .cx-topbar { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 62px; }
+    .cx-burger { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--navy); background: var(--field); border: 1px solid var(--line); flex: 0 0 auto; text-decoration: none; transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease); }
+    .cx-burger:hover, .cx-burger:focus { background: var(--green-soft); color: var(--green-deep); border-color: var(--green); }
+    .cx-burger svg { width: 22px; height: 22px; }
+    .cx-logo { flex: 1; display: flex; justify-content: center; align-items: center; min-width: 0; }
+    .cx-logo .logo { height: 32px; width: auto; max-width: 170px; object-fit: contain; }
+    .cx-topbar .navbar-nav { flex: 0 0 auto; }
+    .cx-avatar img { width: 42px; height: 42px; }
+}

@@ -78,6 +78,7 @@
             <button type="button" class="is-active" data-tab="perfil" role="tab" aria-selected="true">Perfil</button>
             <button type="button" data-tab="seguridad" role="tab" aria-selected="false">Seguridad</button>
             <button type="button" data-tab="avisos" role="tab" aria-selected="false">Notificaciones</button>
+            <button type="button" data-tab="privacidad" role="tab" aria-selected="false">Privacidad</button>
         </div>
     </div>
 
@@ -129,7 +130,7 @@
                                 <label for="cfg_city">Ciudad</label>
                                 <input class="control" id="cfg_city" value="{{ $cityName }}" placeholder="Sin ciudad registrada" readonly>
                             </div>
-                            <div class="field full">
+                            <div class="field">
                                 <label for="address">Dirección</label>
                                 <input class="control" id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
                             </div>
@@ -159,7 +160,22 @@
                     @endif
 
                     <div class="sb-session">
-                        <h4>Sesión activa</h4>
+                        <div class="sb-session-head">
+                            <span class="dot" aria-hidden="true"></span>
+                            <h4>Sesión activa</h4>
+                        </div>
+                        <dl class="sb-session-meta">
+                            <div>
+                                <dt>Dispositivo</dt>
+                                <dd>Este equipo</dd>
+                            </div>
+                            @if($user->last_login_at)
+                                <div>
+                                    <dt>Desde</dt>
+                                    <dd>{{ $user->last_login_at->translatedFormat('d M Y, H:i') }}</dd>
+                                </div>
+                            @endif
+                        </dl>
                         <p>Solo puedes tener una sesión abierta a la vez. Si entras desde otro equipo, esta se cerrará automáticamente.</p>
                         {{-- El form vive fuera de #formUsers (HTML no admite
                              formularios anidados); el boton lo referencia. --}}
@@ -232,6 +248,38 @@
                     <label class="switch-row"><div class="stxt"><b>Vencimientos de acceso</b><span>Aviso 15 días antes de que caduque un curso.</span></div><span class="switch"><input type="checkbox"><i></i></span></label>
                     <label class="switch-row"><div class="stxt"><b>Pedidos y facturas</b><span>Confirmación de compra y comprobantes.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
                 </div>
+            </div>
+        </div>
+
+        {{-- Privacidad y datos: informativo, fuera de #formUsers porque no
+             envía nada. Reutiliza .cfg-privacy, que ya existe en portal.css. --}}
+        <div class="sb-narrow" data-panel="privacidad" hidden>
+            <div class="pnl-card">
+                <div class="pnl-head">
+                    <h2>Privacidad y datos</h2>
+                    <div class="sub">Qué guardamos de tu cuenta y para qué se usa.</div>
+                </div>
+                <div class="cfg-privacy">
+                    <div class="entry">
+                        <b>Datos de identidad</b>
+                        <span>Nombre, apellidos e identificación. Se imprimen en los certificados y en las facturas.</span>
+                    </div>
+                    <div class="entry">
+                        <b>Datos de contacto</b>
+                        <span>Correo, celular y dirección. Se usan para avisarte de tus cursos y para la facturación.</span>
+                    </div>
+                    <div class="entry">
+                        <b>Actividad de formación</b>
+                        <span>Lecciones vistas, resultados de quizzes y exámenes. Sostienen tu progreso y la emisión de certificados.</span>
+                    </div>
+                    @if($user->created_at)
+                        <div class="entry">
+                            <b>Antigüedad de la cuenta</b>
+                            <span>Estudiante desde {{ $user->created_at->translatedFormat('F \d\e Y') }}.</span>
+                        </div>
+                    @endif
+                </div>
+                <a class="cfg-privacy-link" href="{{ route('terms') }}" target="_blank" rel="noopener">Ver términos y tratamiento de datos</a>
             </div>
         </div>
 
