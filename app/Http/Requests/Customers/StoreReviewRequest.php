@@ -6,6 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreReviewRequest extends FormRequest
 {
+    /**
+     * El portal Customers no usa permisos Spatie (ver .claude/rules): está
+     * protegido por scoping de propiedad (`user_id`/`app('customer')`), no
+     * por `panel.permission` — 'customer' en RolesAndPermissionsSeeder no
+     * tiene alias `reviews.*`. Comprobar un permiso aquí sería inconsistente
+     * con el resto del dominio, no una protección real adicional.
+     */
     public function authorize(): bool
     {
         return true;

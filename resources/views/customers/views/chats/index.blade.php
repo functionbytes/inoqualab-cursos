@@ -1,76 +1,136 @@
 @extends('layouts.customers')
 
+@section('title', 'Notificaciones')
+
+@php
+    // $notifications llega agrupado por fecha (Y-m-d) desde el controlador.
+    $planas = collect($notifications)->flatten(1);
+    $sinLeer = $planas->filter(fn ($n) => is_null($n->read_at))->count();
+@endphp
+
 @section('content')
+<section class="pnl-section">
 
-    @include('customers.includes.card', ['title' => 'Notificaciones'])
-
-    <div class="widget-content searchable-container list">
-
-        @forelse($notifications as $date => $group)
-            <div class="card card-body mb-2">
-                <h6 class="fw-semibold text-muted mb-3 border-bottom pb-2">{{ \Carbon\Carbon::parse($date)->translatedFormat('d \d\e F, Y') }}</h6>
-                <ul class="list-unstyled mb-0">
-                    @foreach($group as $notification)
-                        <li class="d-flex align-items-start gap-3 py-2 border-bottom notification-item" data-id="{{ $notification->id }}">
-                            <div class="flex-shrink-0 mt-1">
-                                <span class="rounded-circle d-flex align-items-center justify-content-center bg-light-primary" style="width:36px;height:36px">
-                                    <i class="fas fa-bell text-primary"></i>
-                                </span>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                    <div>
-                                        <h6 class="mb-1 fw-semibold">{{ $notification->data['title'] ?? 'Notificación' }}</h6>
-                                        <p class="mb-1 text-muted">{{ $notification->data['message'] ?? '' }}</p>
-                                        <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if(is_null($notification->read_at))
-                                            <span class="badge bg-primary rounded-pill unread-badge">Nueva</span>
-                                            <button class="btn btn-sm btn-outline-primary btn-mark-read" data-id="{{ $notification->id }}">
-                                                Marcar como leída
-                                            </button>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    @endforeach
-                </ul>
+    <div class="pnl-card pnl-head pnl-head-row">
+        <div>
+            <h2>Notificaciones</h2>
+            <div class="sub">
+                @if($planas->count() > 0)
+                    {{ $sinLeer }} sin leer de {{ $planas->count() }}
+                @else
+                    Aquí llegan los avisos sobre tus cursos, pedidos y certificados
+                @endif
             </div>
-        @empty
-            <div class="card card-body text-center py-5">
-                <i class="fas fa-bell-slash fs-1 text-muted mb-3"></i>
-                <p class="text-muted mb-0">No hay notificaciones</p>
-            </div>
-        @endforelse
-
+        </div>
+        @if($sinLeer > 0)
+            <button type="button" class="nt-readall" id="ntReadAll">Marcar todas como leídas</button>
+        @endif
     </div>
 
+    <div class="pnl-gap"></div>
+
+    @if($planas->isEmpty())
+
+        <div class="pnl-empty">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'bell'])</span>
+            <h3>No tienes notificaciones</h3>
+            <p>Te avisaremos aquí cuando haya novedades en tus cursos, cuando venza un acceso o cuando se emita un certificado.</p>
+            <a href="{{ route('customers.courses') }}">Ir a mis cursos</a>
+        </div>
+
+    @else
+
+        @foreach($notifications as $date => $group)
+            @php
+                $dia = \Carbon\Carbon::parse($date);
+                if ($dia->isToday()) {
+                    $titulo = 'Hoy';
+                } elseif ($dia->isYesterday()) {
+                    $titulo = 'Ayer';
+                } else {
+                    $titulo = \Illuminate\Support\Str::ucfirst($dia->locale('es')->isoFormat('D [de] MMMM [de] YYYY'));
+                }
+            @endphp
+
+            <div class="nt-day">{{ $titulo }}</div>
+
+            <div class="nt-group">
+                @foreach($group as $notification)
+                    @php $nueva = is_null($notification->read_at); @endphp
+
+                    <div class="nt-item {{ $nueva ? 'is-new' : '' }} notification-item" data-id="{{ $notification->id }}">
+                        <span class="ic">@include('customers.includes.icon', ['name' => 'bell'])</span>
+
+                        <div class="txt">
+                            <div class="top">
+                                <b>{{ $notification->data['title'] ?? 'Notificación' }}</b>
+                                @if($nueva)<span class="dot unread-badge"></span>@endif
+                            </div>
+                            <p>{{ $notification->data['message'] ?? '' }}</p>
+                            @if(! empty($notification->data['link']))
+                                <a class="go" href="{{ $notification->data['link'] }}">Ver detalle</a>
+                            @endif
+                        </div>
+
+                        <div class="side">
+                            <span class="time">{{ $notification->created_at->diffForHumans() }}</span>
+                            @if($nueva)
+                                <button type="button" class="btn-mark-read" data-id="{{ $notification->id }}">Marcar leída</button>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endforeach
+
+    @endif
+
+</section>
 @endsection
 
 @push('scripts')
 <script>
-$(document).ready(function () {
-    $(document).on('click', '.btn-mark-read', function () {
-        var btn = $(this);
-        var id = btn.data('id');
-        var item = btn.closest('.notification-item');
-
+$(function () {
+    function marcar(id, $item, cb) {
         $.ajax({
             url: '{{ route('customers.notifications.mark') }}',
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             data: { id: id },
             success: function () {
-                toastr.success('Notificación marcada como leída');
-                item.find('.unread-badge').remove();
-                btn.remove();
+                $item.removeClass('is-new');
+                $item.find('.unread-badge, .btn-mark-read').remove();
+                if (cb) { cb(); }
             },
             error: function () {
                 toastr.error('Error al marcar la notificación');
             }
         });
+    }
+
+    $(document).on('click', '.btn-mark-read', function () {
+        var $btn = $(this);
+        marcar($btn.data('id'), $btn.closest('.notification-item'), function () {
+            toastr.success('Notificación marcada como leída');
+        });
+    });
+
+    // Marcar todas: una petición por notificación sin leer, que es lo que
+    // acepta la ruta actual; el botón desaparece cuando no queda ninguna.
+    $('#ntReadAll').on('click', function () {
+        var $pendientes = $('.notification-item.is-new');
+
+        if (! $pendientes.length) { return; }
+
+        $(this).prop('disabled', true);
+
+        $pendientes.each(function () {
+            var $item = $(this);
+            marcar($item.data('id'), $item);
+        });
+
+        $(this).remove();
+        toastr.success('Notificaciones marcadas como leídas');
     });
 });
 </script>

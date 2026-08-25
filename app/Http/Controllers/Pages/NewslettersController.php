@@ -23,7 +23,8 @@ class NewslettersController extends Controller
 
     public function store(PublicSubscribeRequest $request): JsonResponse
     {
-        if (setting('newsletter_enabled') === '0') {
+        // Activado salvo que el manager lo apague explícitamente.
+        if (! settingEnabled('newsletter_enabled', true)) {
             return response()->json(['success' => false, 'message' => 'Las suscripciones están desactivadas.'], 422);
         }
 
@@ -70,7 +71,7 @@ class NewslettersController extends Controller
 
     public function ajaxPopup(): Response
     {
-        if (setting('newsletter_enabled') === '0' || setting('newsletter_popup_enabled') === '0') {
+        if (! settingEnabled('newsletter_enabled', true) || ! settingEnabled('newsletter_popup_enabled', true)) {
             return response('', 204);
         }
 

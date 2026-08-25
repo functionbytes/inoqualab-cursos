@@ -464,7 +464,7 @@ class SeoMetaController extends Controller
             return response()->json(['error' => 'DeepL SDK no instalado. Ejecuta: composer require deeplcom/deepl-php'], 422);
         }
 
-        $apiKey = config('services.deepl.key', env('DEEPL_API_KEY', ''));
+        $apiKey = config('services.deepl.key');
         if (empty($apiKey)) {
             return response()->json(['error' => 'DeepL API key no configurada. Establece DEEPL_API_KEY en .env'], 422);
         }

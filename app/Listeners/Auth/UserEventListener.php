@@ -2,7 +2,6 @@
 
 namespace App\Listeners\Auth;
 
-use App\Events\Auth\UserConfirmed;
 use App\Events\Auth\UserLoggedIn;
 use App\Events\Auth\UserLoggedOut;
 use App\Events\Auth\UserRegistered;
@@ -35,16 +34,10 @@ class UserEventListener
         Log::info('User Registered: '.$event->user->full_name);
     }
 
-    public function onConfirmed($event)
-    {
-        Log::info('User Confirmed: '.$event->user->full_name);
-    }
-
     public function subscribe($events)
     {
         $events->listen(UserLoggedIn::class, [self::class, 'onLoggedIn']);
         $events->listen(UserLoggedOut::class, [self::class, 'onLoggedOut']);
         $events->listen(UserRegistered::class, [self::class, 'onRegistered']);
-        $events->listen(UserConfirmed::class, [self::class, 'onConfirmed']);
     }
 }

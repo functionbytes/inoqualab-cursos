@@ -60,9 +60,4 @@ class QuizAnswer extends Model
     {
         return $this->belongsTo('App\Models\Quiz\QuizTopic', 'topic_id', 'id');
     }
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Course\Course', 'course_id', 'id');
-    }
 }

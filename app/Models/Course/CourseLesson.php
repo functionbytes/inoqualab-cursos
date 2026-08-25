@@ -147,11 +147,6 @@ class CourseLesson extends Model implements HasMedia
         return $this->chapterStudents()->where('user_id', auth()->id())->exists();
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\User', 'user_id', 'id');
-    }
-
     public function course(): BelongsTo
     {
         return $this->belongsTo('App\Models\Course\Course', 'course_id', 'id');

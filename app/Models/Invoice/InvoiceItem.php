@@ -36,9 +36,4 @@ class InvoiceItem extends Model
     {
         return $this->belongsTo('App\Models\Course\Course');
     }
-
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Order\Order');
-    }
 }

@@ -66,6 +66,10 @@
     if (! $hero) {
         $hero = $courses->first();
     }
+
+    // La ruta lateral muestra las primeras inscripciones en el orden en que se
+    // compraron: es el orden en que el alumno debe cursarlas.
+    $ruta = $courses->sortBy('id')->take(5);
 @endphp
 
 @section('content')
@@ -78,19 +82,23 @@
         </div>
         @if($activos->count() > 0)
             <div class="pnl-streak">
-                <span class="ic"><i class="fa-solid fa-graduation-cap"></i></span>
+                <span class="ic">@include('customers.includes.icon', ['name' => 'cap'])</span>
                 <div><b>{{ $activos->count() }}</b> {{ $activos->count() === 1 ? 'curso activo' : 'cursos activos' }} · ¡sigue aprendiendo!</div>
             </div>
         @endif
     </div>
 
     @if($expirados->count() > 0)
-        <div class="pnl-streak warn" style="margin-bottom:22px;">
-            <span class="ic"><i class="fa-solid fa-triangle-exclamation"></i></span>
-            <div>
-                <b>{{ $expirados->count() }}</b> {{ $expirados->count() === 1 ? 'curso con acceso vencido' : 'cursos con acceso vencido' }}
-                <a href="{{ route('customers.courses') }}">Ver y renovar</a>
+        {{-- El aviso lleva la acción a la derecha: antes era un enlace subrayado
+             perdido dentro del texto y casi nadie lo veía. --}}
+        <div class="pnl-alert">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'warning'])</span>
+            <div class="txt">
+                <b>{{ $expirados->count() }}</b>
+                {{ $expirados->count() === 1 ? 'curso con el acceso vencido' : 'cursos con el acceso vencido' }}.
+                Renuévalos para retomar donde lo dejaste y obtener el certificado.
             </div>
+            <a class="cta" href="{{ route('customers.courses') }}">Ver y renovar</a>
         </div>
     @endif
 
@@ -100,14 +108,15 @@
             $heroPercent = $heroStatus === 'done' ? 100 : (int) round(min(100, (float) $hero->percent));
             $heroThumb = $hero->course?->getFirstMedia('thumbnail')?->getFullUrl() ?: $defaultThumb;
             $heroCat = $hero->course?->categorie?->title;
-            $heroUrl = route('customers.courses.content', $hero->slack);
+            $heroExpired = $heroStatus === 'expired';
+            $heroUrl = $heroExpired ? route('customers.courses') : route('customers.courses.content', $hero->slack);
         @endphp
 
         {{-- ===== Resume hero ===== --}}
         <div class="resume">
             <div class="resume-media" style="background-image:url('{{ $heroThumb }}');background-size:cover;background-position:center;">
-                <a class="resume-play" href="{{ $heroUrl }}" aria-label="Reanudar curso">
-                    <i class="fa-solid fa-play"></i>
+                <a class="resume-play" href="{{ $heroUrl }}" aria-label="{{ $heroExpired ? 'Renovar acceso' : 'Reanudar curso' }}">
+                    @include('customers.includes.icon', ['name' => $heroExpired ? 'refresh' : 'play'])
                 </a>
                 @if($heroCat)
                     <span class="resume-pill">{{ $heroCat }}</span>
@@ -115,11 +124,15 @@
             </div>
             <div class="resume-body">
                 <div class="resume-eyebrow">
-                    {{ $heroPercent > 0 ? 'Continúa donde lo dejaste' : 'Comienza tu próximo curso' }}
+                    @if($heroExpired)
+                        Renueva para continuar
+                    @else
+                        {{ $heroPercent > 0 ? 'Continúa donde lo dejaste' : 'Comienza tu próximo curso' }}
+                    @endif
                 </div>
                 <h2>{{ $hero->course?->title }}</h2>
                 <div class="resume-next">
-                    <i class="fa-solid fa-circle-play"></i>
+                    @include('customers.includes.icon', ['name' => 'play-circle'])
                     {{ $statusLabels[$heroStatus] }}
                 </div>
                 <div class="resume-prog">
@@ -128,12 +141,16 @@
                 </div>
                 <div class="resume-actions">
                     <a class="go" href="{{ $heroUrl }}">
-                        <i class="fa-solid fa-play"></i>
-                        {{ $heroPercent > 0 ? 'Reanudar curso' : 'Comenzar curso' }}
+                        @include('customers.includes.icon', ['name' => $heroExpired ? 'refresh' : 'play'])
+                        @if($heroExpired)
+                            Renovar acceso
+                        @else
+                            {{ $heroPercent > 0 ? 'Reanudar curso' : 'Comenzar curso' }}
+                        @endif
                     </a>
                     @if($hero->certificate)
                         <a class="ghost" href="{{ route('customers.certificate.download', $hero->certificate->slack) }}">
-                            <i class="fa-solid fa-download"></i>
+                            @include('customers.includes.icon', ['name' => 'download'])
                             Certificado
                         </a>
                     @endif
@@ -145,28 +162,28 @@
     {{-- ===== Stats ===== --}}
     <div class="pnl-stats">
         <div class="stat-card">
-            <div class="ic"><i class="fa-solid fa-book-open"></i></div>
+            <div class="ic">@include('customers.includes.icon', ['name' => 'cap'])</div>
             <div>
                 <div class="n">{{ $activos->count() }}</div>
                 <div class="l">Cursos activos</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="ic"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="ic">@include('customers.includes.icon', ['name' => 'chart'])</div>
             <div>
                 <div class="n">{{ $promedio }}%</div>
                 <div class="l">Progreso promedio</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="ic"><i class="fa-solid fa-award"></i></div>
+            <div class="ic">@include('customers.includes.icon', ['name' => 'award'])</div>
             <div>
                 <div class="n">{{ $certificados }}</div>
                 <div class="l">Certificados</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="ic"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="ic">@include('customers.includes.icon', ['name' => 'check'])</div>
             <div>
                 <div class="n">{{ $completados }}</div>
                 <div class="l">Cursos completados</div>
@@ -216,7 +233,7 @@
                                     </div>
                                 </div>
                                 <a class="pc-btn" href="{{ $url }}">
-                                    <i class="fa-solid fa-play"></i>
+                                    @include('customers.includes.icon', ['name' => 'play'])
                                     {{ $percent > 0 ? 'Continuar' : 'Empezar curso' }}
                                 </a>
                             </div>
@@ -224,47 +241,86 @@
                     @endforeach
                 </div>
             @else
-                <div class="pnl-card">
-                    <div class="pnl-head">
-                        <h2>Aún no tienes cursos en progreso</h2>
-                        <div class="sub">Cuando empieces un curso aparecerá aquí para que continúes donde lo dejaste.</div>
-                    </div>
+                {{-- El vacío explica qué hacer y ofrece la salida, en vez de ser
+                     una tarjeta con una frase. --}}
+                <div class="pnl-empty">
+                    <span class="ic">@include('customers.includes.icon', ['name' => 'cap'])</span>
+                    @if($expirados->count() > 0)
+                        <h3>No tienes cursos en progreso</h3>
+                        <p>
+                            {{ $expirados->count() === 1 ? 'Tu curso tiene' : 'Tus '.$expirados->count().' cursos tienen' }}
+                            el acceso vencido. Al renovarlo conservas el progreso que ya llevabas.
+                        </p>
+                        <a href="{{ route('customers.courses') }}">Ver y renovar accesos</a>
+                    @else
+                        <h3>Aún no tienes cursos en progreso</h3>
+                        <p>Cuando empieces un curso aparecerá aquí para que continúes donde lo dejaste.</p>
+                        <a href="{{ route('home') }}">Explorar el catálogo</a>
+                    @endif
                 </div>
             @endif
         </div>
 
-        {{-- Rail lateral: honesto y discreto, sin números inventados --}}
+        {{-- Rail lateral --}}
         <div class="inicio-rail">
-            <div class="goal-card">
-                <h4>Tu aprendizaje</h4>
-                <p style="font-size:13px;color:var(--muted);line-height:1.55;margin:0;">
-                    @if($activos->count() > 0)
-                        Tienes {{ $activos->count() }} {{ $activos->count() === 1 ? 'curso activo' : 'cursos activos' }}
-                        con un progreso promedio del {{ $promedio }}%. ¡Sigue avanzando!
-                    @else
-                        Cuando te inscribas a un curso, aquí verás tu avance y tus metas de estudio.
-                    @endif
-                </p>
-            </div>
+            @if($ruta->count() > 0)
+                {{-- Ruta formativa: da contexto de dónde está el alumno dentro
+                     del conjunto de cursos que compró. --}}
+                <div class="goal-card">
+                    <h4>Tu ruta formativa</h4>
+                    <div class="pnl-route">
+                        @foreach($ruta as $i => $insc)
+                            @php
+                                $st = $statusOf($insc);
+                                $percent = (int) round(min(100, (float) $insc->percent));
+                            @endphp
+                            <div class="step st-{{ $st }}">
+                                <div class="rail">
+                                    <span class="dot">
+                                        @if($st === 'done')
+                                            @include('customers.includes.icon', ['name' => 'check'])
+                                        @endif
+                                    </span>
+                                    @if(! $loop->last)<span class="line"></span>@endif
+                                </div>
+                                <div class="info">
+                                    <b>{{ \Illuminate\Support\Str::limit($insc->course?->title, 42) }}</b>
+                                    <span>
+                                        @if($st === 'expired')
+                                            Acceso vencido
+                                        @elseif($st === 'done')
+                                            Completado
+                                        @elseif($st === 'progress')
+                                            En progreso · {{ $percent }}%
+                                        @else
+                                            Sin iniciar
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <div class="dl-card">
                 <h4>Tus certificados</h4>
                 @if($certificados > 0)
                     @foreach($courses->filter(fn ($c) => $c->certificate) as $insc)
                         <div class="deadline">
-                            <div class="d"><b><i class="fa-solid fa-award"></i></b></div>
+                            <div class="d"><b>@include('customers.includes.icon', ['name' => 'award'])</b></div>
                             <div class="info">
                                 <b>{{ $insc->course?->title }}</b>
                                 <a class="ok" href="{{ route('customers.certificate.download', $insc->certificate->slack) }}"
                                    style="text-decoration:none;">
-                                    <i class="fa-solid fa-download"></i> Descargar certificado
+                                    @include('customers.includes.icon', ['name' => 'download']) Descargar certificado
                                 </a>
                             </div>
                         </div>
                     @endforeach
                 @else
                     <p style="font-size:13px;color:var(--muted);line-height:1.55;margin:0;">
-                        Al completar un curso, tu certificado estará disponible aquí para descargar.
+                        Al completar un curso y aprobar su examen, el certificado aparece aquí para descargar.
                     </p>
                 @endif
             </div>

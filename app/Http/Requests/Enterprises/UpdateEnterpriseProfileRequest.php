@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Enterprises;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateEnterpriseProfileRequest extends FormRequest
 {
@@ -18,7 +19,7 @@ class UpdateEnterpriseProfileRequest extends FormRequest
             'lastname' => ['required', 'string', 'min:3', 'max:100'],
             'identification' => ['nullable', 'string', 'min:3', 'max:100'],
             'address' => ['nullable', 'string', 'min:3', 'max:100'],
-            'password' => ['nullable', 'string', 'min:6', 'max:100'],
+            'password' => ['nullable', 'string', 'max:100', Password::defaults()],
         ];
     }
 

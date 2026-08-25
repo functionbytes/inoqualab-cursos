@@ -90,6 +90,7 @@ use App\Http\Controllers\Managers\Settings\ModulesSettingsController;
 use App\Http\Controllers\Managers\Settings\NewsletterSettingsController;
 use App\Http\Controllers\Managers\Settings\PaymentsSettingsController;
 use App\Http\Controllers\Managers\Settings\PixelSettingsController;
+use App\Http\Controllers\Managers\Settings\PortalSettingsController;
 use App\Http\Controllers\Managers\Settings\RolesController;
 use App\Http\Controllers\Managers\Settings\SeoSettingsController;
 use App\Http\Controllers\Managers\Settings\SettingsController;
@@ -515,6 +516,9 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
 
         Route::get('/pixel', [PixelSettingsController::class, 'index'])->name('manager.settings.pixel');
         Route::post('/pixel/update', [PixelSettingsController::class, 'update'])->name('manager.settings.pixel.update');
+
+        Route::get('/portal', [PortalSettingsController::class, 'index'])->name('manager.settings.portal');
+        Route::post('/portal/update', [PortalSettingsController::class, 'update'])->name('manager.settings.portal.update');
 
         Route::get('/invoices', [InvoicesSettingsController::class, 'index'])->name('manager.settings.invoices');
         Route::post('/invoices/update', [InvoicesSettingsController::class, 'update'])->name('manager.settings.invoices.update');

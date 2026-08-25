@@ -6,6 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class PublicSubscribeRequest extends FormRequest
 {
+    /**
+     * Ruta pública de invitado (suscripción al newsletter desde el footer) —
+     * sin usuario autenticado que comprobar.
+     */
     public function authorize(): bool
     {
         return true;

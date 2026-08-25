@@ -57,6 +57,10 @@ class InscriptionsController extends Controller
         // cualquier usuario del sistema manipulando el id del request).
         abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404, 'El usuario no pertenece a la empresa.');
 
+        // Catálogo: el curso debe estar asignado a la empresa (evita matricular en
+        // un curso fuera de lo contratado, aunque exista tarifa distribuidor↔curso).
+        abort_unless($enterprise->courses()->where('courses.id', $course->id)->exists(), 404, 'El curso no está asignado a la empresa.');
+
         $tariff = DistributorCourse::tariff($course->id, $distributor->id);
         abort_if($tariff === null, 422, 'El curso no tiene una tarifa asignada para este distribuidor.');
         $condition = OrderCondition::slug('payment');
@@ -144,6 +148,10 @@ class InscriptionsController extends Controller
 
         // Ownership: el usuario debe pertenecer a la empresa.
         abort_unless($enterprise->users()->where('users.id', $user->id)->exists(), 404, 'El usuario no pertenece a la empresa.');
+
+        // Catálogo: el curso debe estar asignado a la empresa (evita matricular en
+        // un curso fuera de lo contratado, aunque exista tarifa distribuidor↔curso).
+        abort_unless($enterprise->courses()->where('courses.id', $course->id)->exists(), 404, 'El curso no está asignado a la empresa.');
 
         $existingInscription = Inscription::existingInscription($user->id, $course->id)->first();
 

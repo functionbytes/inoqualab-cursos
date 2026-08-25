@@ -5,6 +5,7 @@ namespace App\Http\Requests\Distributors;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateDistributorProfileRequest extends FormRequest
 {
@@ -30,7 +31,7 @@ class UpdateDistributorProfileRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore(Auth::id()),
             ],
             'address' => ['nullable', 'string', 'min:3', 'max:100'],
-            'password' => ['nullable', 'string', 'min:6', 'max:100'],
+            'password' => ['nullable', 'string', 'max:100', Password::defaults()],
         ];
     }
 

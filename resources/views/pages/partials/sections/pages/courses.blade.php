@@ -23,7 +23,7 @@
                         <div class="coach-image">
                             <a href="{{ route('courses.view', [$course->slack]) }}" class="category">{{ $course->categorie->title }}</a>
                                 @if(count($course->getMedia('thumbnail'))>0)
-                                    <img src="{{ $course->getFirstMedia('thumbnail')->getFullUrl() }}"
+                                    <img src="{{ $course->cardImageUrl() }}"
                                          class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440" loading="lazy"
                                          onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                                 @else

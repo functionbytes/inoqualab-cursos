@@ -1,10 +1,10 @@
 <div class="lv-lhead">
     <div>
-        <span class="lk"><i class="fa-solid fa-circle-question"></i> Evaluación</span>
+        <span class="lk">@include('customers.includes.icon', ['name' => 'circle-question']) Evaluación</span>
         <h1>{{ ucfirst($lesson->title) }}</h1>
         <div class="lmeta">
-            <span><i class="fa-solid fa-list-check"></i> {{ $questions->count() }} preg.</span>
-            <span><i class="fa-solid fa-layer-group"></i> {{ $lesson->chapter->title ?? $course->title }}</span>
+            <span>@include('customers.includes.icon', ['name' => 'list-check']) {{ $questions->count() }} preg.</span>
+            <span>@include('customers.includes.icon', ['name' => 'layers']) {{ $lesson->chapter->title ?? $course->title }}</span>
         </div>
     </div>
 </div>
@@ -85,24 +85,24 @@
                 @endforeach
 
                 <div id="quizAnswerError" class="quiz-error" style="display: none;">
-                    <i class="fa-solid fa-circle-exclamation"></i> Debes seleccionar una respuesta para continuar.
+                    @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
                     <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        <i class="fa-solid fa-arrow-left"></i>
+                        @include('customers.includes.icon', ['name' => 'arrow-left'])
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            <i class="fa-solid fa-arrow-right"></i>
+                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            <i class="fa-solid fa-flag-checkered"></i>
+                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>
@@ -163,24 +163,24 @@
                 @endforeach
 
                 <div id="quizAnswerError" class="quiz-error" style="display: none;">
-                    <i class="fa-solid fa-circle-exclamation"></i> Debes seleccionar una respuesta para continuar.
+                    @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
                     <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        <i class="fa-solid fa-arrow-left"></i>
+                        @include('customers.includes.icon', ['name' => 'arrow-left'])
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            <i class="fa-solid fa-arrow-right"></i>
+                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            <i class="fa-solid fa-flag-checkered"></i>
+                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>
@@ -194,7 +194,7 @@
     <div class="lv-foot lesson-nav-foot">
         @if ($prevLesson && $prevLesson !== 'true')
             <a href="{{ $prevLesson->type->slug == 'quiz' ? route('customers.courses.quiz', $prevLesson->id) : route('customers.courses.lesion', $prevLesson->id) }}" class="lv-fbtn" aria-label="Lección anterior del curso">
-                <i class="fa-solid fa-arrow-left"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-left'])
                 <span class="fb-txt"><span class="l">Anterior</span><span class="t">{{ ucfirst(Str::lower($prevLesson->title)) }}</span></span>
             </a>
         @else
@@ -203,7 +203,7 @@
         @if ($nextLesson && $nextLesson !== 'true')
             <a href="{{ $nextLesson->type->slug == 'quiz' ? route('customers.courses.quiz', $nextLesson->id) : route('customers.courses.lesion', $nextLesson->id) }}" class="lv-fbtn next" aria-label="Siguiente lección del curso">
                 <span class="fb-txt"><span class="l">Siguiente</span><span class="t">{{ ucfirst(Str::lower($nextLesson->title)) }}</span></span>
-                <i class="fa-solid fa-arrow-right"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-right'])
             </a>
         @else
             <span></span>

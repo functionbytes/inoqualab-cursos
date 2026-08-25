@@ -14,7 +14,7 @@
 
                     <div class="ccard-media">
                         @if(count($related->getMedia('thumbnail')) > 0)
-                            <img src="{{ $related->getFirstMedia('thumbnail')->getFullUrl() }}"
+                            <img src="{{ $related->cardImageUrl() }}"
                                  alt="{{ $related->title }}" loading="lazy"
                                  onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
                         @else

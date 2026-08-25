@@ -420,6 +420,106 @@
     })();
     </script>
 
+    {{--
+        Beacon de Core Web Vitals reales. El endpoint (seo.web-vitals.beacon,
+        SeoWebVitalsController::store) ya existía y persiste en seo_web_vitals,
+        pero nada en el frontend lo llamaba -- el panel manager/seo/web-vitals
+        mostraba siempre "sin datos". Usa navigator.sendBeacon en vez de
+        $.ajax (la convención jQuery del proyecto) a propósito: es la única
+        API pensada para sobrevivir a un pagehide/unload sin cancelarse a
+        mitad de camino, que es justo cuando se conocen LCP/CLS finales.
+    --}}
+    <script>
+    (function () {
+        if (!window.PerformanceObserver || !navigator.sendBeacon) return;
+
+        var BEACON_URL = '{{ route('seo.web-vitals.beacon') }}';
+        var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+        var sent = {};
+        var metrics = { LCP: null, CLS: 0, FCP: null, TTFB: null, INP: null };
+
+        function send(metric, value) {
+            if (sent[metric] || value === null || value === undefined || isNaN(value)) return;
+            sent[metric] = true;
+
+            var nav = performance.getEntriesByType('navigation')[0];
+
+            var blob = new Blob([JSON.stringify({
+                _token: CSRF_TOKEN,
+                metric: metric,
+                value: value,
+                url: location.href,
+                navigation_type: (nav && nav.type) || 'navigate'
+            })], { type: 'application/json' });
+
+            navigator.sendBeacon(BEACON_URL, blob);
+        }
+
+        function flushAll() {
+            send('TTFB', metrics.TTFB);
+            send('FCP', metrics.FCP);
+            send('LCP', metrics.LCP);
+            send('CLS', metrics.CLS);
+            send('INP', metrics.INP);
+        }
+
+        // TTFB: ya disponible en la carga inicial vía Navigation Timing.
+        try {
+            var navEntry = performance.getEntriesByType('navigation')[0];
+            if (navEntry) metrics.TTFB = navEntry.responseStart;
+        } catch (e) {}
+
+        // FCP
+        try {
+            new PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (entry.name === 'first-contentful-paint') metrics.FCP = entry.startTime;
+                });
+            }).observe({ type: 'paint', buffered: true });
+        } catch (e) {}
+
+        // LCP: el navegador sigue reemplazando la entrada mientras la página
+        // está visible -- por diseño solo se lee metrics.LCP (el último valor)
+        // al momento de enviar, nunca dentro del propio observer.
+        try {
+            new PerformanceObserver(function (list) {
+                var entries = list.getEntries();
+                var last = entries[entries.length - 1];
+                if (last) metrics.LCP = last.renderTime || last.loadTime;
+            }).observe({ type: 'largest-contentful-paint', buffered: true });
+        } catch (e) {}
+
+        // CLS: suma de layout shifts sin input reciente del usuario.
+        // Simplificado a un total de sesión completa (la spec real usa
+        // ventanas de 5s) -- suficiente para detectar páginas con shifts
+        // graves, que es el uso que le da el panel (worst pages / p75).
+        try {
+            new PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (!entry.hadRecentInput) metrics.CLS += entry.value;
+                });
+            }).observe({ type: 'layout-shift', buffered: true });
+        } catch (e) {}
+
+        // INP: aproximado al máximo de duración de interacción observada (la
+        // spec real usa el percentil 98 sobre todas las interacciones). El
+        // entryType 'event' no tiene soporte universal -- todo el bloque
+        // degrada en silencio si el navegador no lo implementa.
+        try {
+            new PerformanceObserver(function (list) {
+                list.getEntries().forEach(function (entry) {
+                    if (entry.duration > (metrics.INP || 0)) metrics.INP = entry.duration;
+                });
+            }).observe({ type: 'event', buffered: true, durationThreshold: 40 });
+        } catch (e) {}
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') flushAll();
+        });
+        addEventListener('pagehide', flushAll);
+    })();
+    </script>
+
 @if(setting('newsletter_enabled') != '0' && setting('newsletter_popup_enabled') != '0')
 <script>
 (function () {

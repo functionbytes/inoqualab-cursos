@@ -22,7 +22,9 @@ class NotificationsController extends Controller
             return Carbon::parse($date->created_at)->format('Y-m-d');
         });
 
-        return view('customers.views.chats.index')->with([
+        $variant = portalVariant('customers_notifications_variant');
+
+        return view('customers.views.chats.index'.$variant)->with([
             'notifications' => $notifications,
         ]);
 

@@ -45,4 +45,20 @@ return [
         'sandbox' => env('WOMPI_SANDBOX', true),
     ],
 
+    // Traducción automática de metadatos SEO (panel/seo/metas).
+    'deepl' => [
+        'key' => env('DEEPL_API_KEY', ''),
+    ],
+
+    // Google Search Console: OAuth para traer clicks/impresiones a seo_metas.
+    // El refresh token no vive aquí, se guarda en storage/app/seo-gsc.json.
+    'gsc' => [
+        'client_id' => env('GSC_CLIENT_ID', ''),
+        'client_secret' => env('GSC_CLIENT_SECRET', ''),
+        // Sin GSC_PROPERTY_URL cae al dominio de la app. Se resuelve aquí y no
+        // con el segundo argumento de config(): declarada la clave, ese default
+        // ya no se aplicaría nunca (la clave existe, aunque valga null).
+        'property_url' => env('GSC_PROPERTY_URL') ?: env('APP_URL'),
+    ],
+
 ];

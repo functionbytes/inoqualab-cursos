@@ -3,12 +3,13 @@
 namespace App\Http\Requests\Managers\Distributors;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateDistributorStaffRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('distributors.update');
     }
 
     public function rules(): array
@@ -22,7 +23,7 @@ class UpdateDistributorStaffRequest extends FormRequest
             'email' => ['required', 'email', 'max:250'],
             'address' => ['nullable', 'string', 'max:250'],
             'available' => ['required', 'in:0,1'],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', Password::defaults()],
         ];
     }
 

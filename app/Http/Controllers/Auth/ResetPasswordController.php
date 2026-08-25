@@ -60,9 +60,14 @@ class ResetPasswordController extends Controller
         $user->password_reset_token = null;
         $user->password_reset_max_tries = null;
         $user->password_reset_last_tried_on = null;
-        $user->save();
 
-        $user->sessions()->delete();
+        // Expulsa la sesión que estuviera abierta. Es el punto del flujo
+        // "olvidé mi contraseña": si se restablece porque alguien entró en la
+        // cuenta, ese alguien tiene que quedarse fuera aunque la víctima no
+        // vuelva a iniciar sesión inmediatamente.
+        revokeUserSessions($user);
+
+        $user->save();
 
         event(new ResetPasswordCreated($user));
 

@@ -3,7 +3,7 @@
         <ul class="navbar-nav">
             <li class="nav-item d-block d-xl-none">
                 <a class="nav-link sidebartoggler ms-n3" id="sidebarCollapse" href="javascript:void(0)" aria-label="Abrir menú lateral">
-                    <i class="fas fa-bars" aria-hidden="true"></i>
+                    @include('customers.includes.icon', ['name' => 'menu', 'size' => 20])
                 </a>
             </li>
             <li class="nav-item d-none d-xl-block">
@@ -19,7 +19,7 @@
         <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="p-2">
-                <i class="fas fa-ellipsis fs-7"></i>
+                @include('customers.includes.icon', ['name' => 'dots', 'size' => 18])
             </span>
         </button>
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">

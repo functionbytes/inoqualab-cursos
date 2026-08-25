@@ -465,6 +465,14 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
+                            <a class="sidebar-link"  href="{{ route('manager.settings.portal') }}" aria-expanded="false">
+                                  <span>
+                                    <i class="fas fa-circle"></i>
+                                  </span>
+                                <span class="hide-menu">Portal del alumno</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
                             <a class="sidebar-link"  href="{{ route('manager.settings.emails') }}" aria-expanded="false">
                                   <span>
                                     <i class="fas fa-circle"></i>

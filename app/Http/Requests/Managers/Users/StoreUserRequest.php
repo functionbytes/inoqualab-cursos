@@ -4,6 +4,7 @@ namespace App\Http\Requests\Managers\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
@@ -21,7 +22,7 @@ class StoreUserRequest extends FormRequest
             'identification' => ['nullable', 'string', 'max:50', Rule::unique('users', 'identification')],
             'cellphone' => ['nullable', 'string', 'max:30'],
             'role' => ['required', 'in:manager,customer,enterprise,distributor,accounting,support'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::defaults()],
         ];
     }
 

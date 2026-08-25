@@ -9,15 +9,18 @@ use Illuminate\Foundation\Http\FormRequest;
  * request: enviar el formulario incompleto metía NULL en columnas NOT NULL
  * (address, cellphone, nit, email…) y el portal respondía 500.
  *
- * No lleva comprobación de permiso: el middleware IsDistributor ya garantiza
- * que quien llega es un distribuidor, y el controller opera siempre sobre
- * `app('distributor')` — nunca sobre un slack del request.
+ * El middleware IsDistributor ya garantiza que quien llega es un distribuidor
+ * y el controller opera siempre sobre `app('distributor')` — nunca sobre un
+ * slack del request — así que esto no protege contra IDOR. Se comprueba el
+ * permiso igual por consistencia con la convención del proyecto
+ * (.claude/rules/form-requests.md); 'distributor' tiene 'settings.update'
+ * en RolesAndPermissionsSeeder, así que no cambia el acceso real.
  */
 class UpdateDistributorSettingsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('settings.update');
     }
 
     public function rules(): array

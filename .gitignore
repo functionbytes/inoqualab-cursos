@@ -24,9 +24,12 @@ Homestead.json
 
 /public/build
 /storage/pail
-.env.backup
-.env.production
-.env.testing
+# Cualquier variante de .env queda fuera, no solo las tres que se listaban:
+# apareció un `.env.bak-20260823-155226` con 73 variables (contraseñas de base
+# de datos, Redis y SMTP, claves de Wompi) que ningún patrón cubría y que un
+# `git add .` habría subido al repositorio.
+.env.*
+!.env.example
 /storage/app/analytics
 .phpactor.json
 auth.json
@@ -39,3 +42,7 @@ auth.json
 # Storage logs / worker
 /storage/*.log
 /storage/worker/
+
+# Workflows de CI: excluidos del push por falta del scope "workflow" en el token.
+# El ci.yml sigue en local; para subirlo, otorga el scope y quita esta línea.
+/.github/workflows/

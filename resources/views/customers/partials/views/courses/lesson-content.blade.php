@@ -1,5 +1,5 @@
 @php
-    $kickerIcon = ['video'=>'fa-circle-play','audio'=>'fa-volume','image'=>'fa-image','pdf'=>'fa-file-pdf','zip'=>'fa-file-zipper'][$typeSlug] ?? 'fa-book-open';
+    $kickerIcon = ['video'=>'circle-play','audio'=>'audio','image'=>'image','pdf'=>'pdf','zip'=>'zip'][$typeSlug] ?? 'book';
     $kickerLabel = ['video'=>'Video','audio'=>'Audio','image'=>'Imagen','pdf'=>'Documento','zip'=>'Recurso'][$typeSlug] ?? 'Lección';
     $hasResource = in_array($typeSlug, ['audio','image','pdf','zip']) && $classing->hasMedia($typeSlug);
     $tabId = 'lesson'.$classing->id;
@@ -7,7 +7,7 @@
 
 @if ($typeSlug == 'video' && $classing->url)
     <div class="lp-video">
-        <span class="lp-tag"><i class="fa-solid fa-circle-play"></i> Clase en video</span>
+        <span class="lp-tag">@include('customers.includes.icon', ['name' => 'circle-play']) Clase en video</span>
         <iframe
             src="{{ route('customers.courses.player', ['lesson' => $classing->id]) }}"
             frameborder="0"
@@ -16,7 +16,7 @@
     </div>
 @elseif ($typeSlug == 'pdf' && $classing->hasMedia('pdf'))
     <div class="lp-embed lp-embed-pdf">
-        <span class="lp-tag light"><i class="fa-solid fa-file-pdf"></i> Documento PDF</span>
+        <span class="lp-tag light">@include('customers.includes.icon', ['name' => 'pdf']) Documento PDF</span>
         <iframe src="{{ $classing->getFirstMedia('pdf')->getFullUrl() }}" title="{{ $classing->title }}"></iframe>
     </div>
 @elseif ($typeSlug == 'image' && $classing->hasMedia('image'))
@@ -25,14 +25,14 @@
     </div>
 @elseif ($typeSlug == 'audio' && $classing->hasMedia('audio'))
     <div class="lp-embed lp-embed-audio">
-        <span class="lp-tag"><i class="fa-solid fa-volume"></i> Clase en audio</span>
+        <span class="lp-tag">@include('customers.includes.icon', ['name' => 'audio']) Clase en audio</span>
         <audio controls preload="metadata" src="{{ $classing->getFirstMedia('audio')->getFullUrl() }}"></audio>
     </div>
 @endif
 
 <div class="lv-lhead">
     <div>
-        <span class="lk"><i class="fa-solid {{ $kickerIcon }}"></i> {{ $kickerLabel }}</span>
+        <span class="lk">@include('customers.includes.icon', ['name' => $kickerIcon]) {{ $kickerLabel }}</span>
         <h1>{{ ucfirst($classing->title) }}</h1>
     </div>
 </div>
@@ -63,17 +63,17 @@
         <div class="lv-pane">
             @if ($hasResource)
                 @php
-                    $fileIcon = ['audio'=>'fa-volume','image'=>'fa-image','pdf'=>'fa-file-pdf','zip'=>'fa-file-zipper'][$typeSlug] ?? 'fa-file';
+                    $fileIcon = ['audio'=>'audio','image'=>'image','pdf'=>'pdf','zip'=>'zip'][$typeSlug] ?? 'file';
                     $fileMedia = $classing->getFirstMedia($typeSlug);
                 @endphp
                 <div class="lv-reslist">
                     <a class="lv-res" href="{{ $fileMedia->getFullUrl() }}" target="_blank">
-                        <span class="ic"><i class="fa-solid {{ $fileIcon }}"></i></span>
+                        <span class="ic">@include('customers.includes.icon', ['name' => $fileIcon])</span>
                         <span class="info">
                             <b>{{ $fileMedia->file_name }}</b>
                             <span>Material de la lección · {{ strtoupper($typeSlug) }}</span>
                         </span>
-                        <span class="dl"><i class="fa-solid fa-download"></i></span>
+                        <span class="dl">@include('customers.includes.icon', ['name' => 'download'])</span>
                     </a>
                 </div>
             @else
@@ -84,7 +84,7 @@
     <div class="tab-pane fade" id="{{ $tabId }}-notes" role="tabpanel">
         <div class="lv-pane">
             <textarea class="lv-notes" data-lesson-notes="{{ $classing->id }}" placeholder="Escribe tus notas de esta clase…"></textarea>
-            <div class="lv-notes-foot" data-default="Tus notas se guardan automáticamente en este dispositivo."><i class="fa-solid fa-circle-check"></i> <span class="txt">Tus notas se guardan automáticamente en este dispositivo.</span></div>
+            <div class="lv-notes-foot" data-default="Tus notas se guardan automáticamente en este dispositivo.">@include('customers.includes.icon', ['name' => 'circle-check']) <span class="txt">Tus notas se guardan automáticamente en este dispositivo.</span></div>
         </div>
     </div>
 </div>
@@ -97,7 +97,7 @@
         <input type="hidden" name="user" value="{{ $user->id }}">
         @if ($prevLesson && $prevLesson !== 'true')
             <button type="submit" class="lv-fbtn" aria-label="Lección anterior">
-                <i class="fa-solid fa-arrow-left"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-left'])
                 <span class="fb-txt">
                     <span class="l">Anterior</span>
                     <span class="t">{{ ucfirst(Str::lower($prevLesson->title)) }}</span>
@@ -105,7 +105,7 @@
             </button>
         @else
             <button type="submit" class="lv-fbtn" aria-label="Volver al curso">
-                <i class="fa-solid fa-arrow-left"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-left'])
                 <span class="fb-txt"><span class="l">Volver al curso</span></span>
             </button>
         @endif
@@ -119,12 +119,12 @@
         @if ($nextLesson && $nextLesson !== 'true')
             <button type="submit" class="lv-fbtn next" aria-label="Completar y seguir">
                 <span class="fb-txt"><span class="l">Siguiente</span><span class="t">Completar y continuar</span></span>
-                <i class="fa-solid fa-arrow-right"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-right'])
             </button>
         @else
             <button type="submit" class="lv-fbtn next" aria-label="Completar y presentar examen">
                 <span class="fb-txt"><span class="l">Finalizar</span><span class="t">Presentar examen</span></span>
-                <i class="fa-solid fa-arrow-right"></i>
+                @include('customers.includes.icon', ['name' => 'arrow-right'])
             </button>
         @endif
     </form>

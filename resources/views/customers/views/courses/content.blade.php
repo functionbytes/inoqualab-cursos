@@ -41,8 +41,8 @@
     }
 
     $typeIcons = [
-        'video' => 'fa-video', 'text' => 'fa-message-lines', 'audio' => 'fa-volume',
-        'image' => 'fa-image', 'pdf' => 'fa-file-pdf', 'zip' => 'fa-file-zipper', 'quiz' => 'fa-hexagon-check',
+        'video' => 'video', 'text' => 'text', 'audio' => 'audio',
+        'image' => 'image', 'pdf' => 'pdf', 'zip' => 'zip', 'quiz' => 'quiz',
     ];
     $typeLabels = [
         'video' => 'Video', 'text' => 'Lectura', 'audio' => 'Audio',
@@ -63,22 +63,22 @@
             <main class="lv-main">
                 <div class="lp-video">
                     <img src="{{ $courseThumbnail ? $courseThumbnail->getFullUrl() : '/pages/images/courses/default.jpg' }}" alt="{{ $course->title }}" loading="lazy" onerror="this.onerror=null;this.src='/pages/images/courses/default.jpg';">
-                    <span class="lp-tag"><i class="fa-solid fa-circle-play"></i> {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
+                    <span class="lp-tag">@include('customers.includes.icon', ['name' => 'circle-play']) {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
                 </div>
 
                 <div class="lv-content">
                     <div class="lv-lhead">
                         <div>
-                            <span class="lk"><i class="fa-solid fa-book-open"></i> Curso</span>
+                            <span class="lk">@include('customers.includes.icon', ['name' => 'book']) Curso</span>
                             <h1>{{ $course->title }}</h1>
                             <div class="lmeta">
-                                <span><i class="fa-solid fa-list-check"></i> {{ $totalClass }} clases</span>
-                                <span><i class="fa-solid fa-chart-simple"></i> {{ $progressPercentage }}% completado</span>
+                                <span>@include('customers.includes.icon', ['name' => 'list-check']) {{ $totalClass }} clases</span>
+                                <span>@include('customers.includes.icon', ['name' => 'chart-simple']) {{ $progressPercentage }}% completado</span>
                             </div>
                         </div>
                         @if ($inscription->expire == 0 && $startHref)
                             <a class="lv-markbtn" href="{{ $startHref }}">
-                                <i class="fa-solid fa-circle-play"></i> {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
+                                @include('customers.includes.icon', ['name' => 'circle-play']) {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         @endif
                     </div>
@@ -118,17 +118,22 @@
                         </div>
                         <div class="tab-pane fade" id="lv-security" role="tabpanel">
                             <div class="lv-pane">
-                                <div class="lv-res">
-                                    <span class="ic"><i class="fa-duotone fa-user-graduate"></i></span>
-                                    <div class="info">
-                                        @if($course->certifier)
-                                            <b>{{ $course->certifier->firstname . ' ' . $course->certifier->lastname }}</b>
-                                            <span>{{ $course->certifier->profession }}</span>
+                                @if($course->certifier)
+                                    <div class="cert-card">
+                                        <div class="cert-head">
+                                            <span class="cert-ava">@include('customers.includes.icon', ['name' => 'user-grad'])</span>
+                                            <div class="cert-id">
+                                                <b>{{ $course->certifier->firstname . ' ' . $course->certifier->lastname }}</b>
+                                                <span>{{ $course->certifier->profession }}</span>
+                                            </div>
+                                            <span class="cert-badge">@include('customers.includes.icon', ['name' => 'shield-check']) Avala este curso</span>
+                                        </div>
+                                        @if($course->certifier->description != null)
+                                            <div class="cert-creds">{!! clean($course->certifier->description, 'content') !!}</div>
                                         @endif
                                     </div>
-                                </div>
-                                @if($course->certifier && $course->certifier->description != null)
-                                    <div class="lv-pane px-0 pt-3">{!! clean($course->certifier->description, 'content') !!}</div>
+                                @else
+                                    <div class="lv-empty-note">Este curso aún no tiene un certificador asignado.</div>
                                 @endif
                             </div>
                         </div>
@@ -137,9 +142,9 @@
                     @if ($certificate)
                         <div class="lv-pane">
                             <a class="examen-card ready" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
-                                <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
+                                <span class="ex-ic">@include('customers.includes.icon', ['name' => 'award'])</span>
                                 <span class="ex-info"><b>¡Felicidades por alcanzar tu objetivo!</b><span>Haz clic aquí para descargar tu certificado.</span></span>
-                                <span class="ex-arrow"><i class="fa-solid fa-download"></i></span>
+                                <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'download'])</span>
                             </a>
                         </div>
                     @endif
@@ -159,7 +164,7 @@
             <div class="lesson-panel">
                 <div class="lp-video">
                     <img src="{{ $courseThumbnail ? $courseThumbnail->getFullUrl() : '/pages/images/courses/default.jpg' }}" alt="{{ $course->title }}" loading="lazy" onerror="this.onerror=null;this.src='/pages/images/courses/default.jpg';">
-                    <span class="lp-tag"><i class="fa-solid fa-circle-play"></i> {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
+                    <span class="lp-tag">@include('customers.includes.icon', ['name' => 'circle-play']) {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
                 </div>
 
                 <div class="lp-body">
@@ -201,7 +206,7 @@
                         <div class="tab-pane fade" id="pills-security" role="tabpanel">
                             <div class="lv-pane px-0">
                                 <div class="lv-res">
-                                    <span class="ic"><i class="fa-duotone fa-user-graduate"></i></span>
+                                    <span class="ic">@include('customers.includes.icon', ['name' => 'user-grad'])</span>
                                     <div class="info">
                                         @if($course->certifier)
                                             <b>{{ $course->certifier->firstname . ' ' . $course->certifier->lastname }}</b>
@@ -220,16 +225,16 @@
                         <div class="lp-nav">
                             <span class="lp-navnote">{{ $completedClass > 0 ? 'Retoma donde lo dejaste' : 'Empieza tu aprendizaje ahora' }}</span>
                             <a class="lv-markbtn" href="{{ $startHref }}">
-                                <i class="fa-solid fa-circle-play"></i> {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
+                                @include('customers.includes.icon', ['name' => 'circle-play']) {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         </div>
                     @endif
 
                     @if ($certificate)
                         <a class="examen-card ready mt-3" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
-                            <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
+                            <span class="ex-ic">@include('customers.includes.icon', ['name' => 'award'])</span>
                             <span class="ex-info"><b>¡Felicidades por alcanzar tu objetivo!</b><span>Haz clic aquí para descargar tu certificado.</span></span>
-                            <span class="ex-arrow"><i class="fa-solid fa-download"></i></span>
+                            <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'download'])</span>
                         </a>
                     @endif
                 </div>

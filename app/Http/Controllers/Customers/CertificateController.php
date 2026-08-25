@@ -18,7 +18,9 @@ class CertificateController extends Controller
             ->latest('id')
             ->paginate(paginationNumber());
 
-        return view('customers.views.certificates.index', compact('certificates', 'user'));
+        $variant = portalVariant('customers_certificates_variant');
+
+        return view('customers.views.certificates.index'.$variant, compact('certificates', 'user'));
     }
 
     public function view(string $slack): View

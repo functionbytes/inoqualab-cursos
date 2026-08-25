@@ -8,7 +8,7 @@ class StoreDistributorRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('distributors.create');
     }
 
     public function rules(): array

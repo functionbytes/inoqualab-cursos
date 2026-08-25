@@ -4,6 +4,7 @@ namespace App\Http\Requests\Enterprises;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateEnterpriseUserRequest extends FormRequest
 {
@@ -33,7 +34,7 @@ class UpdateEnterpriseUserRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:191'],
             'company' => ['nullable', 'string', 'max:191'],
             'available' => ['nullable', 'boolean'],
-            'password' => ['nullable', 'string', 'min:6', 'max:191'],
+            'password' => ['nullable', 'string', 'max:191', Password::defaults()],
         ];
     }
 

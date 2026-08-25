@@ -173,12 +173,12 @@ class GoogleSearchConsoleService
 
     private function clientId(): string
     {
-        return (string) config('services.gsc.client_id', env('GSC_CLIENT_ID', ''));
+        return (string) config('services.gsc.client_id');
     }
 
     private function clientSecret(): string
     {
-        return (string) config('services.gsc.client_secret', env('GSC_CLIENT_SECRET', ''));
+        return (string) config('services.gsc.client_secret');
     }
 
     private function redirectUri(): string
@@ -188,7 +188,7 @@ class GoogleSearchConsoleService
 
     private function propertyUrl(): string
     {
-        return (string) config('services.gsc.property_url', config('app.url', ''));
+        return (string) (config('services.gsc.property_url') ?: config('app.url', ''));
     }
 
     private function getToken(string $key): ?string

@@ -4,12 +4,13 @@ namespace App\Http\Requests\Supports\Users;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('users.create');
     }
 
     public function rules(): array
@@ -21,7 +22,7 @@ class StoreUserRequest extends FormRequest
             'identification' => ['nullable', 'string', 'max:50', Rule::unique('users', 'identification')],
             'cellphone' => ['nullable', 'string', 'max:30'],
             'role' => ['required', 'in:customer,enterprise,distributor,accounting'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::defaults()],
         ];
     }
 

@@ -51,6 +51,18 @@ class Seo404Log extends Model
                     'first_seen_at' => now(),
                     'last_seen_at' => now(),
                 ]);
+
+                // Solo en la primera vez que se ve esta ruta -- reintentos del
+                // mismo 404 (hit_count subiendo en la rama de arriba) no deben
+                // generar una alerta nueva cada vez.
+                SeoAlert::raise(
+                    SeoAlert::TYPE_NEW_404,
+                    SeoAlert::SEVERITY_WARNING,
+                    "Nueva página no encontrada: {$path}",
+                    $referer ? "Enlazada desde: {$referer}" : 'Sin referer conocido.',
+                    $path,
+                    ['referer' => $referer]
+                );
             }
         } catch (\Throwable) {
             // No bloqueamos la respuesta si el log falla

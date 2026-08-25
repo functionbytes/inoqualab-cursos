@@ -43,16 +43,6 @@ class OrderActivity extends Model
         return $this->belongsTo('App\Models\Order\Order', 'order_id');
     }
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\User', 'user_id', 'id');
-    }
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Course\Course', 'item_id');
-    }
-
     public function distributor(): BelongsTo
     {
         return $this->belongsTo('App\Models\Distributor\Distributor', 'distributor_id');

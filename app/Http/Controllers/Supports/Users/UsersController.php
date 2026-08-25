@@ -349,7 +349,9 @@ class UsersController extends Controller
         $user->password_reset_token = null;
         $user->password_reset_max_tries = null;
         $user->password_reset_last_tried_on = null;
-        $user->sessions()->delete();
+
+        // Soporte cambia la contraseña de un tercero: su sesión abierta debe caer.
+        revokeUserSessions($user);
 
         event(new ResetPasswordCreated($user));
 

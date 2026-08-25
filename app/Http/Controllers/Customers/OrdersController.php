@@ -19,7 +19,9 @@ class OrdersController extends Controller
         $searchKey = $request->search;
         $condition = $request->condition;
 
-        $orders = $user->orders()->with(['condition'])->latest();
+        // items.itemable lo usa la variante B para listar los cursos de cada
+        // pedido; cargarlo aquí evita el N+1 y no penaliza a la variante A.
+        $orders = $user->orders()->with(['condition', 'items.itemable'])->latest();
         $conditions = OrderCondition::latest()->get();
 
         if ($searchKey) {
@@ -32,7 +34,9 @@ class OrdersController extends Controller
 
         $orders = $orders->paginate(paginationNumber());
 
-        return view('customers.views.orders.index', compact(
+        $variant = portalVariant('customers_orders_variant');
+
+        return view('customers.views.orders.index'.$variant, compact(
             'orders', 'conditions', 'condition', 'searchKey'
         ));
     }

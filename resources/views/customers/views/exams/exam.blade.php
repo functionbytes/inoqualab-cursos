@@ -54,6 +54,8 @@
     </div>
 @endif
 
+@include('customers.partials.views.courses.assessment-exit-guard')
+
 <div class="modal fade" id="examConfirmModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -110,7 +112,7 @@
             $('#examConfirmAccept').on('click', function() {
                 examConfirmed = true;
                 examConfirmModal.hide();
-                $('#next').css('pointer-events', 'none').html('<i class="fa-solid fa-spinner fa-spin"></i>');
+                $('#next').css('pointer-events', 'none').html('<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="animation:spin .8s linear infinite;vertical-align:-2px"><path d="M12 3a9 9 0 1 0 9 9"/></svg>');
                 $('#question-form').submit();
             });
 

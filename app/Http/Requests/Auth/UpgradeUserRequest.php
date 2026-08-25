@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpgradeUserRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class UpgradeUserRequest extends FormRequest
             // Unicidad ignorando al propio usuario: sin esto un upgrade podía tomar
             // el correo de otra cuenta.
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->user()?->id)],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
         ];
     }
 

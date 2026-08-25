@@ -78,6 +78,69 @@
             </div>
         </div>
 
+        {{-- ── PageSpeed Insights ───────────────────────────────────────────── --}}
+        <div class="card mb-3">
+            <div class="card-header p-4 border-bottom border-light">
+                <h5 class="mb-1 fw-bold">PageSpeed Insights</h5>
+                <p class="mb-0 text-muted">Scores de Lighthouse y Core Web Vitals de laboratorio para una URL puntual</p>
+            </div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-12 col-md">
+                        <label class="form-label fw-semibold">URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-link text-muted"></i>
+                            </span>
+                            <input type="url" id="pagespeed-url-input" class="form-control border-start-0 ps-0"
+                                   placeholder="https://ejemplo.com/mi-pagina">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <label class="form-label fw-semibold">Dispositivo</label>
+                        <select id="pagespeed-strategy" class="form-select">
+                            <option value="mobile">Móvil</option>
+                            <option value="desktop">Escritorio</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <button type="button" class="btn btn-primary w-100" id="btn-pagespeed">
+                            Analizar
+                        </button>
+                    </div>
+                </div>
+
+                <div id="pagespeed-result" class="d-none">
+                    <hr class="mb-3">
+                    <div class="row g-3 text-center mb-3">
+                        <div class="col-6 col-md-3">
+                            <h4 class="mb-0 fw-bold" id="ps-performance">—</h4>
+                            <span class="text-muted small">Performance</span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h4 class="mb-0 fw-bold" id="ps-seo">—</h4>
+                            <span class="text-muted small">SEO</span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h4 class="mb-0 fw-bold" id="ps-accessibility">—</h4>
+                            <span class="text-muted small">Accesibilidad</span>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <h4 class="mb-0 fw-bold" id="ps-best-practices">—</h4>
+                            <span class="text-muted small">Buenas prácticas</span>
+                        </div>
+                    </div>
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-2"><span class="text-muted small d-block">LCP</span><strong id="ps-lcp">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted small d-block">CLS</span><strong id="ps-cls">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted small d-block">FCP</span><strong id="ps-fcp">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted small d-block">TTFB</span><strong id="ps-ttfb">—</strong></div>
+                        <div class="col-6 col-md-2"><span class="text-muted small d-block">TBT</span><strong id="ps-fid">—</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- ── Auditoría masiva de todas las metas ──────────────────────────── --}}
         <div class="card mb-3">
             <div class="card-header p-4 border-bottom border-light">
@@ -503,6 +566,46 @@ $(function () {
         $('#url-passed-count').text(data.passed.length);
         $('#url-audit-result').removeClass('d-none');
     }
+
+    // ── PageSpeed Insights ────────────────────────────────────────────────────
+    $('#btn-pagespeed').on('click', function () {
+        var url = $('#pagespeed-url-input').val().trim();
+        var strategy = $('#pagespeed-strategy').val();
+        var $btn = $(this);
+
+        if (!url) {
+            toastr.error('Ingresa una URL válida.');
+            return;
+        }
+
+        $btn.prop('disabled', true).text('Analizando...');
+        $('#pagespeed-result').addClass('d-none');
+
+        $.ajax({
+            url: '{{ route("manager.seo.audit.core-web-vitals") }}',
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken },
+            data: { url: url, strategy: strategy },
+            success: function (res) {
+                $('#ps-performance').text(res.performance_score);
+                $('#ps-seo').text(res.seo_score);
+                $('#ps-accessibility').text(res.accessibility_score);
+                $('#ps-best-practices').text(res.best_practices_score);
+                $('#ps-lcp').text(res.lcp);
+                $('#ps-cls').text(res.cls);
+                $('#ps-fcp').text(res.fcp);
+                $('#ps-ttfb').text(res.ttfb);
+                $('#ps-fid').text(res.fid);
+                $('#pagespeed-result').removeClass('d-none');
+            },
+            error: function (xhr) {
+                toastr.error(xhr.responseJSON?.error ?? xhr.responseJSON?.message ?? 'Error al analizar la URL.');
+            },
+            complete: function () {
+                $btn.prop('disabled', false).text('Analizar');
+            }
+        });
+    });
 
     function renderCheckList(selector, items, type) {
         var $list = $(selector).empty();

@@ -8,7 +8,7 @@ class StoreCertifierFileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('certifiers.update');
     }
 
     public function rules(): array

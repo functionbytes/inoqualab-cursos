@@ -97,11 +97,6 @@ class Order extends Model
         return $this->hasMany('App\Models\Order\OrderItem');
     }
 
-    public function invoice(): HasMany
-    {
-        return $this->hasMany('App\Models\Invoice\Invoice');
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo('App\Models\User', 'user_id', 'id');

@@ -13,7 +13,7 @@
             <a href="{{ route('blogs.view',$recent->slug) }}">
                 {{-- La tabla blogs no tiene columna `thumbnail`: la portada vive en
                      Media Library, igual que en BlogController. --}}
-                <img src="{{ $recent->getFirstMediaUrl('thumbnail') ?: asset('/pages/images/blog/default.jpg') }}"
+                <img src="{{ $recent->cardImageUrl(asset('/pages/images/blog/default.jpg')) }}"
                      alt="{{ $recent->title }}" loading="lazy">
             </a>
         </div>

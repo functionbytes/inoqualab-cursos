@@ -25,7 +25,10 @@ class CoursesController extends Controller
         $user = app('customer');
         $courses = $user->inscriptions()->with(['course.media', 'certificate'])->get();
 
-        return view('customers.views.courses.index')->with([
+        // Variante elegida en Configuración › Portal del alumno.
+        $variant = portalVariant('customers_courses_variant');
+
+        return view('customers.views.courses.index'.$variant)->with([
             'user' => $user,
             'courses' => $courses,
         ]);

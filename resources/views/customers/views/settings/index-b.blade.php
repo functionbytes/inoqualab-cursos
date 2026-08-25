@@ -1,0 +1,309 @@
+@extends('layouts.customers')
+
+@section('title', 'Mi cuenta')
+
+@push('css')
+    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}">
+@endpush
+
+@section('content')
+
+@php
+    $cityName = ($citie && isset($cities[$citie])) ? $cities[$citie] : ($user->city ?? '');
+    $photo = method_exists($user, 'getFirstMediaUrl') ? $user->getFirstMediaUrl('avatar') : '';
+    $iniciales = Str::upper(Str::substr($user->firstname, 0, 1).Str::substr($user->lastname, 0, 1));
+
+    // Porcentaje de perfil completo: los seis campos que la ficha del alumno
+    // usa para certificados y facturación.
+    $campos = [
+        'identificación' => $user->identification,
+        'celular' => $user->cellphone,
+        'dirección' => $user->address,
+        'nombres' => $user->firstname,
+        'apellidos' => $user->lastname,
+        'correo' => $user->email,
+    ];
+    $rellenos = collect($campos)->filter(fn ($v) => filled($v))->count();
+    $completo = (int) round($rellenos / count($campos) * 100);
+    $faltan = collect($campos)->filter(fn ($v) => blank($v))->keys();
+@endphp
+
+<section class="sb-page">
+
+    {{-- Carnet del alumno: identidad, progreso del perfil y pestañas en una
+         sola banda, como la cabecera de una ficha. --}}
+    <div class="sb-hero">
+        <div class="sb-crumb">Inicio · <b>Mi cuenta</b></div>
+
+        <div class="sb-card">
+            <div class="sb-av">
+                @if($photo)
+                    <img src="{{ $photo }}" alt="{{ $user->firstname }}">
+                @else
+                    {{ $iniciales }}
+                @endif
+            </div>
+            <div class="sb-id">
+                <h1>{{ ucwords(Str::lower(trim($user->firstname.' '.$user->lastname))) }}</h1>
+                <div class="meta">
+                    <span>{{ $user->email }}</span>
+                    @if($user->created_at)
+                        <span class="dot"></span>
+                        <span>Estudiante desde {{ Str::replace('.', '', $user->created_at->translatedFormat('M Y')) }}</span>
+                    @endif
+                    <span class="dot"></span>
+                    <span>
+                        {{ $user->inscriptions_count }} {{ Str::plural('curso', $user->inscriptions_count) }}
+                        · {{ $user->certificates_count }} {{ Str::plural('certificado', $user->certificates_count) }}
+                    </span>
+                </div>
+            </div>
+            <div class="sb-progress">
+                <div class="top">
+                    <span>Perfil completo</span>
+                    <b>{{ $completo }}%</b>
+                </div>
+                <div class="bar"><i style="--p:{{ $completo }}%"></i></div>
+                <div class="note">
+                    @if($faltan->isEmpty())
+                        Tus datos están al día
+                    @else
+                        {{ $faltan->count() === 1 ? 'Falta' : 'Faltan' }} {{ $faltan->join(', ', ' y ') }}
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="sb-tabs" role="tablist">
+            <button type="button" class="is-active" data-tab="perfil" role="tab" aria-selected="true">Perfil</button>
+            <button type="button" data-tab="seguridad" role="tab" aria-selected="false">Seguridad</button>
+            <button type="button" data-tab="avisos" role="tab" aria-selected="false">Notificaciones</button>
+        </div>
+    </div>
+
+    <div class="sb-body">
+
+        <form id="formLogout" method="POST" action="{{ route('logout') }}">@csrf</form>
+
+        <form id="formUsers" role="form" onsubmit="return false">
+            @csrf
+            <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
+
+            {{-- Perfil --}}
+            <div class="sb-split" data-panel="perfil">
+                <div class="pnl-card">
+                    <div class="pnl-head">
+                        <h2>Datos personales</h2>
+                        <div class="sub">Aparecen en tus facturas y en el certificado que se emite al aprobar cada curso.</div>
+                    </div>
+                    <div class="pnl-form">
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="cfg_firstname">Nombres</label>
+                                <input class="control" id="cfg_firstname" value="{{ $user->firstname }}" readonly>
+                            </div>
+                            <div class="field">
+                                <label for="cfg_lastname">Apellidos</label>
+                                <input class="control" id="cfg_lastname" value="{{ $user->lastname }}" readonly>
+                            </div>
+                            <div class="field">
+                                <label for="cfg_identification_type">Tipo de identificación</label>
+                                <input class="control" id="cfg_identification_type" value="{{ $user->identification_type }}" placeholder="Sin registrar" readonly>
+                            </div>
+                            <div class="field">
+                                <label for="cfg_identification">Número de identificación</label>
+                                <input class="control {{ $user->identification ? '' : 'is-missing' }}"
+                                       id="cfg_identification"
+                                       value="{{ $user->identification }}"
+                                       placeholder="Requerido para certificados" readonly>
+                            </div>
+                            <div class="field">
+                                <label for="email">Correo electrónico</label>
+                                <input class="control" type="email" id="email" name="email" value="{{ $user->email }}" placeholder="Ingresar correo">
+                            </div>
+                            <div class="field">
+                                <label for="cellphone">Celular</label>
+                                <input class="control {{ $user->cellphone ? '' : 'is-missing' }}" id="cellphone" name="cellphone" value="{{ $user->cellphone }}" inputmode="tel" placeholder="Ingresar celular">
+                            </div>
+                            <div class="field">
+                                <label for="cfg_city">Ciudad</label>
+                                <input class="control" id="cfg_city" value="{{ $cityName }}" placeholder="Sin ciudad registrada" readonly>
+                            </div>
+                            <div class="field full">
+                                <label for="address">Dirección</label>
+                                <input class="control" id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
+                            </div>
+                        </div>
+                        <button type="submit" class="pnl-save" id="cfgSave">Guardar cambios</button>
+                    </div>
+                </div>
+
+                <aside class="sb-aside">
+                    @if($faltan->isNotEmpty())
+                        <div class="sb-todo">
+                            <h4>Completa tu perfil</h4>
+                            <p>Sin número de identificación no podemos imprimir tu nombre legal en los certificados ni emitir facturas.</p>
+                            <div class="items">
+                                @foreach($faltan as $campo)
+                                    <div class="item is-pending">
+                                        @include('customers.includes.icon', ['name' => 'circle-alert', 'size' => 15])
+                                        {{ ucfirst($campo) }} pendiente
+                                    </div>
+                                @endforeach
+                                <div class="item is-done">
+                                    @include('customers.includes.icon', ['name' => 'check', 'size' => 15])
+                                    Correo registrado
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="sb-session">
+                        <h4>Sesión activa</h4>
+                        <p>Solo puedes tener una sesión abierta a la vez. Si entras desde otro equipo, esta se cerrará automáticamente.</p>
+                        {{-- El form vive fuera de #formUsers (HTML no admite
+                             formularios anidados); el boton lo referencia. --}}
+                        <button type="submit" form="formLogout" class="sb-logout">Cerrar sesión</button>
+                    </div>
+                </aside>
+            </div>
+
+            {{-- Seguridad --}}
+            <div class="sb-narrow" data-panel="seguridad" hidden>
+                <div class="pnl-card">
+                    <div class="pnl-head">
+                        <h2>Contraseña</h2>
+                        <div class="sub">Usa al menos 8 caracteres. Deja los campos vacíos si no deseas cambiarla.</div>
+                    </div>
+                    <div class="pnl-form">
+                        <div class="field-grid">
+                            <div class="field">
+                                <label for="password">Nueva contraseña</label>
+                                <div class="pw-wrap">
+                                    <input class="control" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres">
+                                    <button type="button" class="pw-toggle" id="cfgPwToggle" aria-label="Mostrar contraseña">@include('customers.includes.icon', ['name' => 'search', 'size' => 16])</button>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label for="password_confirmation">Confirmar nueva contraseña</label>
+                                <input class="control" type="password" id="password_confirmation" name="password_confirmation" placeholder="Repetir contraseña">
+                            </div>
+                        </div>
+                        <button type="submit" class="pnl-save" id="cfgPwSave">Actualizar contraseña</button>
+                    </div>
+                </div>
+
+                <div class="pnl-card sb-activity">
+                    <div class="pnl-head">
+                        <h2>Actividad de la cuenta</h2>
+                    </div>
+                    <div class="entry">
+                        <span class="ic is-live">@include('customers.includes.icon', ['name' => 'circle-check', 'size' => 17])</span>
+                        <div class="txt">
+                            <b>Sesión actual</b>
+                            <span>Este dispositivo{{ $user->last_login_ip ? ' · '.$user->last_login_ip : '' }}</span>
+                        </div>
+                        <span class="tag">Activa</span>
+                    </div>
+                    @if($user->last_login_at)
+                        <div class="entry">
+                            <span class="ic">@include('customers.includes.icon', ['name' => 'clock', 'size' => 17])</span>
+                            <div class="txt">
+                                <b>Último acceso registrado</b>
+                                <span>{{ $user->last_login_at->translatedFormat('d M Y, H:i') }}</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </form>
+
+        {{-- Notificaciones (preferencias visuales) --}}
+        <div class="sb-narrow" data-panel="avisos" hidden>
+            <div class="pnl-card">
+                <div class="pnl-head">
+                    <h2>Avisos por correo</h2>
+                    <div class="sub">Elige qué quieres recibir en {{ $user->email }}.</div>
+                    <div class="cfg-warn">Estas preferencias todavía no se guardan: la pantalla las muestra, pero el envío de avisos no las tiene en cuenta.</div>
+                </div>
+                <div class="cfg-notes">
+                    <label class="switch-row"><div class="stxt"><b>Novedades de cursos</b><span>Cuando se publiquen nuevos cursos o módulos.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
+                    <label class="switch-row"><div class="stxt"><b>Recordatorios de clase</b><span>Si llevas más de una semana sin entrar.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
+                    <label class="switch-row"><div class="stxt"><b>Vencimientos de acceso</b><span>Aviso 15 días antes de que caduque un curso.</span></div><span class="switch"><input type="checkbox"><i></i></span></label>
+                    <label class="switch-row"><div class="stxt"><b>Pedidos y facturas</b><span>Confirmación de compra y comprobantes.</span></div><span class="switch"><input type="checkbox" checked><i></i></span></label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+@endsection
+
+@push('scripts')
+<script type="text/javascript">
+    $(function () {
+        // Pestañas: cada panel es uno de los bloques de la ficha.
+        $('.sb-tabs button').on('click', function () {
+            var tab = $(this).data('tab');
+
+            $('.sb-tabs button').removeClass('is-active').attr('aria-selected', 'false');
+            $(this).addClass('is-active').attr('aria-selected', 'true');
+
+            $('[data-panel]').each(function () {
+                $(this).prop('hidden', $(this).data('panel') !== tab);
+            });
+        });
+
+        // Mostrar/ocultar contraseña
+        $('#cfgPwToggle').on('click', function () {
+            var $i = $('#password');
+            $i.attr('type', $i.attr('type') === 'password' ? 'text' : 'password');
+            $(this).toggleClass('is-on');
+        });
+
+        $('#formUsers').on('submit', function (e) {
+            e.preventDefault();
+
+            var password = $('#password').val();
+            var confirm = $('#password_confirmation').val();
+
+            if (password && password.length < 8) {
+                toastr.warning('La contraseña debe tener al menos 8 caracteres.', 'Advertencia', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                return;
+            }
+            if (password && password !== confirm) {
+                toastr.warning('Las contraseñas no coinciden.', 'Advertencia', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                return;
+            }
+
+            var formData = new FormData(this);
+            var $btns = $('#formUsers button[type="submit"]');
+            $btns.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ route('customers.settings.update') }}",
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                type: 'POST',
+                contentType: false,
+                processData: false,
+                data: formData,
+                success: function (response) {
+                    $btns.prop('disabled', false);
+                    if (response.success === true) {
+                        toastr.success(response.message, 'Operación exitosa', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                        $('#password, #password_confirmation').val('');
+                    }
+                },
+                error: function (xhr) {
+                    $btns.prop('disabled', false);
+                    var msg = 'Se ha generado un error.';
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        msg = Object.values(xhr.responseJSON.errors).map(function (e) { return e[0]; }).join(' ');
+                    }
+                    toastr.warning(msg, 'Operación fallida', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
+                }
+            });
+        });
+    });
+</script>
+@endpush

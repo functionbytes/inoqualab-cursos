@@ -15,7 +15,7 @@ class GscController extends Controller
         $status = [
             'configured' => $service->isConfigured(),
             'connected' => $service->isConnected(),
-            'property_url' => config('services.gsc.property_url', config('app.url')),
+            'property_url' => config('services.gsc.property_url') ?: config('app.url'),
         ];
 
         return view('managers.views.seo.gsc.index', compact('status'));

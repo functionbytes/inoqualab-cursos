@@ -52,6 +52,8 @@ class ScheduledCommandsTest extends TestCase
             'reprocesar correos fallidos' => ['mails:reparse-failed'],
             'informes de analítica' => ['analytics:dispatch-schedules'],
             'poda del audit trail' => ['activitylog:clean'],
+            'alertas SEO (cadenas de redirect + web vitals)' => ['seo:check-alerts'],
+            'vigilancia de colas atascadas' => ['queue:check-stalled --minutes=30'],
         ];
     }
 

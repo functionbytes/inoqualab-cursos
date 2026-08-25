@@ -32,16 +32,6 @@ class OrderItem extends Model
         return LogOptions::defaults()->logOnlyDirty()->logFillable()->setDescriptionForEvent(fn (string $eventName) => "This model has been {$eventName}");
     }
 
-    public function bundle(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Bundle\Bundle');
-    }
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo('App\Models\Course\Course');
-    }
-
     public function order(): BelongsTo
     {
         return $this->belongsTo('App\Models\Order\Order');

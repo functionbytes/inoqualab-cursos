@@ -94,8 +94,7 @@
 @section('content')
 
 @php
-    $hasThumb = count($course->getMedia('thumbnail')) > 0;
-    $thumbUrl = $hasThumb ? $course->getFirstMedia('thumbnail')->getFullUrl() : asset('/pages/images/courses/default.jpg');
+    $thumbUrl = $course->cardImageUrl(asset('/pages/images/courses/default.jpg'));
     $lessonsCount = count($leasons);
     $chaptersCount = count($chapters);
     $courseOnSale = $course->payment == 1 && $course->promotion == 1 && $course->discount < $course->price;

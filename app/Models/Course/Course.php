@@ -4,6 +4,7 @@ namespace App\Models\Course;
 
 use App\Http\Seo\HasSeo;
 use App\Http\Sitemap\HasSitemapItems;
+use App\Models\Concerns\HasCardImage;
 use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Course extends Model implements HasMedia
 {
-    use HasFactory,
+    use HasCardImage, HasFactory,
         HasFinders, HasSeo, HasSitemapItems, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $table = 'courses';
@@ -171,11 +172,6 @@ class Course extends Model implements HasMedia
         return $this->hasMany('App\Models\Course\CourseLesson', 'course_id')
             ->where('available', 1)
             ->orderBy('position', 'asc');
-    }
-
-    public function order(): HasMany
-    {
-        return $this->hasMany('App\Models\Order\Order', 'course_id');
     }
 
     public function announcements(): HasMany

@@ -225,8 +225,8 @@
                                         <div class="form-group">
                                             <label class="control-label col-form-label">Registro público de usuarios</label>
                                             <select class="form-select" id="registration_enabled" name="registration_enabled">
-                                                <option value="1" {{ setting('registration_enabled') != '0' ? 'selected' : '' }}>Habilitado — cualquier visitante puede registrarse</option>
-                                                <option value="0" {{ setting('registration_enabled') == '0' ? 'selected' : '' }}>Deshabilitado — solo el administrador crea cuentas</option>
+                                                <option value="1" {{ settingEnabled('registration_enabled', true) ? 'selected' : '' }}>Habilitado — cualquier visitante puede registrarse</option>
+                                                <option value="0" {{ settingEnabled('registration_enabled', true) ? '' : 'selected' }}>Deshabilitado — solo el administrador crea cuentas</option>
                                             </select>
                                             <small class="text-muted d-block mt-1">Cuando está deshabilitado, el formulario de registro en la web pública rechaza nuevas inscripciones.</small>
                                         </div>

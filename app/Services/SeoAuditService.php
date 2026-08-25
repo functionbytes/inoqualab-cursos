@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Seo\SeoAlert;
 use App\Models\Seo\SeoAuditLog;
 use App\Models\Seo\SeoMeta;
 use Illuminate\Support\Collection;
@@ -9,6 +10,12 @@ use Illuminate\Support\Facades\Http;
 
 class SeoAuditService
 {
+    /**
+     * Caída de score (puntos) a partir de la cual se levanta una alerta.
+     * Por debajo de esto es ruido normal de contenido editado.
+     */
+    private const SCORE_DROP_THRESHOLD = 15;
+
     public function auditUrl(string $url): array
     {
         try {
@@ -57,6 +64,11 @@ class SeoAuditService
     {
         $result = $this->buildResult(null, $this->runMetaChecks($meta));
 
+        // Se lee el score anterior ANTES de crear el nuevo SeoAuditLog: así no
+        // hay ambigüedad de orden si dos auditorías del mismo meta corren
+        // dentro del mismo segundo (audited_at con resolución de 1s).
+        $previousScore = SeoAuditLog::forMeta($meta->id)->recent()->value('score');
+
         $meta->updateQuietly([
             'seo_score' => $result['score'],
             'seo_grade' => $result['grade'],
@@ -72,6 +84,23 @@ class SeoAuditService
             'passed_count' => count($result['passed']),
             'audited_at' => now(),
         ]);
+
+        if ($previousScore !== null && $result['score'] <= $previousScore - self::SCORE_DROP_THRESHOLD) {
+            SeoAlert::raise(
+                SeoAlert::TYPE_SCORE_DROP,
+                $result['score'] < 50 ? SeoAlert::SEVERITY_CRITICAL : SeoAlert::SEVERITY_WARNING,
+                "Caída de score SEO: {$meta->title}",
+                "El score pasó de {$previousScore} a {$result['score']} ({$result['grade']}).",
+                null,
+                [
+                    'seo_meta_id' => $meta->id,
+                    'seoable_type' => $meta->short_type,
+                    'seoable_id' => $meta->seoable_id,
+                    'from' => (int) $previousScore,
+                    'to' => $result['score'],
+                ]
+            );
+        }
 
         return $result;
     }

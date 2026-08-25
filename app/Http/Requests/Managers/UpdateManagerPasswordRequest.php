@@ -4,6 +4,7 @@ namespace App\Http\Requests\Managers;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateManagerPasswordRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class UpdateManagerPasswordRequest extends FormRequest
         return [
             // 'current_password' valida contra la contraseña del usuario autenticado.
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'string', 'min:8', 'max:100', 'confirmed', 'different:current_password'],
+            'password' => ['required', 'string', 'max:100', 'confirmed', 'different:current_password', Password::defaults()],
         ];
     }
 

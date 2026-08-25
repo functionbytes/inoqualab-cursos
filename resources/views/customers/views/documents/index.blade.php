@@ -1,89 +1,104 @@
 @extends('layouts.customers')
 
+@section('title', 'Documentos')
+
+@php
+    // Extensión y peso salen de la media asociada: la tabla anterior solo
+    // mostraba título y fecha, así que no se sabía qué se iba a descargar.
+    $meta = function ($document) {
+        $media = $document->getFirstMedia('files');
+
+        if (! $media) {
+            return null;
+        }
+
+        $ext = \Illuminate\Support\Str::upper(pathinfo($media->file_name, PATHINFO_EXTENSION)) ?: 'ARCHIVO';
+        $bytes = (int) $media->size;
+        $peso = $bytes >= 1048576
+            ? number_format($bytes / 1048576, 1, ',', '.').' MB'
+            : max(1, (int) round($bytes / 1024)).' KB';
+
+        return (object) ['url' => $media->getFullUrl(), 'ext' => $ext, 'peso' => $peso];
+    };
+@endphp
+
 @section('content')
+<section class="pnl-section">
 
-    @include('customers.includes.card', ['title' => 'Documentos'])
-
-    <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <div class="pnl-card pnl-head pnl-head-row">
+        <div>
+            <h2>Documentos</h2>
+            <div class="sub">Material de apoyo y constancias que INOQUALAB comparte contigo</div>
         </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th>Título</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @forelse ($documents as $key => $document)
-                        <tr class="search-items">
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $document->title }}">{{ Str::upper( Str::lower($document->title) )  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y-m-d', strtotime($document->updated_at)) }}">{{ date('Y-m-d', strtotime($document->updated_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                @if($document && $document->getfirstMedia('files'))
-                                    <a target="_blank" href="{{ $document->getfirstMedia('files')->getfullUrl() }}" class="btn mb-1 waves-effect waves-light btn-sm btn-primary">
-                                        Descargar
-                                    </a>
-                                @else
-                                    <span class="text-muted">No disponible</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="text-center py-5 text-muted">
-                                <i class="fa-duotone fa-folder-open fa-2x d-block mb-3 opacity-50"></i>
-                                <span class="fw-semibold d-block">No tienes documentos</span>
-                                <small>Aquí aparecerán los documentos de tus cursos cuando estén disponibles.</small>
-                            </td>
-                        </tr>
-                    @endforelse
+        <form class="pnl-search" action="{{ Request::fullUrl() }}" method="GET" role="search">
+            @include('customers.includes.icon', ['name' => 'search'])
+            <input type="search" name="search" placeholder="Buscar documento…" autocomplete="off"
+                   value="{{ $searchKey ?? '' }}" aria-label="Buscar documento">
+        </form>
+    </div>
 
-                    </tbody>
-                </table>
-            </div>
-            @if ($documents->total() > 0)
-            <div class="result-body ">
-                <span>Mostrando {{ $documents->firstItem() }}-{{ $documents->lastItem() }} de {{ $documents->total() }} resultados</span>
-                <nav>
-                    {{ $documents->appends(request()->input())->links() }}
-                </nav>
-            </div>
+    <div class="pnl-gap"></div>
+
+    @if($searchKey)
+        <div class="od-searching">
+            Resultados para <b>{{ $searchKey }}</b>
+            <a href="{{ route('customers.documents') }}">Quitar búsqueda</a>
+        </div>
+    @endif
+
+    @if($documents->isEmpty())
+
+        <div class="pnl-empty">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'folder'])</span>
+            @if($searchKey)
+                <h3>Ningún documento coincide con «{{ $searchKey }}»</h3>
+                <p>Prueba con otras palabras o quita la búsqueda para ver todo el material disponible.</p>
+                <a href="{{ route('customers.documents') }}">Ver todos los documentos</a>
+            @else
+                <h3>Todavía no hay documentos</h3>
+                <p>Aquí aparecerá el material de apoyo de tus cursos y las constancias que INOQUALAB publique para ti.</p>
+                <a href="{{ route('customers.courses') }}">Ver mis cursos</a>
             @endif
         </div>
-    </div>
+
+    @else
+
+        <div class="dc-list">
+            @foreach($documents as $document)
+                @php $file = $meta($document); @endphp
+
+                <div class="dc-row">
+                    <span class="dc-ext ext-{{ $file ? \Illuminate\Support\Str::lower($file->ext) : 'none' }}">
+                        {{ $file->ext ?? '—' }}
+                    </span>
+
+                    <div class="dc-txt">
+                        <b>{{ \Illuminate\Support\Str::upper(\Illuminate\Support\Str::lower($document->title)) }}</b>
+                        <span>
+                            {{ \Carbon\Carbon::parse($document->updated_at)->locale('es')->isoFormat('D MMM YYYY') }}
+                            @if($file) · {{ $file->peso }} @endif
+                        </span>
+                    </div>
+
+                    <div class="dc-act">
+                        @if($file)
+                            <a class="solid" target="_blank" href="{{ $file->url }}">
+                                @include('customers.includes.icon', ['name' => 'download']) Descargar
+                            </a>
+                        @else
+                            <span class="dc-none">Archivo no disponible</span>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+            <div class="od-foot">
+                <span>Mostrando {{ $documents->firstItem() }}-{{ $documents->lastItem() }} de {{ $documents->total() }} resultados</span>
+                <nav>{{ $documents->appends(request()->input())->links() }}</nav>
+            </div>
+        </div>
+
+    @endif
+
+</section>
 @endsection
-
-
-

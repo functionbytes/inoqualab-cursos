@@ -12,7 +12,10 @@ class DashboardController extends Controller
         $user = app('customer');
         $courses = $user->inscriptions()->with(['course.media', 'certificate'])->get();
 
-        return view('customers.views.dashboard.index', [
+        // La variante la elige el manager en Configuración › Portal del alumno.
+        $variant = portalVariant('customers_dashboard_variant');
+
+        return view('customers.views.dashboard.index'.$variant, [
             'courses' => $courses,
             'user' => $user,
         ]);

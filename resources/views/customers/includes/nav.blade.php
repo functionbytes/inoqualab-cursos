@@ -3,12 +3,12 @@
     <nav class="sidebar-nav scroll-sidebar container-fluid">
       <ul id="sidebarnav">
         <li class="nav-small-cap">
-          <i class="fas fa-ellipsis nav-small-cap-icon fs-4"></i>
+          <span class="nav-small-cap-icon">@include('customers.includes.icon', ['name' => 'dots', 'size' => 16])</span>
         </li>
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('home') }}" aria-expanded="false" >
             <span>
-               <i class="fa-solid fa-house"></i>
+               @include('customers.includes.icon', ['name' => 'home'])
             </span>
             <span class="hide-menu">Inicio</span>
           </a>
@@ -16,7 +16,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.courses') }}" aria-expanded="false" >
             <span>
-              <i class="fa-solid fa-graduation-cap"></i>
+              @include('customers.includes.icon', ['name' => 'cap'])
             </span>
             <span class="hide-menu">Cursos</span>
           </a>
@@ -24,7 +24,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.certificates') }}" aria-expanded="false" >
             <span>
-              <i class="fa-solid fa-award"></i>
+              @include('customers.includes.icon', ['name' => 'award'])
             </span>
             <span class="hide-menu">Certificados</span>
           </a>
@@ -32,7 +32,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.orders') }}" aria-expanded="false" >
             <span>
-              <i class="fa-solid fa-receipt"></i>
+              @include('customers.includes.icon', ['name' => 'receipt'])
             </span>
             <span class="hide-menu">Mis pedidos</span>
           </a>
@@ -40,7 +40,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.documents') }}" aria-expanded="false" >
             <span>
-              <i class="fa-solid fa-folder-open"></i>
+              @include('customers.includes.icon', ['name' => 'folder'])
             </span>
             <span class="hide-menu">Documentos</span>
           </a>
@@ -49,7 +49,7 @@
         <li class="sidebar-item" style="display: none;">
           <button type="button" class="sidebar-link border-0 bg-transparent w-100 text-start">
             <span>
-              <i class="fa-solid fa-headset" aria-hidden="true"></i>
+              @include('customers.includes.icon', ['name' => 'bell'])
             </span>
             <span class="hide-menu">Soporte</span>
           </button>
@@ -58,7 +58,7 @@
         <li class="sidebar-item">
           <a class="sidebar-link " href="{{  route('customers.settings') }}" aria-expanded="false" >
             <span>
-              <i class="fa-solid fa-gear"></i>
+              @include('customers.includes.icon', ['name' => 'gear'])
             </span>
             <span class="hide-menu">Configuración</span>
           </a>

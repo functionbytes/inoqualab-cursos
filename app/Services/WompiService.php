@@ -24,10 +24,17 @@ class WompiService
         $this->publicKey = setting('wompi_public_key') ?: config('services.wompi.public_key', '');
         $this->integritySecret = setting('wompi_integrity_secret') ?: config('services.wompi.integrity_secret', '');
         $this->eventsSecret = setting('wompi_events_secret') ?: config('services.wompi.events_secret', '');
+        // El helper setting() NUNCA devuelve null: su firma es
+        // setting($key, $default = '') y entrega ese default cuando la clave no
+        // existe o su valor es vacío. La comprobación `!== null` se cumplía
+        // siempre, así que el fallback a config() era código muerto y un
+        // entorno sin el ajuste caía en `'' === 'true'` = false, es decir,
+        // apuntaba a la API de PRODUCCIÓN de Wompi mientras
+        // config('services.wompi.sandbox') decía true.
         $sandboxSetting = setting('wompi_sandbox');
-        $this->sandbox = $sandboxSetting !== null
-            ? $sandboxSetting === 'true'
-            : (bool) config('services.wompi.sandbox', true);
+        $this->sandbox = $sandboxSetting === ''
+            ? (bool) config('services.wompi.sandbox', true)
+            : $sandboxSetting === 'true';
         $this->baseUrl = $this->sandbox
             ? 'https://sandbox.wompi.co/v1'
             : 'https://production.wompi.co/v1';

@@ -21,7 +21,9 @@ class DocumentsController extends Controller
 
         $documents = $documents->paginate(paginationNumber());
 
-        return view('customers.views.documents.index')->with([
+        $variant = portalVariant('customers_documents_variant');
+
+        return view('customers.views.documents.index'.$variant)->with([
             'documents' => $documents,
             'searchKey' => $searchKey,
         ]);

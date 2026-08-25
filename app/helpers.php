@@ -80,6 +80,25 @@ if (! function_exists('_settingsCache')) {
     }
 }
 
+if (! function_exists('forgetSettingsCache')) {
+    /**
+     * Olvida los cachés de ajustes de este proceso PHP.
+     *
+     * `_settingsCache()` y `_settingModelCache()` guardan en variables `static`,
+     * que viven lo que viva el proceso. En web da igual (un proceso por
+     * petición), pero un worker de cola arrancado con `--max-jobs=500` procesa
+     * cientos de trabajos con el mismo proceso: si el manager cambia un ajuste
+     * desde el panel, el worker sigue viendo el valor viejo hasta que se
+     * reinicia. Se llama desde `Queue::before()` en AppServiceProvider, de modo
+     * que cada trabajo arranca leyendo lo que hay de verdad en la base.
+     */
+    function forgetSettingsCache(): void
+    {
+        _settingsCache(null, reset: true);
+        _settingModelCache(reset: true);
+    }
+}
+
 if (! function_exists('setting')) {
     function setting($key, $default = '')
     {
@@ -93,6 +112,54 @@ if (! function_exists('setting')) {
         }
 
         return is_numeric($value) ? $value + 0 : $value;
+    }
+}
+
+if (! function_exists('settingEnabled')) {
+    /**
+     * Lee un ajuste de tipo interruptor y devuelve un booleano de verdad.
+     *
+     * Existe porque `setting()` normaliza los valores numéricos con
+     * `$value + 0`, así que un ajuste guardado como '1' vuelve como **int** 1 y
+     * uno guardado como '0' como int 0. Toda comparación estricta contra la
+     * cadena ('=== \'1\'', '!== \'0\'') es por tanto siempre falsa o siempre
+     * verdadera, y el interruptor del panel deja de tener efecto sin que nada
+     * falle. Pasó en tres sitios a la vez: desactivar el boletín no lo
+     * desactivaba, su casilla salía marcada igualmente, e IndexNow no se
+     * activaba nunca.
+     *
+     * @param  bool  $default  Valor cuando el ajuste no existe o está vacío.
+     */
+    function settingEnabled(string $key, bool $default = false): bool
+    {
+        $value = setting($key, null);
+
+        if ($value === null || $value === '') {
+            return $default;
+        }
+
+        // FILTER_VALIDATE_BOOLEAN entiende 1/0, '1'/'0', 'true'/'false',
+        // 'yes'/'no' y 'on'/'off'; devuelve null ante cualquier otra cosa, y
+        // entonces mandar el default es más seguro que adivinar.
+        $parsed = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
+        return $parsed ?? $default;
+    }
+}
+
+if (! function_exists('portalVariant')) {
+    /**
+     * Sufijo de la vista del portal del alumno para el ajuste dado.
+     *
+     * El manager elige entre dos diseños por pantalla en Configuración › Portal
+     * del alumno; el valor se concatena al nombre de la vista, así que aquí solo
+     * se distingue 'b' del resto: una fila corrupta en `settings` cae en la
+     * variante por defecto en vez de tumbar el portal buscando una vista que no
+     * existe.
+     */
+    function portalVariant(string $key): string
+    {
+        return setting($key, 'a') === 'b' ? '-b' : '';
     }
 }
 
@@ -438,9 +505,16 @@ if (! function_exists('getSubTotal')) {
 }
 
 if (! function_exists('_settingModelCache')) {
-    function _settingModelCache(string $key): ?Setting
+    function _settingModelCache(?string $key = null, bool $reset = false): ?Setting
     {
         static $cache = [];
+
+        if ($reset) {
+            $cache = [];
+
+            return null;
+        }
+
         if (! array_key_exists($key, $cache)) {
             $cache[$key] = Setting::where('key', '=', $key)->first();
         }
@@ -491,19 +565,35 @@ if (! function_exists('getLogo')) {
     }
 }
 
-if (! function_exists('getSetting')) {
-    function getSetting()
+if (! function_exists('revokeUserSessions')) {
+    /**
+     * Cierra de verdad la sesión abierta de un usuario, en el driver que sea.
+     *
+     * El proyecto guarda en `users.session` el id de la sesión con la que el
+     * usuario entró (lo usa CheckSession para el "último login gana"), y
+     * destruirla hay que pedírselo al handler de sesión activo. El código que
+     * había llamaba a `$user->sessions()->delete()`, que borra filas de la
+     * tabla `sessions`; pero SESSION_DRIVER es `file` desde hace tiempo, así que
+     * esa tabla solo guarda fósiles (sus filas son de octubre de 2025) y el
+     * borrado no cerraba nada. Restablecer la contraseña dejaba dentro a quien
+     * ya tuviera la sesión abierta.
+     *
+     * Se deja `users.session` a null, coherente con lo que hace el login.
+     * No se guarda el modelo: lo hace quien llama, junto al resto de cambios.
+     */
+    function revokeUserSessions(User $user): void
     {
-        static $cache = null;
+        if ($user->session) {
+            // El handler puede fallar si el fichero ya no está; no debe impedir
+            // el cambio de contraseña, que es lo importante de la operación.
+            try {
+                Session::getHandler()->destroy($user->session);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
 
-        return $cache ??= Setting::first();
-    }
-}
-
-if (! function_exists('clearSessionExceptCurrent')) {
-    function clearSessionExceptCurrent(User $user)
-    {
-        $user->sessions()->where('id', '<>', session()->getId())->delete();
+        $user->session = null;
     }
 }
 

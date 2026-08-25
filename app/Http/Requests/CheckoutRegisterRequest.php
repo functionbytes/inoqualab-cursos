@@ -3,9 +3,15 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class CheckoutRegisterRequest extends FormRequest
 {
+    /**
+     * Ruta de checkout accesible a invitados (crea cuenta) o a un usuario
+     * autenticado que actualiza sus propios datos — en ningún caso hay un
+     * permiso Spatie que comprobar, es autoservicio sobre la propia cuenta.
+     */
     public function authorize(): bool
     {
         return true;
@@ -35,7 +41,7 @@ class CheckoutRegisterRequest extends FormRequest
             'company' => ['nullable', 'string', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
             'citie' => ['nullable', 'integer', 'exists:cities,id'],
-            'password' => ['nullable', 'string', 'min:8'],
+            'password' => ['nullable', 'string', Password::defaults()],
             'terms' => ['accepted'],
             'newsletter' => ['nullable', 'boolean'],
         ];

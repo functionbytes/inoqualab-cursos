@@ -17,6 +17,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Colas de la aplicación
+    |--------------------------------------------------------------------------
+    |
+    | Lista COMPLETA de colas que la app usa, en orden de prioridad. Un
+    | `queue:work` sin `--queue` solo consume la cola por defecto de la
+    | conexión ('default'), así que todo lo despachado a una cola con nombre
+    | se queda pendiente PARA SIEMPRE sin fallar ni registrarse en
+    | failed_jobs: no hay error, simplemente nunca se ejecuta.
+    |
+    | El worker debe arrancarse siempre con la lista completa:
+    |
+    |   php artisan queue:work redis --queue=default,emails,mails,newsletter,seo
+    |
+    | o, sin repetirla a mano:
+    |
+    |   php artisan queue:work redis --queue=$(php artisan queue:app-queues)
+    |
+    | `QueueNamesAreCoveredTest` recorre el código buscando `onQueue()` y
+    | `$queue` y falla si aparece una cola que no esté aquí, para que añadir
+    | una cola nueva sin arrancar su worker rompa el CI en vez de tragarse
+    | los jobs en silencio.
+    |
+    */
+
+    'app_queues' => [
+        'default',
+        'emails',
+        'mails',
+        'newsletter',
+        'seo',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Queue Connections
     |--------------------------------------------------------------------------
     |

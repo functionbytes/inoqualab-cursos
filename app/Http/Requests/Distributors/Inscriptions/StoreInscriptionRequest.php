@@ -8,7 +8,7 @@ class StoreInscriptionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('inscriptions.create');
     }
 
     public function rules(): array

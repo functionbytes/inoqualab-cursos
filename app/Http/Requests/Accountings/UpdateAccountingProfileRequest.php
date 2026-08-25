@@ -5,6 +5,7 @@ namespace App\Http\Requests\Accountings;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateAccountingProfileRequest extends FormRequest
 {
@@ -25,7 +26,7 @@ class UpdateAccountingProfileRequest extends FormRequest
                 'max:255',
                 Rule::unique('users', 'email')->ignore(Auth::id()),
             ],
-            'password' => ['nullable', 'string', 'min:6', 'max:100'],
+            'password' => ['nullable', 'string', 'max:100', Password::defaults()],
         ];
     }
 

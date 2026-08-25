@@ -7,6 +7,65 @@ use Tests\TestCase;
 
 class WompiServiceTest extends TestCase
 {
+    /**
+     * Sin el ajuste `wompi_sandbox` guardado, el servicio tiene que caer en
+     * config('services.wompi.sandbox') — que por defecto es true.
+     *
+     * No lo hacía: el constructor decidía con `setting('wompi_sandbox') !== null`,
+     * y setting() nunca devuelve null (su default es la cadena vacía). La rama
+     * del fallback era código muerto y un entorno sin el ajuste evaluaba
+     * `'' === 'true'` = false, es decir, hablaba con la API de PRODUCCIÓN de
+     * Wompi creyendo estar en sandbox.
+     */
+    public function test_without_the_setting_it_falls_back_to_config_and_stays_in_sandbox(): void
+    {
+        $this->forgetSandboxSetting();
+        config(['services.wompi.sandbox' => true]);
+
+        $service = new WompiService;
+
+        $this->assertTrue($service->isSandbox());
+        $this->assertSame('https://sandbox.wompi.co/v1', $service->getBaseUrl());
+    }
+
+    public function test_without_the_setting_a_config_of_false_still_wins(): void
+    {
+        $this->forgetSandboxSetting();
+        config(['services.wompi.sandbox' => false]);
+
+        $this->assertSame('https://production.wompi.co/v1', (new WompiService)->getBaseUrl());
+    }
+
+    public function test_the_stored_setting_takes_precedence_over_config(): void
+    {
+        config(['services.wompi.sandbox' => false]);
+        $this->overrideSandboxSetting('true');
+
+        $this->assertSame(
+            'https://sandbox.wompi.co/v1',
+            (new WompiService)->getBaseUrl(),
+            'El ajuste del panel manda sobre la config.'
+        );
+
+        config(['services.wompi.sandbox' => true]);
+        $this->overrideSandboxSetting('false');
+
+        $this->assertSame('https://production.wompi.co/v1', (new WompiService)->getBaseUrl());
+    }
+
+    /** Deja el ajuste como si nunca se hubiera guardado. */
+    private function forgetSandboxSetting(): void
+    {
+        _settingsCache(null, true);
+        _settingsCache(['wompi_sandbox' => '']);
+    }
+
+    private function overrideSandboxSetting(string $value): void
+    {
+        _settingsCache(null, true);
+        _settingsCache(['wompi_sandbox' => $value]);
+    }
+
     public function test_integrity_signature_is_deterministic_sha256(): void
     {
         $service = new WompiService;

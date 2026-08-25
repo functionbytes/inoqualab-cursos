@@ -18,7 +18,13 @@ class SettingsController extends Controller
             ? Citie::where('id', $user->citie_id)->pluck('title', 'id')
             : collect();
 
-        return view('customers.views.settings.index', compact('user', 'cities', 'citie'));
+        // El carnet y la barra de perfil completo de la pantalla necesitan
+        // saber cuanto lleva matriculado el alumno y cuanto ha conseguido.
+        $user->loadCount(['inscriptions', 'certificates']);
+
+        $variant = portalVariant('customers_settings_variant');
+
+        return view('customers.views.settings.index'.$variant, compact('user', 'cities', 'citie'));
     }
 
     public function update(UpdateSettingsRequest $request): JsonResponse

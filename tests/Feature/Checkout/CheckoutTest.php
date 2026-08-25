@@ -13,6 +13,7 @@ use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderItem;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
+use App\Models\Order\PaymentEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -340,6 +341,58 @@ class CheckoutTest extends TestCase
         // La orden se paga una vez y la matrícula NO se duplica.
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'condition_id' => $this->paidConditionId()]);
         $this->assertSame(1, Inscription::where('user_id', $user->id)->where('course_id', $course->id)->count());
+    }
+
+    /**
+     * Simula dos webhooks REALMENTE concurrentes (no un reintento secuencial):
+     * justo después de que el SELECT de idempotencia no encuentra fila, se inyecta
+     * la fila "ganadora" de la otra request antes de que el INSERT de esta se
+     * ejecute.
+     *
+     * NO hace falta ningún try/catch propio para esto: `Builder::firstOrCreate()`
+     * en esta versión de Laravel (12) delega en `createOrFirst()`, que YA envuelve
+     * el `create()` en un try/catch de `UniqueConstraintViolationException` y relee
+     * la fila ganadora (`vendor/laravel/framework/.../Eloquent/Builder.php`). El
+     * hallazgo de la auditoría ("sin try/catch, riesgo de 500 transitorio") no
+     * aplica a la versión de Laravel de este proyecto — este test deja la garantía
+     * documentada como regresión en vez de tocar código que ya está protegido.
+     */
+    public function test_webhook_recovers_from_concurrent_unique_constraint_violation(): void
+    {
+        Mail::fake();
+        $this->seedLookups();
+
+        $user = $this->makeUser();
+        $course = $this->makeCourse(50000);
+        $order = $this->makeGeneratedOrder($user, $course, 'race-order', 50000);
+
+        config(['services.wompi.events_secret' => 'test-secret']);
+        $payload = $this->signedWebhookPayload($order->slack, 'txn-race', 'APPROVED', 5000000, 'test-secret');
+
+        $injected = false;
+        \DB::listen(function ($query) use (&$injected, $order) {
+            if (! $injected && str_contains($query->sql, 'select * from `payment_events`')) {
+                $injected = true;
+                \DB::table('payment_events')->insert([
+                    'transaction_id' => 'txn-race',
+                    'status' => 'APPROVED',
+                    'reference' => $order->slack,
+                    'payload' => json_encode([]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        $this->postJson(route('payments.wompi.webhook'), $payload)
+            ->assertOk()
+            ->assertJson(['message' => 'Already processed']);
+
+        // Una sola fila (la inyectada) pese al choque -- no hay 500 ni duplicado.
+        $this->assertSame(
+            1,
+            PaymentEvent::where('transaction_id', 'txn-race')->where('status', 'APPROVED')->count()
+        );
     }
 
     public function test_wompi_webhook_rejects_amount_mismatch(): void

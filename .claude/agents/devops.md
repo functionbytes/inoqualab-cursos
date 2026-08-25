@@ -68,7 +68,7 @@ npm ci && npm run build
 ```ini
 [program:laravel-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/artisan queue:work redis --queue=default,emails,mails,newsletter,seo --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 numprocs=2

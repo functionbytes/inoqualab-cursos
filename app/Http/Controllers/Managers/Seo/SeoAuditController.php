@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\BulkSeoAuditJob;
 use App\Jobs\CheckBrokenLinksJob;
 use App\Models\Seo\SeoMeta;
+use App\Models\Seo\SeoPagespeedSnapshot;
 use App\Services\InternalLinkAnalyzer;
 use App\Services\SeoAuditService;
 use Illuminate\Http\JsonResponse;
@@ -140,11 +141,44 @@ class SeoAuditController extends Controller
             $categories = $data['lighthouseResult']['categories'] ?? [];
             $audits = $data['lighthouseResult']['audits'] ?? [];
 
+            $performance = round(($categories['performance']['score'] ?? 0) * 100);
+            $seoScore = round(($categories['seo']['score'] ?? 0) * 100);
+            $accessibility = round(($categories['accessibility']['score'] ?? 0) * 100);
+            $bestPractices = round(($categories['best-practices']['score'] ?? 0) * 100);
+
+            // numericValue viene en ms (o adimensional para CLS) -- son los
+            // mismos audits que displayValue solo formatea como texto.
+            // INP: Lighthouse 10+ reporta 'interaction-to-next-paint' cuando
+            // hay datos de campo (CrUX) disponibles para la URL; en un sitio
+            // de bajo tráfico normalmente no los hay, por eso es el único
+            // campo que queda null con frecuencia (columna nullable a propósito).
+            $lcpMs = $audits['largest-contentful-paint']['numericValue'] ?? null;
+            $inpMs = $audits['interaction-to-next-paint']['numericValue'] ?? null;
+            $cls = $audits['cumulative-layout-shift']['numericValue'] ?? null;
+            $fcpMs = $audits['first-contentful-paint']['numericValue'] ?? null;
+            $ttfbMs = $audits['server-response-time']['numericValue'] ?? null;
+
+            SeoPagespeedSnapshot::create([
+                'url' => $url,
+                'url_path' => parse_url($url, PHP_URL_PATH) ?: '/',
+                'strategy' => $strategy,
+                'performance' => $performance,
+                'accessibility' => $accessibility,
+                'best_practices' => $bestPractices,
+                'seo' => $seoScore,
+                'lcp_ms' => $lcpMs,
+                'inp_ms' => $inpMs,
+                'cls' => $cls,
+                'fcp_ms' => $fcpMs,
+                'ttfb_ms' => $ttfbMs,
+                'captured_at' => now(),
+            ]);
+
             return response()->json([
-                'performance_score' => round(($categories['performance']['score'] ?? 0) * 100),
-                'seo_score' => round(($categories['seo']['score'] ?? 0) * 100),
-                'accessibility_score' => round(($categories['accessibility']['score'] ?? 0) * 100),
-                'best_practices_score' => round(($categories['best-practices']['score'] ?? 0) * 100),
+                'performance_score' => $performance,
+                'seo_score' => $seoScore,
+                'accessibility_score' => $accessibility,
+                'best_practices_score' => $bestPractices,
                 'lcp' => $audits['largest-contentful-paint']['displayValue'] ?? 'N/A',
                 'fid' => $audits['total-blocking-time']['displayValue'] ?? 'N/A',
                 'cls' => $audits['cumulative-layout-shift']['displayValue'] ?? 'N/A',

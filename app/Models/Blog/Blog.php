@@ -4,6 +4,7 @@ namespace App\Models\Blog;
 
 use App\Http\Seo\HasSeo;
 use App\Http\Sitemap\HasSitemapItems;
+use App\Models\Concerns\HasCardImage;
 use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Blog extends Model implements HasMedia
 {
-    use HasFactory,
+    use HasCardImage, HasFactory,
         HasFinders, HasSeo, HasSitemapItems, InteractsWithMedia, LogsActivity, SoftDeletes;
 
     protected $table = 'blogs';

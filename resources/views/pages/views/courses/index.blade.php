@@ -140,7 +140,7 @@
                                data-title="{{ \Illuminate\Support\Str::lower($course->title) }}">
                                 <div class="ccard-media">
                                     @if ($thumb)
-                                        <img src="{{ $thumb->getFullUrl() }}" alt="{{ $course->title }}" loading="lazy"
+                                        <img src="{{ $course->cardImageUrl() }}" alt="{{ $course->title }}" loading="lazy"
                                              onerror="this.style.display='none';this.nextElementSibling.style.display='';">
                                         <div class="ph" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
                                     @else

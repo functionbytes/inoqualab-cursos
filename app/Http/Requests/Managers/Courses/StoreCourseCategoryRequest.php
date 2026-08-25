@@ -8,7 +8,7 @@ class StoreCourseCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('categories.create');
     }
 
     public function rules(): array

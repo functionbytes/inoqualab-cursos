@@ -37,7 +37,7 @@
         <div class="col-12 col-lg-4">
             <div class="card card-body">
                 <a href="{{ route('customers.notifications') }}" class="btn btn-light w-100">
-                    <i class="fas fa-arrow-left me-2"></i>Volver
+                    @include('customers.includes.icon', ['name' => 'arrow-left'])Volver
                 </a>
             </div>
         </div>

@@ -1,7 +1,7 @@
 @php
     $typeIcons = [
-        'video' => 'fa-video', 'text' => 'fa-message-lines', 'audio' => 'fa-volume',
-        'image' => 'fa-image', 'pdf' => 'fa-file-pdf', 'zip' => 'fa-file-zipper', 'quiz' => 'fa-hexagon-check',
+        'video' => 'video', 'text' => 'text', 'audio' => 'audio',
+        'image' => 'image', 'pdf' => 'pdf', 'zip' => 'zip', 'quiz' => 'quiz',
     ];
     $typeLabels = [
         'video' => 'Video', 'text' => 'Lectura', 'audio' => 'Audio',
@@ -16,7 +16,7 @@
         <div class="lv-rail-head">
             @unless(request()->routeIs('customers.courses.content'))
                 <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back rail-back">
-                    <i class="fa-solid fa-arrow-left"></i> Volver al curso
+                    @include('customers.includes.icon', ['name' => 'arrow-left']) Volver al curso
                 </a>
             @endunless
             <div class="rc">{{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</div>
@@ -42,13 +42,13 @@
                             type="button" data-bs-toggle="collapse" data-bs-target="#lvmod{{ $chapter->id }}"
                             aria-expanded="{{ $isCurrentChapter ? 'true' : 'false' }}" aria-controls="lvmod{{ $chapter->id }}">
                         <span class="mi">
-                            @if($allDone)<i class="fa-solid fa-check"></i>@else{{ $loop->iteration }}@endif
+                            @if($allDone)@include('customers.includes.icon', ['name' => 'check'])@else{{ $loop->iteration }}@endif
                         </span>
                         <span class="mt">
                             <span class="tt">{{ $chapter->title }}</span>
                             <span class="ss">{{ $progresschapters }}/{{ $countchapter }} · {{ $countchapter }} clases</span>
                         </span>
-                        <span class="chev"><i class="fa-solid fa-chevron-down"></i></span>
+                        <span class="chev">@include('customers.includes.icon', ['name' => 'chevron-down'])</span>
                     </button>
 
                     <div class="collapse lv-mod-body {{ $isCurrentChapter ? 'show' : '' }}" id="lvmod{{ $chapter->id }}">
@@ -60,7 +60,7 @@
                                 $href = $lesson->type->slug == 'quiz'
                                     ? route('customers.courses.quiz', $lesson->id)
                                     : route('customers.courses.lesion', $lesson->id);
-                                $icon = $typeIcons[$lesson->type->slug] ?? 'fa-circle-play';
+                                $icon = $typeIcons[$lesson->type->slug] ?? 'circle-play';
                                 $label = $typeLabels[$lesson->type->slug] ?? 'Clase';
                             @endphp
 
@@ -69,9 +69,9 @@
                                @unless ($clickable) aria-disabled="true" tabindex="-1" aria-label="Lección bloqueada" @endunless>
                                 <span class="li-ic">
                                     @if (! $clickable && $validate != 1)
-                                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                                        @include('customers.includes.icon', ['name' => 'lock'])
                                     @else
-                                        <i class="fa-duotone {{ $icon }}"></i>
+                                        @include('customers.includes.icon', ['name' => $icon])
                                     @endif
                                 </span>
                                 <span class="li-main">
@@ -91,34 +91,34 @@
             @if ($exam == null || $percents < 100)
                 <div class="lv-mod">
                     <div class="examen-card">
-                        <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                         <span class="ex-info"><b>Examen final</b><span>Disponible al completar el curso</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'lock'])</span>
                     </div>
                 </div>
             @elseif ($certificate)
                 <div class="lv-mod">
                     <div class="examen-card">
-                        <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'award'])</span>
                         <span class="ex-info"><b>Examen final</b><span>¡Aprobado!</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-circle-check"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'circle-check'])</span>
                     </div>
                 </div>
             @else
                 <div class="lv-mod">
                     <a class="examen-card ready" href="{{ route('customers.courses.exam', $course->slack) }}">
-                        <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                         <span class="ex-info"><b>Examen final</b><span>Presentar examen</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'arrow-right'])</span>
                     </a>
                 </div>
             @endif
         @else
             <div class="lv-mod">
                 <div class="examen-card">
-                    <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                    <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                     <span class="ex-info"><b>Examen final</b><span>Completa todas las clases para habilitarlo</span></span>
-                    <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
+                    <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'lock'])</span>
                 </div>
             </div>
         @endif
@@ -131,7 +131,7 @@
 
         @unless(request()->routeIs('customers.courses.content'))
             <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back rail-back">
-                <i class="fa-solid fa-arrow-left"></i> Volver al curso
+                @include('customers.includes.icon', ['name' => 'arrow-left']) Volver al curso
             </a>
         @endunless
 
@@ -174,27 +174,27 @@
                                     $href = $lesson->type->slug == 'quiz'
                                         ? route('customers.courses.quiz', $lesson->id)
                                         : route('customers.courses.lesion', $lesson->id);
-                                    $icon = $typeIcons[$lesson->type->slug] ?? 'fa-circle-play';
+                                    $icon = $typeIcons[$lesson->type->slug] ?? 'circle-play';
                                     $label = $typeLabels[$lesson->type->slug] ?? 'Clase';
                                     $rowClass = $validate == 1 ? 'done' : ($isCurrent ? 'active' : '');
                                 @endphp
                                 <a class="lesson-row {{ $rowClass }} {{ ! $clickable ? 'pe-none' : '' }}"
                                    href="{{ $clickable ? $href : 'javascript:void(0)' }}"
                                    @unless ($clickable) aria-disabled="true" tabindex="-1" aria-label="Lección bloqueada" @endunless>
-                                    <span class="lr-ic"><i class="fa-duotone {{ $icon }}" aria-hidden="true"></i></span>
+                                    <span class="lr-ic">@include('customers.includes.icon', ['name' => $icon])</span>
                                     <span class="lr-main">
                                         <span class="lr-title">{{ ucfirst(Str::lower($lesson->title)) }}</span>
                                         <span class="lr-meta">{{ $label }}</span>
                                     </span>
                                     <span class="lr-status">
                                         @if ($validate == 1)
-                                            <i class="fa-solid fa-circle-check"></i>
+                                            @include('customers.includes.icon', ['name' => 'circle-check'])
                                         @elseif ($isCurrent)
-                                            <i class="fa-solid fa-circle-play"></i>
+                                            @include('customers.includes.icon', ['name' => 'circle-play'])
                                         @elseif ($clickable)
-                                            <i class="fa-solid fa-circle-play"></i>
+                                            @include('customers.includes.icon', ['name' => 'circle-play'])
                                         @else
-                                            <i class="fa-solid fa-lock"></i>
+                                            @include('customers.includes.icon', ['name' => 'lock'])
                                         @endif
                                     </span>
                                 </a>
@@ -209,28 +209,28 @@
             @if ($percent == 100)
                 @if ($exam == null || $percents < 100)
                     <div class="side-card examen-card">
-                        <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                         <span class="ex-info"><b>Examen final</b><span>Disponible al completar el curso</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'lock'])</span>
                     </div>
                 @elseif ($certificate)
                     <div class="side-card examen-card">
-                        <span class="ex-ic"><i class="fa-duotone fa-award"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'award'])</span>
                         <span class="ex-info"><b>Examen final</b><span>¡Aprobado!</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-circle-check"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'circle-check'])</span>
                     </div>
                 @else
                     <a class="side-card examen-card ready" href="{{ route('customers.courses.exam', $course->slack) }}">
-                        <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                        <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                         <span class="ex-info"><b>Examen final</b><span>Presentar examen</span></span>
-                        <span class="ex-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+                        <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'arrow-right'])</span>
                     </a>
                 @endif
             @else
                 <div class="side-card examen-card">
-                    <span class="ex-ic"><i class="fa-duotone fa-graduation-cap"></i></span>
+                    <span class="ex-ic">@include('customers.includes.icon', ['name' => 'grad'])</span>
                     <span class="ex-info"><b>Examen final</b><span>Completa todas las clases para habilitarlo</span></span>
-                    <span class="ex-arrow"><i class="fa-solid fa-lock"></i></span>
+                    <span class="ex-arrow">@include('customers.includes.icon', ['name' => 'lock'])</span>
                 </div>
             @endif
         @endif

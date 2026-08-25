@@ -18,7 +18,7 @@
 
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" name="newsletter_enabled" id="newsletter_enabled"
-                               @if(setting('newsletter_enabled') !== '0') checked @endif>
+                               @if(settingEnabled('newsletter_enabled', true)) checked @endif>
                         <label class="form-check-label fw-semibold" for="newsletter_enabled">
                             Newsletter activo
                         </label>
@@ -83,13 +83,13 @@
 
                     <div class="form-check form-switch mb-2" id="popupToggleWrapper">
                         <input class="form-check-input" type="checkbox" name="newsletter_popup_enabled" id="newsletter_popup_enabled"
-                               @if(setting('newsletter_popup_enabled') !== '0') checked @endif>
+                               @if(settingEnabled('newsletter_popup_enabled', true)) checked @endif>
                         <label class="form-check-label fw-semibold" for="newsletter_popup_enabled">
                             Habilitar popup del boletín
                         </label>
                     </div>
 
-                    <div id="popup-fields" @if(setting('newsletter_popup_enabled') === '0') class="d-none" @endif>
+                    <div id="popup-fields" @if(! settingEnabled('newsletter_popup_enabled', true)) class="d-none" @endif>
                         <div class="mb-0 mt-3" >
                             <label for="newsletter_popup_delay" class="form-label fw-semibold">
                                 Retraso antes de mostrar <span class="text-muted fw-normal">(segundos)</span>

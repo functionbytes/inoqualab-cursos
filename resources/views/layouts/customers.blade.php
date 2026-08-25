@@ -38,6 +38,9 @@
     <link rel="stylesheet" href="{{ url('managers/libs/fontawesome/fontawesome.css') }}">
     <link rel="stylesheet" href="{{ url('managers/libs/bootstrap/dist/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url('customers/css/style.css') }}">
+    {{-- Versionado por fecha de modificación: sin él, el navegador del alumno
+         sigue sirviendo el CSS anterior tras cada despliegue. --}}
+    <link rel="stylesheet" href="{{ url('customers/css/portal.css') }}?v={{ @filemtime(public_path('customers/css/portal.css')) ?: 1 }}">
 
     @stack('css')
 
@@ -45,8 +48,15 @@
 
 <body class="">
 
+@php
+    // La posición del menú se elige en Configuración › Portal del alumno y vale
+    // para todo el portal: si dependiera de cada vista, la navegación saltaría
+    // de arriba al lateral al cambiar de pantalla. El valor está validado al
+    // guardarse; aquí se filtra igualmente por si la fila se edita a mano.
+    $navLayout = setting('customers_nav_layout', 'horizontal') === 'vertical' ? 'vertical' : 'horizontal';
+@endphp
 <div class="page-wrapper" id="main-wrapper" data-navbarbg="skin6" data-sidebartype="full" data-sidebar-position="fixed"
-    data-header-position="fixed" data-layout="horizontal">
+    data-header-position="fixed" data-layout="{{ $navLayout }}">
 
     <div class="dark-transparent" onclick="document.getElementById('main-wrapper').classList.remove('show-sidebar')"></div>
 
@@ -125,7 +135,7 @@
             '  <div class="modal-dialog modal-dialog-centered">',
             '    <div class="modal-content">',
             '      <div class="modal-header" style="background:#081A28;">',
-            '        <h5 class="modal-title text-white"><i class="fa-duotone fa-clock me-2"></i>Sesión por expirar</h5>',
+            '        <h5 class="modal-title text-white"><svg viewBox=\"0 0 24 24\" width=\"18\" height=\"18\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"display:inline-block;vertical-align:-3px;margin-right:8px\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg>Sesión por expirar</h5>',
             '      </div>',
             '      <div class="modal-body text-center py-4">',
             '        <p class="mb-1">Tu sesión cerrará por inactividad en</p>',

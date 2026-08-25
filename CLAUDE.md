@@ -115,7 +115,15 @@ Convencion de permisos: `{alias}.action` — por ejemplo `orders.view`, `users.c
 ## Notas
 
 - Los cambios de archivo son inmediatos; no hay proceso worker de larga duracion que reiniciar.
-- Para el queue worker en desarrollo: `php artisan queue:work` en una terminal separada.
+- Para el queue worker en desarrollo, **siempre con la lista de colas**:
+  ```bash
+  php artisan queue:work redis --queue=$(php artisan queue:app-queues)
+  ```
+  Un `queue:work` sin `--queue` solo consume la cola `default`, y todo lo que va a
+  `emails`, `mails`, `newsletter` o `seo` se queda pendiente para siempre **sin
+  fallar ni aparecer en `failed_jobs`**. Las colas se declaran en
+  `config/queue.php` → `app_queues`; `QueueNamesAreCoveredTest` rompe el CI si se
+  añade una cola al código y no a esa lista.
 - Variables de entorno en `.env` (raiz del proyecto).
 - NUNCA ejecutar `migrate:fresh` — destruye todos los datos.
 - NUNCA usar `config:cache`, `route:cache` ni `view:cache` en desarrollo (dificulta debug).

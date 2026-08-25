@@ -6,53 +6,97 @@
 <link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}">
 @endpush
 
+@php
+    // Se calculan aquí los estados para poder contar por filtro en la cabecera:
+    // antes los botones no decían cuántos cursos había detrás de cada uno.
+    $items = $courses->map(function ($inscription) {
+        $progress = min(100, max(0, (int) round($inscription->percent)));
+
+        if ($inscription->expire == 1) {
+            $status = 'expired';
+        } elseif ($progress >= 100) {
+            $status = 'done';
+        } elseif ($progress > 0) {
+            $status = 'progress';
+        } else {
+            $status = 'pending';
+        }
+
+        return (object) [
+            'inscription' => $inscription,
+            'progress' => $progress,
+            'status' => $status,
+        ];
+    });
+
+    $labels = [
+        'expired' => 'Expirado',
+        'done' => 'Completado',
+        'progress' => 'En progreso',
+        'pending' => 'Pendiente',
+    ];
+
+    $counts = [
+        'todos' => $items->count(),
+        'progress' => $items->where('status', 'progress')->count(),
+        'pending' => $items->where('status', 'pending')->count(),
+        'done' => $items->where('status', 'done')->count(),
+        'expired' => $items->where('status', 'expired')->count(),
+    ];
+@endphp
+
 @section('content')
 <section class="pnl-section" id="sec-cursos">
 
-    <div class="pnl-card pnl-head">
-        <h2>Mis cursos</h2>
-        <div class="sub">Gestiona y continúa tus capacitaciones.</div>
+    <div class="pnl-card pnl-head pnl-head-row">
+        <div>
+            <h2>Mis cursos</h2>
+            <div class="sub">
+                @if($counts['todos'] > 0)
+                    {{ $counts['todos'] }} {{ $counts['todos'] === 1 ? 'capacitación' : 'capacitaciones' }} ·
+                    {{ $counts['expired'] > 0 ? $counts['expired'].' con el acceso vencido' : 'accesos al día' }}
+                @else
+                    Gestiona y continúa tus capacitaciones.
+                @endif
+            </div>
+        </div>
+        @if($counts['todos'] > 0)
+            <label class="pnl-search" for="cursosBuscar">
+                @include('customers.includes.icon', ['name' => 'search'])
+                <input type="search" id="cursosBuscar" placeholder="Buscar por título…" autocomplete="off">
+            </label>
+        @endif
     </div>
 
-    <div style="height:22px"></div>
+    <div class="pnl-gap"></div>
 
     @if($courses->isEmpty())
 
-        <div class="pnl-card">
-            <div class="doc-empty">
-                <i class="fa-solid fa-folder-open" style="font-size:30px;display:block;margin-bottom:12px;"></i>
-                Aún no tienes cursos asignados. Cuando te inscribas en una capacitación aparecerá aquí.
-            </div>
+        <div class="pnl-empty">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'cap'])</span>
+            <h3>Aún no tienes cursos asignados</h3>
+            <p>Cuando te inscribas en una capacitación aparecerá aquí, con su progreso y su certificado.</p>
+            <a href="{{ route('home') }}">Explorar el catálogo</a>
         </div>
 
     @else
 
         <div class="pnl-filter" id="cursosFilter" role="group" aria-label="Filtrar mis cursos">
-            <button type="button" class="active" data-f="todos" aria-pressed="true">Todos</button>
-            <button type="button" data-f="progress" aria-pressed="false">En progreso</button>
-            <button type="button" data-f="pending" aria-pressed="false">Pendientes</button>
-            <button type="button" data-f="done" aria-pressed="false">Completados</button>
-            <button type="button" data-f="expired" aria-pressed="false">Vencidos</button>
+            @foreach(['todos' => 'Todos', 'progress' => 'En progreso', 'pending' => 'Pendientes', 'done' => 'Completados', 'expired' => 'Vencidos'] as $key => $label)
+                <button type="button" class="{{ $key === 'todos' ? 'active' : '' }}" data-f="{{ $key }}"
+                        aria-pressed="{{ $key === 'todos' ? 'true' : 'false' }}">
+                    {{ $label }}<span class="cnt">{{ $counts[$key] }}</span>
+                </button>
+            @endforeach
         </div>
 
         <div class="pc-grid" id="cursosCards">
-            @foreach($courses as $inscription)
+            @foreach($items as $item)
                 @php
-                    $progress = min(100, max(0, (int) round($inscription->percent)));
-
-                    if ($inscription->expire == 1) {
-                        $status = 'expired';
-                        $statusLabel = 'Expirado';
-                    } elseif ($progress >= 100) {
-                        $status = 'done';
-                        $statusLabel = 'Completado';
-                    } elseif ($progress > 0) {
-                        $status = 'progress';
-                        $statusLabel = 'En progreso';
-                    } else {
-                        $status = 'pending';
-                        $statusLabel = 'Pendiente';
-                    }
+                    $inscription = $item->inscription;
+                    $progress = $item->progress;
+                    $status = $item->status;
+                    $statusLabel = $labels[$status];
 
                     $course   = $inscription->course;
                     $category = $course?->categorie?->title ?? 'Curso';
@@ -63,7 +107,7 @@
                     $certificate = $status === 'done' ? $inscription->certificate : null;
                 @endphp
 
-                <div class="pc-card" data-status="{{ $status }}">
+                <div class="pc-card" data-status="{{ $status }}" data-title="{{ \Illuminate\Support\Str::lower($course?->title ?? '') }}">
                     <div class="pc-media"
                          style="background-image:linear-gradient(150deg,rgba(13,27,42,.72),rgba(13,27,42,.55)),url('{{ $thumb }}');background-size:cover;background-position:center;">
                         <span class="pc-cat">{{ $category }}</span>
@@ -90,22 +134,44 @@
                             </div>
                         </div>
 
+                        {{-- Una línea que explica el estado: el badge por sí solo
+                             no dice qué pasó ni qué se puede hacer. --}}
+                        <div class="pc-note">
+                            @if($status === 'expired')
+                                El acceso venció{{ $inscription->finished ? ' el '.\Carbon\Carbon::parse($inscription->finished)->locale('es')->isoFormat('D MMM YYYY') : '' }}. Al renovarlo conservas tu progreso.
+                            @elseif($status === 'done')
+                                {{ $certificate ? 'Certificado disponible para descargar.' : 'Curso completado. El certificado se emite al aprobar el examen.' }}
+                            @elseif($status === 'progress')
+                                Te queda el {{ 100 - $progress }}% para completarlo.
+                            @else
+                                Aún no has empezado este curso.
+                            @endif
+                        </div>
+
                         @if($status === 'done' && $certificate)
                             <a class="pc-btn ghost" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
-                                <i class="fa-solid fa-download"></i> Ver certificado
+                                @include('customers.includes.icon', ['name' => 'download']) Ver certificado
                             </a>
                         @elseif($status === 'expired')
                             <a class="pc-btn ghost" href="{{ route('checkout', ['course', $course->slack]) }}">
-                                <i class="fa-solid fa-rotate"></i> Renovar acceso
+                                @include('customers.includes.icon', ['name' => 'refresh']) Renovar acceso
                             </a>
                         @else
                             <a class="pc-btn" href="{{ $contentUrl }}">
-                                <i class="fa-solid fa-play"></i> {{ $progress > 0 ? 'Continuar' : 'Comenzar curso' }}
+                                @include('customers.includes.icon', ['name' => 'play']) {{ $progress > 0 ? 'Continuar' : 'Comenzar curso' }}
                             </a>
                         @endif
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        {{-- Se muestra cuando el filtro o la búsqueda no dejan ninguna tarjeta:
+             antes la rejilla simplemente quedaba en blanco. --}}
+        <div class="pnl-empty" id="cursosVacio" hidden>
+            <span class="ic">@include('customers.includes.icon', ['name' => 'search'])</span>
+            <h3>No hay cursos que coincidan</h3>
+            <p>Prueba con otro filtro o borra la búsqueda para ver todas tus capacitaciones.</p>
         </div>
 
     @endif
@@ -116,16 +182,36 @@
 @push('scripts')
 <script>
     $(function () {
+        var filtro = 'todos';
+        var texto = '';
+
+        function aplicar() {
+            var visibles = 0;
+
+            $('#cursosCards .pc-card').each(function () {
+                var $c = $(this);
+                var coincideEstado = (filtro === 'todos') || ($c.data('status') === filtro);
+                var coincideTexto = texto === '' || String($c.data('title')).indexOf(texto) !== -1;
+                var ver = coincideEstado && coincideTexto;
+
+                $c.prop('hidden', !ver);
+                if (ver) { visibles++; }
+            });
+
+            $('#cursosVacio').prop('hidden', visibles !== 0);
+        }
+
         $('#cursosFilter').on('click', 'button', function () {
             var $btn = $(this);
             $btn.siblings().removeClass('active').attr('aria-pressed', 'false');
             $btn.addClass('active').attr('aria-pressed', 'true');
+            filtro = $btn.data('f');
+            aplicar();
+        });
 
-            var f = $btn.data('f');
-            $('#cursosCards .pc-card').each(function () {
-                var match = (f === 'todos') || ($(this).data('status') === f);
-                $(this).prop('hidden', !match);
-            });
+        $('#cursosBuscar').on('input', function () {
+            texto = $(this).val().toLowerCase().trim();
+            aplicar();
         });
     });
 </script>

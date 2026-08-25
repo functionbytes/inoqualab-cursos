@@ -8,7 +8,7 @@ class StoreEnterpriseRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('enterprises.create');
     }
 
     public function rules(): array

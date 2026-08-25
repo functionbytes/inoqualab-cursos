@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Seo\SeoAlert;
 use App\Models\Seo\SeoRedirect;
 use Illuminate\Support\Collection;
 
@@ -108,6 +109,19 @@ class RedirectChainDetector
                 if (empty($chain)) {
                     return null;
                 }
+
+                // Se levanta aquí (no dentro de detect()) porque detectAll()
+                // es el barrido completo pensado para reportar/alertar;
+                // detect() también se usa para chequeos puntuales bajo
+                // demanda donde una alerta sería ruido.
+                SeoAlert::raise(
+                    SeoAlert::TYPE_REDIRECT_CHAIN,
+                    SeoAlert::SEVERITY_WARNING,
+                    "Cadena de redirects: {$redirect->source_path}",
+                    'Cadena detectada: '.implode(' → ', $chain),
+                    $redirect->source_path,
+                    ['chain' => $chain]
+                );
 
                 return [
                     'source' => $redirect->source_path,

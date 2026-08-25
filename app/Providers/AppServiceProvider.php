@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -114,13 +115,35 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
+        // Política única de contraseñas para todo el proyecto.
+        //
+        // Antes cada Form Request traía su propio mínimo y quedaban al revés de
+        // lo razonable: los perfiles de staff con acceso a panel (support,
+        // accounting, distributor, enterprise) pedían min:6 mientras el cliente
+        // final pedía min:8 -- las cuentas con más privilegio eran las de
+        // contraseña más débil.
+        //
+        // uncompromised() consulta el rango k-anónimo de HaveIBeenPwned, así que
+        // se deja fuera en testing: metería una llamada de red en cada test que
+        // valide una contraseña y volvería la suite dependiente de un servicio
+        // externo. Si la API no responde en producción, la regla deja pasar.
+        Password::defaults(function () {
+            $rule = Password::min(8);
+
+            return $this->app->runningUnitTests() ? $rule : $rule->uncompromised();
+        });
+
         Blade::directive('seoTags', fn () => '<?php echo app(\App\Services\SeoService::class)->render(); ?>');
         Blade::directive('schemaOrg', fn () => '<?php if ($schema = app(\App\Services\SchemaOrgService::class)->organization()): echo \'<script type="application/ld+json">\'.json_encode($schema, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES).\'</script>\'; endif; ?>');
 
+        // Los cachés de ajustes viven en variables `static`, es decir, mientras
+        // viva el proceso PHP. Un worker arrancado con --max-jobs=500 procesa
+        // cientos de trabajos sin reiniciarse, así que un ajuste cambiado desde
+        // el panel no llegaba a los trabajos ya encolados: seguían usando la
+        // foto que el worker leyó al arrancar. Olvidarlos aquí hace que cada
+        // trabajo empiece con el estado real de la base.
         Queue::before(function (JobProcessing $event) {
-            // $event->connectionName
-            // $event->job
-            // $event->job->payload()
+            forgetSettingsCache();
         });
 
         Queue::after(function (JobProcessed $event) {

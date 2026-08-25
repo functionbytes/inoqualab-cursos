@@ -3,12 +3,13 @@
 namespace App\Http\Requests\Managers\Distributors;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class StoreDistributorStaffRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('distributors.create');
     }
 
     public function rules(): array
@@ -21,7 +22,7 @@ class StoreDistributorStaffRequest extends FormRequest
             'cellphone' => ['nullable', 'string', 'regex:/^[0-9]{6,10}$/'],
             'email' => ['required', 'email', 'max:250'],
             'address' => ['nullable', 'string', 'max:250'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::defaults()],
         ];
     }
 

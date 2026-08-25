@@ -7,7 +7,7 @@
                     <div class="image">
                         {{-- La tabla blogs no tiene columna `image`: la portada vive en
                              Media Library (colección thumbnail), igual que en BlogController. --}}
-                        <img src="{{ $recent->getFirstMediaUrl('thumbnail') ?: asset('/pages/images/blog/default.jpg') }}"
+                        <img src="{{ $recent->cardImageUrl(asset('/pages/images/blog/default.jpg')) }}"
                              alt="{{ $recent->title }}" loading="lazy">
                     </div>
                     <div class="content">

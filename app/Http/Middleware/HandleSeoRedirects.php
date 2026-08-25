@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Seo\SeoRedirect;
+use App\Models\Seo\SeoRedirectHit;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,35 +12,64 @@ class HandleSeoRedirects
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Solo en peticiones GET/HEAD, ignorar panel y api
+        $response = static::resolve($request);
+
+        return $response ?? $next($request);
+    }
+
+    /**
+     * Resuelve el redirect para la request, si hay uno activo que aplique.
+     *
+     * Se llama desde DOS sitios que cubren casos distintos:
+     * - handle() arriba: el caso en que el path a redirigir COINCIDE con una
+     *   ruta real ya registrada (raro, pero posible).
+     * - El hook de NotFoundHttpException en bootstrap/app.php: el caso real
+     *   y mayoritario de un redirect -- una URL vieja que YA NO tiene
+     *   ningún controller detrás. Ese path no matchea ninguna ruta, así que
+     *   el router lanza NotFoundHttpException ANTES de que corra ningún
+     *   middleware del grupo 'web' (incluido este, que estaba registrado
+     *   ahí vía $middleware->web(prepend:...)) -- por eso ningún redirect
+     *   a una URL genuinamente inexistente funcionaba pese a que el CRUD de
+     *   redirects, el modelo, la cache y el desglose de hits ya estaban
+     *   completos y probados.
+     */
+    public static function resolve(Request $request): ?Response
+    {
         if (! $request->isMethodSafe()) {
-            return $next($request);
+            return null;
         }
 
         $path = '/'.ltrim($request->getPathInfo(), '/');
 
-        if ($this->shouldSkip($path)) {
-            return $next($request);
+        if (static::shouldSkip($path)) {
+            return null;
         }
 
-        if ($redirect = $this->findRedirect($path)) {
-            // Registrar hit en background
-            $redirect->increment('hits_count');
+        $redirect = static::findRedirect($path);
 
-            $target = $redirect->target_path;
-
-            // Si es ruta relativa, convertir a URL completa
-            if (! str_starts_with($target, 'http')) {
-                $target = url($target);
-            }
-
-            return redirect($target, $redirect->status_code);
-        }
-
-        return $next($request);
+        return $redirect ? static::respondWithRedirect($redirect) : null;
     }
 
-    private function shouldSkip(string $path): bool
+    private static function respondWithRedirect(SeoRedirect $redirect): Response
+    {
+        // Contador total (para el listado) + desglose diario (para el
+        // gráfico de analytics()/seo_redirect_hits, que hasta ahora nadie
+        // alimentaba pese a que SeoRedirectController::analytics() ya lo
+        // leía -- el gráfico siempre mostraba la línea en cero).
+        $redirect->increment('hits_count');
+        SeoRedirectHit::recordHit($redirect->id);
+
+        $target = $redirect->target_path;
+
+        // Si es ruta relativa, convertir a URL completa
+        if (! str_starts_with($target, 'http')) {
+            $target = url($target);
+        }
+
+        return redirect($target, $redirect->status_code);
+    }
+
+    private static function shouldSkip(string $path): bool
     {
         return str_starts_with($path, '/panel/')
             || str_starts_with($path, '/manager/')
@@ -48,7 +78,7 @@ class HandleSeoRedirects
             || preg_match('/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|map)$/i', $path);
     }
 
-    private function findRedirect(string $path): ?SeoRedirect
+    private static function findRedirect(string $path): ?SeoRedirect
     {
         $all = SeoRedirect::cachedAll();
 

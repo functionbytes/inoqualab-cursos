@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -111,6 +112,32 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e->getMessage() === 'importingerror') {
                 return redirect()->back()->with('error', 'You are selected different file, please select customers import file.');
             }
+        });
+
+        // Una URL vieja sin ningún controller (el caso normal de un redirect)
+        // no matchea ninguna ruta -> el router lanza NotFoundHttpException
+        // ANTES de que corra el middleware del grupo 'web', incluido
+        // HandleSeoRedirects (registrado ahí vía $middleware->web(prepend:)).
+        // Por eso ningún redirect a una URL genuinamente inexistente
+        // funcionaba. Va ANTES que el hook de TrackSeo404 de abajo: si hay
+        // redirect, se devuelve esa Response y se corta aquí -- no debe
+        // contarse además como un 404 nuevo.
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            return HandleSeoRedirects::resolve($request);
+        });
+
+        // Todo 404 real (ruta inexistente O abort(404) dentro de un
+        // controller ya enrutado) lanza NotFoundHttpException -- el router
+        // la lanza directo cuando no hay match, y abort(404) la lanza
+        // también (Application::abort()). En ambos casos la excepción
+        // deshace la pila de middleware SIN ejecutar el "después" de
+        // $next(), así que TrackSeo404 (middleware que solo mira el status
+        // code DESPUÉS de $next()) nunca se alcanzaba para ningún 404 real
+        // -- seo_404_logs existía pero se quedaba siempre vacía. Se
+        // registra aquí y se devuelve null para que Laravel siga con su
+        // render por defecto de la página 404.
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            TrackSeo404::track($request);
         });
 
         // CSRF expirado (sesión caducada durante un POST) → redirigir a session-expired

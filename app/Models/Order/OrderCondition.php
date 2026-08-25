@@ -5,7 +5,6 @@ namespace App\Models\Order;
 use App\Models\Concerns\HasFinders;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderCondition extends Model
 {
@@ -49,10 +48,5 @@ class OrderCondition extends Model
     public function scopeAvailable($query)
     {
         return $query->where('available', 1);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany('App\Models\Order\Order');
     }
 }

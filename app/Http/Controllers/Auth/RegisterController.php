@@ -25,7 +25,10 @@ class RegisterController extends Controller
 
     public function register(StoreRegisterRequest $request)
     {
-        if (setting('registration_enabled') === 0 || setting('registration_enabled') === '0') {
+        // Habilitado salvo que el manager lo apague. La doble comparación que
+        // había aquí (=== 0 || === '0') funcionaba por cubrir los dos tipos que
+        // setting() puede devolver; settingEnabled() lo resuelve de una vez.
+        if (! settingEnabled('registration_enabled', true)) {
             return redirect()->route('login')
                 ->with('error', 'El registro de nuevas cuentas está deshabilitado en este momento.');
         }

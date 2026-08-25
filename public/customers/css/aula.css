@@ -353,8 +353,8 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .btn-solid:hover { background: var(--navy-soft); transform: translateY(-1px); }
 .btn-solid svg { width: 18px; height: 18px; color: var(--green); }
 
-.go-pay { margin-top: 22px; width: 100%; background: var(--navy); color: #fff; border: none; border-radius: 11px; padding: 16px; font-size: 15px; font-weight: 800; letter-spacing: .03em; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; transition: background .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease); box-shadow: 0 10px 24px rgba(13,27,42,.18); }
-.go-pay:hover { background: var(--navy-soft); transform: translateY(-2px); box-shadow: 0 16px 32px rgba(13,27,42,.24); }
+.go-pay { margin-top: 22px; width: 100%; background: #008bcd; color: #fff; border: none; border-radius: 11px; padding: 16px; font-size: 15px; font-weight: 800; letter-spacing: .03em; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; transition: background .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease); box-shadow: 0 10px 24px rgba(0,139,205,.24); }
+.go-pay:hover { background: #006fa3; transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,139,205,.3); }
 .go-pay svg { width: 18px; height: 18px; }
 .go-pay { white-space: nowrap; }
 .go-pay .arr { transition: transform .2s var(--ease); }
@@ -433,9 +433,12 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pc-top { display: flex; align-items: center; justify-content: space-between; }
 .pc-year { font-size: 12px; font-weight: 800; color: var(--muted); background: var(--field); padding: 5px 11px; border-radius: 7px; }
 .pc-badge { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 5px 10px; border-radius: 20px; white-space: nowrap; }
-.pc-badge.st-progress { background: #e3f1fb; color: var(--green-deep); }
-.pc-badge.st-pending { background: #fbf4e3; color: #b07d12; }
-.pc-badge.st-done { background: #eafaf0; color: #167a3e; }
+/* Estados en paleta azul/gris (base #f4f6f9): en progreso = azul vivo (activo),
+   completado = azul navy sólido (hecho), pendiente = gris neutro (sin empezar).
+   Vencido se deja en rojo suave a propósito: es una alerta de acceso caducado. */
+.pc-badge.st-progress { background: #e3f1fb; color: #006fa3; }
+.pc-badge.st-pending { background: #f4f6f9; color: #6a7888; }
+.pc-badge.st-done { background: #dde8f2; color: #0d1b2a; }
 .pc-badge.st-expired { background: var(--red-soft); color: var(--red); }
 .pc-title { font-size: 16.5px; font-weight: 800; line-height: 1.35; margin: 16px 0 0; color: var(--ink); }
 .pc-track { height: 8px; border-radius: 5px; background: var(--line-2); margin: 18px 0 8px; overflow: hidden; }
@@ -444,8 +447,9 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pc-foot .col .k { font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
 .pc-foot .col .v { font-size: 15px; font-weight: 800; color: var(--navy); margin-top: 2px; white-space: nowrap; }
 .pc-foot .col.r { text-align: right; }
-.pc-btn { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 9px; background: var(--navy); color: #fff; text-decoration: none; font-size: 13.5px; font-weight: 800; padding: 12px; border-radius: 11px; transition: background .18s var(--ease), transform .18s var(--ease); }
-.pc-btn:hover { background: var(--navy-soft); transform: translateY(-1px); }
+.pc-btn { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 9px; background: #008bcd; color: #fff; text-decoration: none; font-size: 13.5px; font-weight: 800; padding: 12px; border-radius: 11px; transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease); }
+.pc-btn:hover { background: #006fa3; color: #fff; transform: translateY(-1px); }
+.pc-btn:hover svg { color: #fff; }
 .pc-btn svg { width: 16px; height: 16px; color: var(--green); }
 .pc-btn.ghost { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
 .pc-btn.ghost:hover { border-color: var(--green); color: var(--green-deep); background: var(--green-soft); }
@@ -471,8 +475,8 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .t-badge.paid { background: #eafaf0; color: #167a3e; }
 .t-badge.pend { background: #fbf4e3; color: #b07d12; }
 .t-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.dl-btn { display: inline-flex; align-items: center; gap: 7px; background: var(--navy); color: #fff; border: none; font-size: 12.5px; font-weight: 700; padding: 9px 15px; border-radius: 9px; cursor: pointer; text-decoration: none; transition: background .15s var(--ease); white-space: nowrap; }
-.dl-btn:hover { background: var(--navy-soft); }
+.dl-btn { display: inline-flex; align-items: center; gap: 7px; background: #008bcd; color: #fff; border: none; font-size: 12.5px; font-weight: 700; padding: 9px 15px; border-radius: 9px; cursor: pointer; text-decoration: none; transition: background .15s var(--ease); white-space: nowrap; }
+.dl-btn:hover { background: #006fa3; }
 .dl-btn svg { width: 15px; height: 15px; color: var(--green); }
 .dl-btn.ghost { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
 .dl-btn.ghost svg { color: var(--green-deep); }
@@ -480,14 +484,12 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pnl-tfoot { padding: 16px 28px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line-2); }
 
 /* search */
-.pnl-search { display: flex; gap: 10px; padding: 22px 28px; }
-.pnl-search .wrap { position: relative; flex: 1; }
-.pnl-search .wrap svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--muted-2); }
-.pnl-search input { width: 100%; background: var(--field); border: 1.5px solid var(--line); border-radius: 11px; padding: 13px 15px 13px 42px; font-size: 14.5px; color: var(--ink); transition: border-color .15s var(--ease), box-shadow .15s var(--ease), background .15s; }
-.pnl-search input:focus { outline: none; border-color: var(--green); background: #fff; box-shadow: 0 0 0 4px rgba(0,139,205,.12); }
-.pnl-search .go { background: var(--navy); color: #fff; border: none; border-radius: 11px; width: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s var(--ease); }
-.pnl-search .go:hover { background: var(--navy-soft); }
-.pnl-search .go svg { width: 19px; height: 19px; }
+/* .pnl-search se define en portal.css (buscador de una sola caja, limpio).
+   Aquí se redefinía con un contenedor de padding 22px 28px + un input con su
+   propio borde y fondo, lo que producía un recuadro dentro de otro recuadro y
+   dejaba el icono de lupa suelto. Sus reglas .wrap/.go además eran código muerto
+   (ninguna vista usa esa estructura). Se elimina para heredar el estilo correcto
+   de portal.css, que este layout ya carga. */
 
 /* config form */
 .pnl-form { padding: 8px 32px 32px; }
@@ -1242,7 +1244,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 /* ===== Aula v2 — Coursera-style learning experience ===== */
 .lv * { box-sizing: border-box; }
-.lv { background: #fff; min-height: 100vh; }
+/* El contenedor del portal reserva 160px arriba para header+menú, lo que dejaba
+   ~49px de franja gris sobre el contenido del aula. Se sube el bloque para que
+   arranque justo bajo el menú, con un respiro mínimo. */
+.lv { background: #fff; min-height: 100vh; margin-top: -40px; }
 
 /* top bar */
 .lv-topbar { position: sticky; top: 0; z-index: 60; background: var(--navy); color: #fff; border-bottom: 1px solid rgba(255,255,255,.08); }
@@ -1340,7 +1345,15 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 /* lesson header + tabs */
 .lv-content { background: #fff; }
-.lv-content > * { max-width: 1080px; margin-left: auto; margin-right: auto; }
+/* La lección usa todo el ancho del área derecha (antes el contenido se capaba a
+   1080px centrado, dejando ~216px de hueco a cada lado). El texto conserva su
+   padding lateral de 36px y su tope de lectura en .lv-pane; el media (video,
+   pdf, imagen, audio) llena el ancho alineando sus bordes con el texto. */
+.lv-content > * { max-width: none; margin-left: 0; margin-right: 0; }
+/* El media arranca alineado con el borde superior del menú lateral (antes tenía
+   28px de margen y quedaba una franja blanca en L en la esquina superior). */
+.lv-content > .lp-video,
+.lv-content > .lp-embed { margin: 0 36px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(13,27,42,.16); }
 .lv-lhead { padding: 26px 36px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .lv-lhead .lk { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green-deep); display: inline-flex; align-items: center; gap: 7px; }
 .lv-lhead .lk svg { width: 14px; height: 14px; }
@@ -1384,6 +1397,30 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-res .dl { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); background: #fff; color: var(--navy); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; transition: all .15s var(--ease); }
 .lv-res .dl:hover { border-color: var(--green); color: var(--green-deep); background: var(--green-soft); }
 .lv-res .dl svg { width: 17px; height: 17px; }
+
+/* Sección Certificador (pestaña del aula) — tarjeta de aval más presentable
+   que la fila suelta + descripción plana que había antes. */
+.cert-card { display: block; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-soft); }
+.cert-head { display: flex; align-items: center; gap: 15px; padding: 20px 22px; background: linear-gradient(180deg, #f4f9fd, #fff); border-bottom: 1px solid var(--line-2); }
+.cert-ava { width: 52px; height: 52px; border-radius: 13px; background: var(--green-soft); color: var(--green-deep); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.cert-ava svg { width: 26px; height: 26px; }
+.cert-id { flex: 1; min-width: 0; }
+.cert-id b { display: block; font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+.cert-id span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.cert-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--green-deep); background: #fff; border: 1px solid rgba(0,139,205,.28); padding: 7px 12px; border-radius: 20px; white-space: nowrap; flex: 0 0 auto; }
+.cert-badge svg { width: 14px; height: 14px; }
+.cert-creds { padding: 18px 22px 20px; color: #46586a; font-size: 14px; line-height: 1.7; }
+.cert-creds p { margin: 0 0 8px; }
+.cert-creds p:last-child { margin-bottom: 0; }
+/* Cuando la descripción viene como texto suelto con saltos de línea, se le da
+   aire entre líneas para que se lea como una lista de credenciales. */
+.cert-creds br { content: ""; display: block; margin-bottom: 6px; }
+.lv-empty-note { color: var(--muted); font-size: 14px; padding: 8px 2px; }
+
+@media (max-width: 560px) {
+    .cert-head { flex-wrap: wrap; }
+    .cert-badge { order: 3; }
+}
 .lv-notes { width: 100%; min-height: 180px; border: 1.5px solid var(--line); border-radius: 13px; padding: 16px; font-family: inherit; font-size: 14.5px; line-height: 1.6; color: var(--ink); resize: vertical; transition: border-color .15s var(--ease), box-shadow .15s var(--ease); }
 .lv-notes:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px rgba(0,139,205,.12); }
 .lv-notes-foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12.5px; color: var(--muted); font-weight: 600; transition: color .15s var(--ease); }
@@ -1724,10 +1761,28 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .ar-actions { display:flex; flex-direction:column; gap:11px; max-width:340px; margin:30px auto 0; }
 .ar-actions form { width:100%; margin:0; }
 .ar-primary, .ar-secondary { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:15px; border:none; border-radius:12px; font-size:14px; font-weight:800; text-decoration:none; cursor:pointer; font-family:inherit; transition:background .18s,transform .18s,border-color .18s,color .18s; }
-.ar-primary { background:#0d1b2a; color:#fff; box-shadow:0 10px 24px rgba(13,27,42,.18); }
-.ar-primary:hover { background:#16304a; transform:translateY(-2px); }
+.ar-primary { background:#008bcd; color:#fff; box-shadow:0 10px 24px rgba(0,139,205,.24); }
+.ar-primary:hover { background:#006fa3; transform:translateY(-2px); }
 .ar-secondary { background:#fff; color:#0d1b2a; border:1.5px solid #e7ecf1; }
 .ar-secondary:hover { border-color:#008bcd; color:#006fa3; background:#e4f2fb; }
+
+/* Modal de salida de cuestionario (guard de quiz/examen).
+   Jerarquía correcta: "Seguir" (recomendado) destaca en azul; "Salir" (destructivo)
+   queda discreto en rojo. Antes estaba al revés y "Seguir" se veía apagado. */
+#assessmentExitModal .modal-content.ax-modal { border:none; border-radius:20px; overflow:hidden; box-shadow:0 24px 60px rgba(13,27,42,.28); }
+#assessmentExitModal .modal-body { padding:34px 30px 28px; text-align:center; }
+.ax-ico { width:62px; height:62px; margin:0 auto 18px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#eef2f6; color:#0d1b2a; }
+.ax-ico svg { width:30px; height:30px; }
+.ax-title { font-size:20px; font-weight:800; letter-spacing:-.01em; margin:0 0 9px; color:#0d1b2a; }
+.ax-text { font-size:14px; line-height:1.6; color:#6a7888; margin:0 auto 24px; max-width:340px; }
+.ax-actions { display:flex; flex-direction:column; gap:11px; }
+.ax-btn { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:15px; border-radius:12px; font-size:14.5px; font-weight:800; cursor:pointer; font-family:inherit; border:1.5px solid transparent; transition:background .18s var(--ease), color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease); }
+/* Paleta del modal: navy (azul oscuro) + grises. "Seguir" (recomendado) navy sólido;
+   "Salir" (destructivo) discreto en gris. Sin rojo. */
+.ax-stay { background:#0d1b2a; color:#fff; box-shadow:0 10px 22px rgba(13,27,42,.22); }
+.ax-stay:hover { background:#16304a; transform:translateY(-2px); }
+.ax-leave { background:#fff; color:#6a7888; border-color:#e7ecf1; }
+.ax-leave:hover { background:#f4f6f9; border-color:#93a0ad; color:#0d1b2a; }
 .ar-review { max-width:560px; margin:26px auto 0; text-align:left; }
 .ar-review .q { background:#fff; border:1px solid #e7ecf1; border-radius:14px; padding:16px 18px; margin-bottom:12px; }
 .ar-review .q b { display:block; color:#1b2a3a; margin-bottom:8px; font-weight:700; }

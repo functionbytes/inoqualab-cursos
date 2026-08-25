@@ -32,3 +32,12 @@ Schedule::command('mails:reparse-failed')->hourly()->withoutOverlapping();
 Schedule::command('analytics:dispatch-schedules')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
 // Poda del audit trail (Spatie activitylog) según retención de config/activitylog.php (365 días).
 Schedule::command('activitylog:clean')->dailyAt('03:00')->withoutOverlapping();
+// Cadenas de redirect + Core Web Vitals pobres -> seo_alerts (score_drop y
+// new_404 se levantan solos en el momento en que ocurren, no necesitan cron).
+Schedule::command('seo:check-alerts')->dailyAt('04:00')->withoutOverlapping();
+
+// Vigilancia de las colas: avisa si alguna acumula trabajo sin que nadie lo
+// consuma. Cubre el fallo más silencioso de todos -- un worker arrancado sin
+// --queue procesa solo 'default' y deja el resto pendiente indefinidamente,
+// sin errores ni entradas en failed_jobs. Ver config/queue.php → app_queues.
+Schedule::command('queue:check-stalled --minutes=30')->everyThirtyMinutes()->withoutOverlapping();

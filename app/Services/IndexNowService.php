@@ -9,7 +9,8 @@ class IndexNowService
 {
     public function enabled(): bool
     {
-        return setting('seo_indexnow_enabled') === '1'
+        // Apagado mientras no se encienda a propósito: avisa a buscadores externos.
+        return settingEnabled('seo_indexnow_enabled')
             && ! empty(setting('seo_indexnow_key'));
     }
 
