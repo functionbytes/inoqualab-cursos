@@ -7,6 +7,7 @@ use App\Html\HtmlBuilder;
 use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
 use App\Models\Course\CourseCategorie;
+use App\Models\Faq\Faq;
 use App\Models\Inscription;
 use App\Models\Invoice\Invoice;
 use App\Models\Mailer\MailerLayout;
@@ -14,6 +15,7 @@ use App\Models\Mailer\MailerTemplate;
 use App\Models\Mailer\MailerVariable;
 use App\Models\Order\Order;
 use App\Models\Setting\Setting;
+use App\Models\Testimonie;
 use App\Models\User;
 use App\Models\Users\Certificate;
 use App\Observers\Mailer\MailerLayoutObserver;
@@ -177,13 +179,14 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Invalida la caché del catálogo público (home) cuando cambia un curso,
-     * paquete o categoría. Ver Pages\PagesController::index (Cache::remember).
+     * paquete, categoría, FAQ o testimonio. Ver Pages\PagesController::index
+     * (Cache::remember).
      */
     private function registerCatalogCacheInvalidation(): void
     {
         $forget = fn () => Cache::forget('catalog.home');
 
-        foreach ([Course::class, Bundle::class, CourseCategorie::class] as $model) {
+        foreach ([Course::class, Bundle::class, CourseCategorie::class, Faq::class, Testimonie::class] as $model) {
             $model::saved($forget);
             $model::deleted($forget);
         }

@@ -54,39 +54,3 @@
         </div>
     </div>
 </section>
-
-@push('css')
-<style>
-.contact-cta-list { display: flex; flex-direction: column; gap: 10px; }
-.contact-cta-item {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
-    padding: 14px 20px;
-    text-decoration: none;
-    cursor: default;
-    transition: background 0.2s, border-color 0.2s;
-}
-a.contact-cta-item { cursor: pointer; }
-a.contact-cta-item:hover {
-    background: rgba(0,139,205,0.15);
-    border-color: rgba(0,139,205,0.4);
-}
-.contact-cta-icon {
-    width: 46px; height: 46px; min-width: 46px;
-    border-radius: 10px;
-    background: #008bcd;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: #fff;
-}
-.contact-cta-label {
-    color: #e0e8f0;
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.3;
-}
-</style>
-@endpush

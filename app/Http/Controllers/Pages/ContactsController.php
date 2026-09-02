@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\Pages\Contact\AlertsMails;
 use App\Mail\Pages\Contact\ResponseMails;
 use App\Models\Contact;
+use App\Models\Faq\Faq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -16,7 +17,9 @@ class ContactsController extends Controller
     {
         seo()->setTitle('Contacto')->setCanonical(url()->current());
 
-        return view('pages.views.contacts.index');
+        return view('pages.views.contacts.index')->with([
+            'homeFaqs' => Faq::take(5)->get(),
+        ]);
     }
 
     public function storage(Request $request)

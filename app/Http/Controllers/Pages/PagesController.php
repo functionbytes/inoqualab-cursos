@@ -7,6 +7,8 @@ use App\Models\Bundle\Bundle;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Faq\Faq;
+use App\Models\Faq\FaqCategorie;
+use App\Models\Testimonie;
 use App\Models\User;
 use App\Services\SchemaOrgService;
 use Illuminate\Support\Facades\Cache;
@@ -26,6 +28,11 @@ class PagesController extends Controller
             'bpms' => Course::latest()->available()->one(23)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'populars' => Course::latest()->available()->featured()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'bundles' => Bundle::available()->latest()->withCount('courses')->limit(4)->get(),
+            'homeFaqs' => Faq::take(5)->get(),
+            // limit(12), no 6: los testimonios previos a esta feature (sin position
+            // ni fecha reciente) empatan en position=0 con los nuevos y, ordenados
+            // por created_at, ya llenaban el límite antes de llegar a estos últimos.
+            'testimonials' => Testimonie::available()->ordered()->limit(12)->get(),
         ]);
 
         return view('pages.views.index')->with($catalog);
@@ -67,19 +74,21 @@ class PagesController extends Controller
 
     public function faqs()
     {
-        $faqs = Faq::get();
+        $categories = FaqCategorie::with(['faqs' => fn ($query) => $query->orderBy('id')])
+            ->get()
+            ->filter(fn ($categorie) => $categorie->faqs->isNotEmpty());
 
         seo()->setTitle('Preguntas frecuentes')
             ->setCanonical(url()->current())
             ->setSchema(app(SchemaOrgService::class)->faq(
-                $faqs->map(fn ($faq) => [
+                $categories->flatMap->faqs->map(fn ($faq) => [
                     'question' => $faq->title,
                     'answer' => trim(preg_replace('/\s+/', ' ', strip_tags((string) $faq->description))),
                 ])->all()
             ));
 
         return view('pages.views.faqs')->with([
-            'faqs' => $faqs,
+            'categories' => $categories,
         ]);
     }
 
