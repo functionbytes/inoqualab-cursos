@@ -44,11 +44,24 @@
     // 2) Envío real del cuestionario: cada vista previene el primer submit para
     //    mostrar su modal de "confirmar envío"; cuando el submit YA no viene
     //    prevenido es el envío de verdad y se levanta el guard.
+    //    Red de seguridad, no la vía principal: $(form).submit() de jQuery, al no
+    //    venir prevenido, delega en el form.submit() nativo del DOM -- y ESE método
+    //    no dispara el evento 'submit' (solo form.requestSubmit() lo hace), así que
+    //    este listener nunca llegaba a correr y el guard seguía "en progreso" hasta
+    //    el beforeunload real, mostrando el diálogo nativo del navegador de más.
     document.addEventListener('submit', function (e) {
         if (e.target && e.target.id === 'question-form' && !e.defaultPrevented) {
             inProgress = false;
         }
     });
+
+    // Vía principal: cada vista llama esto en el click de su botón "Aceptar" del
+    // modal de confirmación, justo antes de disparar el submit real -- ahí SÍ
+    // sabemos con certeza que es un envío legítimo, sin depender de si el navegador
+    // llega a emitir o no el evento 'submit' nativo.
+    window.releaseAssessmentGuard = function () {
+        inProgress = false;
+    };
 
     // 3) Clic en cualquier navegación que sacaría del cuestionario.
     //    El modal se instancia de forma perezosa en el momento del clic: este

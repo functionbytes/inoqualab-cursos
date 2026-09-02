@@ -19,15 +19,16 @@
 
 @section('content')
 
+{{-- El wrapper .aula-result y el .ar-foot (fuera de él) los pone el propio
+     partial (exam-result.blade.php) -- ver el mismo cambio en
+     quiz-result.blade.php/quizs/finish.blade.php. --}}
 @if(setting('aula_version') == '2')
     <div class="lv">
         <div class="lv-shell">
             @include('customers.partials.views.courses.rail')
             <main class="lv-main">
                 <div class="lv-content">
-                    <div class="aula-result">
-                        @include('customers.partials.views.exams.exam-result')
-                    </div>
+                    @include('customers.partials.views.exams.exam-result')
                 </div>
             </main>
         </div>
@@ -35,7 +36,10 @@
 @else
     <div class="aula">
         <div class="aula-grid">
-            <div class="aula-result">
+            {{-- .aula-grid es un grid de 2 columnas (contenido + rail) posicionadas
+                 por orden de los hijos directos -- .aula-result y .ar-foot deben
+                 quedar juntos en la primera columna, de ahí el wrapper. --}}
+            <div>
                 @include('customers.partials.views.exams.exam-result')
             </div>
             @include('customers.partials.views.courses.rail')
@@ -56,7 +60,7 @@
     .ar-rate-done { font-size: 15px; font-weight: 700; color: #006fa3; display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
     .ar-rate-stars { color: #f5b740; font-size: 18px; }
     .ar-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .ar-foot.lv-foot { padding: 26px 0 0; margin-top: 6px; border-top: 1px solid var(--line); }
+    /* .ar-foot.lv-foot vive en aula.css (compartida con quiz/exam finish) */
 </style>
 @endpush
 

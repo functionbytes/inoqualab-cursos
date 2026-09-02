@@ -2,6 +2,12 @@
 
 @section('title', 'Mis certificados')
 
+@section('context-title', 'Mis certificados')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'award'])@endsection
+@section('context-subtitle', 'Descarga los certificados de tus cursos aprobados')
+@section('context-stat-number', $certificates->total())
+@section('context-stat-label', Str::plural('certificado', $certificates->total()))
+
 @php
     // El estado se calcula una vez por certificado: la vista lo necesita para el
     // filtro de la cabecera, para el color de la tarjeta y para decidir si se
@@ -49,7 +55,7 @@
 
     <div class="pnl-card pnl-head pnl-head-row">
         <div>
-            <h2>Mis certificados</h2>
+            {{-- El título ya lo muestra la banda de contexto del header. --}}
             <div class="sub">
                 @if($certificates->total() > 0)
                     {{ $certificates->total() }} {{ $certificates->total() === 1 ? 'certificado emitido' : 'certificados emitidos' }}

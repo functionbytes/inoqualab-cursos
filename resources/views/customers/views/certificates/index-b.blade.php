@@ -2,6 +2,12 @@
 
 @section('title', 'Mis credenciales')
 
+@section('context-title', 'Mis credenciales')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'award'])@endsection
+@section('context-subtitle', 'Descarga los certificados de tus cursos aprobados')
+@section('context-stat-number', $certificates->total())
+@section('context-stat-label', Str::plural('certificado', $certificates->total()))
+
 @php
     $items = $certificates->map(function ($certificate) {
         $end = $certificate->end_at ? \Carbon\Carbon::parse($certificate->end_at) : null;
@@ -42,7 +48,7 @@
 <section class="pnl-section">
 
     <div class="cd-head">
-        <h2>Mis credenciales</h2>
+        {{-- El título ya lo muestra la banda de contexto del header. --}}
         <div class="sub">Selecciona una credencial para previsualizarla y descargarla</div>
     </div>
 

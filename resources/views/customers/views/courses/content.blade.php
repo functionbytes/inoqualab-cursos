@@ -21,7 +21,6 @@
 
 @php
     $certifierThumbnail = optional($course->certifier)->getFirstMedia('thumbnail');
-    $courseThumbnail = $course->getFirstMedia('thumbnail');
 
     $progress = $inscription->progress();
     $last = $progress->first();
@@ -61,11 +60,6 @@
 
             {{-- ===== Contenido principal (banner + info) ===== --}}
             <main class="lv-main">
-                <div class="lp-video">
-                    <img src="{{ $courseThumbnail ? $courseThumbnail->getFullUrl() : '/pages/images/courses/default.jpg' }}" alt="{{ $course->title }}" loading="lazy" onerror="this.onerror=null;this.src='/pages/images/courses/default.jpg';">
-                    <span class="lp-tag">@include('customers.includes.icon', ['name' => 'circle-play']) {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
-                </div>
-
                 <div class="lv-content">
                     <div class="lv-lhead">
                         <div>
@@ -162,11 +156,6 @@
 
             {{-- ===== Columna principal ===== --}}
             <div class="lesson-panel">
-                <div class="lp-video">
-                    <img src="{{ $courseThumbnail ? $courseThumbnail->getFullUrl() : '/pages/images/courses/default.jpg' }}" alt="{{ $course->title }}" loading="lazy" onerror="this.onerror=null;this.src='/pages/images/courses/default.jpg';">
-                    <span class="lp-tag">@include('customers.includes.icon', ['name' => 'circle-play']) {{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</span>
-                </div>
-
                 <div class="lp-body">
                     <h2 class="lp-title">{{ $course->title }}</h2>
 

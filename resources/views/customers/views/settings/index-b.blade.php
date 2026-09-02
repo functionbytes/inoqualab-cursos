@@ -10,8 +10,6 @@
 
 @php
     $cityName = ($citie && isset($cities[$citie])) ? $cities[$citie] : ($user->city ?? '');
-    $photo = method_exists($user, 'getFirstMediaUrl') ? $user->getFirstMediaUrl('avatar') : '';
-    $iniciales = Str::upper(Str::substr($user->firstname, 0, 1).Str::substr($user->lastname, 0, 1));
 
     // Porcentaje de perfil completo: los seis campos que la ficha del alumno
     // usa para certificados y facturación.
@@ -26,61 +24,32 @@
     $rellenos = collect($campos)->filter(fn ($v) => filled($v))->count();
     $completo = (int) round($rellenos / count($campos) * 100);
     $faltan = collect($campos)->filter(fn ($v) => blank($v))->keys();
+
+    $nombreCompleto = ucwords(Str::lower(trim($user->firstname.' '.$user->lastname)));
 @endphp
 
+{{-- Misma banda de contexto que el resto del portal (Cursos, Certificados,
+     Documentos...), con la fila de tabs de esta página insertada debajo. --}}
+@section('context-title', 'Mi cuenta')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'gear'])@endsection
+@section('context-subtitle')
+    {{ $nombreCompleto }} · {{ $user->email }}
+    @if($user->created_at)
+        · Estudiante desde {{ Str::replace('.', '', $user->created_at->translatedFormat('M Y')) }}
+    @endif
+    · {{ $user->inscriptions_count }} {{ Str::plural('curso', $user->inscriptions_count) }}
+    · {{ $user->certificates_count }} {{ Str::plural('certificado', $user->certificates_count) }}
+@endsection
+@section('context-stat-number', $completo.'%')
+@section('context-stat-label', 'Perfil completo')
+@section('context-tabs')
+    <button type="button" class="is-active" data-tab="perfil" role="tab" aria-selected="true">Perfil</button>
+    <button type="button" data-tab="seguridad" role="tab" aria-selected="false">Seguridad</button>
+    <button type="button" data-tab="avisos" role="tab" aria-selected="false">Notificaciones</button>
+    <button type="button" data-tab="privacidad" role="tab" aria-selected="false">Privacidad</button>
+@endsection
+
 <section class="sb-page">
-
-    {{-- Carnet del alumno: identidad, progreso del perfil y pestañas en una
-         sola banda, como la cabecera de una ficha. --}}
-    <div class="sb-hero">
-        <div class="sb-crumb">Inicio · <b>Mi cuenta</b></div>
-
-        <div class="sb-card">
-            <div class="sb-av">
-                @if($photo)
-                    <img src="{{ $photo }}" alt="{{ $user->firstname }}">
-                @else
-                    {{ $iniciales }}
-                @endif
-            </div>
-            <div class="sb-id">
-                <h1>{{ ucwords(Str::lower(trim($user->firstname.' '.$user->lastname))) }}</h1>
-                <div class="meta">
-                    <span>{{ $user->email }}</span>
-                    @if($user->created_at)
-                        <span class="dot"></span>
-                        <span>Estudiante desde {{ Str::replace('.', '', $user->created_at->translatedFormat('M Y')) }}</span>
-                    @endif
-                    <span class="dot"></span>
-                    <span>
-                        {{ $user->inscriptions_count }} {{ Str::plural('curso', $user->inscriptions_count) }}
-                        · {{ $user->certificates_count }} {{ Str::plural('certificado', $user->certificates_count) }}
-                    </span>
-                </div>
-            </div>
-            <div class="sb-progress">
-                <div class="top">
-                    <span>Perfil completo</span>
-                    <b>{{ $completo }}%</b>
-                </div>
-                <div class="bar"><i style="--p:{{ $completo }}%"></i></div>
-                <div class="note">
-                    @if($faltan->isEmpty())
-                        Tus datos están al día
-                    @else
-                        {{ $faltan->count() === 1 ? 'Falta' : 'Faltan' }} {{ $faltan->join(', ', ' y ') }}
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <div class="sb-tabs" role="tablist">
-            <button type="button" class="is-active" data-tab="perfil" role="tab" aria-selected="true">Perfil</button>
-            <button type="button" data-tab="seguridad" role="tab" aria-selected="false">Seguridad</button>
-            <button type="button" data-tab="avisos" role="tab" aria-selected="false">Notificaciones</button>
-            <button type="button" data-tab="privacidad" role="tab" aria-selected="false">Privacidad</button>
-        </div>
-    </div>
 
     <div class="sb-body">
 
@@ -291,10 +260,10 @@
 <script type="text/javascript">
     $(function () {
         // Pestañas: cada panel es uno de los bloques de la ficha.
-        $('.sb-tabs button').on('click', function () {
+        $('.cx-band-tabs button').on('click', function () {
             var tab = $(this).data('tab');
 
-            $('.sb-tabs button').removeClass('is-active').attr('aria-selected', 'false');
+            $('.cx-band-tabs button').removeClass('is-active').attr('aria-selected', 'false');
             $(this).addClass('is-active').attr('aria-selected', 'true');
 
             $('[data-panel]').each(function () {

@@ -14,7 +14,7 @@
   --panel: #ffffff;
   --field: #f7f9fb;
   --green: #008bcd;
-  --green-deep: #006fa3;
+  --green-deep: #008bcd;
   --green-soft: #e4f2fb;
   --amber: #c98a14;
   --amber-soft: #fbf4e3;
@@ -425,7 +425,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pc-top { display: flex; align-items: center; justify-content: space-between; }
 .pc-year { font-size: 12px; font-weight: 800; color: var(--muted); background: var(--field); padding: 5px 11px; border-radius: 7px; }
 .pc-badge { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 5px 10px; border-radius: 20px; white-space: nowrap; }
-.pc-badge.st-progress { background: #e3f1fb; color: #006fa3; }
+.pc-badge.st-progress { background: #e3f1fb; color: #008bcd; }
 .pc-badge.st-pending { background: #f4f6f9; color: #6a7888; }
 .pc-badge.st-done { background: #dde8f2; color: #0d1b2a; }
 .pc-badge.st-expired { background: var(--red-soft); color: var(--red); }
@@ -1390,7 +1390,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-fbtn .fb-txt { min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; }
 .lv-fbtn .fb-txt .l { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 .lv-fbtn .fb-txt .t { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lv-fbtn.next { text-align: right; }
+/* margin-left:auto: con #prev oculto (primera pregunta) .next queda como
+   unico hijo visible del flex, y justify-content:space-between lo pega al
+   inicio en vez de dejarlo al final -- ver aula.css para el detalle. */
+.lv-fbtn.next { text-align: right; margin-left: auto; }
 .lv-fbtn.next .fb-txt { text-align: right; }
 
 /* autoplay toast */

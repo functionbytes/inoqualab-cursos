@@ -12,7 +12,11 @@
 @if(setting('aula_version') == '2')
 
     {{-- ===== Rail de capítulos / lecciones (v2) ===== --}}
-    <aside class="lv-rail {{ $inscription->expire == 1 ? 'd-none' : '' }}">
+    {{-- Backdrop solo relevante en mobile, cuando .lv-rail-toggle (en
+         lesson-content.blade.php / quiz-questions.blade.php) lo despliega
+         como panel fijo -- clic fuera del rail lo cierra. --}}
+    <div class="lv-rail-backdrop" id="lvRailBackdrop"></div>
+    <aside class="lv-rail {{ $inscription->expire == 1 ? 'd-none' : '' }}" id="lvRail">
         <div class="lv-rail-head">
             @unless(request()->routeIs('customers.courses.content'))
                 <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back rail-back">
@@ -250,6 +254,30 @@
                 $rail.scrollTop(Math.max(0, target));
             }
         }
+    });
+
+    {{-- Toggle del rail en mobile (.lv-rail-toggle, ver lesson-content.blade.php
+         y quiz-questions.blade.php). En desktop .lv-rail es sticky y siempre
+         visible -- este código no tiene efecto ahí (el botón está oculto por
+         CSS), solo aplica al breakpoint donde .lv-rail pasa a position:fixed. --}}
+    $(function () {
+        var $rail = $('#lvRail');
+        var $backdrop = $('#lvRailBackdrop');
+        var $toggles = $('.lv-rail-toggle');
+        if (!$rail.length || !$toggles.length) return;
+
+        function setOpen(open) {
+            $rail.toggleClass('open', open);
+            $backdrop.toggleClass('open', open);
+            $toggles.attr('aria-expanded', open ? 'true' : 'false');
+            document.body.style.overflow = open ? 'hidden' : '';
+        }
+
+        $toggles.on('click', function () { setOpen(!$rail.hasClass('open')); });
+        $backdrop.on('click', function () { setOpen(false); });
+        // Al elegir una clase del rail, se navega de todos modos -- cerrarlo
+        // solo evita el parpadeo del panel abierto durante esa navegación.
+        $rail.on('click', '.lv-lesson:not(.pe-none)', function () { setOpen(false); });
     });
 </script>
 @endpush

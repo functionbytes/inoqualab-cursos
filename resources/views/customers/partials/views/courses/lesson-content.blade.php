@@ -35,6 +35,13 @@
         <span class="lk">@include('customers.includes.icon', ['name' => $kickerIcon]) {{ $kickerLabel }}</span>
         <h1>{{ ucfirst($classing->title) }}</h1>
     </div>
+    {{-- Solo visible en mobile (ver .lv-rail-toggle en aula.css): abre el
+         rail de capítulos/lecciones, que en ese breakpoint queda oculto
+         fuera de pantalla (position:fixed; translateX(-105%)) sin ninguna
+         otra forma de acceder a él. --}}
+    <button type="button" class="lv-rail-toggle" aria-label="Ver clases del curso" aria-expanded="false" aria-controls="lvRail">
+        @include('customers.includes.icon', ['name' => 'menu'])
+    </button>
 </div>
 
 <ul class="nav nav-pills lv-tabs px-0" id="{{ $tabId }}-tab" role="tablist">

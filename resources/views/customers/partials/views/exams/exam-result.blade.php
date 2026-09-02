@@ -1,5 +1,9 @@
-<span class="ar-badge">Resultado del examen</span>
-<h2 class="ar-title">{{ Str::upper($course->title) }}</h2>
+{{-- El cuerpo del resultado va en su propio contenedor (.aula-result); el
+     pie de navegación (.ar-foot) queda FUERA de él -- ver el mismo cambio en
+     quiz-result.blade.php. --}}
+<div class="aula-result">
+    <span class="ar-badge">Resultado del examen</span>
+    <h2 class="ar-title">{{ Str::upper($course->title) }}</h2>
 
 @if ($score >= $passingScore)
     <div class="ar-icon ok">@include('customers.includes.icon', ['name' => 'award'])</div>
@@ -65,6 +69,7 @@
         @endif
     </div>
 @endif
+</div>
 
 @if ($lastCourseLesson)
     @php

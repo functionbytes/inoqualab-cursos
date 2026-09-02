@@ -7,6 +7,15 @@
             <span>@include('customers.includes.icon', ['name' => 'layers']) {{ $lesson->chapter->title ?? $course->title }}</span>
         </div>
     </div>
+    {{-- Solo visible en mobile (ver .lv-rail-toggle en aula.css): abre el
+         rail de capítulos/lecciones, que en ese breakpoint queda oculto
+         fuera de pantalla (position:fixed; translateX(-105%)) sin ninguna
+         otra forma de acceder a él. El guard de salida del quiz
+         (assessment-exit-guard.blade.php) ya excluye los clics dentro de
+         .lv-rail-toggle de su intercepción de navegación. --}}
+    <button type="button" class="lv-rail-toggle" aria-label="Ver clases del curso" aria-expanded="false" aria-controls="lvRail">
+        @include('customers.includes.icon', ['name' => 'menu'])
+    </button>
 </div>
 
 <div class="quiz-rule"></div>
@@ -190,23 +199,10 @@
 
 </div>
 
-@if (($prevLesson && $prevLesson !== 'true') || ($nextLesson && $nextLesson !== 'true'))
-    <div class="lv-foot lesson-nav-foot">
-        @if ($prevLesson && $prevLesson !== 'true')
-            <a href="{{ $prevLesson->type->slug == 'quiz' ? route('customers.courses.quiz', $prevLesson->id) : route('customers.courses.lesion', $prevLesson->id) }}" class="lv-fbtn" aria-label="Lección anterior del curso">
-                @include('customers.includes.icon', ['name' => 'arrow-left'])
-                <span class="fb-txt"><span class="l">Anterior</span><span class="t">{{ ucfirst(Str::lower($prevLesson->title)) }}</span></span>
-            </a>
-        @else
-            <span></span>
-        @endif
-        @if ($nextLesson && $nextLesson !== 'true')
-            <a href="{{ $nextLesson->type->slug == 'quiz' ? route('customers.courses.quiz', $nextLesson->id) : route('customers.courses.lesion', $nextLesson->id) }}" class="lv-fbtn next" aria-label="Siguiente lección del curso">
-                <span class="fb-txt"><span class="l">Siguiente</span><span class="t">{{ ucfirst(Str::lower($nextLesson->title)) }}</span></span>
-                @include('customers.includes.icon', ['name' => 'arrow-right'])
-            </a>
-        @else
-            <span></span>
-        @endif
-    </div>
-@endif
+{{-- Sin navegación anterior/siguiente de LECCIONES aquí a propósito: mientras se
+     responde el quiz, esta vista nunca representa un quiz "completado" (el
+     submit real hace POST -> redirect a quiz-result.blade.php), así que ese
+     bloque solo duplicaba visualmente el Anterior/Siguiente de PREGUNTAS de
+     abajo (.quiz-foot) con la misma clase .lv-fbtn, confundiendo cuál era
+     cuál. La navegación entre lecciones del curso ya vive, correctamente,
+     en quiz-result.blade.php una vez el usuario termina el quiz. --}}

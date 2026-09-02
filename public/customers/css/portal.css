@@ -35,7 +35,7 @@
   --line-2: #eef2f6;
   --field: #f7f9fb;
   --green: #008bcd;
-  --green-deep: #006fa3;
+  --green-deep: #008bcd;
   --green-soft: #e4f2fb;
   --amber: #c98a14;
   --amber-soft: #fbf4e3;
@@ -494,7 +494,7 @@
     transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
 }
 .cx-act .solid { background: #008bcd; color: #fff; }
-.cx-act .solid:hover { background: #006fa3; color: #fff; }
+.cx-act .solid:hover { background: #008bcd; color: #fff; }
 .cx-act .ghost { border: 1.5px solid var(--line); color: var(--navy); }
 .cx-act .ghost:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
 
@@ -632,7 +632,7 @@
     transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
 }
 .ct-actions .solid { flex: 1; background: #008bcd; color: #fff; padding: 11px; }
-.ct-actions .solid:hover { background: #006fa3; color: #fff; }
+.ct-actions .solid:hover { background: #008bcd; color: #fff; }
 .ct-actions .ghost {
     width: 42px; height: 40px; border: 1.5px solid var(--line); color: var(--navy);
 }
@@ -728,7 +728,7 @@
     border-radius: 12px; text-decoration: none;
 }
 .cd-buttons .solid { background: #008bcd; color: #fff; }
-.cd-buttons .solid:hover { background: #006fa3; color: #fff; }
+.cd-buttons .solid:hover { background: #008bcd; color: #fff; }
 .cd-buttons .ghost { background: #fff; border: 1.5px solid var(--line); color: var(--navy); }
 .cd-buttons .ghost:hover { border-color: var(--green); color: var(--green-deep); }
 
@@ -792,7 +792,7 @@
 .od-act .ghost { border: 1.5px solid var(--line); color: var(--navy); }
 .od-act .ghost:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
 .od-act .solid { background: #008bcd; color: #fff; }
-.od-act .solid:hover { background: #006fa3; color: #fff; }
+.od-act .solid:hover { background: #008bcd; color: #fff; }
 
 .od-foot {
     display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
@@ -941,7 +941,7 @@
     display: inline-flex; align-items: center; gap: 8px; background: #008bcd; color: #fff;
     font-size: 12.5px; font-weight: 800; padding: 10px 18px; border-radius: 10px; text-decoration: none;
 }
-.dc-act .solid:hover { background: #006fa3; color: #fff; }
+.dc-act .solid:hover { background: #008bcd; color: #fff; }
 .dc-act .solid svg { width: 15px; height: 15px; }
 .dc-none { font-size: 12.5px; font-weight: 600; color: var(--muted-2); font-style: italic; }
 
@@ -1248,7 +1248,7 @@
     background: #008bcd; color: #fff; font-size: 13.5px; font-weight: 800;
     padding: 13px 24px; border-radius: 12px; text-decoration: none;
 }
-.nb-actions .solid:hover { background: #006fa3; color: #fff; }
+.nb-actions .solid:hover { background: #008bcd; color: #fff; }
 .nb-actions .ghost {
     background: #fff; border: 1.5px solid var(--line); color: var(--navy);
     font-size: 13.5px; font-weight: 800; padding: 13px 22px; border-radius: 12px;
@@ -1415,7 +1415,7 @@
 }
 .ovw-btn svg { width: 16px; height: 16px; }
 .ovw-btn.solid { background: #008bcd; color: #fff; box-shadow: 0 8px 20px rgba(0,139,205,.22); }
-.ovw-btn.solid:hover { background: #006fa3; color: #fff; }
+.ovw-btn.solid:hover { background: #008bcd; color: #fff; }
 .ovw-btn.ghost { background: #fff; border: 1.5px solid var(--line); color: var(--navy); }
 .ovw-btn.ghost:hover { border-color: var(--green); color: var(--green-deep); }
 
@@ -1538,16 +1538,18 @@
    =========================================================================== */
 .sb-hero {
     background: var(--navy);
-    border-radius: 0 0 20px 20px;
-    /* La banda sangra hasta el borde del contenedor y devuelve el mismo
-       espacio como padding, de modo que el carnet queda alineado con el borde
-       exterior de las tarjetas de abajo (el .container-fluid del tema usa
-       15px a cada lado). */
-    margin: -24px -15px 0;
-    padding: 0 15px;
-    /* Recorta el pie de pestanas al radio inferior de la banda. */
+    /* Ancho completo real (no solo hasta el borde de .container-fluid): igual
+       que .cx-band, es una extensión del header, no una tarjeta del
+       contenido -- de ahi que no lleve bordes redondeados. El -24px de
+       margin-top cancela el padding-top de .container-fluid (24px) para
+       quedar pegada al header sin gap. */
+    margin-top: -24px;
+    width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
     overflow: hidden;
 }
+/* Mismo criterio que .cx-band-container: alineado con el inset real de
+   .container-fluid (medido por JS), no con un max-width propio adivinado. */
+.sb-hero-container { padding-left: var(--cx-band-left, 25px); padding-right: var(--cx-band-right, 25px); }
 .sb-crumb {
     height: 62px; display: flex; align-items: center;
     font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,.55);
@@ -1558,9 +1560,10 @@
 .sb-body [data-panel][hidden] { display: none; }
 
 .sb-split { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
-/* Mismo ancho que la columna de contenido de .sb-split (aside 320px + gap
-   24px): asi las tarjetas no cambian de tamano al saltar de pestana. */
-.sb-narrow { max-width: calc(100% - 344px); display: flex; flex-direction: column; gap: 20px; }
+/* Seguridad, Notificaciones y Privacidad no tienen aside al lado (solo
+   Perfil lo tiene, via .sb-split): sin el, el hueco de 320px+gap no tiene
+   sentido y solo deja un vacio a la derecha. Ancho completo (col-12). */
+.sb-narrow { max-width: 100%; display: flex; flex-direction: column; gap: 20px; }
 
 .sb-aside { display: flex; flex-direction: column; gap: 18px; }
 
@@ -1634,12 +1637,9 @@
 
 @media (max-width: 1100px) {
     .sb-split { grid-template-columns: 1fr; }
-    /* Sin aside al lado, el hueco reservado para el ya no tiene sentido. */
-    .sb-narrow { max-width: 100%; }
 }
 
 @media (max-width: 600px) {
-    .sb-hero { border-radius: 0 0 16px 16px; }
     /* En columna estrecha el nombre quedaba encajonado a la derecha del
        avatar y los separadores de la meta colgaban al final de cada linea. */
     .sb-card { flex-direction: column; align-items: flex-start; gap: 16px; padding: 4px 0 22px; }
@@ -1664,20 +1664,188 @@
 .pnl-actions .pnl-save { margin-top: 0; }
 
 
-/* ============ Header del portal cliente ============ */
-.cx-avatar { display: inline-flex; }
-.cx-avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--line); transition: border-color .15s var(--ease); }
-.cx-avatar:hover img { border-color: var(--green); }
+/* ============ Header del portal cliente ============
+   Menu de usuario: avatar con iniciales (no hay foto de perfil real) +
+   dropdown tipo lista -- filas separadas por linea fina, sin iconos ni
+   subtitulos, "Cerrar sesion" como una fila mas al final. */
+.cx-avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--navy); color: #fff; border: 2px solid var(--line);
+    font-family: "Cal Sans", sans-serif; font-size: 13px; text-transform: uppercase;
+    transition: border-color .15s var(--ease);
+}
+.cx-avatar:hover { border-color: var(--green); }
 
-/* En móvil: una sola fila limpia -> [menú] [logo centrado] [avatar] */
+.cx-user-menu.content-dd { padding: 0; border: none; border-radius: 14px; box-shadow: 0 20px 50px rgba(13,27,42,.16); overflow: hidden; min-width: 240px; }
+.cx-user-menu-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.cx-user-menu-head .cx-avatar { flex-shrink: 0; width: 38px; height: 38px; border: none; }
+.cx-user-menu-head div { min-width: 0; }
+.cx-user-menu-head h5 { font-family: "Figtree", sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-user-menu-head span { display: block; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.cx-user-menu-links { padding: 4px 0; }
+.cx-user-menu-item { display: block; padding: 12px 18px; font-family: "Figtree", sans-serif; font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line-2); transition: background .15s var(--ease); }
+.cx-user-menu-item:hover { background: var(--field); color: var(--ink); }
+
+.cx-user-menu-logout { display: block; width: 100%; text-align: left; padding: 12px 18px; border: none; background: none; font-family: "Figtree", sans-serif; font-weight: 600; font-size: 14px; color: var(--ink); cursor: pointer; transition: background .15s var(--ease); }
+.cx-user-menu-logout:hover { background: var(--field); }
+
+/* Estado activo dentro del panel del avatar en móvil (mismo color que tenía
+   el nav original -- ver .cx-nav-item.active más abajo). */
+.cx-user-menu-item.is-active { background: var(--navy); color: #fff; }
+
+/* En móvil el panel del avatar hace de menú principal (trae también la
+   navegación completa) -- más ancho y con texto más grande que en escritorio,
+   donde es solo un atajo secundario de cuenta. */
+@media (max-width: 1199px) {
+    .cx-user-menu.content-dd { min-width: 280px; border-radius: 18px; }
+    .cx-user-menu-head { padding: 18px 20px; gap: 14px; }
+    .cx-user-menu-head .cx-avatar { width: 44px; height: 44px; font-size: 15px; }
+    .cx-user-menu-head h5 { font-size: 16px; }
+    .cx-user-menu-head span { font-size: 13.5px; }
+    .cx-user-menu-item { padding: 14px 20px; font-size: 15px; }
+    .cx-user-menu-logout { padding: 14px 20px; font-size: 15px; }
+}
+
+
+/* ============ Header unificado: logo + navegación + avatar ============
+   Antes el logo solo aparecía en móvil y la navegación vivía aparte, como
+   fila propia debajo del header (o como sidebar en layout vertical). En
+   layout "horizontal" ahora todo comparte una sola fila: logo, pills de
+   navegación con estado activo, y el avatar al extremo derecho. */
+.cx-logo { display: flex; align-items: center; flex-shrink: 0; }
+.cx-logo .logo { height: 34px; width: auto; max-width: 170px; object-fit: contain; }
+
+.cx-nav { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0 0 0 32px; padding: 0; }
+.cx-nav-item {
+    display: flex; align-items: center; gap: 7px;
+    /* border-radius:4px, no un pill -- así se veía el ítem activo del nav
+       original (.sidebar-link), antes de fusionarlo en el header. */
+    padding: 8px 14px; border-radius: 4px;
+    font-family: "Figtree", sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: .02em;
+    color: var(--muted); text-decoration: none; white-space: nowrap;
+    transition: background .15s var(--ease), color .15s var(--ease);
+}
+.cx-nav-item:hover { background: var(--field); color: var(--ink); }
+.cx-nav-item.active { background: var(--navy); color: #fff; }
+
+@media (min-width: 1200px) {
+    .cx-topbar { display: flex; align-items: center; padding: 16px 0; }
+}
+
+/* ============ Banda de contexto (parte del header) ============
+   Diferencia visualmente en qué sección del portal está el alumno: ícono +
+   título a la izquierda, dato clave de la sección a la derecha (nº de
+   certificados, de pedidos, etc). Cada vista la activa definiendo
+   @section('context-title'); si no la define (dashboard, configuración,
+   que ya traen su propia cabecera) la banda simplemente no se renderiza.
+
+   Es una segunda fila DENTRO de <header class="app-header"> (no una tarjeta
+   del contenido) -- de ahí el truco de "full bleed": .app-header tiene su
+   propio padding lateral (25px), así que el fondo de la banda quedaría
+   inset con una franja blanca a los lados si no se cancela. width:100vw +
+   margin negativo la estira a los bordes reales de la ventana; el padding
+   interno (25px / 41px en móvil) replica el mismo margen que ya usa el
+   logo/nav de la fila de arriba, para que el contenido quede alineado. */
+.cx-band {
+    background: var(--navy);
+    width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+    position: relative; overflow: hidden;
+}
+.cx-band-glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(480px 200px at 90% -30%, rgba(0,139,205,.28), transparent 65%);
+}
+/* Alineado con el inset real de .container-fluid (medido por JS, ver
+   layouts/customers.blade.php) en vez de un max-width propio adivinado: el
+   del tema no sigue un valor fijo entre breakpoints. Los 25px/41px son solo
+   el valor de respaldo antes de que el JS calcule el real. */
+.cx-band-container { padding-left: var(--cx-band-left, 25px); padding-right: var(--cx-band-right, 25px); }
+.cx-band-crumb {
+    padding-top: 14px;
+    font-family: "Figtree", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.5);
+}
+.cx-band-crumb a { color: rgba(255,255,255,.5); text-decoration: none; }
+.cx-band-crumb a:hover { color: #fff; }
+.cx-band-crumb span { margin: 0 4px; }
+.cx-band-crumb .current { margin: 0; color: #fff; font-weight: 700; }
+.cx-band-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap; padding: 14px 0 22px;
+}
+.cx-band-main { display: flex; align-items: center; gap: 14px; }
+.cx-band-icon {
+    flex-shrink: 0; width: 46px; height: 46px; border-radius: 14px;
+    background: rgba(0,139,205,.18); color: #4fc3f7;
+    display: flex; align-items: center; justify-content: center;
+}
+.cx-band-icon svg { width: 22px; height: 22px; }
+.cx-band-heading { font-family: "Cal Sans", sans-serif; font-size: 24px; color: #fff; }
+.cx-band-sub { font-family: "Figtree", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.55); margin-top: 2px; }
+.cx-band-stat {
+    flex-shrink: 0; background: var(--navy-soft); border-radius: 14px; padding: 10px 22px; text-align: center;
+}
+.cx-band-stat .num { font-family: "Cal Sans", sans-serif; font-size: 24px; color: #fff; }
+.cx-band-stat .label {
+    font-family: "Figtree", sans-serif; font-size: 11px; color: rgba(255,255,255,.55);
+    text-transform: uppercase; letter-spacing: .04em; margin-top: 2px;
+}
+
+/* Fila de tabs opcional (@section('context-tabs'), usada por configuración):
+   se extiende a la pared de la banda cancelando el padding del contenedor
+   -- igual que .cx-band-tabs, ese padding es dinámico (medido por JS), así
+   que el margen negativo también lo usa en vez de un valor fijo. */
+.cx-band-tabs {
+    display: flex; gap: 0; overflow-x: auto;
+    margin: 0 calc(-1 * var(--cx-band-right, 25px)) 0 calc(-1 * var(--cx-band-left, 25px));
+    padding: 0;
+    background: rgba(255,255,255,.03);
+    border-top: 1px solid rgba(255,255,255,.08);
+    scrollbar-width: none;
+}
+.cx-band-tabs::-webkit-scrollbar { display: none; }
+.cx-band-tabs button {
+    position: relative;
+    font-size: 13px; font-weight: 800; padding: 15px 20px; white-space: nowrap;
+    border: none; background: transparent; color: rgba(255,255,255,.5);
+    cursor: pointer; font-family: inherit;
+    transition: color .15s var(--ease), background .15s var(--ease), box-shadow .15s var(--ease);
+}
+.cx-band-tabs button:first-child { padding-left: var(--cx-band-left, 25px); }
+.cx-band-tabs button + button::before {
+    content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+    width: 1px; height: 16px; background: rgba(255,255,255,.10);
+}
+.cx-band-tabs button:hover { color: rgba(255,255,255,.85); background: rgba(255,255,255,.04); }
+.cx-band-tabs button:focus-visible { outline: 2px solid var(--green); outline-offset: -2px; }
+.cx-band-tabs button.is-active {
+    color: #fff;
+    background: rgba(255,255,255,.07);
+    box-shadow: inset 0 -3px 0 var(--green);
+}
+.cx-band-tabs button.is-active::before,
+.cx-band-tabs button.is-active + button::before { opacity: 0; }
+
+@media (max-width: 600px) {
+    .cx-band-crumb { padding-top: 12px; }
+    .cx-band-row { padding-top: 12px; padding-bottom: 18px; }
+    .cx-band-heading { font-size: 20px; }
+    .cx-band-stat { flex: 1 1 100%; text-align: left; display: flex; align-items: baseline; gap: 8px; padding: 10px 14px; }
+}
+
+/* En móvil: una sola fila limpia -> [logo centrado] [avatar]. El avatar es el
+   único trigger (su menú trae también la navegación completa) -- el burger
+   que hubo aquí (`.cx-burger` / `#sidebarCollapse`) no tenía la clase
+   `sidebartoggler` que el tema necesita para funcionar, así que no hacía
+   nada; se quitó del markup en vez de arreglarlo. */
 @media (max-width: 1199px) {
     .app-header { border-bottom: 1px solid var(--line); background: #fff; }
     .cx-topbar { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 62px; }
-    .cx-burger { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--navy); background: var(--field); border: 1px solid var(--line); flex: 0 0 auto; text-decoration: none; transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease); }
-    .cx-burger:hover, .cx-burger:focus { background: var(--green-soft); color: var(--green-deep); border-color: var(--green); }
-    .cx-burger svg { width: 22px; height: 22px; }
-    .cx-logo { flex: 1; display: flex; justify-content: center; align-items: center; min-width: 0; }
+    /* Logo a la izquierda (antes centrado con flex:1, pensado para cuando
+       había un burger a su izquierda ocupando espacio propio). */
+    .cx-logo { display: flex; align-items: center; min-width: 0; }
     .cx-logo .logo { height: 32px; width: auto; max-width: 170px; object-fit: contain; }
     .cx-topbar .navbar-nav { flex: 0 0 auto; }
-    .cx-avatar img { width: 42px; height: 42px; }
+    .cx-avatar { width: 42px; height: 42px; }
 }

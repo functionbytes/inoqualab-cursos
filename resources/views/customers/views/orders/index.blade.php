@@ -2,6 +2,12 @@
 
 @section('title', 'Mis pedidos')
 
+@section('context-title', 'Mis pedidos')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'receipt'])@endsection
+@section('context-subtitle', 'Revisa tus compras, facturas y su estado de pago')
+@section('context-stat-number', $orders->total())
+@section('context-stat-label', Str::plural('pedido', $orders->total()))
+
 @php
     $total = $orders->total();
 
@@ -15,7 +21,7 @@
 
     <div class="pnl-card pnl-head pnl-head-row">
         <div>
-            <h2>Mis pedidos</h2>
+            {{-- El título ya lo muestra la banda de contexto del header. --}}
             <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
         </div>
         <form class="pnl-search" action="{{ Request::fullUrl() }}" method="GET" role="search">

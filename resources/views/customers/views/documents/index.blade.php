@@ -2,6 +2,12 @@
 
 @section('title', 'Documentos')
 
+@section('context-title', 'Documentos')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'folder'])@endsection
+@section('context-subtitle', 'Material de apoyo disponible para tus cursos')
+@section('context-stat-number', $documents->total())
+@section('context-stat-label', Str::plural('documento', $documents->total()))
+
 @php
     // Extensión y peso salen de la media asociada: la tabla anterior solo
     // mostraba título y fecha, así que no se sabía qué se iba a descargar.
@@ -27,7 +33,7 @@
 
     <div class="pnl-card pnl-head pnl-head-row">
         <div>
-            <h2>Documentos</h2>
+            {{-- El título ya lo muestra la banda de contexto del header. --}}
             <div class="sub">Material de apoyo y constancias que INOQUALAB comparte contigo</div>
         </div>
         <form class="pnl-search" action="{{ Request::fullUrl() }}" method="GET" role="search">

@@ -2,6 +2,12 @@
 
 @section('title', 'Mis cursos')
 
+@section('context-title', 'Mis cursos')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'cap'])@endsection
+@section('context-subtitle', 'Continúa donde lo dejaste o inscríbete a uno nuevo')
+@section('context-stat-number', $courses->count())
+@section('context-stat-label', Str::plural('curso', $courses->count()))
+
 @push('css')
 <link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}">
 @endpush
@@ -50,7 +56,8 @@
 
     <div class="pnl-card pnl-head pnl-head-row">
         <div>
-            <h2>Mis cursos</h2>
+            {{-- El título ya lo muestra la banda de contexto del header; aquí
+                 solo queda el detalle dinámico (conteo, accesos vencidos). --}}
             <div class="sub">
                 @if($counts['todos'] > 0)
                     {{ $counts['todos'] }} {{ $counts['todos'] === 1 ? 'capacitación' : 'capacitaciones' }} ·

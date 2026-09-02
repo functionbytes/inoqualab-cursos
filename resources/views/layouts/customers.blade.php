@@ -60,7 +60,12 @@
 
     <div class="dark-transparent" onclick="document.getElementById('main-wrapper').classList.remove('show-sidebar')"></div>
 
-    @include ('customers.includes.nav')
+    {{-- El nav vertical clásico (aside) solo aplica al layout "vertical" --
+         en "horizontal" la navegación ahora vive fusionada en la fila del
+         header (customers.includes.header) y en el menú del avatar en móvil. --}}
+    @if ($navLayout === 'vertical')
+        @include ('customers.includes.nav')
+    @endif
 
     <!-- Main wrapper -->
 
@@ -88,6 +93,44 @@
 <script src="{{ url('managers/libs/toastr/toastr.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/app.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/app.minisidebar.init.js') }}" type="text/javascript"></script>
+@if ($navLayout === 'horizontal')
+<script>
+    // app.minisidebar.init.js (compartido con managers/ y auth/) fuerza SIEMPRE
+    // data-header-position/data-sidebar-position a "fixed" al cargar. En layout
+    // "horizontal" ya no hace falta: la navegación vive fusionada en el header
+    // (no hay aside aparte compitiendo por posición) y sin "fixed" el header
+    // -- banda de contexto incluida -- fluye pegado, de ancho completo, sin
+    // depender del padding-top que el tema reserva para SU cabecera (más alta).
+    // En layout "vertical" no se toca: el aside sí depende de quedar fijo.
+    $(function () {
+        $('#main-wrapper').attr('data-header-position', 'relative');
+        $('#main-wrapper').attr('data-sidebar-position', 'absolute');
+    });
+
+    // El max-width real de .container-fluid depende de reglas internas del
+    // tema que varían según breakpoint y no siguen un valor fijo predecible
+    // (a veces 1200px, a veces más) -- adivinar un max-width propio para la
+    // banda de contexto / el carnet de configuración dejaba su contenido
+    // desalineado del resto de la página en ciertos anchos de pantalla. En
+    // vez de adivinar, se mide el inset real de .container-fluid respecto a
+    // la ventana y se expone como variables CSS: la banda usa exactamente
+    // ese mismo margen, sea cual sea, así siempre coincide.
+    function syncBandInset() {
+        var $cf = $('.body-wrapper > .container-fluid').first();
+        if (!$cf.length) return;
+        var rect = $cf[0].getBoundingClientRect();
+        var pl = parseFloat($cf.css('padding-left')) || 0;
+        var pr = parseFloat($cf.css('padding-right')) || 0;
+        document.documentElement.style.setProperty('--cx-band-left', (rect.left + pl) + 'px');
+        document.documentElement.style.setProperty('--cx-band-right', (window.innerWidth - rect.right + pr) + 'px');
+    }
+    syncBandInset();
+    // Reajusta tras la carga completa: las fuentes web pueden reflowear el
+    // layout después de document.ready y dejar la primera medición corta.
+    $(window).on('load', syncBandInset);
+    $(window).on('resize', syncBandInset);
+</script>
+@endif
 <script src="{{ url('managers/js/app-style-switcher.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/sidebarmenu.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/custom.js') }}" type="text/javascript"></script>

@@ -27,7 +27,7 @@ class CertificateController extends Controller
     {
         $user = app('customer');
 
-        $certificate = Certificate::with(['user', 'course', 'certifier'])
+        $certificate = Certificate::with(['user', 'course', 'certifier', 'certification'])
             ->where('slack', $slack)
             ->where('user_id', $user->id)
             ->firstOrFail();

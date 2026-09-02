@@ -2,6 +2,12 @@
 
 @section('title', 'Mis cursos')
 
+@section('context-title', 'Mis cursos')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'cap'])@endsection
+@section('context-subtitle', 'Continúa donde lo dejaste o inscríbete a uno nuevo')
+@section('context-stat-number', $courses->count())
+@section('context-stat-label', Str::plural('curso', $courses->count()))
+
 @push('css')
 <link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}">
 @endpush

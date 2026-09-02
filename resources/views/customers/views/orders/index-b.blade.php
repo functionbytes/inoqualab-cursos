@@ -2,6 +2,12 @@
 
 @section('title', 'Compras y facturación')
 
+@section('context-title', 'Compras y facturación')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'receipt'])@endsection
+@section('context-subtitle', 'Revisa tus compras, facturas y su estado de pago')
+@section('context-stat-number', $orders->total())
+@section('context-stat-label', Str::plural('pedido', $orders->total()))
+
 @php
     $importe = fn ($order) => (float) ($order->total_order_amount ?? $order->total ?? 0);
 
@@ -21,7 +27,7 @@
 <section class="pnl-section">
 
     <div class="cd-head">
-        <h2>Compras y facturación</h2>
+        {{-- El título ya lo muestra la banda de contexto del header. --}}
         <div class="sub">Cada compra agrupa las capacitaciones que adquiriste y su comprobante</div>
     </div>
 

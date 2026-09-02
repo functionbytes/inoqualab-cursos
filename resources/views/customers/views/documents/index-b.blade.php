@@ -2,6 +2,12 @@
 
 @section('title', 'Mi biblioteca')
 
+@section('context-title', 'Mi biblioteca')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'folder'])@endsection
+@section('context-subtitle', 'Material de apoyo disponible para tus cursos')
+@section('context-stat-number', $documents->total())
+@section('context-stat-label', Str::plural('documento', $documents->total()))
+
 @php
     $meta = function ($document) {
         $media = $document->getFirstMedia('files');
@@ -32,7 +38,7 @@
     @if($documents->isEmpty())
 
         <div class="cd-head">
-            <h2>Mi biblioteca</h2>
+            {{-- El título ya lo muestra la banda de contexto del header. --}}
             <div class="sub">Material de apoyo y constancias que INOQUALAB comparte contigo</div>
         </div>
 
@@ -73,7 +79,7 @@
         <div class="lb-main">
             <div class="lb-head">
                 <div>
-                    <h2>Mi biblioteca</h2>
+                    {{-- El título ya lo muestra la banda de contexto del header. --}}
                     <div class="sub">{{ $documents->total() }} {{ $documents->total() === 1 ? 'documento disponible' : 'documentos disponibles' }}</div>
                 </div>
                 <form class="pnl-search" action="{{ Request::fullUrl() }}" method="GET" role="search">

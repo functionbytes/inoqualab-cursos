@@ -22,7 +22,7 @@
   --panel: #ffffff;
   --field: #f7f9fb;
   --green: #008bcd;
-  --green-deep: #006fa3;
+  --green-deep: #008bcd;
   --green-soft: #e4f2fb;
   --amber: #c98a14;
   --amber-soft: #fbf4e3;
@@ -354,7 +354,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .btn-solid svg { width: 18px; height: 18px; color: var(--green); }
 
 .go-pay { margin-top: 22px; width: 100%; background: #008bcd; color: #fff; border: none; border-radius: 11px; padding: 16px; font-size: 15px; font-weight: 800; letter-spacing: .03em; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; transition: background .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease); box-shadow: 0 10px 24px rgba(0,139,205,.24); }
-.go-pay:hover { background: #006fa3; transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,139,205,.3); }
+.go-pay:hover { background: #008bcd; transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,139,205,.3); }
 .go-pay svg { width: 18px; height: 18px; }
 .go-pay { white-space: nowrap; }
 .go-pay .arr { transition: transform .2s var(--ease); }
@@ -436,7 +436,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 /* Estados en paleta azul/gris (base #f4f6f9): en progreso = azul vivo (activo),
    completado = azul navy sólido (hecho), pendiente = gris neutro (sin empezar).
    Vencido se deja en rojo suave a propósito: es una alerta de acceso caducado. */
-.pc-badge.st-progress { background: #e3f1fb; color: #006fa3; }
+.pc-badge.st-progress { background: #e3f1fb; color: #008bcd; }
 .pc-badge.st-pending { background: #f4f6f9; color: #6a7888; }
 .pc-badge.st-done { background: #dde8f2; color: #0d1b2a; }
 .pc-badge.st-expired { background: var(--red-soft); color: var(--red); }
@@ -448,7 +448,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pc-foot .col .v { font-size: 15px; font-weight: 800; color: var(--navy); margin-top: 2px; white-space: nowrap; }
 .pc-foot .col.r { text-align: right; }
 .pc-btn { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 9px; background: #008bcd; color: #fff; text-decoration: none; font-size: 13.5px; font-weight: 800; padding: 12px; border-radius: 11px; transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease); }
-.pc-btn:hover { background: #006fa3; color: #fff; transform: translateY(-1px); }
+.pc-btn:hover { background: #008bcd; color: #fff; transform: translateY(-1px); }
 .pc-btn:hover svg { color: #fff; }
 .pc-btn svg { width: 16px; height: 16px; color: var(--green); }
 .pc-btn.ghost { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
@@ -476,7 +476,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .t-badge.pend { background: #fbf4e3; color: #b07d12; }
 .t-badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .dl-btn { display: inline-flex; align-items: center; gap: 7px; background: #008bcd; color: #fff; border: none; font-size: 12.5px; font-weight: 700; padding: 9px 15px; border-radius: 9px; cursor: pointer; text-decoration: none; transition: background .15s var(--ease); white-space: nowrap; }
-.dl-btn:hover { background: #006fa3; }
+.dl-btn:hover { background: #008bcd; }
 .dl-btn svg { width: 15px; height: 15px; color: var(--green); }
 .dl-btn.ghost { background: #fff; color: var(--navy); border: 1.5px solid var(--line); }
 .dl-btn.ghost svg { color: var(--green-deep); }
@@ -1265,8 +1265,16 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-ring .meta { line-height: 1.2; }
 .lv-ring .meta .a { font-size: 13px; font-weight: 800; }
 .lv-ring .meta .b { font-size: 11px; color: rgba(255,255,255,.55); font-weight: 600; }
-.lv-rail-toggle { background: rgba(255,255,255,.08); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; display: none; align-items: center; justify-content: center; }
+/* Vive dentro de .lv-lhead (fondo blanco) en lesson-content.blade.php y
+   quiz-questions.blade.php -- por eso los colores claros de .field/.navy en
+   vez del rgba(255,255,255,.08)/blanco pensado originalmente para un header
+   oscuro que no llegó a usarse. */
+.lv-rail-toggle { background: var(--field); border: none; color: var(--navy); width: 38px; height: 38px; border-radius: 10px; display: none; align-items: center; justify-content: center; flex-shrink: 0; }
 .lv-rail-toggle svg { width: 18px; height: 18px; }
+.lv-rail-toggle:hover { background: var(--line-2); }
+/* Backdrop del rail en mobile -- mismo patrón que .cart-backdrop. */
+.lv-rail-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,.55); z-index: 54; opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility .25s var(--ease); display: none; }
+.lv-rail-backdrop.open { opacity: 1; visibility: visible; }
 
 /* shell — 56px es la altura real del header fijo del sitio (.app-header), no 72px */
 .lv-shell { width: 100%; margin: 0; display: grid; grid-template-columns: 360px 1fr; align-items: stretch; min-height: calc(100vh - 56px); }
@@ -1460,7 +1468,12 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-fbtn .fb-txt { min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; }
 .lv-fbtn .fb-txt .l { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
 .lv-fbtn .fb-txt .t { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lv-fbtn.next { text-align: right; }
+/* margin-left:auto, no solo justify-content:space-between en .lv-foot: con
+   #prev oculto (primera pregunta/lección) .next queda como único hijo visible
+   del flex, y space-between lo pega al inicio (izquierda) en vez de dejarlo al
+   final -- margin-left:auto lo empuja a la derecha sin depender de que el
+   hermano exista. */
+.lv-fbtn.next { text-align: right; margin-left: auto; }
 .lv-fbtn.next .fb-txt { text-align: right; }
 
 /* autoplay toast */
@@ -1478,6 +1491,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
   .lv-rail { position: fixed; top: 72px; left: 0; bottom: 0; width: 320px; z-index: 55; transform: translateX(-105%); transition: transform .3s var(--ease); box-shadow: 20px 0 50px rgba(13,27,42,.2); height: calc(100vh - 72px); }
   .lv-rail.open { transform: none; }
   .lv-rail-toggle { display: inline-flex; }
+  .lv-rail-backdrop { display: block; }
   .lv-stage { aspect-ratio: 16/9; max-height: none; }
 }
 @media (max-width: 620px) {
@@ -1751,26 +1765,56 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 /* ===== Resultado de quiz / examen (aula-result) — restaurado tras rediseño ===== */
 .aula-result { max-width: 560px; margin: 40px auto; background:#fff; border:1px solid #e7ecf1; border-radius:22px; box-shadow:0 14px 40px rgba(13,27,42,.10), 0 2px 6px rgba(13,27,42,.05); padding:48px 44px; text-align:center; }
-.ar-badge { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#006fa3; background:#e4f2fb; padding:6px 14px; border-radius:999px; }
+/* Cuando el resultado vive DENTRO de .quiz-wrap (que ya trae su propio fondo
+   blanco heredado de .lv-content/.lp-body) -- tanto server-rendered en
+   finish.blade.php como inyectado por AJAX desde quiz.blade.php/exam.blade.php
+   al enviar el formulario -- se le quita el card propio (fondo/borde/sombra
+   y el max-width:560px pensado para cuando era un modal aparte) para que
+   ocupe el ancho del panel, igual que las preguntas. */
+.quiz-wrap .aula-result { max-width: 100%; background: transparent; border: none; box-shadow: none; margin: 0 auto; padding: 32px 0; }
+/* Franja Anterior/Siguiente del resultado: mismo padding/borde superior que
+   .lv-foot de las preguntas, y el <form> que envuelve cada botón se vuelve
+   "transparente" en el layout flex (sus hijos participan como si fueran
+   hijos directos de .ar-foot), igual en carga server-side que por AJAX.
+   .ar-foot vive FUERA de .aula-result (son hermanos, no anidados): antes,
+   compartiendo un solo card, el pie de navegación heredaba el ancho angosto
+   pensado para el modal y el padding-bottom de la vista quedaba partido
+   entre los dos (8px arriba + 0 abajo) en vez de un valor consistente. */
+.ar-foot.lv-foot { padding: 26px 0 32px; margin-top: 6px; border-top: 1px solid var(--line); }
+.ar-foot form { display: contents; }
+/* Refuerzo del botón "Anterior/Siguiente" del resultado: en este contexto
+   perdía su aspecto de caja (borde/fondo/padding) heredado de .lv-fbtn --
+   valores fijos y !important para que se vea igual que en la vista de
+   preguntas, sin depender de la cascada/orden de carga entre hojas de estilo. */
+.quiz-wrap .ar-foot .lv-fbtn {
+  border: 1.5px solid #e7ecf1 !important;
+  background: #fff !important;
+  border-radius: 12px !important;
+  padding: 11px 18px !important;
+}
+.ar-badge { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#008bcd; background:#e4f2fb; padding:6px 14px; border-radius:999px; }
 .ar-title { font-size:22px; font-weight:800; color:#1b2a3a; margin:18px 0 0; letter-spacing:-.01em; line-height:1.3; }
 .ar-icon { width:88px; height:88px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:26px auto 18px; font-size:36px; color:#fff; }
 .ar-icon.ok { background:linear-gradient(150deg, var(--green), var(--green-deep)); box-shadow:0 10px 26px rgba(0,139,205,.30); }
-.ar-icon.no { background:linear-gradient(150deg,#e0556b,#c23a51); box-shadow:0 10px 26px rgba(194,58,81,.28); }
+.ar-icon.no { background:linear-gradient(150deg, var(--muted-2), var(--muted)); box-shadow:0 10px 26px rgba(106,120,136,.28); }
 .ar-score { font-size:21px; font-weight:800; color:#0d1b2a; margin:0; }
 .ar-sub { color:#6a7888; font-size:15px; line-height:1.7; margin:12px auto 0; max-width:430px; }
 .ar-actions { display:flex; flex-direction:column; gap:11px; max-width:340px; margin:30px auto 0; }
 .ar-actions form { width:100%; margin:0; }
 .ar-primary, .ar-secondary { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:15px; border:none; border-radius:12px; font-size:14px; font-weight:800; text-decoration:none; cursor:pointer; font-family:inherit; transition:background .18s,transform .18s,border-color .18s,color .18s; }
 .ar-primary { background:#008bcd; color:#fff; box-shadow:0 10px 24px rgba(0,139,205,.24); }
-.ar-primary:hover { background:#006fa3; transform:translateY(-2px); }
+.ar-primary:hover { background:#008bcd; transform:translateY(-2px); }
 .ar-secondary { background:#fff; color:#0d1b2a; border:1.5px solid #e7ecf1; }
-.ar-secondary:hover { border-color:#008bcd; color:#006fa3; background:#e4f2fb; }
+.ar-secondary:hover { border-color:#008bcd; color:#008bcd; background:#e4f2fb; }
 
 /* Modal de salida de cuestionario (guard de quiz/examen).
    Jerarquía correcta: "Seguir" (recomendado) destaca en azul; "Salir" (destructivo)
    queda discreto en rojo. Antes estaba al revés y "Seguir" se veía apagado. */
-#assessmentExitModal .modal-content.ax-modal { border:none; border-radius:20px; overflow:hidden; box-shadow:0 24px 60px rgba(13,27,42,.28); }
-#assessmentExitModal .modal-body { padding:34px 30px 28px; text-align:center; }
+/* .ax-modal: mismo patrón visual para cualquier modal de confirmación del aula
+   (guard de salida, confirmar envío de quiz/examen, etc.) -- generalizado desde
+   #assessmentExitModal para que lo reutilicen sin duplicar reglas. */
+.ax-modal { border:none; border-radius:20px; overflow:hidden; box-shadow:0 24px 60px rgba(13,27,42,.28); }
+.ax-modal .modal-body { padding:34px 30px 28px; text-align:center; }
 .ax-ico { width:62px; height:62px; margin:0 auto 18px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#eef2f6; color:#0d1b2a; }
 .ax-ico svg { width:30px; height:30px; }
 .ax-title { font-size:20px; font-weight:800; letter-spacing:-.01em; margin:0 0 9px; color:#0d1b2a; }
@@ -1781,6 +1825,11 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
    "Salir" (destructivo) discreto en gris. Sin rojo. */
 .ax-stay { background:#0d1b2a; color:#fff; box-shadow:0 10px 22px rgba(13,27,42,.22); }
 .ax-stay:hover { background:#16304a; transform:translateY(-2px); }
+/* Variante azul claro (color de acento del sitio): botones de confirmar envío
+   de quiz/examen -- distinta de .ax-stay (oscuro) para no afectar el modal de
+   "salir del cuestionario", que reusa .ax-stay para su propia acción principal. */
+.ax-accent { background:#008bce; color:#fff; box-shadow:0 10px 22px rgba(0,139,206,.25); }
+.ax-accent:hover { background:#0077b0; transform:translateY(-2px); }
 .ax-leave { background:#fff; color:#6a7888; border-color:#e7ecf1; }
 .ax-leave:hover { background:#f4f6f9; border-color:#93a0ad; color:#0d1b2a; }
 .ar-review { max-width:560px; margin:26px auto 0; text-align:left; }

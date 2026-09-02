@@ -13,7 +13,6 @@ use App\Models\Exam\ExamQuestion;
 use App\Models\Exam\ExamTopic;
 use App\Models\Users\Certificate;
 use Carbon\Carbon;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -99,7 +98,7 @@ class ExamController extends Controller
         ));
     }
 
-    public function store(Request $request, $id): RedirectResponse
+    public function store(Request $request, $id)
     {
         $user = app('customer');
         $topic = ExamTopic::id($id);
@@ -153,10 +152,35 @@ class ExamController extends Controller
 
         ExamAnswer::insert($rows);
 
+        // D2: envío por AJAX -- el JS del examen reemplaza el contenido de
+        // .quiz-wrap con el resultado sin recargar ni navegar (la URL se
+        // queda en customers.exam.show, /exam/{id}; antes redirigía a
+        // customers.exam.finish). Fallback al redirect normal si la petición
+        // no es AJAX.
+        if ($request->ajax() || $request->wantsJson()) {
+            $data = $this->buildFinishData($exam->id);
+
+            return response()->json([
+                'success' => true,
+                'html' => view('customers.partials.views.exams.exam-result', $data)->render(),
+                'url' => route('customers.exam.show', $exam->id),
+            ]);
+        }
+
         return redirect()->route('customers.exam.show', $exam->id);
     }
 
     public function finish($id)
+    {
+        return view('customers.views.exams.finish', $this->buildFinishData($id));
+    }
+
+    /**
+     * Datos del resultado del examen + el rail de capítulos/lecciones,
+     * compartidos entre finish() (GET a la vista completa, p.ej. tras un
+     * refresh) y store() (respuesta AJAX del envío, sin recargar la página).
+     */
+    private function buildFinishData($id): array
     {
         $user = app('customer');
         $exam = Exam::where('id', $id)->where('user_id', $user->id)->firstOrFail();
@@ -258,13 +282,13 @@ class ExamController extends Controller
             ->orderByDesc('position')
             ->first();
 
-        return view('customers.views.exams.finish', compact(
+        return compact(
             'user', 'course', 'topic', 'wrong', 'correct',
             'answers', 'score', 'count', 'certificate', 'exam', 'userReview', 'passingScore',
             'lastCourseLesson', 'inscription',
             'chapters', 'completedLessonIds', 'chapterProgress', 'totalClass', 'completedClass',
             'progressPercentage', 'lastchapter', 'lastlesson', 'percent', 'percents'
-        ));
+        );
     }
 
     public function tryagain($id)

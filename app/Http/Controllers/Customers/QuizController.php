@@ -9,7 +9,6 @@ use App\Models\Course\CourseProgress;
 use App\Models\Quiz\Quiz;
 use App\Models\Quiz\QuizAnswer;
 use App\Models\Quiz\QuizQuestion;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -118,7 +117,7 @@ class QuizController extends Controller
 
     }
 
-    public function store(Request $request, $id): RedirectResponse
+    public function store(Request $request, $id)
     {
 
         $user = app('customer');
@@ -141,6 +140,23 @@ class QuizController extends Controller
         $answers = $this->processQuizAnswers($topic, $quiz, $questionIds, $userAnswers, $questions);
 
         QuizAnswer::insert($answers);
+
+        // D2: envío por AJAX -- el JS del quiz reemplaza el contenido de
+        // .quiz-wrap con el resultado sin recargar ni navegar (la URL se
+        // queda en customers.quiz.show, /quiz/{id}; antes redirigía a
+        // customers.quiz.finish). Devuelve el mismo HTML que pintaría la
+        // vista de resultado, ya renderizado. Si la petición no viene por
+        // AJAX (JS deshabilitado, cliente viejo) se conserva el redirect de
+        // siempre como fallback funcional.
+        if ($request->ajax() || $request->wantsJson()) {
+            $data = $this->buildFinishData($quiz->id);
+
+            return response()->json([
+                'success' => true,
+                'html' => view('customers.partials.views.quizs.quiz-result', $data)->render(),
+                'url' => route('customers.quiz.show', $quiz->id),
+            ]);
+        }
 
         return redirect()->route('customers.quiz.show', $quiz->id);
 
@@ -197,6 +213,16 @@ class QuizController extends Controller
 
     public function finish($id)
     {
+        return view('customers.views.quizs.finish', $this->buildFinishData($id));
+    }
+
+    /**
+     * Datos del resultado del quiz + el rail de capítulos/lecciones, compartidos
+     * entre finish() (GET a la vista completa, p.ej. tras un refresh) y
+     * store() (respuesta AJAX del envío, sin recargar la página).
+     */
+    private function buildFinishData($id): array
+    {
 
         $user = app('customer');
         // A2: solo el dueño del quiz puede ver/recalcular su resultado
@@ -251,7 +277,7 @@ class QuizController extends Controller
         $examModel = $inscription->exam;
         $certificate = ($examModel && $examModel->score >= $this->passingScoreFor($examModel)) ? $inscription->certificate : null;
 
-        return view('customers.views.quizs.finish', [
+        return [
             'user' => $user,
             'course' => $course,
             'lesson' => $lesson,
@@ -277,7 +303,7 @@ class QuizController extends Controller
             'nextLesson' => $nextLesson,
             'prevLesson' => $prevLesson,
             'quiz' => $quiz,
-        ]);
+        ];
 
     }
 
