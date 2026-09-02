@@ -39,6 +39,51 @@
                                         <input type="text" class="form-control" id="lastname"  name="lastname" value="{{ $testimonie->lastname }}" placeholder="Ingresar apellido">
                                 </div>
                             </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Rol</label>
+                                        <input type="text" class="form-control" id="role"  name="role" value="{{ $testimonie->role }}" placeholder="Ej: Estudiante certificado">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Ícono (Font Awesome)</label>
+                                        <input type="text" class="form-control" id="icon"  name="icon" value="{{ $testimonie->icon }}" placeholder="Ej: fas fa-user-graduate">
+                                        <label id="icon-error" class="error d-none" for="icon"></label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="control-label col-form-label">Calificación</label>
+                                    <div class="input-group">
+                                        {!! Form::select('rating', [1 => '1 estrella', 2 => '2 estrellas', 3 => '3 estrellas', 4 => '4 estrellas', 5 => '5 estrellas'], $testimonie->rating, ['class' => 'select2 form-control','id' => 'rating']) !!}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Número del contador</label>
+                                        <input type="text" class="form-control" id="counter_value"  name="counter_value" value="{{ $testimonie->counter_value }}" placeholder="Ej: 50">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Sufijo del contador</label>
+                                        <input type="text" class="form-control" id="counter_suffix"  name="counter_suffix" value="{{ $testimonie->counter_suffix }}" placeholder="Ej: K+, %, +">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Descripción del contador</label>
+                                        <input type="text" class="form-control" id="benefit"  name="benefit" value="{{ $testimonie->benefit }}" placeholder="Ej: Estudiantes certificados con nuestros cursos">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                        <label  class="control-label col-form-label">Orden</label>
+                                        <input type="number" class="form-control" id="position"  name="position" value="{{ $testimonie->position }}" min="0" placeholder="0">
+                                </div>
+                            </div>
 
                             <div class="col-12">
                                 <div class="mb-3">
@@ -135,12 +180,26 @@
                     var slack = $("#slack").val();
                     var firstname = $("#firstname").val();
                     var lastname = $("#lastname").val();
+                    var role = $("#role").val();
+                    var icon = $("#icon").val();
+                    var rating = $("#rating").val();
+                    var benefit = $("#benefit").val();
+                    var position = $("#position").val();
+                    var counterValue = $("#counter_value").val();
+                    var counterSuffix = $("#counter_suffix").val();
                     var description = $("#description").val();
                     var available = $("#available").val();
 
                     formData.append('slack', slack);
                     formData.append('firstname', firstname);
                     formData.append('lastname', lastname);
+                    formData.append('role', role);
+                    formData.append('icon', icon);
+                    formData.append('rating', rating);
+                    formData.append('benefit', benefit);
+                    formData.append('counter_value', counterValue);
+                    formData.append('counter_suffix', counterSuffix);
+                    formData.append('position', position);
                     formData.append('description', description);
                     formData.append('available', available);
 

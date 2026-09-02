@@ -68,6 +68,17 @@
                 @endcan
                 @endif
 
+                @can('testimonies.view')
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="{{ route('manager.testimonies') }}" aria-expanded="false">
+                          <span class="d-flex">
+                            <i class="fa-duotone fa-quote-left"></i>
+                          </span>
+                        <span class="hide-menu">Testimonios</span>
+                    </a>
+                </li>
+                @endcan
+
                 @if(setting('module_bundles') !== 0)
                 @can('bundles.view')
                 <li class="sidebar-item">

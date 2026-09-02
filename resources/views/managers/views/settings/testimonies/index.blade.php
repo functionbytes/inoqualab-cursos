@@ -79,7 +79,13 @@
                                 @foreach($testimonies as $testimonie)
                                     <tr>
                                         <td>
+                                            @if($testimonie->icon)
+                                                <i class="{{ $testimonie->icon }} text-muted me-1"></i>
+                                            @endif
                                             <span class="fw-semibold">{{ $testimonie->firstname . ' ' . $testimonie->lastname }}</span>
+                                            @if($testimonie->role)
+                                                <br><span class="text-muted small">{{ $testimonie->role }}</span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
                                             @if($testimonie->available == 1)

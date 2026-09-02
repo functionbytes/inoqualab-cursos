@@ -73,6 +73,13 @@ class TestimoniesController extends Controller
         $testimonie = Testimonie::slack($request->slack);
         $testimonie->firstname = $request->firstname;
         $testimonie->lastname = $request->lastname;
+        $testimonie->role = $request->role;
+        $testimonie->icon = $request->icon;
+        $testimonie->rating = $request->rating ?? 5;
+        $testimonie->benefit = $request->benefit;
+        $testimonie->position = $request->position ?? 0;
+        $testimonie->counter_value = $request->counter_value;
+        $testimonie->counter_suffix = $request->counter_suffix;
         $testimonie->description = $request->description;
         $testimonie->available = $request->available;
         $testimonie->update();
@@ -92,6 +99,13 @@ class TestimoniesController extends Controller
         $testimonie->slack = $this->generate_slack('testimonies');
         $testimonie->firstname = $request->firstname;
         $testimonie->lastname = $request->lastname;
+        $testimonie->role = $request->role;
+        $testimonie->icon = $request->icon;
+        $testimonie->rating = $request->rating ?? 5;
+        $testimonie->benefit = $request->benefit;
+        $testimonie->position = $request->position ?? 0;
+        $testimonie->counter_value = $request->counter_value;
+        $testimonie->counter_suffix = $request->counter_suffix;
         $testimonie->description = $request->description;
         $testimonie->available = $request->available;
         $testimonie->save();

@@ -17,6 +17,13 @@ class Testimonie extends Model
         'slack',
         'firstname',
         'lastname',
+        'role',
+        'icon',
+        'rating',
+        'benefit',
+        'position',
+        'counter_value',
+        'counter_suffix',
         'description',
         'available',
         'created_at',
@@ -26,6 +33,16 @@ class Testimonie extends Model
     public function scopeDescending($query)
     {
         return $query->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Orden manual para el carrusel del home (columna `position`, no fecha de
+     * creación): permite decidir qué testimonio aparece primero sin depender
+     * de cuándo se creó el registro.
+     */
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('position')->orderBy('created_at');
     }
 
     public function scopeAscending($query)
@@ -43,7 +60,9 @@ class Testimonie extends Model
 
     public function scopeAvailable($query)
     {
-        return $query->where('available', 1)->get();
+        // Sin ->get(): un scope debe devolver el Builder encadenable (p.ej.
+        // Testimonie::available()->ordered()->limit(6)->get() en el home).
+        return $query->where('available', 1);
     }
 
     public function scopeSlack($query, $slack)
