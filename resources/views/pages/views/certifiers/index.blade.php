@@ -30,7 +30,7 @@
                                 @if($certifier->hasMedia('thumbnail'))
                                     <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}" loading="lazy">
                                 @else
-                                    <img src="/pages/images/certifier/default.jpg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}" loading="lazy">
+                                    <img src="/pages/images/certifier/default.svg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}" loading="lazy">
                                 @endif
                             </div>
                             <div class="member-description">

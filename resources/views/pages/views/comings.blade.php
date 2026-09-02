@@ -8,7 +8,7 @@
             <div class="d-table-cell">
                 <div class="coming-soon-content">
                     <a class="logo">
-                        <img src="/pages/images/logo/logo.svg" alt="image">
+                        <img src="{{ getlogo() }}" alt="{{ setting('page_title') }}">
                     </a>
                     <h2>Nosotros estamos lanzando pronto</h2>
                     <div id="timer" class="flex-wrap d-flex justify-content-center">

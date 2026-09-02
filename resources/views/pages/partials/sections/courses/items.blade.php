@@ -47,7 +47,7 @@
                         <div class="courses-content">
                            <h3>
                               <a href="{{ route('courses.view', array($course->slack)) }}" class="d-inline-block">
-                                 {{ $course->title }}
+                                 {{ str($course->title)->lower()->ucfirst() }}
                               </a>
                            </h3>
                            <p> {{substr(strip_tags($course->short_detail), 0, 400)}}</p>

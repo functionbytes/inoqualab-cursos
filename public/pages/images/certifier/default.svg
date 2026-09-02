@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Avatar por defecto para certificadores sin foto. Silueta blanca sobre
+     azul oscuro de marca (#081A28), mismo lenguaje visual del resto de
+     iconos del sitio. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#081A28"/>
+    <circle cx="100" cy="78" r="34" fill="#ffffff" fill-opacity=".92"/>
+    <path d="M32 196c0-42 30.5-72 68-72s68 30 68 72" fill="#ffffff" fill-opacity=".92"/>
+</svg>

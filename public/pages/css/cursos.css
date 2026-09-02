@@ -14,7 +14,7 @@
   --line: #e7ecf1;
   --field: #f7f9fb;
   --green: #008bcd;
-  --green-deep: #006fa3;
+  --green-deep: #008bcd;
   --amber: #c98a14;
   --shadow-soft: 0 6px 22px rgba(13,27,42,.07);
   --ease: cubic-bezier(.22,.61,.36,1);
@@ -55,7 +55,7 @@
 .cursos-page .band .lede { margin: 10px 0 0; color: rgba(255,255,255,.62); font-size: 15px; max-width: 460px; }
 
 /* ===== Catalog ===== */
-.cursos-page .catalog { background: #f3f6f9; padding: 44px 0 72px; }
+.cursos-page .catalog { background: #F1F4F6; padding: 44px 0 72px; }
 .cursos-page .cat-layout { display: grid; grid-template-columns: 280px 1fr; gap: 30px; align-items: start; }
 
 .cursos-page .cat-side { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 16px; }

@@ -26,7 +26,7 @@
                         </a>
                     </div>
                     <div class="coach-content">
-                        <h4><a href="{{ route('courses.view', [$course->slack]) }}">{{ $course->title }}</a></h4>
+                        <h4><a href="{{ route('courses.view', [$course->slack]) }}">{{ str($course->title)->lower()->ucfirst() }}</a></h4>
                         <div class="ratting-price">
                             <div class="ratting">
                                 <i class="fas fa-star"></i>

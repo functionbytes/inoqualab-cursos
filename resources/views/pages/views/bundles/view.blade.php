@@ -100,7 +100,7 @@
                                 <div class="pkg-step">
                                     <a class="pkg-steplink" href="{{ route('courses.view', [$course->slack]) }}">
                                         <span class="sl-info">
-                                            <span class="sl-name">{{ $course->title }}</span>
+                                            <span class="sl-name">{{ str($course->title)->lower()->ucfirst() }}</span>
                                             <span class="sl-meta">
                                                 <span><i class="fa-solid fa-circle-play"></i> {{ $classesCount }} {{ $classesCount == 1 ? 'clase' : 'clases' }}</span>
                                                 <span>{{ $course->categorie->title ?? 'Curso' }}</span>

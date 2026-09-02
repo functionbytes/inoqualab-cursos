@@ -27,4 +27,10 @@
         </div>
     @endif
 
+    @if (isset($testimonials) && $testimonials->isNotEmpty())
+        @include('pages.partials.sections.testimonies.testimonies')
+    @endif
+
+    @include ('pages.partials.sections.pages.home-faq')
+
 @endsection

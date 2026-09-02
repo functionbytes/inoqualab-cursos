@@ -35,38 +35,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
   
 
     <link rel="stylesheet" href="{{ url('/pages/css/style.css') }}?v={{ @filemtime(public_path('pages/css/style.css')) ?: '1' }}">
-    <style>
-        /* Footer contact items */
-        .footer-contact-list { display: flex; flex-direction: column; gap: 8px; }
-        .footer-contact-item {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 9px 14px;
-            color: #cdd8e3;
-            text-decoration: none;
-            font-size: 13px;
-            transition: background 0.2s, border-color 0.2s;
-        }
-        a.footer-contact-item:hover {
-            background: rgba(0,139,205,0.2);
-            border-color: rgba(0,139,205,0.45);
-            color: #fff;
-        }
-        .footer-contact-icon {
-            width: 34px; height: 34px; min-width: 34px;
-            border-radius: 8px;
-            background: #008bcd;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; color: #fff;
-        }
-    </style>
-    <style>.cart-drawer:not(.open) { visibility: hidden; pointer-events: none; }</style>
     @stack('css')
 
 
@@ -83,6 +55,14 @@
 
         @include ('pages.includes.footer')
 
+        @include ('pages.includes.socials')
+
+        {{-- Volver arriba: dentro de .page-wrapper para competir en el mismo
+             stacking context que el footer (z-index:9997) y quedar tapado por
+             su fondo opaco al llegar al final de la página. --}}
+        <button id="backToTop" aria-label="Volver arriba">
+            <i class="fas fa-arrow-up"></i>
+        </button>
 
     </div>
 
@@ -393,16 +373,8 @@
     })();
     </script>
 
-    @if(setting('page_whatsapp'))
-    <a href="https://wa.me/{{ preg_replace('/\D/', '', setting('page_whatsapp')) }}?text=Hola%2C+quiero+más+información+sobre+sus+cursos."
-       target="_blank" rel="noopener" class="whatsapp-float" aria-label="Contactar por WhatsApp">
-        <i class="fab fa-whatsapp"></i>
-    </a>
-    @endif
-
-    <button id="backToTop" aria-label="Volver arriba">
-        <i class="fas fa-arrow-up"></i>
-    </button>
+    {{-- Llamar, WhatsApp y volver arriba: ver pages.includes.socials y el
+         botón #backToTop dentro de .page-wrapper (botones flotantes estilo inoqualab) --}}
 
     <script>
     (function () {
@@ -417,6 +389,52 @@
         $(document).on('click', '#goPayBtn', function () {
             $('#goPayText').text('Cargando...');
         });
+    })();
+    </script>
+
+    {{-- Botones flotantes (backToTop, llamar, WhatsApp): se "estacionan" en
+         vez de quedar tapados por el footer. Antes el footer llevaba un
+         z-index más alto para taparlos al llegar al final de la página,
+         pero como el footer es una sección larga eso los ocultaba durante
+         todo su recorrido, no solo al chocar con su contenido -- apenas
+         aparecía el footer, los tres botones "desaparecían" y no volvían.
+         Acá en cambio, apenas el footer entra en la vista, los botones
+         pasan de position:fixed a absolute con un "bottom" recalculado
+         para quedar pegados justo a su borde superior: siguen visibles y
+         usables mientras se scrollea el footer, en vez de ocultarse. --}}
+    <script>
+    (function () {
+        var $footer = $('.iq-footer-sunex');
+        var $wrapper = $('.page-wrapper');
+        if (!$footer.length || !$wrapper.length) return;
+
+        var floaters = [
+            { el: $('#backToTop'), bottom: 156 },
+            { el: $('.atl-float-call'), bottom: 90 },
+            { el: $('.atl-float-text'), bottom: 24 },
+        ];
+        var parked = false;
+
+        function update() {
+            var footerAbsoluteTop = $footer.offset().top;
+            var viewportBottom = $(window).scrollTop() + $(window).height();
+
+            if (viewportBottom >= footerAbsoluteTop) {
+                var extra = $wrapper.outerHeight() - $footer.position().top;
+                floaters.forEach(function (f) {
+                    f.el.css({ position: 'absolute', bottom: (extra + f.bottom) + 'px' });
+                });
+                parked = true;
+            } else if (parked) {
+                floaters.forEach(function (f) {
+                    f.el.css({ position: '', bottom: '' });
+                });
+                parked = false;
+            }
+        }
+
+        $(window).on('scroll.floatersPark resize.floatersPark', update);
+        update();
     })();
     </script>
 

@@ -73,10 +73,3 @@
 </main>
 @endsection
 
-@push('css')
-<style>
-    .cartx .pay-or { display:flex; align-items:center; gap:12px; color:#94a3b8; font-size:12px; margin:16px 0; }
-    .cartx .pay-or::before, .cartx .pay-or::after { content:""; height:1px; background:#e6ebf1; flex:1; }
-    .cartx .payment-widget form { margin:0; }
-</style>
-@endpush

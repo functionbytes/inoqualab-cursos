@@ -96,7 +96,6 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-graduation-cap fa-3x mb-3 text-muted opacity-50"></i>
                         <h5 class="fw-bold mb-2">
                             @if(!empty($searchKey))
                                 No se encontraron resultados

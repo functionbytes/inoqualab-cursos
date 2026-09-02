@@ -135,14 +135,6 @@
 
                         </div>
                     </form>
-
-                    {{-- Garantías / confianza --}}
-                    <div class="checkout-trust">
-                        <div class="ct-item"><span class="ic"><i class="fas fa-bolt"></i></span><div class="tx"><b>Acceso inmediato</b><span>Empieza a estudiar apenas se confirme el pago.</span></div></div>
-                        <div class="ct-item"><span class="ic"><i class="fas fa-award"></i></span><div class="tx"><b>Certificado al finalizar</b><span>Descarga tu certificado al aprobar el curso.</span></div></div>
-                        <div class="ct-item"><span class="ic"><i class="fas fa-lock"></i></span><div class="tx"><b>Pago seguro</b><span>Procesado por Wompi. No almacenamos tu tarjeta.</span></div></div>
-                        <div class="ct-item"><span class="ic"><i class="fab fa-whatsapp"></i></span><div class="tx"><b>Soporte cuando lo necesites</b><span>Escríbenos por WhatsApp ante cualquier duda.</span></div></div>
-                    </div>
                 </div>
 
                 {{-- ===== Columna derecha: resumen + sandbox ===== --}}
@@ -222,7 +214,7 @@
 
                             <button type="submit" class="pay-btn btn-disabled" id="addPayments">
                                 @if($total <= 0)
-                                    <i class="fas fa-graduation-cap"></i> Inscribirme gratis
+                                    Inscribirme gratis
                                 @else
                                     REALIZAR PAGO
                                 @endif
@@ -244,6 +236,14 @@
                             @endif
 
                         </div>
+                    </div>
+
+                    {{-- Garantías / confianza --}}
+                    <div class="checkout-trust">
+                        <div class="ct-item"><span class="ic">@include('customers.includes.icon', ['name' => 'bolt'])</span><div class="tx"><b>Acceso inmediato</b><span>Empieza a estudiar apenas se confirme el pago.</span></div></div>
+                        <div class="ct-item"><span class="ic">@include('customers.includes.icon', ['name' => 'award'])</span><div class="tx"><b>Certificado al finalizar</b><span>Descarga tu certificado al aprobar el curso.</span></div></div>
+                        <div class="ct-item"><span class="ic">@include('customers.includes.icon', ['name' => 'lock'])</span><div class="tx"><b>Pago seguro</b><span>Procesado por Wompi. No almacenamos tu tarjeta.</span></div></div>
+                        <div class="ct-item"><span class="ic">@include('customers.includes.icon', ['name' => 'whatsapp'])</span><div class="tx"><b>Soporte cuando lo necesites</b><span>Escríbenos por WhatsApp ante cualquier duda.</span></div></div>
                     </div>
 
                     @if(setting('wompi_sandbox') === 'true' && $total > 0)
@@ -325,10 +325,16 @@
         $(document).ready(function () {
 
             function loaderCheckout() {
+                // #discount/#total ya vienen calculados desde el controller (respetan
+                // un cupón aplicado que sigue vigente al cargar/recargar la página).
                 var subtotal = parseFloat($('#subtotal').val()) || 0;
-                var formatted = subtotal.toLocaleString('es-CO');
-                $('.subtotal-price').text('$ ' + formatted + ' COP');
-                $('.total-price').text('$ ' + formatted + ' COP');
+                var discount = parseFloat($('#discount').val()) || 0;
+                var total = parseFloat($('#total').val()) || subtotal;
+                $('.subtotal-price').text('$ ' + subtotal.toLocaleString('es-CO') + ' COP');
+                if (discount > 0) {
+                    $('.discount-price').text('$ ' + discount.toLocaleString('es-CO') + ' COP');
+                }
+                $('.total-price').text('$ ' + total.toLocaleString('es-CO') + ' COP');
             }
             loaderCheckout();
 

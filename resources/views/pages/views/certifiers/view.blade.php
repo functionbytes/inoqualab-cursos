@@ -22,7 +22,7 @@
                                  @if($certifier->hasMedia('thumbnail'))
                                     <img src="{{ $certifier->getFirstMediaUrl('thumbnail') }}" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}">
                                  @else
-                                    <img src="/pages/images/certifier/default.jpg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}">
+                                    <img src="/pages/images/certifier/default.svg" alt="{{ $certifier->firstname . ' ' . $certifier->lastname }}">
                                  @endif
                               </div>
                               <div class="instructor-details-content">
@@ -97,7 +97,7 @@
                                  </a>
                               </div>
                               <div class="course-content">
-                                 <h4><a href="{{ route('courses.view', [$course->slack]) }}">{{ $course->title }}</a></h4>
+                                 <h4><a href="{{ route('courses.view', [$course->slack]) }}">{{ str($course->title)->lower()->ucfirst() }}</a></h4>
                                  <div class="ratting-price">
                                     <div class="ratting">
                                        <i class="fas fa-star"></i>

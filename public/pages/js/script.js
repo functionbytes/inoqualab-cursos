@@ -44,32 +44,64 @@
     $(document).ready(function () {
 
         // 01. Header Style and Scroll to Top
+        // Habia otro headerStyle() casi identico mas abajo, enganchado aparte a
+        // $(window).on('scroll', ...) con un umbral distinto (150 vs 250) y sin
+        // guardar el estado: cada scroll volvia a llamar fadeIn()/fadeOut() sobre
+        // .scroll-top aunque ya estuviera visible/oculto, apilando animaciones en
+        // cola -- por eso el boton (y con el, cualquier cosa que dependiera de
+        // .fixed-header) se veia "seguir apareciendo" un rato despues de dejar de
+        // hacer scroll. Ahora hay un solo umbral y solo se actua si el estado
+        // realmente cambia.
+        var $siteHeader = $('.main-header');
+        var $scrollLink = $('.scroll-top');
+        var headerIsFixed = null;
+
         function headerStyle() {
-            if ($('.main-header').length) {
-                var windowpos = $(window).scrollTop();
-                var siteHeader = $('.main-header');
-                var scrollLink = $('.scroll-top');
-                if (windowpos >= 250) {
-                    siteHeader.addClass('fixed-header');
-                    scrollLink.fadeIn(300);
-                } else {
-                    siteHeader.removeClass('fixed-header');
-                    scrollLink.fadeOut(300);
-                }
+            if (!$siteHeader.length) return;
+
+            var shouldBeFixed = $(window).scrollTop() >= 250;
+            if (shouldBeFixed === headerIsFixed) return;
+            headerIsFixed = shouldBeFixed;
+
+            if (shouldBeFixed) {
+                $siteHeader.addClass('fixed-header');
+                $scrollLink.stop(true, true).fadeIn(300);
+            } else {
+                $siteHeader.removeClass('fixed-header');
+                $scrollLink.stop(true, true).fadeOut(300);
             }
         }
         headerStyle();
+        $(window).on('scroll', headerStyle);
 
 
         // 02. Dropdown menu
+        // Antes usaba .hover(fn) con slideToggle: una sola funcion para abrir Y
+        // cerrar (toggle), asi que si el estado se desincronizaba (scroll de por
+        // medio, doble disparo, animacion interrumpida) el hover dejaba de abrir
+        // o el submenu quedaba a medio desplegar. Con mouseenter/mouseleave
+        // separados usando slideDown/slideUp la accion siempre es explicita, y
+        // stop(true, true) salta al final de la animacion en curso en vez de
+        // dejarla a medias.
         var mobileWidth = 992;
-        var navcollapse = $('.navigation li.dropdown');
+        var $navDropdowns = $('.navigation li.dropdown');
 
-        navcollapse.hover(function () {
+        $navDropdowns.on('mouseenter', function () {
             if ($(window).innerWidth() >= mobileWidth) {
-                $(this).children('ul').stop(true, false, true).slideToggle(300);
-                $(this).children('.megamenu').stop(true, false, true).slideToggle(300);
+                $(this).children('ul, .megamenu').stop(true, true).slideDown(300);
             }
+        }).on('mouseleave', function () {
+            if ($(window).innerWidth() >= mobileWidth) {
+                $(this).children('ul, .megamenu').stop(true, true).slideUp(300);
+            }
+        });
+
+        // Si el submenu se queda abierto (mouse quieto sobre "Cursos" mientras
+        // se hace scroll con la rueda), justo ahi el header pasa a fixed-header
+        // (arriba) y el submenu -- que cuelga de ese header -- se veia saltar de
+        // posicion en vez de desaparecer. Cerrarlo apenas hay scroll evita el salto.
+        $(window).on('scroll', function () {
+            $navDropdowns.children('ul, .megamenu').stop(true, true).slideUp(200);
         });
 
         // 03. Submenu Dropdown Toggle
@@ -85,10 +117,11 @@
             //Dropdown parent link — navegable; el toggle lo maneja .dropdown-btn
         }
 
-        //Submenu Dropdown Toggle
+        //Al abrir/cerrar el menu movil, colapsar cualquier submenu que
+        //hubiera quedado desplegado de una apertura anterior.
         if ($('.main-header .main-menu').length) {
-            $('.main-header .main-menu .navbar-toggle').click(function () {
-                $(this).prev().prev().next().next().children('li.dropdown').hide();
+            $('.main-header .main-menu .navbar-toggle').on('click', function () {
+                $('.main-header .main-menu .navbar-collapse li.dropdown > ul').hide();
             });
         }
 
@@ -271,6 +304,37 @@
                         breakpoint: 1199,
                         settings: {
                             slidesToShow: Math.min(2, coachSlides),
+                        }
+                    },
+                    {
+                        breakpoint: 767,
+                        settings: {
+                            slidesToShow: 1,
+                        }
+                    }
+                ]
+            });
+        }
+
+        // 12b. Testimonial Slider (home) -- mismo guard que Coach Slider: sin
+        // limitar slidesToShow al nº real de slides, infinite:true rompe slick
+        // (initADA) cuando hay menos slides que columnas.
+        if ($('.testimonial-slider').length) {
+            var testimonialSlides = $('.testimonial-slider').children().length;
+            $('.testimonial-slider').slick({
+                slidesToShow: Math.min(3, testimonialSlides),
+                slidesToScroll: 1,
+                infinite: testimonialSlides > 3,
+                speed: 400,
+                autoplay: true,
+                arrows: false,
+                dots: true,
+                autoplaySpeed: 6000,
+                responsive: [
+                    {
+                        breakpoint: 1199,
+                        settings: {
+                            slidesToShow: Math.min(2, testimonialSlides),
                         }
                     },
                     {
@@ -518,32 +582,6 @@
 
     });
 
-
-    /* ==========================================================================
-       When document is scroll, do
-       ========================================================================== */
-
-    $(window).on('scroll', function () {
-
-        // Header Style and Scroll to Top
-        function headerStyle() {
-            if ($('.main-header').length) {
-                var windowpos = $(window).scrollTop();
-                var siteHeader = $('.main-header');
-                var scrollLink = $('.scroll-top');
-                if (windowpos >= 150) {
-                    siteHeader.addClass('fixed-header');
-                    scrollLink.fadeIn(300);
-                } else {
-                    siteHeader.removeClass('fixed-header');
-                    scrollLink.fadeOut(300);
-                }
-            }
-        }
-
-        headerStyle();
-
-    });
 
     /* ==========================================================================
        When document is loaded, do

@@ -14,7 +14,7 @@
   --line: #e7ecf1;
   --field: #f7f9fb;
   --green: #008bcd;
-  --green-deep: #006fa3;
+  --green-deep: #008bcd;
   --shadow-soft: 0 6px 22px rgba(13,27,42,.07);
   --ease: cubic-bezier(.22,.61,.36,1);
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -43,7 +43,7 @@
 .bundle-page .band .b-stats svg { width: 16px; height: 16px; color: var(--green); }
 
 /* Layout */
-.bundle-page .bp-wrap { background: #f3f6f9; padding: 40px 0 72px; }
+.bundle-page .bp-wrap { background: #F1F4F6; padding: 40px 0 72px; }
 .bundle-page .bp-layout { display: grid; grid-template-columns: 1fr 360px; gap: 30px; align-items: start; }
 
 /* Main */
