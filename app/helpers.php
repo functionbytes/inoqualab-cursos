@@ -13,6 +13,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\URL;
 
+if (! function_exists('devThrottle')) {
+    /**
+     * Límite de throttle relajado en dominios *.test (Herd/local): el mismo
+     * equipo probando/reintentando un flujo (login, quiz, examen...) agota en
+     * minutos un límite pensado para tráfico real de producción. En producción
+     * (host real) se respeta siempre el límite estricto pasado en $prod.
+     */
+    function devThrottle(int $prod, ?int $dev = null, int $decayMinutes = 1): string
+    {
+        $dev ??= $prod * 3;
+        $max = str_ends_with(request()->getHost(), '.test') ? $dev : $prod;
+
+        return "throttle:{$max},{$decayMinutes}";
+    }
+}
+
 if (! function_exists('getlogo')) {
     function getlogo()
     {
@@ -30,8 +46,16 @@ if (! function_exists('getlogo')) {
 if (! function_exists('setCoupon')) {
     function setCoupon($coupon)
     {
-        $theTime = time() + 86400 * 7;
-        setcookie('coupon_code', $coupon->code, $theTime, '/');
+        // secure/httponly/samesite explícitos, igual que XSRF-TOKEN/session (Laravel
+        // sí las marca así) -- consistente con el resto de cookies de la app en un
+        // sitio HTTPS.
+        setcookie('coupon_code', $coupon->code, [
+            'expires' => time() + 86400 * 7,
+            'path' => '/',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
     }
 }
 
@@ -167,10 +191,16 @@ if (! function_exists('removeCoupon')) {
     function removeCoupon()
     {
         if (isset($_COOKIE['coupon_code'])) {
-            // Mismo path '/' con el que se creó en setCoupon(): sin él, el borrado
-            // usa el path de la URL actual (p.ej. /checkout/coupon) y la cookie
-            // original sobrevive — el cupón "quitado" se seguía consumiendo.
-            setcookie('coupon_code', '', time() - 3600, '/');
+            // Mismos atributos (path/secure/samesite) con los que se creó en
+            // setCoupon(): sin ellos el navegador la trata como una cookie distinta
+            // y la original sobrevive — el cupón "quitado" se seguía consumiendo.
+            setcookie('coupon_code', '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'secure' => true,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
             unset($_COOKIE['coupon_code']);
         }
     }

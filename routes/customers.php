@@ -50,20 +50,20 @@ Route::group(['prefix' => 'customer', 'middleware' => ['auth', 'customers', 'ses
         Route::get('/certificate/view/{slack}', [CertificateController::class, 'view'])->name('customers.certificate.view');
         Route::get('/certificate/download/{slack}', [CertificateController::class, 'download'])->name('customers.certificate.download')->middleware('throttle:30,1');
 
-        Route::post('/content/quiz/realized', [QuizController::class, 'realized'])->name('customers.quiz.realized')->middleware('throttle:20,1');
+        Route::post('/content/quiz/realized', [QuizController::class, 'realized'])->name('customers.quiz.realized')->middleware(devThrottle(20));
         Route::get('/content/quiz/{lesson}', [QuizController::class, 'quiz'])->name('customers.courses.quiz');
         Route::get('/content/quiz/finish/{quiz}', [QuizController::class, 'finish'])->name('customers.quiz.show');
         Route::get('/content/quiz/tryagain/{quiz}', [QuizController::class, 'tryagain'])->name('customers.quiz.tryagain');
         // El segmento de URL llega al controller pero no se usa: store() toma el
         // quiz de $request->quiz y valida que sea del usuario autenticado.
-        Route::post('/content/quiz/store/{lesson}', [QuizController::class, 'store'])->name('customers.quiz.store')->middleware('throttle:20,1');
+        Route::post('/content/quiz/store/{lesson}', [QuizController::class, 'store'])->name('customers.quiz.store')->middleware(devThrottle(20));
 
         // Este sí recibe el slack del curso, no un id.
         Route::get('/content/exam/{course}', [ExamController::class, 'exam'])->name('customers.courses.exam');
         Route::get('/content/exam/finish/{exam}', [ExamController::class, 'finish'])->name('customers.exam.show');
         Route::get('/content/exam/tryagain/{exam}', [ExamController::class, 'tryagain'])->name('customers.exam.tryagain');
         // Recibe el id del ExamTopic, no el del curso ni el del examen.
-        Route::post('/content/exam/store/{topic}', [ExamController::class, 'store'])->name('customers.exam.store')->middleware('throttle:20,1');
+        Route::post('/content/exam/store/{topic}', [ExamController::class, 'store'])->name('customers.exam.store')->middleware(devThrottle(20));
     });
 
     Route::group(['prefix' => 'documents'], function () {

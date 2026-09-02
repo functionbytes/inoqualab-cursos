@@ -22,9 +22,10 @@
 
 @if(empty($drawerCart))
     <div class="cart-empty">
+        <span class="ic"><i class="fas fa-cart-shopping" aria-hidden="true"></i></span>
         <h4>Tu carrito está vacío</h4>
         <p>Aún no has agregado cursos. Explora nuestro catálogo y empieza a certificarte.</p>
-        <a class="cart-empty-btn" href="{{ route('courses') }}"><i class="fas fa-graduation-cap"></i> Ver cursos</a>
+        <a class="cart-empty-btn" href="{{ route('courses') }}">Ver cursos</a>
     </div>
 @else
     <div class="cart-body">
@@ -87,6 +88,6 @@
         @endif
         <p class="cart-foot-note">{{ $drawerDiscount > 0 ? 'Impuestos calculados en el pago.' : 'Cupones e impuestos se calculan en el pago.' }}</p>
         <a class="cart-view" href="{{ route('cart.index') }}">Ver carrito</a>
-        <a class="cart-cta" href="{{ route('checkout.cart') }}">Finalizar compra <span class="arr">→</span></a>
+        <a class="cart-cta" href="{{ route('checkout.cart') }}">Finalizar compra </a>
     </div>
 @endif

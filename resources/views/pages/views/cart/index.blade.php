@@ -39,12 +39,8 @@
                                 <h3>Tu carrito está vacío</h3>
                                 <p>Aún no has agregado cursos ni paquetes. Explora el catálogo y empieza a certificarte.</p>
                                 <div class="cp-empty-actions">
-                                    <a class="btn-solid" href="{{ route('courses') }}">
-                                        <i class="fas fa-graduation-cap"></i> Ver cursos
-                                    </a>
-                                    <a class="btn-outline-dark" href="{{ route('bundles') }}">
-                                        <i class="fas fa-layer-group"></i> Ver paquetes
-                                    </a>
+                                    <a class="btn-solid" href="{{ route('courses') }}">Ver cursos</a>
+                                    <a class="btn-outline-dark" href="{{ route('bundles') }}">Ver paquetes</a>
                                 </div>
                             </div>
                         @else
@@ -99,12 +95,8 @@
                             @endforeach
 
                             <div class="cp-actions">
-                                <button type="button" class="btn-ghost danger js-cart-clear">
-                                    <i class="fas fa-trash-can"></i> Vaciar carrito
-                                </button>
-                                <a class="btn-ghost" href="{{ route('courses') }}">
-                                    <i class="fas fa-chevron-left"></i> Seguir comprando
-                                </a>
+                                <button type="button" class="btn-ghost danger js-cart-clear">Vaciar carrito</button>
+                                <a class="btn-ghost" href="{{ route('courses') }}">Seguir comprando</a>
                             </div>
                         @endif
 
@@ -146,7 +138,7 @@
                                 </div>
 
                                 <a class="go-pay" id="goPayBtn" href="{{ route('checkout.cart') }}">
-                                    <span id="goPayText">Finalizar pago</span> <span class="arr">→</span>
+                                    <span id="goPayText">Finalizar pago</span>
                                 </a>
 
                                 <div class="trust">

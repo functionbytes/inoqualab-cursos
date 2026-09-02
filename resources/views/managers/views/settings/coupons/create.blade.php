@@ -369,6 +369,28 @@
 
                             }
 
+                        },
+                        error: function(xhr) {
+
+                            $submitButton.prop('disabled', false);
+
+                            var error = 'Ocurrió un error al crear el cupón.';
+
+                            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                error = Object.values(xhr.responseJSON.errors).flat().join(' ');
+                            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                                error = xhr.responseJSON.message;
+                            }
+
+                            toastr.error(error, "Operación fallida", {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-bottom-right"
+                            });
+
+                            $('.errors').text(error);
+                            $('.errors').removeClass('d-none');
+
                         }
                     });
 

@@ -47,13 +47,30 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío.');
         }
 
-        removeCoupon();
-
         $items = collect($lines)->map(fn ($line) => (object) $line);
 
+        // El cupón vive en cookie (setCoupon()/getCoupon()), no en sesión -- antes se
+        // borraba aquí incondicionalmente en cada GET, así que un simple refresh de
+        // /checkout ya perdía el cupón recién aplicado por AJAX. Ahora se relee y, si
+        // sigue siendo válido para el carrito actual, se recalcula el descuento real;
+        // si ya no aplica (cupón borrado/deshabilitado/vencido/carrito cambió), se limpia.
         $discount = 0;
-        $total = $subtotal;
         $coupon = getCoupon();
+
+        if ($coupon !== '') {
+            $couponModel = Coupon::where('code', $coupon)->first();
+
+            if ($couponModel && $couponModel->available) {
+                $discount = cartCouponDiscount($lines, $couponModel);
+            }
+
+            if ($discount <= 0) {
+                removeCoupon();
+                $coupon = '';
+            }
+        }
+
+        $total = max(0, $subtotal - $discount);
         $date = new Carbon;
         $user = User::auth();
 

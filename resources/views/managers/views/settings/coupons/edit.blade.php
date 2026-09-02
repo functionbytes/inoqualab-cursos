@@ -119,7 +119,7 @@
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Cursos</label>
                                     <div class="input-group">
-                                        {!! Form::select('courses[]', $courses, null, ['class' => 'select2 form-control', 'multiple' => 'multiple', 'id' => 'courses', 'data-placeholder' => 'Seleccionar cursos (opcional)']) !!}
+                                        {!! Form::select('courses[]', $courses, $coupon_courses, ['class' => 'select2 form-control', 'multiple' => 'multiple', 'id' => 'courses', 'data-placeholder' => 'Seleccionar cursos (opcional)']) !!}
                                     </div>
                                     <label id="courses-error" class="error d-none" for="courses"></label>
                                 </div>
@@ -129,7 +129,7 @@
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Paquetes</label>
                                     <div class="input-group">
-                                        {!! Form::select('bundles[]', $bundles, null, ['class' => 'select2 form-control', 'multiple' => 'multiple', 'id' => 'bundles', 'data-placeholder' => 'Seleccionar paquetes (opcional)']) !!}
+                                        {!! Form::select('bundles[]', $bundles, $coupon_bundles, ['class' => 'select2 form-control', 'multiple' => 'multiple', 'id' => 'bundles', 'data-placeholder' => 'Seleccionar paquetes (opcional)']) !!}
                                     </div>
                                     <label id="bundles-error" class="error d-none" for="bundles"></label>
                                 </div>
@@ -410,6 +410,28 @@
                                 $('.errors').removeClass('d-none');
 
                             }
+
+                        },
+                        error: function(xhr) {
+
+                            $submitButton.prop('disabled', false);
+
+                            var error = 'Ocurrió un error al actualizar el cupón.';
+
+                            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                error = Object.values(xhr.responseJSON.errors).flat().join(' ');
+                            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                                error = xhr.responseJSON.message;
+                            }
+
+                            toastr.error(error, "Operación fallida", {
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: "toast-bottom-right"
+                            });
+
+                            $('.errors').text(error);
+                            $('.errors').removeClass('d-none');
 
                         }
                     });
