@@ -170,7 +170,8 @@ $(document).ready(function () {
                         $('#enterprise').val(0).trigger('change');
 
                         $('#users-modal').modal('show');
-                        $('#users-link').attr('href', urlEnterprises);
+                        $('#users-modal .enterprise-div').removeClass('d-none');
+                        $('#enterprise-link').attr('href', urlEnterprises);
                     } else {
                         var error = response.message;
                         $('.errors').removeClass('d-none');

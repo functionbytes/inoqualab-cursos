@@ -153,7 +153,8 @@ $(document).ready(function () {
                         $('#password').val('');
 
                         $('#users-modal').modal('show');
-                        $('#users-link').attr('href', $form.data('users-url'));
+                        $('#users-modal .enterprise-div').removeClass('d-none');
+                        $('#enterprise-link').attr('href', $form.data('users-url'));
                     } else {
                         var error = response.message;
                         $('.errors').removeClass('d-none').html(error);

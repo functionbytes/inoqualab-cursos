@@ -3,7 +3,7 @@ $(document).ready(function () {
 
     const $form = $('#formReport');
 
-    $('#enteprises').select2({
+    $('#enterprise').select2({
         placeholder: 'Seleccionar una empresa',
         minimumResultsForSearch: Infinity,
     });

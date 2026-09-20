@@ -1,5 +1,11 @@
 $(document).ready(function () {
 
+    function escHtml(t) {
+        var d = document.createElement('div');
+        d.textContent = String(t || '');
+        return d.innerHTML;
+    }
+
     var $form = $('#formEdit');
     var previewUrl = $form.data('preview-url');
     var testUrl = $form.data('test-url');

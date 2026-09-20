@@ -184,6 +184,16 @@ $(document).ready(function () {
 });
 
 $(function () {
+    // FIXME: la vista no tiene un contenedor #descriptions (falta la sección
+    // de "Descripción" en el formulario). Bug preexistente: sin este guard,
+    // `new Quill('#descriptions', ...)` lanza una excepción porque el
+    // selector no matchea ningún elemento. Se preserva el comportamiento
+    // (el campo description nunca se completa) hasta que se agregue el
+    // contenedor real al blade.
+    if ($('#descriptions').length === 0) {
+        return;
+    }
+
     var description = new Quill('#descriptions', {
         modules: {
             toolbar: [['clean']],

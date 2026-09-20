@@ -41,6 +41,12 @@ globs: "resources/views/pages/**/*.blade.php,resources/views/layouts/pages.blade
 ## Imágenes de cursos (Spatie Media Library)
 - Thumbnail: `$model->getFirstMediaUrl('thumbnail')` con fallback a imagen default
 - Preview curso: `asset('images/course/' . $course->preview_image)`
+- Fallback de imagen rota: clase `js-img-fallback` + `data-fallback-src="{{ asset(...) }}"` (o `data-fallback-action="hide-sibling"` para el patrón "ocultar imagen y mostrar el ícono placeholder hermano"). El listener global vive en `public/pages/js/layout.js` — NUNCA usar `onerror=""` inline
+
+## JS y CSS
+- **NO `<script>`/`<style>` inline**: extraer a `public/pages/js/{misma-ruta}.js` / `public/pages/css/{misma-ruta}.css`, cargados vía `@push('scripts')` / `@push('css')` (el layout `layouts/pages.blade.php` ya expone ambos stacks)
+- **NO `onclick=`/`onchange=`/`onsubmit=` inline**: event delegation jQuery (`$(document).on('evento', '.selector', fn)`)
+- Datos de Blade que el JS necesita → atributos `data-*`, nunca interpolados en el `.js`
 
 ## Evitar
 - `#90bb13` (color del panel admin — nunca en pages)

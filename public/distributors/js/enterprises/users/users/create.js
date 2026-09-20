@@ -123,7 +123,8 @@ $(document).ready(function () {
                         $('#password').val('');
 
                         $('#users-modal').modal('show');
-                        $('#users-link').attr('href', $form.data('redirectUrl'));
+                        $('#users-modal .enterprise-div').removeClass('d-none');
+                        $('#enterprise-link').attr('href', $form.data('redirectUrl'));
                     } else {
                         $('.errors').removeClass('d-none');
                         $('.errors').html(response.message);

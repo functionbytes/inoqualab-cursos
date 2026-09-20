@@ -3,7 +3,7 @@ Dropzone.autoDiscover = false;
 $(document).ready(function () {
     var $form = $('#formReport');
 
-    $('#enteprises').select2({
+    $('#enterprise').select2({
         placeholder: 'Seleccionar una empresa',
         minimumResultsForSearch: Infinity,
     });

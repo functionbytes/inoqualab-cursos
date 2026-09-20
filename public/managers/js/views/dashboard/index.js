@@ -53,12 +53,10 @@ $(document).ready(function () {
         },
     };
     new ApexCharts(document.querySelector('.customers'), customers).render();
-    new ApexCharts(document.querySelector('.customers1'), customers).render();
     new ApexCharts(document.querySelector('.customers2'), customers).render();
     new ApexCharts(document.querySelector('.customers3'), customers).render();
     new ApexCharts(document.querySelector('.customers4'), customers).render();
     new ApexCharts(document.querySelector('.customers5'), customers).render();
-    new ApexCharts(document.querySelector('.customers6'), customers).render();
     // =====================================
     // Profit
     // =====================================

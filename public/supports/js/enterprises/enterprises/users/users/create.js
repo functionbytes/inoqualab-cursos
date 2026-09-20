@@ -137,7 +137,8 @@ $(document).ready(function () {
                         $('#password').val('');
 
                         $('#users-modal').modal('show');
-                        $('#users-link').attr('href', redirectUrl);
+                        $('#users-modal .enterprise-div').removeClass('d-none');
+                        $('#enterprise-link').attr('href', redirectUrl);
                     } else {
                         $('.errors').removeClass('d-none').html(response.message);
 

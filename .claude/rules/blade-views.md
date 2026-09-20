@@ -1,14 +1,17 @@
 ---
-globs: "modules/*/resources/views/**/*.blade.php"
+globs: "resources/views/{managers,supports,distributors,enterprises,accountings,customers}/**/*.blade.php"
 ---
 
-# Blade View Rules — PANEL ADMIN (modules/)
+# Blade View Rules — PANELES ADMIN Y PORTALES (managers/supports/distributors/enterprises/accountings/customers)
 
-> ⚠️ Estas reglas aplican SOLO a `modules/*/resources/views/` (panel admin).
-> Para vistas públicas (`resources/views/pages/`) ver `rules/pages-views.md`.
+> ⚠️ Este proyecto es un monolito en `app/` y `resources/views/{dominio}/` — NO existe `modules/`.
+> Estas reglas aplican a los paneles/portales protegidos. Para vistas públicas (`resources/views/pages/`) ver `rules/pages-views.md`.
 
 - Icons: Font Awesome 6 ONLY (`fas fa-*`, `far fa-*`, `fab fa-*`). NEVER use Tabler Icons (`ti ti-*`)
 - JavaScript: jQuery + AJAX. NEVER use Livewire or Inertia.js
+- **NO `<script>` inline**: todo JS va en un archivo `.js` propio bajo `public/{perfil}/js/{misma-ruta-que-la-vista}.js`, cargado con `@push('scripts')<script src="{{ asset(...) }}"></script>@endpush`. Datos de Blade (`route()`, variables, `@json()`) se pasan vía atributos `data-*`, nunca interpolados dentro del `.js`
+- **NO `<style>` inline ni `style=""`**: todo CSS va en un archivo `.css` propio bajo `public/{perfil}/css/{misma-ruta-que-la-vista}.css`, cargado con `@push('css')`. Excepción: plantillas renderizadas vía `Pdf::loadView()` (dompdf, `enable_remote=false`) pueden mantener CSS inline porque dompdf no carga `<link>` externos
+- **NO `onclick=`/`onchange=`/`onsubmit=`/`onerror=` inline**: usar clases/`data-*` + `$(document).on('evento', '.selector', fn)` (event delegation). Excepción: `onerror` en `<img>` no hace bubbling, así que su fallback se maneja con un listener delegado en fase de captura (`addEventListener('error', fn, true)`), no con jQuery `.on()`
 - Section titles: capitalize only first word (`Informacion basica`, NOT `Informacion Basica`)
 - Use Bootstrap 5.3 classes over custom CSS. NEVER use `style=""` inline styles
 - CSRF token in AJAX: `headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }`

@@ -1,5 +1,8 @@
 # Frontend Agent Memory
 
+- [Training project structure](project_training_structure.md) — real path is `resources/views/managers/views/`, NOT `modules/` (that's a different/foreign project)
+- [Managers inline JS/CSS extraction pattern](project_managers_inline_js_extraction.md) — de-inlining pattern (data-* attrs, onclick→delegation) applied to enterprises/distributors/certifiers/newsletter/notifications/analytics
+
 ## Layout & Stack directives
 - Layout: `@stack('css')` for stylesheets, `@stack('scripts')` for JS (NOT `@stack('styles')`)
 - Main layout: `modules/Theme/resources/views/layouts/theme.blade.php`

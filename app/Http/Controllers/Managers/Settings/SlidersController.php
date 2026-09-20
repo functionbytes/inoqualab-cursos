@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Settings\Sliders\StoreSliderRequest;
 use App\Http\Requests\Managers\Settings\Sliders\UpdateSliderRequest;
 use App\Models\Slider;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -138,6 +139,29 @@ class SlidersController extends Controller
 
         return redirect()->route('manager.sliders');
 
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:sliders,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'sliders.delete' : 'sliders.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Slider::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' slider(s) procesados.']);
     }
 
     public function getThumbnails($slack)

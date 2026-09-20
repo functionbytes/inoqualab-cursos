@@ -197,12 +197,8 @@ $(document).ready(function () {
                 $('#status').val('true');
             });
 
-            // NOTA: uploadThumbnail() no está definida en ningún lugar de este
-            // archivo. Bug preexistente conservado tal cual estaba en el inline
-            // original (ver reporte de la tarea de extracción de JS/CSS).
             myThumbnail.on('complete', function () {
                 $('#status').val('true');
-                uploadThumbnail();
             });
         }
     });

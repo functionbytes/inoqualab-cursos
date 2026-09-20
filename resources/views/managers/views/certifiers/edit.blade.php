@@ -13,7 +13,7 @@
                       data-signature-url="{{ route('manager.certifiers.signatures') }}"
                       data-thumbnail-get-url="{{ route('manager.certifiers.thumbnails.get', ':item') }}"
                       data-signature-get-url="{{ route('manager.certifiers.signatures.get', ':item') }}"
-                      data-thumbnail-delete-url="{{ route('manager.settings.metadata.delete', ':id') }}"
+                      data-thumbnail-delete-url="{{ route('manager.certifiers.thumbnails.delete', ':id') }}"
                       data-signature-delete-url="{{ route('manager.certifiers.signatures.delete', ':id') }}"
                       data-redirect-url="{{ route('manager.certifiers') }}">
 

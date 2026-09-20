@@ -41,7 +41,7 @@ $(document).ready(function () {
                 contentType: false,
                 processData: false,
                 data: formData,
-                success: function (d) {
+                success: function (response) {
                     if (response.success == true) {
                         toastr.success(response.message, 'Operación exitosa', {
                             closeButton: true,

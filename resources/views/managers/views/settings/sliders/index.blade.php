@@ -8,7 +8,7 @@
     <div id="slidersPage" class="widget-content searchable-container list"
          data-flash-success="{{ session('success') }}"
          data-flash-error="{{ session('error') }}"
-         data-bulk-action-url="{{ route('manager.sliders') }}">
+         data-bulk-action-url="{{ route('manager.sliders.bulk-action') }}">
 
         <div class="card">
 
