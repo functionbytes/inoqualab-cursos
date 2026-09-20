@@ -47,10 +47,9 @@ class MailerTemplateController extends Controller
     {
         $module = $request->input('module', 'core');
         $layouts = MailerLayout::where('type', 'layout')->enabled()->orderBy('alias')->get();
-        $variables = MailerTemplate::defaultVariables($module);
         $baseContent = MailerTemplate::getStructureForModule($module);
 
-        return view('managers.views.mailer.templates.create', compact('module', 'layouts', 'variables', 'baseContent'));
+        return view('managers.views.mailer.templates.create', compact('module', 'layouts', 'baseContent'));
     }
 
     public function store(StoreMailerTemplateRequest $request): RedirectResponse
@@ -88,9 +87,8 @@ class MailerTemplateController extends Controller
     {
         $template = MailerTemplate::where('uid', $uid)->with('layout')->firstOrFail();
         $layouts = MailerLayout::where('type', 'layout')->enabled()->orderBy('alias')->get();
-        $variables = $template->getAvailableVariables();
 
-        return view('managers.views.mailer.templates.edit', compact('template', 'layouts', 'variables'));
+        return view('managers.views.mailer.templates.edit', compact('template', 'layouts'));
     }
 
     public function update(UpdateMailerTemplateRequest $request, string $uid): RedirectResponse

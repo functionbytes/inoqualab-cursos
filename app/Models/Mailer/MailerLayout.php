@@ -2,6 +2,7 @@
 
 namespace App\Models\Mailer;
 
+use App\Services\Mailer\MailerTemplateRendererService;
 use App\Traits\HasUid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,16 @@ class MailerLayout extends Model
             'is_protected' => 'boolean',
             'is_enabled' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // MailerTemplateRendererService cachea header/footer/wrapper 1h por alias
+        // (getCachedLayoutContent). Sin esto, guardar un cambio aquí -- desde el
+        // panel, tinker o un seeder -- lo deja invisible en los correos reales
+        // hasta que el cache expire solo.
+        static::saved(fn () => MailerTemplateRendererService::clearCache());
+        static::deleted(fn () => MailerTemplateRendererService::clearCache());
     }
 
     public function scopeEnabled(Builder $query): Builder

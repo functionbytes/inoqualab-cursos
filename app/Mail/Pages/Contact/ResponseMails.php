@@ -25,11 +25,14 @@ class ResponseMails extends Mailable implements ShouldQueue
 
     public string $date;
 
+    public string $slack;
+
     public function __construct($contact)
     {
         $this->firstname = $contact->firstname;
         $this->email = $contact->email;
         $this->date = $contact->created_at ?? now();
+        $this->slack = $contact->slack;
     }
 
     public function build(): self
@@ -37,6 +40,7 @@ class ResponseMails extends Mailable implements ShouldQueue
         $data = app(MailTemplateService::class)->render('contacts.response', [
             'CUSTOMER_FIRSTNAME' => $this->firstname,
             'CONTACT_DATE' => humanize_date($this->date),
+            'CONTACT_ID' => $this->slack,
         ]);
 
         return $this->to($this->email)

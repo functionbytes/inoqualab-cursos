@@ -25,6 +25,10 @@ class AlertsMails extends Mailable implements ShouldQueue
 
     public string $email;
 
+    public string $cellphone;
+
+    public string $message;
+
     public string $date;
 
     public string $slack;
@@ -37,6 +41,8 @@ class AlertsMails extends Mailable implements ShouldQueue
         $this->email = $contact->email;
         $this->firstname = $contact->firstname;
         $this->lastname = $contact->lastname;
+        $this->cellphone = $contact->cellphone ?? '';
+        $this->message = $contact->message ?? '';
         $this->date = $contact->created_at ?? now();
         $this->contactUrl = route('manager.contacts.edit', $contact->slack);
     }
@@ -48,6 +54,12 @@ class AlertsMails extends Mailable implements ShouldQueue
             'CONTACT_DATE' => humanize_date($this->date),
             'CONTACT_NAMES' => ucwords($this->firstname).' '.ucwords($this->lastname),
             'CONTACT_EMAIL' => $this->email,
+            'CONTACT_PHONE' => $this->cellphone ?: '—',
+            // El mensaje viaja crudo desde un formulario público: MailTemplateService
+            // solo hace str_replace (no hay Blade/autoescape de por medio), así que
+            // se escapa aquí -- sin esto, un remitente podría inyectar HTML/script
+            // en el panel de correo del manager.
+            'CONTACT_MESSAGE' => nl2br(e($this->message)),
             'CONTACT_URL' => $this->contactUrl,
         ]);
 

@@ -56,7 +56,7 @@ class NewSubscriberAdminMail extends Mailable implements ShouldQueue
         return [
             'SITE_NAME' => config('app.name'),
             'SITE_URL' => config('app.url'),
-            'SITE_LOGO_URL' => config('app.url').'/images/logo.png',
+            'SITE_LOGO_URL' => getlogo(),
             'SUPPORT_EMAIL' => config('mail.from.address'),
             'CURRENT_YEAR' => date('Y'),
             'SUBSCRIBER_EMAIL' => $this->newsletter->email,

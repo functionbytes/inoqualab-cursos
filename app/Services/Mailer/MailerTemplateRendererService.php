@@ -239,7 +239,7 @@ class MailerTemplateRendererService
             'ORDER_STATUS' => 'Completada',
             'SITE_NAME' => $appName,
             'SITE_URL' => $appUrl,
-            'SITE_LOGO_URL' => "{$appUrl}/images/logo.png",
+            'SITE_LOGO_URL' => getlogo(),
             'SUPPORT_EMAIL' => $fromAddress,
             'SUPPORT_PHONE' => '+52 555 000 0000',
             'COMPANY_NAME' => $appName,

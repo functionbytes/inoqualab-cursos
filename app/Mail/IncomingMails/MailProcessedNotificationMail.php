@@ -3,6 +3,7 @@
 namespace App\Mail\IncomingMails;
 
 use App\Models\Mail\IncomingMail;
+use App\Services\MailTemplateService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -20,79 +21,39 @@ class MailProcessedNotificationMail extends Mailable implements ShouldQueue
 
     public function build(): self
     {
-        // settings es key/value: setting($clave). getSetting()->prop devolvía null.
-        $siteName = setting('page_title') ?: config('app.name');
-        $enterprise = $this->incomingMail->enterprise?->title ?? '';
+        $enterprise = $this->incomingMail->enterprise?->title;
         $orderSlack = $this->incomingMail->order?->slack;
-        $coursesUrl = route('customers.courses');
-        $logoUrl = getLogo();
-        $supportEmail = setting('page_email') ?: '';
 
-        $enterpriseLine = $enterprise
-            ? "<p style=\"color:#5A7093;line-height:1.7;margin:0 0 16px\">La solicitud de inscripción para <strong>{$enterprise}</strong> ha sido procesada correctamente.</p>"
-            : '<p style="color:#5A7093;line-height:1.7;margin:0 0 16px">Tu solicitud de inscripción ha sido procesada correctamente.</p>';
+        $requestSummary = $enterprise
+            ? "La solicitud de inscripción para <strong style=\"color:#081A28;\">{$enterprise}</strong> ha sido procesada correctamente."
+            : 'Tu solicitud de inscripción ha sido procesada correctamente.';
 
-        $orderLine = $orderSlack
-            ? "<p style=\"color:#5A7093;line-height:1.7;margin:0 0 24px\">Número de referencia: <strong style=\"color:#081A28\">{$orderSlack}</strong></p>"
+        $referenceBlock = $orderSlack
+            ? $this->referenceBlock($orderSlack)
             : '';
 
-        $logoHtml = $logoUrl
-            ? "<img src=\"{$logoUrl}\" alt=\"{$siteName}\" style=\"max-height:36px;vertical-align:middle\">"
-            : "<span style=\"font-size:20px;font-weight:bold;color:#fff\">{$siteName}</span>";
-
-        $footerContact = $supportEmail
-            ? "<br>¿Dudas? Escríbenos a <a href=\"mailto:{$supportEmail}\" style=\"color:#008bce\">{$supportEmail}</a>"
-            : '';
-
-        $html = <<<HTML
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Solicitud procesada — {$siteName}</title>
-</head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:32px 16px">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);max-width:600px;width:100%">
-
-        {{-- Header --}}
-        <tr><td style="background:#008bce;padding:24px 32px">
-          {$logoHtml}
-        </td></tr>
-
-        {{-- Body --}}
-        <tr><td style="padding:36px 32px">
-          <h2 style="margin:0 0 8px;color:#081A28;font-size:22px">Tu solicitud fue procesada</h2>
-          <p style="color:#8D9DB5;font-size:13px;margin:0 0 24px">Notificación automática — {$siteName}</p>
-
-          {$enterpriseLine}
-          {$orderLine}
-
-          <a href="{$coursesUrl}"
-             style="display:inline-block;background:#008bce;color:#fff;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px">
-            Ver mis cursos
-          </a>
-        </td></tr>
-
-        {{-- Divider --}}
-        <tr><td style="border-top:1px solid #f0f0f0"></td></tr>
-
-        {{-- Footer --}}
-        <tr><td style="padding:20px 32px;background:#f9fafb;color:#8D9DB5;font-size:12px;text-align:center;line-height:1.6">
-          Este es un mensaje automático generado por {$siteName}. Por favor no respondas a este correo.{$footerContact}
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>
-HTML;
+        $data = app(MailTemplateService::class)->render('mails.request_processed', [
+            'REQUEST_SUMMARY' => $requestSummary,
+            'REFERENCE_BLOCK' => $referenceBlock,
+            'COURSES_URL' => route('customers.courses'),
+        ]);
 
         return $this->to($this->incomingMail->from)
-            ->subject("Tu solicitud ha sido procesada — {$siteName}")
-            ->html($html);
+            ->subject($data['subject'])
+            ->html($data['html']);
+    }
+
+    private function referenceBlock(string $orderSlack): string
+    {
+        return <<<HTML
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f7f9fb;border-radius:10px;margin:0 0 28px;"><tr><td style="padding:22px 24px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="150" valign="top" style="padding:0;font-family:'Figtree',Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#93a0ad;">REFERENCIA</td>
+<td valign="top" style="padding:0;font-family:'Figtree',Arial,Helvetica,sans-serif;font-size:14px;color:#081A28;font-weight:600;">{$orderSlack}</td>
+</tr>
+</table>
+</td></tr></table>
+HTML;
     }
 }

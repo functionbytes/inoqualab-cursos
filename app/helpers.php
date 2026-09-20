@@ -43,6 +43,39 @@ if (! function_exists('getlogo')) {
     }
 }
 
+if (! function_exists('getLogoBase64')) {
+    /**
+     * Logo como data URI, para contextos que no pueden depender de una URL
+     * remota: DomPDF no trae red habilitada por defecto, y el disco de media
+     * apunta al dominio de producción en este entorno (ver memoria
+     * project_media_disk_points_to_prod) -- un <img src="{{ getlogo() }}">
+     * dentro de un PDF generado localmente no cargaría nada. Lee el archivo
+     * LOCAL del logo ya configurado (mismo Media Library que usa getlogo())
+     * y lo devuelve listo para <img src="...">; null si no hay archivo local
+     * (el llamador decide el fallback, normalmente ocultar la imagen).
+     */
+    function getLogoBase64(): ?string
+    {
+        $setting = _settingModelCache('page_logo');
+        $media = $setting?->getFirstMedia('logo');
+        $path = $media?->getPath() ?? public_path('pages/images/logo.png');
+
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'png' => 'image/png',
+            'jpg', 'jpeg' => 'image/jpeg',
+            'svg' => 'image/svg+xml',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+
+        return 'data:'.$mime.';base64,'.base64_encode(file_get_contents($path));
+    }
+}
+
 if (! function_exists('setCoupon')) {
     function setCoupon($coupon)
     {
@@ -643,9 +676,11 @@ function certificate_date($dates): string
 
 function humanize_date($dates): string
 {
-    $date = Carbon::parse($dates);
-
-    return ucwords($date->format('F j, Y'));
+    // Carbon::format() usa el formateador nativo de PHP, que ignora el locale
+    // de la app (config('app.locale') = 'es') -- salía "September 15, 2026" en
+    // correos en español. translatedFormat() sí respeta el locale indicado.
+    // Sin ucwords(): en español "de" no se capitaliza ("15 de septiembre de 2026").
+    return Carbon::parse($dates)->locale('es')->translatedFormat('j \d\e F \d\e Y');
 }
 
 function month($dates): string

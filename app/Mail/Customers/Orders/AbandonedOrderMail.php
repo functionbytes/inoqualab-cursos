@@ -3,35 +3,46 @@
 namespace App\Mail\Customers\Orders;
 
 use App\Models\Order\Order;
+use App\Services\MailTemplateService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 class AbandonedOrderMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public readonly Order $order) {}
+    public string $email;
 
-    public function envelope(): Envelope
+    public string $firstname;
+
+    public string $reference;
+
+    public string $total;
+
+    public string $payUrl;
+
+    public function __construct(Order $order)
     {
-        return new Envelope(subject: 'Completa tu compra en '.(setting('page_title') ?: 'INOQUALAB'));
+        $this->email = $order->user->email;
+        $this->firstname = $order->user?->firstname ?? 'estudiante';
+        $this->reference = $order->reference ?? $order->slack;
+        $this->total = '$'.number_format((float) $order->total_order_amount, 0, ',', '.').' COP';
+        $this->payUrl = route('payments.pay', $order->slack);
     }
 
-    public function content(): Content
+    public function build(): self
     {
-        return new Content(
-            view: 'emails.orders.abandoned',
-            with: [
-                'brand' => setting('page_title') ?: 'INOQUALAB',
-                'name' => $this->order->user?->firstname ?? 'estudiante',
-                'reference' => $this->order->reference ?? $this->order->slack,
-                'total' => (float) $this->order->total_order_amount,
-                'payUrl' => route('payments.pay', $this->order->slack),
-            ],
-        );
+        $data = app(MailTemplateService::class)->render('orders.abandoned', [
+            'CUSTOMER_FIRSTNAME' => $this->firstname,
+            'ORDER_NUMBER' => $this->reference,
+            'ORDER_TOTAL' => $this->total,
+            'PAY_URL' => $this->payUrl,
+        ]);
+
+        return $this->to($this->email)
+            ->subject($data['subject'])
+            ->html($data['html']);
     }
 }

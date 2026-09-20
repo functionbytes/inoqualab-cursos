@@ -50,7 +50,7 @@ class MailTemplatesController extends Controller
         $template = MailTemplate::findOrFail($id);
 
         $content = $request->input('content', $template->content);
-        $html = app(MailTemplateService::class)->renderRaw($content);
+        $html = app(MailTemplateService::class)->renderRawBody($content);
 
         return response()->json(['success' => true, 'html' => $html]);
     }
@@ -63,7 +63,7 @@ class MailTemplatesController extends Controller
         $content = $request->input('content', $template->content);
         $subject = $request->input('subject', $template->subject);
 
-        $html = $service->renderRaw($content);
+        $html = $service->renderRawBody($content);
         $renderedSubject = $service->renderRaw($subject);
 
         try {
