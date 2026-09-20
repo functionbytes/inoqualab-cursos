@@ -36,7 +36,7 @@
         {{-- Encabezado de URL + volver --}}
         <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
             <a href="{{ route('manager.seo.web-vitals.index') }}" class="btn btn-light btn-sm">
-                <i class="fas fa-arrow-left me-1"></i> Volver
+                Volver
             </a>
             <div>
                 <span class="text-muted small">URL analizada:</span>
@@ -145,7 +145,5 @@
 @endsection
 
 @push('css')
-<style>
-    .cwv-icon-box { width: 36px; height: 36px; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/web-vitals/shared.css') }}">
 @endpush

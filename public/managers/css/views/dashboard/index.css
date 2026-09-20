@@ -1,0 +1,5 @@
+/* KPI cards: mismo tratamiento responsivo que analytics/index.blade.php */
+@media (max-width: 575.98px) {
+    #dashboard-kpi-row .col-8 { flex: 0 0 100%; max-width: 100%; }
+    #dashboard-kpi-row .col-4 { display: none !important; }
+}

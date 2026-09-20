@@ -4,7 +4,9 @@
 
 @section('content')
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+         data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
 
         <div class="card">
             <div class="card-header p-4 border-bottom border-light">
@@ -15,7 +17,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{{ route('manager.seo.search-console.import') }}" class="btn btn-primary">
-                            <i class="fas fa-upload me-1"></i> Importar datos
+                            Importar datos
                         </a>
                     </div>
                 </div>
@@ -118,18 +120,18 @@
                                         $ctr = $page->gsc_impressions > 0
                                             ? round($page->gsc_clicks / $page->gsc_impressions * 100, 2)
                                             : 0;
-                                        $posColor = match(true) {
-                                            ($page->gsc_position ?? 999) <= 3  => '#13C672',
-                                            ($page->gsc_position ?? 999) <= 10 => '#008bce',
-                                            ($page->gsc_position ?? 999) <= 20 => '#FEC90F',
-                                            default                            => '#FA896B',
+                                        $posBadgeClass = match(true) {
+                                            ($page->gsc_position ?? 999) <= 3  => 'pos-badge-excellent',
+                                            ($page->gsc_position ?? 999) <= 10 => 'pos-badge-good',
+                                            ($page->gsc_position ?? 999) <= 20 => 'pos-badge-fair',
+                                            default                            => 'pos-badge-poor',
                                         };
                                     @endphp
                                     <tr>
                                         <td>
                                             <div class="small fw-semibold">{{ Str::limit($page->title ?? 'Sin título', 50) }}</div>
                                             @if($page->canonical_url)
-                                                <small class="text-muted text-truncate d-block" style="max-width:300px;">{{ $page->canonical_url }}</small>
+                                                <small class="text-muted text-truncate d-block analytics-url-col">{{ $page->canonical_url }}</small>
                                             @endif
                                         </td>
                                         <td class="text-center">
@@ -146,7 +148,7 @@
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge rounded-pill text-white fw-bold" style="background:{{ $posColor }};">
+                                            <span class="badge rounded-pill text-white fw-bold {{ $posBadgeClass }}">
                                                 #{{ number_format($page->gsc_position ?? 0, 1) }}
                                             </span>
                                         </td>
@@ -187,7 +189,7 @@
                         </p>
                         @if(!request('search'))
                             <a href="{{ route('manager.seo.search-console.import') }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-upload me-1"></i> Importar datos de Search Console
+                                Importar datos de Search Console
                             </a>
                         @endif
                     </div>
@@ -201,15 +203,10 @@
     </div>
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/dashboard/analytics.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}', 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}', 'Error');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
 @endpush

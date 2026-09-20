@@ -1,5 +1,5 @@
  @if (count($recents) > 0)
-    <div class="widget widget-recent-courses wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+    <div class="widget widget-recent-courses wow fadeInUp delay-0-2s animated">
         <h4 class="widget-title">Blogs recientes</h4>
         <ul>
             @foreach ($recents as $recent)

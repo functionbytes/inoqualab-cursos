@@ -101,7 +101,7 @@
                                        value="{{ request('search') }}">
                             </div>
                         </div>
-                        <div class="flex-shrink-0" style="min-width: 180px;">
+                        <div class="flex-shrink-0 filter-select-lg">
                             <select name="seoable_type" class="form-select">
                                 <option value="">Todos los tipos</option>
                                 @foreach($seoableTypes as $type)
@@ -111,7 +111,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="flex-shrink-0" style="min-width: 160px;">
+                        <div class="flex-shrink-0 filter-select-md">
                             <select name="sort_by" class="form-select">
                                 <option value="updated_at" @selected(request('sort_by', 'updated_at') === 'updated_at')>Actualizado</option>
                                 <option value="created_at" @selected(request('sort_by') === 'created_at')>Creado</option>
@@ -119,7 +119,7 @@
                                 <option value="seo_score" @selected(request('sort_by') === 'seo_score')>Score SEO</option>
                             </select>
                         </div>
-                        <div class="flex-shrink-0" style="min-width: 150px;">
+                        <div class="flex-shrink-0 filter-select-sm">
                             <select name="sort_direction" class="form-select">
                                 <option value="desc" @selected(request('sort_direction', 'desc') === 'desc')>Descendente</option>
                                 <option value="asc" @selected(request('sort_direction') === 'asc')>Ascendente</option>
@@ -226,10 +226,10 @@
                                             <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $meta->id }}">
                                         </td>
                                         <td>
-                                            <span class="editable-cell d-block" data-meta-id="{{ $meta->id }}" data-field="title" data-original-value="{{ $meta->title ?? '' }}" style="cursor:pointer;">
+                                            <span class="editable-cell d-block" data-meta-id="{{ $meta->id }}" data-field="title" data-original-value="{{ $meta->title ?? '' }}">
                                                 <span class="cell-text">{{ Str::limit($meta->title ?? 'Sin título', 50) }}</span>
                                             </span>
-                                            <span class="editable-cell" data-meta-id="{{ $meta->id }}" data-field="description" data-original-value="{{ $meta->description ?? '' }}" style="cursor:pointer;">
+                                            <span class="editable-cell" data-meta-id="{{ $meta->id }}" data-field="description" data-original-value="{{ $meta->description ?? '' }}">
                                                 <small class="text-muted cell-text">{{ Str::limit($meta->description ?? 'Sin descripción', 60) }}</small>
                                             </span>
                                         </td>
@@ -360,8 +360,12 @@
 
     @include('managers.includes.delete')
 
+    <div id="metas-config" class="d-none"
+         data-bulk-destroy-url="{{ route('manager.seo.metas.bulk-destroy') }}"
+         data-inline-base-url="{{ url('panel/seo/metas') }}"></div>
+
     {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none" style="z-index:1050;">
+    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
         <div class="card shadow-lg border-0">
             <div class="card-body py-2 px-4 d-flex align-items-center gap-3">
                 <span class="text-muted small"><span data-bulk-count>0</span> seleccionados</span>
@@ -392,116 +396,10 @@
     </div>
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function() {
-    $(document).on('click', '[data-action="reload"]', function() { window.location.reload(); });
-
-    $('.delete-btn').on('click', function() {
-        $('#delete-modal .modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-    });
-
-    $('#delete-form').on('submit', function (e) {
-        e.preventDefault();
-        var url = $(this).attr('action');
-        var $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).text('Eliminando...');
-        $.ajax({
-            url: url,
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                $('#delete-modal').modal('hide');
-                toastr.success(res.message || 'Eliminado correctamente');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function () {
-                toastr.error('Error al eliminar');
-                $btn.prop('disabled', false).text('Confirmar');
-            }
-        });
-    });
-
-    const $toolbar = $('#bulk-toolbar');
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function() { return $(this).val(); }).get();
-    }
-
-    function updateBulkState() {
-        const ids = getSelectedIds();
-        $toolbar.toggleClass('d-none', ids.length === 0);
-        $('[data-bulk-count]').text(ids.length);
-        $('#bulk-count').text(ids.length);
-    }
-
-    $('#select-all-metas').on('change', function() {
-        $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
-        updateBulkState();
-    });
-    $(document).on('change', '.bulk-checkbox', updateBulkState);
-    $('#bulk-cancel').on('click', function() {
-        $('.bulk-checkbox, #select-all-metas').prop('checked', false);
-        updateBulkState();
-    });
-
-    $('#bulk-delete-btn').on('click', function() { $('#bulk-modal').modal('show'); });
-
-    $('#bulk-delete-confirm').on('click', function () {
-        const ids = getSelectedIds();
-        if (!ids.length) return;
-        const $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Eliminando...');
-        $.ajax({
-            url: '{{ route('manager.seo.metas.bulk-destroy') }}',
-            method: 'POST',
-            data: { _token: $('meta[name="csrf-token"]').attr('content'), ids: ids },
-            success: function (res) {
-                toastr.success(res.message, 'Éxito');
-                setTimeout(function() { location.reload(); }, 800);
-            },
-            error: function () {
-                toastr.error('Error al eliminar registros.');
-                $btn.prop('disabled', false).html('Confirmar eliminación');
-            }
-        });
-    });
-
-    // Inline edit
-    $(document).on('click', '.editable-cell', function (e) {
-        e.stopPropagation();
-        if ($(this).find('input').length) return;
-        const cell = $(this);
-        const metaId = cell.data('meta-id');
-        const field = cell.data('field');
-        const currentValue = cell.data('original-value') || cell.find('.cell-text').first().text().trim();
-        const input = $('<input type="text" class="form-control form-control-sm">').val(currentValue);
-        input.on('blur keydown', function (e) {
-            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== 'Escape') return;
-            if (e.key === 'Escape') { cell.find('.cell-text').show(); input.remove(); return; }
-            const newValue = input.val();
-            $.ajax({
-                url: '{{ url("panel/seo/metas") }}/' + metaId + '/inline',
-                method: 'PATCH',
-                data: { _token: $('meta[name="csrf-token"]').attr('content'), field: field, value: newValue },
-                success: function () {
-                    cell.data('original-value', newValue);
-                    cell.find('.cell-text').text(newValue || (field === 'description' ? 'Sin descripción' : 'Sin título'));
-                    cell.find('.cell-text').show();
-                    input.remove();
-                    toastr.success('Actualizado');
-                },
-                error: function () {
-                    toastr.error('Error al guardar');
-                    cell.find('.cell-text').show();
-                    input.remove();
-                }
-            });
-        });
-        cell.find('.cell-text').hide();
-        cell.append(input);
-        input.focus().select();
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/metas/index.js') }}"></script>
 @endpush

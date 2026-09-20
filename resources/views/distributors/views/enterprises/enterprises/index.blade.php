@@ -4,8 +4,10 @@
 
   @include('distributors.includes.card', ['title' => 'Empresas'])
 
-  <div class="widget-content searchable-container list">
-    
+  <div class="widget-content searchable-container list"
+       data-bulk-url="{{ route('distributor.enterprises.bulk-action') }}"
+       data-bulk-entity-label="empresa(s)">
+
     <div class="card card-body">
       <div class="row">
         <div class="col-md-12 col-xl-12">
@@ -39,6 +41,7 @@
         <table class="table search-table align-middle text-nowrap">
           <thead class="header-item">
           <tr>
+            <th scope="col" class="col-checkbox"><input type="checkbox" class="form-check-input" id="select-all"></th>
             <th scope="col">Titulo</th>
             <th scope="col">Estado</th>
             <th scope="col">Fecha</th>
@@ -46,11 +49,14 @@
           </tr>
           </thead>
           <tbody>
-         
+
           @foreach ($enterprises as $key => $enterprise)
 
             <tr class="search-items">
 
+              <td>
+                <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $enterprise->id }}">
+              </td>
               <td>
                 <span class="usr-email-addr" data-email="{{ Str::lower($enterprise->title)  }}">{{ Str::words( Str::upper(Str::lower($enterprise->title)), 12, '...')  }}</span>
               </td>
@@ -94,6 +100,23 @@
     </div>
   </div>
 
+  @include('managers.includes.bulk-toolbar-modal', [
+      'bulkEntityLabel' => 'empresa(s)',
+      'bulkActions' => [
+          ['value' => 'publish', 'label' => 'Publicar'],
+          ['value' => 'hide', 'label' => 'Ocultar'],
+          ['value' => 'delete', 'label' => 'Eliminar'],
+      ],
+  ])
+
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('distributors/css/tables.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('distributors/js/enterprises/enterprises/index.js') }}"></script>
+@endpush
 
 

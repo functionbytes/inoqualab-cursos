@@ -2,10 +2,17 @@
 
 @section('title', 'Testimonios')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/testimonies/index.css') }}">
+@endpush
+
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="testimoniesPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.testimonies.bulk-action') }}">
 
         <div class="card">
 
@@ -69,6 +76,9 @@
                         <table class="table table-hover align-middle text-nowrap">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="testimonies-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Titulo</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Fecha</th>
@@ -78,6 +88,10 @@
                             <tbody>
                                 @foreach($testimonies as $testimonie)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $testimonie->id }}">
+                                        </td>
                                         <td>
                                             @if($testimonie->icon)
                                                 <i class="{{ $testimonie->icon }} text-muted me-1"></i>
@@ -207,35 +221,17 @@
 
     @include('managers.includes.delete')
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'testimonio(s)',
+        'bulkActions' => [
+            ['value' => 'publish', 'label' => 'Publicar'],
+            ['value' => 'hide', 'label' => 'Ocultar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/testimonies/index.js') }}"></script>
 @endpush

@@ -2,10 +2,16 @@
 
 @section('title', 'Cupones')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/coupons/index.css') }}">
+@endpush
+
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="couponsPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-bulk-action-url="{{ route('manager.coupons.bulk-action') }}">
 
         <div class="card">
 
@@ -69,6 +75,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="coupons-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Título</th>
                                     <th>Código</th>
                                     <th class="text-center">Estado</th>
@@ -80,6 +89,10 @@
                             <tbody>
                                 @foreach($coupons as $coupon)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $coupon->id }}">
+                                        </td>
                                         <td>
                                             <div class="fw-semibold">{{ Str::words($coupon->title, 12, '...') }}</div>
                                         </td>
@@ -209,32 +222,17 @@
 
     @include('managers.includes.delete')
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'cupón(es)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/coupons/index.js') }}"></script>
 @endpush

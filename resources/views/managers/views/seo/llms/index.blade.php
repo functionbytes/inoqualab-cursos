@@ -39,18 +39,19 @@
                         <textarea
                             id="llms-editor"
                             name="llms_txt"
-                            class="form-control font-monospace"
+                            class="form-control font-monospace llms-editor-textarea"
                             rows="20"
-                            style="resize: vertical; font-size: 13px; line-height: 1.6;">{{ $content ?? '' }}</textarea>
+                            data-update-url="{{ route('manager.seo.llms.update') }}"
+                            data-reset-url="{{ route('manager.seo.llms.reset') }}">{{ $content ?? '' }}</textarea>
                     </div>
                 </div>
 
                 <div class="card-footer bg-white border-top p-3">
                     <button type="button" class="btn btn-primary w-100 mb-2" id="btn-save-llms">
-                        <i class="fas fa-save me-1"></i>Guardar llms.txt
+                        Guardar llms.txt
                     </button>
                     <button type="button" class="btn btn-outline-secondary w-100" id="btn-reset-llms">
-                        <i class="fas fa-rotate-left me-1"></i>Restaurar default
+                        Restaurar default
                     </button>
                 </div>
             </div>
@@ -88,37 +89,37 @@
                     <div class="list-group list-group-flush">
                         <div class="list-group-item px-3 py-2">
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-dark text-white flex-shrink-0 mt-1" style="font-size:10px;">H1</span>
+                                <span class="badge bg-dark text-white flex-shrink-0 mt-1 badge-fs-10">H1</span>
                                 <div>
                                     <code class="small"># Nombre del sitio</code>
-                                    <div class="text-muted" style="font-size:11px;">Encabezado principal, nombre del proyecto o marca</div>
+                                    <div class="text-muted text-fs-11">Encabezado principal, nombre del proyecto o marca</div>
                                 </div>
                             </div>
                         </div>
                         <div class="list-group-item px-3 py-2">
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-secondary text-white flex-shrink-0 mt-1" style="font-size:10px;">&gt;</span>
+                                <span class="badge bg-secondary text-white flex-shrink-0 mt-1 badge-fs-10">&gt;</span>
                                 <div>
                                     <code class="small">&gt; Descripción corta</code>
-                                    <div class="text-muted" style="font-size:11px;">Blockquote con resumen breve del sitio en una línea</div>
+                                    <div class="text-muted text-fs-11">Blockquote con resumen breve del sitio en una línea</div>
                                 </div>
                             </div>
                         </div>
                         <div class="list-group-item px-3 py-2">
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-info text-white flex-shrink-0 mt-1" style="font-size:10px;">H2</span>
+                                <span class="badge bg-info text-white flex-shrink-0 mt-1 badge-fs-10">H2</span>
                                 <div>
                                     <code class="small">## Secciones</code>
-                                    <div class="text-muted" style="font-size:11px;">Agrupa los enlaces por categoría o área</div>
+                                    <div class="text-muted text-fs-11">Agrupa los enlaces por categoría o área</div>
                                 </div>
                             </div>
                         </div>
                         <div class="list-group-item px-3 py-2">
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-success text-white flex-shrink-0 mt-1" style="font-size:10px;">–</span>
+                                <span class="badge bg-success text-white flex-shrink-0 mt-1 badge-fs-10">–</span>
                                 <div>
                                     <code class="small">- [Enlace](url): descripción</code>
-                                    <div class="text-muted" style="font-size:11px;">Lista de URLs relevantes con descripción breve</div>
+                                    <div class="text-muted text-fs-11">Lista de URLs relevantes con descripción breve</div>
                                 </div>
                             </div>
                         </div>
@@ -133,7 +134,7 @@
                     <p class="text-muted">Copia y adapta este ejemplo</p>
                 </div>
                 <div class="card-body p-3">
-                    <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.72rem;white-space:pre-wrap;"># Nombre del sitio
+                    <pre class="small bg-light p-2 rounded mb-0 llms-example-pre"># Nombre del sitio
 
 &gt; Descripción breve en una línea.
 
@@ -170,83 +171,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/llms/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    // Guardar llms.txt via AJAX
-    $('#btn-save-llms').on('click', function () {
-        var $btn = $(this);
-        var content = $('#llms-editor').val();
-
-        $btn.prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-        );
-
-        $.ajax({
-            url: '{{ route('manager.seo.llms.update') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: { llms_txt: content },
-            dataType: 'json',
-            success: function (response) {
-                toastr.success(response.message ?? 'llms.txt guardado correctamente');
-            },
-            error: function (xhr) {
-                var msg = 'Error al guardar';
-                if (xhr.responseJSON) {
-                    msg = xhr.responseJSON.message ?? msg;
-                    if (xhr.responseJSON.errors) {
-                        var errors = xhr.responseJSON.errors;
-                        msg = Object.values(errors).flat().join('<br>');
-                    }
-                }
-                toastr.error(msg);
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html(
-                    '<i class="fas fa-save me-1"></i>Guardar llms.txt'
-                );
-            }
-        });
-    });
-
-    // Restaurar default via AJAX
-    $('#btn-reset-llms').on('click', function () {
-        if (!confirm('¿Restaurar el llms.txt al valor por defecto? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        var $btn = $(this);
-        $btn.prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Restaurando...'
-        );
-
-        $.ajax({
-            url: '{{ route('manager.seo.llms.reset') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            dataType: 'json',
-            success: function (response) {
-                toastr.success(response.message ?? 'Contenido restaurado al valor por defecto');
-                if (response.content !== undefined) {
-                    $('#llms-editor').val(response.content);
-                } else {
-                    setTimeout(function () { window.location.reload(); }, 800);
-                }
-            },
-            error: function (xhr) {
-                var msg = xhr.responseJSON ? (xhr.responseJSON.message ?? 'Error al restaurar') : 'Error al restaurar';
-                toastr.error(msg);
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html(
-                    '<i class="fas fa-rotate-left me-1"></i>Restaurar default'
-                );
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/llms/index.js') }}"></script>
 @endpush

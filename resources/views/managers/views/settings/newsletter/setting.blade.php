@@ -1,12 +1,16 @@
 @extends('layouts.managers')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/newsletter/setting.css') }}">
+@endpush
+
 @section('content')
 
 <div class="row g-4 align-items-start">
 
     {{-- Columna principal --}}
     <div class="col-lg-8">
-        <form id="formNewsletter" onsubmit="return false">
+        <form id="formNewsletter" data-update-url="{{ route('manager.settings.newsletter.update') }}">
             @csrf
 
             <div class="card">
@@ -59,7 +63,7 @@
                     </div>
 
                     <div id="notification-email-fields" @if(setting('newsletter_email_notifications') != 1) class="d-none" @endif>
-                        <div class="mt-3" style="max-width:360px">
+                        <div class="mt-3 newsletter-notification-email-field">
                             <label for="newsletter_notification_email" class="form-label fw-semibold">
                                 Correo de destino
                             </label>
@@ -206,59 +210,5 @@
 @endsection
 
 @push('scripts')
-<script>
-(function () {
-
-    // ── Show/hide condicional ─────────────────────────────────────────────────
-    document.getElementById('newsletter_email_notifications')?.addEventListener('change', function () {
-        document.getElementById('notification-email-fields').classList.toggle('d-none', !this.checked);
-    });
-
-    document.getElementById('newsletter_popup_enabled')?.addEventListener('change', function () {
-        document.getElementById('popup-fields').classList.toggle('d-none', !this.checked);
-    });
-
-    document.getElementById('newsletter_mailjet_enabled')?.addEventListener('change', function () {
-        document.getElementById('mailjet-fields').classList.toggle('d-none', !this.checked);
-    });
-
-    // ── Guardar via AJAX ──────────────────────────────────────────────────────
-    document.getElementById('formNewsletter').addEventListener('submit', function () {
-        var formData = new FormData();
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-        formData.append('newsletter_enabled',              document.getElementById('newsletter_enabled').checked ? 1 : 0);
-        formData.append('newsletter_double_optin',          document.getElementById('newsletter_double_optin').checked ? 1 : 0);
-        formData.append('newsletter_email_notifications',  document.getElementById('newsletter_email_notifications').checked ? 1 : 0);
-        formData.append('newsletter_notification_email',   document.getElementById('newsletter_notification_email').value);
-        formData.append('newsletter_popup_enabled',        document.getElementById('newsletter_popup_enabled').checked ? 1 : 0);
-        formData.append('newsletter_popup_delay',          document.getElementById('newsletter_popup_delay').value);
-        formData.append('newsletter_mailjet_enabled',      document.getElementById('newsletter_mailjet_enabled').checked ? 1 : 0);
-        formData.append('newsletter_mailjet_api_key',      document.getElementById('newsletter_mailjet_api_key').value);
-        formData.append('newsletter_mailjet_api_secret',   document.getElementById('newsletter_mailjet_api_secret').value);
-        formData.append('newsletter_mailjet_list_id',      document.getElementById('newsletter_mailjet_list_id').value);
-
-        $.ajax({
-            url: '{{ route('manager.settings.newsletter.update') }}',
-            type: 'POST',
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (res) {
-                if (res.success) {
-                    toastr.success(res.message, 'Operación exitosa', {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: 'toast-bottom-right',
-                    });
-                }
-            },
-            error: function (xhr) {
-                var msg = xhr.responseJSON?.message ?? 'Error al guardar.';
-                toastr.error(msg, 'Error', { closeButton: true, positionClass: 'toast-bottom-right' });
-            }
-        });
-    });
-
-})();
-</script>
+<script src="{{ asset('managers/js/views/settings/newsletter/setting.js') }}"></script>
 @endpush

@@ -7,7 +7,11 @@
 
             <div class="card w-100">
 
-                <form id="formContacs" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formContacs" enctype="multipart/form-data" role="form"
+                      data-urls='@json([
+                          "update" => route("manager.contacts.update"),
+                          "index" => route("manager.contacts"),
+                      ])'>
 
                     {{ csrf_field() }}
 
@@ -105,131 +109,5 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formContacs").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    available: {
-                        required: true,
-                    },
-
-                },
-                messages: {
-                    reviewed: {
-                        required: "Es necesario un estado.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formContacs');
-                    var formData = new FormData($form[0]);
-                    var slack = $("#slack").val();
-                    var reviewed = $("#reviewed").val();
-
-                    formData.append('slack', slack);
-                    formData.append('reviewed', reviewed);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-                    $.ajax({
-                        url: "{{ route('manager.contacts.update') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    window.location = "{{ route('manager.contacts') }}";
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-        });
-
-        var toolbarOptions = [
-            ['bold', 'italic', 'underline', 'strike'],        
-            ['blockquote', 'code-block'],
-            [{ 'header': 1 }, { 'header': 2 }],               
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'script': 'sub' }, { 'script': 'super' }],      
-            [{ 'indent': '-1' }, { 'indent': '+1' }],          
-            [{ 'direction': 'rtl' }],                         
-            [{ 'size': ['small', false, 'large', 'huge'] }],  
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [ 'link', 'image', 'video' ],
-            [{ 'color': [] }, { 'background': [] }],          
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-
-            ['clean']                                        
-        ];
-
-        var toolbarOption = [
-            ['clean']                                       
-        ];
-
-        var description = new Quill('#messages', {
-
-            modules: {
-                toolbar: toolbarOption,
-                clipboard: {
-                    matchVisual: false
-                }
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-        $(".ql-editor").addClass('disabled');
-        $(".ql-editor").attr('contenteditable', false);
-
-    </script>
-
+<script src="{{ asset('managers/js/views/settings/contacts/edit.js') }}"></script>
 @endpush
-
-
-

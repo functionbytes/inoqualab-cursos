@@ -1,0 +1,17 @@
+.variable-selector-wrap {
+    max-width: 400px;
+}
+.mailer-variables-panel {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.mailer-template-preview {
+    min-height: 500px;
+    max-height: 700px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}

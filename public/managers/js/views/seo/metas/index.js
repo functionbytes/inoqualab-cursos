@@ -1,0 +1,113 @@
+$(document).ready(function () {
+    var $config = $('#metas-config');
+    var bulkDestroyUrl = $config.data('bulk-destroy-url');
+    var inlineBaseUrl = $config.data('inline-base-url');
+
+    $(document).on('click', '[data-action="reload"]', function () { window.location.reload(); });
+
+    $('.delete-btn').on('click', function () {
+        $('#delete-modal .modal-title').text($(this).data('title'));
+        $('#delete-form').attr('action', $(this).data('url'));
+    });
+
+    $('#delete-form').on('submit', function (e) {
+        e.preventDefault();
+        var url = $(this).attr('action');
+        var $btn = $(this).find('[type=submit]');
+        $btn.prop('disabled', true).text('Eliminando...');
+        $.ajax({
+            url: url,
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            success: function (res) {
+                $('#delete-modal').modal('hide');
+                toastr.success(res.message || 'Eliminado correctamente');
+                setTimeout(function () { location.reload(); }, 800);
+            },
+            error: function () {
+                toastr.error('Error al eliminar');
+                $btn.prop('disabled', false).text('Confirmar');
+            }
+        });
+    });
+
+    const $toolbar = $('#bulk-toolbar');
+
+    function getSelectedIds() {
+        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
+    }
+
+    function updateBulkState() {
+        const ids = getSelectedIds();
+        $toolbar.toggleClass('d-none', ids.length === 0);
+        $('[data-bulk-count]').text(ids.length);
+        $('#bulk-count').text(ids.length);
+    }
+
+    $('#select-all-metas').on('change', function () {
+        $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
+        updateBulkState();
+    });
+    $(document).on('change', '.bulk-checkbox', updateBulkState);
+    $('#bulk-cancel').on('click', function () {
+        $('.bulk-checkbox, #select-all-metas').prop('checked', false);
+        updateBulkState();
+    });
+
+    $('#bulk-delete-btn').on('click', function () { $('#bulk-modal').modal('show'); });
+
+    $('#bulk-delete-confirm').on('click', function () {
+        const ids = getSelectedIds();
+        if (!ids.length) return;
+        const $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Eliminando...');
+        $.ajax({
+            url: bulkDestroyUrl,
+            method: 'POST',
+            data: { _token: $('meta[name="csrf-token"]').attr('content'), ids: ids },
+            success: function (res) {
+                toastr.success(res.message, 'Éxito');
+                setTimeout(function () { location.reload(); }, 800);
+            },
+            error: function () {
+                toastr.error('Error al eliminar registros.');
+                $btn.prop('disabled', false).html('Confirmar eliminación');
+            }
+        });
+    });
+
+    // Inline edit
+    $(document).on('click', '.editable-cell', function (e) {
+        e.stopPropagation();
+        if ($(this).find('input').length) return;
+        const cell = $(this);
+        const metaId = cell.data('meta-id');
+        const field = cell.data('field');
+        const currentValue = cell.data('original-value') || cell.find('.cell-text').first().text().trim();
+        const input = $('<input type="text" class="form-control form-control-sm">').val(currentValue);
+        input.on('blur keydown', function (e) {
+            if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== 'Escape') return;
+            if (e.key === 'Escape') { cell.find('.cell-text').show(); input.remove(); return; }
+            const newValue = input.val();
+            $.ajax({
+                url: inlineBaseUrl + '/' + metaId + '/inline',
+                method: 'PATCH',
+                data: { _token: $('meta[name="csrf-token"]').attr('content'), field: field, value: newValue },
+                success: function () {
+                    cell.data('original-value', newValue);
+                    cell.find('.cell-text').text(newValue || (field === 'description' ? 'Sin descripción' : 'Sin título'));
+                    cell.find('.cell-text').show();
+                    input.remove();
+                    toastr.success('Actualizado');
+                },
+                error: function () {
+                    toastr.error('Error al guardar');
+                    cell.find('.cell-text').show();
+                    input.remove();
+                }
+            });
+        });
+        cell.find('.cell-text').hide();
+        cell.append(input);
+        input.focus().select();
+    });
+});

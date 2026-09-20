@@ -1,3 +1,16 @@
+@if(setting('aula_version') == '2')
+    {{-- Barra sticky solo-mobile con el toggle del rail (ver misma nota en
+         lesson-content.blade.php). El guard de salida del quiz
+         (assessment-exit-guard.blade.php) ya excluye los clics dentro de
+         .lv-rail-toggle de su intercepción de navegación -- sigue aplicando
+         igual aunque el botón se movió de contenedor. --}}
+    <div class="lv-mobile-bar">
+        <button type="button" class="lv-rail-toggle" aria-label="Ver clases del curso" aria-expanded="false" aria-controls="lvRail">
+            @include('customers.includes.icon', ['name' => 'menu'])
+        </button>
+    </div>
+@endif
+
 <div class="lv-lhead">
     <div>
         <span class="lk">@include('customers.includes.icon', ['name' => 'circle-question']) Evaluación</span>
@@ -7,15 +20,6 @@
             <span>@include('customers.includes.icon', ['name' => 'layers']) {{ $lesson->chapter->title ?? $course->title }}</span>
         </div>
     </div>
-    {{-- Solo visible en mobile (ver .lv-rail-toggle en aula.css): abre el
-         rail de capítulos/lecciones, que en ese breakpoint queda oculto
-         fuera de pantalla (position:fixed; translateX(-105%)) sin ninguna
-         otra forma de acceder a él. El guard de salida del quiz
-         (assessment-exit-guard.blade.php) ya excluye los clics dentro de
-         .lv-rail-toggle de su intercepción de navegación. --}}
-    <button type="button" class="lv-rail-toggle" aria-label="Ver clases del curso" aria-expanded="false" aria-controls="lvRail">
-        @include('customers.includes.icon', ['name' => 'menu'])
-    </button>
 </div>
 
 <div class="quiz-rule"></div>
@@ -68,7 +72,7 @@
 
                 @foreach ($questions as $key => $question)
                     @if ($key > 0)
-                        <div style="display: none;" id="more_quiz{{ $key }}">
+                        <div class="d-none-js" id="more_quiz{{ $key }}">
                             <div class="quiz-step" id="quiz{{ $key + 1 }}">
                                 <input type="hidden" name="question_id[{{ $count }}]" value="{{ $question['id'] }}">
                                 <div class="quiz-qhead">
@@ -93,25 +97,22 @@
                     @php $count++; @endphp
                 @endforeach
 
-                <div id="quizAnswerError" class="quiz-error" style="display: none;">
+                <div id="quizAnswerError" class="quiz-error d-none-js">
                     @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
-                    <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        @include('customers.includes.icon', ['name' => 'arrow-left'])
+                    <a id="prev" class="lv-fbtn d-none-js" value="1">
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>
@@ -149,7 +150,7 @@
 
                 @foreach ($questions as $key => $question)
                     @if ($key > 0)
-                        <div style="display: none;" id="more_quiz{{ $key }}">
+                        <div class="d-none-js" id="more_quiz{{ $key }}">
                             <div class="quiz-step" id="quiz{{ $key + 1 }}">
                                 <input type="hidden" name="question_id[{{ $count }}]" value="{{ $question['id'] }}">
                                 <div class="quiz-qhead">
@@ -171,25 +172,22 @@
                     @php $count++; @endphp
                 @endforeach
 
-                <div id="quizAnswerError" class="quiz-error" style="display: none;">
+                <div id="quizAnswerError" class="quiz-error d-none-js">
                     @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
-                    <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        @include('customers.includes.icon', ['name' => 'arrow-left'])
+                    <a id="prev" class="lv-fbtn d-none-js" value="1">
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>

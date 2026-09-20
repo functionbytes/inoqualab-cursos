@@ -5,7 +5,7 @@
 @section('title', 'Dashboard')
 
 @push('css')
-    <link rel="stylesheet" href="{{ url('customers/css/aula.css') }}">
+    <link rel="stylesheet" href="{{ url('customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @php
@@ -114,7 +114,7 @@
 
         {{-- ===== Resume hero ===== --}}
         <div class="resume">
-            <div class="resume-media" style="background-image:url('{{ $heroThumb }}');background-size:cover;background-position:center;">
+            <div class="resume-media has-thumb" style="--thumb: url('{{ $heroThumb }}')" data-default-thumb="{{ $defaultThumb }}">
                 <a class="resume-play" href="{{ $heroUrl }}" aria-label="{{ $heroExpired ? 'Renovar acceso' : 'Reanudar curso' }}">
                     @include('customers.includes.icon', ['name' => $heroExpired ? 'refresh' : 'play'])
                 </a>
@@ -141,7 +141,6 @@
                 </div>
                 <div class="resume-actions">
                     <a class="go" href="{{ $heroUrl }}">
-                        @include('customers.includes.icon', ['name' => $heroExpired ? 'refresh' : 'play'])
                         @if($heroExpired)
                             Renovar acceso
                         @else
@@ -150,7 +149,6 @@
                     </a>
                     @if($hero->certificate)
                         <a class="ghost" href="{{ route('customers.certificate.download', $hero->certificate->slack) }}">
-                            @include('customers.includes.icon', ['name' => 'download'])
                             Certificado
                         </a>
                     @endif
@@ -210,7 +208,7 @@
                             $url = route('customers.courses.content', $insc->slack);
                         @endphp
                         <div class="pc-card" data-status="{{ $st }}">
-                            <div class="pc-media" style="background-image:url('{{ $thumb }}');background-size:cover;background-position:center;">
+                            <div class="pc-media has-thumb" style="--thumb: url('{{ $thumb }}')" data-default-thumb="{{ $defaultThumb }}">
                                 @if($cat)
                                     <span class="pc-cat">{{ $cat }}</span>
                                 @endif
@@ -233,7 +231,6 @@
                                     </div>
                                 </div>
                                 <a class="pc-btn" href="{{ $url }}">
-                                    @include('customers.includes.icon', ['name' => 'play'])
                                     {{ $percent > 0 ? 'Continuar' : 'Empezar curso' }}
                                 </a>
                             </div>
@@ -311,15 +308,14 @@
                             <div class="d"><b>@include('customers.includes.icon', ['name' => 'award'])</b></div>
                             <div class="info">
                                 <b>{{ $insc->course?->title }}</b>
-                                <a class="ok" href="{{ route('customers.certificate.download', $insc->certificate->slack) }}"
-                                   style="text-decoration:none;">
-                                    @include('customers.includes.icon', ['name' => 'download']) Descargar certificado
+                                <a class="ok text-decoration-none" href="{{ route('customers.certificate.download', $insc->certificate->slack) }}">
+                                    Descargar certificado
                                 </a>
                             </div>
                         </div>
                     @endforeach
                 @else
-                    <p style="font-size:13px;color:var(--muted);line-height:1.55;margin:0;">
+                    <p class="dl-card-empty">
                         Al completar un curso y aprobar su examen, el certificado aparece aquí para descargar.
                     </p>
                 @endif
@@ -330,20 +326,5 @@
 @endsection
 
 @push('scripts')
-    <script type="text/javascript">
-        $(document).ready(function () {
-            // Fallback de imagen para los fondos (resume-media y pc-media) si la URL falla.
-            $('.resume-media, .pc-media').each(function () {
-                var $el = $(this);
-                var bg = $el.css('background-image');
-                var match = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
-                if (!match) { return; }
-                var img = new Image();
-                img.onerror = function () {
-                    $el.css('background-image', "url('{{ asset('/pages/images/courses/default.jpg') }}')");
-                };
-                img.src = match[1];
-            });
-        });
-    </script>
+    <script src="{{ asset('customers/js/views/dashboard/index.js') }}"></script>
 @endpush

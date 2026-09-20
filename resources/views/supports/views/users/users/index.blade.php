@@ -2,149 +2,297 @@
 
 @section('content')
 
-    @include('supports.includes.card', ['title' => 'Usuarios'])
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-bulk-url="{{ route('support.users.bulk-action') }}"
+         data-bulk-entity-label="usuario(s)">
 
-    <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="role" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar estado</option>
-                                        <option value="manager" @isset($role) @if ($role=='manager') selected @endif @endisset>  Administrador</option>
-                                        <option value="customer" @isset($role) @if ($role=='customer') selected @endif @endisset>  Cliente</option>
-                                        <option value="enterprise" @isset($role) @if ($role=='enterprise') selected  @endif @endisset>  Empresa</option>
-                                        <option value="distributor" @isset($role) @if ($role=='distributor') selected  @endif @endisset>  Empleado distribuidor</option>
-                                        <option value="support" @isset($role) @if ($role=='support') selected  @endif @endisset>  Soporte</option>
-                                        <option value="accounting" @isset($role) @if ($role=='accounting') selected  @endif @endisset>  Contabilidad</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            <div class="col-auto">
-                                <a href=" {{ route('support.users.create') }}" class="btn btn-primary">
-                                    <i class="fa-duotone fa-plus"></i>
-                                </a>
+        <div class="card">
+
+            {{-- Header --}}
+            <div class="card-header p-4 border-bottom border-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Usuarios</h5>
+                        <p class="mb-0 text-muted">Gestiona los usuarios registrados en la plataforma</p>
+                    </div>
+                    <div class="ms-auto">
+                        <a href="{{ route('support.users.create') }}" class="btn btn-primary">
+                            Nuevo usuario
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Stats --}}
+            <div class="card-body border-bottom">
+                <div class="row g-3">
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Total</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['total']) }}</h4>
+                                <span class="text-muted">Usuarios registrados</span>
                             </div>
                         </div>
-                    </form>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Clientes</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['customers']) }}</h4>
+                                <span class="text-muted">Rol cliente</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Empresas</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['enterprises']) }}</h4>
+                                <span class="text-muted">Rol empresa</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Activos</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['actives']) }}</h4>
+                                <span class="text-muted">Estado activo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ route('support.users') }}" id="searchForm">
+
+                    <input type="hidden" name="role" id="filterRole" value="{{ $role ?? '' }}">
+
+                    <div class="d-flex gap-2 align-items-center">
+                        <div class="flex-fill">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-search text-muted"></i>
+                                </span>
+                                <input type="search" name="search" class="form-control border-start-0 ps-0"
+                                       placeholder="Buscar por nombre, correo o identificación..."
+                                       value="{{ $searchKey ?? '' }}">
+                            </div>
+                        </div>
+
+                        @php
+                            $activeFilters = (int)(($role ?? '') !== '');
+                        @endphp
+                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
+                                data-bs-toggle="modal" data-bs-target="#filters-modal">
+                            <i class="fas fa-sliders"></i>
+                            @if($activeFilters > 0)
+                                <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
+                            @endif
+                        </button>
+
+                        <button type="submit" class="btn btn-primary flex-shrink-0">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($users->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="users-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
+                                    <th>Identificación</th>
+                                    <th>Cliente</th>
+                                    <th>Correo electrónico</th>
+                                    <th class="text-center">Perfil</th>
+                                    <th class="text-center">Creación</th>
+                                    <th class="text-center">Actualización</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($users as $user)
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $user->id }}">
+                                        </td>
+                                        <td>
+                                            <span>{{ ucfirst($user->identification) }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($user->firstname.' '.$user->lastname)), 2, '...') }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ $user->email }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $user->role == 'manager' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary' }}">
+                                                @if($user->role == 'manager')
+                                                    Administrador
+                                                @elseif($user->role == 'customer')
+                                                    Cliente
+                                                @elseif($user->role == 'enterprise')
+                                                    Empresa
+                                                @elseif($user->role == 'distributor')
+                                                    Empleado distribuidor
+                                                @elseif($user->role == 'support')
+                                                    Soporte
+                                                @elseif($user->role == 'accounting')
+                                                    Contabilidad
+                                                @endif
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ $user->created_at->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-muted">{{ $user->updated_at->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    @if($user->role == 'customer')
+                                                        <li>
+                                                            <a class="dropdown-item"
+                                                               href="{{ route('support.users.navegation', $user->slack) }}">
+                                                                Dashboard
+                                                            </a>
+                                                        </li>
+                                                    @endif
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           href="{{ route('support.users.view', $user->slack) }}">
+                                                            Visualizar
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           href="{{ route('support.users.edit', $user->slack) }}">
+                                                            Editar
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item confirm-delete"
+                                                           href="#"
+                                                           data-href="{{ route('support.users.destroy', $user->slack) }}">
+                                                            Eliminar
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x mb-3 text-muted opacity-50"></i>
+                        <h5 class="fw-bold mb-2">
+                            @if($searchKey || ($role ?? '') !== '')
+                                No se encontraron resultados
+                            @else
+                                No hay usuarios
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-4">
+                            @if($searchKey || ($role ?? '') !== '')
+                                No hay usuarios que coincidan con los filtros aplicados.
+                            @else
+                                Crea el primer usuario de la plataforma.
+                            @endif
+                        </p>
+                        @if($searchKey || ($role ?? '') !== '')
+                            <a href="{{ route('support.users') }}" class="btn btn-outline-secondary">
+                                Ver todos
+                            </a>
+                        @else
+                            <a href="{{ route('support.users.create') }}" class="btn btn-primary">
+                                Nuevo usuario
+                            </a>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+            @if($users->hasPages())
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <span class="text-muted">
+                        Mostrando {{ $users->firstItem() }}–{{ $users->lastItem() }} de {{ $users->total() }} usuarios
+                    </span>
+                    {{ $users->appends(request()->input())->links() }}
+                </div>
+            @endif
+
+        </div>
+    </div>
+
+    {{-- Filters modal --}}
+    <div class="modal fade" id="filters-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtros avanzados</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-0">
+                        <label class="form-label fw-semibold">Perfil</label>
+                        <select id="modalRole" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="manager" {{ ($role ?? '') === 'manager' ? 'selected' : '' }}>Administrador</option>
+                            <option value="customer" {{ ($role ?? '') === 'customer' ? 'selected' : '' }}>Cliente</option>
+                            <option value="enterprise" {{ ($role ?? '') === 'enterprise' ? 'selected' : '' }}>Empresa</option>
+                            <option value="distributor" {{ ($role ?? '') === 'distributor' ? 'selected' : '' }}>Empleado distribuidor</option>
+                            <option value="support" {{ ($role ?? '') === 'support' ? 'selected' : '' }}>Soporte</option>
+                            <option value="accounting" {{ ($role ?? '') === 'accounting' ? 'selected' : '' }}>Contabilidad</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer flex-column">
+                    <button type="button" id="applyFiltersBtn" class="btn btn-primary w-100 mb-2">
+                        Aplicar filtros
+                    </button>
+                    <a href="{{ route('support.users') }}" class="btn btn-secondary w-100">
+                        Limpiar filtros
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th scope="col">Identificación</th>
-                        <th scope="col">Cliente</th>
-                        <th scope="col">Correo electronico</th>
-                        <th scope="col">Perfil</th>
-                        <th scope="col">Fecha creación</th>
-                        <th scope="col">Fecha actualización</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($users as $key => $user)
-                        <tr class="search-items">
-
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->identification }}">{{ ucfirst($user->identification) }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->firstname . ' ' . $user->lastname }}">{{ Str::words( Str::upper(Str::lower($user->firstname . ' ' . $user->lastname)), 2, '...')  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->email }}">{{ $user->email }}</span>
-                            </td>
-                            <td>
-                               <span class="badge {{ $user->role == 'manager' ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-
-                            @if ($user->role == 'manager')
-                                Administrador
-                             @elseif($user->role == 'customer')
-                                 Cliente
-                             @elseif($user->role == 'enterprise')
-                                 Empresa
-                              @elseif($user->role == 'distributor')
-                                Empleado distribuidor
-                              @elseif($user->role == 'support')
-                                  Soporte
-                              @elseif($user->role == 'accounting')
-                                  Contabilidad
-                             @endif
-                               </span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y-m-d', strtotime($user->created_at)) }}">{{ date('Y-m-d', strtotime($user->created_at)) }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y-m-d', strtotime($user->updated_at)) }}">{{ date('Y-m-d', strtotime($user->updated_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-                                        @if ($user->role == 'customer')
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.navegation', $user->slack) }}">
-                                                    Dashboard
-                                                </a>
-                                            </li>
-                                        @endif
-
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.view', $user->slack) }}">
-                                                Visualizar
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('support.users.edit', $user->slack) }}">
-                                                Editar
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('support.users.destroy', $user->slack) }}">
-                                                Eliminar
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $users->firstItem() }}-{{ $users->lastItem() }} de {{ $users->total() }} resultados</span>
-                <nav>
-                    {{ $users->appends(request()->input())->links() }}
-                </nav>
-            </div>
-        </div>
     </div>
+
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'usuario(s)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
+@push('css')
+    <link rel="stylesheet" href="{{ asset('supports/css/views/users/users/index.css') }}">
+@endpush
 
+@push('scripts')
+    <script src="{{ asset('supports/js/views/users/users/index.js') }}"></script>
+@endpush

@@ -1,0 +1,106 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --navy:#0d1b2a; --blue:#008bcd; --ink:#1b2a3a; }
+body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#e9eef3; color:var(--ink); -webkit-font-smoothing:antialiased; }
+
+/* flex-wrap + white-space:nowrap en los textos: en mobile no cabían
+   el título y los dos botones en una fila, y el texto se partía a
+   media palabra dentro de cada botón (3-4 líneas de alto). Con
+   nowrap cada rótulo se mantiene en una sola línea y es el grupo
+   completo (.l o .actions) el que baja de fila, no el texto. */
+.cert-bar { position:sticky; top:0; z-index:10; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; row-gap:10px; padding:14px 28px; }
+/* También envuelve: en pantallas muy angostas ni el link "Volver" ni
+   el título cabían juntos en una fila sin desbordar horizontalmente. */
+.cert-bar .l { display:flex; align-items:center; flex-wrap:wrap; gap:6px 14px; }
+.cert-bar a.back { display:inline-flex; align-items:center; gap:8px; color:rgba(255,255,255,.8); text-decoration:none; font-size:13.5px; font-weight:700; padding:8px 12px; border-radius:9px; transition:background .15s; white-space:nowrap; }
+.cert-bar a.back:hover { background:rgba(255,255,255,.1); color:#fff; }
+.cert-bar a.back svg { width:16px; height:16px; flex:0 0 auto; }
+.cert-bar .ttl { font-size:14px; font-weight:800; letter-spacing:.04em; white-space:nowrap; }
+.cert-bar .actions { display:flex; gap:10px; }
+.cert-bar button, .cert-bar a.btnx { display:inline-flex; align-items:center; gap:9px; border:none; border-radius:10px; padding:11px 20px; font-size:13.5px; font-weight:800; cursor:pointer; font-family:inherit; text-decoration:none; white-space:nowrap; transition:transform .15s, filter .15s, background .15s; }
+.cert-bar .dl { background:var(--blue); color:#fff; box-shadow:0 8px 20px rgba(0,139,205,.35); }
+.cert-bar .dl:hover { transform:translateY(-2px); filter:brightness(1.07); }
+.cert-bar .ghost { background:rgba(255,255,255,.1); color:#fff; }
+.cert-bar .ghost:hover { background:rgba(255,255,255,.2); }
+
+/* Mobile: "Imprimir"/"Descargar" ocupan la fila completa, mitad y
+   mitad (antes cada botón media su propio contenido, así que
+   "Descargar PDF" -- más largo -- quedaba visiblemente más ancho que
+   "Imprimir"). Solo abajo de este ancho: en desktop .actions vive en
+   la misma fila que el título vía justify-content:space-between, y
+   forzarlo a 100% ahí rompería esa fila. */
+@media (max-width:640px) {
+    .cert-bar .actions { width:100%; }
+    .cert-bar button, .cert-bar a.btnx { flex:1; justify-content:center; }
+}
+
+/* En escritorio la barra se quedaba con el mismo tamaño compacto
+   pensado para mobile -- header más alto, título y botones más
+   grandes para que no se vean perdidos en una pantalla ancha. */
+@media (min-width:900px) {
+    .cert-bar { padding:20px 40px; }
+    .cert-bar .l { gap:20px; }
+    .cert-bar a.back { font-size:14.5px; padding:10px 16px; }
+    .cert-bar a.back svg { width:18px; height:18px; }
+    .cert-bar .ttl { font-size:17px; }
+    .cert-bar .actions { gap:14px; }
+    .cert-bar button, .cert-bar a.btnx { padding:13px 26px; font-size:14.5px; border-radius:12px; }
+}
+
+.cert-stage { padding:36px 20px 60px; display:flex; justify-content:center; }
+@media (min-width:900px) {
+    .cert-stage { padding:56px 40px 90px; }
+}
+/* Aspect ratio A4 landscape, igual que setPaper('a4','landscape') en el PDF.
+   container-type:inline-size habilita las unidades cqw de abajo: todo
+   el texto escala con el ancho REAL de esta caja (que va de ~350px en
+   mobile a 1040px en desktop por el max-width:100%) en vez de quedar
+   fijo en px -- antes, en mobile, el texto no se achicaba al ritmo de
+   la caja y todo terminaba solapado/desbordado. */
+.cert {
+    width:1040px; max-width:100%; aspect-ratio:1.4142/1; background:#fff; position:relative;
+    box-shadow:0 30px 80px rgba(13,27,42,.22); overflow:hidden; container-type:inline-size;
+}
+.cert .bg { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Mismas clases/posiciones (%) que download.blade.php, calibradas contra
+   la plantilla-imagen -- escaladas ~0.926 (1040/1123px, ancho aprox. de
+   una página A4 landscape a 96dpi) para que el texto coincida en tamaño
+   relativo con el del PDF. Los font-size en cqw son ese mismo px de
+   diseño expresado como % del ancho de .cert (px / 1040 * 100), para
+   que escalen junto con la caja en vez de quedar fijos. */
+/* Posiciones re-calibradas a ojo contra la plantilla-imagen real
+   (public/media/194/1681965223default.jpg) en vez de copiar los % de
+   download.blade.php: ese CSS usa line-height:0 (+ en varios casos
+   bottom:0;margin:auto) para anclar el texto -- un truco que dompdf
+   interpreta distinto a un navegador real, y aquí producía texto
+   desplazado/solapado con las líneas fijas de la imagen. En su lugar:
+   line-height normal + transform:translateY(-50%) centra cada bloque
+   de texto exactamente en su coordenada "top", de forma predecible. */
+.cert p { text-align:center; }
+.text-time { color:#1a1a16; font-size:1.635cqw; font-weight:600; text-transform:uppercase; line-height:1.2; }
+.text-certifier { color:#1a1a16; font-size:1.058cqw; font-weight:600; text-transform:uppercase; line-height:1.2; }
+.text-certifier-description { color:#575756; font-size:0.865cqw; font-weight:400; line-height:1.3; }
+/* font-size dinámico (según longitud del nombre) vía --name-size, puesta
+   inline por certificates/views/view.blade.php. */
+.text-user { color:#1a1a16; font-size:var(--name-size); font-weight:600; text-transform:uppercase; line-height:1.2; }
+.text-identification { color:#1a1a16; font-size:1.827cqw; font-weight:600; text-transform:uppercase; line-height:1.2; }
+.text-course { color:#1a1a16; font-size:1.635cqw; font-weight:600; text-transform:uppercase; line-height:1.2; }
+.text-end, .text-start { color:#1a1a16; font-size:1.635cqw; font-weight:600; text-transform:uppercase; line-height:1.2; }
+
+.certifier { position:absolute; top:89%; left:66%; width:34%; text-align:center; transform:translateY(-50%); }
+.certifier-description { position:absolute; top:93%; left:66%; width:34%; text-align:center; transform:translateY(-50%); }
+.signature { position:absolute; top:82%; left:80%; width:8.942cqw; transform:translateY(-50%); }
+.user { position:absolute; top:41%; left:0; width:100%; text-align:center; transform:translateY(-50%); }
+.identification { position:absolute; top:49.7%; left:51.08%; text-align:center; transform:translateY(-50%); }
+.start { position:absolute; top:68.5%; left:40.08%; text-align:center; transform:translateY(-50%); }
+.end { position:absolute; top:68.5%; left:69%; text-align:center; transform:translateY(-50%); }
+.time { position:absolute; top:62.8%; left:59%; text-align:center; transform:translateY(-50%); }
+.course { position:absolute; top:59.6%; left:0; width:100%; text-align:center; transform:translateY(-50%); }
+
+@media print {
+    @page { size: A4 landscape; margin: 0; }
+    body { background:#fff; }
+    .cert-bar { display:none; }
+    .cert-stage { padding:0; }
+    .cert { width:100%; height:100vh; aspect-ratio:auto; box-shadow:none; }
+}

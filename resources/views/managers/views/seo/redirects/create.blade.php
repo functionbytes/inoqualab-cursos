@@ -4,7 +4,10 @@
 
 @section('content')
 
-    <form id="formRedirect" action="{{ route('manager.seo.redirects.store') }}" method="POST" novalidate>
+    <form id="formRedirect" action="{{ route('manager.seo.redirects.store') }}" method="POST" novalidate
+          data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+          data-flash-error="{{ session('error') }}" data-flash-error-title="Error"
+          data-redirect-index-url="{{ route('manager.seo.redirects.index') }}">
         @csrf
 
         <div class="row">
@@ -209,42 +212,6 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}', 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}', 'Error');
-    @endif
-
-    $('#formRedirect').on('submit', function (e) {
-        e.preventDefault();
-        var $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Guardando...');
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function (res) {
-                toastr.success(res.message, 'Éxito');
-                setTimeout(function () {
-                    window.location.href = '{{ route('manager.seo.redirects.index') }}';
-                }, 800);
-            },
-            error: function (xhr) {
-                $btn.prop('disabled', false).html('Crear redirección');
-                if (xhr.status === 422) {
-                    var errors = xhr.responseJSON.errors;
-                    $.each(errors, function (field, messages) {
-                        toastr.error(messages[0]);
-                    });
-                } else {
-                    toastr.error('Error al crear la redirección.');
-                }
-            }
-        });
-    });
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/redirects/create.js') }}"></script>
 @endpush

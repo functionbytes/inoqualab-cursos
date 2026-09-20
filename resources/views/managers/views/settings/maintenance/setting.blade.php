@@ -7,7 +7,12 @@
 
             <div class="card w-100">
 
-                <form id="formMaintenance" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formMaintenance" enctype="multipart/form-data" role="form"
+                      data-urls='@php $__jsonInline1 = [
+                          "update" => route("manager.settings.maintenance.update"),
+                          "secret" => route("manager.settings.maintenance.secret"),
+                          "dashboard" => route("manager.dashboard"),
+                      ]; @endphp@json($__jsonInline1)'>
 
                     {{ csrf_field() }}
 
@@ -38,7 +43,7 @@
                                                 <i id="eyeIconSecret" class="fas fa-eye"></i>
                                             </button>
                                             <button type="button" id="btnCopySecret" class="btn btn-outline-secondary">
-                                                <i class="fas fa-copy"></i> Copiar
+                                                Copiar
                                             </button>
                                         </div>
                                         <div class="alert alert-light-warning note mt-4 mb-0">
@@ -82,159 +87,5 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            var secretLoaded = false;
-
-            // La llave real nunca viaja en el HTML inicial: se trae via AJAX
-            // (protegida por el mismo permiso) solo cuando hace falta.
-            function loadSecret(callback) {
-                if (secretLoaded) {
-                    callback();
-                    return;
-                }
-
-                $.ajax({
-                    url: "{{ route('manager.settings.maintenance.secret') }}",
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    type: "GET",
-                    success: function(response) {
-                        $("#maintenance_mode_value").val(response.value);
-                        secretLoaded = true;
-                        callback();
-                    }
-                });
-            }
-
-            $("#maintenance_mode").click(function(){
-                var check = $(this).prop('checked');
-                if(check == true) {
-                    $(".maintenance_mode").removeClass("d-none");
-                    loadSecret(function() {});
-                } else {
-                    $(".maintenance_mode").addClass("d-none");
-                }
-            });
-
-            if ($("#maintenance_mode").is(':checked')) {
-                loadSecret(function() {});
-            }
-
-            $("#btnToggleSecret").on('click', function() {
-                loadSecret(function() {
-                    var input = $("#maintenance_mode_value");
-                    var icon = $("#eyeIconSecret");
-                    var isPassword = input.attr('type') === 'password';
-
-                    input.attr('type', isPassword ? 'text' : 'password');
-                    icon.toggleClass('fa-eye fa-eye-slash');
-                });
-            });
-
-            $("#btnCopySecret").on('click', function() {
-                loadSecret(function() {
-                    navigator.clipboard.writeText($("#maintenance_mode_value").val()).then(function() {
-                        toastr.info("Llave secreta copiada al portapapeles", "", {
-                            closeButton: true,
-                            progressBar: true,
-                            positionClass: "toast-bottom-right"
-                        });
-                    });
-                });
-            });
-
-            $("#formMaintenance").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    maintenance_mode_value: {
-                        required: true,
-                        minlength: 1,
-                        maxlength: 200,
-                    },
-                },
-                messages: {
-                    maintenance_mode_value: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 1 caracter",
-                        maxlength: "Debe contener al menos 4 caracter",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formMaintenance');
-                    var formData = new FormData($form[0]);
-                    var maintenance_mode_value = $("#maintenance_mode_value").val();
-                    var maintenance_mode = $("#maintenance_mode").is(':checked');
-
-                    formData.append('maintenance_mode', maintenance_mode);
-                    formData.append('maintenance_mode_value', maintenance_mode_value);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-
-                    $.ajax({
-                        url: "{{ route('manager.settings.maintenance.update') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    window.location.href = "{{ route('manager.dashboard') }}";
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-        });
-
-    </script>
-
-
+<script src="{{ asset('managers/js/views/settings/maintenance/setting.js') }}"></script>
 @endpush
-
-

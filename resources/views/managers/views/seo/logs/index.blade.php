@@ -106,7 +106,7 @@
                                         <td>
                                             <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $log->id }}">
                                         </td>
-                                        <td style="max-width:280px">
+                                        <td class="log-path-col">
                                             <code class="small text-break">{{ Str::limit($log->path, 70) }}</code>
                                         </td>
                                         <td>
@@ -117,7 +117,7 @@
                                         <td>
                                             <p class="text-muted">{{ $log->last_seen_at?->diffForHumans() ?? '—' }}</p>
                                         </td>
-                                        <td style="max-width:200px">
+                                        <td class="log-referer-col">
                                             <small class="text-muted text-break">{{ Str::limit($log->referer, 50) ?: '—' }}</small>
                                         </td>
                                         <td>
@@ -185,6 +185,11 @@
 
     </div>
 
+    <div id="logs-config" class="d-none"
+         data-bulk-destroy-url="{{ route('manager.seo.logs.bulk-destroy') }}"
+         data-create-redirect-url="{{ route('manager.seo.logs.create-redirect') }}"
+         data-clear-url="{{ route('manager.seo.logs.clear') }}"></div>
+
     {{-- Bulk toolbar --}}
     <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
         <button type="button" class="btn btn-primary shadow-lg px-4"
@@ -230,7 +235,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formCreateRedirect" onsubmit="return false">
+                    <form id="formCreateRedirect">
                         <input type="hidden" id="log-id" name="log_id">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">URL de origen</label>
@@ -266,160 +271,10 @@
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/logs/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    // ── Bulk selection ────────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    // ── Bulk modal ────────────────────────────────────────────────────────────
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#bulk-apply-btn').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getSelectedIds();
-
-        if (!action) { toastr.warning('Selecciona una accion.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos un registro.'); return; }
-
-        if (action === 'delete' && !confirm('¿Eliminar los ' + ids.length + ' registro(s)?')) return;
-
-        $('#bulk-apply-btn').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route('manager.seo.logs.bulk-destroy') }}',
-            method: 'POST',
-            contentType: 'application/json',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? 'Registros eliminados.');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-    // ── Crear redirect desde 404 ──────────────────────────────────────────────
-    $(document).on('click', '.btn-create-redirect', function (e) {
-        e.preventDefault();
-        $('#log-id').val($(this).data('id'));
-        $('#redirect-source').val($(this).data('path'));
-        $('#redirect-target').val('').removeClass('is-invalid');
-        $('.invalid-feedback').text('');
-        $('#modalCreateRedirect').modal('show');
-    });
-
-    $('#btn-save-log-redirect').on('click', function () {
-        var $btn = $(this).prop('disabled', true).text('Creando...');
-
-        $.ajax({
-            url: '{{ route('manager.seo.logs.create-redirect') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: {
-                log_id:      $('#log-id').val(),
-                source_path: $('#redirect-source').val(),
-                target_path: $('#redirect-target').val(),
-                status_code: $('#redirect-code').val(),
-            },
-            success: function (response) {
-                toastr.success(response.message ?? 'Redirect creado correctamente');
-                $('#modalCreateRedirect').modal('hide');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function (field, messages) {
-                        $('#redirect-' + field.replace('_path', '')).addClass('is-invalid')
-                            .next('.invalid-feedback').text(messages[0]);
-                    });
-                } else {
-                    toastr.error('Error al crear el redirect');
-                }
-            },
-            complete: function () {
-                $btn.prop('disabled', false).text('Crear redirect');
-            }
-        });
-    });
-
-    // ── Marcar resuelto ───────────────────────────────────────────────────────
-    $(document).on('click', '.btn-mark-resolved', function (e) {
-        e.preventDefault();
-        var $el = $(this);
-
-        $.ajax({
-            url: $el.data('url'),
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (response) {
-                toastr.success(response.message ?? 'Marcado como resuelto');
-                $el.closest('tr').fadeOut(400, function () { $(this).remove(); });
-            },
-            error: function () {
-                toastr.error('Error al marcar como resuelto');
-            }
-        });
-    });
-
-    // ── Limpiar registros viejos ──────────────────────────────────────────────
-    $('#btn-clean-old').on('click', function () {
-        if (!confirm('¿Eliminar todos los registros 404 con más de 90 días de antigüedad?')) return;
-
-        var $btn = $(this).prop('disabled', true).text('Limpiando...');
-
-        $.ajax({
-            url: '{{ route('manager.seo.logs.clear') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (response) {
-                toastr.success(response.message ?? 'Registros eliminados');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function () {
-                toastr.error('Error al limpiar los registros');
-            },
-            complete: function () {
-                $btn.prop('disabled', false).text('Limpiar registros (+90 días)');
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/logs/index.js') }}"></script>
 @endpush
+

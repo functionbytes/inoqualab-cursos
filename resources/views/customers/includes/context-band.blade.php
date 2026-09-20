@@ -5,6 +5,7 @@
 @hasSection('context-title')
     <div class="cx-band">
         <div class="cx-band-glow"></div>
+        <div class="cx-band-tex"></div>
         {{-- Contenedor centrado (mismo max-width que el resto del contenido):
              sin él, en pantallas muy anchas el título quedaría pegado al
              borde real de la ventana en vez de alinearse con las tarjetas
@@ -12,14 +13,11 @@
         <div class="cx-band-container">
             <div class="cx-band-crumb">
                 <a href="{{ route('home') }}">Inicio</a>
-                <span>·</span>
+                <span class="sep">@include('customers.includes.icon', ['name' => 'arrow-right'])</span>
                 <span class="current">@yield('context-title')</span>
             </div>
             <div class="cx-band-row">
                 <div class="cx-band-main">
-                    @hasSection('context-icon')
-                        <span class="cx-band-icon">@yield('context-icon')</span>
-                    @endif
                     <div>
                         <div class="cx-band-heading">@yield('context-title')</div>
                         @hasSection('context-subtitle')
@@ -32,9 +30,11 @@
                      legítimamente puede traer un conteo en 0. El label (texto,
                      nunca "0") es el gate seguro para decidir si mostrar el dato. --}}
                 @hasSection('context-stat-label')
+                    {{-- IDs fijos: páginas con listados filtrables por AJAX
+                         (Mis pedidos) actualizan este número sin recargar. --}}
                     <div class="cx-band-stat">
-                        <div class="num">@yield('context-stat-number')</div>
-                        <div class="label">@yield('context-stat-label')</div>
+                        <div class="num" id="cxStatNumber">@yield('context-stat-number')</div>
+                        <div class="label" id="cxStatLabel">@yield('context-stat-label')</div>
                     </div>
                 @endif
             </div>

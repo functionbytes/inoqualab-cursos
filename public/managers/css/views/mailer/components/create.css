@@ -1,0 +1,20 @@
+.mailer-preview-tab {
+    min-height: 500px;
+    max-height: 700px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+.mailer-variables-panel {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.mailer-preview-main {
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    background: #f8f9fa;
+}
+.variable-insert {
+    cursor: pointer;
+}

@@ -46,7 +46,7 @@
           </a>
         </li>
 
-        <li class="sidebar-item" style="display: none;">
+        <li class="sidebar-item d-none">
           <button type="button" class="sidebar-link border-0 bg-transparent w-100 text-start">
             <span>
               @include('customers.includes.icon', ['name' => 'bell'])

@@ -5,7 +5,10 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="slidersPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.sliders') }}">
 
         <div class="card">
 
@@ -67,7 +70,7 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width:40px">
+                                    <th class="sliders-col-checkbox">
                                         <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
                                     <th>Título</th>
@@ -245,96 +248,9 @@
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/sliders/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getChecked() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#btn-bulk-apply').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getChecked();
-
-        if (!action) { toastr.warning('Selecciona una acción.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos un banner.'); return; }
-
-        if (action === 'delete' && !confirm('¿Eliminar los ' + ids.length + ' banner(es)?')) return;
-
-        $('#btn-bulk-apply').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route('manager.sliders') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? 'Acción aplicada.');
-                setTimeout(function () { location.reload(); }, 700);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/sliders/index.js') }}"></script>
 @endpush

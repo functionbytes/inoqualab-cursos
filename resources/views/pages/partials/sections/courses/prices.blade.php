@@ -1,5 +1,4 @@
-<div class="widget widget-radio wow fadeInUp delay-0-2s animated"
-    style="visibility: visible; animation-name: fadeInUp;">
+<div class="widget widget-radio wow fadeInUp delay-0-2s animated">
     <h4 class="widget-title">Filter By Price</h4>
     <form class="newsletter-form" action="#">
         <div class="custom-control custom-radio">

@@ -4,7 +4,9 @@
 
 @section('content')
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="campaigns-page"
+         data-bulk-url="{{ route('manager.newsletter.campaigns.bulk-action') }}"
+         data-has-sending="{{ $hasSending ? 'true' : 'false' }}">
 
         <div class="card">
 
@@ -111,7 +113,7 @@
                                 title="Filtros avanzados">
                             <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size:.65rem;">{{ $activeFilters }}</span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary filter-badge-sm">{{ $activeFilters }}</span>
                             @endif
                         </button>
                         @if($activeFilters > 0)
@@ -156,6 +158,9 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Nombre</th>
                                     <th>Asunto</th>
                                     <th class="text-center">Estado</th>
@@ -167,6 +172,10 @@
                             <tbody>
                                 @foreach($campaigns as $campaign)
                                 <tr data-id="{{ $campaign->id }}">
+                                    <td>
+                                        <input type="checkbox" class="form-check-input bulk-checkbox"
+                                               value="{{ $campaign->id }}">
+                                    </td>
                                     <td class="fw-medium">{{ $campaign->name }}</td>
                                     <td class="text-muted small text-truncate" title="{{ $campaign->subject }}">
                                         {{ $campaign->subject }}
@@ -340,113 +349,19 @@
     </div>
 </div>
 
+@include('managers.includes.bulk-toolbar-modal', [
+    'bulkEntityLabel' => 'campaña(s)',
+    'bulkActions' => [
+        ['value' => 'delete', 'label' => 'Eliminar'],
+    ],
+])
+
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/newsletter/campaigns/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-(function () {
-    // ── Select2 en modal de filtros ───────────────────────────────────────────
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('#modalStatus').select2({ allowClear: false, width: '100%', dropdownParent: $('#filters-modal') });
-    }
-
-    // ── Filtros avanzados ─────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    var sendUrl = null;
-
-    // Abrir modal de envío
-    $(document).on('click', '.btn-send', function () {
-        sendUrl = $(this).data('url');
-        $('#sendCampaignName').text($(this).data('name'));
-        new bootstrap.Modal(document.getElementById('sendModal')).show();
-    });
-
-    // Confirmar envío
-    $('#btnConfirmSend').on('click', function () {
-        if (! sendUrl) return;
-        var $btn = $(this).prop('disabled', true).text('Enviando...');
-
-        $.ajax({
-            url: sendUrl,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                bootstrap.Modal.getInstance(document.getElementById('sendModal')).hide();
-                toastr.success(res.message);
-                setTimeout(function () { location.reload(); }, 1500);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al enviar la campaña.');
-                $btn.prop('disabled', false).text('Sí, enviar ahora');
-            },
-        });
-    });
-
-    // Duplicar campaña
-    $(document).on('click', '.btn-duplicate', function () {
-        $.ajax({
-            url: $(this).data('url'),
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                toastr.success(res.message);
-                if (res.redirect) {
-                    setTimeout(function () { window.location.href = res.redirect; }, 900);
-                }
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al duplicar.');
-            },
-        });
-    });
-
-    // Reintentar campaña fallida
-    $(document).on('click', '.btn-retry', function () {
-        $.ajax({
-            url: $(this).data('url'),
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                toastr.success(res.message);
-                setTimeout(function () { location.reload(); }, 900);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al reintentar.');
-            },
-        });
-    });
-
-    // Eliminar campaña
-    $(document).on('click', '.btn-delete', function () {
-        if (! confirm('¿Eliminar esta campaña? La acción no se puede deshacer.')) return;
-        var $row = $(this).closest('tr');
-
-        $.ajax({
-            url: $(this).data('url'),
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                toastr.success(res.message);
-                $row.fadeOut(400, function () { $(this).remove(); });
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al eliminar.');
-            },
-        });
-    });
-
-    @if($hasSending)
-    setTimeout(function () {
-        if (document.querySelectorAll('.modal.show').length === 0) {
-            location.reload();
-        }
-    }, 10000);
-    @endif
-})();
-</script>
+<script src="{{ asset('managers/js/views/newsletter/campaigns/index.js') }}"></script>
 @endpush

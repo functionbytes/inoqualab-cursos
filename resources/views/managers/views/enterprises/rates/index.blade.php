@@ -7,7 +7,9 @@
 
         <div class="card w-100">
 
-            <form id="formRates" enctype="multipart/form-data" role="form" onSubmit="return false">
+            <form id="formRates" enctype="multipart/form-data" role="form"
+                  data-update-url="{{ route('manager.enterprises.rates.update') }}"
+                  data-redirect-url="{{ route('manager.enterprises', ':slack') }}">
 
                 {{ csrf_field() }}
 
@@ -44,7 +46,7 @@
                                         </div>
                                     </td>
                                     <td class="">
-                                        <input type="text" class="form-control" id="courses"  name="courses[{{ $rate->id }}]"   value="{{ $rate->price }}" placeholder="Ingresar precio">
+                                        <input type="text" class="form-control" id="courses_{{ $rate->id }}"  name="courses[{{ $rate->id }}]"   value="{{ $rate->price }}" placeholder="Ingresar precio">
                                     </td>
                                 </tr>
                                 @endforeach
@@ -74,87 +76,6 @@
 
 
 @push('scripts')
-
-<script type="text/javascript">
-    Dropzone.autoDiscover = false;
-
-    $(document).ready(function() {
-
-        $("#formRates").validate({
-            submit: false,
-            ignore: ".ignore",
-            rules: {
-                'courses[]': {
-                    required: true,
-                    number: true,
-                    min: 0
-                },
-            },
-            messages: {
-                'courses[]': {
-                    required: "Es necesario ingresar un precio.",
-                    number: "Debe ser un número.",
-                    min: "El precio no puede ser negativo."
-                },
-            },
-            submitHandler: function(form) {
-
-                var $form = $('#formRates');
-                var formData = new FormData($form[0]);
-
-                $.ajax({
-                    url: "{{ route('manager.enterprises.rates.update') }}",
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    type: "POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success: function(response) {
-
-                        if(response.success == true){
-
-                            toastr.success("Se ha crado un empleado.", "Operación exitosa", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right"
-                            });
-
-                            setTimeout(function() {
-                                let slack = @json($enterprise->slack);
-                                window.location.href = "{{ route('manager.enterprises', ':slack') }}".replace(':slack', slack);
-                            }, 2000);
-
-
-                        }else{
-
-                            $submitButton.prop('disabled', false);
-                            error = response.message;
-
-                            toastr.warning(error, "Operación fallida", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right"
-                            });
-
-                            $('.errors').text(error);
-                            $('.errors').removeClass('d-none');
-
-                        }
-
-                    }
-                });
-
-            }
-
-        });
-
-    });
-
-</script>
-
-
-
+<script src="{{ asset('managers/js/views/enterprises/rates/index.js') }}"></script>
 @endpush
 

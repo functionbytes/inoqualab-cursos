@@ -13,7 +13,7 @@
     <div class="col-lg-12 d-flex align-items-stretch">
         <div class="card w-100">
 
-            <form id="formIncomingMail" onsubmit="return false">
+            <form id="formIncomingMail" data-update-url="{{ route('manager.settings.incoming-mail.update') }}">
                 @csrf
 
                 {{-- Habilitar servicio --}}
@@ -113,7 +113,7 @@
                 {{-- Guardar --}}
                 <div class="card-body">
                     <button type="submit" class="btn btn-primary" id="btnSaveIncomingMail">
-                        <i class="fas fa-save me-1"></i> Guardar configuración
+                        Guardar configuración
                     </button>
                 </div>
 
@@ -190,36 +190,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    $('#formIncomingMail').submit(function () {
-        var btn = $('#btnSaveIncomingMail');
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...');
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('manager.settings.incoming-mail.update') }}',
-            data: $(this).serialize(),
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                    // Refrescar para que el badge ACTIVO se actualice
-                    setTimeout(function () { location.reload(); }, 800);
-                } else {
-                    toastr.error(response.message);
-                }
-            },
-            error: function () {
-                toastr.error('Error al guardar la configuración');
-            },
-            complete: function () {
-                btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i> Guardar configuración');
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/incoming-mail/setting.js') }}"></script>
 @endpush

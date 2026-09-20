@@ -64,25 +64,23 @@
                         <label for="module" class="form-label fw-semibold">Módulo</label>
                         <select class="form-select select2" id="module" name="module">
                             <option value="">Todos los módulos</option>
-                            <option value="core" @selected(request('module') === 'core')>Core</option>
-                            <option value="documents" @selected(request('module') === 'documents')>Documentos</option>
-                            <option value="orders" @selected(request('module') === 'orders')>Pedidos</option>
+                            @foreach($modules as $value => $label)
+                                <option value="{{ $value }}" @selected(request('module') === $value)>{{ $label }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-12 col-sm-6 col-md-3">
                         <label for="category" class="form-label fw-semibold">Categoría</label>
                         <select class="form-select select2" id="category" name="category">
                             <option value="">Todas las categorías</option>
-                            <option value="system" @selected(request('category') === 'system')>Sistema</option>
-                            <option value="customer" @selected(request('category') === 'customer')>Cliente</option>
-                            <option value="order" @selected(request('category') === 'order')>Pedido</option>
-                            <option value="document" @selected(request('category') === 'document')>Documento</option>
-                            <option value="general" @selected(request('category') === 'general')>General</option>
+                            @foreach($categories as $value => $label)
+                                <option value="{{ $value }}" @selected(request('category') === $value)>{{ $label }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="col-12 col-md-2 d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-search me-2"></i>Buscar
+                            Buscar
                         </button>
                         @if(request('search') || request('module') || request('category'))
                             <a href="{{ route('mailers.variables.index') }}" class="btn btn-outline-secondary">
@@ -101,6 +99,9 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
+                            <th class="col-checkbox">
+                                <input type="checkbox" class="form-check-input" id="select-all">
+                            </th>
                             <th width="20%">Clave</th>
                             <th width="20%">Nombre</th>
                             <th width="12%">Categoría</th>
@@ -113,6 +114,10 @@
                     <tbody>
                         @foreach($variables as $variable)
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input bulk-checkbox"
+                                           value="{{ $variable->id }}">
+                                </td>
                                 <td>
                                     <code class="text-primary d-block">{{ $variable->key }}</code>
                                     @if($variable->is_system)
@@ -172,8 +177,8 @@
                                             @if(!$variable->is_system)
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <button type="button" class="dropdown-item"
-                                                            onclick="document.getElementById('delete-form').action='{{ route('mailers.variables.destroy', $variable) }}'"
+                                                    <button type="button" class="dropdown-item js-delete-variable"
+                                                            data-delete-url="{{ route('mailers.variables.destroy', $variable) }}"
                                                             data-bs-toggle="modal" data-bs-target="#delete-modal">
                                                         Eliminar variable
                                                     </button>
@@ -228,7 +233,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-cog text-primary"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Sistema</h6>
@@ -242,7 +247,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-user text-info"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Cliente</h6>
@@ -256,7 +261,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-file-alt text-warning"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Documento/Pedido</h6>
@@ -280,7 +285,7 @@
             <div class="modal-body text-center p-4 position-relative">
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 <div class="mb-3 mt-2">
-                    <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                    <i class="fas fa-triangle-exclamation text-warning fs-icon-lg"></i>
                 </div>
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
@@ -295,30 +300,24 @@
     </div>
 </div>
 
+<div id="bulk-config" class="d-none" data-bulk-url="{{ route('mailers.variables.bulk-action') }}"></div>
+
+@include('managers.includes.bulk-toolbar-modal', [
+    'bulkEntityLabel' => 'variable(s)',
+    'bulkActions' => [
+        ['value' => 'enable', 'label' => 'Habilitar'],
+        ['value' => 'disable', 'label' => 'Deshabilitar'],
+        ['value' => 'delete', 'label' => 'Eliminar'],
+    ],
+])
+
 @endsection
 
-@push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/variables/index.css') }}">
+@endpush
 
-    $('.toggle-status').on('change', function() {
-        const $toggle = $(this);
-        $.ajax({
-            url: $toggle.data('url'),
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function(data) {
-                if (!data.success) $toggle.prop('checked', !$toggle.prop('checked'));
-            },
-            error: function() {
-                $toggle.prop('checked', !$toggle.prop('checked'));
-                toastr.error('Error al cambiar el estado');
-            }
-        });
-    });
-});
-</script>
+@push('scripts')
+<script src="{{ asset('managers/js/views/mailer/variables/index.js') }}"></script>
 @endpush

@@ -5,7 +5,9 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <form id="formReassign" role="form" onSubmit="return false">
+                <form id="formReassign" role="form" onSubmit="return false"
+                      data-reassign-url="{{ route('distributor.enterprises.users.reassign.single') }}"
+                      data-redirect-url="{{ route('distributor.enterprises.users', $enterprise->slack ?? '') }}">
                     {{ csrf_field() }}
                     <input type="hidden" name="slack" value="{{ $user->slack }}">
 
@@ -14,7 +16,7 @@
                             <h5 class="mb-0">Reasignar usuario — {{ $user->firstname }} {{ $user->lastname }}</h5>
                             <div class="ms-auto">
                                 <a href="{{ route('distributor.enterprises.users.view', $user->slack) }}" class="btn btn-light btn-sm">
-                                    <i class="fas fa-arrow-left me-1"></i> Volver
+                                    Volver
                                 </a>
                             </div>
                         </div>
@@ -48,31 +50,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    $("#formReassign").validate({
-        rules: { enterprise: { required: true } },
-        messages: { enterprise: { required: "Selecciona una empresa." } },
-        submitHandler: function(form) {
-            $.ajax({
-                url: "{{ route('distributor.enterprises.users.reassign.single') }}",
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                type: "POST",
-                data: $(form).serialize(),
-                success: function() {
-                    toastr.success('Usuario reasignado correctamente.');
-                    setTimeout(function() { window.location.href = "{{ route('distributor.enterprises.users', $enterprise->slack ?? '') }}"; }, 1000);
-                },
-                error: function(xhr) {
-                    if (xhr.status === 422) {
-                        $.each(xhr.responseJSON.errors, function(k, v) { toastr.error(v[0]); });
-                    } else {
-                        toastr.error('Error al reasignar el usuario.');
-                    }
-                }
-            });
-        }
-    });
-});
-</script>
+    <script src="{{ asset('distributors/js/enterprises/users/users/reassign.js') }}"></script>
 @endpush

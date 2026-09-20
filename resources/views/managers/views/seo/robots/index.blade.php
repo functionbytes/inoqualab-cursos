@@ -34,16 +34,18 @@
                             name="robots_txt"
                             class="form-control font-monospace"
                             rows="20"
+                            data-update-url="{{ route('manager.seo.robots.update') }}"
+                            data-reset-url="{{ route('manager.seo.robots.reset') }}"
                         >{{ $content }}</textarea>
                     </div>
                 </div>
 
                 <div class="card-footer bg-white border-top">
                     <button type="button" class="btn btn-primary w-100 mb-2" id="btn-save-robots">
-                        <i class="fas fa-save me-1"></i>Guardar robots.txt
+                        Guardar robots.txt
                     </button>
                     <button type="button" class="btn btn-outline-secondary w-100" id="btn-reset-robots">
-                        <i class="fas fa-rotate-left me-1"></i>Restaurar default
+                        Restaurar default
                     </button>
                 </div>
             </div>
@@ -101,10 +103,10 @@
                             <span class="small fw-semibold text-muted">Bloquear todo</span>
                             <button type="button" class="btn btn-sm btn-outline-secondary btn-insert-snippet"
                                     data-snippet="User-agent: *&#10;Disallow: /">
-                                <i class="fas fa-plus me-1"></i>Insertar
+                                Insertar
                             </button>
                         </div>
-                        <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.78rem;">User-agent: *
+                        <pre class="small bg-light p-2 rounded mb-0 robots-snippet-pre">User-agent: *
 Disallow: /</pre>
                     </div>
 
@@ -114,10 +116,10 @@ Disallow: /</pre>
                             <span class="small fw-semibold text-muted">Permitir todo</span>
                             <button type="button" class="btn btn-sm btn-outline-secondary btn-insert-snippet"
                                     data-snippet="User-agent: *&#10;Allow: /">
-                                <i class="fas fa-plus me-1"></i>Insertar
+                                Insertar
                             </button>
                         </div>
-                        <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.78rem;">User-agent: *
+                        <pre class="small bg-light p-2 rounded mb-0 robots-snippet-pre">User-agent: *
 Allow: /</pre>
                     </div>
 
@@ -127,10 +129,10 @@ Allow: /</pre>
                             <span class="small fw-semibold text-muted">Bloquear panel</span>
                             <button type="button" class="btn btn-sm btn-outline-secondary btn-insert-snippet"
                                     data-snippet="Disallow: /panel/&#10;Disallow: /manager/">
-                                <i class="fas fa-plus me-1"></i>Insertar
+                                Insertar
                             </button>
                         </div>
-                        <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.78rem;">Disallow: /panel/
+                        <pre class="small bg-light p-2 rounded mb-0 robots-snippet-pre">Disallow: /panel/
 Disallow: /manager/</pre>
                     </div>
 
@@ -140,10 +142,10 @@ Disallow: /manager/</pre>
                             <span class="small fw-semibold text-muted">Permitir bots IA</span>
                             <button type="button" class="btn btn-sm btn-outline-secondary btn-insert-snippet"
                                     data-snippet="User-agent: GPTBot&#10;Allow: /&#10;&#10;User-agent: ClaudeBot&#10;Allow: /">
-                                <i class="fas fa-plus me-1"></i>Insertar
+                                Insertar
                             </button>
                         </div>
-                        <pre class="small bg-light p-2 rounded mb-0" style="font-size:0.78rem;">User-agent: GPTBot
+                        <pre class="small bg-light p-2 rounded mb-0 robots-snippet-pre">User-agent: GPTBot
 Allow: /
 
 User-agent: ClaudeBot
@@ -163,93 +165,10 @@ Allow: /</pre>
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/robots/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    var $editor = $('#robots-editor');
-
-    // Función para insertar snippet al final del textarea
-    function insertSnippet(snippet) {
-        var current = $editor.val().trimEnd();
-        var separator = current.length > 0 ? '\n\n' : '';
-        $editor.val(current + separator + snippet);
-        $editor.focus();
-        $editor[0].scrollTop = $editor[0].scrollHeight;
-    }
-
-    // Botones de insertar snippet
-    $(document).on('click', '.btn-insert-snippet', function () {
-        var raw = $(this).data('snippet');
-        // data() already decodes HTML entities in some cases; ensure newlines
-        var snippet = String(raw).replace(/&#10;/g, '\n');
-        insertSnippet(snippet);
-    });
-
-    // Guardar robots.txt via AJAX
-    $('#btn-save-robots').on('click', function () {
-        var $btn = $(this).prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-        );
-
-        $.ajax({
-            url: '{{ route('manager.seo.robots.update') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: { robots_txt: $editor.val() },
-            dataType: 'json',
-            success: function (response) {
-                toastr.success(response.message ?? 'robots.txt guardado correctamente');
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    var errors = xhr.responseJSON.errors;
-                    var first = errors[Object.keys(errors)[0]];
-                    toastr.error(first ? first[0] : 'Error de validación');
-                } else {
-                    toastr.error('Error al guardar el robots.txt');
-                }
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html(
-                    '<i class="fas fa-save me-1"></i>Guardar robots.txt'
-                );
-            }
-        });
-    });
-
-    // Restaurar default via AJAX
-    $('#btn-reset-robots').on('click', function () {
-        if (!window.confirm('¿Restaurar el robots.txt al valor por defecto? Esta acción no se puede deshacer.')) {
-            return;
-        }
-
-        var $btn = $(this).prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Restaurando...'
-        );
-
-        $.ajax({
-            url: '{{ route('manager.seo.robots.reset') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            dataType: 'json',
-            success: function (response) {
-                if (response.content !== undefined) {
-                    $editor.val(response.content);
-                }
-                toastr.success(response.message ?? 'robots.txt restaurado al valor por defecto');
-            },
-            error: function () {
-                toastr.error('Error al restaurar el robots.txt');
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html(
-                    '<i class="fas fa-rotate-left me-1"></i>Restaurar default'
-                );
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/robots/index.js') }}"></script>
 @endpush

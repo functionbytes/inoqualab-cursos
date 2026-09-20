@@ -3,7 +3,7 @@
 @section('content')
 
 
-    <div class="row g-3">
+    <div class="row g-3" data-flash-success="{{ session('success') }}">
 
         {{-- Form column --}}
         <div class="col-12 col-lg-8">
@@ -226,13 +226,6 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-    $('.select2').select2({ width: '100%' });
-
-    @if(session('success'))
-        toastr.success('{{ session("success") }}');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/templates/create.js') }}"></script>
 @endpush

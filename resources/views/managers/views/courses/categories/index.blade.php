@@ -5,7 +5,13 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="courses-categories-index"
+         data-flash-success="{{ session('success') }}"
+         data-config='@json([
+            "routes" => [
+                "bulkAction" => route("manager.categories.courses.bulk-action"),
+            ],
+         ])'>
 
         <div class="card">
 
@@ -67,6 +73,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="courses-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Titulo</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Actualización</th>
@@ -76,6 +85,10 @@
                             <tbody>
                                 @foreach($categories as $categorie)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $categorie->id }}">
+                                        </td>
                                         <td class="fw-semibold">{{ Str::upper(Str::lower($categorie->title)) }}</td>
                                         <td class="text-center">
                                             @if($categorie->available)
@@ -189,37 +202,23 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'categoria(s)',
+        'bulkActions' => [
+            ['value' => 'publish', 'label' => 'Publicar'],
+            ['value' => 'hide', 'label' => 'Ocultar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/courses/categories/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/courses/categories/index.js') }}"></script>
 @endpush

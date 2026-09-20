@@ -108,28 +108,34 @@
                             <div class="modern-course-features-box grid-content-reverse h-100">
                                 <div class="inner">
                                     <div class="rbt-image-gallery-wrapper">
+                                        {{-- Markup de swiper.js con posiciones ya calculadas (transform/width
+                                             inline): residuo de un "copiar HTML" tras ejecutar el widget en el
+                                             navegador. La librería swiper no está cargada en este proyecto
+                                             (ver layouts/pages.blade.php) y este partial no se incluye desde
+                                             ninguna vista, así que se retiran los inline styles sin sustituto
+                                             -- si el carrusel se reactiva, swiper.js recalcula estos valores. --}}
                                         <div class="swiper modern-course-carousel-activation rbt-arrow-between swiper-initialized swiper-horizontal swiper-pointer-events swiper-backface-hidden">
-                                            <div class="swiper-wrapper" id="swiper-wrapper-534d4d801095e1cb8" aria-live="polite" style="transition-duration: 0ms; transform: translate3d(-558px, 0px, 0px);"><div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="2" role="group" aria-label="3 / 3" style="width: 558px;">
+                                            <div class="swiper-wrapper" id="swiper-wrapper-534d4d801095e1cb8" aria-live="polite"><div class="swiper-slide swiper-slide-duplicate swiper-slide-prev" data-swiper-slide-index="2" role="group" aria-label="3 / 3">
                                                     <div class="thumbnail mt--0">
                                                         <img src="/pages/images/course/single-course-09.jpg" alt="Image" loading="lazy">
                                                     </div>
                                                 </div>
-                                                <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" role="group" aria-label="1 / 3" style="width: 558px;">
+                                                <div class="swiper-slide swiper-slide-active" data-swiper-slide-index="0" role="group" aria-label="1 / 3">
                                                     <div class="thumbnail mt--0">
                                                         <img src="/pages/images/course/single-course-07.jpg" alt="Image" loading="lazy">
                                                     </div>
                                                 </div>
-                                                <div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" role="group" aria-label="2 / 3" style="width: 558px;">
+                                                <div class="swiper-slide swiper-slide-next" data-swiper-slide-index="1" role="group" aria-label="2 / 3">
                                                     <div class="thumbnail mt--0">
                                                         <img src="/pages/images/course/single-course-08.jpg" alt="Image" loading="lazy">
                                                     </div>
                                                 </div>
-                                                <div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="2" role="group" aria-label="3 / 3" style="width: 558px;">
+                                                <div class="swiper-slide swiper-slide-duplicate-prev" data-swiper-slide-index="2" role="group" aria-label="3 / 3">
                                                     <div class="thumbnail mt--0">
                                                         <img src="/pages/images/course/single-course-09.jpg" alt="Image" loading="lazy">
                                                     </div>
                                                 </div>
-                                            <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" role="group" aria-label="1 / 3" style="width: 558px;">
+                                            <div class="swiper-slide swiper-slide-duplicate swiper-slide-duplicate-active" data-swiper-slide-index="0" role="group" aria-label="1 / 3">
                                                     <div class="thumbnail mt--0">
                                                         <img src="/pages/images/course/single-course-07.jpg" alt="Image" loading="lazy">
                                                     </div>

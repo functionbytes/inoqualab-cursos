@@ -2,9 +2,16 @@
 
 @section('title', 'Roles y permisos')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/roles/index.css') }}">
+@endpush
+
 @section('content')
 
-    <div class="widget-content searchable-container list">
+    <div id="rolesPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.roles.bulk-action') }}">
 
         <div class="card">
 
@@ -92,6 +99,9 @@
                         <table class="table table-hover mb-0 align-middle">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="roles-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Nombre del rol</th>
                                     <th>Guard</th>
                                     <th class="text-center">Permisos</th>
@@ -104,6 +114,12 @@
                                 @foreach($roles as $role)
                                     @php $isSystem = in_array($role->name, $protectedRoles, true); @endphp
                                     <tr>
+                                        <td>
+                                            @unless($isSystem)
+                                                <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                       value="{{ $role->id }}">
+                                            @endunless
+                                        </td>
                                         <td>
                                             <a href="{{ route('manager.roles.edit', $role->id) }}" class="text-decoration-none fw-semibold">
                                                 {{ $role->name }}
@@ -154,7 +170,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <div class="mb-3"><i class="fas fa-shield-halved text-muted" style="font-size:2.5rem;"></i></div>
+                        <div class="mb-3"><i class="fas fa-shield-halved text-muted roles-empty-icon"></i></div>
                         <h6 class="mb-1">No hay roles {{ $searchKey ? 'que coincidan' : 'configurados' }}</h6>
                         <p class="text-muted mb-3">Crea el primer rol para gestionar permisos.</p>
                         <a href="{{ route('manager.roles.create') }}" class="btn btn-sm btn-primary">Crear rol</a>
@@ -175,19 +191,15 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'rol(es)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
 @push('scripts')
-<script>
-    $(document).on('click', '.delete-btn', function () {
-        $('#delete-form').attr('action', $(this).data('url'));
-    });
-
-    @if(session('success'))
-        toastr.success(@json(session('success')), 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error(@json(session('error')), 'Error');
-    @endif
-</script>
+<script src="{{ asset('managers/js/views/settings/roles/index.js') }}"></script>
 @endpush

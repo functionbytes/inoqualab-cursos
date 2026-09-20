@@ -13,8 +13,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0"
-                             style="width:44px;height:44px;">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0 icon-box-44">
                             <i class="fas fa-language text-primary fs-5"></i>
                         </div>
                         <div>
@@ -28,8 +27,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-warning-subtle flex-shrink-0"
-                             style="width:44px;height:44px;">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-warning-subtle flex-shrink-0 icon-box-44">
                             <i class="fas fa-circle-question text-warning fs-5"></i>
                         </div>
                         <div>
@@ -43,8 +41,7 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center {{ count($conflicts) > 0 ? 'bg-danger-subtle' : 'bg-success-subtle' }} flex-shrink-0"
-                             style="width:44px;height:44px;">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center {{ count($conflicts) > 0 ? 'bg-danger-subtle' : 'bg-success-subtle' }} flex-shrink-0 icon-box-44">
                             <i class="fas fa-{{ count($conflicts) > 0 ? 'triangle-exclamation text-danger' : 'check-circle text-success' }} fs-5"></i>
                         </div>
                         <div>
@@ -178,3 +175,7 @@
     </div>
 
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/hreflang.css') }}">
+@endpush

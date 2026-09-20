@@ -1,0 +1,36 @@
+.error-hero {
+    padding: 100px 0 120px;
+}
+
+.error-hero-number {
+    font-size: 130px;
+    font-weight: 800;
+    color: #008bce;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.error-hero-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #081A28;
+    margin-bottom: 16px;
+}
+
+.error-hero-text {
+    color: #5A7093;
+    font-size: 16px;
+    margin-bottom: 36px;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.error-hero-actions {
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.error-hero-actions .fas {
+    margin-right: 8px;
+}

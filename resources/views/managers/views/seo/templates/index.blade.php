@@ -5,7 +5,8 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}" data-flash-error="{{ session('error') }}">
 
         <div class="card">
 
@@ -81,7 +82,7 @@
                         <table class="table table-hover align-middle text-nowrap">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width:40px">
+                                    <th class="col-checkbox">
                                         <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
                                     <th>Nombre</th>
@@ -225,212 +226,27 @@
         </div>
     </div>
 
-    {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
-        <button type="button" class="btn btn-primary shadow-lg px-4"
-                data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Aplicar accion
-        </button>
-    </div>
+    <div id="bulk-config" class="d-none" data-bulk-url="{{ route('manager.seo.templates.bulk-action') }}"></div>
 
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Accion masiva</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-3">
-                        Se aplicará la acción sobre <strong><span data-bulk-count>0</span> plantilla(s)</strong>.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Accion</label>
-                        <select id="bulk-action-select" class="form-select">
-                            <option value="">Seleccionar accion...</option>
-                            <option value="activate">Activar</option>
-                            <option value="deactivate">Desactivar</option>
-                            <option value="delete">Eliminar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button id="btn-bulk-apply" type="button" class="btn btn-primary w-100 mb-2">Aplicar</button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'plantilla(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Toggle active state ──────────────────────────────────────────────────
-    $(document).on('change', '.toggle-active', function () {
-        var $toggle = $(this);
-
-        $.ajax({
-            url: $toggle.data('url'),
-            method: 'PATCH',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                toastr.success(res.message ?? 'Estado actualizado.');
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al actualizar el estado.');
-                $toggle.prop('checked', !$toggle.prop('checked'));
-            }
-        });
-    });
-
-    // ── Apply to metas ───────────────────────────────────────────────────────
-    var currentApplyData = null;
-
-    $(document).on('click', '.apply-btn', function (e) {
-        e.preventDefault();
-        var previewUrl = $(this).data('preview-url');
-        var applyUrl   = $(this).data('apply-url');
-        var templateId = $(this).data('id');
-
-        currentApplyData = { applyUrl: applyUrl, templateId: templateId };
-
-        $('#apply-modal-body').html(
-            '<div class="py-3">' +
-            '<div class="spinner-border text-primary" role="status"></div>' +
-            '<p class="mt-2 text-muted">Calculando registros afectados...</p>' +
-            '</div>'
-        );
-        $('#confirm-apply-btn').prop('disabled', true);
-        $('#applyModal').modal('show');
-
-        $.getJSON(previewUrl, function (res) {
-            var count = res.affected_count ?? 0;
-            $('#apply-modal-body').html(
-                '<div class="display-4 text-primary mb-3"><i class="fas fa-layer-group"></i></div>' +
-                '<p class="mb-1">Esta plantilla se aplicará a</p>' +
-                '<h3 class="fw-bold mb-1">' + count + '</h3>' +
-                '<p class="text-muted mb-0">registro(s) de meta SEO.</p>'
-            );
-            $('#confirm-apply-btn').prop('disabled', count === 0);
-        }).fail(function () {
-            $('#apply-modal-body').html('<p class="text-danger py-3">Error al cargar la previsualización.</p>');
-        });
-    });
-
-    $('#confirm-apply-btn').on('click', function () {
-        if (!currentApplyData) return;
-        var $btn = $(this);
-        $btn.prop('disabled', true).text('Aplicando...');
-
-        $.ajax({
-            url: currentApplyData.applyUrl,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ template_id: currentApplyData.templateId }),
-            success: function (res) {
-                $('#applyModal').modal('hide');
-                toastr.success(res.message ?? 'Plantilla aplicada correctamente.');
-                currentApplyData = null;
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al aplicar la plantilla.');
-                $btn.prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-    $('#applyModal').on('hidden.bs.modal', function () {
-        currentApplyData = null;
-        $('#confirm-apply-btn').prop('disabled', true).text('Aplicar');
-    });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getChecked() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#btn-bulk-apply').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getChecked();
-
-        if (!action) { toastr.warning('Selecciona una acción.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos una plantilla.'); return; }
-
-        if (action === 'delete' && !confirm('¿Eliminar ' + ids.length + ' plantilla(s)?')) return;
-
-        $('#btn-bulk-apply').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route('manager.seo.templates.bulk-action') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? ids.length + ' plantilla(s) procesadas.');
-                setTimeout(function () { location.reload(); }, 700);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/templates/index.js') }}"></script>
 @endpush
+

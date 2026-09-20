@@ -11,7 +11,7 @@
 <div class="band">
     <div class="container">
         <div class="crumb">
-            <a href="{{ route('index') }}" style="color:inherit">INICIO</a>
+            <a href="{{ route('index') }}">INICIO</a>
             <span class="sep">/</span>
             <span class="cur">PREGUNTAS FRECUENTES</span>
         </div>
@@ -78,19 +78,7 @@
 </section>
 
 @push('scripts')
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('.iq-faq-item-header').on('click', function() {
-            $('.iq-faq-item-header').addClass('collapsed');
-            $('.iq-faq-item .collapse').removeClass('show');
-
-            if ($(this).hasClass('collapsed')) {
-                $(this).removeClass('collapsed');
-                $($(this).attr('data-target')).addClass('show');
-            }
-        });
-    });
-</script>
+    <script src="{{ asset('pages/js/views/faqs.js') }}"></script>
 @endpush
 
 @endsection

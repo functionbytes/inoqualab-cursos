@@ -33,19 +33,19 @@
                                                                 <span>Referencia :</span>
                                                                 <strong>{{  $invoice->reference}}</strong>
                                                             </p>
-                                                            @if($invoice->date!=null)
+                                                            @if($invoice->payment_at!=null)
                                                                 <p class="mt-0 mb-0">
                                                                     <span>Fecha de la factura :</span>
                                                                     <strong>{{ date('Y-m-d', strtotime($invoice->payment_at)) }}</strong>
                                                                 </p>
                                                             @endif
-                                                            <p class="mt-0 mb-0">
+                                                            <p class="mt-0 mb-0 {{ $invoice->from_at ? '' : 'd-none' }}">
                                                                 <span>Desde :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($invoice->from_at)) }}</strong>
+                                                                <strong>{{ $invoice->from_at ? date('Y-m-d', strtotime($invoice->from_at)) : '' }}</strong>
                                                             </p>
-                                                            <p class="mt-0 mb-0">
+                                                            <p class="mt-0 mb-0 {{ $invoice->to_at ? '' : 'd-none' }}">
                                                                 <span>Hasta :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($invoice->to_at)) }}</strong>
+                                                                <strong>{{ $invoice->to_at ? date('Y-m-d', strtotime($invoice->to_at)) : '' }}</strong>
                                                             </p>
                                                         </address>
                                                     </div>

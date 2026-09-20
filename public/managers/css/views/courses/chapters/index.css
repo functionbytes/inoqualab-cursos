@@ -1,0 +1,18 @@
+.courses-col-checkbox {
+    width: 40px;
+}
+
+.drag-handle {
+    cursor: grab;
+}
+
+#chapters-sortable tr.ui-sortable-helper {
+    display: table;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+}
+
+.sortable-placeholder td {
+    background: #eaf6fc;
+    height: 48px;
+}

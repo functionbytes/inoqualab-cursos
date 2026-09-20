@@ -63,12 +63,10 @@
             <div class="lb-tree">
                 <div class="eyebrow">Biblioteca</div>
                 <span class="item is-active">
-                    @include('customers.includes.icon', ['name' => 'folder'])
                     Todos<b>{{ $documents->total() }}</b>
                 </span>
                 @foreach($porTipo as $tipo => $n)
                     <span class="item">
-                        @include('customers.includes.icon', ['name' => 'receipt'])
                         {{ $tipo }}<b>{{ $n }}</b>
                     </span>
                 @endforeach

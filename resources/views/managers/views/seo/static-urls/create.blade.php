@@ -5,7 +5,7 @@
 @section('content')
 
 
-    <div class="row">
+    <div class="row" data-flash-error="{{ session('error') }}">
 
         {{-- Formulario principal --}}
         <div class="col-lg-8">
@@ -47,15 +47,22 @@
                                     <label class="col-form-label fw-semibold">
                                         Prioridad <span class="text-danger">*</span>
                                     </label>
+                                    @php
+                                        $priorityLabels = [
+                                            '1.0' => 'Máxima', '0.9' => 'Muy alta', '0.8' => 'Alta',
+                                            '0.7' => 'Media-alta', '0.6' => 'Media', '0.5' => 'Media',
+                                            '0.4' => 'Media-baja', '0.3' => 'Baja', '0.2' => 'Muy baja',
+                                            '0.1' => 'Mínima',
+                                        ];
+                                    @endphp
                                     <select class="form-select @error('priority') is-invalid @enderror"
                                             id="priority"
                                             name="priority"
                                             required>
-                                        <option value="1.0" {{ old('priority', '0.5') == '1.0' ? 'selected' : '' }}>1.0 — Muy alta</option>
-                                        <option value="0.8" {{ old('priority', '0.5') == '0.8' ? 'selected' : '' }}>0.8 — Alta</option>
-                                        <option value="0.5" {{ old('priority', '0.5') == '0.5' ? 'selected' : '' }}>0.5 — Media</option>
-                                        <option value="0.3" {{ old('priority', '0.5') == '0.3' ? 'selected' : '' }}>0.3 — Baja</option>
-                                        <option value="0.1" {{ old('priority', '0.5') == '0.1' ? 'selected' : '' }}>0.1 — Muy baja</option>
+                                        @foreach($priorityOptions as $option)
+                                            @php $optionValue = number_format($option, 1); @endphp
+                                            <option value="{{ $optionValue }}" {{ old('priority', '0.5') == $optionValue ? 'selected' : '' }}>{{ $optionValue }} — {{ $priorityLabels[$optionValue] ?? '' }}</option>
+                                        @endforeach
                                     </select>
                                     @error('priority')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -71,17 +78,20 @@
                                     <label class="col-form-label fw-semibold">
                                         Frecuencia de cambio <span class="text-danger">*</span>
                                     </label>
+                                    @php
+                                        $changefreqLabels = [
+                                            'always' => 'Siempre', 'hourly' => 'Por hora', 'daily' => 'Diario',
+                                            'weekly' => 'Semanal', 'monthly' => 'Mensual', 'yearly' => 'Anual',
+                                            'never' => 'Nunca',
+                                        ];
+                                    @endphp
                                     <select class="form-select @error('changefreq') is-invalid @enderror"
                                             id="changefreq"
                                             name="changefreq"
                                             required>
-                                        <option value="always"  {{ old('changefreq', 'weekly') == 'always'  ? 'selected' : '' }}>always — Siempre</option>
-                                        <option value="hourly"  {{ old('changefreq', 'weekly') == 'hourly'  ? 'selected' : '' }}>hourly — Por hora</option>
-                                        <option value="daily"   {{ old('changefreq', 'weekly') == 'daily'   ? 'selected' : '' }}>daily — Diario</option>
-                                        <option value="weekly"  {{ old('changefreq', 'weekly') == 'weekly'  ? 'selected' : '' }}>weekly — Semanal</option>
-                                        <option value="monthly" {{ old('changefreq', 'weekly') == 'monthly' ? 'selected' : '' }}>monthly — Mensual</option>
-                                        <option value="yearly"  {{ old('changefreq', 'weekly') == 'yearly'  ? 'selected' : '' }}>yearly — Anual</option>
-                                        <option value="never"   {{ old('changefreq', 'weekly') == 'never'   ? 'selected' : '' }}>never — Nunca</option>
+                                        @foreach($changefreqOptions as $option)
+                                            <option value="{{ $option }}" {{ old('changefreq', 'weekly') == $option ? 'selected' : '' }}>{{ $option }} — {{ $changefreqLabels[$option] ?? '' }}</option>
+                                        @endforeach
                                     </select>
                                     @error('changefreq')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -193,41 +203,7 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    $('#formStaticUrl').validate({
-        rules: {
-            url:        { required: true, maxlength: 2048 },
-            priority:   { required: true },
-            changefreq: { required: true }
-        },
-        messages: {
-            url: {
-                required:  'La URL es obligatoria.',
-                maxlength: 'Maximo 2048 caracteres.'
-            },
-            priority:   { required: 'Selecciona una prioridad.' },
-            changefreq: { required: 'Selecciona la frecuencia de cambio.' }
-        },
-        highlight: function (element) {
-            $(element).addClass('is-invalid').removeClass('is-valid');
-        },
-        unhighlight: function (element) {
-            $(element).removeClass('is-invalid').addClass('is-valid');
-        },
-        errorPlacement: function (error, element) {
-            error.addClass('invalid-feedback d-block').insertAfter(element);
-        },
-        submitHandler: function (form) {
-            form.submit();
-        }
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/static-urls/create.js') }}"></script>
 @endpush
+

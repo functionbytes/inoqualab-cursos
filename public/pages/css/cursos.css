@@ -49,6 +49,7 @@
   display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--navy);
   font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 8px 16px; border-radius: 7px; white-space: nowrap;
 }
+.cursos-page .crumb a { color: inherit; }
 .cursos-page .crumb .sep { color: var(--muted-2); font-weight: 600; }
 .cursos-page .crumb .cur { color: var(--green-deep); }
 .cursos-page .band h1 { font-size: clamp(34px, 5vw, 50px); font-weight: 800; letter-spacing: -.02em; margin: 18px 0 0; color: #fff; }
@@ -60,6 +61,8 @@
 
 .cursos-page .cat-side { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 16px; }
 .cursos-page .fblock { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-soft); padding: 20px 20px 22px; }
+.cursos-page .fblock--compact { padding-top: 14px; padding-bottom: 14px; }
+.cursos-page .ph--hidden { display: none; }
 .cursos-page .fblock h4 { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 15px; display: flex; align-items: center; gap: 9px; }
 .cursos-page .fblock h4::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: var(--green); }
 .cursos-page .fsearch { position: relative; display: flex; align-items: center; }

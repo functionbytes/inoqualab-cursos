@@ -10,10 +10,10 @@
                         <h5 class="mb-0">Detalle de categoría</h5>
                         <div class="ms-auto">
                             <a href="{{ route('manager.categories.courses') }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i> Volver
+                                Volver
                             </a>
                             <a href="{{ route('manager.categories.courses.edit', $categorie->slack) }}" class="btn btn-primary btn-sm ms-1">
-                                <i class="fas fa-edit me-1"></i> Editar
+                                Editar
                             </a>
                         </div>
                     </div>

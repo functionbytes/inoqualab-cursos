@@ -30,7 +30,9 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('manager.mail_templates.update', $template->id) }}" id="formEdit">
+    <form method="POST" action="{{ route('manager.mail_templates.update', $template->id) }}" id="formEdit"
+          data-preview-url="{{ route('manager.mail_templates.preview_ajax', $template->id) }}"
+          data-test-url="{{ route('manager.mail_templates.send_test', $template->id) }}">
         @csrf
         @method('PUT')
 
@@ -62,7 +64,7 @@
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-secondary btn-sm" id="btnFormatCode"
                                         title="Formatear código HTML (beautify)">
-                                    <i class="fas fa-wand-magic-sparkles me-1"></i>Formatear HTML
+                                    Formatear HTML
                                 </button>
                             </div>
                             <small class="text-muted d-none d-md-inline">
@@ -108,13 +110,13 @@
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="code-tab" data-bs-toggle="tab"
                                     data-bs-target="#code-panel" type="button" role="tab">
-                                <i class="fas fa-code me-1"></i>Código
+                                Código
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="preview-tab" data-bs-toggle="tab"
                                     data-bs-target="#preview-panel" type="button" role="tab">
-                                <i class="fas fa-eye me-1"></i>Vista previa
+                                Vista previa
                             </button>
                         </li>
                     </ul>
@@ -147,7 +149,7 @@
                                 @endphp
 
                                 <div class="mb-2">
-                                    <small class="fw-semibold text-uppercase text-muted d-block mb-1" style="font-size:10px;letter-spacing:.5px;">Globales</small>
+                                    <small class="fw-semibold text-uppercase text-muted text-uppercase-xs d-block mb-1">Globales</small>
                                     <div class="d-flex flex-wrap gap-1">
                                         @foreach($globalVars as $var => $desc)
                                             <button type="button"
@@ -162,7 +164,7 @@
 
                                 @if($template->variables)
                                     <div>
-                                        <small class="fw-semibold text-uppercase text-muted d-block mb-1" style="font-size:10px;letter-spacing:.5px;">Esta plantilla</small>
+                                        <small class="fw-semibold text-uppercase text-muted text-uppercase-xs d-block mb-1">Esta plantilla</small>
                                         <div class="d-flex flex-wrap gap-1">
                                             @foreach($template->variables as $var => $desc)
                                                 <button type="button"
@@ -206,8 +208,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div id="previewContainer"
-                                 style="min-height:500px;max-height:700px;overflow-y:auto;background:#f8f9fa;border-radius:4px;transition:max-width .3s ease;max-width:100%;margin:0 auto;">
+                            <div id="previewContainer" class="mail-preview-container">
                                 <div class="text-center py-5 text-muted">
                                     <i class="fas fa-eye fs-1 d-block mb-3"></i>
                                     <p class="mb-0">Cambia al tab de código para comenzar a editar</p>
@@ -226,14 +227,14 @@
                     {{-- Botones de acción --}}
                     <div class="card-footer bg-white border-top">
                         <button type="submit" class="btn btn-primary w-100 mb-1">
-                            <i class="fas fa-save me-1"></i>Guardar cambios
+                            Guardar cambios
                         </button>
                         <button type="button" class="btn btn-outline-info w-100 mb-1"
                                 data-bs-toggle="modal" data-bs-target="#modalTestEmail">
-                            <i class="fas fa-paper-plane me-1"></i>Enviar correo de prueba
+                            Enviar correo de prueba
                         </button>
                         <a href="{{ route('manager.mail_templates') }}" class="btn btn-secondary w-100">
-                            <i class="fas fa-arrow-left me-1"></i>Volver al listado
+                            Volver al listado
                         </a>
                     </div>
                 </div>
@@ -340,7 +341,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-info" id="btnSendTestEmail">
-                    <i class="fas fa-paper-plane me-1"></i>Enviar prueba
+                    Enviar prueba
                 </button>
             </div>
         </div>
@@ -351,30 +352,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/monokai.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.css">
-<style>
-    #codeEditorWrapper .CodeMirror {
-        height: 520px;
-        font-size: 13px;
-        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-        line-height: 1.6;
-    }
-    .variable-insert {
-        transition: transform .1s ease;
-    }
-    .variable-insert:hover {
-        transform: translateY(-1px);
-    }
-    #previewContainer iframe {
-        display: block;
-        width: 100%;
-        border: none;
-        background: #fff;
-        overflow: hidden;
-    }
-    #previewContainer {
-        transition: max-width .3s ease;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/mail_templates/edit.css') }}">
 @endpush
 
 @push('scripts')
@@ -388,210 +366,9 @@
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/html-hint.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/css-hint.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/dist/beautify-html.js"></script>
-
-<script>
-$(document).ready(function () {
-
-    var previewTimeout;
-    var hasChanges = false;
-
-    // ── CodeMirror ────────────────────────────────────────────────────────
-    var editor = CodeMirror(document.getElementById('codeEditorWrapper'), {
-        value: document.getElementById('content').value,
-        mode: 'htmlmixed',
-        theme: 'monokai',
-        lineNumbers: true,
-        lineWrapping: true,
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        matchBrackets: true,
-        extraKeys: {
-            'Ctrl-Space': 'autocomplete',
-            'Ctrl-S': function () { submitForm(); },
-            'Ctrl-/': 'toggleComment'
-        }
-    });
-
-    // ── Estado del editor ─────────────────────────────────────────────────
-    function setStatus(text, variant) {
-        var $el = $('#editorStatus');
-        $el.text(text).removeClass('bg-black bg-warning bg-success bg-danger text-dark text-white');
-        if (variant === 'warning') {
-            $el.addClass('bg-warning text-dark');
-        } else if (variant === 'success') {
-            $el.addClass('bg-success text-white');
-        } else if (variant === 'danger') {
-            $el.addClass('bg-danger text-white');
-        } else {
-            $el.addClass('bg-black text-white');
-        }
-    }
-
-    // ── Vista previa AJAX ─────────────────────────────────────────────────
-    function updatePreview() {
-        var content = editor.getValue();
-        $.ajax({
-            url: '{{ route('manager.mail_templates.preview_ajax', $template->id) }}',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                content: content
-            },
-            dataType: 'json',
-            beforeSend: function () {
-                setStatus('Cargando...', 'default');
-            },
-            success: function (data) {
-                if (!data.success) return;
-                var $container = $('#previewContainer');
-                var $iframe = $('<iframe>').css({ width: '100%', border: 'none', background: '#fff' });
-                $container.empty().append($iframe);
-                $iframe[0].srcdoc = data.html;
-                $iframe.on('load', function () {
-                    try {
-                        var doc = this.contentDocument || this.contentWindow.document;
-                        $(this).height(doc.documentElement.scrollHeight);
-                    } catch (e) {
-                        $(this).height(600);
-                    }
-                });
-                setStatus('En vivo', 'success');
-            },
-            error: function () {
-                $('#previewContainer').html(
-                    '<div class="alert alert-danger m-3"><i class="fas fa-exclamation-circle me-2"></i>Error al cargar vista previa</div>'
-                );
-                setStatus('Error', 'danger');
-            }
-        });
-    }
-
-    // ── Evento de cambio en el editor ─────────────────────────────────────
-    editor.on('change', function () {
-        hasChanges = true;
-        setStatus('Modificado', 'warning');
-        clearTimeout(previewTimeout);
-        previewTimeout = setTimeout(updatePreview, 2000);
-    });
-
-    // ── Botón: Formatear HTML ─────────────────────────────────────────────
-    $('#btnFormatCode').on('click', function (e) {
-        e.preventDefault();
-        var formatted = html_beautify(editor.getValue(), {
-            indent_size: 2,
-            wrap_line_length: 120,
-            preserve_newlines: true,
-            max_preserve_newlines: 2,
-            unformatted: ['a', 'span', 'strong', 'em', 'b', 'i', 'code']
-        });
-        editor.setValue(formatted);
-        editor.focus();
-        setStatus('Formateado', 'success');
-        setTimeout(function () { setStatus('Listo', 'default'); }, 1500);
-    });
-
-    // ── Botón: Actualizar vista previa ────────────────────────────────────
-    $('#btnRefreshPreview').on('click', function (e) {
-        e.preventDefault();
-        updatePreview();
-        $(this).prop('disabled', true);
-        setTimeout(function () { $('#btnRefreshPreview').prop('disabled', false); }, 1000);
-    });
-
-    // ── Inserción de variables ────────────────────────────────────────────
-    $(document).on('click', '.variable-insert', function (e) {
-        e.preventDefault();
-        var varName = $(this).data('variable-name');
-        editor.replaceRange('{' + varName + '}', editor.getCursor());
-        editor.focus();
-    });
-
-    // ── Toggle Desktop / Móvil ────────────────────────────────────────────
-    $('#btnDesktopView, #btnMobileView').on('click', function () {
-        var width = $(this).data('width');
-        $('#previewContainer').css('max-width', width);
-        $('#btnDesktopView, #btnMobileView').removeClass('active');
-        $(this).addClass('active');
-    });
-
-    // ── Abrir tab de vista previa → actualizar ────────────────────────────
-    $('#preview-tab').on('shown.bs.tab', function () {
-        updatePreview();
-    });
-
-    // ── Envío del formulario ──────────────────────────────────────────────
-    function submitForm() {
-        document.getElementById('content').value = editor.getValue();
-        hasChanges = false;
-        document.getElementById('formEdit').submit();
-    }
-
-    $('#formEdit').on('submit', function () {
-        document.getElementById('content').value = editor.getValue();
-        hasChanges = false;
-        $(this).find('[type="submit"]').prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-        );
-        return true;
-    });
-
-    // ── Advertencia al salir con cambios ──────────────────────────────────
-    window.addEventListener('beforeunload', function (e) {
-        if (hasChanges) {
-            e.preventDefault();
-            return '';
-        }
-    });
-
-    // ── Enviar correo de prueba ───────────────────────────────────────────
-    $('#btnSendTestEmail').on('click', function () {
-        var email = $('#testEmailInput').val().trim();
-        if (!email) {
-            $('#testEmailInput').addClass('is-invalid').focus();
-            return;
-        }
-        $('#testEmailInput').removeClass('is-invalid');
-
-        var $btn = $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Enviando...');
-        $('#testEmailResult').addClass('d-none');
-
-        $.ajax({
-            url: '{{ route('manager.mail_templates.send_test', $template->id) }}',
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                test_email: email,
-                content: editor.getValue(),
-                subject: $('input[name="subject"]').val()
-            },
-            dataType: 'json',
-            success: function (data) {
-                $('#testEmailResult')
-                    .removeClass('d-none alert-danger')
-                    .addClass('alert alert-success')
-                    .html('<i class="fas fa-check-circle me-2"></i>' + escHtml(data.message));
-            },
-            error: function (xhr) {
-                var msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al enviar el correo';
-                $('#testEmailResult')
-                    .removeClass('d-none alert-success')
-                    .addClass('alert alert-danger')
-                    .html('<i class="fas fa-exclamation-circle me-2"></i>' + escHtml(msg));
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-paper-plane me-1"></i>Enviar prueba');
-            }
-        });
-    });
-
-    $('#modalTestEmail').on('hidden.bs.modal', function () {
-        $('#testEmailInput').val('').removeClass('is-invalid');
-        $('#testEmailResult').addClass('d-none').removeClass('alert alert-success alert-danger').html('');
-    });
-
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify-html.js"></script>
+<script src="{{ asset('managers/js/views/mail_templates/edit.js') }}"></script>
 @endpush
 
 @endsection

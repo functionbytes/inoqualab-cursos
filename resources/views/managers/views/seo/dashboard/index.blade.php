@@ -12,9 +12,19 @@
         $gradeTotal  = $gradeDistribution
             ? (int)($gradeDistribution->A + $gradeDistribution->B + $gradeDistribution->C + $gradeDistribution->D + $gradeDistribution->F)
             : 0;
+
+        $dashboardConfig = [
+            'trendValues' => $trendValues,
+            'trendLabels' => $trendLabels,
+            'hasTrend' => $hasTrend,
+            'gradeTotal' => $gradeTotal,
+            'gradeDistribution' => $gradeDistribution,
+        ];
     @endphp
 
-    <div class="widget-content">
+    <div class="widget-content"
+         id="seo-dashboard"
+         data-config='@json($dashboardConfig)'>
 
         {{-- ── Fila 1 de KPIs ──────────────────────────────────────────────── --}}
         <div class="row g-3 mb-3">
@@ -197,11 +207,10 @@
                     <div class="card-body">
                         <h5 class="card-title fw-semibold mb-3">Tendencia últimos 7 días</h5>
                         @if($hasTrend)
-                            <div id="trendChart" style="height:260px;"></div>
+                            <div id="trendChart" class="seo-chart-260"></div>
                         @else
                             <div class="text-center py-5">
-                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                     style="width:56px;height:56px;background:#f5f6f8;">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 seo-empty-icon-circle">
                                     <i class="fas fa-chart-area text-secondary fs-5"></i>
                                 </div>
                                 <p class="mb-1 fw-semibold text-muted">Sin datos de tendencia</p>
@@ -222,11 +231,10 @@
                     <div class="card-body">
                         <h5 class="card-title fw-semibold mb-3">Distribución por grado</h5>
                         @if($gradeTotal > 0)
-                            <div id="gradeDonut" style="height:260px;"></div>
+                            <div id="gradeDonut" class="seo-chart-260"></div>
                         @else
                             <div class="text-center py-5">
-                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                     style="width:56px;height:56px;background:#f5f6f8;">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 seo-empty-icon-circle">
                                     <i class="fas fa-chart-pie text-secondary fs-5"></i>
                                 </div>
                                 <p class="mb-1 fw-semibold text-muted">Sin datos de score</p>
@@ -244,8 +252,7 @@
                         <h5 class="card-title fw-semibold mb-3">Páginas con peor score</h5>
                         @if($worstPages->isEmpty())
                             <div class="text-center py-5">
-                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                                     style="width:56px;height:56px;background:#f5f6f8;">
+                                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 seo-empty-icon-circle">
                                     <i class="fas fa-list text-secondary fs-5"></i>
                                 </div>
                                 <p class="mb-1 fw-semibold text-muted">Sin datos</p>
@@ -270,7 +277,7 @@
                                         };
                                     @endphp
                                     <div class="list-group-item px-0 py-2 border-0 border-bottom d-flex align-items-center gap-2">
-                                        <span class="badge {{ $scoreBg }} flex-shrink-0" style="min-width:36px;text-align:center;">
+                                        <span class="badge {{ $scoreBg }} flex-shrink-0 seo-score-badge">
                                             {{ $sc }}
                                         </span>
                                         <div class="flex-grow-1 text-truncate">
@@ -372,124 +379,11 @@
 @endsection
 
 @push('css')
-<style>
-    .brand-box-red  { background: #fce8e8; color: #b10100; }
-    .brand-box-dark { background: #e8e8e8; color: #333333; }
-    .brand-badge-noindex { background: #f0f0f0; color: #555; font-weight: 500; }
-    .seo-icon-box   { width: 44px; height: 44px; }
-    .seo-section-label { font-size: 0.72rem; letter-spacing: 0.05em; }
-    .seo-quick-card {
-        transition: box-shadow 0.15s ease, transform 0.15s ease;
-        cursor: pointer;
-    }
-    .seo-quick-card:hover {
-        box-shadow: 0 4px 16px rgba(0,139,206,.15) !important;
-        transform: translateY(-2px);
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/dashboard/index.css') }}">
 @endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
-<script>
-(function () {
-    'use strict';
-
-    var trendValues = @json($trendValues);
-    var trendLabels = @json($trendLabels);
-    var hasTrend    = {{ $hasTrend ? 'true' : 'false' }};
-
-    var sparkColor  = '#008bce';
-    var sparkOpts   = {
-        chart: {
-            type: 'area',
-            height: 60,
-            width: 90,
-            sparkline: { enabled: true },
-            animations: { enabled: false },
-        },
-        stroke:   { curve: 'smooth', width: 2 },
-        fill:     { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 } },
-        tooltip:  { enabled: false },
-        colors:   [sparkColor],
-        series:   [{ name: '', data: trendValues.length ? trendValues : [0] }],
-    };
-
-    if (hasTrend) {
-        ['spark-score', 'spark-total', 'spark-redirects', 'spark-og'].forEach(function (id) {
-            var el = document.querySelector('#' + id);
-            if (el) { new ApexCharts(el, sparkOpts).render(); }
-        });
-
-        // Área principal tendencia
-        new ApexCharts(document.querySelector('#trendChart'), {
-            series: [{ name: 'Metas actualizadas', data: trendValues }],
-            chart: {
-                type: 'area',
-                height: 260,
-                toolbar: { show: false },
-                zoom: { enabled: false },
-                fontFamily: 'inherit',
-            },
-            colors: [sparkColor],
-            stroke:  { curve: 'smooth', width: 2 },
-            fill:    { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.02 } },
-            dataLabels: { enabled: false },
-            xaxis: {
-                categories: trendLabels,
-                labels: {
-                    style: { fontSize: '11px', colors: '#adb5bd' },
-                    formatter: function (v) {
-                        return v && v.length === 10 ? v.slice(8,10) + '/' + v.slice(5,7) : v;
-                    },
-                },
-                axisBorder: { show: false },
-                axisTicks:  { show: false },
-            },
-            yaxis: {
-                labels: {
-                    style: { fontSize: '11px', colors: '#adb5bd' },
-                    formatter: function (v) { return Math.round(v); },
-                },
-                min: 0,
-            },
-            grid:    { borderColor: '#f0f0f0', strokeDashArray: 4 },
-            tooltip: { theme: 'light', y: { formatter: function (v) { return v + ' metas'; } } },
-        }).render();
-    }
-
-    // Donut distribución grados
-    var gradeTotal = {{ $gradeTotal }};
-    if (gradeTotal > 0) {
-        var gd = @json($gradeDistribution);
-        new ApexCharts(document.querySelector('#gradeDonut'), {
-            series: [
-                parseInt(gd.A) || 0,
-                parseInt(gd.B) || 0,
-                parseInt(gd.C) || 0,
-                parseInt(gd.D) || 0,
-                parseInt(gd.F) || 0,
-            ],
-            labels: ['A (90+)', 'B (75–89)', 'C (60–74)', 'D (40–59)', 'F (<40)'],
-            colors: ['#198754', '#0dcaf0', '#ffc107', '#dc3545', '#b10100'],
-            chart: {
-                type: 'donut',
-                height: 260,
-                fontFamily: 'inherit',
-                toolbar: { show: false },
-            },
-            plotOptions: {
-                pie: { donut: { size: '65%' } },
-            },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '12px' },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: function (v) { return v + ' páginas'; } },
-            },
-        }).render();
-    }
-
-})();
-</script>
+<script src="{{ asset('managers/js/views/seo/dashboard/index.js') }}"></script>
 @endpush
+

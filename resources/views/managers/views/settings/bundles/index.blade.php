@@ -2,10 +2,18 @@
 
 @section('title', 'Paquetes')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/bundles/index.css') }}">
+@endpush
+
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="bundlesPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.bundles.bulk-action') }}"
+         data-toggle-url="{{ route('manager.bundles.toggle') }}">
 
         <div class="card">
 
@@ -69,6 +77,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="bundles-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Titulo</th>
                                     <th>Precio</th>
                                     <th class="text-center">Cursos</th>
@@ -81,17 +92,19 @@
                                 @foreach($bundles as $bundle)
                                     <tr>
                                         <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $bundle->id }}">
+                                        </td>
+                                        <td>
                                             <div class="d-flex align-items-center gap-2">
                                                 @php $thumb = $bundle->getFirstMedia('thumbnail'); @endphp
                                                 @if($thumb)
                                                     <img src="{{ $thumb->getFullUrl() }}"
                                                          alt="{{ $bundle->title }}"
-                                                         class="rounded"
-                                                         width="38" height="38"
-                                                         style="object-fit:cover;flex-shrink:0">
+                                                         class="rounded bundles-thumb"
+                                                         width="38" height="38">
                                                 @else
-                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0"
-                                                         style="width:38px;height:38px">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center flex-shrink-0 bundles-thumb-placeholder">
                                                         <i class="fas fa-box-open text-muted"></i>
                                                     </div>
                                                 @endif
@@ -248,58 +261,17 @@
 
     @include('managers.includes.delete')
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'paquete(s)',
+        'bulkActions' => [
+            ['value' => 'publish', 'label' => 'Publicar'],
+            ['value' => 'hide', 'label' => 'Ocultar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Toggle disponibilidad individual ────────────────────────────────────
-    $(document).on('click', '.btn-toggle-available', function () {
-        var slack = $(this).data('slack');
-
-        $.ajax({
-            url: '{{ route('manager.bundles.toggle') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: { slack: slack },
-            success: function (res) {
-                if (res.success) {
-                    toastr.success(res.message, 'Listo', { positionClass: 'toast-bottom-right', progressBar: true, closeButton: true });
-                    setTimeout(function () { location.reload(); }, 1200);
-                }
-            },
-            error: function () {
-                toastr.error('Error al cambiar el estado.');
-            }
-        });
-    });
-
-    // ── Eliminar individual via modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/bundles/index.js') }}"></script>
 @endpush

@@ -51,7 +51,7 @@
                             <input type="text" class="form-control @error('key') is-invalid @enderror"
                                    id="key" name="key"
                                    value="{{ old('key', $variable->key) }}" required
-                                   pattern="^[A-Z_]+$" title="Solo mayúsculas y guiones bajos"
+                                   pattern="^[A-Z][A-Z0-9_]+$" title="Debe comenzar con mayúscula; solo mayúsculas, números y guiones bajos"
                                    @if($variable->is_system) disabled @endif>
                             @error('key')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             @if($variable->is_system)
@@ -148,11 +148,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/variables/edit.js') }}"></script>
 @endpush

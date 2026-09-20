@@ -6,7 +6,8 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <form id="formReport" role="form" onSubmit="return false">
+                <form id="formReport" role="form" onSubmit="return false"
+                      data-generate-url="{{ route('enterprise.courses.generate') }}">
                     {{ csrf_field() }}
                     <input type="hidden" id="enterprise_id" name="enterprise" value="{{ $enterprises->id ?? '' }}">
                     <input type="hidden" id="course_id" name="course" value="{{ $course->id }}">
@@ -34,7 +35,7 @@
                         <div class="action-form border-top mt-4">
                             <div class="text-center p-3">
                                 <button type="submit" class="btn btn-primary px-4 w-100">
-                                    <i class="fas fa-download me-1"></i> Descargar reporte
+                                    Descargar reporte
                                 </button>
                             </div>
                         </div>
@@ -47,20 +48,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    $("#formReport").validate({
-        rules: { modalitie: { required: true } },
-        messages: { modalitie: { required: "Selecciona una modalidad." } },
-        submitHandler: function() {
-            var query = {
-                modalitie: $("#modalitie").val(),
-                enterprise: $("#enterprise_id").val(),
-                course: $("#course_id").val(),
-            };
-            window.location = "{{ route('enterprise.courses.generate') }}?" + $.param(query);
-        }
-    });
-});
-</script>
+<script src="{{ asset('enterprises/js/views/report/index.js') }}"></script>
 @endpush

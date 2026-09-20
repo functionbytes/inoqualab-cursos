@@ -12,7 +12,8 @@
             <div class="card">
                 <form id="scheduleForm"
                       action="{{ route('manager.settings.analytics.schedules.update', $schedule) }}"
-                      method="POST">
+                      method="POST"
+                      data-flash-success="{{ session('success') }}">
                     @csrf
                     @method('PUT')
 
@@ -241,13 +242,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    $('.select2').select2({ width: '100%' });
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/analytics/schedules/edit.js') }}"></script>
 @endpush

@@ -22582,7 +22582,7 @@ html[dir=rtl] .welcome-bg-img {
 }
 .sidebar-nav ul .sidebar-item.selected > .sidebar-link.active, .sidebar-nav ul .sidebar-item.selected > .sidebar-link,
 .sidebar-nav ul .sidebar-item > .sidebar-link.active {
-    background-color: #081A28;
+    background-color: #008bce;
     color: #fff;
 }
 .sidebar-nav ul .sidebar-item.selected .sidebar-link.has-arrow::after {
@@ -31765,7 +31765,7 @@ span.flatpickr-weekday {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 24px 0 14px;
+    margin: 24px 0 2px;
     padding-top: 20px;
     border-top: 1px solid #e9ecef;
     font-size: 12px;
@@ -31774,7 +31774,11 @@ span.flatpickr-weekday {
     letter-spacing: .6px;
     color: #5A7093;
 }
-.form-section-title i { color: #008bce; font-size: 13px; }
+.form-section-desc {
+    margin: 0 0 14px;
+    font-size: 13px;
+    color: #8D9DB5;
+}
 
 /* theme.css fuerza ".text-danger { color: #fff !important }" (línea ~28705),
    dejando invisibles los asteriscos de "obligatorio" y cualquier texto de
@@ -31783,4 +31787,209 @@ span.flatpickr-weekday {
    theme.css carga después. */
 body .text-danger {
     color: #dc3545 !important;
+}
+
+/* ============================================================
+   Icon rail sidebar (panel manager) — portado desde modules/Theme
+   de inoqualab: rail de iconos fijo (80px) + panel lateral flotante
+   con las opciones de cada sección. Solo se activa cuando existe
+   <aside class="side-mini-panel"> en el DOM (panel manager); los
+   demás portales (support/distributor/enterprise/accounting) siguen
+   usando <aside class="left-sidebar"> sin cambios.
+   ============================================================ */
+
+.side-mini-panel {
+    position: fixed;
+    left: 0;
+    width: 80px;
+    height: 100%;
+    background: var(--bs-white);
+    top: 0;
+    z-index: 99;
+    transition: all .4s ease-in-out;
+}
+
+.side-mini-panel .sidebartoggler {
+    color: var(--bs-dark-text-emphasis);
+}
+
+.side-mini-panel .scroll-sidebar {
+    overflow-y: auto;
+    height: calc(100vh - 50px);
+}
+
+.side-mini-panel .scroll-sidebar .simplebar-track.simplebar-horizontal {
+    visibility: hidden !important;
+}
+
+.side-mini-panel .mini-nav {
+    height: 100vh;
+    z-index: 99;
+    position: relative;
+    background: #ffffff;
+}
+
+.side-mini-panel .mini-nav .brand-logo {
+    height: 70px;
+}
+
+.side-mini-panel .mini-nav ul.mini-nav-ul {
+    height: calc(100vh - 70px);
+}
+
+.side-mini-panel .mini-nav .mini-nav-item > a {
+    display: flex;
+    width: 100%;
+    font-size: 18px;
+    text-align: center;
+    color: var(--bs-body-color);
+    position: relative;
+    background: #ffffff;
+    z-index: 99;
+    height: 48px;
+    margin-bottom: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item.selected > a i {
+    color: #ffffff !important;
+    position: relative;
+    z-index: 2;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item.selected > a:before {
+    content: "";
+    background: #008bce !important;
+    width: 48px;
+    height: 48px;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    z-index: 1;
+    transition: all 0.2s ease;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item:not(.selected) > a:hover i {
+    color: #008bce !important;
+    transition: color 0.2s ease;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item:not(.selected) > a:hover:before {
+    content: "";
+    background: rgba(0, 139, 206, 0.1);
+    width: 48px;
+    height: 48px;
+    display: block;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 12px;
+    z-index: 1;
+    transition: all 0.2s ease;
+}
+
+.side-mini-panel .sidebarmenu .sidebar-nav {
+    position: absolute;
+    height: 100vh;
+    width: 240px;
+    background: var(--bs-white);
+    top: 0;
+    left: 80px;
+    display: none;
+    padding: 20px 20px 24px 20px;
+    z-index: 98;
+    border-right: 1px solid var(--bs-border-color, #e5eaef);
+}
+
+.side-mini-panel .sidebarmenu .sidebar-nav.d-block {
+    display: block;
+}
+
+body[data-sidebartype="mini-sidebar"] .side-mini-panel {
+    left: -330px !important;
+    transition: left 0.3s ease;
+}
+
+body[data-sidebartype="full"] .side-mini-panel {
+    left: 0 !important;
+    transition: left 0.3s ease;
+}
+
+#main-wrapper.show-sidebar .side-mini-panel {
+    left: 0 !important;
+    transition: left 0.3s ease;
+}
+
+/* Ancho del contenido: 80px con solo el rail de iconos, 80+240px
+   cuando además hay un panel lateral abierto ("with-vertical"). */
+#main-wrapper > .side-mini-panel ~ .body-wrapper {
+    margin-left: 80px !important;
+    transition: margin-left 0.3s ease;
+}
+
+#main-wrapper > .side-mini-panel.with-vertical ~ .body-wrapper {
+    margin-left: 320px !important;
+}
+
+@media (max-width: 1199.98px) {
+    #main-wrapper > .side-mini-panel ~ .body-wrapper,
+    #main-wrapper > .side-mini-panel.with-vertical ~ .body-wrapper {
+        margin-left: 0 !important;
+    }
+
+    .side-mini-panel {
+        left: -330px !important;
+    }
+
+    #main-wrapper.show-sidebar .side-mini-panel {
+        left: 0 !important;
+    }
+}
+
+/* Tooltip del icon rail (data-bs-toggle="tooltip" en cada mini-nav-item):
+   portado de modules/Theme/public/theme/css/extra.css — color de marca
+   en vez del gris/secondary por defecto de Bootstrap. */
+.tooltip-inner {
+    background-color: #008bce !important;
+    color: #fff !important;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 139, 206, 0.3);
+}
+
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before,
+.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #008bce !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before,
+.bs-tooltip-end .tooltip-arrow::before {
+    border-right-color: #008bce !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before,
+.bs-tooltip-bottom .tooltip-arrow::before {
+    border-bottom-color: #008bce !important;
+}
+
+.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before,
+.bs-tooltip-start .tooltip-arrow::before {
+    border-left-color: #008bce !important;
+}
+
+/* Logo del header en los portales support/distributor/enterprise/accounting
+   (<img class="logo">, ver resources/views/{portal}/includes/header.blade.php)
+   — nunca tuvo una regla CSS que lo acotara, así que se renderizaba a su
+   tamaño natural (~700x208px) y desbordaba el header. */
+.app-header .logo {
+    height: 40px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
 }

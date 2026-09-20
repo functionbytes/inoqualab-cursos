@@ -43,18 +43,6 @@
 </section>
 
 @push('scripts')
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('#homeFaqAccordion .iq-faq-item-header').on('click', function() {
-            $('#homeFaqAccordion .iq-faq-item-header').addClass('collapsed');
-            $('#homeFaqAccordion .collapse').removeClass('show');
-
-            if ($(this).hasClass('collapsed')) {
-                $(this).removeClass('collapsed');
-                $($(this).attr('data-target')).addClass('show');
-            }
-        });
-    });
-</script>
+    <script src="{{ asset('pages/js/partials/sections/pages/home-faq.js') }}"></script>
 @endpush
 @endif

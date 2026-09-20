@@ -3,46 +3,7 @@
 @section('title', 'Portal del alumno')
 
 @push('css')
-<style>
-    .pv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-    .pv-opt { position: relative; }
-    .pv-opt input { position: absolute; opacity: 0; pointer-events: none; }
-    .pv-opt label {
-        display: block; cursor: pointer; border: 2px solid #e7ecf1; border-radius: 14px;
-        padding: 16px; background: #fff; transition: border-color .15s ease, box-shadow .15s ease;
-        height: 100%;
-    }
-    .pv-opt label:hover { border-color: #b9d9ec; }
-    .pv-opt input:checked + label { border-color: #008bcd; box-shadow: 0 6px 22px rgba(0,139,205,.16); }
-    .pv-opt input:focus-visible + label { outline: 2px solid #008bcd; outline-offset: 2px; }
-    .pv-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-    .pv-name { font-size: 14px; font-weight: 700; color: #1b2a3a; }
-    .pv-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6a7888; background: #f0f4f8; padding: 3px 9px; border-radius: 20px; }
-    .pv-opt input:checked + label .pv-tag { background: #e4f2fb; color: #006fa3; }
-    .pv-desc { font-size: 12.5px; line-height: 1.6; color: #6a7888; margin: 12px 0 0; }
-    .pv-sec { margin-bottom: 30px; }
-    .pv-sec-title { font-size: 15px; font-weight: 600; color: #1b2a3a; margin-bottom: 4px; }
-    .pv-sec-note { font-size: 12.5px; color: #6a7888; margin-bottom: 14px; }
-
-    /* Miniatura esquemática, sin estilos inline */
-    .pv-shot { background: #f3f6f9; border: 1px solid #e7ecf1; border-radius: 8px; padding: 8px; display: flex; gap: 6px; height: 116px; }
-    .pv-shot.is-stacked { flex-direction: column; }
-    .pv-shot .bar { background: #0d1b2a; border-radius: 3px; }
-    .pv-shot .blk { background: #fff; border: 1px solid #e2e8ee; border-radius: 3px; }
-    .pv-shot .acc { background: #008bcd; border-radius: 3px; }
-    .pv-col { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-    .pv-row { display: flex; gap: 6px; }
-    .pv-topbar { height: 9px; }
-    .pv-sidebar { width: 26px; }
-    .pv-hero { height: 38px; }
-    .pv-fill { flex: 1; }
-    .pv-strip { height: 16px; }
-    .pv-lines { height: 13px; }
-    .pv-chips { height: 12px; }
-    .pv-chips .acc, .pv-chips .blk { width: 34px; }
-    .pv-aside { width: 40px; opacity: .85; }
-    .pv-panel { width: 74px; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/portal/setting.css') }}">
 @endpush
 
 @php
@@ -153,7 +114,7 @@
 <div class="row">
     <div class="col-lg-12 d-flex align-items-stretch">
         <div class="card w-100">
-            <form id="formPortal" role="form" onSubmit="return false">
+            <form id="formPortal" role="form" data-update-url="{{ route('manager.settings.portal.update') }}">
                 {{ csrf_field() }}
 
                 <div class="card-body border-top">
@@ -208,45 +169,5 @@
 @endsection
 
 @push('scripts')
-<script type="text/javascript">
-    $(document).ready(function () {
-
-        $('#formPortal').on('submit', function (e) {
-            e.preventDefault();
-
-            var $submitButton = $('#formPortal button[type="submit"]');
-            $submitButton.prop('disabled', true);
-
-            var data = { _token: $('meta[name="csrf-token"]').attr('content') };
-
-            $('#formPortal input[type="radio"]:checked').each(function () {
-                data[this.name] = this.value;
-            });
-
-            $.ajax({
-                url: "{{ route('manager.settings.portal.update') }}",
-                type: "POST",
-                data: data,
-                success: function (response) {
-                    if (response.success === true) {
-                        toastr.success(response.message, "Operación exitosa", {
-                            closeButton: true, progressBar: true, positionClass: "toast-bottom-right"
-                        });
-                    }
-                },
-                error: function (xhr) {
-                    var msg = 'No se pudo guardar la configuración.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) { msg = xhr.responseJSON.message; }
-                    toastr.error(msg, "Error", {
-                        closeButton: true, progressBar: true, positionClass: "toast-bottom-right"
-                    });
-                },
-                complete: function () {
-                    $submitButton.prop('disabled', false);
-                }
-            });
-        });
-
-    });
-</script>
+<script src="{{ asset('managers/js/views/settings/portal/setting.js') }}"></script>
 @endpush

@@ -5,7 +5,8 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="schedulesPage" class="widget-content searchable-container list"
+         data-bulk-action-url="{{ route('manager.settings.analytics.schedules.bulk-action') }}">
 
         <div class="card">
 
@@ -311,48 +312,14 @@
         </div>
     </div>
 
-    {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
-        <button type="button" class="btn btn-primary shadow-lg px-4"
-                data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Aplicar accion
-        </button>
-    </div>
-
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Accion masiva</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-3">
-                        Se aplicara la accion sobre
-                        <strong><span data-bulk-count>0</span> reporte(s)</strong>.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Accion</label>
-                        <select id="bulk-action-select" class="form-select">
-                            <option value="">Seleccionar accion...</option>
-                            <option value="activate">Activar</option>
-                            <option value="deactivate">Desactivar</option>
-                            <option value="delete">Eliminar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button id="bulk-apply-btn" type="button" class="btn btn-primary w-100 mb-2">
-                        Aplicar
-                    </button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'reporte(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     {{-- Delete modal --}}
     <div id="delete-modal" class="modal fade">
@@ -383,104 +350,6 @@
 
 @endsection
 
-@push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
-@endpush
-
 @push('scripts')
-<script>
-$(function () {
-
-    // ── Filters modal ───────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterFrequency').val($('#modalFrequency').val());
-        $('#filterFormat').val($('#modalFormat').val());
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Bulk selection ──────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    // ── Toggle activo/inactivo ──────────────────────────────────────────────
-    $(document).on('click', '.toggle-btn', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $.post($btn.data('url'), { _token: $('meta[name="csrf-token"]').attr('content') })
-            .done(function (res) {
-                toastr.success(res.message || 'Estado actualizado.');
-                setTimeout(function () { location.reload(); }, 800);
-            })
-            .fail(function () {
-                toastr.error('Error al cambiar el estado.');
-            });
-    });
-
-    // ── Delete modal ────────────────────────────────────────────────────────
-    $(document).on('click', '.delete-btn', function (e) {
-        e.preventDefault();
-        $('#delete-modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-    // ── Bulk modal ──────────────────────────────────────────────────────────
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#bulk-apply-btn').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getSelectedIds();
-
-        if (!action) { toastr.warning('Selecciona una accion.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos un reporte.'); return; }
-
-        if (action === 'delete' && !confirm('¿Eliminar los ' + ids.length + ' reporte(s)?')) return;
-
-        $('#bulk-apply-btn').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route("manager.settings.analytics.schedules.bulk-action") }}',
-            method: 'POST',
-            contentType: 'application/json',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message || ids.length + ' reporte(s) procesados.');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/analytics/schedules/index.js') }}"></script>
 @endpush

@@ -10,7 +10,7 @@
         {{-- Card 1: General --}}
         <div class="col-12">
             <div class="card">
-                <form id="formSeoGeneral" onsubmit="return false">
+                <form id="formSeoGeneral">
                     <div class="card-header border-bottom p-3">
                         <h6 class="mb-0 fw-bold">General</h6>
                         <p class="text-muted">Configuración básica del SEO del sitio</p>
@@ -57,7 +57,7 @@
                         <button type="button" class="btn btn-primary" data-form="formSeoGeneral"
                                 data-url="{{ route('manager.settings.seo.update') }}"
                                 id="btn-save-general">
-                            <i class="fas fa-save me-1"></i>Guardar configuración general
+                            Guardar configuración general
                         </button>
                     </div>
                 </form>
@@ -67,7 +67,7 @@
         {{-- Card 2: Verificaciones de buscadores --}}
         <div class="col-12">
             <div class="card">
-                <form id="formSeoVerifications" onsubmit="return false">
+                <form id="formSeoVerifications">
                     <div class="card-header border-bottom p-3">
                         <h6 class="mb-0 fw-bold">Verificaciones de buscadores</h6>
                         <p class="text-muted">Códigos de verificación para webmaster tools</p>
@@ -137,7 +137,7 @@
                                                    value="{{ $settings['seo_indexnow_key'] ?? '' }}"
                                                    placeholder="Genera una clave UUID única">
                                             <button type="button" class="btn btn-outline-secondary" id="btn-gen-uuid">
-                                                <i class="fas fa-rotate me-1"></i>Generar clave
+                                                Generar clave
                                             </button>
                                         </div>
                                         <div class="form-text">
@@ -152,7 +152,7 @@
                         <button type="button" class="btn btn-primary" data-form="formSeoVerifications"
                                 data-url="{{ route('manager.settings.seo.update') }}"
                                 id="btn-save-verifications">
-                            <i class="fas fa-save me-1"></i>Guardar verificaciones
+                            Guardar verificaciones
                         </button>
                     </div>
                 </form>
@@ -162,7 +162,7 @@
         {{-- Card 3: robots.txt y llms.txt --}}
         <div class="col-12 col-lg-6">
             <div class="card h-100">
-                <form id="formRobots" onsubmit="return false">
+                <form id="formRobots">
                     <div class="card-header border-bottom p-3">
                         <h6 class="mb-0 fw-bold">robots.txt</h6>
                         <p class="text-muted">Controla qué rastreadores pueden indexar</p>
@@ -179,7 +179,7 @@
                         <button type="button" class="btn btn-primary" data-form="formRobots"
                                 data-url="{{ route('manager.settings.seo.robots') }}"
                                 id="btn-save-robots">
-                            <i class="fas fa-save me-1"></i>Guardar robots.txt
+                            Guardar robots.txt
                         </button>
                     </div>
                 </form>
@@ -188,7 +188,7 @@
 
         <div class="col-12 col-lg-6">
             <div class="card h-100">
-                <form id="formLlms" onsubmit="return false">
+                <form id="formLlms">
                     <div class="card-header border-bottom p-3">
                         <h6 class="mb-0 fw-bold">llms.txt</h6>
                         <p class="text-muted">Instrucciones para modelos de lenguaje (LLMs)</p>
@@ -205,7 +205,7 @@
                         <button type="button" class="btn btn-primary" data-form="formLlms"
                                 data-url="{{ route('manager.settings.seo.llms') }}"
                                 id="btn-save-llms">
-                            <i class="fas fa-save me-1"></i>Guardar llms.txt
+                            Guardar llms.txt
                         </button>
                     </div>
                 </form>
@@ -217,71 +217,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    // Generar UUID para IndexNow
-    $('#btn-gen-uuid').on('click', function () {
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = Math.random() * 16 | 0;
-            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
-        $('#seo_indexnow_key').val(uuid);
-        toastr.info('Clave generada. Recuerda guardar los cambios.');
-    });
-
-    // Guardar genérico para cualquier formulario
-    function saveForm($btn) {
-        var formId = $btn.data('form');
-        var url    = $btn.data('url');
-        var $form  = $('#' + formId);
-
-        $form.find('.is-invalid').removeClass('is-invalid');
-        $form.find('.invalid-feedback').text('');
-
-        var data = {};
-        $form.find('input, textarea, select').each(function () {
-            if (!this.name) return;
-            if (this.type === 'checkbox') {
-                data[this.name] = this.checked ? '1' : '0';
-            } else {
-                data[this.name] = $(this).val();
-            }
-        });
-
-        $btn.prop('disabled', true).prepend('<span class="spinner-border spinner-border-sm me-1"></span>');
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: data,
-            success: function (response) {
-                toastr.success(response.message ?? 'Configuración guardada');
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function (field, messages) {
-                        $form.find('[name="' + field + '"]')
-                            .addClass('is-invalid')
-                            .next('.invalid-feedback').text(messages[0]);
-                    });
-                    toastr.error('Corrige los errores del formulario');
-                } else {
-                    toastr.error('Error al guardar la configuración');
-                }
-            },
-            complete: function () {
-                $btn.prop('disabled', false).find('.spinner-border').remove();
-            }
-        });
-    }
-
-    $('#btn-save-general').on('click', function () { saveForm($(this)); });
-    $('#btn-save-verifications').on('click', function () { saveForm($(this)); });
-    $('#btn-save-robots').on('click', function () { saveForm($(this)); });
-    $('#btn-save-llms').on('click', function () { saveForm($(this)); });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/seo/index.js') }}"></script>
 @endpush

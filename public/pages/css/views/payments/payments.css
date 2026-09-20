@@ -1,0 +1,31 @@
+/* Resumen de orden en pay.blade.php / sandbox.blade.php: 2 columnas
+   (producto + precio), sin las columnas de cantidad/eliminar del carrito. */
+.cp-item--summary {
+    grid-template-columns: 1fr 150px;
+}
+
+.cp-sub--tight {
+    margin-bottom: 10px;
+}
+
+.cp-sub--roomy {
+    margin-bottom: 18px;
+}
+
+.sandbox--spaced {
+    margin-top: 22px;
+}
+
+.go-pay--spaced {
+    margin-top: 11px;
+}
+
+.go-pay--approved {
+    background: #1f9d57;
+    box-shadow: 0 10px 24px rgba(31, 157, 87, .28);
+}
+
+.go-pay--declined {
+    background: #d24a43;
+    box-shadow: 0 10px 24px rgba(210, 74, 67, .26);
+}

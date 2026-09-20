@@ -24,8 +24,8 @@
                             <a href="{{ route('courses.view', [$course->slack]) }}" class="category">{{ $course->categorie->title }}</a>
                                 @if(count($course->getMedia('thumbnail'))>0)
                                     <img src="{{ $course->cardImageUrl() }}"
-                                         class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440" loading="lazy"
-                                         onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
+                                         class="card-img-top rounded-0 object-fit-cover js-img-fallback" alt="{{ $course->title }}" height="440" loading="lazy"
+                                         data-fallback-src="{{ asset('/pages/images/courses/default.jpg') }}">
                                 @else
                                     <img src="{{ asset('/pages/images/courses/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440" loading="lazy">
                                 @endif

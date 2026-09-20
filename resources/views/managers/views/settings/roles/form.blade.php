@@ -10,7 +10,8 @@
 
 @section('content')
 
-    <form method="POST"
+    <form id="roleFormPage" method="POST"
+          data-flash-success="{{ session('success') }}"
           action="{{ $role ? route('manager.roles.update', $role->id) : route('manager.roles.store') }}">
         @csrf
         @if($role)
@@ -136,42 +137,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    function refreshAssigned() {
-        $('#assignedCount').text($('.permission-checkbox:checked').length);
-    }
-
-    // Filtro por nombre
-    $('#permissionFilter').on('input', function () {
-        const term = $(this).val().toLowerCase();
-        $('.perm-item').each(function () {
-            const label = $(this).find('.form-check-label').text().toLowerCase();
-            $(this).toggle(term === '' || label.includes(term));
-        });
-        $('.perm-group').each(function () {
-            $(this).toggle($(this).find('.perm-item:visible').length > 0);
-        });
-    });
-
-    // Marcar/desmarcar todo un grupo
-    $('.group-toggle').on('change', function () {
-        $(this).closest('.perm-group').find('.permission-checkbox').prop('checked', this.checked);
-        refreshAssigned();
-    });
-
-    $('.permission-checkbox').on('change', refreshAssigned);
-
-    // Estado inicial de los toggles de grupo
-    $('.perm-group').each(function () {
-        const total = $(this).find('.permission-checkbox').length;
-        const checked = $(this).find('.permission-checkbox:checked').length;
-        $(this).find('.group-toggle').prop('checked', total > 0 && total === checked);
-    });
-
-    @if(session('success'))
-        toastr.success(@json(session('success')), 'Éxito');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/roles/form.js') }}"></script>
 @endpush

@@ -1,4 +1,4 @@
-<section class="contact-cta-section py-80 rpb-60" style="background:#0d1b2e;">
+<section class="contact-cta-section contact-cta-section--dark py-80 rpb-60">
     <div class="container">
         <div class="row justify-content-center mb-40">
             <div class="col-12 text-center">
@@ -54,3 +54,7 @@
         </div>
     </div>
 </section>
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('pages/css/partials/sections/pages/contact.css') }}">
+@endpush

@@ -1,11 +1,11 @@
-@php use Carbon\Carbon; @endphp
+@php use Carbon\Carbon; use Illuminate\Support\Str; @endphp
 
 @extends('layouts.customers')
 
 @section('title', 'Dashboard')
 
 @push('css')
-    <link rel="stylesheet" href="{{ url('customers/css/aula.css') }}">
+    <link rel="stylesheet" href="{{ url('customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @php
@@ -55,103 +55,120 @@
     // Iniciados = los que tienen algún avance registrado.
     $iniciados = $courses->filter(fn ($c) => (float) $c->percent > 0)->count();
 
-    // Circunferencia del anillo de progreso (r=43 en el viewBox 0 0 100 100).
-    $ring = 2 * M_PI * 43;
+    $certificatesCount = $courses->filter(fn ($c) => $c->certificate)->count();
+
+    // El nombre viene en mayúsculas de BD (uso legal en certificados/facturas);
+    // para un saludo se ve gritado, así que acá se normaliza solo para mostrar.
+    $firstName = Str::of($user->firstname)->lower()->explode(' ')->first();
+    $firstName = $firstName ? Str::ucfirst($firstName) : $user->firstname;
 @endphp
 
 @section('content')
 
 <div class="pb-dash">
 
-    {{-- ===== Cabecera ===== --}}
+    {{-- ===== Cabecera: saludo -- la idea es que la portada empuje a
+         "seguir" antes que a "buscar" (el buscador vivía acá, se quitó). ===== --}}
     <div class="pb-head">
         <div>
             <div class="eyebrow">{{ ucfirst(Carbon::now()->locale('es')->isoFormat('dddd, D [de] MMMM')) }}</div>
-            <h1>Tu sesión de hoy</h1>
+            <h1>Hola, {{ $firstName }}</h1>
+            <p class="pb-sub">
+                @if($hero && ! $heroExpired && $heroPercent < 100)
+                    Continúa donde lo dejaste y sigue sumando avances.
+                @elseif($expirados->count() > 0)
+                    Tienes {{ $expirados->count() }} {{ $expirados->count() === 1 ? 'curso por renovar' : 'cursos por renovar' }}.
+                @else
+                    Vas al día con tu plan de formación.
+                @endif
+            </p>
         </div>
-        <a class="pb-search" href="{{ route('customers.courses') }}">
-            @include('customers.includes.icon', ['name' => 'search'])
-            <span>Buscar en mis cursos…</span>
-        </a>
     </div>
 
-    @if($hero)
-        {{-- ===== Bloque dominante: retomar ===== --}}
-        <div class="pb-hero">
-            <div class="pb-hero-body">
-                <div class="eyebrow">
-                    {{ $hero->course?->categorie?->title ?: 'Capacitación' }}
-                    @if($heroExpired) · acceso vencido @endif
-                </div>
-                <h2>{{ $hero->course?->title }}</h2>
-                <div class="pb-hero-meta">
-                    <span>
-                        @include('customers.includes.icon', ['name' => 'clock'])
-                        {{ $statusLabels[$statusOf($hero)] }}
-                    </span>
-                    @if($hero->certificate)
-                        <span>
-                            @include('customers.includes.icon', ['name' => 'award'])
-                            Certificado emitido
-                        </span>
-                    @endif
-                </div>
-                <div class="pb-hero-actions">
-                    @if($heroExpired)
-                        <a class="go" href="{{ route('customers.courses') }}">
-                            @include('customers.includes.icon', ['name' => 'refresh'])
-                            Renovar acceso
-                        </a>
-                    @else
-                        <a class="go" href="{{ route('customers.courses.content', $hero->slack) }}">
-                            @include('customers.includes.icon', ['name' => 'play'])
-                            {{ $heroPercent > 0 ? 'Reanudar' : 'Comenzar' }}
-                        </a>
-                    @endif
-                    <a class="ghost" href="{{ route('customers.courses') }}">Ver todos mis cursos</a>
-                </div>
+    {{-- ===== Chips de resumen: mismo dato que antes vivía en la franja
+         inferior ("Resumen"), pero como contexto rápido junto al saludo en
+         vez de una tarjeta aparte al final de la página. ===== --}}
+    <div class="pb-chips">
+        <span class="pb-chip"><b>{{ $activos->count() }}</b>{{ $activos->count() === 1 ? 'Curso activo' : 'Cursos activos' }}</span>
+        <span class="pb-chip"><b>{{ $certificatesCount }}</b>{{ $certificatesCount === 1 ? 'Certificado' : 'Certificados' }}</span>
+        @if($expirados->count() > 0)
+            <span class="pb-chip is-warn"><b>{{ $expirados->count() }}</b>Por vencer</span>
+        @endif
+    </div>
+
+    {{-- ===== Banda de próxima acción: fusiona el hero de "retomar" y la
+         tarjeta "Próximo hito" de antes en un único bloque -- un solo lugar
+         que le dice al alumno qué hacer ahora, no dos que repetían lo
+         mismo. ===== --}}
+    @if($hero && ! $heroExpired && $heroPercent < 100)
+        <div class="pb-next">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'play'])</span>
+            <div class="txt">
+                <div class="lbl">{{ $heroPercent > 0 ? 'Continúa donde quedaste' : 'Empieza cuando quieras' }}</div>
+                <b>{{ $hero->course?->title }}</b>
+                <span>{{ $hero->course?->categorie?->title ?: 'Capacitación' }} · {{ $heroPercent }}% completado</span>
             </div>
-            <div class="pb-ring">
-                <svg viewBox="0 0 100 100" aria-hidden="true">
-                    <circle cx="50" cy="50" r="43" class="track"/>
-                    <circle cx="50" cy="50" r="43" class="fill"
-                            stroke-dasharray="{{ round($ring, 1) }}"
-                            stroke-dashoffset="{{ round($ring * (1 - $heroPercent / 100), 1) }}"/>
-                </svg>
-                <div class="val">
-                    <b>{{ $heroPercent }}%</b>
-                    <span>del curso</span>
-                </div>
+            <a class="pb-cta" href="{{ route('customers.courses.content', $hero->slack) }}">
+                {{ $heroPercent > 0 ? 'Reanudar' : 'Comenzar' }}
+            </a>
+        </div>
+    @elseif($expirados->count() > 0)
+        <div class="pb-next is-warn">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'refresh'])</span>
+            <div class="txt">
+                <div class="lbl">Tienes accesos vencidos</div>
+                <b>{{ $expirados->count() }} {{ $expirados->count() === 1 ? 'curso con el acceso vencido' : 'cursos con el acceso vencido' }}</b>
+                <span>Al renovar conservas el progreso registrado.</span>
             </div>
+            <a class="pb-cta" href="{{ route('customers.courses') }}">Renovar accesos</a>
+        </div>
+    @elseif($hero)
+        <div class="pb-next is-done">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'award'])</span>
+            <div class="txt">
+                <div class="lbl">Vas al día</div>
+                <b>No tienes cursos pendientes</b>
+                <span>Explora el catálogo para seguir formándote.</span>
+            </div>
+            <a class="pb-cta" href="{{ route('home') }}">Ver catálogo</a>
         </div>
     @endif
 
-    {{-- ===== Ruta formativa ===== --}}
+    {{-- ===== Todos tus cursos: lista compacta con barra de progreso en vez
+         de tarjetas grandes -- el detalle vive en /cursos, acá solo se
+         necesita ver de un vistazo en qué va cada uno. ===== --}}
     @if($ruta->count() > 0)
         <div class="pb-sec">
-            <h3>Tu ruta formativa</h3>
+            <h3>Todos tus cursos</h3>
             <span class="note">
                 {{ $iniciados }} {{ $iniciados === 1 ? 'iniciado' : 'iniciados' }}
                 @if($expirados->count() > 0) · {{ $expirados->count() }} por renovar @endif
             </span>
         </div>
 
-        <div class="pb-route">
-            @foreach($ruta as $i => $insc)
+        <div class="pb-list">
+            @foreach($ruta as $insc)
                 @php
                     $st = $statusOf($insc);
                     $percent = (int) round(min(100, (float) $insc->percent));
-                    $activa = $hero && $insc->id === $hero->id;
                 @endphp
-                <div class="pb-step st-{{ $st }} @if($activa) is-active @endif">
-                    <div class="top">
-                        <span class="num">{{ $i + 1 }}</span>
-                        <span class="chip">{{ $statusLabels[$st] }}</span>
+                <div class="pb-row st-{{ $st }}">
+                    <span class="ic">
+                        @if($st === 'done')
+                            @include('customers.includes.icon', ['name' => 'award'])
+                        @elseif($st === 'expired')
+                            @include('customers.includes.icon', ['name' => 'refresh'])
+                        @else
+                            @include('customers.includes.icon', ['name' => 'play'])
+                        @endif
+                    </span>
+                    <div class="txt">
+                        <b>{{ $insc->course?->title }}</b>
+                        <span>{{ $statusLabels[$st] }}</span>
                     </div>
-                    <div class="title">{{ $insc->course?->title }}</div>
 
                     @if($st === 'expired')
-                        <a class="act" href="{{ route('customers.courses') }}">Renovar acceso</a>
+                        <a class="act" href="{{ route('customers.courses') }}">Renovar</a>
                     @elseif($st === 'done')
                         @if($insc->certificate)
                             <a class="act" href="{{ route('customers.certificate.download', $insc->certificate->slack) }}">Certificado</a>
@@ -160,48 +177,12 @@
                         @endif
                     @else
                         <div class="bar"><i style="--p:{{ $percent }}%"></i></div>
-                        <div class="sub">{{ $percent }}% completado</div>
+                        <span class="pct">{{ $percent }}%</span>
                     @endif
                 </div>
             @endforeach
         </div>
     @endif
-
-    {{-- ===== Franja inferior ===== --}}
-    <div class="pb-cols">
-        <div class="pb-card">
-            <h4>Próximo hito</h4>
-            @if($hero && ! $heroExpired && $heroPercent < 100)
-                <p>Termina «{{ \Illuminate\Support\Str::limit($hero->course?->title, 60) }}» para desbloquear su examen final y el certificado.</p>
-                <div class="pb-goal">
-                    <span class="ic">@include('customers.includes.icon', ['name' => 'award'])</span>
-                    <div class="grow">
-                        <div class="bar"><i style="--p:{{ $heroPercent }}%"></i></div>
-                        <div class="sub">{{ $heroPercent }}% del curso completado</div>
-                    </div>
-                </div>
-            @elseif($expirados->count() > 0)
-                <p>Tienes {{ $expirados->count() }} {{ $expirados->count() === 1 ? 'curso con el acceso vencido' : 'cursos con el acceso vencido' }}. Al renovar conservas el progreso registrado.</p>
-                <a class="pb-cta" href="{{ route('customers.courses') }}">Renovar accesos</a>
-            @else
-                <p>No tienes cursos pendientes. Explora el catálogo para seguir formándote.</p>
-                <a class="pb-cta" href="{{ route('home') }}">Ver catálogo</a>
-            @endif
-        </div>
-
-        <div class="pb-card">
-            <div class="pb-card-head">
-                <h4>Resumen</h4>
-                <a href="{{ route('customers.courses') }}">Ver cursos</a>
-            </div>
-            <div class="pb-figs">
-                <div><b>{{ $courses->count() }}</b><span>Inscripciones</span></div>
-                <div><b>{{ $activos->count() }}</b><span>Con acceso</span></div>
-                <div><b>{{ $completados->count() }}</b><span>Completados</span></div>
-                <div><b>{{ $promedio }}%</b><span>Progreso medio</span></div>
-            </div>
-        </div>
-    </div>
 
 </div>
 

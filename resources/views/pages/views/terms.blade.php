@@ -2,8 +2,7 @@
 @section('title', 'Términos y Condiciones')
 @section('content')
 
-<section class="page-banner-area rel z-1 text-white text-center"
-    style="background-image: url(/pages/images/banner.jpg);">
+<section class="page-banner-area page-banner-area--default rel z-1 text-white text-center">
     <div class="container">
         <div class="banner-inner rpt-10">
             <h2 class="page-title wow fadeInUp delay-0-2s animated">Términos y Condiciones</h2>

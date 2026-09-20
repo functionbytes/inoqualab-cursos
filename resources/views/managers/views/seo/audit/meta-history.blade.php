@@ -6,7 +6,7 @@
 
 
     {{-- Cabecera con info del meta --}}
-    <div class="card mb-4">
+    <div class="card mb-4" data-flash-success="{{ session('success') }}">
         <div class="card-body d-flex align-items-center gap-3">
             <div class="flex-grow-1">
                 <h6 class="fw-bold mb-1">{{ $seoMeta->title ?? '(sin título)' }}</h6>
@@ -159,36 +159,7 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-
-    $(document).on('click', '.btn-view-issues', function () {
-        var issues = $(this).data('issues');
-        var html = '';
-
-        if (!issues || issues.length === 0) {
-            html = '<p class="text-muted">No hay issues registrados.</p>';
-        } else {
-            issues.forEach(function (issue) {
-                var badgeClass = issue.status === 'error' ? 'bg-danger' : 'bg-warning text-dark';
-                html += '<div class="border rounded p-3 mb-2">';
-                html += '<div class="d-flex align-items-start gap-2">';
-                html += '<span class="badge ' + badgeClass + ' mt-1">' + issue.status + '</span>';
-                html += '<div>';
-                html += '<p class="mb-1 fw-semibold">' + $('<div>').text(issue.message).html() + '</p>';
-                if (issue.recommendation) {
-                    html += '<p class="text-muted">' + $('<div>').text(issue.recommendation).html() + '</p>';
-                }
-                html += '</div></div></div>';
-            });
-        }
-
-        $('#issuesModalBody').html(html);
-        $('#issuesModal').modal('show');
-    });
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/audit/meta-history.js') }}"></script>
 @endpush
+

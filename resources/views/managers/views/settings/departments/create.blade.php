@@ -7,7 +7,11 @@
 
       <div class="card w-100">
 
-        <form id="formDepartments" enctype="multipart/form-data" role="form" onSubmit="return false">
+        <form id="formDepartments" enctype="multipart/form-data" role="form"
+              data-urls='@json([
+                  "store" => route("manager.departments.store"),
+                  "index" => route("manager.departments"),
+              ])'>
 
           {{ csrf_field() }}
 
@@ -59,101 +63,5 @@
 
 
 @push('scripts')
-
-  <script type="text/javascript">
-
-    $(document).ready(function() {
-
-
-      $("#formDepartments").validate({
-        submit: false,
-        ignore: ".ignore",
-        rules: {
-          title: {
-            required: true,
-            minlength: 3,
-            maxlength: 100,
-          },
-          available: {
-            required: true,
-          },
-
-        },
-        messages: {
-          title: {
-            required: "El parametro es necesario.",
-            minlength: "Debe contener al menos 3 caracter",
-            maxlength: "Debe contener al menos 100 caracter",
-          },
-          available: {
-            required: "Es necesario un estado.",
-          },
-        },
-        submitHandler: function(form) {
-
-          var $form = $('#formDepartments');
-          var formData = new FormData($form[0]);
-          var title = $("#title").val();
-          var available = $("#available").val();
-
-          formData.append('title', title);
-          formData.append('available', available);
-
-         var $submitButton = $('button[type="submit"]');
-         $submitButton.prop('disabled', true);
-
-          $.ajax({
-            url: "{{ route('manager.departments.store') }}",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: "POST",
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function(response) {
-
-                  if(response.success == true){
-
-                      message = response.message;
-
-                      toastr.success(message, "Operación exitosa", {
-                          closeButton: true,
-                          progressBar: true,
-                          positionClass: "toast-bottom-right"
-                      });
-
-                      setTimeout(function() {
-                          window.location = "{{ route('manager.departments') }}";
-                      }, 2000);
-
-                  }else{
-
-                      $submitButton.prop('disabled', false);
-                      error = response.message;
-
-                      toastr.warning(error, "Operación fallida", {
-                          closeButton: true,
-                          progressBar: true,
-                          positionClass: "toast-bottom-right"
-                      });
-
-                      $('.errors').text(error);
-                      $('.errors').removeClass('d-none');
-
-                  }
-
-              }
-          });
-
-        }
-
-      });
-
-    });
-
-  </script>
-
-
+<script src="{{ asset('managers/js/views/settings/departments/create.js') }}"></script>
 @endpush
-

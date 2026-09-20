@@ -10,7 +10,7 @@
                         <h5 class="mb-0">Resultado de importación — {{ $enterprise->title }}</h5>
                         <div class="ms-auto">
                             <a href="{{ route('manager.enterprises.users', $enterprise->slack) }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i> Volver a usuarios
+                                Volver a usuarios
                             </a>
                         </div>
                     </div>

@@ -24,7 +24,9 @@
     @endif
 
     {{-- Main Form --}}
-    <form method="POST" action="{{ route('mailers.templates.update', $template->uid) }}" id="formEdit">
+    <form method="POST" action="{{ route('mailers.templates.update', $template->uid) }}" id="formEdit"
+          data-preview-url="{{ route('mailers.templates.preview-ajax', $template->uid) }}"
+          data-variables-url="{{ route('mailers.templates.variables', $template->uid) }}">
         @csrf
         @method('PATCH')
 
@@ -44,7 +46,7 @@
                             <div class="d-flex align-items-center gap-2">
                                 <a href="{{ route('mailers.templates.versions', $template->uid) }}"
                                    class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-history me-1"></i>Historial
+                                    Historial
                                 </a>
                                 <span class="badge text-info">
                                     <i class="fas fa-keyboard me-1"></i>Ctrl+S para guardar
@@ -244,7 +246,7 @@
                                         <i class="fas fa-sync-alt me-1"></i>
                                     </button>
                                 </div>
-                                <div id="variablesPanel" style="max-height: 350px; overflow-y: auto;">
+                                <div id="variablesPanel" class="mailer-variables-panel">
                                     <div class="text-center py-4 text-muted">
                                         <div class="spinner-border spinner-border-sm mb-2" role="status">
                                             <span class="visually-hidden">Cargando...</span>
@@ -286,7 +288,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div id="previewContainer" style="min-height: 500px; max-height: 700px; overflow-y: auto; background: #f8f9fa; border-radius: 4px;">
+                            <div id="previewContainer" class="mailer-template-preview-edit">
                                 <div class="text-center py-5">
                                     <div class="spinner-border text-primary mb-3" role="status">
                                         <span class="visually-hidden">Cargando...</span>
@@ -382,6 +384,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/monokai.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/templates/edit.css') }}">
 @endpush
 
 @push('scripts')
@@ -395,272 +398,13 @@
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/html-hint.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/css-hint.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/emmet-codemirror@1.1.106/emmet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/dist/beautify.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/dist/beautify-html.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emmet-codemirror@1.2.5/dist/emmet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify-html.js"></script>
 
 <!-- Shared Mailer Editor utilities -->
 <script src="{{ asset('js/modules/mailer-editor.js') }}"></script>
-
-<script>
-$(document).ready(function() {
-
-    // Initialize Bootstrap Tooltips
-    $('[data-bs-toggle="tooltip"]').each(function() {
-        new bootstrap.Tooltip(this);
-    });
-
-    // Initialize Select2
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-
-    // Initialize CodeMirror via shared utility
-    var extraVars = ['ORDER_ID', 'ORDER_NUMBER', 'ORDER_TOTAL', 'ORDER_STATUS', 'ORDER_DATE', 'DOCUMENT_TYPE', 'UPLOAD_LINK', 'EXPIRATION_DATE'];
-    MailerEditor.registerHintHelpers(extraVars);
-    const editor = MailerEditor.initCodeMirror();
-    if (!editor) return;
-    MailerEditor.bindAutocomplete(editor);
-
-    let previewTimeout;
-    let hasChanges = false;
-
-    function updateEditorStatus(s, i, c) { MailerEditor.updateEditorStatus(s, i, c); }
-    function updatePreviewStatus(s) { MailerEditor.updatePreviewStatus(s); }
-    function formatCode() { MailerEditor.formatCode(editor); }
-    function insertVariable(name) { MailerEditor.insertVariable(name, editor); }
-
-    // Update Preview (AJAX with layout support)
-    function updatePreview() {
-        updatePreviewStatus('Actualizando...');
-        const previewUrl = `{{ route('mailers.templates.preview-ajax', $template->uid) }}`;
-        const currentLayoutId = $('#layout_id').val();
-        const currentContent = editor.getValue();
-
-        const params = { content: currentContent };
-        if (currentLayoutId) {
-            params.layout_id = currentLayoutId;
-        }
-
-        $.ajax({
-            url: previewUrl,
-            type: 'POST',
-            data: params,
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    const $container = $('#previewContainer');
-                    const $iframe = $('<iframe>').css({ 'width': '100%', 'border': 'none', 'display': 'block', 'background': 'white', 'overflow': 'hidden' });
-
-                    $container.empty().append($iframe);
-                    $iframe[0].srcdoc = data.html;
-
-                    $iframe.on('load', function() {
-                        try {
-                            const iframeDoc = this.contentDocument || this.contentWindow.document;
-                            $(this).css('height', iframeDoc.documentElement.scrollHeight + 'px');
-                        } catch (e) {
-                            $(this).css('height', 'auto');
-                        }
-                    });
-
-                    updatePreviewStatus('En vivo');
-                }
-            },
-            error: function() {
-                updatePreviewStatus('Error');
-                $('#previewContainer').html(
-                    '<div class="alert alert-danger m-3"><i class="fas fa-exclamation-circle me-2"></i>Error al cargar vista previa</div>'
-                );
-            }
-        });
-    }
-
-    // Load Variables
-    function loadVariables() {
-        $.ajax({
-            url: '{{ route('mailers.templates.variables', $template->uid) }}',
-            type: 'GET',
-            dataType: 'json',
-            success: function(data) {
-                if (data.success) {
-                    renderVariables(data.variables);
-                }
-            },
-            error: function() {
-                $('#variablesPanel').html(
-                    '<div class="alert alert-danger m-2"><i class="fas fa-exclamation-circle me-2"></i>Error al cargar variables</div>'
-                );
-            }
-        });
-    }
-
-    // Render Variables
-    function renderVariables(variableGroups) {
-        let html = '<div class="row g-1 px-2">';
-
-        $.each(variableGroups, function(groupIdx, group) {
-            if (group.group === 'Cliente') return true;
-
-            $.each(group.items, function(idx, variable) {
-                html += '<div class="col-6 col-md-4">';
-                html += '<div class="variable-card variable-insert" data-variable-name="' + variable.name + '" data-bs-toggle="tooltip" title="' + variable.name + '">';
-                html += '<code class="variable-code">{' + variable.name + '}</code>';
-                html += '</div></div>';
-            });
-        });
-
-        html += '</div>';
-        $('#variablesPanel').html(html);
-
-        let selectorOptions = '<option value="">-- Selecciona una variable --</option>';
-        $.each(variableGroups, function(groupIdx, group) {
-            if (group.group === 'Cliente') return true;
-            selectorOptions += '<optgroup label="' + group.group + '">';
-            $.each(group.items, function(idx, variable) {
-                selectorOptions += '<option value="' + variable.name + '">{' + variable.name + '}</option>';
-            });
-            selectorOptions += '</optgroup>';
-        });
-        $('#variableSelector').html(selectorOptions);
-
-        $('[data-bs-toggle="tooltip"]').each(function() {
-            try { new bootstrap.Tooltip(this); } catch(e) { /* ignore */ }
-        });
-
-        $(document).off('click.tplEditVar').on('click.tplEditVar', '.variable-insert', function(e) {
-            e.preventDefault();
-            insertVariable($(this).data('variable-name'));
-        });
-    }
-
-    // Initial load
-    updatePreview();
-    loadVariables();
-
-    // Auto-update preview on change
-    editor.on('change', function() {
-        hasChanges = true;
-        updateEditorStatus('Modificado', 'pencil', 'warning');
-        clearTimeout(previewTimeout);
-        previewTimeout = setTimeout(function() {
-            updatePreview();
-            updateEditorStatus('Listo', 'check-circle', 'success');
-        }, 2000);
-    });
-
-    // Update preview when layout changes
-    $('#layout_id').on('change', function(e) {
-        e.preventDefault();
-        updatePreview();
-        toastr.info('Layout actualizado en la vista previa', 'Información', {
-            timeOut: 2000,
-            progressBar: true
-        });
-    });
-
-    // Button: Refresh Preview
-    $('#btnRefreshPreviewEdit').on('click', function(e) {
-        e.preventDefault();
-        updatePreview();
-        $(this).prop('disabled', true);
-        setTimeout(() => $(this).prop('disabled', false), 1000);
-    });
-
-    // Device view switcher
-    $('#preview-panel #btnDesktopViewEdit, #preview-panel #btnMobileViewEdit').on('click', function() {
-        const width = $(this).data('width');
-        const $container = $('#previewContainer');
-
-        $('#preview-panel .btn-group .btn').removeClass('active');
-        $(this).addClass('active');
-
-        $container.css('max-width', width);
-
-        const msg = width === '375px' ? 'Vista móvil activada' : 'Vista desktop activada';
-        toastr.info(msg, 'Vista Previa', { timeOut: 1500, progressBar: true });
-    });
-
-    // Tab: Update preview when preview tab is shown
-    $('#preview-tab').on('shown.bs.tab', function () {
-        updatePreview();
-    });
-
-    // Button: Load Variables
-    $('#btnLoadVariables').on('click', function(e) {
-        e.preventDefault();
-        loadVariables();
-        toastr.info('Recargando variables...', 'Información');
-    });
-
-    // Button: Format Code
-    $('#btnFormatCode').on('click', function(e) {
-        e.preventDefault();
-        formatCode();
-    });
-
-    // Button: Insert Variable from selector
-    $('#btnInsertVariable').on('click', function(e) {
-        e.preventDefault();
-        const variableName = $('#variableSelector').val();
-        if (!variableName) {
-            toastr.warning('Por favor selecciona una variable', 'Atención');
-            return;
-        }
-        insertVariable(variableName);
-        $('#variableSelector').val('');
-    });
-
-    // Enter key on variable selector
-    $('#variableSelector').on('keypress', function(e) {
-        if (e.which === 13) {
-            e.preventDefault();
-            const variableName = $(this).val();
-            if (!variableName) {
-                toastr.warning('Por favor selecciona una variable', 'Atención');
-                return;
-            }
-            insertVariable(variableName);
-            $(this).val('');
-        }
-    });
-
-    // Ctrl+S to save
-    editor.setOption('extraKeys', {
-        'Ctrl-S': function(cm) {
-            $('#formEdit').submit();
-        },
-        'Ctrl-/': 'toggleComment'
-    });
-
-    // Warn on unsaved changes
-    window.addEventListener('beforeunload', function(e) {
-        if (hasChanges) {
-            e.preventDefault();
-            return '';
-        }
-    });
-
-    // Sync textarea before submit
-    $('#formEdit').on('submit', function(e) {
-        const editorContent = editor.getValue();
-        $('#content').val(editorContent);
-
-        hasChanges = false;
-
-        const $btn = $(this).find('[type="submit"]');
-        $btn.prop('disabled', true);
-
-        toastr.info('Guardando cambios...', 'Información', {
-            timeOut: 0,
-            extendedTimeOut: 0
-        });
-
-        return true;
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/templates/edit.js') }}"></script>
 @endpush
 
 @endsection

@@ -44,7 +44,7 @@
                                    id="key" name="key"
                                    placeholder="Ej: CUSTOMER_NAME, ORDER_NUMBER"
                                    value="{{ old('key') }}" required
-                                   pattern="^[A-Z_]+$" title="Solo mayúsculas y guiones bajos">
+                                   pattern="^[A-Z][A-Z0-9_]+$" title="Debe comenzar con mayúscula; solo mayúsculas, números y guiones bajos">
                             @error('key')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -121,11 +121,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/variables/create.js') }}"></script>
 @endpush

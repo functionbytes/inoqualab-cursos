@@ -5,7 +5,10 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="enterprise-users-page"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-url="{{ route('manager.enterprises.users.bulk-action', $enterprise->slack) }}">
 
         <div class="card">
 
@@ -70,6 +73,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Identificación</th>
                                     <th>Cliente</th>
                                     <th>Correo electrónico</th>
@@ -80,6 +86,10 @@
                             <tbody>
                                 @foreach($users as $user)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $user->id }}">
+                                        </td>
                                         <td>{{ $user->identification }}</td>
                                         <td>
                                             <div class="fw-semibold">
@@ -193,41 +203,22 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'usuario(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/enterprises/users/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/enterprises/users/index.js') }}"></script>
 @endpush

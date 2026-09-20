@@ -5,7 +5,14 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="users-index"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-config='@json([
+            "routes" => [
+                "bulkAction" => route("manager.users.bulk-action"),
+            ],
+         ])'>
 
         <div class="card">
 
@@ -69,6 +76,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="users-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Identificación</th>
                                     <th>Cliente</th>
                                     <th>Correo electrónico</th>
@@ -81,6 +91,10 @@
                             <tbody>
                                 @foreach($users as $user)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $user->id }}">
+                                        </td>
                                         <td>{{ $user->identification }}</td>
                                         <td>
                                             <div class="fw-semibold">
@@ -242,37 +256,23 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'usuario(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/users/users/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterRole').val($('#modalRole').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/users/users/index.js') }}"></script>
 @endpush

@@ -151,7 +151,7 @@
                                     <div>
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="badge {{ $cfg['class'] }}" style="min-width:24px;">{{ $grade }}</span>
+                                                <span class="badge {{ $cfg['class'] }} grade-badge">{{ $grade }}</span>
                                                 <span class="small text-muted">{{ $cfg['label'] }}</span>
                                             </div>
                                             <div class="d-flex align-items-center gap-2">
@@ -159,10 +159,10 @@
                                                 <span class="text-muted small">({{ $percent }}%)</span>
                                             </div>
                                         </div>
-                                        <div class="progress" style="height:8px;">
-                                            <div class="progress-bar {{ $cfg['class'] }}"
+                                        <div class="progress progress-thin">
+                                            <div class="progress-bar {{ $cfg['class'] }} grade-progress-bar"
                                                  role="progressbar"
-                                                 style="width: {{ $percent }}%"
+                                                 data-width="{{ $percent }}"
                                                  aria-valuenow="{{ $percent }}"
                                                  aria-valuemin="0"
                                                  aria-valuemax="100">
@@ -188,8 +188,9 @@
 @endsection
 
 @push('css')
-<style>
-    .seo-icon-box { width: 36px; height: 36px; }
-    .bg-orange { background-color: #fd7e14; color: #fff; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/report/index.css') }}">
+@endpush
+
+@push('scripts')
+<script src="{{ asset('managers/js/views/seo/report/index.js') }}"></script>
 @endpush

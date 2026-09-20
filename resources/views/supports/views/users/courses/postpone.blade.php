@@ -9,7 +9,9 @@
 
             <div class="card w-100">
 
-                <form id="formAction" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formAction" enctype="multipart/form-data" role="form" onSubmit="return false"
+                      data-action-url="{{ route('support.users.inscriptions.action') }}"
+                      data-redirect-url="{{ route('support.users.courses.index', $user->slack) }}">
 
                     {{ csrf_field() }}
 
@@ -44,7 +46,9 @@
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Fecha</label>
                                     <div class="input-group">
-                                        <input type="text" id="range" name="range" class="form-control daterange" />
+                                        <input type="text" id="range" name="range" class="form-control daterange"
+                                               data-start="{{ date('d/m/Y', strtotime($inscription->enroll_start)) }}"
+                                               data-end="{{ date('d/m/Y', strtotime($inscription->enroll_expire)) }}" />
                                         <span class="input-group-text">
                                           <i class="fas fa-calendar fs-5"></i>
                                         </span>
@@ -73,90 +77,6 @@
 @endsection
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-
-            $('.daterange').daterangepicker({
-                startDate: '{{ date("d/m/Y", strtotime($inscription->enroll_start)) }}',
-                endDate: '{{ date("d/m/Y", strtotime($inscription->enroll_expire)) }}',
-                locale: {
-                    format: 'DD/MM/YYYY'
-                }
-            });
-
-            $("#formAction").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    range: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    range: {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formAction');
-                    var formData = new FormData($form[0]);
-                    var inscription = $("#inscription").val();
-                    var range = $("#range").val();
-
-                    formData.append('inscription', inscription);
-                    formData.append('range', range);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-                    $.ajax({
-                        url: "{{ route('support.users.inscriptions.action') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if (response.success == true) {
-
-                                toastr.success(response.message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    window.location.href = "{{ route('support.users.courses.index', $user->slack) }}";
-                                }, 1500);
-
-                            } else {
-
-                                $submitButton.prop('disabled', false);
-
-                                toastr.warning(response.message, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-                            }
-
-                        },
-                        error: function() {
-                            $submitButton.prop('disabled', false);
-                        }
-                    });
-
-                }
-
-            });
-
-        });
-    </script>
-
+    <script src="{{ asset('supports/js/views/users/courses/postpone.js') }}"></script>
 @endpush

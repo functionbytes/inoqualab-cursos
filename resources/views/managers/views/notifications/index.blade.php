@@ -16,8 +16,14 @@
                         <h5 class="mb-1 fw-bold">Notificaciones</h5>
                         <p class="mb-0 text-muted">Historial de notificaciones recibidas</p>
                     </div>
-                    <div class="ms-auto">
-                        <button type="button" class="btn btn-primary" id="btn-mark-all">
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <div class="form-check mb-0">
+                            <input type="checkbox" class="form-check-input" id="select-all">
+                            <label class="form-check-label text-muted" for="select-all">Seleccionar todo</label>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="btn-mark-all"
+                                data-mark-all-url="{{ route('manager.notifications.markasread') }}"
+                                data-bulk-url="{{ route('manager.notifications.bulk-action') }}">
                             Marcar todas como leidas
                         </button>
                     </div>
@@ -34,8 +40,11 @@
                         @foreach($group as $notification)
                             <li class="d-flex align-items-start gap-3 py-2 border-bottom">
                                 <div class="flex-shrink-0 mt-1">
-                                    <span class="rounded-circle d-flex align-items-center justify-content-center bg-light-primary"
-                                          style="width:36px;height:36px">
+                                    <input type="checkbox" class="form-check-input bulk-checkbox"
+                                           value="{{ $notification->id }}">
+                                </div>
+                                <div class="flex-shrink-0 mt-1">
+                                    <span class="notification-icon rounded-circle d-flex align-items-center justify-content-center bg-light-primary">
                                         <i class="fas fa-bell text-primary"></i>
                                     </span>
                                 </div>
@@ -64,25 +73,20 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'notificación(es)',
+        'bulkActions' => [
+            ['value' => 'read', 'label' => 'Marcar como leídas'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/notifications/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-    $('#btn-mark-all').on('click', function () {
-        $.ajax({
-            url: '{{ route('manager.notifications.markasread') }}',
-            method: 'GET',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function () {
-                toastr.success('Todas las notificaciones marcadas como leidas');
-                $('.badge.bg-primary.rounded-pill').remove();
-            },
-            error: function () {
-                toastr.error('Error al marcar las notificaciones');
-            }
-        });
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/notifications/index.js') }}"></script>
 @endpush

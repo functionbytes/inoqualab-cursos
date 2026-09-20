@@ -3,7 +3,9 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="users-inscriptions-index"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}">
 
         <div class="card">
 
@@ -134,16 +136,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-});
-</script>
+<script src="{{ asset('managers/js/views/users/users/inscriptions/index.js') }}"></script>
 @endpush

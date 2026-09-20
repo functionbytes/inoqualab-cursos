@@ -113,6 +113,9 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
+                                <th class="col-checkbox">
+                                    <input type="checkbox" class="form-check-input" id="select-all">
+                                </th>
                                 <th>Nombre</th>
                                 <th>Fuente</th>
                                 <th>Tipo</th>
@@ -130,6 +133,10 @@
                                 @endphp
                                 <tr>
                                     <td>
+                                        <input type="checkbox" class="form-check-input bulk-checkbox"
+                                               value="{{ $endpoint->id }}">
+                                    </td>
+                                    <td>
                                         <span class="fw-bold d-block">{{ $endpoint->name }}</span>
                                         <p class="text-muted">{{ $endpoint->slug }}</p>
                                     </td>
@@ -146,9 +153,9 @@
                                         @if($total > 0)
                                             <div class="d-flex align-items-center justify-content-center gap-2">
                                                 <small class="fw-semibold">{{ $successRate }}%</small>
-                                                <div class="progress" style="width:60px;height:6px;">
+                                                <div class="progress endpoint-progress">
                                                     <div class="progress-bar bg-success endpoint-progress-bar" role="progressbar"
-                                                         data-width="{{ $successRate }}" style="width:0"
+                                                         data-width="{{ $successRate }}"
                                                          aria-valuenow="{{ $successRate }}" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
                                             </div>
@@ -158,9 +165,9 @@
                                     </td>
                                     <td class="text-center">
                                         @if($endpoint->is_active)
-                                            <span class="badge rounded-pill py-1 px-2" style="background:#36c76c;color:#fff">Activo</span>
+                                            <span class="badge rounded-pill py-1 px-2 bg-success text-white">Activo</span>
                                         @else
-                                            <span class="badge rounded-pill py-1 px-2" style="background:#fa4c3c;color:#fff">Inactivo</span>
+                                            <span class="badge rounded-pill py-1 px-2 bg-danger text-white">Inactivo</span>
                                         @endif
                                     </td>
                                     <td>
@@ -181,8 +188,8 @@
                                                 </li>
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <button type="button" class="dropdown-item"
-                                                            onclick="document.getElementById('delete-form').action='{{ route('mailers.endpoints.destroy', $endpoint) }}'"
+                                                    <button type="button" class="dropdown-item js-delete-endpoint"
+                                                            data-delete-url="{{ route('mailers.endpoints.destroy', $endpoint) }}"
                                                             data-bs-toggle="modal" data-bs-target="#delete-modal">
                                                         Eliminar
                                                     </button>
@@ -235,7 +242,7 @@
             <div class="modal-body text-center p-4 position-relative">
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 <div class="mb-3 mt-2">
-                    <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                    <i class="fas fa-triangle-exclamation text-warning fs-icon-lg"></i>
                 </div>
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
@@ -250,19 +257,24 @@
     </div>
 </div>
 
+<div id="bulk-config" class="d-none" data-bulk-url="{{ route('mailers.endpoints.bulk-action') }}"></div>
+
+@include('managers.includes.bulk-toolbar-modal', [
+    'bulkEntityLabel' => 'endpoint(s)',
+    'bulkActions' => [
+        ['value' => 'activate', 'label' => 'Activar'],
+        ['value' => 'deactivate', 'label' => 'Desactivar'],
+        ['value' => 'delete', 'label' => 'Eliminar'],
+    ],
+])
+
 @endsection
 
-@push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/index.css') }}">
+@endpush
 
-    $('.endpoint-progress-bar').each(function() {
-        var width = Math.max(0, Math.min(100, parseFloat($(this).data('width')) || 0));
-        $(this).css('width', width + '%');
-    });
-});
-</script>
+@push('scripts')
+<script src="{{ asset('managers/js/views/mailer/endpoints/index.js') }}"></script>
 @endpush

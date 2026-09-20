@@ -4,32 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orden {{ $order->slack }}</title>
-    <style>
-        body { font-family: Arial, sans-serif; font-size: 13px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        h2 { color: #008bce; border-bottom: 2px solid #008bce; padding-bottom: 8px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
-        .info-item { padding: 8px; background: #f8f9fa; border-radius: 4px; }
-        .info-item label { font-weight: bold; display: block; color: #666; font-size: 11px; }
-        .info-item span { font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #008bce; color: #fff; padding: 8px; text-align: left; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; }
-        .text-end { text-align: right; }
-        .total-row td { font-weight: bold; background: #f0f0f0; }
-        @media print {
-            .no-print { display: none; }
-            body { -webkit-print-color-adjust: exact; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('supports/css/views/distributors/orders/orders/print.css') }}">
 </head>
 <body>
     <div class="container">
-        <div class="no-print" style="margin-bottom:15px;">
-            <button onclick="window.print()" style="background:#008bce;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;">
+        <div class="no-print print-actions">
+            <button class="btn-print">
                 Imprimir
             </button>
-            <button onclick="window.history.back()" style="background:#6c757d;color:#fff;border:none;padding:8px 20px;border-radius:4px;cursor:pointer;margin-left:8px;">
+            <button class="btn-back">
                 Volver
             </button>
         </div>
@@ -75,7 +58,7 @@
                 @endforeach
                 @else
                 <tr>
-                    <td colspan="3" style="text-align:center;color:#999;">Sin ítems registrados.</td>
+                    <td colspan="3" class="empty-items">Sin ítems registrados.</td>
                 </tr>
                 @endif
             </tbody>
@@ -87,5 +70,6 @@
             </tfoot>
         </table>
     </div>
+    <script src="{{ asset('supports/js/views/distributors/orders/orders/print.js') }}"></script>
 </body>
 </html>

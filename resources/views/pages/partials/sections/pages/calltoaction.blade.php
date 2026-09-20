@@ -1,6 +1,6 @@
 <section class="call-to-action rel z-2 mt-705  rmt-95">
     <div class="container">
-        <div class="call-to-action-inner wow zoomIn delay-0-2s" style="visibility: visible;">
+        <div class="call-to-action-inner wow zoomIn delay-0-2s">
             <div class="row align-items-center">
                 <div class="col-lg-8">
                     <div class="notification rmb-25">

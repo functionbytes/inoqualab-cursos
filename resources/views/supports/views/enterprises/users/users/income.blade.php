@@ -7,7 +7,8 @@
 
             <div class="card w-100">
 
-                <form id="formAction" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formAction" enctype="multipart/form-data" role="form"
+                      data-generate-url="{{ route('support.enterprises.users.incoming') }}">
 
                     {{ csrf_field() }}
 
@@ -78,62 +79,8 @@
 
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            $('.daterange').daterangepicker();
-
-            $("#formAction").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    range: {
-                        required: true,
-                    },
-                    course: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    range: {
-                        required: "Es necesario una opción.",
-                    },
-                    course: {
-                        required: "Es necesario una opción.",
-                    }
-                },
-                submitHandler: function(form) {
-
-                    toastr.success("Se esta generando el reporte.", "Operación exitosa", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-bottom-right"
-                    });
-
-                    var query = {
-                        range: $("#range").val(),
-                        enterprise: $("#enterprise").val(),
-                        course: $("#course").val(),
-                    }
-
-                    var url = "{{ route('support.enterprises.users.incoming') }}?" + $.param(query);
-
-                    window.location = url;
-
-                }
-
-            });
-
-
-        });
-    </script>
-
-
-
+    <script src="{{ asset('supports/js/enterprises/users/users/income.js') }}"></script>
 @endpush
 
 

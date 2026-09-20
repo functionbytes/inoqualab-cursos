@@ -16,7 +16,7 @@
                     </p>
                 </div>
                 <a href="{{ route('manager.users.edit', $user->slack) }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i>Volver al usuario
+                    Volver al usuario
                 </a>
             </div>
         </div>
@@ -24,8 +24,7 @@
         {{-- Info del usuario --}}
         <div class="card-body border-bottom py-3">
             <div class="alert bg-light border mb-0 d-flex align-items-center gap-3">
-                <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
-                     style="width:44px;height:44px;">
+                <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center flex-shrink-0 emails-user-avatar">
                     <span class="fw-bold text-primary">{{ strtoupper(substr($user->firstname, 0, 1)) }}</span>
                 </div>
                 <div class="flex-grow-1">
@@ -56,7 +55,7 @@
                             @foreach($logs as $log)
                                 <tr>
                                     <td class="ps-4">
-                                        <p class="mb-0 fw-semibold text-truncate" style="max-width:380px;"
+                                        <p class="mb-0 fw-semibold text-truncate emails-subject-col"
                                            title="{{ $log->subject }}">
                                             {{ $log->subject }}
                                         </p>
@@ -87,7 +86,7 @@
                                     <td class="text-center">
                                         <a href="{{ route('manager.users.emails.show', $log->id) }}"
                                            class="btn btn-sm btn-outline-primary" title="Ver contenido del correo">
-                                            <i class="fas fa-eye me-1"></i>Vista previa
+                                            Vista previa
                                         </a>
                                     </td>
                                 </tr>
@@ -120,3 +119,7 @@
     </div>
 
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/users/emails/index.css') }}">
+@endpush

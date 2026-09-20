@@ -5,7 +5,14 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="courses-reviews-index"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-config='@json([
+            "routes" => [
+                "bulkAction" => route("manager.reviews.bulk-action"),
+            ],
+         ])'>
 
         <div class="card">
 
@@ -62,6 +69,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="courses-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Curso</th>
                                     <th>Estudiante</th>
                                     <th class="text-center">Calificacion</th>
@@ -73,6 +83,10 @@
                             <tbody>
                                 @foreach($reviews as $review)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $review->id }}">
+                                        </td>
                                         <td>
                                             <span class="fw-semibold">{{ Str::words(optional($review->course)->title ?? 'Curso eliminado', 8, '...') }}</span>
                                         </td>
@@ -86,7 +100,7 @@
                                                 @endfor
                                             </span>
                                         </td>
-                                        <td style="white-space:normal;max-width:360px">
+                                        <td class="reviews-comment-col">
                                             <span class="text-muted">{{ $review->comment ? Str::limit($review->comment, 120) : '—' }}</span>
                                         </td>
                                         <td class="text-center">
@@ -186,41 +200,21 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'reseña(s)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/courses/reviews/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterRating').val($('#modalRating').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/courses/reviews/index.js') }}"></script>
 @endpush

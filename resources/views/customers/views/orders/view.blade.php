@@ -25,7 +25,7 @@
 <section class="pnl-section">
 
     <a href="{{ route('customers.orders') }}" class="ovw-back">
-        @include('customers.includes.icon', ['name' => 'arrow-left']) Volver a mis pedidos
+        Volver a mis pedidos
     </a>
 
     <div class="ovw-wrap">
@@ -105,14 +105,12 @@
 
             @if($puedePagar)
                 <a href="{{ route('customers.orders.payments', $order->slack) }}" class="ovw-btn solid">
-                    @include('customers.includes.icon', ['name' => 'credit-card'])
                     {{ $reintento ? 'Reintentar pago' : 'Pagar ahora' }}
                 </a>
             @endif
 
             @if($pagada)
                 <a href="{{ route('customers.orders.invoice', $order->slack) }}" class="ovw-btn {{ $puedePagar ? 'ghost' : 'solid' }}" target="_blank">
-                    @include('customers.includes.icon', ['name' => 'download'])
                     Descargar recibo
                 </a>
             @endif

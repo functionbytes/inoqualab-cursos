@@ -56,7 +56,7 @@
 
                 @foreach ($questions as $key => $question)
                     @if ($key > 0)
-                        <div style="display: none;" id="more_exam{{ $key }}">
+                        <div class="d-none-js" id="more_exam{{ $key }}">
                             <div class="quiz-step" id="exam{{ $key + 1 }}">
                                 <input type="hidden" name="question_id[{{ $count }}]" value="{{ $question['id'] }}">
                                 <div class="quiz-qhead">
@@ -81,25 +81,22 @@
                     @php $count++; @endphp
                 @endforeach
 
-                <div id="quizAnswerError" class="quiz-error" style="display: none;">
+                <div id="quizAnswerError" class="quiz-error d-none-js">
                     @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
-                    <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        @include('customers.includes.icon', ['name' => 'arrow-left'])
+                    <a id="prev" class="lv-fbtn d-none-js" value="1">
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>
@@ -137,7 +134,7 @@
 
                 @foreach ($questions as $key => $question)
                     @if ($key > 0)
-                        <div style="display: none;" id="more_exam{{ $key }}">
+                        <div class="d-none-js" id="more_exam{{ $key }}">
                             <div class="quiz-step" id="exam{{ $key + 1 }}">
                                 <input type="hidden" name="question_id[{{ $count }}]" value="{{ $question['id'] }}">
                                 <div class="quiz-qhead">
@@ -159,25 +156,22 @@
                     @php $count++; @endphp
                 @endforeach
 
-                <div id="quizAnswerError" class="quiz-error" style="display: none;">
+                <div id="quizAnswerError" class="quiz-error d-none-js">
                     @include('customers.includes.icon', ['name' => 'circle-alert']) Debes seleccionar una respuesta para continuar.
                 </div>
 
                 <div class="lv-foot quiz-foot">
-                    <a id="prev" class="lv-fbtn" value="1" style="display: none;">
-                        @include('customers.includes.icon', ['name' => 'arrow-left'])
+                    <a id="prev" class="lv-fbtn d-none-js" value="1">
                         <span class="fb-txt"><span class="l">Anterior</span></span>
                     </a>
                     @if ($que_count >= 2)
                         <a id="next" class="lv-fbtn next" value="0" role="button" aria-label="Siguiente pregunta">
                             <span class="fb-txt"><span class="l">Siguiente</span></span>
-                            @include('customers.includes.icon', ['name' => 'arrow-right'])
                         </a>
                     @endif
                     @if ($que_count == 1)
                         <a id="finish" class="lv-fbtn next">
                             <span class="fb-txt"><span class="l">Finalizar</span></span>
-                            @include('customers.includes.icon', ['name' => 'flag'])
                         </a>
                     @endif
                 </div>
@@ -195,7 +189,6 @@
     @endphp
     <div class="lv-foot lesson-nav-foot">
         <a href="{{ $lastLessonHref }}" class="lv-fbtn" aria-label="Volver a la última lección">
-            @include('customers.includes.icon', ['name' => 'arrow-left'])
             <span class="fb-txt"><span class="l">Anterior</span><span class="t">{{ ucfirst(Str::lower($lastCourseLesson->title)) }}</span></span>
         </a>
         <span></span>

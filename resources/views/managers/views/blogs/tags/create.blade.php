@@ -5,9 +5,15 @@
   <div class="row">
     <div class="col-lg-12 d-flex align-items-stretch">
 
-      <div class="card w-100">
+      <div class="card w-100" id="blogs-tags-create"
+           data-config='@php $__jsonInline1 = [
+              "routes" => [
+                  "store" => route("manager.blogs.tags.store"),
+                  "index" => route("manager.blogs.tags"),
+              ],
+           ]; @endphp@json($__jsonInline1)'>
 
-        <form id="formTags" enctype="multipart/form-data" role="form" onSubmit="return false">
+        <form id="formTags" enctype="multipart/form-data" role="form">
 
           {{ csrf_field() }}
 
@@ -60,104 +66,6 @@
 
 
 @push('scripts')
-
-  <script type="text/javascript">
-
-    $(document).ready(function() {
-
-
-      $("#formTags").validate({
-        submit: false,
-        ignore: ".ignore",
-        rules: {
-          title: {
-            required: true,
-            minlength: 3,
-            maxlength: 100,
-          },
-          available: {
-            required: true,
-          },
-
-        },
-        messages: {
-          title: {
-            required: "El parametro es necesario.",
-            minlength: "Debe contener al menos 3 caracter",
-            maxlength: "Debe contener al menos 100 caracter",
-          },
-          available: {
-            required: "Es necesario un estado.",
-          },
-        },
-        submitHandler: function(form) {
-
-          var $form = $('#formTags');
-          var formData = new FormData($form[0]);
-          var title = $("#title").val();
-          var available = $("#available").val();
-
-          formData.append('title', title);
-          formData.append('available', available);
-
-
-            var $submitButton = $('button[type="submit"]');
-            $submitButton.prop('disabled', true);
-
-
-            $.ajax({
-            url: "{{ route('manager.blogs.tags.store') }}",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: "POST",
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function(response) {
-
-                  if(response.success == true){
-
-                      message = response.message;
-
-                      toastr.success(message, "Operación exitosa", {
-                          closeButton: true,
-                          progressBar: true,
-                          positionClass: "toast-bottom-right"
-                      });
-
-                      setTimeout(function() {
-
-                          window.location = "{{ route('manager.blogs.tags') }}";
-                      }, 2000);
-
-                  }else{
-
-                      $submitButton.prop('disabled', false);
-                      error = response.message;
-
-                      toastr.warning(error, "Operación fallida", {
-                          closeButton: true,
-                          progressBar: true,
-                          positionClass: "toast-bottom-right"
-                      });
-
-                      $('.errors').text(error);
-                      $('.errors').removeClass('d-none');
-
-                  }
-
-              }
-          });
-
-        }
-
-      });
-
-    });
-
-  </script>
-
-
+<script src="{{ asset('managers/js/views/blogs/tags/create.js') }}"></script>
 @endpush
 

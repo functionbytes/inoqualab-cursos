@@ -11,7 +11,7 @@
             <div class="col-lg-8">
 
                 {{-- Google Analytics GA4 --}}
-                <form id="analyticsForm">
+                <form id="analyticsForm" data-update-url="{{ route('manager.settings.analytics.update') }}">
                     @csrf
 
                     <div class="card mb-4">
@@ -133,7 +133,8 @@
                         </div>
 
                         <div class="card-footer border-top-0 pt-0">
-                            <button type="button" class="btn btn-outline-secondary w-100" id="clearCacheBtn">
+                            <button type="button" class="btn btn-outline-secondary w-100" id="clearCacheBtn"
+                                    data-url="{{ route('manager.settings.analytics.clear-cache') }}">
                                 Limpiar caché del dashboard
                             </button>
                         </div>
@@ -142,7 +143,7 @@
                 </form>
 
                 {{-- Pixels de seguimiento --}}
-                <form id="pixelsForm">
+                <form id="pixelsForm" data-update-url="{{ route('manager.settings.analytics.update') }}">
                     @csrf
 
                     <div class="card">
@@ -335,108 +336,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    // Toggle GA4 dependent fields
-    $('#googleAnalyticsEnable').on('change', function () {
-        $('#ga4Fields').toggleClass('d-none', !this.checked);
-    });
-
-    // Submit GA4 form
-    $('#analyticsForm').on('submit', function (e) {
-        e.preventDefault();
-        const $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Guardando...');
-
-        $.ajax({
-            url: '{{ route("manager.settings.analytics.update") }}',
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function (res) {
-                if (res.success) {
-                    toastr.success(res.message);
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-                    toastr.error(res.message || 'Error al guardar.');
-                }
-            },
-            error: function (xhr) {
-                const errors = xhr.responseJSON?.errors;
-                if (errors) {
-                    Object.values(errors).flat().forEach(m => toastr.error(m));
-                } else {
-                    toastr.error(xhr.responseJSON?.message || 'Error al guardar.');
-                }
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('Guardar configuración GA4');
-            }
-        });
-    });
-
-    // Submit pixels form
-    $('#pixelsForm').on('submit', function (e) {
-        e.preventDefault();
-        const $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Guardando...');
-
-        $.ajax({
-            url: '{{ route("manager.settings.analytics.update") }}',
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function (res) {
-                if (res.success) { toastr.success(res.message); }
-                else { toastr.error(res.message || 'Error al guardar.'); }
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al guardar los pixels.');
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('Guardar pixels');
-            }
-        });
-    });
-
-    // Clear analytics dashboard cache
-    $('#clearCacheBtn').on('click', function () {
-        const $btn = $(this);
-        $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Limpiando...');
-
-        $.post('{{ route("manager.settings.analytics.clear-cache") }}', {
-            _token: $('meta[name="csrf-token"]').attr('content')
-        })
-        .done(function (res) {
-            toastr.success(res.message || 'Caché limpiado correctamente.');
-        })
-        .fail(function () {
-            toastr.error('Error al limpiar el caché.');
-        })
-        .always(function () {
-            $btn.prop('disabled', false).html('Limpiar caché del dashboard');
-        });
-    });
-
-    // Validate JSON credentials
-    $('#validateBtn').on('click', function () {
-        const raw = $('#credentials').val().trim();
-        if (!raw) { toastr.warning('Pega el JSON de credenciales primero.'); return; }
-
-        try {
-            const obj = JSON.parse(raw);
-            if (obj.type !== 'service_account') {
-                toastr.error('El JSON no es de tipo service_account.');
-                return;
-            }
-            const missing = ['project_id', 'client_email', 'private_key'].filter(k => !obj[k]);
-            if (missing.length) {
-                toastr.error('Faltan campos: ' + missing.join(', '));
-                return;
-            }
-            toastr.success('JSON válido. Proyecto: ' + obj.project_id);
-        } catch (err) {
-            toastr.error('JSON inválido: ' + err.message);
-        }
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/analytics/index.js') }}"></script>
 @endpush

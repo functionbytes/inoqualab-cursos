@@ -5,6 +5,7 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ url('/pages/css/storefront.css') }}?v={{ @filemtime(public_path('pages/css/storefront.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ asset('pages/css/views/bundles/index.css') }}">
 @endpush
 
 @section('content')
@@ -13,7 +14,7 @@
     <div class="band">
         <div class="container">
             <div class="crumb">
-                <a href="{{ route('index') }}" style="color:inherit">INICIO</a>
+                <a href="{{ route('index') }}">INICIO</a>
                 <span class="sep">/</span>
                 <span class="cur">PAQUETES</span>
             </div>
@@ -60,9 +61,8 @@
                             <div class="plcard-media">
                                 @if ($bundleThumb)
                                     <img src="{{ $bundleThumb->getFullUrl() }}" alt="{{ $bundle->title }}" loading="lazy"
-                                         style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;"
-                                         onerror="this.style.display='none';this.nextElementSibling.style.display='';">
-                                    <i class="fas fa-box-open pkico" style="display:none;"></i>
+                                         class="js-img-fallback" data-fallback-action="hide-sibling">
+                                    <i class="fas fa-box-open pkico js-hidden"></i>
                                 @else
                                     <i class="fas fa-box-open pkico"></i>
                                 @endif

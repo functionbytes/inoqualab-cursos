@@ -7,7 +7,9 @@
 
             <div class="card w-100">
 
-                <form id="formInclide" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formInclide" enctype="multipart/form-data" role="form"
+                      data-include-url="{{ route('manager.enterprises.courses.include') }}"
+                      data-redirect-url="{{ route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
 
                     {{ csrf_field() }}
 
@@ -66,67 +68,7 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formInclide").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    'user[]': {
-                        required: true,
-                    },
-                },
-                messages: {
-                    'user[]': {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formInclide');
-                    var formData = new FormData($form[0]);
-                    var enterprise = $("#enterprises").val();
-                    var course = $("#course").val();
-                    var slack = $("#slack").val();
-                    var users = $("#users").val();
-
-                    formData.append('slack', slack);
-                    formData.append('enterprises', enterprise);
-                    formData.append('users', users);
-                    formData.append('course', course);
-
-                    $.ajax({
-                        url: "{{ route('manager.enterprises.courses.include') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(d) {
-
-                            window.location.href = "{{ route('manager.enterprises.courses.view',  [$enterprise->slack, $course->slack] ) }}";
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+<script src="{{ asset('managers/js/views/enterprises/courses/insert.js') }}"></script>
 @endpush
 
 

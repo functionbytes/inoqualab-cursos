@@ -1,0 +1,41 @@
+.brand-box-red {
+    background: #fce8e8;
+    color: #b10100;
+}
+.brand-box-dark {
+    background: #e8e8e8;
+    color: #333333;
+}
+.brand-badge-noindex {
+    background: #f0f0f0;
+    color: #555;
+    font-weight: 500;
+}
+.seo-icon-box {
+    width: 44px;
+    height: 44px;
+}
+.seo-section-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+}
+.seo-quick-card {
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+}
+.seo-quick-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 139, 206, .15) !important;
+    transform: translateY(-2px);
+}
+.seo-chart-260 {
+    height: 260px;
+}
+.seo-empty-icon-circle {
+    width: 56px;
+    height: 56px;
+    background: #f5f6f8;
+}
+.seo-score-badge {
+    min-width: 36px;
+    text-align: center;
+}

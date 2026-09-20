@@ -6,7 +6,8 @@
     @else
     @endif
 
-    <div class="row g-3">
+    <div class="row g-3" id="users-emails-show"
+         data-config='@json(["bodyHtml" => $log->body_html ?? ""])'>
 
         {{-- Columna principal: vista previa --}}
         <div class="col-12 col-lg-8">
@@ -38,7 +39,7 @@
                         sandboxeado sin allow-scripts en vez de inyectarlo en el DOM del panel,
                         para que ningún <script> embebido pueda ejecutarse. --}}
                         <iframe id="previewContainer" sandbox="allow-same-origin"
-                                style="width:100%;max-width:100%;min-height:400px;background:#fff;box-shadow:0 4px 20px rgba(0,0,0,.1);border-radius:8px;border:0;transition:max-width .3s ease;"></iframe>
+                                class="email-preview-frame"></iframe>
                     </div>
                 </div>
                 <div class="card-footer bg-light border-top">
@@ -62,15 +63,15 @@
                 <div class="card-body p-0">
                     <div class="list-group list-group-flush">
                         <div class="list-group-item px-3 py-2">
-                            <small class="text-muted fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Asunto</small>
+                            <small class="text-muted fw-semibold d-block email-detail-label">Asunto</small>
                             <span class="fw-semibold">{{ $log->subject }}</span>
                         </div>
                         <div class="list-group-item px-3 py-2">
-                            <small class="text-muted fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Destinatario</small>
+                            <small class="text-muted fw-semibold d-block email-detail-label">Destinatario</small>
                             <code class="text-primary">{{ $log->recipient_email }}</code>
                         </div>
                         <div class="list-group-item px-3 py-2">
-                            <small class="text-muted fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Estado</small>
+                            <small class="text-muted fw-semibold d-block email-detail-label">Estado</small>
                             @if($log->status === 'sent')
                                 <span class="badge bg-success-subtle text-success">
                                     <i class="fas fa-check me-1"></i>Enviado correctamente
@@ -82,14 +83,14 @@
                             @endif
                         </div>
                         <div class="list-group-item px-3 py-2">
-                            <small class="text-muted fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Fecha de envío</small>
+                            <small class="text-muted fw-semibold d-block email-detail-label">Fecha de envío</small>
                             <span>{{ $log->sent_at ? $log->sent_at->format('d/m/Y H:i:s') : $log->created_at->format('d/m/Y H:i:s') }}</span>
                             <br>
                             <p class="text-muted">{{ $log->sent_at ? $log->sent_at->diffForHumans() : $log->created_at->diffForHumans() }}</p>
                         </div>
                         @if($log->error_message)
                             <div class="list-group-item px-3 py-2">
-                                <small class="text-danger fw-semibold d-block" style="font-size:10px;letter-spacing:.5px;text-transform:uppercase;">Error</small>
+                                <small class="text-danger fw-semibold d-block email-detail-label">Error</small>
                                 <div class="alert alert-danger mb-0 small mt-1 py-2">{{ $log->error_message }}</div>
                             </div>
                         @endif
@@ -104,18 +105,18 @@
                 </div>
                 <div class="card-body d-grid gap-2">
                     <button type="button" class="btn btn-outline-secondary" id="btnPrint">
-                        <i class="fas fa-print me-1"></i>Imprimir
+                        Imprimir
                     </button>
                     @if($user)
                         <a href="{{ route('manager.users.emails', $user->slack) }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Volver al historial
+                            Volver al historial
                         </a>
                         <a href="{{ route('manager.users.edit', $user->slack) }}" class="btn btn-primary">
-                            <i class="fas fa-user me-1"></i>Ver usuario
+                            Ver usuario
                         </a>
                     @else
                         <a href="{{ route('manager.users') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>Volver a usuarios
+                            Volver a usuarios
                         </a>
                     @endif
                 </div>
@@ -150,46 +151,11 @@
     </div>
 
 @push('css')
-<style>
-    @media print {
-        .col-lg-4, .card-header, .card-footer { display: none !important; }
-        #previewWrapper { padding: 0 !important; }
-        #previewContainer { box-shadow: none !important; border-radius: 0 !important; }
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/users/emails/show.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-    var previewFrame = document.getElementById('previewContainer');
-    previewFrame.srcdoc = @json($log->body_html ?? '');
-    previewFrame.addEventListener('load', function () {
-        try {
-            var height = previewFrame.contentDocument.documentElement.scrollHeight;
-            previewFrame.style.height = Math.max(height, 400) + 'px';
-        } catch (e) {
-            // Si el navegador bloquea el acceso al documento, se queda con min-height.
-        }
-    });
-
-    $('#btnDesktopView').on('click', function () {
-        $('#previewContainer').css('max-width', '100%');
-        $('#btnDesktopView, #btnMobileView').removeClass('active');
-        $(this).addClass('active');
-    });
-
-    $('#btnMobileView').on('click', function () {
-        $('#previewContainer').css('max-width', '375px');
-        $('#btnDesktopView, #btnMobileView').removeClass('active');
-        $(this).addClass('active');
-    });
-
-    $('#btnPrint').on('click', function () {
-        window.print();
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/users/emails/show.js') }}"></script>
 @endpush
 
 @endsection

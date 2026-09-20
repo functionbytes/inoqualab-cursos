@@ -1,0 +1,15 @@
+.perm-matrix { border-collapse: separate; border-spacing: 0; }
+.perm-matrix thead th { position: sticky; top: 0; z-index: 3; background: #f8f9fa; }
+.perm-matrix th.col-perm,
+.perm-matrix td.col-perm {
+    position: sticky; left: 0; z-index: 2; background: #fff;
+    min-width: 240px; max-width: 240px; border-right: 1px solid #e9ecef;
+}
+.perm-matrix thead th.col-perm { z-index: 4; background: #f8f9fa; }
+.perm-matrix .col-role { min-width: 92px; text-align: center; }
+.perm-matrix tr.module-row td { background: #eef2f7; font-weight: 600; }
+.perm-matrix td.col-perm.small-name { font-size: .8rem; }
+.perm-has { color: #13C672; }
+.perm-not { color: #dfe3e8; }
+.matrix-scroll { max-height: 70vh; }
+.badge-mini { font-size: .6rem; }

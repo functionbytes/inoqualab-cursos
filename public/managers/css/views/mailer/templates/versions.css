@@ -1,0 +1,15 @@
+.version-subject-truncate {
+    max-width: 250px;
+}
+.version-diff-pre {
+    max-height: 500px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.version-col-id {
+    width: 60px;
+}
+.version-col-actions {
+    width: 160px;
+}

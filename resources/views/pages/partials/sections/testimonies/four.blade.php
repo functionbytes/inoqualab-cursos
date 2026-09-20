@@ -2,7 +2,7 @@
 <!-- Testimonial Area Start -->
 <section class="testimonials-four pb-130 rpb-100">
     <div class="container">
-        <div class="testimonials-four-iamge pt-130 rpt-100 pb-75" style="background-image: url(assets/images/testimonials/testimonials-four-bg-dots.png);">
+        <div class="testimonials-four-iamge testimonials-four-iamge--bg pt-130 rpt-100 pb-75">
             <img src="/pages/images/testimonials/testimonials-four-image.png" alt="Testimonial">
         </div>
         <div class="testimonial-four-wrap">
@@ -86,5 +86,7 @@
     </div>
 </section>
 <!-- Testimonial Area End -->
-        
-        
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('pages/css/partials/sections/testimonies/four.css') }}">
+@endpush

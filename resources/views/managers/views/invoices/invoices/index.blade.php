@@ -5,7 +5,9 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="invoices-index"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}">
 
         <div class="card">
 
@@ -212,24 +214,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCondition').val($('#modalCondition').val());
-        $('#filterMethods').val($('#modalMethods').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/invoices/invoices/index.js') }}"></script>
 @endpush

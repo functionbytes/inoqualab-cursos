@@ -4,7 +4,18 @@
 
 @section('content')
 
-    <div class="row g-3">
+    <div class="row g-3" id="campaign-form-page"
+         data-is-new="{{ $campaign ? 'false' : 'true' }}"
+         data-save-url="{{ $campaign ? route('manager.newsletter.campaigns.update', $campaign) : route('manager.newsletter.campaigns.store') }}"
+         data-save-method="{{ $campaign ? 'PUT' : 'POST' }}"
+         data-campaign-exists="{{ $campaign ? 'true' : 'false' }}"
+         data-is-draft="{{ $campaign && $campaign->isDraft() ? 'true' : 'false' }}"
+         data-is-failed="{{ $campaign && $campaign->isFailed() ? 'true' : 'false' }}"
+         data-preview-url="{{ $campaign ? route('manager.newsletter.campaigns.preview', $campaign) : '' }}"
+         data-test-url="{{ $campaign ? route('manager.newsletter.campaigns.test', $campaign) : '' }}"
+         data-send-url="{{ $campaign ? route('manager.newsletter.campaigns.send', $campaign) : '' }}"
+         data-active-count-url="{{ route('manager.newsletter.campaigns.active-count') }}"
+         data-index-url="{{ route('manager.newsletter.campaigns.index') }}">
 
         {{-- Columna principal --}}
         <div class="col-12 col-lg-8">
@@ -75,13 +86,13 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="code-tab" data-bs-toggle="tab"
                                 data-bs-target="#code-panel" type="button" role="tab">
-                            <i class="fas fa-code me-1"></i>Código
+                            Código
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="preview-tab" data-bs-toggle="tab"
                                 data-bs-target="#preview-panel" type="button" role="tab">
-                            <i class="fas fa-eye me-1"></i>Vista previa
+                            Vista previa
                         </button>
                     </li>
                 </ul>
@@ -114,8 +125,7 @@
                                     <button type="button"
                                             class="btn btn-sm btn-outline-secondary variable-insert font-monospace"
                                             data-variable="{{ $var }}"
-                                            title="{{ $desc }}"
-                                            style="font-size:.75rem;">{{ $var }}</button>
+                                            title="{{ $desc }}">{{ $var }}</button>
                                 @endforeach
                             </div>
                         </div>
@@ -126,7 +136,7 @@
                     {{-- Tab Vista previa --}}
                     <div class="tab-pane fade p-3" id="preview-panel" role="tabpanel">
                         @if($campaign)
-                            <div id="previewContainer" style="min-height:500px;background:#f8f9fa;border-radius:4px;">
+                            <div id="previewContainer" class="preview-container">
                                 <div class="text-center py-5 text-muted" id="previewPlaceholder">
                                     <i class="fas fa-eye fs-1 d-block mb-3"></i>
                                     <p class="mb-0">Guardando los cambios actualizará la vista previa</p>
@@ -139,7 +149,7 @@
                                     Las variables se reemplazan con valores de ejemplo en la previsualización
                                 </p>
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btnRefreshPreview">
-                                    <i class="fas fa-sync-alt me-1"></i>Actualizar
+                                    Actualizar
                                 </button>
                             </div>
                         @else
@@ -319,16 +329,7 @@
 @push('css')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/monokai.min.css">
-<style>
-    #codeEditorWrapper .CodeMirror {
-        height: 520px;
-        font-size: 13px;
-        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-        line-height: 1.6;
-    }
-    .variable-insert { transition: transform .1s ease; }
-    .variable-insert:hover { transform: translateY(-1px); }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/newsletter/campaigns/form.css') }}">
 @endpush
 
 @push('scripts')
@@ -339,196 +340,5 @@
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/closetag.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/matchbrackets.min.js"></script>
-
-<script>
-$(document).ready(function () {
-
-    var isNew     = {{ $campaign ? 'false' : 'true' }};
-    var saveUrl   = isNew
-        ? '{{ route('manager.newsletter.campaigns.store') }}'
-        : '{{ $campaign ? route('manager.newsletter.campaigns.update', $campaign) : '' }}';
-    var saveMethod = isNew ? 'POST' : 'PUT';
-    var hasChanges = false;
-
-    // ── CodeMirror ────────────────────────────────────────────────────────
-    var editor = CodeMirror(document.getElementById('codeEditorWrapper'), {
-        value: document.getElementById('fieldContent').value,
-        mode: 'htmlmixed',
-        theme: 'monokai',
-        lineNumbers: true,
-        lineWrapping: true,
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        matchBrackets: true,
-        extraKeys: {
-            'Ctrl-S': function () { saveCampaign(); },
-            'Ctrl-/': 'toggleComment'
-        }
-    });
-
-    editor.on('change', function () {
-        hasChanges = true;
-    });
-
-    // ── Inserción de variables ────────────────────────────────────────────
-    $(document).on('click', '.variable-insert', function (e) {
-        e.preventDefault();
-        editor.replaceRange($(this).data('variable'), editor.getCursor());
-        editor.focus();
-    });
-
-    // ── Guardar campaña ───────────────────────────────────────────────────
-    function saveCampaign() {
-        var name    = $.trim($('#fieldName').val());
-        var subject = $.trim($('#fieldSubject').val());
-        var content = editor.getValue();
-
-        if (! name)    { toastr.warning('El nombre es obligatorio.'); return; }
-        if (! subject) { toastr.warning('El asunto es obligatorio.'); return; }
-        if (! content) { toastr.warning('El contenido es obligatorio.'); return; }
-
-        var $btn = $('#btnSave').prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-        );
-
-        $.ajax({
-            url: saveUrl,
-            method: saveMethod,
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: {
-                name:               name,
-                subject:            subject,
-                preheader:          $('#fieldPreheader').val(),
-                content:            content,
-                newsletter_list_id: $('#fieldList').val() || null,
-            },
-            success: function (res) {
-                hasChanges = false;
-                if (isNew) {
-                    window.location.href = res.redirect || '{{ route('manager.newsletter.campaigns.index') }}';
-                } else {
-                    toastr.success(res.message);
-                    $btn.prop('disabled', false).text('Guardar cambios');
-                }
-            },
-            error: function (xhr) {
-                var errors = xhr.responseJSON?.errors;
-                if (errors) {
-                    toastr.error(Object.values(errors).flat().join('<br>'), 'Errores de validación');
-                } else {
-                    toastr.error(xhr.responseJSON?.message || 'Error al guardar.');
-                }
-                $btn.prop('disabled', false).text('Guardar cambios');
-            },
-        });
-    }
-
-    $('#btnSave').on('click', saveCampaign);
-
-    // ── Vista previa ──────────────────────────────────────────────────────
-    @if($campaign)
-    function loadPreview() {
-        var $container = $('#previewContainer');
-        $container.html('<div class="text-center py-5 text-muted"><span class="spinner-border"></span></div>');
-
-        var $iframe = $('<iframe>').css({ width: '100%', border: 'none', background: '#fff' });
-        $iframe.attr('src', '{{ route('manager.newsletter.campaigns.preview', $campaign) }}');
-        $iframe.on('load', function () {
-            try {
-                var doc = this.contentDocument || this.contentWindow.document;
-                $(this).height(doc.documentElement.scrollHeight);
-            } catch (e) {
-                $(this).height(600);
-            }
-        });
-        $container.empty().append($iframe);
-    }
-
-    $('#preview-tab').on('shown.bs.tab', function () {
-        loadPreview();
-    });
-
-    $('#btnRefreshPreview').on('click', function () {
-        loadPreview();
-    });
-    @endif
-
-    // ── Envío de prueba ───────────────────────────────────────────────────
-    @if($campaign && ($campaign->isDraft() || $campaign->isFailed()))
-    $('#btnTestSend').on('click', function () {
-        var email = $.trim($('#testEmail').val());
-        if (! email) { toastr.warning('Ingresa un correo para la prueba.'); return; }
-
-        var $btn = $(this).prop('disabled', true).text('Enviando...');
-
-        $.ajax({
-            url: '{{ route('manager.newsletter.campaigns.test', $campaign) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: { email: email },
-            success: function (res) { toastr.success(res.message); },
-            error: function (xhr) { toastr.error(xhr.responseJSON?.message || 'Error al enviar prueba.'); },
-            complete: function () { $btn.prop('disabled', false).text('Enviar'); },
-        });
-    });
-    @endif
-
-    // ── Modal de envío ────────────────────────────────────────────────────
-    @if($campaign && $campaign->isDraft())
-    $('#btnSendCampaign').on('click', function () {
-        $('#sendModalCount').html('<span class="spinner-border spinner-border-sm align-middle"></span>');
-        $('#btnConfirmSend').prop('disabled', true);
-        new bootstrap.Modal(document.getElementById('sendModal')).show();
-
-        $.ajax({
-            url: '{{ route('manager.newsletter.campaigns.active-count') }}',
-            method: 'GET',
-            success: function (res) {
-                if (res.count === 0) {
-                    bootstrap.Modal.getInstance(document.getElementById('sendModal')).hide();
-                    toastr.warning('No hay suscriptores activos para enviar la campaña.');
-                    return;
-                }
-                $('#sendModalCount').text(res.count.toLocaleString('es-ES'));
-                $('#btnConfirmSend').prop('disabled', false);
-            },
-            error: function () {
-                $('#sendModalCount').text('?');
-                $('#btnConfirmSend').prop('disabled', false);
-            },
-        });
-    });
-
-    $('#btnConfirmSend').on('click', function () {
-        var $btn = $(this).prop('disabled', true).text('Enviando...');
-
-        $.ajax({
-            url: '{{ route('manager.newsletter.campaigns.send', $campaign) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                bootstrap.Modal.getInstance(document.getElementById('sendModal')).hide();
-                toastr.success(res.message);
-                setTimeout(function () {
-                    window.location.href = '{{ route('manager.newsletter.campaigns.index') }}';
-                }, 1500);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message || 'Error al enviar.');
-                $btn.prop('disabled', false).text('Sí, enviar ahora');
-            },
-        });
-    });
-    @endif
-
-    // ── Advertencia al salir con cambios ──────────────────────────────────
-    window.addEventListener('beforeunload', function (e) {
-        if (hasChanges) {
-            e.preventDefault();
-            return '';
-        }
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/newsletter/campaigns/form.js') }}"></script>
 @endpush

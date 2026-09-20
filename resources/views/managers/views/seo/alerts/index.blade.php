@@ -5,7 +5,8 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}" data-flash-error="{{ session('error') }}">
 
         <div class="card">
 
@@ -112,6 +113,9 @@
                         <table class="table table-hover align-middle text-nowrap">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Severidad</th>
                                     <th>Tipo</th>
                                     <th>Título</th>
@@ -134,6 +138,10 @@
                                     @endphp
                                     <tr>
                                         <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $alert->id }}">
+                                        </td>
+                                        <td>
                                             <span class="badge bg-{{ $sev['color'] }}-subtle text-{{ $sev['color'] }}">
                                                 {{ $sev['label'] }}
                                             </span>
@@ -147,8 +155,8 @@
                                         </td>
                                         <td>
                                             @if($alert->url)
-                                                <a href="{{ $alert->url }}" target="_blank" class="text-truncate d-block"
-                                                   style="max-width:160px" title="{{ $alert->url }}">
+                                                <a href="{{ $alert->url }}" target="_blank" class="text-truncate d-block alert-url-truncate"
+                                                   title="{{ $alert->url }}">
                                                     {{ Str::limit($alert->url, 30) }}
                                                 </a>
                                             @else
@@ -294,88 +302,28 @@
         </div>
     </div>
 
+    <div id="bulk-config" class="d-none"
+         data-bulk-url="{{ route('manager.seo.alerts.bulk-action') }}"
+         data-acknowledge-all-url="{{ route('manager.seo.alerts.acknowledge-all') }}"></div>
+
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'alerta(s)',
+        'bulkActions' => [
+            ['value' => 'acknowledge', 'label' => 'Marcar como revisadas'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/alerts/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterSeverity').val($('#modalSeverity').val());
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Acknowledge single alert ─────────────────────────────────────────────
-    $(document).on('click', '.acknowledge-btn', function (e) {
-        e.preventDefault();
-        var $item = $(this);
-        var url   = $item.data('url');
-
-        $item.closest('.dropdown-menu').find('.acknowledge-btn').addClass('disabled').text('Procesando...');
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                toastr.success(res.message || 'Alerta marcada como revisada.');
-                setTimeout(function () { location.reload(); }, 600);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar la alerta.');
-                $item.removeClass('disabled').text('Marcar como revisada');
-            }
-        });
-    });
-
-    // ── Acknowledge all ──────────────────────────────────────────────────────
-    $('#acknowledge-all-btn').on('click', function () {
-        $('#acknowledgeAllModal').modal('show');
-    });
-
-    $('#confirm-acknowledge-all').on('click', function () {
-        var $btn = $(this);
-        $btn.prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route("manager.seo.alerts.acknowledge-all") }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                $('#acknowledgeAllModal').modal('hide');
-                toastr.success(res.message || 'Todas las alertas marcadas como revisadas.');
-                setTimeout(function () { location.reload(); }, 600);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $btn.prop('disabled', false).text('Confirmar');
-            }
-        });
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/alerts/index.js') }}"></script>
 @endpush

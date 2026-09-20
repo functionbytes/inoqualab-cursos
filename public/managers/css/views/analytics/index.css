@@ -1,0 +1,124 @@
+/* Static layout helpers (replace inline style="" from the Blade template) */
+.realtime-dot {
+    width: 10px;
+    height: 10px;
+    background: #008bce;
+}
+
+.realtime-dot-badge {
+    width: 8px;
+    height: 8px;
+    top: -1px;
+    right: -1px;
+}
+
+.realtime-updated-text {
+    font-size: 0.7rem;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 36px;
+    background: #e9ecef;
+}
+
+.icon-btn-32 {
+    width: 32px;
+    height: 32px;
+    background: #f5f6f8;
+}
+
+.icon-circle-44 {
+    width: 44px;
+    height: 44px;
+}
+
+.tabs-scroll-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.tabs-scroll-nav {
+    min-width: max-content;
+}
+
+.export-icon-box {
+    width: 40px;
+    height: 40px;
+}
+
+.export-item-body {
+    min-width: 0;
+    flex: 1;
+}
+
+.export-desc-text {
+    font-size: 0.72rem;
+}
+
+.export-btn-sm {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+}
+
+/* Base */
+#visits-map { height: 340px; border-radius: 0 0 0 8px; }
+#countries-list { max-height: 340px; overflow-y: auto; }
+.analytics-main-chart { height: 295px; }
+.analytics-heatmap { height: 200px; }
+.analytics-donut-chart { height: 200px; }
+.analytics-countries-col { border-left: 1px solid #dee2e6; }
+
+.country-item { padding: 10px 16px; border-bottom: 1px solid #f5f6f8; display: flex; align-items: center; gap: 12px; }
+.country-item:last-child { border-bottom: none; }
+.country-item:hover { background: #f5f6f8; cursor: pointer; }
+.country-item.country-active { background: #e8f4fd; }
+.map-reset-btn { position: absolute; top: 10px; right: 10px; z-index: 999; }
+.progress-thin { height: 4px; }
+.cmp-up   { color: #198754; }
+.cmp-down { color: #dc3545; }
+.analytics-pills-col { min-width: 0; }
+#rangePills { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#rangePills::-webkit-scrollbar { display: none; }
+#rangePills .nav-link.active { background: #008bce; color: #fff !important; }
+#rangePills .nav-link:hover:not(.active) { background: #e8f4fd; color: #008bce; }
+#rangePills .nav-link { white-space: nowrap; }
+
+/* Tablet (md) */
+@media (max-width: 991.98px) {
+    .analytics-countries-col { border-left: 0; border-top: 1px solid #dee2e6; }
+    #visits-map { border-radius: 0; }
+}
+
+/* KPI cards: full-width text + hide sparklines on xs */
+@media (max-width: 575.98px) {
+    #kpi-row .col-8 { flex: 0 0 100%; max-width: 100%; }
+    #kpi-row .col-4 { display: none !important; }
+}
+
+/* Mobile (sm) */
+@media (max-width: 767.98px) {
+    #visits-map { height: 220px; }
+    #countries-list { max-height: 200px; }
+    .analytics-main-chart { height: 220px; }
+    .analytics-heatmap { height: 150px; }
+    .country-item { padding: 8px 12px; gap: 8px; }
+    .country-item .fw-semibold { font-size: 0.8rem; }
+    .country-item .text-muted { font-size: 0.72rem; }
+}
+
+/* Extra small */
+@media (max-width: 575.98px) {
+    .analytics-donut-chart { height: 160px; }
+    .card-header h4.card-title { font-size: 0.95rem; }
+    #traffic-sources-list, #pages-list, #landing-pages-list, #exit-pages-list,
+    #referrers-list, #search-terms-list, #user-flow-list {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    #traffic-sources-list table, #pages-list table, #landing-pages-list table,
+    #exit-pages-list table, #referrers-list table, #search-terms-list table,
+    #user-flow-list table {
+        min-width: 420px;
+    }
+}

@@ -5,9 +5,15 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
 
-            <div class="card w-100">
+            <div class="card w-100" id="invoices-create"
+                 data-config='@php $__jsonInline1 = [
+                    "routes" => [
+                        "store" => route("manager.invoices.store"),
+                        "view" => route("manager.invoices.view", ":id"),
+                    ],
+                 ]; @endphp@json($__jsonInline1)'>
 
-                <form id="formInvoices" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formInvoices" enctype="multipart/form-data" role="form">
 
                     {{ csrf_field() }}
 
@@ -33,7 +39,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
+                                    <label class="control-label col-form-label">Condición pago</label>
                                     <div class="input-group">
                                         {!! Form::select('condition', $conditions, null , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                     </div>
@@ -42,7 +48,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Condición pago</label>
+                                    <label class="control-label col-form-label">Metodo pago</label>
                                     <div class="input-group">
                                         {!! Form::select('method', $methods, null , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
                                     </div>
@@ -109,104 +115,8 @@
 
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-
-            $('.daterange').daterangepicker();
-
-            $("#formInvoices").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    condition: {
-                        required: true,
-                    },
-                    method: {
-                        required: true,
-                    },
-                    distributor: {
-                        required: true,
-                    },
-
-                },
-                messages: {
-                    condition: {
-                        required: "Es necesario un estado.",
-                    },
-                    method: {
-                        required: "Es necesario un estado.",
-                    },
-                    distributor: {
-                        required: "Es necesario un distribuidor.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formInvoices');
-                    var formData = new FormData($form[0]);
-                    var distributor = $("#distributor").val();
-                    var condition = $("#condition").val();
-                    var method = $("#method").val();
-                    var range = $("#range").val();
-
-                    formData.append('distributor', distributor);
-                    formData.append('condition', condition);
-                    formData.append('methods', method);
-                    formData.append('range', range);
-
-                    $.ajax({
-                        url: "{{ route('manager.invoices.store') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                // toastr.success("Se ha generado una factura.", "Operación exitosa", {
-                                //     closeButton: true,
-                                //     progressBar: true,
-                                //     positionClass: "toast-bottom-right"
-                                // });
-
-                                var url = "{{ route('manager.invoices.view', ':id') }}";
-                                url = url.replace(':id', response.data);
-
-                                $("#view-modal").modal("show");
-                                $("#view-link").attr("href", url);
-
-                            }else{
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-                            }
-                        }
-                    });
-
-                }
-
-            });
-
-        });
-
-    </script>
-
-
+    <script src="{{ asset('managers/js/views/invoices/invoices/create.js') }}"></script>
 @endpush
 
 

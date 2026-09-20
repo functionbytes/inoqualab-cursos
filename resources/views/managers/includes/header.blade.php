@@ -37,13 +37,12 @@
                            id="dropNotif" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-bell fs-6"></i>
                             @if($unreadCount > 0)
-                                <span class="badge rounded-pill bg-danger position-absolute"
-                                      style="top:2px;right:2px;font-size:9px;padding:2px 5px;min-width:16px;"
+                                <span class="badge rounded-pill bg-danger position-absolute header-notif-badge"
                                       id="notifBadge">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
                             @endif
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end content-dd dropdown-menu-animate-up p-0"
-                             aria-labelledby="dropNotif" style="min-width:320px;max-width:360px;">
+                        <div class="dropdown-menu dropdown-menu-end content-dd dropdown-menu-animate-up p-0 header-notif-dropdown"
+                             aria-labelledby="dropNotif">
                             <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom bg-light rounded-top">
                                 <span class="fw-semibold small">Notificaciones</span>
                                 @if($unreadCount > 0)
@@ -52,23 +51,22 @@
                                     </a>
                                 @endif
                             </div>
-                            <div style="max-height:320px;overflow-y:auto;">
+                            <div class="header-notif-list">
                                 @forelse($recentNotifs as $notif)
                                     <a href="{{ route('manager.notifications') }}"
                                        class="d-flex align-items-start gap-2 px-3 py-2 border-bottom text-dark text-decoration-none hover-bg-light notif-item"
                                        data-notif-id="{{ $notif->id }}">
                                         <div class="flex-shrink-0 mt-1">
-                                            <span class="rounded-circle d-flex align-items-center justify-content-center bg-primary-subtle"
-                                                  style="width:32px;height:32px;">
+                                            <span class="rounded-circle d-flex align-items-center justify-content-center bg-primary-subtle header-notif-icon-circle">
                                                 <i class="fas fa-bell fs-6 text-primary"></i>
                                             </span>
                                         </div>
                                         <div class="flex-grow-1 overflow-hidden">
                                             <div class="fw-semibold small text-truncate">{{ $notif->data['title'] ?? 'Notificación' }}</div>
                                             <div class="text-muted small text-truncate">{{ $notif->data['message'] ?? '' }}</div>
-                                            <div class="text-muted" style="font-size:11px;">{{ $notif->created_at->diffForHumans() }}</div>
+                                            <div class="text-muted header-notif-time">{{ $notif->created_at->diffForHumans() }}</div>
                                         </div>
-                                        <span class="badge bg-primary rounded-pill flex-shrink-0 align-self-start mt-1" style="width:8px;height:8px;padding:0;"></span>
+                                        <span class="badge bg-primary rounded-pill flex-shrink-0 align-self-start mt-1 header-notif-dot"></span>
                                     </a>
                                 @empty
                                     <div class="text-center py-4 text-muted small">
@@ -89,7 +87,7 @@
                         <a class="nav-link pe-0" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="d-flex align-items-center">
                                 <div class="user-profile-img">
-                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="35" height="35" alt="Foto de perfil" onerror="this.src='{{ url('managers/images/profile/profile.jpg') }}'" />
+                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="35" height="35" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
                                 </div>
                             </div>
                         </a>
@@ -97,7 +95,7 @@
                             <div class="profile-dropdown position-relative" data-simplebar>
 
                                 <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="50" height="50" alt="Foto de perfil" onerror="this.src='{{ url('managers/images/profile/profile.jpg') }}'" />
+                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="50" height="50" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
                                     <div class="ms-3">
                                         <h5 class="mb-1 fs-3 text-uppercase">{{ Str::words(Auth::user()->firstname ,1,'') }} {{ Str::words(Auth::user()->lastname,1,'') }} </h5>
                                         <span class="mb-1 d-block text-dark">
@@ -127,4 +125,8 @@
 </header>
 
 <!-- Header End -->
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/includes/header.css') }}">
+@endpush
 

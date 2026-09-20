@@ -89,29 +89,12 @@
     </div>
  </section>
 
-
-<script src="{{ url('pages/js/jquery.min.js') }}" type="text/javascript"></script>
-
-<script>
-
-     $(document).ready(function() {
-            $("#terms").on("change",function(){
-
-                    value = $(this).is(":checked");
-
-                    if(value == true){
-                        $('#addRegister').removeClass("register-disabled");
-                    }else{
-                        $('#addRegister').addClass("register-disabled");
-                    }
-
-
-            });
-     });
-
-</script>
-
 @endsection
+
+@push('scripts')
+    <script src="{{ url('pages/js/jquery.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('auth/js/register.js') }}"></script>
+@endpush
 
 
 

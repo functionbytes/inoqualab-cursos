@@ -150,7 +150,7 @@
                                                 <span class="text-muted">—</span>
                                             @endif
                                         </td>
-                                        <td style="max-width:280px"><span class="text-break">{{ $log->description }}</span></td>
+                                        <td class="activity-description-col"><span class="text-break">{{ $log->description }}</span></td>
                                         <td class="text-center">
                                             @if($log->properties && $log->properties->isNotEmpty())
                                                 <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0 btn-detail"
@@ -219,34 +219,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/activity/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-    function fmt(v) {
-        if (v === null || v === undefined) return '<span class="text-muted">—</span>';
-        if (typeof v === 'object') return '<code>' + $('<div>').text(JSON.stringify(v)).html() + '</code>';
-        return $('<div>').text(String(v)).html();
-    }
-
-    $(document).on('click', '.btn-detail', function () {
-        var props = $(this).data('props') || {};
-        var attrs = props.attributes || {};
-        var old   = props.old || {};
-        var keys  = Object.keys(attrs).length ? Object.keys(attrs) : Object.keys(old);
-
-        var $body = $('#detail-body').empty();
-        $('#detail-meta').text($(this).data('meta') || '');
-
-        if (!keys.length) {
-            $body.append('<tr><td colspan="3" class="text-muted text-center">Sin propiedades registradas</td></tr>');
-        } else {
-            keys.forEach(function (k) {
-                $body.append('<tr><td class="fw-semibold">' + fmt(k) + '</td><td>' + fmt(old[k]) + '</td><td>' + fmt(attrs[k]) + '</td></tr>');
-            });
-        }
-
-        $('#detailModal').modal('show');
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/activity/index.js') }}"></script>
 @endpush

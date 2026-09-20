@@ -6,6 +6,7 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ url('/pages/css/storefront.css') }}?v={{ @filemtime(public_path('pages/css/storefront.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ asset('pages/css/views/bundles/view.css') }}">
 @endpush
 
 @section('content')
@@ -84,7 +85,7 @@
                 </div>
 
                 {{-- Cursos incluidos --}}
-                <div class="pkg-card" style="margin-top:24px">
+                <div class="pkg-card pkg-card--spaced">
                     <div class="pkg-head">
                         <h2>Cursos incluidos ({{ $coursesCount }})</h2>
                     </div>
@@ -121,8 +122,8 @@
                 <div class="buy-media">
                     @if ($bundleMedia)
                         <img src="{{ $bundleMedia->getFullUrl() }}" alt="{{ $bundle->title }}" loading="lazy"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                        <div class="ph" style="display:none;"><i class="fa-solid fa-box-open"></i><span>Imagen del paquete</span></div>
+                             class="js-img-fallback" data-fallback-action="hide-sibling" data-fallback-sibling-display="flex">
+                        <div class="ph js-hidden"><i class="fa-solid fa-box-open"></i><span>Imagen del paquete</span></div>
                     @else
                         <div class="ph"><i class="fa-solid fa-box-open"></i><span>Imagen del paquete</span></div>
                     @endif
@@ -146,7 +147,7 @@
                                 <i class="fa-solid fa-circle-check"></i> Ya tienes este paquete
                             </a>
                         </div>
-                        <p style="text-align:center;font-size:12.5px;font-weight:600;margin:16px 0 0">Ve a tus cursos para continuar aprendiendo</p>
+                        <p class="buy-note">Ve a tus cursos para continuar aprendiendo</p>
                     @else
                         <form class="form-add-to-cart" action="{{ route('cart.add') }}" method="POST">
                             @csrf
@@ -159,7 +160,7 @@
                                 <button type="submit" class="buy-outline" id="btnBundleAddCart">Agregar al carrito</button>
                             </div>
                         </form>
-                        <p style="text-align:center;font-size:12.5px;font-weight:600;margin:16px 0 0">Pago seguro · Acceso inmediato</p>
+                        <p class="buy-note">Pago seguro · Acceso inmediato</p>
                     @endif
                 </div>
             </div>
@@ -169,13 +170,7 @@
 </section>
 
 @push('scripts')
-<script>
-    $(document).ready(function () {
-        // Diferenciar "Compra ahora" vs "Agregar al carrito" (el handler del carrito vive en layouts.pages)
-        $(document).on('click', '#btnBundleBuyNow', function () { $('#bundleBuyNow').val('1'); });
-        $(document).on('click', '#btnBundleAddCart', function () { $('#bundleBuyNow').val(''); });
-    });
-</script>
+<script src="{{ asset('pages/js/views/bundles/view.js') }}"></script>
 @endpush
 
 @endsection

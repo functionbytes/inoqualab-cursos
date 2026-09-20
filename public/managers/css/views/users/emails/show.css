@@ -1,0 +1,22 @@
+@media print {
+    .col-lg-4, .card-header, .card-footer { display: none !important; }
+    #previewWrapper { padding: 0 !important; }
+    #previewContainer { box-shadow: none !important; border-radius: 0 !important; }
+}
+
+.email-preview-frame {
+    width: 100%;
+    max-width: 100%;
+    min-height: 400px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
+    border-radius: 8px;
+    border: 0;
+    transition: max-width .3s ease;
+}
+
+.email-detail-label {
+    font-size: 10px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}

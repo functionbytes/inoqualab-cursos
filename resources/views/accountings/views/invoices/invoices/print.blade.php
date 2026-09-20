@@ -35,15 +35,15 @@
                                                             </p>
                                                             <p class="mt-0 mb-0">
                                                                 <span>Fecha de la factura :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($invoice->date)) }}</strong>
+                                                                <strong>{{ $invoice->created_at?->format('Y-m-d') ?? 'N/D' }}</strong>
                                                             </p>
-                                                            <p class="mt-0 mb-0">
+                                                            <p class="mt-0 mb-0 {{ $invoice->from_at ? '' : 'd-none' }}">
                                                                 <span>Fecha de inicio :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($invoice->enroll_start)) }}</strong>
+                                                                <strong>{{ $invoice->from_at ? date('Y-m-d', strtotime($invoice->from_at)) : '' }}</strong>
                                                             </p>
-                                                            <p class="mt-0 mb-0">
+                                                            <p class="mt-0 mb-0 {{ $invoice->to_at ? '' : 'd-none' }}">
                                                                 <span>Fecha de vencimiento :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($invoice->enroll_expire)) }}</strong>
+                                                                <strong>{{ $invoice->to_at ? date('Y-m-d', strtotime($invoice->to_at)) : '' }}</strong>
                                                             </p>
                                                         </address>
                                                     </div>
@@ -81,7 +81,7 @@
                                                                 </td>
                                                                 <td class="border-bottom-0">
                                                                     <div class="d-flex align-items-center gap-3">
-                                                                        <p class="mb-0">${{ number_format($item->amount)}}</p>
+                                                                        <p class="mb-0">${{ number_format($item->total)}}</p>
                                                                     </div>
                                                                 </td>
 

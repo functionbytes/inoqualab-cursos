@@ -64,7 +64,7 @@
                 <h6 class="mb-2">No hay endpoints configurados</h6>
                 <p class="text-muted mb-3">Crea tu primer endpoint para obtener documentación personalizada</p>
                 <a href="{{ route('mailers.endpoints.create') }}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-plus me-1"></i>Crear endpoint
+                    Crear endpoint
                 </a>
             </div>
         </div>
@@ -73,7 +73,7 @@
         @foreach($endpoints as $endpoint)
             <div class="card mb-3">
                 {{-- Header --}}
-                <div class="card-header border-bottom" style="@if($endpoint->is_active) background: rgba(54,199,108,0.10); @else background: rgba(220,53,69,0.10); @endif">
+                <div class="card-header border-bottom {{ $endpoint->is_active ? 'bg-success-soft' : 'bg-danger-soft' }}">
                     <div class="row align-items-center">
                         <div class="col">
                             <h5 class="mb-1 fw-bold">
@@ -218,22 +218,22 @@
                     <ul class="nav nav-pills mb-3" role="tablist" id="endpoint-{{ $endpoint->id }}-tabs">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="curl-{{ $endpoint->id }}-tab" data-bs-toggle="tab" data-bs-target="#curl-{{ $endpoint->id }}" type="button" role="tab">
-                                <i class="fab fa-linux me-1"></i>cURL
+                                cURL
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="js-{{ $endpoint->id }}-tab" data-bs-toggle="tab" data-bs-target="#js-{{ $endpoint->id }}" type="button" role="tab">
-                                <i class="fab fa-js me-1"></i>JavaScript
+                                JavaScript
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="php-{{ $endpoint->id }}-tab" data-bs-toggle="tab" data-bs-target="#php-{{ $endpoint->id }}" type="button" role="tab">
-                                <i class="fab fa-php me-1"></i>PHP
+                                PHP
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="python-{{ $endpoint->id }}-tab" data-bs-toggle="tab" data-bs-target="#python-{{ $endpoint->id }}" type="button" role="tab">
-                                <i class="fab fa-python me-1"></i>Python
+                                Python
                             </button>
                         </li>
                     </ul>
@@ -256,7 +256,7 @@
   }'</code></pre>
                             </div>
                             <button class="btn btn-sm btn-outline-secondary mt-2 btn-copy-code" data-target="curl-{{ $endpoint->id }}">
-                                <i class="fas fa-copy me-1"></i>Copiar
+                                Copiar
                             </button>
                         </div>
 
@@ -283,7 +283,7 @@
 .catch(error => console.error('Error:', error));</code></pre>
                             </div>
                             <button class="btn btn-sm btn-outline-secondary mt-2 btn-copy-code" data-target="js-{{ $endpoint->id }}">
-                                <i class="fas fa-copy me-1"></i>Copiar
+                                Copiar
                             </button>
                         </div>
 
@@ -317,7 +317,7 @@ curl_close($curl);
 echo json_encode(json_decode($response), JSON_PRETTY_PRINT);</code></pre>
                             </div>
                             <button class="btn btn-sm btn-outline-secondary mt-2 btn-copy-code" data-target="php-{{ $endpoint->id }}">
-                                <i class="fas fa-copy me-1"></i>Copiar
+                                Copiar
                             </button>
                         </div>
 
@@ -349,7 +349,7 @@ print(f'Status Code: {response.status_code}')
 print(json.dumps(response.json(), indent=2))</code></pre>
                             </div>
                             <button class="btn btn-sm btn-outline-secondary mt-2 btn-copy-code" data-target="python-{{ $endpoint->id }}">
-                                <i class="fas fa-copy me-1"></i>Copiar
+                                Copiar
                             </button>
                         </div>
                     </div>
@@ -402,10 +402,10 @@ print(json.dumps(response.json(), indent=2))</code></pre>
                         </p>
                         <div class="d-flex gap-2">
                             <a href="{{ route('mailers.endpoints.edit', $endpoint) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-edit me-1"></i>Editar
+                                Editar
                             </a>
                             <a href="{{ route('mailers.endpoints.logs', $endpoint) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-history me-1"></i>Ver logs
+                                Ver logs
                             </a>
                         </div>
                     </div>
@@ -422,35 +422,10 @@ print(json.dumps(response.json(), indent=2))</code></pre>
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/documentation.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function() {
-
-    // Copy token to clipboard
-    $(document).on('click', '.btn-copy-token', function() {
-        const token = $(this).data('token');
-        const $btn = $(this);
-
-        navigator.clipboard.writeText(token).then(function() {
-            const original = $btn.html();
-            $btn.html('<i class="fas fa-check"></i>');
-            setTimeout(function() { $btn.html(original); }, 2000);
-            toastr.success('Token copiado al portapapeles', 'Copiado', { timeOut: 2000 });
-        });
-    });
-
-    // Copy code blocks to clipboard
-    $(document).on('click', '.btn-copy-code', function() {
-        const target = $(this).data('target');
-        const code = $('#' + target).find('code').text();
-        const $btn = $(this);
-
-        navigator.clipboard.writeText(code).then(function() {
-            const original = $btn.html();
-            $btn.html('<i class="fas fa-check me-1"></i>Copiado!');
-            setTimeout(function() { $btn.html(original); }, 2000);
-        });
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/documentation.js') }}"></script>
 @endpush

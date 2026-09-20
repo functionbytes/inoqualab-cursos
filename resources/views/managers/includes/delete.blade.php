@@ -4,7 +4,7 @@
             <div class="modal-body text-center p-4 position-relative">
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 <div class="mb-3 mt-2">
-                    <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                    <i class="fas fa-triangle-exclamation text-warning delete-modal-icon"></i>
                 </div>
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
@@ -18,3 +18,7 @@
         </div>
     </div>
 </div>
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/includes/delete.css') }}">
+@endpush

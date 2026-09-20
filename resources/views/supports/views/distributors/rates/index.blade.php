@@ -7,7 +7,9 @@
 
             <div class="card w-100">
 
-                <form id="formRates" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formRates" enctype="multipart/form-data" role="form" onSubmit="return false"
+                      data-update-url="{{ route('support.distributors.rates.update') }}"
+                      data-redirect-url-template="{{ route('support.distributors.navegation', ':slack') }}">
 
                     {{ csrf_field() }}
 
@@ -76,95 +78,6 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formRates").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    'courses[]': {
-                        required: true,
-                        number: true,
-                        min: 0
-                    },
-                },
-                messages: {
-                    'courses[]': {
-                        required: "Es necesario ingresar un precio.",
-                        number: "Debe ser un número.",
-                        min: "El precio no puede ser negativo."
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formRates');
-                    var formData = new FormData($form[0]);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-
-                    $.ajax({
-                        url: "{{ route('support.distributors.rates.update') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    let slack = @json($distributor->slack);
-                                    window.location.href = "{{ route('support.distributors.navegation', ':slack') }}".replace(':slack', slack);
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+    <script src="{{ asset('supports/js/views/distributors/rates/index.js') }}"></script>
 @endpush
 

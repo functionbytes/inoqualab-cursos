@@ -93,7 +93,7 @@
 
                     <div class="alert alert-light border small p-3 mb-4">
                         <p class="fw-semibold mb-2">Estructura esperada</p>
-                        <pre class="mb-0 small text-muted" style="white-space:pre-wrap">[
+                        <pre class="mb-0 small text-muted import-json-example">[
   {
     "seoable_type": "App\\Models\\Course",
     "seoable_id": 1,
@@ -139,3 +139,7 @@
     </div>
 
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/import-json.css') }}">
+@endpush

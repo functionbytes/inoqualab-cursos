@@ -14,7 +14,7 @@
 @endsection
 
 @push('css')
-    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}">
+    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @section('content')
@@ -61,6 +61,17 @@
             {{-- ===== Contenido principal (banner + info) ===== --}}
             <main class="lv-main">
                 <div class="lv-content">
+                    {{-- Barra sticky solo-mobile con el toggle del rail (mismo bloque
+                         que lesson-content.blade.php): sin este botón .lv-rail-toggle
+                         nunca existe en el DOM, el JS de rail.blade.php aborta su bind
+                         (if (!$toggles.length) return;) y el rail -- position:fixed y
+                         oculto por CSS en mobile -- queda sin forma de abrirse. --}}
+                    <div class="lv-mobile-bar">
+                        <button type="button" class="lv-rail-toggle" aria-label="Ver clases del curso" aria-expanded="false" aria-controls="lvRail">
+                            @include('customers.includes.icon', ['name' => 'menu'])
+                        </button>
+                    </div>
+
                     <div class="lv-lhead">
                         <div>
                             <span class="lk">@include('customers.includes.icon', ['name' => 'book']) Curso</span>
@@ -72,7 +83,7 @@
                         </div>
                         @if ($inscription->expire == 0 && $startHref)
                             <a class="lv-markbtn" href="{{ $startHref }}">
-                                @include('customers.includes.icon', ['name' => 'circle-play']) {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
+                                {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         @endif
                     </div>
@@ -115,7 +126,13 @@
                                 @if($course->certifier)
                                     <div class="cert-card">
                                         <div class="cert-head">
-                                            <span class="cert-ava">@include('customers.includes.icon', ['name' => 'user-grad'])</span>
+                                            <span class="cert-ava">
+                                                @if($course->certifier->hasMedia('thumbnail'))
+                                                    <img src="{{ $course->certifier->getFirstMediaUrl('thumbnail') }}" alt="{{ $course->certifier->firstname }} {{ $course->certifier->lastname }}">
+                                                @else
+                                                    @include('customers.includes.icon', ['name' => 'user-grad'])
+                                                @endif
+                                            </span>
                                             <div class="cert-id">
                                                 <b>{{ $course->certifier->firstname . ' ' . $course->certifier->lastname }}</b>
                                                 <span>{{ $course->certifier->profession }}</span>
@@ -127,7 +144,9 @@
                                         @endif
                                     </div>
                                 @else
-                                    <div class="lv-empty-note">Este curso aún no tiene un certificador asignado.</div>
+                                    <div class="lv-empty">
+                                        <p>Este curso aún no tiene un certificador asignado.</p>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -152,7 +171,7 @@
 
     {{-- ===================== VERSIÓN 1 — sidebar a la derecha ===================== --}}
     <div class="aula">
-        <div class="aula-grid" style="{{ $inscription->expire == 1 ? 'grid-template-columns:1fr;' : '' }}">
+        <div class="aula-grid {{ $inscription->expire == 1 ? 'is-single' : '' }}">
 
             {{-- ===== Columna principal ===== --}}
             <div class="lesson-panel">
@@ -214,7 +233,7 @@
                         <div class="lp-nav">
                             <span class="lp-navnote">{{ $completedClass > 0 ? 'Retoma donde lo dejaste' : 'Empieza tu aprendizaje ahora' }}</span>
                             <a class="lv-markbtn" href="{{ $startHref }}">
-                                @include('customers.includes.icon', ['name' => 'circle-play']) {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
+                                {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         </div>
                     @endif

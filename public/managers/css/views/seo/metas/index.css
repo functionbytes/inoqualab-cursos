@@ -1,0 +1,15 @@
+.filter-select-lg {
+    min-width: 180px;
+}
+.filter-select-md {
+    min-width: 160px;
+}
+.filter-select-sm {
+    min-width: 150px;
+}
+.editable-cell {
+    cursor: pointer;
+}
+.bulk-toolbar-float {
+    z-index: 1050;
+}

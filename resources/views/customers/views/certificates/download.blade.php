@@ -12,12 +12,19 @@
         }
 
         @font-face {
-        font-family: 'Montserrat';
-        src: url({{storage_path('fonts/Montserrat.ttf')}}) format("truetype");
+        font-family: 'Plus Jakarta Sans';
+        font-weight: 400;
+        src: url({{storage_path('fonts/PlusJakartaSans-Regular.ttf')}}) format("truetype");
+        }
+
+        @font-face {
+        font-family: 'Plus Jakarta Sans';
+        font-weight: 600;
+        src: url({{storage_path('fonts/PlusJakartaSans-SemiBold.ttf')}}) format("truetype");
         }
 
         body {
-            font-family: 'Montserrat';
+            font-family: 'Plus Jakarta Sans';
             color: 303030;
         }
 

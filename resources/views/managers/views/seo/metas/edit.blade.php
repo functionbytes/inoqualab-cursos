@@ -21,7 +21,7 @@
 
         {{-- Columna principal --}}
         <div class="col-12 col-lg-8">
-            <form id="formSeoMeta" onsubmit="return false">
+            <form id="formSeoMeta" data-update-url="{{ route('manager.seo.metas.update', $seoMeta->id) }}">
 
                 {{-- Acordeón de secciones --}}
                 <div class="accordion" id="seoAccordion">
@@ -118,8 +118,7 @@
                                                value="{{ old('og_image', $seoMeta->og_image) }}"
                                                placeholder="https://ejemplo.com/imagen.jpg">
                                         <div id="og-image-preview" class="mt-2 d-none">
-                                            <img src="" alt="Vista previa OG" class="img-fluid rounded border"
-                                                 style="max-height:120px">
+                                            <img src="" alt="Vista previa OG" class="img-fluid rounded border og-image-preview-img">
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
@@ -228,12 +227,12 @@
                         <div id="collapseSchema" class="accordion-collapse collapse" data-bs-parent="#seoAccordion">
                             <div class="accordion-body">
                                 <label class="form-label fw-semibold">JSON-LD personalizado</label>
-                                <textarea class="form-control font-monospace" id="custom_schema" name="custom_schema"
+                                <textarea class="form-control font-monospace" id="schema_custom" name="schema_custom"
                                           rows="10"
-                                          placeholder='{"@@context":"https://schema.org","@@type":"Course","name":"..."}'>{{ old('custom_schema', $seoMeta->custom_schema) }}</textarea>
+                                          placeholder='{"@@context":"https://schema.org","@@type":"Course","name":"..."}'>{{ old('schema_custom', $seoMeta->schema_custom ? json_encode($seoMeta->schema_custom, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
                                 <div class="mt-2 d-flex gap-2 align-items-center">
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-validate-json">
-                                        <i class="fas fa-check-circle me-1"></i>Validar JSON
+                                        Validar JSON
                                     </button>
                                     <span id="json-validation-msg" class="small"></span>
                                 </div>
@@ -247,7 +246,7 @@
                 <div class="card mt-3">
                     <div class="card-footer bg-white">
                         <button type="button" class="btn btn-primary w-100 mb-2" id="btn-save-meta">
-                            <i class="fas fa-save me-1"></i>Guardar cambios
+                            Guardar cambios
                         </button>
                         <a href="{{ route('manager.seo.metas.index') }}" class="btn btn-light w-100">
                             Cancelar
@@ -336,89 +335,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/edit.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    // Contadores de caracteres
-    function charCounter(inputId, countId) {
-        var $el = $('#' + inputId);
-        $('#' + countId).text($el.val().length);
-        $el.on('input', function () {
-            $('#' + countId).text(this.value.length);
-        });
-    }
-    charCounter('title', 'title-count');
-    charCounter('description', 'description-count');
-
-    // Vista previa de imagen OG
-    $('#og_image').on('input', function () {
-        var url = $(this).val().trim();
-        if (url) {
-            $('#og-image-preview img').attr('src', url);
-            $('#og-image-preview').removeClass('d-none');
-        } else {
-            $('#og-image-preview').addClass('d-none');
-        }
-    }).trigger('input');
-
-    // Validar JSON
-    $('#btn-validate-json').on('click', function () {
-        var val = $('#custom_schema').val().trim();
-        var $msg = $('#json-validation-msg');
-
-        if (!val) {
-            $msg.text('(vacío)').attr('class', 'small text-muted');
-            return;
-        }
-
-        try {
-            JSON.parse(val);
-            $msg.text('JSON válido').attr('class', 'small text-success');
-        } catch (e) {
-            $msg.text('JSON inválido: ' + e.message).attr('class', 'small text-danger');
-        }
-    });
-
-    // Guardar vía AJAX
-    $('#btn-save-meta').on('click', function () {
-        var $btn = $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Guardando...');
-
-        // Limpiar errores previos
-        $('.is-invalid').removeClass('is-invalid');
-        $('.invalid-feedback').text('');
-
-        var data = {};
-        $('#formSeoMeta').find('input, textarea, select').each(function () {
-            if (this.name) data[this.name] = $(this).val();
-        });
-
-        $.ajax({
-            url: '{{ route('manager.seo.metas.update', $seoMeta->id) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: Object.assign(data, { _method: 'PUT' }),
-            success: function (response) {
-                toastr.success(response.message ?? 'Cambios guardados correctamente');
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    $.each(xhr.responseJSON.errors, function (field, messages) {
-                        var $field = $('[name="' + field + '"]');
-                        $field.addClass('is-invalid');
-                        $field.closest('.col-12, .col-md-6').find('.invalid-feedback').first().text(messages[0]);
-                    });
-                    toastr.error('Corrige los errores del formulario');
-                } else {
-                    toastr.error('Error al guardar los cambios');
-                }
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-save me-1"></i>Guardar cambios');
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/metas/edit.js') }}"></script>
 @endpush

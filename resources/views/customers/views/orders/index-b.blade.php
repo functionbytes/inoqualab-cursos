@@ -27,9 +27,40 @@
 <section class="pnl-section">
 
     <div class="cd-head">
-        {{-- El título ya lo muestra la banda de contexto del header. --}}
-        <div class="sub">Cada compra agrupa las capacitaciones que adquiriste y su comprobante</div>
+        {{-- pnl-head-row para el layout flex (título+buscador en fila) sin
+             tocar .cd-head, compartido con chats/documents/certificados-b,
+             donde solo hay título+subtítulo apilados. --}}
+        <div class="pnl-head-row">
+            <div class="sub">Cada compra agrupa las capacitaciones que adquiriste y su comprobante</div>
+            <form class="pnl-search" action="{{ Request::fullUrl() }}" method="GET" role="search">
+                @include('customers.includes.icon', ['name' => 'search'])
+                <input type="search" name="search" placeholder="Nº de pedido…" autocomplete="off"
+                       value="{{ $searchKey ?? '' }}" aria-label="Buscar por número de pedido">
+            </form>
+        </div>
     </div>
+
+    @if($searchKey)
+        <div class="od-searching">
+            Resultados para <b>{{ $searchKey }}</b>
+            <a href="{{ route('customers.orders') }}">Quitar búsqueda</a>
+        </div>
+    @endif
+
+    @if($totalOrdersCount > 0)
+        <div class="pnl-filter" role="group" aria-label="Filtrar mis pedidos">
+            <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
+               class="{{ $condition ? '' : 'active' }}">
+                Todos<span class="cnt">{{ $totalOrdersCount }}</span>
+            </a>
+            @foreach($conditions as $c)
+                <a href="{{ route('customers.orders', array_filter(['search' => $searchKey, 'condition' => $c->id])) }}"
+                   class="{{ (string) $condition === (string) $c->id ? 'active' : '' }}">
+                    {{ $c->title }}<span class="cnt">{{ $conditionCounts->get($c->id, 0) }}</span>
+                </a>
+            @endforeach
+        </div>
+    @endif
 
     @if($orders->isEmpty())
 
@@ -38,6 +69,10 @@
             @if($searchKey)
                 <h3>Ningún pedido coincide con «{{ $searchKey }}»</h3>
                 <p>Revisa el número o quita la búsqueda para ver todo tu historial.</p>
+                <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
+            @elseif($condition)
+                <h3>No tienes pedidos en este estado</h3>
+                <p>Prueba con otra pestaña para ver el resto de tu historial.</p>
                 <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
             @else
                 <h3>Todavía no tienes compras</h3>
@@ -95,10 +130,10 @@
 
                         <footer>
                             <a href="{{ route('customers.orders.view', $order->slack) }}">
-                                @include('customers.includes.icon', ['name' => 'search']) Ver detalle del pedido
+                                Ver detalle del pedido
                             </a>
                             <a href="{{ route('customers.orders.invoice', $order->slack) }}" target="_blank">
-                                @include('customers.includes.icon', ['name' => 'download']) Descargar factura
+                                Descargar factura
                             </a>
                             @if($puedePagar)
                                 <a class="pay" href="{{ route('customers.orders.payments', $order->slack) }}">Pagar ahora</a>

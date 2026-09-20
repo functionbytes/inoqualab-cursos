@@ -7,7 +7,8 @@
 
             <div class="card w-100">
 
-                <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formReport" enctype="multipart/form-data" role="form"
+                      data-generate-url="{{ route('manager.enterprises.courses.generate') }}">
 
                     {{ csrf_field() }}
 
@@ -56,50 +57,7 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formReport").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    modalitie: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    modalitie: {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var query = {
-                        modalitie: $("#modalitie").val(),
-                        enterprise: $("#enterprise").val(),
-                        course: $("#course").val(),
-                    }
-
-                    var url = "{{ route('manager.enterprises.courses.generate') }}?" + $.param(query);
-
-                    window.location = url;
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+<script src="{{ asset('managers/js/views/enterprises/courses/report.js') }}"></script>
 @endpush
 
 

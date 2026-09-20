@@ -139,7 +139,7 @@
                                             <input type="checkbox" class="form-check-input bulk-checkbox"
                                                    value="{{ $log->id }}">
                                         </td>
-                                        <td style="max-width:320px;">
+                                        <td class="audit-meta-col">
                                             @if($log->seoMeta)
                                                 <span class="fw-semibold small d-block text-truncate">
                                                     {{ $log->seoMeta->title ?: ('Meta #' . $log->seoMeta->id) }}
@@ -249,40 +249,16 @@
 
     </div>
 
-    {{-- Bulk toolbar flotante --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
-        <button type="button" class="btn btn-primary shadow-lg px-4"
-                data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Eliminar seleccionados
-        </button>
-    </div>
+    <div id="audit-history-config" class="d-none"
+         data-bulk-url="{{ route('manager.seo.audit.history.bulk-action') }}"
+         data-clear-url="{{ route('manager.seo.audit.history.clear') }}"></div>
 
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Eliminar auditorías seleccionadas</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-0">
-                        Se eliminarán
-                        <strong><span data-bulk-count>0</span> auditoría(s)</strong>
-                        del historial. Esta accion no se puede deshacer.
-                    </p>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button id="bulk-apply-btn" type="button" class="btn btn-primary w-100 mb-2">
-                        Eliminar seleccionados
-                    </button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'auditoría(s)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     {{-- Modal confirmar limpiar historial --}}
     <div class="modal fade" id="modal-clear-history" tabindex="-1" aria-hidden="true">
@@ -344,103 +320,9 @@
 @endsection
 
 @push('css')
-<style>
-    .bulk-toolbar-float { z-index: 1050; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/audit/history.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    // ── Bulk selection ────────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    // ── Bulk delete ───────────────────────────────────────────────────────────
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-apply-btn').prop('disabled', false).text('Eliminar seleccionados');
-    });
-
-    $('#bulk-apply-btn').on('click', function () {
-        var ids = getSelectedIds();
-        if (!ids.length) { toastr.warning('Selecciona al menos un registro.'); return; }
-
-        $('#bulk-apply-btn').prop('disabled', true).text('Eliminando...');
-
-        $.ajax({
-            url: '{{ route("manager.seo.audit.history.bulk-action") }}',
-            method: 'POST',
-            contentType: 'application/json',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: JSON.stringify({ action: 'delete', ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? ids.length + ' auditoría(s) eliminada(s).');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al eliminar.');
-                $('#bulk-apply-btn').prop('disabled', false).text('Eliminar seleccionados');
-            }
-        });
-    });
-
-    // ── Delete individual ─────────────────────────────────────────────────────
-    $(document).on('click', '.btn-delete-log', function () {
-        $('#delete-modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-    // ── Limpiar historial ─────────────────────────────────────────────────────
-    $('#btn-clear-history').on('click', function () {
-        $('#modal-clear-history').modal('show');
-    });
-
-    $('#btn-confirm-clear').on('click', function () {
-        var $btn = $(this).prop('disabled', true).text('Limpiando...');
-
-        $.ajax({
-            url: '{{ route("manager.seo.audit.history.clear") }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                $('#modal-clear-history').modal('hide');
-                toastr.success(res.message ?? 'Historial limpiado correctamente.');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al limpiar el historial.');
-            },
-            complete: function () {
-                $btn.prop('disabled', false).text('Confirmar limpieza');
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/audit/history.js') }}"></script>
 @endpush

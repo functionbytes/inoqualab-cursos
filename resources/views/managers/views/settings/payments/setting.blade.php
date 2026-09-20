@@ -6,7 +6,8 @@
     <div class="col-lg-12 d-flex align-items-stretch">
         <div class="card w-100">
 
-            <form id="formPayments" enctype="multipart/form-data" role="form" onSubmit="return false">
+            <form id="formPayments" enctype="multipart/form-data" role="form"
+                  data-update-url="{{ route('manager.settings.payments.update') }}">
                 {{ csrf_field() }}
 
                 {{-- Wompi --}}
@@ -88,7 +89,7 @@
                         <input type="text" class="form-control" id="webhookUrl"
                             value="{{ route('payments.wompi.webhook') }}" readonly>
                         <button class="btn btn-outline-secondary" type="button" id="copyWebhook">
-                            <i class="fas fa-copy"></i> Copiar
+                            Copiar
                         </button>
                     </div>
                 </div>
@@ -96,7 +97,7 @@
                 {{-- Botón guardar --}}
                 <div class="card-body">
                     <button type="submit" class="btn btn-primary" id="btnSavePayments">
-                        <i class="fas fa-save mr-1"></i> Guardar configuración
+                        Guardar configuración
                     </button>
                 </div>
 
@@ -108,36 +109,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    $('#formPayments').submit(function () {
-
-        $.ajax({
-            type: 'POST',
-            url: '{{ route('manager.settings.payments.update') }}',
-            data: $(this).serialize(),
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (response) {
-                if (response.success) {
-                    toastr.success(response.message);
-                } else {
-                    toastr.error(response.message);
-                }
-            },
-            error: function (xhr) {
-                toastr.error('Error al guardar la configuración');
-            }
-        });
-    });
-
-    $('#copyWebhook').on('click', function () {
-        var url = $('#webhookUrl').val();
-        navigator.clipboard.writeText(url).then(function () {
-            toastr.info('URL copiada al portapapeles');
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/payments/setting.js') }}"></script>
 @endpush

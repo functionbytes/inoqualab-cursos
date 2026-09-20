@@ -20,6 +20,10 @@
     <link rel="canonical" href="{{ url()->full() }}" />
     <meta name="robots" content="all">
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('supports/css/views/users/exams/exam.css') }}">
+@endpush
 @section('content')
     <div class="row">
         <div class="col-lg-12">
@@ -38,8 +42,8 @@
                         <div class="lesion-content-wrapper rbt-article-content-wrapper">
 
                             <div class="content">
-                                <div class="progress mb-3" style="height: 6px;" aria-label="Progreso">
-                                    <div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                <div class="progress mb-3 exam-progress" aria-label="Progreso">
+                                    <div id="progressbar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
 
                                 <div id="question_block" class="question-block">
@@ -122,7 +126,7 @@
 
                                                         @if ($key > 0)
 
-                                                            <div style="display: none;" id="more_exam{{ $key }}">
+                                                            <div class="exam-step-hidden" id="more_exam{{ $key }}">
 
                                                                 <div class="jumbotron" id="exam{{ $key + 1 }}">
                                                                     <div class="middle-answer row">
@@ -286,7 +290,7 @@
 
                                                             @if ($key > 0)
 
-                                                                <div style="display: none;" id="more_exam{{ $key }}">
+                                                                <div class="exam-step-hidden" id="more_exam{{ $key }}">
 
                                                                     <div class="jumbotron" id="exam{{ $key + 1 }}">
                                                                         <div class="middle-answer row">
@@ -414,154 +418,6 @@
         </div>
         @endsection
 
-
         @push('scripts')
-            <script type="text/javascript">
-                var totalques = 0;
-
-
-                $(document).ready(function() {
-
-                    totalques = $('.jumbotron').length;
-
-                    var i = 1;
-                    var count = 0;
-
-                    $('#next').click(function() {
-
-
-                        var totalques = $('.jumbotron').length;
-                        var type = $('#type').val();
-                        var x = $('#next').val();
-                        var y = $('#prev').val();
-
-                        if (type == 0) {
-
-
-                            var numberNotChecked = $('#more_exam' + count).find('input[type="radio"]:checked')
-                                .length;
-
-
-                            if (numberNotChecked > 0) {
-
-
-                                i++;
-                                x++;
-
-                                $('#prev').show();
-
-                                if (x < totalques) {
-
-                                    var z = x - 1;
-
-                                    $('#more_exam' + x).show('fast');
-                                    $('#more_exam' + z).hide('fast');
-                                    $('#next').val(x);
-                                    $('#prev').val(x);
-
-
-                                    if (i == totalques) {
-                                        $('#next').attr('type', 'submit');
-                                    }
-
-                                }
-
-                                if (x == totalques) {
-                                    $('#question-form').submit();
-                                }
-
-                                progres = (x / totalques) * 100;
-                                $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                                count++;
-
-                            }
-
-                        }
-
-                        if (type == 1) {
-
-
-                            $('#prev').show();
-
-
-                            var numberNotChecked = $('#more_exam' + count).find('input:checkbox:not(":checked")')
-                                .length;
-
-                            if (numberNotChecked != 4) {
-
-                                i++;
-                                x++;
-
-                                $('#prev').show();
-
-                                if (x < totalques) {
-
-                                    var z = x - 1;
-
-                                    $('#more_exam' + x).show('fast');
-                                    $('#more_exam' + z).hide('fast');
-                                    $('#next').val(x);
-                                    $('#prev').val(x);
-
-
-                                    if (i == totalques) {
-                                        $('#next').attr('type', 'submit');
-                                    }
-
-                                }
-
-                                if (x == totalques)
-                                    $('#question-form').submit();
-                            }
-
-                            progres = (x / totalques) * 100;
-                            $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                            count++;
-
-
-
-                        }
-
-
-                    });
-
-                    $('#prev').click(function() {
-
-                        i--;
-                        count--;
-
-                        var totalques = $('.jumbotron').length;
-                        var x = $('#next').val();
-                        var y = $('#prev').val();
-
-                        $('#next').removeAttr('type');
-
-                        $('#next').show();
-
-                        y--;
-
-                        if (y == 0) {
-                            $('#next').val(0);
-                            $('#prev').val(1);
-                            $('#prev').hide();
-                        } else {
-                            $('#next').val(y);
-                            $('#prev').val(y);
-                        }
-
-                        $('#more_exam' + y).show('fast');
-                        $('#more_exam' + x).hide();
-
-
-                        progres = (x / totalques) * 100;
-                        $('#progressbar').css('width', progres + '%').attr('aria-valuenow', Math.round(progres));
-
-                    });
-
-
-                });
-            </script>
-
-    @endpush
+            <script src="{{ asset('supports/js/views/users/exams/exam.js') }}"></script>
+        @endpush

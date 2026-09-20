@@ -4,7 +4,9 @@
 
 @section('content')
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="newsletter-lists-page"
+         data-flash-success="{{ session('success') }}"
+         data-bulk-url="{{ route('manager.newsletter.lists.bulk-action') }}">
 
         <div class="card">
 
@@ -33,6 +35,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Nombre</th>
                                     <th>Tipo</th>
                                     <th class="text-center">Suscriptores</th>
@@ -43,6 +48,10 @@
                             <tbody>
                                 @foreach($lists as $list)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $list->id }}">
+                                        </td>
                                         <td>
                                             <div class="fw-semibold">{{ $list->name }}</div>
                                             @if($list->description)
@@ -118,24 +127,23 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'lista(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
-@push('scripts')
-<script>
-$(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/newsletter/lists/index.css') }}">
+@endpush
 
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-});
-</script>
+@push('scripts')
+<script src="{{ asset('managers/js/views/newsletter/lists/index.js') }}"></script>
 @endpush

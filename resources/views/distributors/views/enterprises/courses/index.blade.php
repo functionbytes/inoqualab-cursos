@@ -4,8 +4,10 @@
 
     @include('distributors.includes.card', ['title' => 'Cursos'])
 
-    <div class="widget-content searchable-container list">
-        
+    <div class="widget-content searchable-container list"
+         data-bulk-url="{{ route('distributor.enterprises.courses.bulk-action', $enterprise->slack) }}"
+         data-bulk-entity-label="curso(s)">
+
         <div class="card card-body">
             <div class="row">
                 <div class="col-md-12 col-xl-12">
@@ -40,15 +42,19 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                     <tr>
+                        <th scope="col" class="col-checkbox"><input type="checkbox" class="form-check-input" id="select-all"></th>
                         <th scope="col">Titulo</th>
                         <th scope="col">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
-                   
+
                     @foreach ($courses as $key => $course)
                         <tr class="search-items">
 
+                            <td>
+                                <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $course->id }}">
+                            </td>
                             <td>
                                 <span class="usr-email-addr" data-email="{{ $course->title }}">{{ Str::words( Str::upper(Str::lower($course->title)), 12, '...')  }}</span>
                             </td>
@@ -78,6 +84,21 @@
             </div>
         </div>
     </div>
+
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'curso(s)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Quitar de la empresa'],
+        ],
+    ])
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('distributors/css/tables.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('distributors/js/enterprises/courses/index.js') }}"></script>
+@endpush
 
 

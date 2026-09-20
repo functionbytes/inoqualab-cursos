@@ -146,11 +146,11 @@
                                         $statusVal = is_object($log->status) ? $log->status->value : $log->status;
                                     @endphp
                                     @if($statusVal === 'success')
-                                        <span class="badge rounded-pill py-1 px-2" style="background:#36c76c;color:#fff">Éxito</span>
+                                        <span class="badge rounded-pill py-1 px-2 bg-success text-white">Éxito</span>
                                     @elseif($statusVal === 'pending')
                                         <span class="badge rounded-pill py-1 px-2 bg-warning text-dark">Pendiente</span>
                                     @else
-                                        <span class="badge rounded-pill py-1 px-2" style="background:#fa4c3c;color:#fff">Fallido</span>
+                                        <span class="badge rounded-pill py-1 px-2 bg-danger text-white">Fallido</span>
                                     @endif
                                 </td>
                                 <td>
@@ -215,11 +215,11 @@
                                 <small class="text-muted fw-semibold text-uppercase d-block">Estado</small>
                                 @php $statusVal = is_object($log->status) ? $log->status->value : $log->status; @endphp
                                 @if($statusVal === 'success')
-                                    <span class="badge rounded-pill py-1 px-2 mt-1" style="background:#36c76c;color:#fff">Éxito</span>
+                                    <span class="badge rounded-pill py-1 px-2 mt-1 bg-success text-white">Éxito</span>
                                 @elseif($statusVal === 'pending')
                                     <span class="badge rounded-pill py-1 px-2 mt-1 bg-warning text-dark">Pendiente</span>
                                 @else
-                                    <span class="badge rounded-pill py-1 px-2 mt-1" style="background:#fa4c3c;color:#fff">Fallido</span>
+                                    <span class="badge rounded-pill py-1 px-2 mt-1 bg-danger text-white">Fallido</span>
                                 @endif
                             </div>
                             <div class="col-md-6">
@@ -240,14 +240,14 @@
                     {{-- Payload --}}
                     <div class="p-4 border-bottom">
                         <h6 class="fw-bold mb-3"><i class="fas fa-code me-2"></i>Payload recibido</h6>
-                        <pre class="bg-light p-3 rounded mb-0" style="max-height:300px;overflow-y:auto;font-size:12px;"><code>{{ json_encode($log->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
+                        <pre class="bg-light p-3 rounded mb-0 log-detail-pre log-detail-pre-lg"><code>{{ json_encode($log->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</code></pre>
                     </div>
 
                     {{-- Error --}}
                     @if($log->error_message)
-                        <div class="p-4 border-bottom" style="background: rgba(220,53,69,0.10)">
+                        <div class="p-4 border-bottom bg-danger-soft">
                             <h6 class="fw-bold mb-3"><i class="fas fa-exclamation-circle me-2"></i>Mensaje de error</h6>
-                            <pre class="bg-white p-3 rounded mb-0" style="max-height:200px;overflow-y:auto;font-size:12px;"><code>{{ $log->error_message }}</code></pre>
+                            <pre class="bg-white p-3 rounded mb-0 log-detail-pre"><code>{{ $log->error_message }}</code></pre>
                         </div>
                     @endif
 
@@ -281,12 +281,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/logs.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/logs.js') }}"></script>
 @endpush

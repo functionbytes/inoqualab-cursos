@@ -75,7 +75,7 @@
 
                     <div class="col-12 col-sm-6 col-md-2 d-flex gap-2">
                         <button type="submit" class="btn btn-primary flex-grow-1">
-                            <i class="fas fa-search me-2"></i>Buscar
+                            Buscar
                         </button>
                         @if(!empty($search) || !empty($type))
                             <a href="{{ route('mailers.components.index') }}" class="btn btn-outline-secondary">
@@ -94,6 +94,9 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
+                            <th class="col-checkbox">
+                                <input type="checkbox" class="form-check-input" id="select-all">
+                            </th>
                             <th width="30%">Componente</th>
                             <th width="16%">Código</th>
                             <th width="12%">Tipo</th>
@@ -107,6 +110,10 @@
                                 $isCritical = in_array($component->alias, ['email_template_header', 'email_template_footer', 'email_template_wrapper']);
                             @endphp
                             <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input bulk-checkbox"
+                                           value="{{ $component->id }}">
+                                </td>
                                 <td>
                                     <strong class="d-block">{{ $component->subject ?? $component->alias }}</strong>
                                     <small class="text-muted d-block">{{ $component->alias }}</small>
@@ -155,8 +162,8 @@
                                             @if(!$isCritical)
                                                 <li><hr class="dropdown-divider"></li>
                                                 <li>
-                                                    <button type="button" class="dropdown-item"
-                                                            onclick="document.getElementById('delete-form').action='{{ route('mailers.components.destroy', $component->uid) }}'"
+                                                    <button type="button" class="dropdown-item js-delete-component"
+                                                            data-delete-url="{{ route('mailers.components.destroy', $component->uid) }}"
                                                             data-bs-toggle="modal" data-bs-target="#delete-modal">
                                                         Eliminar
                                                     </button>
@@ -201,7 +208,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-arrow-up text-primary"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Header</h6>
@@ -215,7 +222,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-arrow-down text-success"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Footer</h6>
@@ -229,7 +236,7 @@
                     <div class="card h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;">
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
                                     <i class="fas fa-layer-group text-info"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Wrapper</h6>
@@ -253,7 +260,7 @@
             <div class="modal-body text-center p-4 position-relative">
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 <div class="mb-3 mt-2">
-                    <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                    <i class="fas fa-triangle-exclamation text-warning fs-icon-lg"></i>
                 </div>
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
@@ -268,14 +275,24 @@
     </div>
 </div>
 
+<div id="bulk-config" class="d-none" data-bulk-url="{{ route('mailers.components.bulk-action') }}"></div>
+
+@include('managers.includes.bulk-toolbar-modal', [
+    'bulkEntityLabel' => 'componente(s)',
+    'bulkActions' => [
+        ['value' => 'enable', 'label' => 'Habilitar'],
+        ['value' => 'disable', 'label' => 'Deshabilitar'],
+        ['value' => 'delete', 'label' => 'Eliminar'],
+    ],
+])
+
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/components/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/components/index.js') }}"></script>
 @endpush

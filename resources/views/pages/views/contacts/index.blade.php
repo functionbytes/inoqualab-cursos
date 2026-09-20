@@ -4,6 +4,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ url('/pages/css/storefront.css') }}?v={{ @filemtime(public_path('pages/css/storefront.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{{ asset('pages/css/views/contacts/index.css') }}">
 @endpush
 
 @section('content')
@@ -11,7 +12,7 @@
 <div class="band">
     <div class="container">
         <div class="crumb">
-            <a href="{{ route('index') }}" style="color:inherit">INICIO</a>
+            <a href="{{ route('index') }}">INICIO</a>
             <span class="sep">/</span>
             <span class="cur">CONTACTO</span>
         </div>
@@ -25,10 +26,10 @@
         <div class="section-title text-center mb-0 wow fadeInUp delay-0-2s animated">
             <span class="sub-title">Atención directa</span>
             <h2>Hablemos</h2>
-            <p class="text-justify" style="max-width:720px;margin:0 auto;">Valoramos la retroalimentación de nuestros clientes y estamos aquí para responder a tus preguntas, escuchar tus comentarios y proporcionar cualquier ayuda que necesites.</p>
+            <p class="text-justify iq-contact-intro-text">Valoramos la retroalimentación de nuestros clientes y estamos aquí para responder a tus preguntas, escuchar tus comentarios y proporcionar cualquier ayuda que necesites.</p>
         </div>
 
-        <div class="row g-4" style="margin-top:60px;">
+        <div class="row g-4 iq-contact-cards">
             <div class="col-md-6 col-lg-3">
                 <div class="iq-contact-card">
                     <div class="iq-contact-card-icon"><i class="fab fa-whatsapp"></i></div>
@@ -80,13 +81,13 @@
     <div class="container text-center">
         <span class="sub-title">Escríbenos</span>
         <h2>Envíanos tu solicitud</h2>
-        <p style="max-width:640px;margin:0 auto;color:rgba(255,255,255,.75);">Cuéntanos qué necesitas y un asesor te responderá lo antes posible.</p>
+        <p class="iq-form-band-text">Cuéntanos qué necesitas y un asesor te responderá lo antes posible.</p>
 
         <div class="iq-form-card text-start">
             <h3>Contacto</h3>
             <p>Si tienes dudas o quieres saber más, nos pondremos en contacto contigo.</p>
 
-            <form id="formContacts" class="account__form" enctype="multipart/form-data" role="form" onSubmit="return false">
+            <form id="formContacts" class="account__form" enctype="multipart/form-data" role="form" onSubmit="return false" data-store-url="{{ route('contacts.store') }}">
 
                 <div class="row g-4">
                     <div class="col-md-6">
@@ -152,188 +153,6 @@
 
 
 @push('scripts')
-<script type="text/javascript">
-    $(document).ready(function() {
-
-        jQuery.validator.addMethod("emailExt", function(value, element, param) {
-            return value.match(/^[a-zA-Z0-9_\.%\+\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,3}$/);
-        }, 'Porfavor ingrese email valido');
-
-        jQuery.validator.addMethod(
-            'validationTxt',
-            function(value, element, param) {
-                return value.match(
-                    /^[ a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/,
-                )
-            },
-            'Por favor ingrese solo letras',
-        )
-
-
-        $("#terms").on("change", function() {
-            value = $(this).is(":checked");
-            if (value == true) {
-                $('#submitContacts').removeClass("contact-disabled");
-            } else {
-                $('#submitContacts').addClass("contact-disabled");
-            }
-        });
-
-        $("#submitContacts").click(function() {
-            if ($(this).hasClass('contact-disabled')) return false;
-            $("#formContacts").submit();
-        });
-
-
-        $("#formContacts").validate({
-            submit: false,
-            ignore: ".ignore",
-            errorClass: 'error show-error',
-            validClass: 'valid',
-            rules: {
-                firstname: {
-                    validationTxt: true,
-                    required: true,
-                    minlength: 3,
-                    maxlength: 30
-                },
-                lastname: {
-                    validationTxt: true,
-                    required: true,
-                    minlength: 3,
-                    maxlength: 30
-                },
-                email: {
-                    required: true,
-                    email: true,
-                    emailExt: true
-                },
-                cellphone: {
-                    required: true,
-                    number: true,
-                    minlength: 8,
-                    maxlength: 500
-                },
-                message: {
-                    required: true,
-                    minlength: 3,
-                    maxlength: 8000
-                }
-            },
-            messages: {
-                firstname: {
-                    text: 'Este campo es obligatorio.',
-                    required: 'El campo nombre es necesario.',
-                    minlength: 'El nombre debe contener al menos 3 caracteres.',
-                    maxlength: 'El nombre  debe contener no mas de 30 caracteres'
-                },
-                lastname: {
-                    text: 'Este campo es obligatorio.',
-                    required: 'El campo nombre es necesario.',
-                    minlength: 'El nombre debe contener al menos 3 caracteres.',
-                    maxlength: 'El nombre  debe contener no mas de 30 caracteres'
-                },
-                email: {
-                    required: "El email es necesario",
-                    email: "Por favor ingrese email valido"
-                },
-                cellphone: {
-                    required: "La celular es necesario",
-                    minlength: "La celular debe contener al menos 6 caracteres",
-                    maxlength: "La celular debe contener no mas de 20 caracteres",
-                    number: "Sólo se pueden ingresar números"
-                },
-                message: {
-                    required: 'Este campo es obligatorio.',
-                    minlength: 'El mensaje debe contener al menos 3 caracteres.',
-                    maxlength: 'El mensaje  debe contener no mas de 8000 caracteres',
-                }
-            },
-            errorPlacement: function(error, element) {
-                $("#" + element.attr("id") + "-error")
-                    .removeClass("d-none")
-                    .addClass("show-error")
-                    .html(error.html());
-            },
-            submitHandler: function(form) {
-
-                var $form = $('#formContacts');
-                var formData = new FormData($form[0]);
-                var firstname = $("#firstname").val();
-                var lastname = $("#lastname").val();
-                var email = $("#email").val();
-                var cellphone = $("#cellphone").val();
-                var message = $("#message").val();
-
-                formData.append('firstname', firstname);
-                formData.append('lastname', lastname);
-                formData.append('email', email);
-                formData.append('cellphone', cellphone);
-                formData.append('message', message);
-
-                var $submitBtn = $('#submitContacts');
-                $submitBtn.addClass('contact-disabled');
-
-                $.ajax({
-                    url: "{{ route('contacts.store') }}",
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    type: "POST",
-                    contentType: false,
-                    processData: false,
-                    data: formData,
-                    success: function(response) {
-
-                        if(response.success == true){
-
-                            toastr.success("¡Mensaje enviado correctamente! Nos pondremos en contacto pronto.", "Enviado", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right",
-                                timeOut: 5000
-                            });
-
-                            setTimeout(function() {
-                                $("#firstname").val('');
-                                $("#lastname").val('');
-                                $("#email").val('');
-                                $("#cellphone").val('');
-                                $("#message").val('');
-                                $("#terms").prop('checked', false);
-                                $submitBtn.addClass('contact-disabled');
-                            }, 500);
-
-                        } else {
-
-                            if ($('#terms').is(':checked')) $submitBtn.removeClass('contact-disabled');
-
-                            toastr.warning(response.message || "Hubo un problema al enviar el mensaje. Inténtalo de nuevo.", "Error", {
-                                closeButton: true,
-                                progressBar: true,
-                                positionClass: "toast-bottom-right"
-                            });
-
-                            $('.errors').text(response.message || '').removeClass('d-none');
-
-                        }
-
-                    },
-                    error: function() {
-                        if ($('#terms').is(':checked')) $submitBtn.removeClass('contact-disabled');
-                        toastr.error("Error al enviar el mensaje. Por favor, inténtalo más tarde.", "Error", {
-                            closeButton: true,
-                            progressBar: true,
-                            positionClass: "toast-bottom-right"
-                        });
-                    }
-                });
-
-            }
-
-        });
-    });
-</script>
-
+    <script src="{{ asset('pages/js/views/contacts/index.js') }}"></script>
 @endpush
 

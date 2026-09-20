@@ -9,7 +9,9 @@
         {{-- FORMULARIO PRINCIPAL --}}
         <div class="col-lg-8">
             <div class="card">
-                <form id="formRedirect" action="{{ route('manager.seo.redirects.update', $seoRedirect) }}" method="POST" novalidate>
+                <form id="formRedirect" action="{{ route('manager.seo.redirects.update', $seoRedirect) }}" method="POST" novalidate
+                      data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+                      data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
                     @csrf
                     @method('PUT')
 
@@ -247,45 +249,6 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}', 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}', 'Error');
-    @endif
-
-    $('#formRedirect').on('submit', function (e) {
-        e.preventDefault();
-        var $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Guardando...');
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: $(this).serialize(),
-            success: function (res) {
-                toastr.success(res.message, 'Éxito');
-                $btn.prop('disabled', false).html('Guardar cambios');
-            },
-            error: function (xhr) {
-                $btn.prop('disabled', false).html('Guardar cambios');
-                if (xhr.status === 422) {
-                    var errors = xhr.responseJSON.errors;
-                    $.each(errors, function (field, messages) {
-                        toastr.error(messages[0]);
-                    });
-                } else {
-                    toastr.error('Error al actualizar la redirección.');
-                }
-            }
-        });
-    });
-
-    $('.delete-btn').on('click', function () {
-        $('#delete-modal .modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-    });
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/redirects/edit.js') }}"></script>
 @endpush

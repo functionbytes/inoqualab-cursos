@@ -14,8 +14,7 @@
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0
-                             {{ $status['configured'] ? 'bg-success-subtle' : 'bg-secondary-subtle' }}"
-                             style="width:44px;height:44px;">
+                             {{ $status['configured'] ? 'bg-success-subtle' : 'bg-secondary-subtle' }} icon-box-44">
                             <i class="fas fa-key fs-5 {{ $status['configured'] ? 'text-success' : 'text-secondary' }}"></i>
                         </div>
                         <div>
@@ -36,8 +35,7 @@
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0
-                             {{ $status['connected'] ? 'bg-success-subtle' : 'bg-secondary-subtle' }}"
-                             style="width:44px;height:44px;">
+                             {{ $status['connected'] ? 'bg-success-subtle' : 'bg-secondary-subtle' }} icon-box-44">
                             <i class="fas fa-plug fs-5 {{ $status['connected'] ? 'text-success' : 'text-secondary' }}"></i>
                         </div>
                         <div>
@@ -58,8 +56,7 @@
                 <div class="card">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-2 d-flex align-items-center justify-content-center flex-shrink-0
-                             {{ $status['property_url'] ? 'bg-primary-subtle' : 'bg-secondary-subtle' }}"
-                             style="width:44px;height:44px;">
+                             {{ $status['property_url'] ? 'bg-primary-subtle' : 'bg-secondary-subtle' }} icon-box-44">
                             <i class="fas fa-globe fs-5 {{ $status['property_url'] ? 'text-primary' : 'text-secondary' }}"></i>
                         </div>
                         <div class="min-w-0">
@@ -100,8 +97,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
         @if($status['configured'] && !$status['connected'])
             <div class="card mb-3">
                 <div class="card-body text-center py-5">
-                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 bg-primary-subtle"
-                         style="width:64px;height:64px;">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 bg-primary-subtle icon-box-64">
                         <i class="fab fa-google text-primary fs-3"></i>
                     </div>
                     <h5 class="fw-bold mb-2">Conecta tu cuenta de Google</h5>
@@ -188,8 +184,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="d-flex gap-3">
-                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0"
-                                 style="width:40px;height:40px;">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0 icon-box-40">
                                 <i class="fas fa-mouse-pointer text-primary"></i>
                             </div>
                             <div>
@@ -201,8 +196,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="d-flex gap-3">
-                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-info-subtle flex-shrink-0"
-                                 style="width:40px;height:40px;">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-info-subtle flex-shrink-0 icon-box-40">
                                 <i class="fas fa-eye text-info"></i>
                             </div>
                             <div>
@@ -214,8 +208,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="d-flex gap-3">
-                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-warning-subtle flex-shrink-0"
-                                 style="width:40px;height:40px;">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-warning-subtle flex-shrink-0 icon-box-40">
                                 <i class="fas fa-ranking-star text-warning"></i>
                             </div>
                             <div>
@@ -227,8 +220,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
                     <div class="col-md-6 col-lg-3">
                         <div class="d-flex gap-3">
-                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-success-subtle flex-shrink-0"
-                                 style="width:40px;height:40px;">
+                            <div class="rounded-2 d-flex align-items-center justify-content-center bg-success-subtle flex-shrink-0 icon-box-40">
                                 <i class="fas fa-percent text-success"></i>
                             </div>
                             <div>
@@ -244,8 +236,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
                 <div class="row g-3 align-items-center">
                     <div class="col-auto">
-                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-secondary-subtle"
-                             style="width:36px;height:36px;">
+                        <div class="rounded-2 d-flex align-items-center justify-content-center bg-secondary-subtle icon-box-36">
                             <i class="fas fa-arrows-rotate text-secondary"></i>
                         </div>
                     </div>
@@ -269,15 +260,10 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/gsc/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-
-    $('#btn-disconnect').on('click', function () {
-        if (!confirm('¿Desconectar la cuenta de Google? Se eliminarán los tokens almacenados.')) return;
-        $('#form-disconnect').submit();
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/gsc/index.js') }}"></script>
 @endpush

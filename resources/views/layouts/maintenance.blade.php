@@ -22,18 +22,20 @@
     <link rel="icon" type="image/x-icon" href="{{ getFavicon() }}">
 
     @yield('head')
-    <!--====== Flaticon ======-->
-    <link rel="stylesheet" href="{{ url('/pages/css/flaticon.min.css') }}">
+    {{-- Flaticon, Nice Select y jQuery UI retirados: 0 usos en todo
+         resources/views/ -- mismo criterio ya aplicado en layouts/pages.blade.php.
+         Los dos <link> de Font Awesome que había acá (font-awesome-5.9.0.min.css
+         y managers/libs/fontawesome/fontawesome.min.css) daban 404 los dos:
+         ninguno de esos archivos existe en public/. Los íconos del footer
+         (pages.includes.socials, fa-phone/fa-whatsapp) no se veían en la
+         página de mantenimiento real. Se reemplazan por el único que sí
+         existe y ya usa el resto del sitio. --}}
     <!--====== Font Awesome ======-->
-    <link rel="stylesheet" href="{{ url('/pages/css/font-awesome-5.9.0.min.css') }}">
+    <link rel="stylesheet" href="{{ url('/pages/css/fontawesome.min.css') }}">
     <!--====== Bootstrap ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/bootstrap-4.5.3.min.css') }}">
     <!--====== Magnific Popup ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/magnific-popup.min.css') }}">
-    <!--====== Nice Select ======-->
-    <link rel="stylesheet" href="{{ url('/pages/css/nice-select.min.css') }}">
-    <!--====== jQuery UI ======-->
-    <link rel="stylesheet" href="{{ url('/pages/css/jquery-ui.min.css') }}">
     <!--====== Animate ======-->
     <link rel="stylesheet" href="{{ url('/pages/css/animate.min.css') }}">
     <link rel="stylesheet" href="{{ url('/pages/css/slick.min.css') }}">
@@ -42,8 +44,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url('managers/libs/fontawesome/fontawesome.min.css') }}">
-   
 
     @stack('css')
 
@@ -68,8 +68,6 @@
     <script src="{{ url('pages/js/appear.min.js') }}" type="text/javascript"></script>
     <!--====== Slick ======-->
     <script src="{{ url('pages/js/slick.min.js') }}" type="text/javascript"></script>
-    <!--====== jQuery UI ======-->
-    <script src="{{ url('pages/js/jquery-ui.min.js') }}" type="text/javascript"></script>
     <!--====== Isotope ======-->
     <script src="{{ url('pages/js/isotope.pkgd.min.js') }}" type="text/javascript"></script>
     <!--====== Circle Progress bar ======-->
@@ -91,23 +89,10 @@
     snippet anterior era Universal Analytics con un tracking ID ajeno (residuo del
     template comercial) enviando pageviews a una propiedad de GA que no es de este
     proyecto; UA además dejó de recolectar datos desde julio 2023. --}}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ setting('google_analytics_measurement_id') }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', '{{ setting('google_analytics_measurement_id') }}');
-    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ setting('google_analytics_measurement_id') }}" data-ga-measurement-id="{{ setting('google_analytics_measurement_id') }}"></script>
     @endif
 
-
-    <script>
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-    </script>
+    <script src="{{ asset('maintenance/js/layout.js') }}" type="text/javascript"></script>
 
     @stack('scripts')
 

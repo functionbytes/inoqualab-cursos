@@ -1,0 +1,11 @@
+.mailer-variables-panel {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.mailer-template-preview-edit {
+    min-height: 500px;
+    max-height: 700px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 4px;
+}

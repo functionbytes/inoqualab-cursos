@@ -7,7 +7,12 @@
 <main class="cartx">
     <section class="cartx-checkout">
         <div class="container">
-            <div class="res-wrap cartx-reveal">
+            <div class="res-wrap cartx-reveal"
+                 id="orderApproved"
+                 data-order-id="{{ $order->slack }}"
+                 data-order-value="{{ (float) $order->total_order_amount }}"
+                 data-order-currency="COP"
+                 data-order-content-ids="{{ $order->items->pluck('id')->values()->toJson() }}">
 
                 <div class="res-icon ok"><i class="fas fa-check"></i></div>
                 <h2>Tu orden <span class="o">#{{ $order->reference ?? $order->slack }}</span> fue pagada exitosamente</h2>
@@ -69,29 +74,7 @@
 </main>
 
 @push('scripts')
-<script>
-(function () {
-    var orderId  = @json($order->slack);
-    var value    = {{ (float) $order->total_order_amount }};
-    var currency = 'COP';
-
-    // Disparar la conversión una sola vez por orden (evita recargas/duplicados).
-    var key = 'purchase_fired_' + orderId;
-    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) {}
-
-    var contentIds = @json($order->items->pluck('id')->values());
-
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'Purchase', { value: value, currency: currency, content_ids: contentIds, content_type: 'product', num_items: contentIds.length });
-    }
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'purchase', { transaction_id: orderId, value: value, currency: currency });
-    }
-    if (typeof ttq !== 'undefined') {
-        ttq.track('CompletePayment', { value: value, currency: currency, content_type: 'product' });
-    }
-})();
-</script>
+    <script src="{{ asset('pages/js/views/payments/approved.js') }}"></script>
 @endpush
 
 @endsection

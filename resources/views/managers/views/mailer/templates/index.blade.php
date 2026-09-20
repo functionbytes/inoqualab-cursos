@@ -4,7 +4,9 @@
 
 @section('content')
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+         data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
 
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -39,7 +41,7 @@
                             Ver componentes
                         </a>
                         <a href="{{ route('mailers.templates.create') }}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i> Nuevo template
+                            Nuevo template
                         </a>
                     </div>
                 </div>
@@ -57,7 +59,7 @@
                             </div>
                         </div>
                         <a href="{{ route('mailers.components.index') }}" class="btn btn-info btn-sm flex-shrink-0">
-                            <i class="fas fa-arrow-right me-1"></i> Ver
+                            Ver
                         </a>
                     </div>
                 </div>
@@ -78,7 +80,7 @@
                             </div>
                         </div>
                         @if(!empty($modules))
-                            <div class="flex-shrink-0" style="min-width: 180px;">
+                            <div class="flex-shrink-0 filter-select-lg">
                                 <select name="module" class="form-select select2 h-100">
                                     <option value="">Todos los módulos</option>
                                     @foreach($modules as $mod)
@@ -132,9 +134,9 @@
                                         </td>
                                         <td class="text-center">
                                             @if($template->is_enabled)
-                                                <span class="badge" style="background:#36c76c;color:#fff">Activo</span>
+                                                <span class="badge bg-success text-white">Activo</span>
                                             @else
-                                                <span class="badge" style="background:#fa4c3c;color:#fff">Inactivo</span>
+                                                <span class="badge bg-danger text-white">Inactivo</span>
                                             @endif
                                         </td>
                                         <td class="text-center">
@@ -211,7 +213,7 @@
                             </p>
                             @if(!$search && !$module)
                                 <a href="{{ route('mailers.templates.create') }}" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-plus me-1"></i> Nuevo template
+                                    Nuevo template
                                 </a>
                             @endif
                         </div>
@@ -235,40 +237,18 @@
         </div>
     </div>
 
-    {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none" style="z-index:1050;">
-        <button type="button" class="btn btn-primary shadow-lg px-4" data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Aplicar acción
-        </button>
-    </div>
+    <div id="bulk-config" class="d-none"
+         data-bulk-url="{{ route('mailers.templates.bulk-action') }}"
+         data-send-test-base-url="{{ url('settings/mailers/templates') }}"></div>
 
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Acción masiva</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-3">Se aplicará la acción sobre <strong><span data-bulk-count>0</span> plantilla(s)</strong>.</p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Acción</label>
-                        <select id="bulk-action-select" class="form-select">
-                            <option value="">Seleccionar acción...</option>
-                            <option value="activate">Activar</option>
-                            <option value="deactivate">Desactivar</option>
-                            <option value="delete">Eliminar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="bulk-apply-btn" type="button" class="btn btn-primary w-100 mb-1">Aplicar</button>
-                    <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'plantilla(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     {{-- Send Test Modal --}}
     <div class="modal fade" id="modalSendTest" tabindex="-1" aria-hidden="true">
@@ -294,7 +274,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary w-100 mb-1" id="sendTestSubmitBtn">
-                            <i class="fas fa-paper-plane me-1"></i> Enviar ahora
+                            Enviar ahora
                         </button>
                         <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>
                     </div>
@@ -310,7 +290,7 @@
             <div class="modal-body text-center p-4 position-relative">
                 <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 <div class="mb-3 mt-2">
-                    <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                    <i class="fas fa-triangle-exclamation text-warning fs-icon-lg"></i>
                 </div>
                 <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
                 <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
@@ -327,72 +307,11 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/templates/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-    const bulk = window.BulkActions.init({ checkbox: '.bulk-checkbox' });
-
-    $('#bulk-action-select').select2({ dropdownParent: $('#bulk-modal'), width: '100%' });
-
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('').trigger('change');
-        $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-        bulk.reset();
-    });
-
-    $('#bulk-apply-btn').on('click', function () {
-        const action = $('#bulk-action-select').val();
-        const ids    = bulk.getIds();
-
-        if (!action) { toastr.warning('Selecciona una acción.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos una plantilla.'); return; }
-        if (action === 'delete' && !confirm('¿Eliminar las ' + ids.length + ' plantilla(s) seleccionadas? Las protegidas serán omitidas.')) { return; }
-
-        $('#bulk-apply-btn').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route('mailers.templates.bulk-action') }}',
-            method: 'POST',
-            data: JSON.stringify({ action, ids, _token: $('meta[name="csrf-token"]').attr('content') }),
-            contentType: 'application/json',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message);
-                setTimeout(() => location.reload(), 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-            },
-        });
-    });
-
-    $('.delete-btn').on('click', function () {
-        $('#delete-modal .modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-        $('#delete-form input[name="_method"]').val('DELETE');
-    });
-
-    $(document).on('click', '.btn-send-test', function () {
-        const uid     = $(this).data('template-uid');
-        const name    = $(this).data('template-name');
-        const subject = $(this).data('template-subject');
-
-        $('#sendTestTemplateName').text(name);
-        $('#sendTestTemplateSubject').text(subject);
-        $('#sendTestForm').attr('action', '{{ url("settings/mailers/templates") }}/' + uid + '/send-test');
-        $('#send_test_email').val('');
-
-        new bootstrap.Modal(document.getElementById('modalSendTest')).show();
-    });
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}', 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}', 'Error');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/mailer/templates/index.js') }}"></script>
 @endpush

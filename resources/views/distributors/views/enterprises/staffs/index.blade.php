@@ -3,8 +3,10 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
-        
+    <div class="widget-content searchable-container list"
+         data-bulk-url="{{ route('distributor.enterprises.staffs.bulk-action', $enterprise->slack) }}"
+         data-bulk-entity-label="empleado(s)">
+
         <div class="card card-body">
             <div class="row">
                 <div class="col-md-12 col-xl-12">
@@ -48,6 +50,7 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                     <tr>
+                        <th scope="col" class="col-checkbox"><input type="checkbox" class="form-check-input" id="select-all"></th>
                         <th scope="col">Identificación</th>
                         <th scope="col">Cliente</th>
                         <th scope="col">Correo electronico</th>
@@ -57,11 +60,13 @@
                     </tr>
                     </thead>
                     <tbody>
-                   
+
                     @foreach ($users as $key => $user)
                         <tr class="search-items">
 
-
+                            <td>
+                                <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $user->id }}">
+                            </td>
                             <td>
                                 <span class="usr-email-addr" data-email="{{ $user->identification }}">{{ ucfirst($user->identification) }}</span>
                             </td>
@@ -111,7 +116,24 @@
             </div>
         </div>
     </div>
-    
+
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'empleado(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('distributors/css/tables.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('distributors/js/enterprises/staffs/index.js') }}"></script>
+@endpush
 
 

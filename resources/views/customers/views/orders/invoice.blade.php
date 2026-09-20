@@ -3,11 +3,23 @@
 <head>
     <meta charset="utf-8">
     <style>
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-weight: 400;
+            src: url({{ storage_path('fonts/PlusJakartaSans-Regular.ttf') }}) format("truetype");
+        }
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-weight: 700;
+            src: url({{ storage_path('fonts/PlusJakartaSans-Bold.ttf') }}) format("truetype");
+        }
         * { box-sizing: border-box; }
-        body { font-family: DejaVu Sans, sans-serif; color: #1b2a3a; font-size: 12px; margin: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: #1b2a3a; font-size: 12px; margin: 0; }
+        .accent { background: #008bce; height: 6px; width: 100%; }
         .wrap { padding: 28px 34px; }
         .head { width: 100%; border-bottom: 2px solid #0d1b2a; padding-bottom: 14px; margin-bottom: 22px; }
-        .head td { vertical-align: top; }
+        .head td { vertical-align: middle; }
+        .brand-logo { height: 40px; width: auto; }
         .brand { font-size: 20px; font-weight: bold; color: #0d1b2a; }
         .doc { text-align: right; }
         .doc .t { font-size: 16px; font-weight: bold; color: #006fa3; }
@@ -16,12 +28,14 @@
         .meta td { vertical-align: top; padding-right: 16px; width: 50%; }
         .meta .lbl { color: #8d9db5; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
         .meta .val { font-size: 12px; color: #1b2a3a; margin-bottom: 6px; }
-        table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+        table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; table-layout: fixed; }
         table.items th { background: #0d1b2a; color: #fff; text-align: left; padding: 8px 10px; font-size: 11px; }
         table.items td { padding: 8px 10px; border-bottom: 1px solid #e7ecf1; }
-        table.items td.r, table.items th.r { text-align: right; }
+        table.items td.r, table.items th.r { text-align: right; white-space: nowrap; }
+        table.items th.c-product { width: auto; }
+        table.items th.c-qty, table.items th.c-price, table.items th.c-subtotal { width: 70px; }
         .totals { width: 45%; margin-left: 55%; }
-        .totals td { padding: 5px 10px; }
+        .totals td { padding: 5px 10px; white-space: nowrap; }
         .totals td.r { text-align: right; }
         .totals .grand td { border-top: 2px solid #0d1b2a; font-size: 15px; font-weight: bold; color: #006fa3; padding-top: 8px; }
         .badge { display: inline-block; background: #e4f2fb; color: #006fa3; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: bold; }
@@ -29,11 +43,18 @@
     </style>
 </head>
 <body>
+<div class="accent"></div>
 <div class="wrap">
 
     <table class="head">
         <tr>
-            <td><span class="brand">{{ $brand }}</span></td>
+            <td>
+                @if($logo)
+                    <img class="brand-logo" src="{{ $logo }}" alt="{{ $brand }}">
+                @else
+                    <span class="brand">{{ $brand }}</span>
+                @endif
+            </td>
             <td class="doc">
                 <div class="t">Recibo de compra</div>
                 <div class="ref">#{{ $order->reference ?? $order->slack }}</div>
@@ -62,10 +83,10 @@
     <table class="items">
         <thead>
             <tr>
-                <th>Producto</th>
-                <th class="r">Cant.</th>
-                <th class="r">Precio</th>
-                <th class="r">Subtotal</th>
+                <th class="c-product">Producto</th>
+                <th class="r c-qty">Cant.</th>
+                <th class="r c-price">Precio</th>
+                <th class="r c-subtotal">Subtotal</th>
             </tr>
         </thead>
         <tbody>
@@ -78,8 +99,8 @@
                 <tr>
                     <td>{{ optional($it->itemable)->title ?? 'Producto' }}</td>
                     <td class="r">{{ $qty }}</td>
-                    <td class="r">$ {{ number_format($unit, 0, ',', '.') }}</td>
-                    <td class="r">$ {{ number_format($line, 0, ',', '.') }}</td>
+                    <td class="r">${{ number_format($unit, 0, ',', '.') }}</td>
+                    <td class="r">${{ number_format($line, 0, ',', '.') }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -87,10 +108,10 @@
 
     <table class="totals">
         @if($order->total_discount_amount > 0)
-            <tr><td>Subtotal</td><td class="r">$ {{ number_format($order->total_before_discount, 0, ',', '.') }} COP</td></tr>
-            <tr><td>Descuento{{ optional($order->coupon)->code ? ' ('.$order->coupon->code.')' : '' }}</td><td class="r">– $ {{ number_format($order->total_discount_amount, 0, ',', '.') }} COP</td></tr>
+            <tr><td>Subtotal</td><td class="r">${{ number_format($order->total_before_discount, 0, ',', '.') }} COP</td></tr>
+            <tr><td>Descuento{{ optional($order->coupon)->code ? ' ('.$order->coupon->code.')' : '' }}</td><td class="r">–${{ number_format($order->total_discount_amount, 0, ',', '.') }} COP</td></tr>
         @endif
-        <tr class="grand"><td>Total</td><td class="r">$ {{ number_format($order->total_order_amount, 0, ',', '.') }} COP</td></tr>
+        <tr class="grand"><td>Total</td><td class="r">${{ number_format($order->total_order_amount, 0, ',', '.') }} COP</td></tr>
     </table>
 
     <div class="foot">

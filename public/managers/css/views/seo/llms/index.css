@@ -1,0 +1,15 @@
+.llms-editor-textarea {
+    resize: vertical;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.badge-fs-10 {
+    font-size: 10px;
+}
+.text-fs-11 {
+    font-size: 11px;
+}
+.llms-example-pre {
+    font-size: 0.72rem;
+    white-space: pre-wrap;
+}

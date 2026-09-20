@@ -1,0 +1,18 @@
+.filter-chips-label {
+    font-size: .8rem;
+}
+
+.filter-chip {
+    border-radius: 5px;
+    font-size: .8rem;
+    line-height: 1.4;
+    background: rgba(10, 37, 64, .39);
+    border: 1.5px solid rgba(10, 37, 64, .23);
+    color: #071a28;
+    padding: .25rem .5rem;
+}
+
+.filter-chip-icon {
+    font-size: .65rem;
+    opacity: .7;
+}

@@ -1,12 +1,18 @@
 @extends('layouts.managers')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/modules/setting.css') }}">
+@endpush
+
 @section('content')
 
 <div class="row g-4 align-items-start">
 
     {{-- Columna principal --}}
     <div class="col-lg-8">
-        <form id="formModules" onsubmit="return false">
+        <form id="formModules"
+              data-update-url="{{ route('manager.settings.modules.update') }}"
+              data-module-keys='@php $__jsonInline1 = ["module_coupons","module_bundles","module_incoming_mail","module_invoices","module_departments","module_documents","module_contacts","module_newsletter","module_reviews","module_certifications","module_certifiers","module_enterprises","module_distributors","module_faqs","module_instructions","module_seo","module_analytics"]; @endphp@json($__jsonInline1)'>
             @csrf
 
             {{-- Contenido --}}
@@ -116,7 +122,7 @@
                 <p class="text-muted">Activa o desactiva la visibilidad de módulos en el panel de administración. Los módulos desactivados dejan de aparecer en el menú lateral.</p>
                 <hr>
                 <h6 class="fw-bold mb-2">Notas importantes</h6>
-                <ul class="text-muted ps-3 mb-0" style="font-size:.875rem;">
+                <ul class="text-muted ps-3 mb-0 modules-notes-list">
                     <li class="mb-1">Desactivar un módulo <strong>no elimina</strong> los datos existentes.</li>
                     <li class="mb-1">Puedes reactivarlo en cualquier momento y los datos estarán intactos.</li>
                     <li>Los módulos de <strong>Cursos</strong> y <strong>Usuarios</strong> son obligatorios y no se pueden desactivar.</li>
@@ -130,33 +136,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    $('#btnSave').on('click', function () {
-        var $btn = $(this).prop('disabled', true).text('Guardando...');
-        var data = {};
-
-        // Checkboxes: enviar 0 si no están marcados
-        @foreach(['module_coupons','module_bundles','module_incoming_mail','module_invoices','module_departments','module_documents','module_contacts','module_newsletter','module_reviews','module_certifications','module_certifiers','module_enterprises','module_distributors','module_faqs','module_instructions','module_seo','module_analytics'] as $key)
-        data['{{ $key }}'] = $('#{{ $key }}').is(':checked') ? 1 : 0;
-        @endforeach
-
-        data['_token'] = $('meta[name="csrf-token"]').attr('content');
-
-        $.ajax({
-            url: '{{ route('manager.settings.modules.update') }}',
-            method: 'POST',
-            data: data,
-            success: function (res) {
-                toastr.success(res.message);
-                $btn.prop('disabled', false).text('Guardar cambios');
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al guardar.');
-                $btn.prop('disabled', false).text('Guardar cambios');
-            }
-        });
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/modules/setting.js') }}"></script>
 @endpush

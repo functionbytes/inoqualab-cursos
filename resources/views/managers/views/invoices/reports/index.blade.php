@@ -5,9 +5,14 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
 
-            <div class="card w-100">
+            <div class="card w-100" id="invoices-reports-index"
+                 data-config='@json([
+                    "routes" => [
+                        "generate" => route("manager.invoices.generate"),
+                    ],
+                 ])'>
 
-                <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formReport" enctype="multipart/form-data" role="form">
 
                     {{ csrf_field() }}
 
@@ -87,80 +92,8 @@
 
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-
-
-            $('.daterange').daterangepicker();
-
-            $("#formReport").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    method: {
-                        required: true,
-                    },
-                    condition: {
-                        required: true,
-                    },
-                    distributor: {
-                        required: true,
-                    },
-                    range: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    method: {
-                        required: "Es necesario una opción.",
-                    },
-                    condition: {
-                        required: "Es necesario una opción.",
-                    },
-                    distributor: {
-                        required: "Es necesario una opción.",
-                    },
-                    range: {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    toastr.success("Se ha generado el reporte.", "Operación exitosa", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-bottom-right"
-                    });
-
-                    var query = {
-                        range: $("#range").val(),
-                        distributor: $("#distributor").val(),
-                        methods : $("#method").val(),
-                        condition: $("#condition").val(),
-                    }
-
-                    var url = "{{ route('manager.invoices.generate') }}?" + $.param(query);
-
-                    window.location = url;
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+    <script src="{{ asset('managers/js/views/invoices/reports/index.js') }}"></script>
 @endpush
 
 

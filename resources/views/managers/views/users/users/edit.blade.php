@@ -5,9 +5,15 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
 
-            <div class="card w-100">
+            <div class="card w-100" id="users-edit"
+                 data-config='@json([
+                    "routes" => [
+                        "update" => route("manager.users.update"),
+                        "index" => route("manager.users"),
+                    ],
+                 ])'>
 
-                <form id="formUsers" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formUsers" enctype="multipart/form-data" role="form">
 
                     {{ csrf_field() }}
 
@@ -23,7 +29,7 @@
                                     administrador
                                 @elseif($user->role == 'customer')
                                     cliente
-                                @elseif($user->role == 'enterprises')
+                                @elseif($user->role == 'enterprise')
                                     empresa
                                 @endif
                             </h5>
@@ -81,7 +87,7 @@
                                         <input type="password" class="form-control" id="password"  name="password" value="" placeholder="Ingresar contraseña">
                                 </div>
                             </div>
-                            <div class="col-6 divEnterprise {{ $user->role == 'customer' or $user->role == 'customer' ? '' : 'd-none' }}">
+                            <div class="col-6 divEnterprise {{ $user->role == 'customer' || $user->role == 'enterprise' ? '' : 'd-none' }}">
                                 <div class="mb-3">
                                     <label class="control-label col-form-label">Empresa</label>
                                     <div class="input-group">
@@ -132,213 +138,6 @@
 
 @endsection
 
-
-
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            function toggleEnterpriseDiv(role) {
-                if (role === 'enterprises' || role === 'customer') {
-                    $('.divEnterprise').removeClass('d-none');
-                } else {
-                    $('.divEnterprise').addClass('d-none');
-                }
-            }
-
-            // Inicializar validación de roles al cargar la página
-            toggleEnterpriseDiv($('#roles').val());
-
-            // Validación dinámica cuando se cambia el valor de roles
-            $('#roles').change(function () {
-                toggleEnterpriseDiv($(this).val());
-            });
-
-
-            jQuery.validator.addMethod(
-                'emailExt',
-                function (value, element, param) {
-                    return value.match(
-                        /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
-                    )
-                },
-                'Porfavor ingrese email valido',
-            );
-
-            $("#formUsers").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    firstname: {
-                        required: true,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                    lastname: {
-                        required: true,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                    identification: {
-                        required: false,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                    cellphone: {
-                        required: false,
-                        number: true,
-                        minlength: 6,
-                        maxlength: 10,
-                    },
-                    
-                    available: {
-                        required: true,
-                    },
-                    role: {
-                        required: true,
-                    },
-                    enterprise: {
-                        required: false,
-                    },
-
-                    address: {
-                        required: false,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-                    email: {
-                        required: true,
-                        email: true,
-                        emailExt: true,
-                    },
-                    password: {
-                        required: false,
-                        minlength: 3,
-                        maxlength: 100,
-                    },
-
-                },
-                messages: {
-                    firstname: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 3 caracter",
-                        maxlength: "Debe contener al menos 100 caracter",
-                    },
-                    lastname: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 3 caracter",
-                        maxlength: "Debe contener al menos 100 caracter",
-                    },
-                    identification: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 3 caracter",
-                        maxlength: "Debe contener al menos 100 caracter",
-                    },
-                    cellphone: {
-                        required: "El parametro es necesario.",
-                        number: 'Solo se puede ingresar números.',
-                        minlength: "Debe contener al menos 6 caracter",
-                        maxlength: "Debe contener al menos 10 caracter",
-                    },
-                    email: {
-                        required: 'Tu email ingresar correo electrónico es necesario.',
-                        email: 'Por favor, introduce una dirección de correo electrónico válida.',
-                    },
-                    password: {
-                        required: "El parametro es necesario.",
-                        minlength: "Debe contener al menos 6 caracter",
-                        maxlength: "Debe contener al menos 10 caracter",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formUsers');
-                    var formData = new FormData($form[0]);
-                    var slack = $("#slack").val();
-                    var firstname = $("#firstname").val();
-                    var lastname = $("#lastname").val();
-                    var identification = $("#identification").val();
-                    var cellphone = $("#cellphone").val();
-                    var email = $("#email").val();
-                    var password = $("#password").val();
-                    var address = $("#address").val();
-                    var available = $("#available").val();
-                    var role = $("#roles").val();
-                    var enterprise = $("#enterprises").val();
-
-                    formData.append('slack', slack);
-                    formData.append('firstname', firstname);
-                    formData.append('lastname', lastname);
-                    formData.append('identification', identification);
-                    formData.append('cellphone', cellphone);
-                    formData.append('email', email);
-                    formData.append('address', address);
-                    formData.append('password', password);
-                    formData.append('available', available);
-                    formData.append('role', role);
-                    formData.append('enterprises', enterprise);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-                    $.ajax({
-                        url: "{{ route('manager.users.update') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    window.location.href = "{{ route('manager.users') }}";
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-        });
-
-    </script>
-
+<script src="{{ asset('managers/js/views/users/users/edit.js') }}"></script>
 @endpush
-
-
-

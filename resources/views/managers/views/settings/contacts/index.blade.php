@@ -2,10 +2,17 @@
 
 @section('title', 'Contactos')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/contacts/index.css') }}">
+@endpush
+
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div id="contactsPage" class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.contacts.bulk-action') }}">
 
         <div class="card">
 
@@ -62,6 +69,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="contacts-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Nombre</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Fecha</th>
@@ -71,6 +81,10 @@
                             <tbody>
                                 @foreach($contacts as $contact)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $contact->id }}">
+                                        </td>
                                         <td class="fw-semibold">
                                             {{ Str::words(Str::title(Str::lower($contact->firstname . ' ' . $contact->lastname)), 12, '...') }}
                                         </td>
@@ -188,35 +202,17 @@
 
     @include('managers.includes.delete')
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'contacto(s)',
+        'bulkActions' => [
+            ['value' => 'reviewed', 'label' => 'Marcar como gestionado'],
+            ['value' => 'pending', 'label' => 'Marcar como pendiente'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterReviewed').val($('#modalReviewed').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/settings/contacts/index.js') }}"></script>
 @endpush

@@ -5,7 +5,19 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="exams-topics-index"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-config='@php $__jsonInline1 = [
+            "questionType" => (int) $topic->type,
+            "topicSlack" => $topic->slack,
+            "routes" => [
+                "bulkAction" => route("manager.courses.exam.questions.bulk-action"),
+                "editBase" => url("panel/courses/exam/questions/edit"),
+                "update" => route("manager.courses.exam.questions.update"),
+                "store" => route("manager.courses.exam.questions.store"),
+            ],
+         ]; @endphp@json($__jsonInline1)'>
 
         <div class="card">
 
@@ -68,6 +80,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="exams-col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Titulo</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Fecha</th>
@@ -77,6 +92,10 @@
                             <tbody>
                                 @foreach($questions as $question)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $question->id }}">
+                                        </td>
                                         <td>
                                             <div class="fw-semibold">{{ Str::words(Str::ucfirst(Str::lower($question->question)), 10, '...') }}</div>
                                         </td>
@@ -202,7 +221,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formQuestion" onsubmit="return false">
+                    <form id="formQuestion">
                         <input type="hidden" id="questionSlack" value="">
 
                         <div class="mb-3">
@@ -269,208 +288,23 @@
         </div>
     </div>
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'pregunta(s)',
+        'bulkActions' => [
+            ['value' => 'publish', 'label' => 'Publicar'],
+            ['value' => 'hide', 'label' => 'Ocultar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/exams/topics/index.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Eliminar individual vía modal ────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-    // ── Crear / Editar pregunta (modal) ────────────────────────────────────────
-    // El tipo de pregunta lo define el topic (examen) y es fijo: 1 = selección
-    // múltiple (A/B/C/D), 0 = falso/verdadero. El formulario ya se renderizó
-    // con la variante correcta desde el servidor.
-    var questionMode = 'create';
-    var questionType = {{ (int) $topic->type }};
-
-    // select2 se inicializa perezosamente en "shown.bs.modal": el modal está
-    // oculto al cargar la página y select2 calcula mal el ancho sobre
-    // elementos ocultos. dropdownParent evita que el desplegable quede
-    // clipeado o mal posicionado dentro del modal.
-    $('#question-modal').on('shown.bs.modal', function () {
-        if (typeof $.fn.select2 === 'undefined') return;
-
-        if (!$('#questionAvailable').hasClass('select2-hidden-accessible')) {
-            $('#questionAvailable').select2({ width: '100%', dropdownParent: $('#question-modal') });
-        }
-        if (!$('#questionAnswer').hasClass('select2-hidden-accessible')) {
-            $('#questionAnswer').select2({
-                width: '100%',
-                dropdownParent: $('#question-modal'),
-                placeholder: $('#questionAnswer').data('placeholder'),
-            });
-        }
-    });
-
-    function resetQuestionForm() {
-        $('#questionSlack').val('');
-        $('#questionText, #questionA, #questionB, #questionC, #questionD').val('');
-        $('#questionAvailable').val('1');
-        $('#questionAnswer').val(null).trigger('change');
-        $('#formQuestion').validate().resetForm();
-        $('#formQuestion .is-invalid').removeClass('is-invalid');
-    }
-
-    $('.btn-new-question').on('click', function () {
-        questionMode = 'create';
-        $('#questionModalTitle').text('Nueva pregunta');
-        resetQuestionForm();
-    });
-
-    // Abrir en modo "editar": trae los datos vía AJAX y precarga el modal.
-    $(document).on('click', '.btn-edit-question', function (e) {
-        e.preventDefault();
-        var slack = $(this).data('slack');
-
-        $.getJSON("{{ url('panel/courses/exam/questions/edit') }}/" + slack, function (data) {
-            questionMode = 'edit';
-            $('#questionModalTitle').text('Editar pregunta');
-            $('#questionSlack').val(data.slack);
-            $('#questionText').val(data.question);
-            $('#questionAvailable').val(String(data.available));
-            $('#questionA').val(data.a);
-            $('#questionB').val(data.b);
-            $('#questionC').val(data.c);
-            $('#questionD').val(data.d);
-
-            var answerValue = questionType === 1 && data.answer ? data.answer.split(',') : data.answer;
-            $('#questionAnswer').val(answerValue).trigger('change');
-
-            $('#question-modal').modal('show');
-        }).fail(function () {
-            toastr.error('No se pudo cargar la pregunta.');
-        });
-    });
-
-    // Reglas de validación: A/B/C/D solo aplican si el topic es de selección múltiple.
-    var questionRules = {
-        question: { required: true, minlength: 3, maxlength: 400 },
-        answer: { required: true },
-    };
-    var questionMessages = {
-        question: {
-            required: 'La pregunta es obligatoria.',
-            minlength: 'Debe contener al menos 3 caracteres.',
-            maxlength: 'Debe contener como máximo 400 caracteres.',
-        },
-        answer: { required: 'Selecciona la respuesta correcta.' },
-    };
-
-    if (questionType === 1) {
-        ['a', 'b', 'c', 'd'].forEach(function (field) {
-            questionRules[field] = { required: true, minlength: 3, maxlength: 200 };
-            questionMessages[field] = {
-                required: 'La respuesta ' + field.toUpperCase() + ' es obligatoria.',
-                minlength: 'Debe contener al menos 3 caracteres.',
-                maxlength: 'Debe contener como máximo 200 caracteres.',
-            };
-        });
-    }
-
-    $('#formQuestion').validate({
-        rules: questionRules,
-        messages: questionMessages,
-        errorElement: 'label',
-        errorPlacement: function (error, element) {
-            error.removeClass('d-none');
-            var target = element.hasClass('select2-hidden-accessible') ? element.next('.select2-container') : element;
-            error.insertAfter(target);
-        },
-        highlight: function (element) {
-            $(element).addClass('is-invalid');
-        },
-        unhighlight: function (element) {
-            $(element).removeClass('is-invalid');
-        },
-        submitHandler: function () {
-            var answer = $('#questionAnswer').val();
-            if (Array.isArray(answer)) {
-                answer = answer.join(',');
-            }
-
-            var formData = new FormData();
-            formData.append('slack', $('#questionSlack').val());
-            formData.append('question', $('#questionText').val());
-            formData.append('available', $('#questionAvailable').val());
-            formData.append('answer', answer);
-            formData.append('topic', "{{ $topic->slack }}");
-            if (questionType === 1) {
-                formData.append('a', $('#questionA').val());
-                formData.append('b', $('#questionB').val());
-                formData.append('c', $('#questionC').val());
-                formData.append('d', $('#questionD').val());
-            }
-
-            var isEdit = questionMode === 'edit';
-            var url = isEdit
-                ? "{{ route('manager.courses.exam.questions.update') }}"
-                : "{{ route('manager.courses.exam.questions.store') }}";
-
-            var $btn = $('#btnSaveQuestion').prop('disabled', true);
-            var btnOriginalText = $btn.text();
-            $btn.text('Guardando...');
-
-            $.ajax({
-                url: url,
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrfToken },
-                contentType: false,
-                processData: false,
-                data: formData,
-                success: function (res) {
-                    $btn.prop('disabled', false).text(btnOriginalText);
-                    if (res.success) {
-                        $('#question-modal').modal('hide');
-                        toastr.success(res.message);
-                        setTimeout(function () { location.reload(); }, 800);
-                    } else {
-                        toastr.warning(res.message || 'No se pudo guardar.');
-                    }
-                },
-                error: function (xhr) {
-                    $btn.prop('disabled', false).text(btnOriginalText);
-                    if (xhr.status === 422) {
-                        $.each(xhr.responseJSON.errors, function (field, messages) {
-                            toastr.error(messages[0]);
-                        });
-                    } else {
-                        toastr.error('Ocurrió un error al guardar la pregunta.');
-                    }
-                },
-            });
-        },
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/exams/topics/index.js') }}"></script>
 @endpush

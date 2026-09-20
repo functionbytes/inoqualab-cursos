@@ -45,7 +45,7 @@
         <div class="col-12 col-lg-4">
             <div class="card card-body">
                 <a href="{{ url()->previous() }}" class="btn btn-light w-100">
-                    <i class="fas fa-arrow-left me-2"></i>Volver
+                    Volver
                 </a>
             </div>
         </div>

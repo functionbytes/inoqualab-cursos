@@ -7,7 +7,9 @@
 
             <div class="card w-100">
 
-                <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formReport" enctype="multipart/form-data" role="form"
+                      data-get-enterprises-url="{{ route('accounting.orders.get.enterprises') }}"
+                      data-generate-url="{{ route('accounting.orders.generate') }}">
 
                     {{ csrf_field() }}
 
@@ -106,133 +108,8 @@
 
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $('#distributor').on('change', function() {
-                var distributorId = $(this).val();
-
-                $.ajax({
-                    url: '{{ route('accounting.orders.get.enterprises') }}', // URL para obtener los cursos
-                    type: 'POST', // Tipo de solicitud
-                    data: {
-                        distributor: distributorId
-                    }, // Datos enviados en la solicitud
-                    dataType: 'json', // Tipo de datos esperados en la respuesta
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // Token CSRF para solicitudes seguras
-                    },
-                    success: function(data) {
-                        // Inicializa el select2 con los datos obtenidos
-                        $('#enterprise').empty().select2({
-                            data: data.map(function(item) {
-                                return {
-                                    id: item.id, // Asume que 'id' es el identificador único del curso
-                                    text: item.text // Asume que 'name' es el nombre del curso
-                                };
-                            }),
-                            placeholder: "Seleccionar una empresa"
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error en la solicitud AJAX:', error);
-                    }
-                });
-
-
-            });
-
-            $("#distributors").select2({
-                placeholder: "Seleccionar una distribuidor",
-                minimumResultsForSearch: Infinity
-            });
-
-
-            $('.daterange').daterangepicker();
-
-            $("#formReport").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    distributor: {
-                        required: true,
-                    },
-                    enterprise: {
-                        required: function(element) {
-                            return $("#distributor").val() == '0' ? false : true;
-                        }
-                    },
-                    type: {
-                        required: true,
-                    },
-                    condition: {
-                        required: true,
-                    },
-                    method: {
-                        required: true,
-                    },
-                    range: {
-                        required: true,
-                    },
-                },
-                messages: {
-                    distributor: {
-                        required: "Es necesario una opción.",
-                    },
-                    enterprise: {
-                        required: "Es necesario una opción.",
-                    },
-                    type: {
-                        required: "Es necesario una opción.",
-                    },
-                    condition: {
-                        required: "Es necesario una opción.",
-                    },
-                    method: {
-                        required: "Es necesario una opción.",
-                    },
-                    range: {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    toastr.success("Se ha generado el reporte.", "Operación exitosa", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-bottom-right"
-                    });
-
-                    var query = {
-                        range: $("#range").val(),
-                        distributor: $("#distributor").val(),
-                        enterprise: $("#enterprise").val(),
-                        type : $("#type").val(),
-                        methods : $("#method").val(),
-                        condition: $("#condition").val(),
-                    }
-
-                    var url = "{{ route('accounting.orders.generate') }}?" + $.param(query);
-
-                    window.location = url;
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+    <script src="{{ asset('accountings/js/views/orders/report/index.js') }}"></script>
 @endpush
 
 

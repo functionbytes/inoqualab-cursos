@@ -95,7 +95,7 @@
         </div>
 
         <div class="iq-values">
-            <div class="iq-value-item iq-value-item--featured" style="background-image: url('/pages/images/about/about-three.jpg')">
+            <div class="iq-value-item iq-value-item--featured">
                 <div class="iq-value-body">
                     <span class="iq-value-icon"><img src="/pages/images/icons/compliance.svg" alt=""></span>
                     <div class="iq-value-content">

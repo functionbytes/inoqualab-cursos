@@ -88,8 +88,8 @@
                                     }}</a>
                                  @if(count($course->getMedia('thumbnail'))>0)
                                  <img src="{{ $course->getfirstMedia('thumbnail')->getfullUrl() }}"
-                                    class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440"
-                                    onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
+                                    class="card-img-top rounded-0 object-fit-cover js-img-fallback" alt="{{ $course->title }}" height="440"
+                                    data-fallback-src="{{ asset('/pages/images/courses/default.jpg') }}">
                                  @else
                                  <img src="{{ asset('/pages/images/courses/default.jpg') }}"
                                     class="card-img-top rounded-0 object-fit-cover" alt="{{ $course->title }}" height="440">
@@ -147,14 +147,5 @@
 @endsection
 
 @push('scripts')
-
-<script type="text/javascript">
-   $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-</script>
-
-
+    <script src="{{ asset('pages/js/common/ajax-csrf-setup.js') }}"></script>
 @endpush

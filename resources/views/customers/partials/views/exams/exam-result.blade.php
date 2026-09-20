@@ -10,7 +10,7 @@
     <p class="ar-score">¡Felicitaciones, aprobaste el examen!</p>
     <p class="ar-sub">Respondiste correctamente {{ $correct > 0 ? $correct : 0 }} de {{ $count > 0 ? $count : 0 }} preguntas. Ya puedes descargar tu certificado.</p>
     <div class="ar-actions">
-        <a class="ar-primary" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">@include('customers.includes.icon', ['name' => 'download']) Descargar certificado</a>
+        <a class="ar-primary" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">Descargar certificado</a>
         <a class="ar-secondary" href="{{ route('customers.dashboard') }}">Volver al inicio</a>
     </div>
 
@@ -21,7 +21,7 @@
             <p class="ar-rate-done">
                 <span class="ar-rate-stars">
                     @for ($s = 1; $s <= 5; $s++)
-                        <span class="star-ic{{ $s <= $userReview->rating ? ' is-filled' : '' }}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:block"><path d="m12 3 2.6 5.6L21 9.3l-4.5 4.3 1.1 6.4L12 17l-5.6 3 1.1-6.4L3 9.3l6.4-.7Z"/></svg></span>
+                        <span class="star-ic{{ $s <= $userReview->rating ? ' is-filled' : '' }}"><svg class="d-block" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 3 2.6 5.6L21 9.3l-4.5 4.3 1.1 6.4L12 17l-5.6 3 1.1-6.4L3 9.3l6.4-.7Z"/></svg></span>
                     @endfor
                 </span>
                 Ya calificaste este curso con {{ $userReview->rating }}/5. ¡Gracias!
@@ -38,7 +38,7 @@
                     @endfor
                 </div>
                 <textarea name="comment" class="ar-comment" rows="3" placeholder="Cuéntanos tu opinión sobre el curso (opcional)…" maxlength="1000"></textarea>
-                <button type="submit" class="ar-primary" id="rateSubmit" disabled>@include('customers.includes.icon', ['name' => 'send']) Enviar calificación</button>
+                <button type="submit" class="ar-primary" id="rateSubmit" disabled>Enviar calificación</button>
             </form>
         @endif
     </div>
@@ -65,7 +65,7 @@
 
     <div class="ar-actions">
         @if ($topic->quiz_again)
-            <a class="ar-primary" href="{{ route('customers.exam.tryagain', $exam->id) }}">@include('customers.includes.icon', ['name' => 'refresh']) Reintentar examen</a>
+            <a class="ar-primary" href="{{ route('customers.exam.tryagain', $exam->id) }}">Reintentar examen</a>
         @endif
     </div>
 @endif
@@ -79,7 +79,6 @@
     @endphp
     <div class="lv-foot ar-foot">
         <a href="{{ $lastLessonHref }}" class="lv-fbtn" aria-label="Volver a la última lección">
-            @include('customers.includes.icon', ['name' => 'arrow-left'])
             <span class="fb-txt"><span class="l">Anterior</span><span class="t">{{ ucfirst(Str::lower($lastCourseLesson->title)) }}</span></span>
         </a>
         <span></span>

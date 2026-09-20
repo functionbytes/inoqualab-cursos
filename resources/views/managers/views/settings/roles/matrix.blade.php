@@ -3,23 +3,7 @@
 @section('title', 'Matriz de permisos')
 
 @push('css')
-<style>
-    .perm-matrix { border-collapse: separate; border-spacing: 0; }
-    .perm-matrix thead th { position: sticky; top: 0; z-index: 3; background: #f8f9fa; }
-    .perm-matrix th.col-perm,
-    .perm-matrix td.col-perm {
-        position: sticky; left: 0; z-index: 2; background: #fff;
-        min-width: 240px; max-width: 240px; border-right: 1px solid #e9ecef;
-    }
-    .perm-matrix thead th.col-perm { z-index: 4; background: #f8f9fa; }
-    .perm-matrix .col-role { min-width: 92px; text-align: center; }
-    .perm-matrix tr.module-row td { background: #eef2f7; font-weight: 600; }
-    .perm-matrix td.col-perm.small-name { font-size: .8rem; }
-    .perm-has { color: #13C672; }
-    .perm-not { color: #dfe3e8; }
-    .matrix-scroll { max-height: 70vh; }
-    .badge-mini { font-size: .6rem; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/settings/roles/matrix.css') }}">
 @endpush
 
 @section('content')
@@ -101,23 +85,5 @@
 @endsection
 
 @push('scripts')
-<script>
-    $('#matrixFilter').on('input', function () {
-        const term = $(this).val().toLowerCase();
-        $('.perm-row').each(function () {
-            const name = ($(this).data('name') + '').toLowerCase();
-            $(this).toggle(term === '' || name.includes(term));
-        });
-        // Oculta el encabezado de módulo si no le quedan permisos visibles
-        $('.module-row').each(function () {
-            let next = $(this).next('.perm-row');
-            let anyVisible = false;
-            while (next.length) {
-                if (next.is(':visible')) { anyVisible = true; break; }
-                next = next.next('.perm-row');
-            }
-            $(this).toggle(anyVisible || term === '');
-        });
-    });
-</script>
+<script src="{{ asset('managers/js/views/settings/roles/matrix.js') }}"></script>
 @endpush

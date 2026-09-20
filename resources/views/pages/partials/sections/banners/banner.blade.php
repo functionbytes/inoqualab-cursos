@@ -4,7 +4,7 @@
         @foreach ($sliders as $slider)
         @if ($slider->available == 1)
             @if(count($slider->getMedia('thumbnail'))>0)
-                <div class="slider-item" style="background-image: url({{ $slider->getfirstMedia('thumbnail')->getfullUrl() }});">
+                <div class="slider-item" data-bg="{{ $slider->getfirstMedia('thumbnail')->getfullUrl() }}">
             @endif
 
             <div class="container">
@@ -34,4 +34,8 @@
     </div>
 </section>
 <!-- Slider Section End -->
+
+@push('scripts')
+    <script src="{{ asset('pages/js/common/apply-data-bg.js') }}"></script>
+@endpush
 

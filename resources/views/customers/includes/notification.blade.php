@@ -66,66 +66,6 @@
             @endif
             @endif
 
-            {{-- @if ($notification->data['status'] == 'mail')
-            @if($notification->read_at != null)
-
-            <div class="card mb-3 notify-read">
-                <a href="javascript:" class="ticketnotetrash notifydeletespruko" data-id="{{$notification->id}}">
-                    <i class="fe fe-trash-2" data-id="{{$notification->id}}"></i>
-                </a>
-                <div class="d-flex p-4 border-bottom-0">
-                    <div class="">
-                        <svg class="alt-notify mail me-4" xmlns=" http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path fill="#8ac0c3"
-                                  d="M19,20H5a3.00328,3.00328,0,0,1-3-3V7A3.00328,3.00328,0,0,1,5,4H19a3.00328,3.00328,0,0,1,3,3V17A3.00328,3.00328,0,0,1,19,20Z" />
-                            <path fill="#3c969c"
-                                  d="M22,7a3.00328,3.00328,0,0,0-3-3H5A3.00328,3.00328,0,0,0,2,7V8.061l9.47852,5.79248a1.00149,1.00149,0,0,0,1.043,0L22,8.061Z" />
-                        </svg>
-                    </div>
-                    <div class="mt-0 text-start">
-                                                                <span class="fs-16 font-weight-semibold">{{$notification->data['mailsubject']}}<span
-                                                                            class="badge badge-success badge-notify br-13 ms-2 mt-0"
-                                                                            style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
-                        <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
-                                    data-id="{{$notification->id}}" class="ms-3 text-blue mark-as-read">Ver</a></p>
-                    </div>
-                </div>
-                <span class="text-end mb-2 me-3 fs-12 text-muted">
-                                                            {{$notification->created_at->timezone(Auth::guard('customer')->user()->timezone)->format(setting('time_format'))}}
-                                                        </span>
-            </div>
-            @else
-            <div class="card mb-3">
-                <a href="javascript:" class="ticketnotetrash notifydeletespruko" data-id="{{$notification->id}}">
-                    <i class="fe fe-trash-2" data-id="{{$notification->id}}"></i>
-                </a>
-                <div class="d-flex p-4 border-bottom-0">
-                    <div class="">
-                        <svg class="alt-notify mail me-4" xmlns=" http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path fill="#8ac0c3"
-                                  d="M19,20H5a3.00328,3.00328,0,0,1-3-3V7A3.00328,3.00328,0,0,1,5,4H19a3.00328,3.00328,0,0,1,3,3V17A3.00328,3.00328,0,0,1,19,20Z" />
-                            <path fill="#3c969c"
-                                  d="M22,7a3.00328,3.00328,0,0,0-3-3H5A3.00328,3.00328,0,0,0,2,7V8.061l9.47852,5.79248a1.00149,1.00149,0,0,0,1.043,0L22,8.061Z" />
-                        </svg>
-                    </div>
-                    <div class="mt-0 text-start">
-                                                                <span class="fs-16 font-weight-semibold">{{$notification->data['mailsubject']}} <span
-                                                                            class="badge badge-success badge-notify br-13 ms-2 mt-0"
-                                                                            style="background-color: {{$notification->data['mailsendtagcolor']}}">{{$notification->data['mailsendtag']}}</span></span>
-                        <p class="fs-13 mb-0 pe-6">{{Str::limit($notification->data['mailtext'], '400', '...')}}<a
-                                    href="{{route('customers.notifications.view', $notification->id)}}" data-id="{{$notification->id}}"
-                                    class="ms-3 text-blue mark-as-read">Ver</a></p>
-                    </div>
-                </div>
-                <span class="text-end mb-2 me-3 fs-12 text-muted">
-                                                            {{$notification->created_at->timezone(Auth::guard('customer')->user()->timezone)->format(setting('time_format'))}}
-                                                        </span>
-
-            </div>
-            @endif
-            @endif --}}
-
             @endforeach
 
             @empty

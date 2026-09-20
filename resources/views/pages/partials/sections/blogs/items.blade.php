@@ -4,11 +4,11 @@
 
                  <a href="{{ route('blogs.view',$blog->slug) }}"  class="blog-standard-wrap">
 
-                     <div class="blog-standard-item wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+                     <div class="blog-standard-item wow fadeInUp delay-0-2s animated">
                          <div class="image">
                              @if(count($blog->getMedia('thumbnail'))>0)
-                                 <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}" height="440" loading="lazy"
-                                      onerror="this.src='{{ asset('/pages/images/blog/default.jpg') }}'">
+                                 <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover js-img-fallback" alt="{{ $blog->title }}" height="440" loading="lazy"
+                                      data-fallback-src="{{ asset('/pages/images/blog/default.jpg') }}">
                              @else
                                  <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}" height="440" loading="lazy">
                              @endif

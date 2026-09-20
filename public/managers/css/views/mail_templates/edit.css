@@ -1,0 +1,33 @@
+#codeEditorWrapper .CodeMirror {
+    height: 520px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    line-height: 1.6;
+}
+.variable-insert {
+    transition: transform .1s ease;
+}
+.variable-insert:hover {
+    transform: translateY(-1px);
+}
+#previewContainer iframe {
+    display: block;
+    width: 100%;
+    border: none;
+    background: #fff;
+    overflow: hidden;
+}
+.mail-preview-container {
+    min-height: 500px;
+    max-height: 700px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border-radius: 4px;
+    transition: max-width .3s ease;
+    max-width: 100%;
+    margin: 0 auto;
+}
+.text-uppercase-xs {
+    font-size: 10px;
+    letter-spacing: .5px;
+}

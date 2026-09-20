@@ -14,7 +14,7 @@
 @endsection
 
 @push('css')
-    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}">
+    <link rel="stylesheet" href="{{ url('/customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @section('content')

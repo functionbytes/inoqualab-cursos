@@ -85,50 +85,7 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-
-
-        var toolbarOptions = [
-            ['bold', 'italic', 'underline', 'strike'],        
-            ['blockquote', 'code-block'],
-            [{ 'header': 1 }, { 'header': 2 }],              
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'script': 'sub' }, { 'script': 'super' }],     
-            [{ 'indent': '-1' }, { 'indent': '+1' }],          
-            [{ 'direction': 'rtl' }],                        
-            [{ 'size': ['small', false, 'large', 'huge'] }], 
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [ 'link', 'image', 'video' ],
-            [{ 'color': [] }, { 'background': [] }],         
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-
-            ['clean']                                        
-        ];
-
-       
-        var toolbarOption = [
-            ['clean']                                        
-        ];
-
-        var description = new Quill('#messages', {
-
-            modules: {
-                toolbar: toolbarOption,
-                clipboard: {
-                    matchVisual: false
-                }
-            },
-            placeholder: 'Escriba aquí...',
-            theme: 'snow'
-        });
-
-        $(".ql-editor").addClass('disabled');
-        $(".ql-editor").attr('contenteditable', false);
-
-    </script>
-
+<script src="{{ asset('supports/js/views/contacts/view.js') }}"></script>
 @endpush
 
 

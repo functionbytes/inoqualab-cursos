@@ -1,0 +1,105 @@
+body {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    color: #008bce;
+    border-bottom: 2px solid #008bce;
+    padding-bottom: 8px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.info-item {
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.info-item label {
+    font-weight: bold;
+    display: block;
+    color: #666;
+    font-size: 11px;
+}
+
+.info-item span {
+    font-size: 14px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th {
+    background: #008bce;
+    color: #fff;
+    padding: 8px;
+    text-align: left;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.text-end {
+    text-align: right;
+}
+
+.total-row td {
+    font-weight: bold;
+    background: #f0f0f0;
+}
+
+.print-actions {
+    margin-bottom: 15px;
+}
+
+.btn-print,
+.btn-back {
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-print {
+    background: #008bce;
+}
+
+.btn-back {
+    background: #6c757d;
+    margin-left: 8px;
+}
+
+.empty-items {
+    text-align: center;
+    color: #999;
+}
+
+@media print {
+    .no-print {
+        display: none;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact;
+    }
+}

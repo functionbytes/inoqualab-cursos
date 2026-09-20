@@ -1,0 +1,32 @@
+.header-notif-badge {
+    top: 2px;
+    right: 2px;
+    font-size: 9px;
+    padding: 2px 5px;
+    min-width: 16px;
+}
+
+.header-notif-dropdown {
+    min-width: 320px;
+    max-width: 360px;
+}
+
+.header-notif-list {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.header-notif-icon-circle {
+    width: 32px;
+    height: 32px;
+}
+
+.header-notif-time {
+    font-size: 11px;
+}
+
+.header-notif-dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+}

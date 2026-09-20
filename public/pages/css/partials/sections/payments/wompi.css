@@ -1,0 +1,35 @@
+.wompi-sandbox-box {
+    background: #fff8e1;
+    border: 2px dashed #f9a825;
+    border-radius: 8px;
+}
+
+.wompi-sandbox-note {
+    font-size: 12px;
+}
+
+.wompi-sandbox-actions {
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.wompi-sim-btn {
+    color: #fff;
+    font-size: 12px;
+}
+
+.wompi-sim-btn--approved {
+    background: #2e7d32;
+}
+
+.wompi-sim-btn--declined {
+    background: #c62828;
+}
+
+.wompi-sim-btn--pending {
+    background: #1565c0;
+}
+
+.wompi-sim-btn--error {
+    background: #455a64;
+}

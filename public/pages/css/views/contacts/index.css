@@ -1,0 +1,14 @@
+.iq-contact-intro-text {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.iq-contact-cards {
+    margin-top: 60px;
+}
+
+.iq-form-band-text {
+    max-width: 640px;
+    margin: 0 auto;
+    color: rgba(255, 255, 255, .75);
+}

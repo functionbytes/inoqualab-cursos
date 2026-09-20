@@ -13,7 +13,9 @@
 
       <div class="card w-100">
 
-        <form id="formNotifications" enctype="multipart/form-data" role="form" onSubmit="return false">
+        <form id="formNotifications" enctype="multipart/form-data" role="form"
+              data-update-url="{{ route('support.settings.notifications.update') }}"
+              data-redirect-url="{{ route('support.dashboard') }}">
 
           <input type="hidden" name="slack"  id="slack" value="{{ $user->slack }}">
           {{ csrf_field() }}
@@ -95,116 +97,7 @@
 @endsection
 
 @push('scripts')
-
-  <script type="text/javascript">
-
-    Dropzone.autoDiscover = false;
-
-    $(document).ready(function() {
-
-      $("#formNotifications").validate({
-        submit: false,
-        ignore: ".ignore",
-        rules: {
-          mail_notification: {
-            required: false,
-          },
-          inscription_notification: {
-            required: false,
-          },
-          invoice_notification: {
-            required: false,
-          },
-        },
-        message: {
-          mail_notification: {
-            required: "El parametro es necesario.",
-          },
-          inscription_notification: {
-            required: "El parametro es necesario.",
-          },
-          invoice_notification: {
-            required: "El parametro es necesario.",
-          },
-        },
-        submitHandler: function(form) {
-
-          var $form = $('#formNotifications');
-          var formData = new FormData($form[0]);
-          var slack = $("#slack").val();
-          var mail_notification = $("#mail_notification").is(':checked');
-          var inscription_notification = $("#inscription_notification").is(':checked');
-          var invoice_notification = $("#invoice_notification").is(':checked');
-
-          formData.append('slack', slack);
-          formData.append('mail_notification', mail_notification);
-          formData.append('inscription_notification', inscription_notification);
-          formData.append('invoice_notification', invoice_notification);
-
-            var $submitButton = $('button[type="submit"]');
-            $submitButton.prop('disabled', true);
-
-            $.ajax({
-            url: "{{ route('support.settings.notifications.update') }}",
-            headers: {
-              'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            type: "POST",
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function(response) {
-
-              if(response.success == true){
-                toastr.success("Se ha editado correctamente el perfil.", "Operación exitosa", {
-                  closeButton: true,
-                  progressBar: true,
-                  positionClass: "toast-bottom-right"
-                });
-
-                setTimeout(function() {
-                  window.location.href = "{{ route('support.dashboard') }}";
-                }, 2000);
-
-              }else{
-
-                $submitButton.prop('disabled', false);
-
-                toastr.warning("Se ha generado un error.", "Operación fallida", {
-                  closeButton: true,
-                  progressBar: true,
-                  positionClass: "toast-bottom-right"
-                });
-
-                error = response.message;
-                $('.errors').removeClass('d-none');
-                $('.errors').html(error);
-
-              }
-
-            },
-            error: function(xhr) {
-
-              $submitButton.prop('disabled', false);
-
-              toastr.warning("Se ha generado un error.", "Operación fallida", {
-                closeButton: true,
-                progressBar: true,
-                positionClass: "toast-bottom-right"
-              });
-            }
-          });
-
-        }
-
-      });
-
-
-
-    });
-
-  </script>
-
+<script src="{{ asset('supports/js/views/settings/notifications.js') }}"></script>
 @endpush
 
 

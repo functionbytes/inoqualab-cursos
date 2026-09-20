@@ -8,17 +8,17 @@
             <div class="row">
                 <div class="col-lg-8">
                     <div class="blog-details-wrap">
-                        <div class="image mb-25 wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+                        <div class="image mb-25 wow fadeInUp delay-0-2s animated">
                            @if(count($blog->getMedia('thumbnail'))>0)
-                            <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}"
-                                 onerror="this.src='{{ asset('/pages/images/blog/default.jpg') }}'">
+                            <img src="{{ $blog->getfirstMedia('thumbnail')->getfullUrl() }}" class="card-img-top rounded-0 object-fit-cover js-img-fallback" alt="{{ $blog->title }}"
+                                 data-fallback-src="{{ asset('/pages/images/blog/default.jpg') }}">
                             @else
                             <img src="{{ asset('/pages/images/blog/default.jpg') }}" class="card-img-top rounded-0 object-fit-cover" alt="{{ $blog->title }}">
                             @endif
                             <a href="#"><i class="fas fa-share-alt"></i></a>
                         </div>
                         <div class="blog-content-wrap">
-                        <ul class="blog-standard-header wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+                        <ul class="blog-standard-header wow fadeInUp delay-0-2s animated">
                             <li><span class="name">Admin</span></li>
                             <li><i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($blog->updated_at)->locale('es')->isoFormat('D [de] MMMM, YYYY') }}</li>
                             <li><i class="far fa-folder"></i> <a href="{{ route('blogs.categories', optional($blog->categorie)->slug ?? '#') }}">{{ optional($blog->categorie)->title }}</a></li>

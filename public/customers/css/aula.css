@@ -1,5 +1,8 @@
-/* ===== INOQUALAB — Checkout / Facturación ===== */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* ===== INOQUALAB — Checkout / Facturación =====
+   Sin @import de la fuente acá: este archivo solo se carga vía @push('css')
+   sobre layouts/customers.blade.php, que ya carga portal.css (con el mismo
+   @import) ANTES del stack. Repetirlo duplicaba la petición de red y el
+   parseo de @font-face sin aportar nada. */
 
 /* El template admin centra .container-fluid a max-width:1200px en pantallas >=1300px
    (ver customers/css/style.css). El aula/quiz/examen deben ocupar todo el ancho disponible. */
@@ -7,6 +10,21 @@
 #main-wrapper .body-wrapper > .container-fluid:has(> .aula) {
     max-width: none !important;
     margin: 0 !important;
+    /* Padding lateral (24px de .body-wrapper > .container-fluid en style.css)
+       cancelado para que el aula vaya de lado a lado. */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* En escritorio el padding-top (24px, mismo origen que el lateral de arriba)
+   dejaba una franja gris entre el header y el aula -- en mobile ese aire
+   se necesita (ver .lv-mobile-bar), pero en escritorio debe quedar pegado
+   justo debajo del header. */
+@media (min-width: 1200px) {
+    #main-wrapper .body-wrapper > .container-fluid:has(> .lv),
+    #main-wrapper .body-wrapper > .container-fluid:has(> .aula) {
+        padding-top: 0 !important;
+    }
 }
 
 :root {
@@ -422,7 +440,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pnl-head .sub { color: var(--muted); font-size: 13px; margin-top: 3px; }
 
 /* progress course cards */
-.pc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 20px; }
+/* 300px, no 330px: a 768px (tablet) el contenedor de .ct-body-wrap da ~670px
+   utilizables -- 2 columnas de 330px + gap(20) piden 680px, 10px de más, y
+   la rejilla caía a 1 sola columna. Con 300px sobra margen (620px). */
+.pc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 .pc-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-soft); padding: 0; overflow: hidden; display: flex; flex-direction: column; transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
 .pc-media { height: 124px; background: linear-gradient(150deg, var(--navy), var(--navy-soft)); position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .pc-media::after { content: ''; position: absolute; inset: 0; background-image: linear-gradient(115deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 22px 22px; }
@@ -455,11 +476,8 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pc-btn.ghost:hover { border-color: var(--green); color: var(--green-deep); background: var(--green-soft); }
 .pc-btn.ghost svg { color: var(--green-deep); }
 
-/* filter tabs */
-.pnl-filter { display: inline-flex; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 5px; box-shadow: var(--shadow-soft); margin-bottom: 22px; flex-wrap: wrap; }
-.pnl-filter button { padding: 9px 17px; border: none; background: none; border-radius: 9px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; transition: background .15s var(--ease), color .15s var(--ease); }
-.pnl-filter button:hover { color: var(--ink); }
-.pnl-filter button.active { background: var(--navy); color: #fff; }
+/* filter tabs: movido a portal.css (se carga siempre; este archivo solo en
+   Cursos/Dashboard/Settings) */
 
 /* table */
 .pnl-tablewrap { padding: 8px 28px 22px; overflow-x: auto; }
@@ -541,6 +559,8 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .inicio-rail { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 92px; }
 .goal-card, .dl-card { background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-soft); padding: 22px; }
 .goal-card h4, .dl-card h4 { font-size: 14px; font-weight: 800; margin: 0 0 16px; letter-spacing: -.01em; }
+/* Texto de ".dl-card" cuando el alumno aún no tiene certificados. */
+.dl-card-empty { font-size: 13px; color: var(--muted); line-height: 1.55; margin: 0; }
 .goal-ring { display: flex; align-items: center; gap: 18px; }
 .donut2 { position: relative; width: 86px; height: 86px; flex: 0 0 auto; }
 .donut2 svg { transform: rotate(-90deg); }
@@ -983,8 +1003,11 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .aula > .container { max-width: none; }
 .aula-head { margin-bottom: 22px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .ah-left { min-width: 0; }
-.aula-back { display: inline-flex; align-items: center; gap: 7px; color: var(--navy); font-size: 12.5px; font-weight: 700; margin-bottom: 14px; background: #fff; border: 1px solid var(--line); padding: 8px 14px; border-radius: 9px; box-shadow: var(--shadow-soft); transition: border-color .15s var(--ease), color .15s var(--ease), background .15s var(--ease); white-space: nowrap; text-decoration: none; }
-.aula-back:hover { color: var(--green-deep); border-color: var(--green); background: var(--green-soft); }
+/* Mismo azul sólido que el resto de los CTA del aula (.pc-btn, .ar-primary,
+   .dl-btn): antes era blanco con borde, y quedaba como una acción
+   secundaria en vez del botón principal para volver al curso. */
+.aula-back { display: inline-flex; align-items: center; gap: 7px; color: #fff; font-size: 12.5px; font-weight: 700; margin-bottom: 14px; background: var(--green); border: none; padding: 8px 14px; border-radius: 9px; box-shadow: 0 8px 20px rgba(0,139,205,.24); transition: transform .15s var(--ease), box-shadow .15s var(--ease); white-space: nowrap; text-decoration: none; }
+.aula-back:hover { color: #fff; background: var(--green); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,139,205,.3); }
 .ah-progress { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-soft); padding: 16px 20px; min-width: 250px; }
 .ahp-top { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; font-weight: 700; color: var(--muted); }
 .ahp-top b { font-size: 16px; font-weight: 800; color: var(--green-deep); }
@@ -1010,6 +1033,9 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lp-video .lp-tag { position: absolute; z-index: 2; top: 16px; left: 16px; display: inline-flex; align-items: center; gap: 7px; background: rgba(13,27,42,.6); backdrop-filter: blur(6px); color: #fff; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; padding: 7px 12px; border-radius: 8px; white-space: nowrap; }
 .lp-video .lp-tag svg { width: 15px; height: 15px; color: var(--green); }
 .lp-video .lp-dur { position: absolute; z-index: 2; bottom: 16px; right: 16px; background: rgba(13,27,42,.75); color: #fff; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 7px; }
+.lp-fullscreen { position: absolute; z-index: 3; top: 16px; right: 16px; width: 34px; height: 34px; border: none; border-radius: 8px; background: rgba(13,27,42,.6); backdrop-filter: blur(6px); color: #fff; display: flex; align-items: center; justify-content: center; transition: background .15s var(--ease); }
+.lp-fullscreen:hover { background: rgba(13,27,42,.8); }
+.lp-fullscreen svg { width: 15px; height: 15px; }
 .lp-video.playing .lp-play { opacity: 0; pointer-events: none; }
 .lp-video .lp-playing-label { position: absolute; z-index: 2; color: rgba(255,255,255,.85); font-size: 14px; font-weight: 700; opacity: 0; transition: opacity .25s var(--ease); display: flex; align-items: center; gap: 10px; }
 .lp-video.playing .lp-playing-label { opacity: 1; }
@@ -1244,10 +1270,14 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 /* ===== Aula v2 — Coursera-style learning experience ===== */
 .lv * { box-sizing: border-box; }
-/* El contenedor del portal reserva 160px arriba para header+menú, lo que dejaba
-   ~49px de franja gris sobre el contenido del aula. Se sube el bloque para que
-   arranque justo bajo el menú, con un respiro mínimo. */
-.lv { background: #fff; min-height: 100vh; margin-top: -40px; }
+/* Antes traía margin-top:-40px para compensar un header más alto de un
+   diseño viejo (de dos filas) -- con el header actual de una sola fila
+   (.app-header, 56px en escritorio / 80px en mobile) ese margen negativo
+   hacía que .lv arrancara ENCIMA del header en vez de debajo (18-20px de
+   solape real, aunque poco visible cuando ambos fondos son blancos). Sin
+   margen, .lv usa el padding-top de 24px que ya trae .container-fluid
+   como único respiro -- limpio y sin solape en ningún breakpoint. */
+.lv { background: #fff; min-height: 100vh; }
 
 /* top bar */
 .lv-topbar { position: sticky; top: 0; z-index: 60; background: var(--navy); color: #fff; border-bottom: 1px solid rgba(255,255,255,.08); }
@@ -1275,15 +1305,37 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 /* Backdrop del rail en mobile -- mismo patrón que .cart-backdrop. */
 .lv-rail-backdrop { position: fixed; inset: 0; background: rgba(13,27,42,.55); z-index: 54; opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility .25s var(--ease); display: none; }
 .lv-rail-backdrop.open { opacity: 1; visibility: visible; }
+/* Manija de arrastre de la hoja inferior -- solo tiene sentido en mobile,
+   ver @media (max-width:1000px) donde se vuelve display:block. */
+.lv-rail-grab { display: none; width: 38px; height: 4px; border-radius: 3px; background: var(--line); margin: 10px auto 2px; flex: 0 0 auto; }
+
+/* Barra sticky solo-mobile con el botón ☰, ubicada ANTES del video/contenido
+   (ver lesson-content.blade.php y quiz-questions.blade.php) para que el
+   menú de clases quede alcanzable sin bajar a buscarlo. En desktop no pinta
+   nada (el toggle vive oculto) y no ocupa espacio. */
+.lv-mobile-bar { display: none; }
+@media (max-width: 1000px) {
+  .lv-mobile-bar { display: flex; justify-content: flex-end; align-items: center; position: sticky; top: 0; z-index: 10; background: #fff; padding: 10px 18px; border-bottom: 1px solid var(--line-2); }
+}
 
 /* shell — 56px es la altura real del header fijo del sitio (.app-header), no 72px */
 .lv-shell { width: 100%; margin: 0; display: grid; grid-template-columns: 360px 1fr; align-items: stretch; min-height: calc(100vh - 56px); }
 
 /* left rail */
-.lv-rail { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; background: #fff; border-right: 1px solid var(--line); }
+.lv-rail { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
 .lv-rail::-webkit-scrollbar { width: 9px; }
 .lv-rail::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
-.lv-rail-head { padding: 20px 22px 18px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: #fff; z-index: 2; }
+.lv-rail-head { padding: 20px 22px 18px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: #fff; z-index: 2; flex: 0 0 auto; }
+/* Footer fijo (sticky bottom) con "Volver al curso": antes vivía arriba del
+   todo, dentro de .lv-rail-head, y se perdía de vista al bajar por la lista
+   de clases. Con .lv-rail-head fijo arriba y esto fijo abajo, solo el
+   listado de capítulos hace scroll en el medio. */
+.lv-rail-foot { padding: 14px 22px; border-top: 1px solid var(--line-2); background: #fff; position: sticky; bottom: 0; z-index: 2; flex: 0 0 auto; }
+/* Mismo padding/tamaño de fuente que .lv-fbtn ("Volver al curso"/"Siguiente"
+   en el pie de la lección): antes heredaba el padding chico de .aula-back
+   (pensado para un link de breadcrumb), así que quedaba más bajo que el
+   resto de los botones de la misma pantalla. */
+.lv-rail-foot .aula-back { margin-bottom: 0; width: 100%; justify-content: center; padding: 11px 18px; font-size: 14px; border-radius: 12px; }
 .rail-back { display: flex; margin: 0 0 14px auto; width: fit-content; }
 .lv-rail-head .t { font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
 .lv-rail-head .bar { height: 7px; border-radius: 5px; background: var(--line-2); margin: 12px 0 8px; overflow: hidden; }
@@ -1321,6 +1373,18 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-main { min-width: 0; background: #fff; display: flex; flex-direction: column; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; }
 .lv-main::-webkit-scrollbar { width: 9px; }
 .lv-main::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+
+/* El header (.app-header) gana padding-top en este mismo breakpoint (ver
+   portal.css) y pasa de 56px a 80px de alto real -- el offset sticky de
+   rail/main tiene que coincidir con el alto real del header (mismo criterio
+   que en escritorio, donde top:56px = alto real del header ahí) para que
+   al hacer scroll queden pegados justo debajo, sin solape ni hueco. */
+@media (max-width: 1199px) {
+  .lv-shell { min-height: calc(100vh - 80px); }
+  .lv-rail { top: 80px; height: calc(100vh - 80px); }
+  .lv-main { top: 80px; height: calc(100vh - 80px); }
+}
+
 .lv-content { flex: 1 0 auto; }
 .lv-stage { background: #000; position: relative; aspect-ratio: 16/9; height: min(calc(100vh - 130px), 660px); width: auto; max-width: 100%; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 .lv-stage-bg { position: absolute; inset: 0; background: radial-gradient(900px 500px at 50% 35%, #173249, #06101b); }
@@ -1358,10 +1422,12 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
    padding lateral de 36px y su tope de lectura en .lv-pane; el media (video,
    pdf, imagen, audio) llena el ancho alineando sus bordes con el texto. */
 .lv-content > * { max-width: none; margin-left: 0; margin-right: 0; }
-/* El media arranca alineado con el borde superior del menú lateral (antes tenía
-   28px de margen y quedaba una franja blanca en L en la esquina superior). */
+/* 24px arriba (PC y mobile) para que el overlay de título propio de Vimeo/
+   YouTube y los controles (⛶, historial, etc.) no queden pegados/cortados
+   contra el borde superior del contenedor -- antes era 0 y, al ser el primer
+   elemento de .lv-content, el video quedaba tocando el borde. */
 .lv-content > .lp-video,
-.lv-content > .lp-embed { margin: 0 36px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(13,27,42,.16); }
+.lv-content > .lp-embed { margin: 24px 36px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(13,27,42,.16); }
 .lv-lhead { padding: 26px 36px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
 .lv-lhead .lk { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green-deep); display: inline-flex; align-items: center; gap: 7px; }
 .lv-lhead .lk svg { width: 14px; height: 14px; }
@@ -1382,11 +1448,72 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-tab.active::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: var(--green); }
 .lv-tab .badge { display: inline-block; margin-left: 7px; font-size: 11px; font-weight: 800; background: var(--green-soft); color: var(--green-deep); padding: 1px 7px; border-radius: 10px; }
 
-.lv-pane { padding: 28px 36px 36px; max-width: 820px; }
+.lv-pane { padding: 28px 36px 36px; }
+
+/* ===== Contenido enriquecido (clean($x, 'content')) =====
+   Texto libre que cargan los administradores vía editor WYSIWYG -- puede
+   traer cualquiera de las etiquetas permitidas en config/purifier.php
+   (perfil "content": h1-h6, p, a, ul/ol/li, b/strong, i/em, u, s,
+   blockquote, pre/code, img, table, hr, iframe de video). Se estandariza
+   acá para que se vea consistente sin importar qué mezcla de etiquetas
+   traiga cada lección/curso/anuncio -- .lv-pane ya se reutiliza en varias
+   vistas (ver content.blade.php) además de la descripción de la lección. */
+.lv-pane > *:first-child { margin-top: 0; }
+.lv-pane > *:last-child { margin-bottom: 0; }
+
 .lv-pane p { color: #46586a; font-size: 15px; line-height: 1.75; margin: 0 0 14px; }
 .lv-pane .term { color: #46586a; font-size: 15px; line-height: 1.75; margin: 0 0 12px; }
 .lv-pane .term b { color: var(--navy); }
-.lv-pane h3 { font-size: 16px; font-weight: 800; margin: 0 0 14px; }
+
+.lv-pane h1, .lv-pane h2, .lv-pane h3, .lv-pane h4, .lv-pane h5, .lv-pane h6 { color: var(--navy); font-weight: 800; line-height: 1.35; margin: 28px 0 14px; }
+.lv-pane h1 { font-size: 24px; }
+.lv-pane h2 { font-size: 20px; }
+.lv-pane h3 { font-size: 16px; margin-top: 0; }
+.lv-pane h4 { font-size: 15px; }
+.lv-pane h5, .lv-pane h6 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+
+.lv-pane a { color: var(--green-deep); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+.lv-pane a:hover { color: var(--navy); }
+
+/* El tema resetea `ul { list-style: none }` globalmente (pensado para menús,
+   no para prosa) -- se restaura acá explícitamente o las listas del editor
+   quedaban sin viñetas/números. */
+.lv-pane ul { list-style: disc; }
+.lv-pane ol { list-style: decimal; }
+.lv-pane ul, .lv-pane ol { color: #46586a; font-size: 15px; line-height: 1.75; margin: 0 0 14px; padding-left: 22px; }
+.lv-pane li { margin-bottom: 6px; }
+.lv-pane li:last-child { margin-bottom: 0; }
+.lv-pane ul ul, .lv-pane ol ol, .lv-pane ul ol, .lv-pane ol ul { margin: 6px 0 0; }
+
+.lv-pane strong, .lv-pane b { color: var(--navy); font-weight: 800; }
+.lv-pane u { text-decoration: underline; }
+.lv-pane s { text-decoration: line-through; }
+
+.lv-pane blockquote { margin: 0 0 14px; padding: 12px 18px; border-left: 3px solid var(--green); background: var(--field); border-radius: 0 10px 10px 0; color: var(--ink); font-style: italic; }
+.lv-pane blockquote > *:last-child { margin-bottom: 0; }
+
+.lv-pane pre { margin: 0 0 14px; padding: 14px 16px; background: var(--navy); color: var(--line-2); border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.6; }
+/* El tema trae `code { color: #fff !important; }` global (pensado para fondos
+   oscuros) -- sin el !important acá, el código quedaba blanco sobre el fondo
+   claro de .field y era invisible. */
+.lv-pane code { font-family: 'SFMono-Regular', ui-monospace, Menlo, monospace; font-size: 13px; background: var(--field); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--ink) !important; }
+.lv-pane pre code { background: none; border: none; padding: 0; color: var(--line-2) !important; }
+
+.lv-pane img { max-width: 100%; height: auto; border-radius: 12px; margin: 6px 0 14px; display: block; }
+
+.lv-pane hr { border: none; border-top: 1px solid var(--line); margin: 24px 0; }
+
+/* display:block + overflow-x en la tabla misma (sin wrapper -- el editor no
+   permite envolverla en un div propio) para que en mobile haga scroll
+   horizontal en vez de romper el layout. */
+.lv-pane table { display: block; overflow-x: auto; width: 100%; border-collapse: collapse; margin: 0 0 14px; font-size: 14px; }
+.lv-pane th, .lv-pane td { padding: 10px 14px; border: 1px solid var(--line); text-align: left; }
+.lv-pane th { background: var(--field); color: var(--navy); font-weight: 800; white-space: nowrap; }
+
+/* iframes de video (YouTube/Vimeo) embebidos dentro del texto -- distintos
+   del video principal de la lección (.lp-video). Sin wrapper para forzar
+   aspect-ratio (el purifier no lo agrega), solo se evita que desborden. */
+.lv-pane iframe { max-width: 100%; border: 0; border-radius: 12px; margin: 6px 0 14px; }
 
 .learn-content ul { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; margin: 6px 0 14px; padding: 0; list-style: none; }
 .learn-content li { display: flex; align-items: flex-start; gap: 11px; font-size: 14.5px; line-height: 1.5; color: #3c4d5e; }
@@ -1409,11 +1536,17 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 /* Sección Certificador (pestaña del aula) — tarjeta de aval más presentable
    que la fila suelta + descripción plana que había antes. */
 .cert-card { display: block; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-soft); }
+/* .cert-card::before (barra degradada verde→navy a la izquierda) es de la
+   otra tarjeta .cert-card (grid, ver más arriba) que también usa esta misma
+   clase en pages/views/courses/view.blade.php -- se cancela solo acá, sin
+   tocar esa página pública. */
+.lv-pane .cert-card::before { display: none; }
 .cert-head { display: flex; align-items: center; gap: 15px; padding: 20px 22px; background: linear-gradient(180deg, #f4f9fd, #fff); border-bottom: 1px solid var(--line-2); }
-.cert-ava { width: 52px; height: 52px; border-radius: 13px; background: var(--green-soft); color: var(--green-deep); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.cert-ava { width: 52px; height: 52px; border-radius: 50%; background: var(--green-soft); color: var(--green-deep); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; overflow: hidden; }
 .cert-ava svg { width: 26px; height: 26px; }
+.cert-ava img { width: 100%; height: 100%; object-fit: cover; }
 .cert-id { flex: 1; min-width: 0; }
-.cert-id b { display: block; font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+.cert-id b { display: block; font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; text-align: left; }
 .cert-id span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
 .cert-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--green-deep); background: #fff; border: 1px solid rgba(0,139,205,.28); padding: 7px 12px; border-radius: 20px; white-space: nowrap; flex: 0 0 auto; }
 .cert-badge svg { width: 14px; height: 14px; }
@@ -1423,11 +1556,19 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 /* Cuando la descripción viene como texto suelto con saltos de línea, se le da
    aire entre líneas para que se lea como una lista de credenciales. */
 .cert-creds br { content: ""; display: block; margin-bottom: 6px; }
-.lv-empty-note { color: var(--muted); font-size: 14px; padding: 8px 2px; }
+/* Estado vacío reusable (descripción/recursos de la lección sin contenido,
+   curso sin certificador, etc.) -- antes era texto gris suelto sin jerarquía,
+   desentonaba con el resto de la interfaz que sí cuida estos detalles. */
+.lv-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 20px; }
+.lv-empty p { margin: 0; font-size: 14px; color: var(--muted); max-width: 320px; }
 
 @media (max-width: 560px) {
-    .cert-head { flex-wrap: wrap; }
-    .cert-badge { order: 3; }
+    /* flex-wrap + order dejaba a .cert-id (flex:1) calculando su ancho antes
+       de que .cert-badge (nowrap) se sacara de esa misma línea -- terminaba
+       con ~23px de ancho real y su texto se partía letra por letra, tapado
+       por la insignia. En columna cada fila usa el ancho completo. */
+    .cert-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .cert-badge { order: 0; }
 }
 .lv-notes { width: 100%; min-height: 180px; border: 1.5px solid var(--line); border-radius: 13px; padding: 16px; font-family: inherit; font-size: 14.5px; line-height: 1.6; color: var(--ink); resize: vertical; transition: border-color .15s var(--ease), box-shadow .15s var(--ease); }
 .lv-notes:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 4px rgba(0,139,205,.12); }
@@ -1466,7 +1607,7 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-fbtn:disabled { opacity: .4; cursor: not-allowed; }
 .lv-fbtn svg { width: 18px; height: 18px; color: var(--green-deep); flex: 0 0 auto; }
 .lv-fbtn .fb-txt { min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; }
-.lv-fbtn .fb-txt .l { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.lv-fbtn .fb-txt .l { display: block; font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lv-fbtn .fb-txt .t { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* margin-left:auto, no solo justify-content:space-between en .lv-foot: con
    #prev oculto (primera pregunta/lección) .next queda como único hijo visible
@@ -1488,16 +1629,47 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 @media (max-width: 1000px) {
   .lv-shell { grid-template-columns: 1fr; }
-  .lv-rail { position: fixed; top: 72px; left: 0; bottom: 0; width: 320px; z-index: 55; transform: translateX(-105%); transition: transform .3s var(--ease); box-shadow: 20px 0 50px rgba(13,27,42,.2); height: calc(100vh - 72px); }
-  .lv-rail.open { transform: none; }
+  /* Hoja inferior: sube desde abajo en vez del cajón angosto de 320px que
+     dejaba el video asomado a la derecha (bug reportado). Cubre casi toda
+     la pantalla pero deja el video visible/oscurecido arriba como referencia. */
+  .lv-rail {
+    position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto;
+    max-height: 82vh; height: auto; z-index: 55;
+    border-right: none; border-radius: 18px 18px 0 0;
+    box-shadow: 0 -18px 50px rgba(13,27,42,.22);
+    transform: translateY(100%); transition: transform .32s var(--ease);
+    display: flex; flex-direction: column;
+  }
+  .lv-rail.open { transform: translateY(0); }
   .lv-rail-toggle { display: inline-flex; }
   .lv-rail-backdrop { display: block; }
+  .lv-rail-grab { display: block; }
+  .lv-rail-head { border-radius: 18px 18px 0 0; }
   .lv-stage { aspect-ratio: 16/9; max-height: none; }
+  /* El header del sitio (logo/avatar) queda oculto mientras la hoja está
+     abierta -- ver nota en rail.blade.php: el backdrop ya lo bloqueaba para
+     clics, pero visualmente parecía "encima" por su paleta blanco+navy. */
+  body.lv-rail-open .app-header { visibility: hidden; }
 }
 @media (max-width: 620px) {
   .lv-concepts { grid-template-columns: repeat(2, 1fr); }
   .lv-lhead, .lv-tabs, .lv-pane, .lv-foot, .lv-quiz { padding-left: 18px; padding-right: 18px; }
+  /* "Completar y continuar" no cabía en el 46% de ancho del botón + el
+     ellipsis de .fb-txt .t lo cortaba a "Completar y contin…" -- en vez de
+     truncar información se deja pasar a una segunda línea. */
+  .lv-fbtn { max-width: 48%; }
+  .lv-fbtn .fb-txt .t { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
+  /* Mismo caso cuando .l es el único texto del botón (sin lección anterior,
+     ej. "Volver al curso"): se veía "VOLVER AL CUR…" */
+  .lv-fbtn .fb-txt .l { white-space: normal; overflow: visible; text-overflow: clip; }
   .lv-ring .meta { display: none; }
+  /* De lado a lado en vez de píldora angosta -- el único botón de la fila,
+     se pierde a un costado en pantallas chicas. */
+  .lv-markbtn { display: flex; width: 100%; justify-content: center; }
+  /* La tarjeta del certificador también de lado a lado -- se saca del
+     padding lateral de .lv-pane (18px acá arriba) con márgenes negativos
+     y se le quita el radio/borde de los costados para que quede a ras. */
+  .cert-card { margin-left: -18px; margin-right: -18px; border-radius: 0; border-left: none; border-right: none; }
 }
 
 /* ===== Course catalog ===== */
@@ -1843,3 +2015,18 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .ar-stars .star i { color: var(--line); }
 .ar-rate-stars i.is-filled,
 .ar-stars .star i.is-filled { color: var(--amber); }
+
+/* ===========================================================================
+   Utilidades — extraídas de estilos inline (limpieza JS/CSS inline, sep-2026)
+   =========================================================================== */
+/* Miniatura de curso con foto real: la url() la pone el Blade vía la custom
+   property --thumb (dinámica), el resto del estilo vive acá (estático). */
+.pc-media.has-thumb { background-image: var(--thumb); background-size: cover; background-position: center; }
+/* Variante con degradado oscuro para que el badge blanco (.pc-cat) siga
+   legible sobre la foto -- usada en el listado de "Mis cursos". */
+.pc-media.has-thumb-dim { background-image: linear-gradient(150deg, rgba(13,27,42,.72), rgba(13,27,42,.55)), var(--thumb); background-size: cover; background-position: center; }
+.resume-media.has-thumb { background-image: var(--thumb); background-size: cover; background-position: center; }
+
+/* Grid de la lección (v1, sidebar a la derecha): con el acceso vencido el
+   rail se oculta y el contenido pasa a una sola columna. */
+.aula-grid.is-single { grid-template-columns: 1fr; }

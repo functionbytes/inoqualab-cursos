@@ -19,7 +19,10 @@
                 </div>
 
                 <div class="card-body p-4">
-                    <form id="formList">
+                    <form id="formList"
+                          data-is-new="{{ $list ? 'false' : 'true' }}"
+                          data-save-url="{{ $list ? route('manager.newsletter.lists.update', $list->id) : route('manager.newsletter.lists.store') }}"
+                          data-save-method="{{ $list ? 'PUT' : 'POST' }}">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="fieldName"
@@ -52,51 +55,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    var isNew     = {{ $list ? 'false' : 'true' }};
-    var saveUrl   = isNew ? '{{ route('manager.newsletter.lists.store') }}' : '{{ $list ? route('manager.newsletter.lists.update', $list->id) : '' }}';
-    var saveMethod = isNew ? 'POST' : 'PUT';
-
-    $('#btnSave').on('click', function () {
-        var name = $.trim($('#fieldName').val());
-        if (! name) { toastr.warning('El nombre es obligatorio.'); return; }
-
-        var $btn = $(this).prop('disabled', true).html(
-            '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
-        );
-
-        $.ajax({
-            url: saveUrl,
-            method: saveMethod,
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: {
-                name:        name,
-                description: $('#fieldDescription').val(),
-                is_active:   $('#fieldActive').is(':checked') ? 1 : 0,
-            },
-            success: function (res) {
-                if (res.redirect) {
-                    window.location.href = res.redirect;
-                } else {
-                    toastr.success(res.message);
-                    $btn.prop('disabled', false).text('Guardar cambios');
-                }
-            },
-            error: function (xhr) {
-                $btn.prop('disabled', false).text(isNew ? 'Crear lista' : 'Guardar cambios');
-                if (xhr.status === 422 && xhr.responseJSON) {
-                    var errors = xhr.responseJSON.errors || {};
-                    $.each(errors, function (k, msgs) { toastr.error(msgs[0]); });
-                    if (xhr.responseJSON.message && ! Object.keys(errors).length) {
-                        toastr.error(xhr.responseJSON.message);
-                    }
-                } else {
-                    toastr.error('Ocurrió un error al guardar.');
-                }
-            },
-        });
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/newsletter/lists/form.js') }}"></script>
 @endpush

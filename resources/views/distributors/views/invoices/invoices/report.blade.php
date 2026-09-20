@@ -5,7 +5,8 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <form id="formReport" role="form" onSubmit="return false">
+                <form id="formReport" role="form" onSubmit="return false"
+                      data-generate-url="{{ route('distributor.invoices.generate') }}">
                     {{ csrf_field() }}
 
                     <div class="card-body border-top">
@@ -36,7 +37,7 @@
                         <div class="action-form border-top mt-4">
                             <div class="text-center p-3">
                                 <button type="submit" class="btn btn-primary px-4 w-100">
-                                    <i class="fas fa-download me-1"></i> Descargar reporte
+                                    Descargar reporte
                                 </button>
                             </div>
                         </div>
@@ -49,16 +50,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    $("#formReport").submit(function(e) {
-        e.preventDefault();
-        var query = {
-            method: $("#method").val(),
-            condition: $("#condition").val(),
-        };
-        window.location = "{{ route('distributor.invoices.generate') }}?" + $.param(query);
-    });
-});
-</script>
+    <script src="{{ asset('distributors/js/invoices/invoices/report.js') }}"></script>
 @endpush

@@ -1,0 +1,15 @@
+.stat-card-soft-primary {
+    background: rgba(0, 139, 206, 0.10);
+}
+.stat-card-soft-info {
+    background: rgba(23, 162, 184, 0.10);
+}
+.stat-card-soft-success {
+    background: rgba(54, 199, 108, 0.12);
+}
+.stat-card-soft-danger {
+    background: rgba(220, 53, 69, 0.12);
+}
+.progress-thin {
+    height: 8px;
+}

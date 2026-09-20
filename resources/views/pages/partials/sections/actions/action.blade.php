@@ -17,7 +17,7 @@
 
         <div class="row">
             <div class="col-lg-4 col-sm-12">
-                <div class="feature-six-item mt-30 wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-six-item mt-30 wow fadeInUp delay-0-2s animated">
                     <div class="content">
                         <div class="icon">
                             <img src="/pages/images/icons/certificate.svg" alt="Icon">
@@ -28,7 +28,7 @@
                 </div>
             </div>
             <div class="col-lg-4 col-sm-12">
-                <div class="feature-six-item wow fadeInUp delay-0-4s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-six-item wow fadeInUp delay-0-4s animated">
                     <div class="content">
                         <div class="icon">
                             <img src="/pages/images/icons/tips.svg" alt="Icon">
@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="col-lg-4 col-sm-12">
-                <div class="feature-six-item mt-30 wow fadeInUp delay-0-6s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-six-item mt-30 wow fadeInUp delay-0-6s animated">
                     <div class="content">
                         <div class="icon">
                             <img src="/pages/images/icons/support.svg" alt="Icon">

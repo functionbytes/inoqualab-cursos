@@ -5,14 +5,19 @@
 @section('context-title', 'Mis cursos')
 @section('context-icon')@include('customers.includes.icon', ['name' => 'cap'])@endsection
 @section('context-subtitle', 'Continúa donde lo dejaste o inscríbete a uno nuevo')
-@section('context-stat-number', $courses->count())
-@section('context-stat-label', Str::plural('curso', $courses->count()))
+@section('context-stat-number', $courses->total())
+@section('context-stat-label', Str::plural('curso', $courses->total()))
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}">
+<link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @php
+    // $counts ya viene calculado desde el controller sobre TODAS las
+    // inscripciones del usuario (no solo la página cargada) -- antes se
+    // recalculaba acá sobre $courses->map(), que antes traía la colección
+    // completa sin paginar; con paginate() eso solo habría contado los ítems
+    // de la página actual.
     $items = $courses->map(function ($inscription) {
         $progress = min(100, max(0, (int) round($inscription->percent)));
 
@@ -40,18 +45,8 @@
         'pending' => 'Sin iniciar',
     ];
 
-    $counts = [
-        'todos' => $items->count(),
-        'progress' => $items->where('status', 'progress')->count(),
-        'done' => $items->where('status', 'done')->count(),
-        'expired' => $items->where('status', 'expired')->count(),
-    ];
-
-    $conAcceso = $items->where('status', '!=', 'expired')->count();
-
-    $promedio = $items->count() > 0
-        ? (int) round($items->avg('progress'))
-        : 0;
+    $conAcceso = $counts['todos'] - $counts['expired'];
+    $promedio = $avgProgress;
 @endphp
 
 @section('content')
@@ -152,6 +147,13 @@
                     No hay cursos en este estado. Cambia de pestaña para ver el resto de tu expediente.
                 </div>
             </div>
+
+            @if($courses->hasPages())
+                <div class="cx-pager">
+                    <span>Mostrando {{ $courses->firstItem() }}-{{ $courses->lastItem() }} de {{ $courses->total() }} resultados</span>
+                    {{ $courses->appends(request()->input())->links() }}
+                </div>
+            @endif
         </div>
 
         {{-- Panel lateral: estado global y la acción que resuelve el problema
@@ -182,13 +184,13 @@
             <div class="cx-links">
                 <h4>Atajos</h4>
                 <a href="{{ route('customers.certificates') }}">
-                    @include('customers.includes.icon', ['name' => 'award']) Mis certificados
+                    Mis certificados
                 </a>
                 <a href="{{ route('customers.orders') }}">
-                    @include('customers.includes.icon', ['name' => 'receipt']) Pedidos y facturas
+                    Pedidos y facturas
                 </a>
                 <a href="{{ route('home') }}">
-                    @include('customers.includes.icon', ['name' => 'cap']) Explorar catálogo
+                    Explorar catálogo
                 </a>
             </div>
         </aside>
@@ -201,31 +203,5 @@
 @endsection
 
 @push('scripts')
-<script>
-    $(function () {
-        function aplicar(f) {
-            var visibles = 0;
-
-            $('#cursosCards .cx-row').each(function () {
-                var ver = (f === 'todos') || ($(this).data('status') === f);
-                $(this).prop('hidden', !ver);
-                if (ver) { visibles++; }
-            });
-
-            $('#cursosVacio').prop('hidden', visibles !== 0);
-        }
-
-        $('#cursosFilter').on('click', 'button', function () {
-            var $btn = $(this);
-            $btn.siblings().removeClass('active').attr('aria-pressed', 'false');
-            $btn.addClass('active').attr('aria-pressed', 'true');
-            aplicar($btn.data('f'));
-        });
-
-        // El aviso del panel lateral filtra la lista en vez de llevar a otra página.
-        $('.cx-filter-expired').on('click', function () {
-            $('#cursosFilter button[data-f="expired"]').trigger('click');
-        });
-    });
-</script>
+<script src="{{ asset('customers/js/views/courses/index-b.js') }}"></script>
 @endpush

@@ -2,6 +2,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ url('pages/css/print.css') }}">
+    <link rel="stylesheet" href="{{ asset('supports/css/views/orders/payment.css') }}">
 @endpush
 
 @section('content')
@@ -75,8 +76,8 @@
                                             <label for="wompi" class="font-weight-500 mb-0 custom-control-label">
                                                 <span class="fs-12 text-heading d-inline-block mr-1"><i
                                                         class="fas fa-credit-card"></i></span>
-                                                <font style="vertical-align: inherit;">
-                                                    <font style="vertical-align: inherit;">
+                                                <font class="valign-inherit">
+                                                    <font class="valign-inherit">
                                                         Pagar con Wompi</font>
                                                 </font>
                                             </label>
@@ -87,8 +88,8 @@
                                             <label for="direct" class="font-weight-500 mb-0 custom-control-label"><span
                                                     class="fs-12 text-heading d-inline-block mr-1"><i
                                                         class="fas fa-money-bill-wave"></i></span>
-                                                <font style="vertical-align: inherit;">
-                                                    <font style="vertical-align: inherit;">Paga con directamente</font>
+                                                <font class="valign-inherit">
+                                                    <font class="valign-inherit">Paga con directamente</font>
                                                 </font>
                                             </label>
                                         </div>
@@ -96,7 +97,8 @@
 
 
                                 </div>
-                                <a href="#" class="default-btn actionPayment text-center"><span
+                                <a href="#" class="default-btn actionPayment text-center"
+                                   data-whatsapp="{{ $setting->whatsapp }}"><span
                                         class="label">Pagar</span></a>
                             </div>
                         </div>
@@ -122,26 +124,5 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-
-            $(".actionPayment").click(function() {
-
-                var payment = $('input:radio[name=payment]:checked').val();
-
-                if (payment == 'wompi') {
-
-                    $(".waybox-button").click();
-
-                } else {
-                    var cellphone = @json($setting->whatsapp);
-                    var win = window.open('https://api.whatsapp.com/send?phone=57' + cellphone, '_blank');
-                    win.focus();
-                }
-            });
-
-        });
-    </script>
-
+<script src="{{ asset('supports/js/views/orders/payment.js') }}"></script>
 @endpush

@@ -34,6 +34,8 @@
         'book' => '<path d="M4 5h16v12H4z"/><path d="M8 21h8"/>',
         'credit-card' => '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
         'menu' => '<path d="M4 6h16M4 12h16M4 18h16"/>',
+        'expand' => '<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+        'logout' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
         'dots' => '<circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/>',
         // ── Iconos del aula / evaluaciones ──────────────────────────────
         'circle-play' => '<circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5Z"/>',
@@ -71,7 +73,7 @@
     $sw = $stroke ?? 2;
 @endphp
 @if($d)
-    <svg viewBox="0 0 24 24" width="{{ $sz }}" height="{{ $sz }}" fill="none" stroke="currentColor"
+    <svg class="icon-svg" viewBox="0 0 24 24" width="{{ $sz }}" height="{{ $sz }}" fill="none" stroke="currentColor"
          stroke-width="{{ $sw }}" stroke-linecap="round" stroke-linejoin="round"
-         aria-hidden="true" focusable="false" style="display:block;flex:0 0 auto">{!! $d !!}</svg>
+         aria-hidden="true" focusable="false">{!! $d !!}</svg>
 @endif

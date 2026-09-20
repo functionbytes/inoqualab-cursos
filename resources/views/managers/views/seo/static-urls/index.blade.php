@@ -5,7 +5,8 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}" data-flash-error="{{ session('error') }}">
 
         <div class="card">
 
@@ -99,7 +100,7 @@
                         <table class="table table-hover align-middle mb-0 text-nowrap">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width:40px">
+                                    <th class="col-checkbox">
                                         <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
                                     <th>URL</th>
@@ -193,176 +194,26 @@
         </div>
     </div>
 
-    {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
-        <button type="button" class="btn btn-primary shadow-lg px-4"
-                data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Aplicar accion
-        </button>
-    </div>
+    <div id="bulk-config" class="d-none" data-bulk-url="{{ route('manager.seo.static-urls.bulk-action') }}"></div>
 
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Accion masiva</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-3">
-                        Se aplicará la acción sobre <strong><span data-bulk-count>0</span> URL(s)</strong>.
-                    </p>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Accion</label>
-                        <select id="bulk-action-select" class="form-select">
-                            <option value="">Seleccionar acción...</option>
-                            <option value="activate">Activar</option>
-                            <option value="deactivate">Desactivar</option>
-                            <option value="delete">Eliminar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button id="btn-bulk-apply" type="button" class="btn btn-primary w-100 mb-2">
-                        Aplicar
-                    </button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'URL(s)',
+        'bulkActions' => [
+            ['value' => 'activate', 'label' => 'Activar'],
+            ['value' => 'deactivate', 'label' => 'Desactivar'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     @include('managers.includes.delete')
 
 @endsection
 
 @push('css')
-<style>.bulk-toolbar-float { z-index: 1050; }</style>
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
 @endpush
 
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Bulk selection ────────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getChecked() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#btn-bulk-apply').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getChecked();
-
-        if (!action) { toastr.warning('Selecciona una acción.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos una URL.'); return; }
-
-        $('#btn-bulk-apply').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
-            url: '{{ route('manager.seo.static-urls.bulk-action') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? 'Acción aplicada.');
-                setTimeout(function () { location.reload(); }, 700);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-            }
-        });
-    });
-
-    // ── Toggle activo vía AJAX ────────────────────────────────────────────────
-    $(document).on('click', '.toggle-active', function (e) {
-        e.preventDefault();
-        var url = $(this).data('url');
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: { _method: 'PATCH' },
-            success: function (res) {
-                toastr.success(res.message ?? 'Estado actualizado.');
-                setTimeout(function () { location.reload(); }, 600);
-            },
-            error: function () {
-                toastr.error('Error al cambiar el estado.');
-            }
-        });
-    });
-
-    // ── Eliminar vía modal de confirmación ────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-    $('#delete-form').on('submit', function (e) {
-        e.preventDefault();
-        var url = $(this).attr('action');
-        var $btn = $(this).find('[type=submit]');
-        $btn.prop('disabled', true).text('Eliminando...');
-        $.ajax({
-            url: url,
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                $('#delete-modal').modal('hide');
-                toastr.success(res.message || 'Eliminado correctamente');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function () {
-                toastr.error('Error al eliminar');
-                $btn.prop('disabled', false).text('Confirmar');
-            }
-        });
-    });
-
-});
-</script>
-
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/static-urls/index.js') }}"></script>
 @endpush

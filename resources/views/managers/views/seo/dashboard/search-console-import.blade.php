@@ -4,14 +4,15 @@
 
 @section('content')
 
-    <div class="row justify-content-center">
+    <div class="row justify-content-center"
+         data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+         data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
         <div class="col-md-12">
             <div class="card shadow-sm">
                 <div class="card-body">
 
                     <div class="mb-4 text-center">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3"
-                             style="width: 80px; height: 80px;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3 icon-box-80">
                             <i class="fab fa-google fa-3x text-primary"></i>
                         </div>
                         <h5 class="fw-bold">Importar datos de Search Console</h5>
@@ -40,8 +41,7 @@
                             <h6 class="fw-bold mb-3">Cómo exportar desde Search Console</h6>
                             <div class="d-flex mb-3">
                                 <div class="me-3">
-                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                          style="width: 32px; height: 32px;">1</span>
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center icon-box-32">1</span>
                                 </div>
                                 <div>
                                     <strong class="d-block">Accede a Google Search Console</strong>
@@ -50,8 +50,7 @@
                             </div>
                             <div class="d-flex mb-3">
                                 <div class="me-3">
-                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                          style="width: 32px; height: 32px;">2</span>
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center icon-box-32">2</span>
                                 </div>
                                 <div>
                                     <strong class="d-block">Resultados de búsqueda → Páginas</strong>
@@ -60,8 +59,7 @@
                             </div>
                             <div class="d-flex mb-3">
                                 <div class="me-3">
-                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center"
-                                          style="width: 32px; height: 32px;">3</span>
+                                    <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center icon-box-32">3</span>
                                 </div>
                                 <div>
                                     <strong class="d-block">Exportar → Descargar CSV</strong>
@@ -70,8 +68,7 @@
                             </div>
                             <div class="d-flex">
                                 <div class="me-3">
-                                    <span class="badge bg-success rounded-circle d-flex align-items-center justify-content-center"
-                                          style="width: 32px; height: 32px;">
+                                    <span class="badge bg-success rounded-circle d-flex align-items-center justify-content-center icon-box-32">
                                         <i class="fas fa-check"></i>
                                     </span>
                                 </div>
@@ -129,15 +126,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/dashboard/search-console-import.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-    @if(session('success'))
-        toastr.success('{{ session('success') }}', 'Éxito');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}', 'Error');
-    @endif
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
 @endpush

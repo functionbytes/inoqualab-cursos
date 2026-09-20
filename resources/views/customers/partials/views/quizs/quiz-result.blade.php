@@ -20,7 +20,7 @@
         </p>
         @if ($topic->quiz_again >= 1)
             <div class="ar-actions">
-                <a class="ar-primary" href="{{ route('customers.quiz.tryagain', $quiz->id) }}">@include('customers.includes.icon', ['name' => 'refresh']) Reintentar</a>
+                <a class="ar-primary" href="{{ route('customers.quiz.tryagain', $quiz->id) }}">Reintentar</a>
             </div>
         @endif
     @endif
@@ -28,13 +28,12 @@
 
 <div class="lv-foot ar-foot">
     @if ($prevLesson && $prevLesson !== 'true')
-        <form action="{{ route('customers.courses.prev') }}" method="POST" onsubmit="var b=this.querySelector('button');b.disabled=true;">
+        <form action="{{ route('customers.courses.prev') }}" method="POST" class="js-disable-on-submit">
             @csrf
             <input type="hidden" name="course" value="{{ $course->id }}">
             <input type="hidden" name="lesson" value="{{ $lesson->id }}">
             <input type="hidden" name="user" value="{{ $user->id }}">
             <button type="submit" class="lv-fbtn" aria-label="Lección anterior">
-                @include('customers.includes.icon', ['name' => 'arrow-left'])
                 <span class="fb-txt">
                     <span class="l">Anterior</span>
                     <span class="t">{{ ucfirst(Str::lower($prevLesson->title)) }}</span>
@@ -46,14 +45,13 @@
     @endif
 
     @if ($score >= $passingScore)
-        <form action="{{ route('customers.quiz.realized') }}" method="POST" onsubmit="var b=this.querySelector('button');b.disabled=true;">
+        <form action="{{ route('customers.quiz.realized') }}" method="POST" class="js-disable-on-submit">
             @csrf
             <input type="hidden" name="course" value="{{ $course->id }}">
             <input type="hidden" name="lesson" value="{{ $lesson->id }}">
             <input type="hidden" name="user" value="{{ $user->id }}">
             <button type="submit" class="lv-fbtn next" aria-label="Continuar">
                 <span class="fb-txt"><span class="l">Siguiente</span><span class="t">Continuar</span></span>
-                @include('customers.includes.icon', ['name' => 'arrow-right'])
             </button>
         </form>
     @else

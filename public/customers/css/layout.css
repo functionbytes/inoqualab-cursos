@@ -1,0 +1,19 @@
+/* Modal de aviso de sesión por expirar (ver public/customers/js/layout.js) */
+.cx-session-modal-header {
+    background: #081A28;
+}
+
+.cx-session-modal-icon {
+    display: inline-block;
+    vertical-align: -3px;
+    margin-right: 8px;
+}
+
+.cx-session-modal-countdown {
+    color: #081A28;
+}
+
+.cx-session-modal-btn {
+    background: #081A28;
+    color: #fff;
+}

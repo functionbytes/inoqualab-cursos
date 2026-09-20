@@ -3,7 +3,12 @@
 
 @section('content')
 
-    <div class="container-fluid">
+    <div class="container-fluid" id="accounting-dashboard" data-config='@php $__jsonInline1 = [
+        "monthValues" => $monthValues,
+        "monthNames" => $monthNames,
+        "yearValues" => $yearValues,
+        "yearNames" => $yearNames,
+    ]; @endphp@json($__jsonInline1)'>
         <div class="row">
             <div class="col-sm-6">
                 <div class="card">
@@ -193,207 +198,9 @@
 @endsection
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/owl.carousel/dist/owl.carousel.min.js') }}" type="text/javascript"></script>
     <script src="{{ url('managers/libs/apexcharts/dist/apexcharts.min.js') }}" type="text/javascript"></script>
-
-    <script>
-        $(document).ready(function() {
-
-
-            var customers = {
-                chart: {
-                    id: "sparkline3",
-                    type: "area",
-                    fontFamily: "Plus Jakarta Sans', sans-serif",
-                    foreColor: "#008bce",
-                    height: 60,
-                    sparkline: {
-                        enabled: true,
-                    },
-                    group: "sparklines",
-                },
-                series: [
-                    {
-                        name: "Clientes",
-                        color: "#000",
-                        data: [30, 25, 35, 20, 30, 40],
-                    },
-                ],
-                stroke: {
-                    curve: "smooth",
-                    width: 2,
-                },
-                fill: {
-                    type: "gradient",
-                    gradient: {
-                        shadeIntensity: 0,
-                        inverseColors: false,
-                        opacityFrom: 0.12,
-                        opacityTo: 0,
-                        stops: [20, 180],
-                    },
-                },
-                markers: {
-                    size: 0,
-                },
-                tooltip: {
-                    theme: "dark",
-                    fixed: {
-                        enabled: true,
-                        position: "right",
-                    },
-                    x: {
-                        show: false,
-                    },
-                },
-            };
-            new ApexCharts(document.querySelector('#customers1'), customers).render();
-            new ApexCharts(document.querySelector('#customers2'), customers).render();
-            new ApexCharts(document.querySelector('#customers3'), customers).render();
-            new ApexCharts(document.querySelector('#customers4'), customers).render();
-
-
-            var invoice = {
-                series: [
-                    {
-                        name: "Facturas",
-                        data: @json($monthValues),
-                    },
-                ],
-                chart: {
-                    toolbar: {
-                        show: false,
-                    },
-                    height: 260,
-                    type: "bar",
-                    fontFamily: "Plus Jakarta Sans', sans-serif",
-                    foreColor: "#000",
-                },
-                colors: ["#000", "#008bce", "#000", "#4f8ac8", "#000", "#4f8ac8"],
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: "45%",
-                        distributed: true,
-                        endingShape: "rounded",
-                    },
-                },
-
-                dataLabels: {
-                    enabled: false,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                    xaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                xaxis: {
-                    categories: @json($monthNames),
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    labels: {
-                        show: false,
-                    },
-                },
-                tooltip: {
-                    theme: "dark",
-                },
-            };
-
-            var invoices = new ApexCharts(document.querySelector("#invoices"), invoice);
-            invoices.render();
-
-
-            var order = {
-                series: [
-                    {
-                        name: "Facturas",
-                        data: @json($yearValues),
-                    },
-                ],
-
-                chart: {
-                    toolbar: {
-                        show: false,
-                    },
-                    height: 260,
-                    type: "bar",
-                    fontFamily: "Plus Jakarta Sans', sans-serif",
-                    foreColor: "#000",
-                },
-                colors: ["#000", "#008bce", "#000", "#4f8ac8", "#000", "#4f8ac8"],
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: "45%",
-                        distributed: true,
-                        endingShape: "rounded",
-                    },
-                },
-
-                dataLabels: {
-                    enabled: false,
-                },
-                legend: {
-                    show: false,
-                },
-                grid: {
-                    yaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                    xaxis: {
-                        lines: {
-                            show: false,
-                        },
-                    },
-                },
-                xaxis: {
-
-                    categories: @json($yearNames),
-                    axisBorder: {
-                        show: false,
-                    },
-                    axisTicks: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    labels: {
-                        show: false,
-                    },
-                },
-                tooltip: {
-                    theme: "dark",
-                },
-            };
-
-            var orders = new ApexCharts(document.querySelector("#invoiceList"), order);
-            orders.render();
-
-
-
-
-        });
-    </script>
+    <script src="{{ asset('accountings/js/views/dashboard/index.js') }}"></script>
 @endpush
 
 

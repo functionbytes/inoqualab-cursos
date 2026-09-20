@@ -172,62 +172,51 @@
     color: var(--green-deep);
 }
 .pb-head h1 { font-size: 30px; font-weight: 800; margin: 8px 0 0; letter-spacing: -.025em; }
-.pb-search {
-    display: inline-flex; align-items: center; gap: 10px; background: #fff;
-    border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px;
-    box-shadow: var(--shadow-soft); color: var(--muted-2); font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: border-color .15s var(--ease), color .15s var(--ease);
-}
-.pb-search:hover { border-color: var(--green); color: var(--green-deep); }
-.pb-search svg { width: 16px; height: 16px; }
 
-/* ===== Bloque dominante ===== */
-.pb-hero {
-    position: relative; overflow: hidden; background: var(--navy); border-radius: 22px;
-    padding: 34px 38px; display: grid; grid-template-columns: 1fr 200px; gap: 34px;
-    align-items: center; box-shadow: 0 18px 46px rgba(13,27,42,.22);
+.pb-sub { font-size: 13.5px; font-weight: 600; color: var(--muted); margin: 8px 0 0; }
+
+/* ===== Chips de resumen ===== */
+.pb-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
+.pb-chip {
+    display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line);
+    border-radius: 20px; padding: 8px 16px 8px 8px; font-size: 12.5px; font-weight: 700; color: var(--ink);
 }
-.pb-hero::after {
+.pb-chip b {
+    display: flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+    border-radius: 50%; background: var(--navy); color: #fff; font-size: 11px;
+}
+.pb-chip.is-warn b { background: var(--amber); }
+
+/* ===== Banda de próxima acción: fusiona "retomar" + "próximo hito" ===== */
+.pb-next {
+    position: relative; overflow: hidden; background: var(--navy); border-radius: 18px;
+    padding: 22px 26px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    box-shadow: 0 14px 36px rgba(13,27,42,.18); margin-bottom: 10px;
+}
+.pb-next::after {
     content: ''; position: absolute; inset: 0; pointer-events: none;
-    background-image: linear-gradient(115deg, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 26px 26px;
+    background: radial-gradient(420px 200px at 100% -30%, rgba(0,139,205,.25), transparent 60%);
 }
-.pb-hero-body { position: relative; z-index: 1; }
-.pb-hero-body .eyebrow {
-    font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--green);
+.pb-next .ic {
+    position: relative; z-index: 1; flex: 0 0 auto; width: 50px; height: 50px; border-radius: 14px;
+    background: rgba(79,195,247,.16); color: #4fc3f7; display: flex; align-items: center; justify-content: center;
 }
-.pb-hero-body h2 {
-    font-size: 27px; font-weight: 800; color: #fff; letter-spacing: -.02em;
-    margin: 11px 0 0; line-height: 1.25; max-width: 640px; text-wrap: pretty;
+.pb-next .ic svg { width: 23px; height: 23px; }
+.pb-next.is-warn .ic { background: rgba(245,166,35,.16); color: #f5a623; }
+.pb-next.is-done .ic { background: rgba(79,195,247,.16); color: #4fc3f7; }
+.pb-next .txt { position: relative; z-index: 1; flex: 1; min-width: 220px; }
+.pb-next .lbl {
+    font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #4fc3f7;
+    margin-bottom: 4px;
 }
-.pb-hero-meta { display: flex; align-items: center; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
-.pb-hero-meta span {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 13px; font-weight: 600; color: rgba(255,255,255,.6);
+.pb-next.is-warn .lbl { color: #f5a623; }
+.pb-next .txt b { display: block; color: #fff; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+.pb-next .txt span { display: block; color: rgba(255,255,255,.55); font-size: 12.5px; font-weight: 600; margin-top: 3px; }
+.pb-next .pb-cta {
+    position: relative; z-index: 1; flex: 0 0 auto; background: #fff; color: var(--navy);
+    box-shadow: none;
 }
-.pb-hero-meta svg { width: 15px; height: 15px; color: var(--green); }
-.pb-hero-actions { display: flex; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
-.pb-hero-actions a {
-    display: inline-flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 800;
-    padding: 14px 24px; border-radius: 12px; text-decoration: none; white-space: nowrap;
-    transition: background .18s var(--ease), transform .18s var(--ease);
-}
-.pb-hero-actions .go { background: var(--green); color: #fff; box-shadow: 0 12px 30px rgba(0,139,205,.35); }
-.pb-hero-actions .go:hover { background: var(--green-deep); color: #fff; transform: translateY(-2px); }
-.pb-hero-actions .go svg { width: 15px; height: 15px; }
-.pb-hero-actions .ghost { background: rgba(255,255,255,.08); color: #fff; }
-.pb-hero-actions .ghost:hover { background: rgba(255,255,255,.14); color: #fff; }
-
-.pb-ring { position: relative; z-index: 1; display: flex; justify-content: center; }
-.pb-ring svg { width: 168px; height: 168px; transform: rotate(-90deg); }
-.pb-ring .track { fill: none; stroke: rgba(255,255,255,.12); stroke-width: 9; }
-.pb-ring .fill { fill: none; stroke: var(--green); stroke-width: 9; stroke-linecap: round; }
-.pb-ring .val {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-}
-.pb-ring .val b { font-size: 34px; font-weight: 800; color: #fff; line-height: 1; }
-.pb-ring .val span { font-size: 11.5px; font-weight: 700; color: rgba(255,255,255,.5); margin-top: 5px; }
+.pb-next .pb-cta:hover { background: #e8edf2; color: var(--navy); }
 
 /* ===== Encabezado de sección ===== */
 .pb-sec {
@@ -237,86 +226,50 @@
 .pb-sec h3 { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -.015em; }
 .pb-sec .note { font-size: 12.5px; color: var(--muted); font-weight: 700; }
 
-/* ===== Ruta como stepper ===== */
-.pb-route { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-.pb-step {
-    background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 18px;
-    display: flex; flex-direction: column;
+/* ===== Todos tus cursos: filas compactas con barra inline ===== */
+.pb-list { display: flex; flex-direction: column; gap: 10px; }
+.pb-row {
+    display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--line);
+    border-radius: 13px; padding: 14px 16px;
 }
-.pb-step.is-active { border: 1.5px solid var(--green); box-shadow: 0 10px 28px rgba(0,139,205,.14); }
-.pb-step .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pb-step .num {
-    width: 30px; height: 30px; border-radius: 9px; background: var(--field);
-    border: 1px solid var(--line); color: var(--muted);
-    display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800;
+.pb-row .ic {
+    flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; background: var(--field);
+    color: var(--muted-2); display: flex; align-items: center; justify-content: center;
 }
-.pb-step.is-active .num { background: var(--green); border-color: var(--green); color: #fff; }
-.pb-step .chip {
-    font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-    padding: 4px 9px; border-radius: 6px; background: var(--green-soft); color: var(--green-deep);
+.pb-row .ic svg { width: 17px; height: 17px; }
+.pb-row.st-done .ic { background: var(--green-soft); color: var(--green-deep); }
+.pb-row.st-expired .ic { background: var(--red-soft); color: var(--red); }
+.pb-row .txt { flex: 1; min-width: 0; }
+.pb-row .txt b {
+    display: block; font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap;
 }
-.pb-step.st-expired .chip { background: var(--red-soft); color: var(--red); }
-.pb-step.st-pending .chip { background: var(--line-2); color: var(--muted); }
-.pb-step .title {
-    font-size: 13px; font-weight: 800; line-height: 1.4; margin: 14px 0 12px;
-    min-height: 54px; text-wrap: pretty;
-    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
-.pb-step .bar { height: 6px; border-radius: 4px; background: var(--line-2); overflow: hidden; margin-top: auto; }
-.pb-step .bar i {
+.pb-row .txt span { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.pb-row .bar { width: 90px; height: 6px; border-radius: 4px; background: var(--line-2); overflow: hidden; flex: 0 0 auto; }
+.pb-row .bar i {
     display: block; height: 100%; width: var(--p, 0%); border-radius: 4px;
     background: linear-gradient(90deg, var(--green), #0072a8);
 }
-.pb-step .sub { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-top: 8px; }
-.pb-step .act {
-    display: block; text-align: center; margin-top: auto; font-size: 12px; font-weight: 800;
-    padding: 9px; border-radius: 9px; border: 1.5px solid var(--line); color: var(--navy);
-    text-decoration: none; transition: border-color .15s var(--ease), background .15s var(--ease);
+.pb-row .pct { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: var(--muted); width: 34px; text-align: right; }
+.pb-row .act {
+    flex: 0 0 auto; font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 9px;
+    border: 1.5px solid var(--line); color: var(--navy); text-decoration: none;
+    transition: border-color .15s var(--ease), background .15s var(--ease);
 }
-.pb-step .act:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
-
-/* ===== Franja inferior ===== */
-.pb-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; margin-top: 32px; }
-.pb-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 18px;
-    padding: 24px 26px; box-shadow: var(--shadow-soft);
-}
-.pb-card h4 { font-size: 15px; font-weight: 800; margin: 0 0 4px; }
-.pb-card p { font-size: 13px; color: var(--muted); font-weight: 600; line-height: 1.6; margin: 0 0 18px; }
-.pb-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.pb-card-head h4 { margin: 0; }
-.pb-card-head a { font-size: 12.5px; font-weight: 800; color: var(--green-deep); text-decoration: none; }
-
-.pb-goal { display: flex; align-items: center; gap: 14px; }
-.pb-goal .ic {
-    width: 44px; height: 44px; border-radius: 12px; background: var(--green-soft); color: var(--green-deep);
-    display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
-}
-.pb-goal .ic svg { width: 20px; height: 20px; }
-.pb-goal .grow { flex: 1; min-width: 0; }
-.pb-goal .bar { height: 8px; border-radius: 5px; background: var(--line-2); overflow: hidden; }
-.pb-goal .bar i {
-    display: block; height: 100%; width: var(--p, 0%); border-radius: 5px;
-    background: linear-gradient(90deg, var(--green), #0072a8);
-}
-.pb-goal .sub { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 8px; }
+.pb-row .act:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
 
 .pb-cta {
     display: inline-block; background: var(--navy); color: #fff; font-size: 13px; font-weight: 800;
-    padding: 12px 22px; border-radius: 11px; text-decoration: none;
+    padding: 12px 22px; border-radius: 11px; text-decoration: none; white-space: nowrap;
 }
 .pb-cta:hover { background: var(--navy-soft); color: #fff; }
 
-.pb-figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.pb-figs > div { text-align: center; background: var(--field); border: 1px solid var(--line-2); border-radius: 12px; padding: 14px 8px; }
-.pb-figs b { display: block; font-size: 20px; font-weight: 800; color: var(--navy); line-height: 1; }
-.pb-figs span { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-top: 6px; }
-
-@media (max-width: 900px) {
-    .pb-hero { grid-template-columns: 1fr; }
-    .pb-ring { justify-content: flex-start; }
-    .pb-figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 620px) {
+    .pb-next { padding: 20px; }
+    .pb-next .pb-cta { width: 100%; text-align: center; }
+    .pb-row { flex-wrap: wrap; }
+    .pb-row .bar { order: 3; flex: 1 1 100%; width: auto; }
+    .pb-row .pct { order: 2; }
 }
 
 /* ===========================================================================
@@ -390,14 +343,29 @@
     border: 0; background: transparent; outline: none; width: 100%;
     font-size: 14.5px; font-weight: 600; color: var(--ink);
 }
-.pnl-search input::placeholder { color: var(--muted-2); font-weight: 600; }
+/* El placeholder heredaba el mismo peso/tamaño que el texto que el usuario
+   escribe (14.5px/700) -- se veía más "gritado" de lo que corresponde a un
+   texto de ayuda, más grande que las columnas de la tabla debajo. */
+.pnl-search input::placeholder { color: var(--muted-2); font-weight: 500; font-size: 13px; }
+
+/* Filtro por pestañas (Mis cursos, Mis certificados...). Vivía solo en
+   aula.css -- movido acá para que esté disponible en cualquier vista sin
+   tener que cargar ese archivo completo solo por este componente. */
+.pnl-filter { display: inline-flex; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 5px; box-shadow: var(--shadow-soft); margin-bottom: 22px; flex-wrap: wrap; }
+.pnl-filter button, .pnl-filter a {
+    padding: 9px 17px; border: none; background: none; border-radius: 9px; font-size: 13px; font-weight: 700;
+    color: var(--muted); cursor: pointer; transition: background .15s var(--ease), color .15s var(--ease);
+    text-decoration: none; display: inline-flex; align-items: center;
+}
+.pnl-filter button:hover, .pnl-filter a:hover { color: var(--ink); }
+.pnl-filter button.active, .pnl-filter a.active { background: var(--navy); color: #fff; }
 
 /* Recuento dentro de cada botón de filtro */
-.pnl-filter button .cnt {
+.pnl-filter button .cnt, .pnl-filter a .cnt {
     display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 800;
     padding: 2px 7px; border-radius: 20px; background: var(--line-2); color: var(--muted);
 }
-.pnl-filter button.active .cnt { background: rgba(255,255,255,.2); color: #fff; }
+.pnl-filter button.active .cnt, .pnl-filter a.active .cnt { background: rgba(255,255,255,.2); color: #fff; }
 
 /* Línea que explica el estado de la tarjeta */
 .pc-note {
@@ -500,6 +468,13 @@
 
 .cx-none { padding: 48px 40px; text-align: center; font-size: 13.5px; font-weight: 600; color: var(--muted); }
 
+.cx-pager {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--line); border-top: none; border-radius: 0 0 18px 18px;
+    margin-top: -1px; padding: 16px 22px;
+    font-size: 12.5px; font-weight: 700; color: var(--muted);
+}
+
 /* ===== Panel lateral ===== */
 .cx-side { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 24px; }
 
@@ -568,7 +543,18 @@
 
 /* ===========================================================================
    Certificados · variante A (galería)
+   Subtítulo/alerta, grupos por año y el pie con el paginador viven en una
+   sola caja (.ct-table) -- mismo criterio que .od-table en Mis pedidos.
    =========================================================================== */
+.ct-table {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    box-shadow: var(--shadow-soft); overflow: hidden;
+}
+.ct-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 20px 24px; border-bottom: 1px solid var(--line-2);
+}
+.ct-head .sub { font-size: 13.5px; font-weight: 600; color: var(--muted); }
 .ct-alert {
     display: inline-flex; align-items: center; gap: 9px; background: var(--amber-soft);
     border: 1px solid #f0ddb0; border-radius: 10px; padding: 9px 14px;
@@ -576,7 +562,48 @@
 }
 .ct-alert svg { width: 16px; height: 16px; }
 
-.ct-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+/* .pnl-filter trae su propio look de "isla" (fondo blanco + borde + sombra)
+   pensado para flotar sobre el fondo gris de la página -- cuando vive dentro
+   de una caja que ya es blanca (.ct-table, .od-table) se aplana a una fila
+   simple con una línea inferior en vez de una tarjeta dentro de otra
+   tarjeta. Compartida entre Certificados y Mis pedidos. */
+.pnl-filter-flat {
+    margin: 0; padding: 14px 24px; border: none; border-radius: 0; box-shadow: none;
+    background: transparent; border-bottom: 1px solid var(--line-2);
+}
+.ct-filter-empty {
+    text-align: center; padding: 30px 20px; font-size: 13px; font-weight: 600; color: var(--muted);
+}
+
+.ct-body-wrap { padding: 24px; }
+
+/* Encabezado de grupo por año (emitido) */
+.ct-year { display: flex; align-items: center; gap: 12px; margin: 28px 0 16px; }
+.ct-year:first-child { margin-top: 0; }
+.ct-year b { font-size: 15px; font-weight: 800; }
+.ct-year span { font-size: 11.5px; font-weight: 700; color: var(--muted-2); }
+.ct-year .line { flex: 1; height: 1px; background: var(--line); }
+
+.ct-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    padding: 16px 24px; background: var(--field); border-top: 1px solid var(--line-2);
+    font-size: 12.5px; font-weight: 700; color: var(--muted);
+}
+
+/* 1/2/3 columnas explícitas por breakpoint, no auto-fill: con
+   minmax(280px, 340px) el máximo fijo hacía que el navegador contara
+   columnas usando ESE máximo (no el mínimo), así que a ~600-900px de ancho
+   entraba 1 sola columna en vez de 2. Cambiar a minmax(280px, 1fr) arregla
+   el conteo pero desborda a 4+ columnas en monitores anchos (1440px+) --
+   breakpoints fijos garantizan exactamente 1 en mobile, 2 en tablet y 3 en
+   desktop sin importar qué tan ancha sea la pantalla. */
+.ct-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+@media (min-width: 640px) {
+    .ct-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    .ct-grid { grid-template-columns: repeat(3, 1fr); }
+}
 
 .ct-card {
     background: #fff; border: 1px solid var(--line); border-radius: 18px;
@@ -750,16 +777,27 @@
     padding: 11px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 700; color: var(--green-deep);
 }
 .od-searching a { margin-left: 10px; font-weight: 800; text-decoration: underline; }
+/* Variante dentro de .od-table (estado con resultados): sin radio ni margen
+   propios, es una franja más dentro de la misma caja, no una tarjeta aparte. */
+.od-searching.od-searching-inline { border-radius: 0; border-width: 0 0 1px; margin: 0; padding: 13px 24px; }
 
+/* Título + buscador + columnas + filas + pie (con el paginador) viven en la
+   misma caja -- antes el título/buscador eran una tarjeta aparte con un
+   espacio visible antes de la tabla. */
 .od-table {
     background: #fff; border: 1px solid var(--line); border-radius: 18px;
     box-shadow: var(--shadow-soft); overflow: hidden;
 }
+.od-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    padding: 20px 24px; border-bottom: 1px solid var(--line-2);
+}
+.od-head .sub { font-size: 13.5px; font-weight: 600; color: var(--muted); }
 .od-cols, .od-row {
     display: grid; grid-template-columns: 150px minmax(0, 1fr) 130px 140px 200px; gap: 18px; align-items: center;
 }
 .od-cols {
-    padding: 15px 24px; background: var(--field); border-bottom: 1px solid var(--line-2);
+    padding: 13px 24px; border-bottom: 1.5px solid var(--ink);
     font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2);
 }
 .od-row { padding: 18px 24px; border-bottom: 1px solid var(--line-2); }
@@ -860,10 +898,15 @@
     font-size: 12.5px; font-weight: 800; color: var(--green-deep); text-decoration: none;
 }
 .ob-card footer a svg { width: 15px; height: 15px; }
+/* Mismo azul de marca que el resto de los CTA primarios del portal
+   (.od-act .solid en la variante A, .pc-btn, .aula-back, .dl-btn) -- antes
+   era navy, un color distinto para la misma acción "Pagar" según la
+   variante activa. */
 .ob-card footer .pay {
-    margin-left: auto; background: var(--navy); color: #fff; padding: 10px 18px; border-radius: 10px;
+    margin-left: auto; background: var(--green); color: #fff; padding: 10px 18px; border-radius: 10px;
+    transition: transform .15s var(--ease);
 }
-.ob-card footer .pay:hover { background: var(--navy-soft); color: #fff; }
+.ob-card footer .pay:hover { background: var(--green); color: #fff; transform: translateY(-1px); }
 
 .ob-side { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 24px; }
 .ob-panel {
@@ -882,11 +925,13 @@
 .ob-panel .figs b.warn { color: #f0c675; }
 .ob-panel .figs span { display: block; font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.5); margin-top: 3px; }
 
+/* Mismo azul que .ob-card footer .pay -- misma acción "Pagar", mismo color. */
 .cx-warn-link {
-    display: block; text-align: center; background: var(--navy); color: #fff;
+    display: block; text-align: center; background: var(--green); color: #fff;
     font-size: 13px; font-weight: 800; padding: 12px; border-radius: 11px; text-decoration: none;
+    transition: transform .15s var(--ease);
 }
-.cx-warn-link:hover { background: var(--navy-soft); color: #fff; }
+.cx-warn-link:hover { background: var(--green); color: #fff; transform: translateY(-1px); }
 
 .ob-billing {
     background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px;
@@ -1015,6 +1060,60 @@
     .lb-wrap { grid-template-columns: 1fr; }
     .lb-tree { position: static; }
     .dc-row { flex-wrap: wrap; }
+}
+
+/* ===========================================================================
+   Instrucciones · listado (guías por categoría)
+   =========================================================================== */
+.ins-list { display: flex; flex-direction: column; gap: 14px; }
+
+.ins-card {
+    display: block; background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; box-shadow: var(--shadow-soft); text-decoration: none; color: inherit;
+    transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.ins-card:hover {
+    color: inherit; border-color: var(--green-deep); box-shadow: 0 10px 24px rgba(13,27,42,.08);
+    transform: translateY(-1px);
+}
+.ins-badge {
+    display: inline-flex; align-items: center; font-size: 11px; font-weight: 800;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--green-deep);
+    background: var(--green-soft); padding: 4px 11px; border-radius: 20px; margin-bottom: 12px;
+}
+.ins-card h3 { font-size: 16px; font-weight: 800; margin: 0 0 8px; letter-spacing: -.01em; color: var(--navy); }
+.ins-card p { font-size: 13.5px; font-weight: 500; color: var(--muted); line-height: 1.6; margin: 0; }
+.ins-more {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 800;
+    color: var(--navy); margin-top: 16px;
+}
+.ins-more svg { width: 13px; height: 13px; transition: transform .15s; }
+.ins-card:hover .ins-more { color: var(--green-deep); }
+.ins-card:hover .ins-more svg { transform: translateX(3px); }
+
+@media (max-width: 620px) {
+    .ins-card { padding: 18px; }
+}
+
+/* ===========================================================================
+   Instrucciones · detalle de guía
+   =========================================================================== */
+.ins-back {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700;
+    color: var(--muted); text-decoration: none; margin-bottom: 18px;
+}
+.ins-back svg { width: 14px; height: 14px; }
+.ins-back:hover { color: var(--navy); }
+
+.ins-doc { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-soft); overflow: hidden; }
+.ins-doc-head { padding: 26px 30px 22px; border-bottom: 1px solid var(--line-2); }
+.ins-doc-head h1 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin: 12px 0 0; }
+.ins-doc-body { padding: 26px 30px 30px; }
+
+@media (max-width: 620px) {
+    .ins-doc-head { padding: 20px; }
+    .ins-doc-body { padding: 20px; }
+    .ins-doc-head h1 { font-size: 19px; }
 }
 
 /* ===========================================================================
@@ -1176,6 +1275,13 @@
     cursor: pointer; font-family: inherit; white-space: nowrap;
 }
 .nt-item .btn-mark-read:hover { border-color: var(--green); color: var(--green-deep); }
+.nt-item .nt-del {
+    background: transparent; border: 1px solid var(--line); color: var(--muted-2);
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.nt-item .nt-del svg { width: 13px; height: 13px; }
+.nt-item .nt-del:hover { border-color: var(--red); color: var(--red); }
 
 /* ===========================================================================
    Notificaciones · variante B (bandeja de dos paneles)
@@ -1362,7 +1468,11 @@
 
 .ovw-items { padding: 6px 28px; }
 .ovw-item {
-    display: grid; grid-template-columns: auto 1fr 130px; gap: 14px; align-items: center;
+    /* align-items: start, no center: con un título largo que hace wrap a
+       varias líneas (frecuente en mobile, donde la columna del título queda
+       angosta) el chip quedaba centrado en TODA la altura del bloque de
+       texto -- se veía flotando a media altura en vez de junto al título. */
+    display: grid; grid-template-columns: auto 1fr 130px; gap: 14px; align-items: start;
     padding: 16px 0; border-bottom: 1px solid var(--line-2);
 }
 .ovw-item:last-child { border-bottom: 0; }
@@ -1375,6 +1485,13 @@
 .ovw-item .txt span { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 3px; }
 .ovw-item .price { text-align: right; font-size: 14.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .ovw-empty-items { padding: 24px 0; text-align: center; font-size: 13px; font-weight: 600; color: var(--muted-2); }
+/* La columna fija de 130px para el precio, cómoda en desktop, en mobile le
+   dejaba a la columna 1fr del título apenas ~70px -- el título envolvía en
+   6+ líneas y agrandaba toda la fila sin necesidad. 90px sigue siendo de
+   sobra para un monto en COP y libera espacio real para el título. */
+@media (max-width: 620px) {
+    .ovw-item { grid-template-columns: auto 1fr 90px; gap: 10px; }
+}
 
 .ovw-totals {
     padding: 18px 28px 24px; border-top: 1px solid var(--line-2);
@@ -1592,10 +1709,6 @@
 .sb-session { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
 .sb-session-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
 .sb-session h4 { font-size: 14px; font-weight: 800; color: var(--ink); margin: 0; }
-.sb-session .dot {
-    width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto;
-    background: var(--green); box-shadow: 0 0 0 3px rgba(0,139,205,.16);
-}
 .sb-session-meta { margin: 0 0 14px; padding: 0; }
 .sb-session-meta > div {
     display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
@@ -1605,14 +1718,19 @@
 .sb-session-meta dt { font-size: 12px; font-weight: 700; color: var(--muted); margin: 0; }
 .sb-session-meta dd { font-size: 12.5px; font-weight: 700; color: var(--ink); margin: 0; text-align: right; }
 .sb-session p { font-size: 12.5px; font-weight: 600; color: var(--muted); line-height: 1.65; margin: 0; }
+/* Solido gris neutro -- no es un error ni una advertencia, es una accion de
+   cuenta mas (como "Guardar cambios"), asi que no necesita el peso visual
+   del rojo de alerta. */
 .sb-logout {
-    display: block; width: 100%; margin-top: 16px;
-    border: 1.5px solid var(--line); background: #fff; color: var(--red);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 16px;
+    border: none; background: var(--muted); color: #fff;
     font-size: 12.5px; font-weight: 800; font-family: inherit;
     padding: 11px; border-radius: 10px; cursor: pointer;
-    transition: border-color .15s var(--ease), background .15s var(--ease);
+    transition: background .15s var(--ease), transform .15s var(--ease);
 }
-.sb-logout:hover { border-color: var(--red); background: var(--red-soft); }
+.sb-logout svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.sb-logout:hover { background: #57636f; transform: translateY(-1px); }
 
 .sb-activity .entry {
     display: flex; align-items: center; gap: 14px;
@@ -1651,12 +1769,13 @@
     .sb-progress { width: 100%; min-width: 0; }
 }
 
-/* El .pnl-save base ocupa el ancho completo (venia del formulario antiguo de
-   una sola columna). En configuracion el boton acompana a un texto de ayuda
-   o a otra accion, asi que se ajusta al contenido. */
+/* El .pnl-save base ya ocupa el ancho completo -- de lado a lado como el
+   resto de los botones principales del portal, en cualquier resolución. Solo
+   se ajustan tamaño/tipografía para que no se vea tan pesado junto a un
+   formulario más chico que el de una sola columna del que viene la base. */
 .cfg-page .pnl-save,
 .sb-page .pnl-save {
-    width: auto; margin-top: 24px; padding: 13px 28px;
+    margin-top: 24px; padding: 13px 28px;
     font-size: 13.5px; letter-spacing: 0; box-shadow: none;
 }
 .cfg-page .pnl-save:hover,
@@ -1666,72 +1785,140 @@
 
 /* ============ Header del portal cliente ============
    Menu de usuario: avatar con iniciales (no hay foto de perfil real) +
-   dropdown tipo lista -- filas separadas por linea fina, sin iconos ni
-   subtitulos, "Cerrar sesion" como una fila mas al final. */
+   panel con cabecera (identidad + X para cerrar) y filas con icono + flecha,
+   "Cerrar sesion" separado por un divisor con su propio color. Inspirado en
+   el menu movil del sitio corporativo (X arriba a la derecha, fila con
+   icono a la izquierda y flecha a la derecha). */
+/* "Plus Jakarta Sans" -- este bloque y el resto de .cx-* de abajo (avatar,
+   menu de usuario, banda de contexto) pedian "Cal Sans"/"Figtree", que
+   nunca se cargan en ningun lado del portal (solo Plus Jakarta Sans, ver
+   @import arriba de aula.css). Sin la fuente real, el navegador caia al
+   generico "sans-serif" -- los titulos de pagina (.cx-band-heading) y el
+   avatar se veian en la fuente del sistema, distinta al resto del sitio. */
 .cx-avatar {
     display: inline-flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; border-radius: 50%;
     background: var(--navy); color: #fff; border: 2px solid var(--line);
-    font-family: "Cal Sans", sans-serif; font-size: 13px; text-transform: uppercase;
+    font-family: "Plus Jakarta Sans", sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase;
     transition: border-color .15s var(--ease);
 }
 .cx-avatar:hover { border-color: var(--green); }
 
-.cx-user-menu.content-dd { padding: 0; border: none; border-radius: 14px; box-shadow: 0 20px 50px rgba(13,27,42,.16); overflow: hidden; min-width: 240px; }
-.cx-user-menu-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
-.cx-user-menu-head .cx-avatar { flex-shrink: 0; width: 38px; height: 38px; border: none; }
-.cx-user-menu-head div { min-width: 0; }
-.cx-user-menu-head h5 { font-family: "Figtree", sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* margin-top explicito: el margen por defecto de Bootstrap (.125rem) no
+   alcanzaba a despegar el panel del header, y la cabecera de identidad
+   (con el avatar) quedaba pegada/parcialmente tapada por el header. */
+.cx-user-menu.content-dd { padding: 0; border: none; border-radius: 16px; box-shadow: 0 20px 50px rgba(13,27,42,.16); overflow: hidden; min-width: 260px; margin-top: 10px !important; }
+
+.cx-user-menu-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.cx-user-menu-id { display: flex; align-items: center; gap: 12px; min-width: 0; }
+/* color y display explícitos: ".cx-user-menu-head span" (pensada para el
+   email/nombre) tiene más especificidad que el ".cx-avatar" de base -- ambos
+   son <span>, así que ganaba su display:block (el "KA" quedaba arriba a la
+   izquierda en vez de centrado) y su color gris (casi invisible sobre navy). */
+.cx-user-menu-head .cx-avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0; width: 38px; height: 38px; border: none; color: #fff;
+}
+.cx-user-menu-id > div { min-width: 0; }
+.cx-user-menu-head h5 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cx-user-menu-head span { display: block; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cx-user-menu-close { flex-shrink: 0; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: #fff; color: var(--navy); display: flex; align-items: center; justify-content: center; transition: background .15s var(--ease); }
+.cx-user-menu-close:hover { background: var(--field); }
+.cx-user-menu-close svg { width: 13px; height: 13px; }
 
-.cx-user-menu-links { padding: 4px 0; }
-.cx-user-menu-item { display: block; padding: 12px 18px; font-family: "Figtree", sans-serif; font-weight: 600; font-size: 14px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line-2); transition: background .15s var(--ease); }
+.cx-user-menu-links { padding: 6px; }
+.cx-user-menu-label { padding: 10px 10px 6px; font-family: "Plus Jakarta Sans", sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--muted-2); }
+.cx-user-menu-item {
+    display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+    padding: 10px 8px; border-radius: 11px; border: none; background: none; cursor: pointer;
+    font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 14px; color: var(--ink);
+    text-decoration: none; transition: background .15s var(--ease);
+}
 .cx-user-menu-item:hover { background: var(--field); color: var(--ink); }
+.cx-umi-ic { flex-shrink: 0; width: 32px; height: 32px; border-radius: 9px; background: var(--field); color: var(--navy); display: flex; align-items: center; justify-content: center; }
+.cx-umi-ic svg { width: 15px; height: 15px; }
+.cx-umi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cx-umi-chev { flex-shrink: 0; color: var(--muted-2); }
+.cx-umi-chev svg { width: 14px; height: 14px; }
 
-.cx-user-menu-logout { display: block; width: 100%; text-align: left; padding: 12px 18px; border: none; background: none; font-family: "Figtree", sans-serif; font-weight: 600; font-size: 14px; color: var(--ink); cursor: pointer; transition: background .15s var(--ease); }
-.cx-user-menu-logout:hover { background: var(--field); }
-
-/* Estado activo dentro del panel del avatar en móvil (mismo color que tenía
-   el nav original -- ver .cx-nav-item.active más abajo). */
+/* Estado activo (misma seccion en la que ya esta el usuario). */
 .cx-user-menu-item.is-active { background: var(--navy); color: #fff; }
+.cx-user-menu-item.is-active .cx-umi-ic { background: rgba(255,255,255,.12); color: var(--green); }
+.cx-user-menu-item.is-active .cx-umi-chev { color: rgba(255,255,255,.5); }
+
+.cx-user-menu-divider { height: 1px; background: var(--line); margin: 6px 14px; }
+
+/* "Cerrar sesion" separado del resto: mismo patron de fila pero sin flecha
+   (no lleva a ninguna seccion) -- ya no lleva acento rojo (era el mismo
+   criterio "error/alerta" que se corrigio en Configuracion: cerrar sesion
+   es una accion de cuenta mas, no un error, ver .sb-logout mas arriba).
+   El divider + margin ya lo separan visualmente del resto sin necesitar color. */
+.cx-user-menu-logout { margin: 0 6px 6px; }
+.cx-user-menu-logout .cx-umi-ic { background: var(--field); color: var(--muted); }
+.cx-user-menu-logout .cx-umi-t { color: var(--ink); }
+.cx-user-menu-logout:hover { background: var(--field); }
 
 /* En móvil el panel del avatar hace de menú principal (trae también la
    navegación completa) -- más ancho y con texto más grande que en escritorio,
    donde es solo un atajo secundario de cuenta. */
 @media (max-width: 1199px) {
-    .cx-user-menu.content-dd { min-width: 280px; border-radius: 18px; }
     .cx-user-menu-head { padding: 18px 20px; gap: 14px; }
     .cx-user-menu-head .cx-avatar { width: 44px; height: 44px; font-size: 15px; }
     .cx-user-menu-head h5 { font-size: 16px; }
     .cx-user-menu-head span { font-size: 13.5px; }
-    .cx-user-menu-item { padding: 14px 20px; font-size: 15px; }
-    .cx-user-menu-logout { padding: 14px 20px; font-size: 15px; }
+    .cx-user-menu-links { padding: 8px; }
+    .cx-user-menu-label { padding: 12px 10px 8px; }
+    .cx-user-menu-item { padding: 13px 10px; font-size: 15px; }
+    .cx-umi-ic { width: 36px; height: 36px; }
+    .cx-umi-ic svg { width: 16px; height: 16px; }
+
+    /* El panel del avatar es el menú principal en móvil (trae también la
+       navegación completa) -- pasa de tarjeta flotante a pantalla completa,
+       igual que cualquier otra app: cabecera fija arriba y la lista hace
+       scroll propio si no entra. Bootstrap posiciona el dropdown con Popper
+       via inline style (position/transform) -- solo !important le gana. */
+    .cx-user-menu.content-dd.show {
+        position: fixed !important;
+        inset: 0 !important;
+        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+        transform: none !important;
+        width: 100% !important; max-width: 100% !important;
+        height: 100% !important; max-height: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        display: flex !important;
+        flex-direction: column;
+        z-index: 1055;
+    }
+    .cx-user-menu-head { flex: 0 0 auto; }
+    .cx-user-menu-scroll { flex: 1 1 auto; overflow-y: auto; }
 }
 
 
-/* ============ Header unificado: logo + navegación + avatar ============
-   Antes el logo solo aparecía en móvil y la navegación vivía aparte, como
-   fila propia debajo del header (o como sidebar en layout vertical). En
-   layout "horizontal" ahora todo comparte una sola fila: logo, pills de
-   navegación con estado activo, y el avatar al extremo derecho. */
+/* ============ Header en dos capas: marca+cuenta arriba, navegación abajo ====
+   .cx-topbar es la fila de identidad (logo a la izquierda, avatar a la
+   derecha) -- visible en mobile y desktop por igual. La navegación ya no
+   comparte esa fila: vive en .cx-navbar, una franja aparte con fondo propio,
+   solo en desktop (en mobile los mismos ítems están dentro del menú de
+   usuario). El ítem activo es el mismo pill navy con texto blanco que ya
+   usaba el nav original de una sola fila -- solo cambió dónde vive la fila. */
 .cx-logo { display: flex; align-items: center; flex-shrink: 0; }
 .cx-logo .logo { height: 34px; width: auto; max-width: 170px; object-fit: contain; }
 
-.cx-nav { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0 0 0 32px; padding: 0; }
+.cx-navbar { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 8px 0; }
+.cx-nav { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
 .cx-nav-item {
     display: flex; align-items: center; gap: 7px;
-    /* border-radius:4px, no un pill -- así se veía el ítem activo del nav
-       original (.sidebar-link), antes de fusionarlo en el header. */
-    padding: 8px 14px; border-radius: 4px;
-    font-family: "Figtree", sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: .02em;
-    color: var(--muted); text-decoration: none; white-space: nowrap;
+    padding: 8px 14px; border-radius: 8px;
+    font-family: "Plus Jakarta Sans", sans-serif; font-weight: 700; font-size: 12px; letter-spacing: .02em;
+    color: var(--navy); text-decoration: none; white-space: nowrap;
     transition: background .15s var(--ease), color .15s var(--ease);
 }
-.cx-nav-item:hover { background: var(--field); color: var(--ink); }
+.cx-nav-item:hover { background: var(--field); }
 .cx-nav-item.active { background: var(--navy); color: #fff; }
 
 @media (min-width: 1200px) {
-    .cx-topbar { display: flex; align-items: center; padding: 16px 0; }
+    .cx-topbar { display: flex; align-items: center; padding: 14px 0; }
 }
 
 /* ============ Banda de contexto (parte del header) ============
@@ -1750,12 +1937,26 @@
    logo/nav de la fila de arriba, para que el contenido quede alineado. */
 .cx-band {
     background: var(--navy);
-    width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+    /* Antes width:100vw + margin:calc(50% - 50vw): 100vw incluye el ancho de
+       la barra de scroll vertical cuando la hay (casi siempre, la página
+       tiene contenido de sobra), así que el cálculo quedaba corto y la banda
+       se veía corrida unos px hacia la izquierda con un hueco a la derecha.
+       --cx-band-bleed-left/right los mide layouts/customers.blade.php en
+       píxeles reales (el padding de .app-header, su padre), sin vw de por
+       medio -- un margen negativo por sí solo ya estira el bloque. */
+    margin-left: calc(-1 * var(--cx-band-bleed-left, 25px));
+    margin-right: calc(-1 * var(--cx-band-bleed-right, 25px));
     position: relative; overflow: hidden;
 }
 .cx-band-glow {
     position: absolute; inset: 0; pointer-events: none;
     background: radial-gradient(480px 200px at 90% -30%, rgba(0,139,205,.28), transparent 65%);
+}
+/* Textura diagonal muy tenue -- referencia sutil al laboratorio sin ser
+   literal (no un ícono de ciencia), solo rompe el navy plano de fondo. */
+.cx-band-tex {
+    position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 1px, transparent 1px 14px);
 }
 /* Alineado con el inset real de .container-fluid (medido por JS, ver
    layouts/customers.blade.php) en vez de un max-width propio adivinado: el
@@ -1763,13 +1964,15 @@
    el valor de respaldo antes de que el JS calcule el real. */
 .cx-band-container { padding-left: var(--cx-band-left, 25px); padding-right: var(--cx-band-right, 25px); }
 .cx-band-crumb {
-    padding-top: 14px;
-    font-family: "Figtree", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.5);
+    position: relative;
+    padding-top: 14px; display: flex; align-items: center; gap: 6px;
+    font-family: "Plus Jakarta Sans", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.5);
 }
 .cx-band-crumb a { color: rgba(255,255,255,.5); text-decoration: none; }
 .cx-band-crumb a:hover { color: #fff; }
-.cx-band-crumb span { margin: 0 4px; }
-.cx-band-crumb .current { margin: 0; color: #fff; font-weight: 700; }
+.cx-band-crumb .sep { display: inline-flex; color: rgba(255,255,255,.35); }
+.cx-band-crumb .sep svg { width: 12px; height: 12px; }
+.cx-band-crumb .current { color: #fff; font-weight: 700; }
 .cx-band-row {
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px; flex-wrap: wrap; padding: 14px 0 22px;
@@ -1779,16 +1982,17 @@
     flex-shrink: 0; width: 46px; height: 46px; border-radius: 14px;
     background: rgba(0,139,205,.18); color: #4fc3f7;
     display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 0 0 1px rgba(79,195,247,.2);
 }
 .cx-band-icon svg { width: 22px; height: 22px; }
-.cx-band-heading { font-family: "Cal Sans", sans-serif; font-size: 24px; color: #fff; }
-.cx-band-sub { font-family: "Figtree", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.55); margin-top: 2px; }
+.cx-band-heading { font-family: "Plus Jakarta Sans", sans-serif; font-size: 24px; color: #fff; }
+.cx-band-sub { font-family: "Plus Jakarta Sans", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.55); margin-top: 2px; }
 .cx-band-stat {
     flex-shrink: 0; background: var(--navy-soft); border-radius: 14px; padding: 10px 22px; text-align: center;
 }
-.cx-band-stat .num { font-family: "Cal Sans", sans-serif; font-size: 24px; color: #fff; }
+.cx-band-stat .num { font-family: "Plus Jakarta Sans", sans-serif; font-size: 24px; color: #fff; }
 .cx-band-stat .label {
-    font-family: "Figtree", sans-serif; font-size: 11px; color: rgba(255,255,255,.55);
+    font-family: "Plus Jakarta Sans", sans-serif; font-size: 11px; color: rgba(255,255,255,.55);
     text-transform: uppercase; letter-spacing: .04em; margin-top: 2px;
 }
 
@@ -1840,7 +2044,10 @@
    `sidebartoggler` que el tema necesita para funcionar, así que no hacía
    nada; se quitó del markup en vez de arreglarlo. */
 @media (max-width: 1199px) {
-    .app-header { border-bottom: 1px solid var(--line); background: #fff; }
+    /* El tema trae `padding-bottom: 5px !important` para .app-header pero
+       ningun padding-top (queda en 0), asi que el logo/avatar quedaban
+       pegados al borde superior en vez de centrados en la fila. */
+    .app-header { border-bottom: 1px solid var(--line); background: #fff; padding-top: 12px; }
     .cx-topbar { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 62px; }
     /* Logo a la izquierda (antes centrado con flex:1, pensado para cuando
        había un burger a su izquierda ocupando espacio propio). */
@@ -1849,3 +2056,58 @@
     .cx-topbar .navbar-nav { flex: 0 0 auto; }
     .cx-avatar { width: 42px; height: 42px; }
 }
+
+/* ============ Paginador (Certificados, Documentos, Mis pedidos) ============
+   El HTML lo genera resources/views/vendor/pagination/tailwind.blade.php
+   (compartida con el panel manager: <ul class="pagination"><li
+   class="page-item"><a class="page-link">). El manager la estiliza contra
+   Bootstrap (--bs-pagination-*); acá no había ningún estilo -- salía la caja
+   sin clases del navegador. Mismo criterio visual que el panel: números en
+   caja, activo en el azul de marca (--green, el mismo #008bce del admin). */
+.result-body { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding-top: 18px; }
+.result-body > span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.pagination {
+    display: flex; align-items: center; gap: 6px; list-style: none; margin: 0; padding: 0;
+}
+.page-link {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 34px; height: 34px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: #fff; color: var(--ink);
+    font-family: "Plus Jakarta Sans", sans-serif; font-size: 12.5px; font-weight: 700;
+    text-decoration: none; transition: background .15s var(--ease), border-color .15s var(--ease), color .15s var(--ease);
+}
+.page-link:hover { border-color: var(--green); color: var(--green-deep); background: var(--green-soft); }
+.page-item.active .page-link { background: var(--green); border-color: var(--green); color: #fff; }
+.page-item.disabled .page-link { opacity: .4; pointer-events: none; }
+
+@media (max-width: 600px) {
+    .result-body { justify-content: center; text-align: center; }
+}
+
+/* ===========================================================================
+   Utilidades — extraídas de estilos inline (limpieza JS/CSS inline, sep-2026)
+   =========================================================================== */
+/* SVG de customers.includes.icon: sin esto quedaba como inline-block con la
+   línea base del texto, desalineado dentro de botones/spans flex. */
+.icon-svg { display: block; flex: 0 0 auto; }
+
+/* display:none SIN !important -- a diferencia de d-none de Bootstrap, esta
+   clase la puede revertir jQuery .show()/.fadeIn()/etc. con un simple
+   style.display inline (el !important de d-none se lo comería). Úsala en
+   cualquier elemento que un script muestre/oculte después de cargar. */
+.d-none-js { display: none; }
+
+/* Icono de "cargando" (spinner) inyectado por JS en quiz.blade.php/exam.blade.php
+   al confirmar el envío -- reutiliza el @keyframes spin ya definido arriba. */
+.spin-ic { animation: spin .8s linear infinite; vertical-align: -2px; }
+
+/* Fila de notificaciones (partials/views/chats/list.blade.php): agrupa el
+   buscador y "marcar todas" a la derecha de .pnl-head-row. */
+.pnl-head-tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* Botones de una notificación (marcar leída / eliminar), a la derecha de la hora. */
+.nt-actions { display: flex; gap: 8px; align-items: center; }
+
+/* Variante compacta de .pnl-empty para el estado "sin resultados" dentro de
+   una lista ya cargada (menos aire que el vacío de página completa). */
+.pnl-empty.compact { padding: 30px 20px; }

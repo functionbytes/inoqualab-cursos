@@ -7,7 +7,8 @@
         
         <div class="card w-100">
 
-            <form id="formInscriptions" enctype="multipart/form-data" role="form" onSubmit="return false">
+            <form id="formInscriptions" enctype="multipart/form-data" role="form" onSubmit="return false"
+                  data-redirect-url-template="{{ route('support.distributors.navegation', ':slack') }}">
 
                 {{ csrf_field() }}
 
@@ -71,102 +72,5 @@
 
 
 @push('scripts')
-
-<script type="text/javascript">
-    Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formInscriptions").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    'course': {
-                        required: true,
-                    },
-                    'user[]': {
-                        required: true,
-                    },
-                },
-                messages: {
-                    'course': {
-                        required: "Es necesario una opción.",
-                    },
-                    'user[]': {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formInscriptions');
-                    var formData = new FormData($form[0]);
-                    var enterprise = $("#enterprise").val();
-                    var course = $("#course").val();
-                    var users = $("#users").val();
-
-                    formData.append('enterprises', enterprise);
-                    formData.append('users', users);
-                    formData.append('course', course);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-                    $.ajax({
-                        url: "/manager/enterprises/inscriptions/generate",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(d) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    let slack = @json($enterprise->slack);
-                                    window.location.href = "{{ route('support.distributors.navegation', ':slack') }}".replace(':slack', slack);
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-
-        });
-
-</script>
-
-
-
+    <script src="{{ asset('supports/js/views/distributors/distributors/inscription.js') }}"></script>
 @endpush

@@ -16,7 +16,7 @@
                         @if(count($related->getMedia('thumbnail')) > 0)
                             <img src="{{ $related->cardImageUrl() }}"
                                  alt="{{ $related->title }}" loading="lazy"
-                                 onerror="this.src='{{ asset('/pages/images/courses/default.jpg') }}'">
+                                 class="js-img-fallback" data-fallback-src="{{ asset('/pages/images/courses/default.jpg') }}">
                         @else
                             <img src="{{ asset('/pages/images/courses/default.jpg') }}"
                                  alt="{{ $related->title }}" loading="lazy">

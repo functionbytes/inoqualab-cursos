@@ -85,7 +85,22 @@
         </div>
     @endif
 
-    <div class="row g-3">
+    @php $isReadOnly = in_array($mail->status, ['processed', 'ignored']); @endphp
+    <div class="row g-3" id="mails-view"
+         data-config='@php $__jsonInline1 = [
+            "readOnly" => $isReadOnly,
+            "routes" => [
+                "reviewers" => route("manager.mails.reviewers"),
+                "assign" => route("manager.mails.assign", $mail->slack),
+                "courses" => route("manager.mails.courses"),
+                "note" => route("manager.mails.note", $mail->slack),
+                "confirm" => route("manager.mails.confirm", $mail->slack),
+                "orderView" => route("manager.orders.view", ":slack"),
+                "index" => route("manager.mails.index"),
+                "discard" => route("manager.mails.discard", $mail->slack),
+                "reparse" => route("manager.mails.reparse", $mail->slack),
+            ],
+         ]; @endphp@json($__jsonInline1)'>
 
         {{-- ==================== SIDEBAR IZQUIERDA col-lg-4 ==================== --}}
         <div class="col-12 col-lg-4">
@@ -187,7 +202,7 @@
                                     <ul class="list-unstyled mb-0 mt-1">
                                         @foreach($payload['courses'] as $courseText)
                                             <li class="d-flex align-items-start gap-2 mb-1">
-                                                <i class="fas fa-book-open text-primary mt-1" style="font-size:11px"></i>
+                                                <i class="fas fa-book-open text-primary mt-1 mails-view-text-xs"></i>
                                                 <span class="small">{{ $courseText }}</span>
                                             </li>
                                         @endforeach
@@ -238,20 +253,20 @@
                     <div class="d-grid gap-2">
                         @if($mail->status === 'processed' && $mail->order)
                             <a href="{{ route('manager.orders.view', $mail->order->slack) }}" class="btn btn-success">
-                                <i class="fas fa-file-lines me-1"></i> Ver orden generada
+                                Ver orden generada
                             </a>
                         @endif
                         @if(!in_array($mail->status, ['processed', 'ignored']))
                             <button type="button" id="reparse-btn" class="btn btn-outline-info"
                                     data-slack="{{ $mail->slack }}">
-                                <i class="fas fa-rotate me-1"></i> Re-analizar correo
+                                Re-analizar correo
                             </button>
                             <button type="button" id="discard-btn" class="btn btn-outline-secondary">
-                                <i class="fas fa-ban me-1"></i> Descartar
+                                Descartar
                             </button>
                         @endif
                         <a href="{{ route('manager.mails.index') }}" class="btn btn-light">
-                            <i class="fas fa-arrow-left me-1"></i> Volver al listado
+                            Volver al listado
                         </a>
                     </div>
                 </div>
@@ -264,13 +279,12 @@
                     <p class="text-muted">Comentarios del equipo (no visibles al cliente)</p>
                 </div>
                 <div class="card-body">
-                    <textarea id="notes-textarea" class="form-control form-control-sm"
-                              rows="3" placeholder="Añadir nota..."
-                              style="resize:vertical">{{ $mail->notes ?? '' }}</textarea>
+                    <textarea id="notes-textarea" class="form-control form-control-sm mails-notes-textarea"
+                              rows="3" placeholder="Añadir nota...">{{ $mail->notes ?? '' }}</textarea>
                     <div class="d-flex justify-content-between align-items-center mt-2">
                         <p class="text-muted"><span id="notes-chars">{{ strlen($mail->notes ?? '') }}</span> caracteres</p>
                         <button type="button" id="save-notes-btn" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-floppy-disk me-1"></i> Guardar nota
+                            Guardar nota
                         </button>
                     </div>
                 </div>
@@ -310,11 +324,11 @@
                                 @endphp
                                 <li class="d-flex align-items-start gap-2 p-3 {{ !$loop->last ? 'border-bottom' : '' }}">
                                     <div class="mt-1 flex-shrink-0">
-                                        <i class="fas {{ $icon }} {{ $color }}" style="font-size:14px;width:16px;text-align:center"></i>
+                                        <i class="fas {{ $icon }} {{ $color }} mails-timeline-icon"></i>
                                     </div>
                                     <div class="flex-grow-1">
                                         <div class="fw-semibold small {{ $color }}">{{ $label }}</div>
-                                        <div class="text-muted" style="font-size:11px">
+                                        <div class="text-muted mails-view-text-xs">
                                             {{ \Carbon\Carbon::parse($activity->created_at)->format('d/m/Y H:i') }}
                                             @if($activity->causer)
                                                 — {{ trim($activity->causer->firstname . ' ' . $activity->causer->lastname) }}
@@ -337,9 +351,8 @@
         <div class="col-12 col-lg-8">
 
             {{-- Confirmar orden --}}
-            @php $isReadOnly = in_array($mail->status, ['processed', 'ignored']); @endphp
             <div class="card mb-3">
-                <form id="confirmForm" onsubmit="return false">
+                <form id="confirmForm">
                     <div class="card-header p-3 border-bottom {{ $isReadOnly ? 'bg-light' : '' }}">
                         <h6 class="mb-0 fw-bold">Confirmar orden</h6>
                         <p class="text-muted">
@@ -356,10 +369,10 @@
                         @if(!$isReadOnly)
                         <div class="mb-3">
                             <button type="button" class="btn btn-link btn-sm p-0 text-muted" id="toggle-overrides">
-                                <i class="fas fa-pencil me-1"></i> Editar campos extraídos
+                                Editar campos extraídos
                             </button>
                             <div id="overrides-panel" class="mt-2 p-3 border rounded bg-light d-none">
-                                <p class="text-muted mb-2" style="font-size:11px">Sobreescribe los datos del correo antes de crear la orden. Deja vacío para usar el valor original.</p>
+                                <p class="text-muted mb-2 mails-view-text-xs">Sobreescribe los datos del correo antes de crear la orden. Deja vacío para usar el valor original.</p>
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <label class="form-label form-label-sm mb-1">Documento</label>
@@ -451,7 +464,7 @@
                     @if(!$isReadOnly)
                     <div class="card-footer border-top bg-light">
                         <button type="submit" id="confirm-btn" class="btn btn-primary w-100 mb-2">
-                            <i class="fas fa-circle-check me-1"></i> Confirmar y crear orden
+                            Confirmar y crear orden
                         </button>
                         <button type="button" id="discard-btn-form" class="btn btn-outline-secondary w-100">
                             Descartar correo
@@ -472,10 +485,10 @@
                             </div>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-primary active" id="btnFormatted">
-                                    <i class="fas fa-align-left me-1"></i> Texto
+                                    Texto
                                 </button>
                                 <button type="button" class="btn btn-outline-primary" id="btnRaw">
-                                    <i class="fas fa-code me-1"></i> Raw
+                                    Raw
                                 </button>
                             </div>
                         </div>
@@ -528,335 +541,9 @@
 @endsection
 
 @push('css')
-<style>
-.preview-wrapper {
-    padding: 20px;
-    background: #f8f9fa;
-    min-height: 200px;
-}
-.preview-body-formatted {
-    background: #fff;
-    border-radius: 6px;
-    padding: 16px 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.07);
-    font-size: .875rem;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    word-break: break-word;
-    max-height: 420px;
-    overflow-y: auto;
-}
-.preview-body-raw {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    border-radius: 6px;
-    padding: 16px 20px;
-    font-size: .78rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 420px;
-    overflow-y: auto;
-    margin: 0;
-}
-.btn-group .btn.active {
-    background-color: #008bce !important;
-    border-color: #008bce !important;
-    color: #fff !important;
-}
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/mails/view.css') }}">
 @endpush
 
 @push('scripts')
-<script type="text/javascript">
-$(document).ready(function () {
-
-    // Select2 AJAX para asignar revisor
-    $('#assign-user-select').select2({
-        placeholder: 'Buscar revisor...',
-        allowClear: true,
-        ajax: {
-            url: '{{ route("manager.mails.reviewers") }}',
-            dataType: 'json', delay: 300,
-            data: function (p) { return { q: p.term || '' }; },
-            processResults: function (d) { return { results: d }; },
-            cache: true
-        }
-    });
-
-    $('#assign-btn').on('click', function () {
-        var userId = $('#assign-user-select').val();
-        var $btn = $(this).prop('disabled', true);
-        $.ajax({
-            url: '{{ route("manager.mails.assign", $mail->slack) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            contentType: 'application/json',
-            data: JSON.stringify({ user_id: userId || null }),
-            success: function (r) {
-                $btn.prop('disabled', false);
-                r.success
-                    ? toastr.success(r.message, '', { positionClass: 'toast-bottom-right' })
-                    : toastr.error(r.message, '', { positionClass: 'toast-bottom-right' });
-            },
-            error: function () {
-                $btn.prop('disabled', false);
-                toastr.error('Error al asignar.', '', { positionClass: 'toast-bottom-right' });
-            }
-        });
-    });
-
-    $('#enterprise_id').select2({ placeholder: 'Seleccionar empresa', allowClear: true });
-    initCourseSelects();
-
-    function initCourseSelects() {
-        $('.course-select').each(function () {
-            if (!$(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2({ placeholder: 'Seleccionar curso', allowClear: true });
-            }
-        });
-    }
-
-    // Cambio de empresa → recargar cursos
-    $('#enterprise_id').on('change', function () {
-        var enterpriseId = $(this).val();
-        if (!enterpriseId) return;
-        $.ajax({
-            url: '{{ route("manager.mails.courses") }}',
-            method: 'GET', data: { enterprise_id: enterpriseId },
-            success: function (courses) {
-                $('.course-select').each(function () {
-                    var $sel = $(this);
-                    $sel.select2('destroy').empty().append('<option value="">— Seleccionar curso —</option>');
-                    $.each(courses, function (i, c) {
-                        $sel.append($('<option>', { value: c.id, text: c.text }));
-                    });
-                    $sel.select2({ placeholder: 'Seleccionar curso', allowClear: true });
-                });
-            },
-            error: function () { toastr.error('Error al cargar los cursos.', 'Error', { positionClass: 'toast-bottom-right' }); }
-        });
-    });
-
-    // Notas internas
-    $('#notes-textarea').on('input', function () {
-        $('#notes-chars').text($(this).val().length);
-    });
-    $('#save-notes-btn').on('click', function () {
-        var $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Guardando...');
-        $.ajax({
-            url: '{{ route("manager.mails.note", $mail->slack) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            contentType: 'application/json',
-            data: JSON.stringify({ notes: $('#notes-textarea').val() }),
-            success: function (r) {
-                $btn.prop('disabled', false).html('<i class="fas fa-floppy-disk me-1"></i> Guardar nota');
-                r.success ? toastr.success(r.message, '', { positionClass: 'toast-bottom-right' })
-                           : toastr.error(r.message, '', { positionClass: 'toast-bottom-right' });
-            },
-            error: function () {
-                $btn.prop('disabled', false).html('<i class="fas fa-floppy-disk me-1"></i> Guardar nota');
-                toastr.error('Error al guardar la nota.', '', { positionClass: 'toast-bottom-right' });
-            }
-        });
-    });
-
-    // Atajos de teclado (solo cuando no hay foco en inputs)
-    var isReadOnly = {{ $isReadOnly ? 'true' : 'false' }};
-    $(document).on('keydown', function (e) {
-        if ($(e.target).is('input, textarea, select, button, a')) return;
-        switch (e.key) {
-            case 'Enter':
-                if (!isReadOnly) { e.preventDefault(); $('#confirmForm').trigger('submit'); }
-                break;
-            case 'd': case 'D':
-                e.preventDefault();
-                $('#discard-modal').modal('show');
-                break;
-            case 'r': case 'R':
-                if (!isReadOnly) { e.preventDefault(); $('#reparse-btn').trigger('click'); }
-                break;
-            case 'n': case 'N':
-                e.preventDefault();
-                $('#notes-textarea').focus();
-                break;
-        }
-    });
-
-    // Toggle panel de overrides
-    $('#toggle-overrides').on('click', function () {
-        var open = $('#overrides-panel').toggleClass('d-none').hasClass('d-none') === false;
-        $(this).html(open
-            ? '<i class="fas fa-chevron-up me-1"></i> Ocultar campos'
-            : '<i class="fas fa-pencil me-1"></i> Editar campos extraídos');
-    });
-
-    // Confirmar orden
-    $('#confirmForm').on('submit', function () {
-        var enterpriseId = $('#enterprise_id').val();
-        if (!enterpriseId) {
-            toastr.warning('Debe seleccionar una empresa.', 'Advertencia', { positionClass: 'toast-bottom-right' });
-            return false;
-        }
-        var courseMap = {};
-        $('.course-select').each(function () {
-            var val = $(this).val();
-            if (val) courseMap[$(this).data('course-text')] = val;
-        });
-        var payloadOverrides = {};
-        $('.payload-override').each(function () {
-            var val = $.trim($(this).val());
-            if (val !== '') payloadOverrides[$(this).data('key')] = val;
-        });
-        var payload = {
-            enterprise_id: enterpriseId,
-            course_map: courseMap,
-            save_alias: $('#save_alias').is(':checked') ? 1 : 0,
-            payload_overrides: payloadOverrides,
-        };
-        $('#confirm-btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Procesando...');
-        $.ajax({
-            url: '{{ route("manager.mails.confirm", $mail->slack) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
-            success: function (r) {
-                $('#confirm-btn').prop('disabled', false).html('<i class="fas fa-circle-check me-1"></i> Confirmar y crear orden');
-                if (r.success) {
-                    toastr.success(r.message, 'Listo', { positionClass: 'toast-bottom-right' });
-                    var target = r.order_slack
-                        ? '{{ route("manager.orders.view", ":slack") }}'.replace(':slack', r.order_slack)
-                        : '{{ route("manager.mails.index") }}';
-                    setTimeout(function () { window.location.href = target; }, 1200);
-                } else {
-                    toastr.error(r.message, 'Error', { positionClass: 'toast-bottom-right' });
-                }
-            },
-            error: function (xhr) {
-                $('#confirm-btn').prop('disabled', false).html('<i class="fas fa-circle-check me-1"></i> Confirmar y crear orden');
-                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-                    $.each(xhr.responseJSON.errors, function (f, m) {
-                        toastr.warning(m[0], 'Validación', { positionClass: 'toast-bottom-right' });
-                    });
-                } else {
-                    toastr.error('Error al procesar la solicitud.', 'Error', { positionClass: 'toast-bottom-right' });
-                }
-            }
-        });
-    });
-
-    // Descartar (ambos botones abren el mismo modal)
-    $('#discard-btn, #discard-btn-form').on('click', function () {
-        $('#discard-modal').modal('show');
-    });
-
-    $('#discard-confirm-btn').on('click', function () {
-        $.ajax({
-            url: '{{ route("manager.mails.discard", $mail->slack) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (r) {
-                $('#discard-modal').modal('hide');
-                r.success ? toastr.success(r.message, 'Listo', { positionClass: 'toast-bottom-right' })
-                           : toastr.error(r.message, 'Error', { positionClass: 'toast-bottom-right' });
-                if (r.success) setTimeout(function () { window.location.href = '{{ route("manager.mails.index") }}'; }, 1200);
-            },
-            error: function () {
-                $('#discard-modal').modal('hide');
-                toastr.error('Error al procesar la solicitud.');
-            }
-        });
-    });
-
-    // Re-analizar — actualiza UI sin recargar
-    function updateCourseSelects(courseMatches) {
-        if (!courseMatches || !courseMatches.length) return;
-        $.each(courseMatches, function (i, cm) {
-            var $sel = $('.course-select').filter(function () {
-                return $(this).data('course-text') === cm.text;
-            });
-            if ($sel.length && cm.matched_id) {
-                $sel.val(cm.matched_id).trigger('change.select2');
-            }
-        });
-    }
-
-    function reloadCoursesForEnterprise(enterpriseId, courseMatches) {
-        $.ajax({
-            url: '{{ route("manager.mails.courses") }}',
-            data: { enterprise_id: enterpriseId },
-            success: function (courses) {
-                $('.course-select').each(function () {
-                    var $sel = $(this);
-                    $sel.select2('destroy').empty().append('<option value="">— Seleccionar curso —</option>');
-                    $.each(courses, function (i, c) {
-                        $sel.append($('<option>', { value: c.id, text: c.text }));
-                    });
-                    $sel.select2({ placeholder: 'Seleccionar curso', allowClear: true });
-                });
-                updateCourseSelects(courseMatches);
-            }
-        });
-    }
-
-    $('#reparse-btn').on('click', function () {
-        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Analizando...');
-        $.ajax({
-            url: '{{ route("manager.mails.reparse", $mail->slack) }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (r) {
-                $('#reparse-btn').prop('disabled', false).html('<i class="fas fa-rotate me-1"></i> Re-analizar correo');
-                if (!r.success) { toastr.error(r.message, 'Error', { positionClass: 'toast-bottom-right' }); return; }
-
-                if (r.auto_confirmed) {
-                    toastr.success(r.message, 'Auto-confirmado', { positionClass: 'toast-bottom-right', timeOut: 3000 });
-                    var target = r.order_slack
-                        ? '{{ route("manager.orders.view", ":slack") }}'.replace(':slack', r.order_slack)
-                        : '{{ route("manager.mails.index") }}';
-                    setTimeout(function () { window.location.href = target; }, 1800);
-                    return;
-                }
-
-                var currentEntId = $('#enterprise_id').val();
-                var newEntId = r.enterprise_id ? String(r.enterprise_id) : '';
-
-                if (newEntId && newEntId !== currentEntId) {
-                    if ($('#enterprise_id option[value="' + newEntId + '"]').length === 0) {
-                        $('#enterprise_id').append(new Option(r.enterprise_name, newEntId));
-                    }
-                    $('#enterprise_id').val(newEntId).trigger('change.select2');
-                    reloadCoursesForEnterprise(newEntId, r.course_matches);
-                } else {
-                    updateCourseSelects(r.course_matches);
-                }
-
-                var msg = r.message + (r.enterprise_name ? ' — <strong>' + $('<span>').text(r.enterprise_name).html() + '</strong>' : '');
-                toastr.success(msg, 'Listo', { positionClass: 'toast-bottom-right', allowHtml: true });
-            },
-            error: function () {
-                $('#reparse-btn').prop('disabled', false).html('<i class="fas fa-rotate me-1"></i> Re-analizar correo');
-                toastr.error('Error al re-analizar.', 'Error', { positionClass: 'toast-bottom-right' });
-            }
-        });
-    });
-
-    // Toggle texto / raw del cuerpo
-    $('#btnFormatted').on('click', function () {
-        $('#bodyFormatted').removeClass('d-none');
-        $('#bodyRaw').addClass('d-none');
-        $('.btn-group .btn').removeClass('active');
-        $(this).addClass('active');
-    });
-    $('#btnRaw').on('click', function () {
-        $('#bodyRaw').removeClass('d-none');
-        $('#bodyFormatted').addClass('d-none');
-        $('.btn-group .btn').removeClass('active');
-        $(this).addClass('active');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/mails/view.js') }}"></script>
 @endpush

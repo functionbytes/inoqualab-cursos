@@ -113,12 +113,15 @@
                                                 $avgFmt    = $isCls
                                                     ? number_format($row->avg_value, 3)
                                                     : number_format($row->avg_value) . ' ms';
+                                                // route() rechaza un parámetro vacío: la home ("/") da
+                                                // ltrim('/','/') === '' y revienta con UrlGenerationException.
+                                                $pathParam = ltrim($row->url_path, '/');
                                                 $detailUrl = route('manager.seo.web-vitals.show', [
-                                                    'path' => ltrim($row->url_path, '/'),
+                                                    'path' => $pathParam !== '' ? $pathParam : '_root',
                                                 ]);
                                             @endphp
                                             <tr>
-                                                <td class="text-truncate" style="max-width:220px;">
+                                                <td class="text-truncate worst-page-url">
                                                     <a href="{{ $detailUrl }}" class="text-decoration-none small fw-semibold">
                                                         {{ $row->url_path }}
                                                     </a>
@@ -205,7 +208,6 @@
 @endsection
 
 @push('css')
-<style>
-    .cwv-icon-box { width: 36px; height: 36px; }
-</style>
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/web-vitals/shared.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/web-vitals/index.css') }}">
 @endpush

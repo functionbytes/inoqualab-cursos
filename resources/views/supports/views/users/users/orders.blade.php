@@ -4,8 +4,10 @@
 
     @include('supports.includes.card', ['title' => 'Ordenes - ' . $user->firstname . ' ' . $user->lastname])
 
-    <div class="widget-content searchable-container list">
-        
+    <div class="widget-content searchable-container list"
+         data-bulk-url="{{ route('support.users.orders.bulk-action') }}"
+         data-bulk-entity-label="orden(es)">
+
         <div class="card card-body">
             <div class="row">
                 <div class="col-md-12 col-xl-12">
@@ -35,6 +37,7 @@
                 <table class="table search-table align-middle text-nowrap">
                     <thead class="header-item">
                     <tr>
+                        <th class="orders-col-checkbox"><input type="checkbox" class="form-check-input" id="select-all"></th>
                         <th scope="col">Orden</th>
                         <th scope="col">Numero</th>
                         <th scope="col">Fecha</th>
@@ -46,6 +49,9 @@
                     @foreach ($orders as $key =>$order)
                         <tr class="search-items">
 
+                            <td>
+                                <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $order->id }}">
+                            </td>
                             <td>
                                 <span class="usr-email-addr" data-email="{{$order->slack }}">{{$order->slack }}</span>
                             </td>
@@ -91,7 +97,23 @@
         </div>
         @endif
     </div>
+
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'orden(es)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('supports/css/views/users/users/orders.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('supports/js/views/users/users/orders.js') }}"></script>
+@endpush
 
 
 

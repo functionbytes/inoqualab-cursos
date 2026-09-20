@@ -10,7 +10,7 @@
                         <a href="{{ $trusted->url != null ? $trusted->url : '#' }}">
                             @if(count($trusted->getMedia('thumbnail'))>0)
                                 <img src="{{ $trusted->getfirstMedia('thumbnail')->getfullUrl() }}"
-                                     onerror="this.src='{{ asset('/pages/images/trusted/default.png') }}'">
+                                     class="js-img-fallback" data-fallback-src="{{ asset('/pages/images/trusted/default.png') }}">
                             @else
                                 <img src="{{ asset('/pages/images/trusted/default.png') }}">
                             @endif

@@ -10,9 +10,9 @@
 
                         <div class="swiper-slide">
                             @if($slider->image!=null)
-                                <div class="rbt-banner-area rbt-banner-6 variation-03 bg_image bg_image--17" data-gradient-overlay="5" style="background-image: url({{ asset('/pages/images/sliders/'.$slider->image) }});">
+                                <div class="rbt-banner-area rbt-banner-6 variation-03 bg_image bg_image--17" data-gradient-overlay="5" data-bg="{{ asset('/pages/images/sliders/'.$slider->image) }}">
                             @else
-                                <div class="rbt-banner-area rbt-banner-6 variation-03 bg_image bg_image--17" data-gradient-overlay="5" style="background-image: url({{ asset('/pages/images/sliders/'.$slider->image) }});">
+                                <div class="rbt-banner-area rbt-banner-6 variation-03 bg_image bg_image--17" data-gradient-overlay="5" data-bg="{{ asset('/pages/images/sliders/'.$slider->image) }}">
                             @endif
                                 <div class="wrapper w-100">
                                     <div class="container">
@@ -62,3 +62,7 @@
     </div>
 
 </div>
+
+@push('scripts')
+    <script src="{{ asset('pages/js/common/apply-data-bg.js') }}"></script>
+@endpush

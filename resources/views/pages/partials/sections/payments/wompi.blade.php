@@ -19,29 +19,29 @@
 </form>
 
 @if(setting('wompi_sandbox') === 'true')
-<div class="mt-3 p-3" style="background:#fff8e1;border:2px dashed #f9a825;border-radius:8px;">
-    <p class="mb-2" style="font-size:12px;"><strong>🧪 Sandbox:</strong> Simula el resultado del pago sin usar Wompi real.</p>
-    <div class="d-flex" style="gap:8px;flex-wrap:wrap;">
+<div class="wompi-sandbox-box mt-3 p-3">
+    <p class="wompi-sandbox-note mb-2"><strong>🧪 Sandbox:</strong> Simula el resultado del pago sin usar Wompi real.</p>
+    <div class="wompi-sandbox-actions d-flex">
         <a href="{{ route('checkout.simulate', [$wompi->reference, 'APPROVED']) }}"
-           class="btn btn-sm"
-           style="background:#2e7d32;color:#fff;font-size:12px;">
+           class="btn btn-sm wompi-sim-btn wompi-sim-btn--approved">
             ✓ Simular APROBADO
         </a>
         <a href="{{ route('checkout.simulate', [$wompi->reference, 'DECLINED']) }}"
-           class="btn btn-sm"
-           style="background:#c62828;color:#fff;font-size:12px;">
+           class="btn btn-sm wompi-sim-btn wompi-sim-btn--declined">
             ✗ Simular DECLINADO
         </a>
         <a href="{{ route('checkout.simulate', [$wompi->reference, 'PENDING']) }}"
-           class="btn btn-sm"
-           style="background:#1565c0;color:#fff;font-size:12px;">
+           class="btn btn-sm wompi-sim-btn wompi-sim-btn--pending">
             ⏳ Simular PENDIENTE
         </a>
         <a href="{{ route('checkout.simulate', [$wompi->reference, 'ERROR']) }}"
-           class="btn btn-sm"
-           style="background:#455a64;color:#fff;font-size:12px;">
+           class="btn btn-sm wompi-sim-btn wompi-sim-btn--error">
             ⚠ Simular ERROR
         </a>
     </div>
 </div>
 @endif
+
+@push('css')
+    <link rel="stylesheet" href="{{ asset('pages/css/partials/sections/payments/wompi.css') }}">
+@endpush

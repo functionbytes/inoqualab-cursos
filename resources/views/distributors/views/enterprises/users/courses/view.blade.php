@@ -75,19 +75,16 @@
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
                                         <li class="{{ $user->culminated == 1 ? '' : 'd-none'}}">
                                             <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('distributor.certificate.user', $user->slack) }}">
-                                                <i class="fa-duotone fa-money-check-pen"></i>
                                                 Certificado
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item  d-flex align-items-center gap-3" href="{{ route('distributor.courses.details', $user->slack) }}">
-                                                <i class="fa-light fa-file-certificate"></i>
                                                 Detalle
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('distributor.courses.progress', $user->slack) }}">
-                                                <i class="fa-duotone fa-money-check-pen"></i>
                                                 Reporte
                                             </a>
                                         </li>

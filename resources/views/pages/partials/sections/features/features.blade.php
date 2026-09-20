@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-4 col-md-6">
-                <div class="feature-item wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-item wow fadeInUp delay-0-2s animated">
                     <div class="image">
                         <img src="/pages/images/icons/certificate.svg" alt="Icon">
                     </div>
@@ -13,7 +13,7 @@
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
-                <div class="feature-item wow fadeInUp delay-0-4s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-item wow fadeInUp delay-0-4s animated">
                     <div class="image">
                         <img src="/pages/images/icons/tips.svg" alt="Icon">
                     </div>
@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
-                <div class="feature-item wow fadeInUp delay-0-6s animated" style="visibility: visible; animation-name: fadeInUp;">
+                <div class="feature-item wow fadeInUp delay-0-6s animated">
                     <div class="image">
                         <img src="/pages/images/icons/support.svg" alt="Icon">
                     </div>

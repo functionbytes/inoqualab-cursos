@@ -1,0 +1,9 @@
+.bulk-toolbar-float {
+    z-index: 1050;
+}
+.log-path-col {
+    max-width: 280px;
+}
+.log-referer-col {
+    max-width: 200px;
+}

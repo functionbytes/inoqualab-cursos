@@ -39,7 +39,7 @@
                 <div class="d-flex gap-2 align-items-center flex-wrap">
                     <a href="{{ route('mailers.templates.edit', $template->uid) }}"
                        class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>Volver al editor
+                        Volver al editor
                     </a>
                 </div>
             </div>
@@ -57,12 +57,12 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-3" style="width: 60px;">#</th>
+                                <th class="ps-3 version-col-id">#</th>
                                 <th>Asunto</th>
                                 <th>Nota del cambio</th>
                                 <th>Guardado por</th>
                                 <th>Fecha</th>
-                                <th style="width: 160px;"></th>
+                                <th class="version-col-actions"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -70,7 +70,7 @@
                                 <tr>
                                     <td class="ps-3 text-muted">{{ $version->id }}</td>
                                     <td>
-                                        <span class="text-truncate d-inline-block" style="max-width: 250px;"
+                                        <span class="text-truncate d-inline-block version-subject-truncate"
                                               title="{{ $version->subject }}">
                                             {{ $version->subject ?: '(sin asunto)' }}
                                         </span>
@@ -107,7 +107,7 @@
                                             @csrf
                                             <button type="submit" class="btn btn-outline-primary btn-sm btn-restore"
                                                     data-confirm="¿Restaurar esta versión? Se guardará el contenido actual antes de restaurar.">
-                                                <i class="fas fa-undo me-1"></i>Restaurar
+                                                Restaurar
                                             </button>
                                         </form>
                                     </td>
@@ -146,7 +146,7 @@
                         </div>
                         <div>
                             <label class="form-label fw-semibold text-muted text-uppercase">Contenido</label>
-                            <pre class="border rounded p-3 bg-light small" style="max-height: 500px; overflow: auto; white-space: pre-wrap; word-break: break-all;">{{ $version->content }}</pre>
+                            <pre class="border rounded p-3 bg-light small version-diff-pre">{{ $version->content }}</pre>
                         </div>
                     </div>
                     <div class="modal-footer d-block">
@@ -155,7 +155,7 @@
                             @csrf
                             <button type="submit" class="btn btn-primary w-100 mb-2 btn-restore"
                                     data-confirm="¿Restaurar esta versión?">
-                                <i class="fas fa-undo me-1"></i>Restaurar esta versión
+                                Restaurar esta versión
                             </button>
                         </form>
                         <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cerrar</button>
@@ -186,24 +186,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/templates/versions.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(document).ready(function () {
-    let $pendingRestoreForm = null;
-
-    $(document).on('click', '.btn-restore', function (e) {
-        e.preventDefault();
-        const msg = $(this).data('confirm') || '¿Restaurar esta versión?';
-        $pendingRestoreForm = $(this).closest('form');
-        $('#confirm-restore-message').text(msg);
-        new bootstrap.Modal(document.getElementById('confirm-restore-modal')).show();
-    });
-
-    $('#confirm-restore-btn').on('click', function () {
-        if ($pendingRestoreForm) {
-            $pendingRestoreForm.submit();
-        }
-    });
-});
-</script>
+<script src="{{ asset('managers/js/views/mailer/templates/versions.js') }}"></script>
 @endpush

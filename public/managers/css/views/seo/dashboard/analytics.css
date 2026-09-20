@@ -1,0 +1,15 @@
+.analytics-url-col {
+    max-width: 300px;
+}
+.pos-badge-excellent {
+    background: #13C672;
+}
+.pos-badge-good {
+    background: #008bce;
+}
+.pos-badge-fair {
+    background: #FEC90F;
+}
+.pos-badge-poor {
+    background: #FA896B;
+}

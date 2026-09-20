@@ -5,7 +5,7 @@
 @section('content')
 
 
-    <div class="row">
+    <div class="row" data-flash-success="{{ session('success') }}" data-flash-error="{{ session('error') }}">
 
         {{-- Formulario principal --}}
         <div class="col-lg-8">
@@ -48,16 +48,23 @@
                                     <label class="col-form-label fw-semibold">
                                         Prioridad <span class="text-danger">*</span>
                                     </label>
-                                    @php $currentPriority = old('priority', number_format($staticUrl->priority, 1)); @endphp
+                                    @php
+                                        $currentPriority = old('priority', number_format($staticUrl->priority, 1));
+                                        $priorityLabels = [
+                                            '1.0' => 'Máxima', '0.9' => 'Muy alta', '0.8' => 'Alta',
+                                            '0.7' => 'Media-alta', '0.6' => 'Media', '0.5' => 'Media',
+                                            '0.4' => 'Media-baja', '0.3' => 'Baja', '0.2' => 'Muy baja',
+                                            '0.1' => 'Mínima',
+                                        ];
+                                    @endphp
                                     <select class="form-select @error('priority') is-invalid @enderror"
                                             id="priority"
                                             name="priority"
                                             required>
-                                        <option value="1.0" {{ $currentPriority == '1.0' ? 'selected' : '' }}>1.0 — Muy alta</option>
-                                        <option value="0.8" {{ $currentPriority == '0.8' ? 'selected' : '' }}>0.8 — Alta</option>
-                                        <option value="0.5" {{ $currentPriority == '0.5' ? 'selected' : '' }}>0.5 — Media</option>
-                                        <option value="0.3" {{ $currentPriority == '0.3' ? 'selected' : '' }}>0.3 — Baja</option>
-                                        <option value="0.1" {{ $currentPriority == '0.1' ? 'selected' : '' }}>0.1 — Muy baja</option>
+                                        @foreach($priorityOptions as $option)
+                                            @php $optionValue = number_format($option, 1); @endphp
+                                            <option value="{{ $optionValue }}" {{ $currentPriority == $optionValue ? 'selected' : '' }}>{{ $optionValue }} — {{ $priorityLabels[$optionValue] ?? '' }}</option>
+                                        @endforeach
                                     </select>
                                     @error('priority')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -73,18 +80,21 @@
                                     <label class="col-form-label fw-semibold">
                                         Frecuencia de cambio <span class="text-danger">*</span>
                                     </label>
-                                    @php $currentFreq = old('changefreq', $staticUrl->changefreq); @endphp
+                                    @php
+                                        $currentFreq = old('changefreq', $staticUrl->changefreq);
+                                        $changefreqLabels = [
+                                            'always' => 'Siempre', 'hourly' => 'Por hora', 'daily' => 'Diario',
+                                            'weekly' => 'Semanal', 'monthly' => 'Mensual', 'yearly' => 'Anual',
+                                            'never' => 'Nunca',
+                                        ];
+                                    @endphp
                                     <select class="form-select @error('changefreq') is-invalid @enderror"
                                             id="changefreq"
                                             name="changefreq"
                                             required>
-                                        <option value="always"  {{ $currentFreq == 'always'  ? 'selected' : '' }}>always — Siempre</option>
-                                        <option value="hourly"  {{ $currentFreq == 'hourly'  ? 'selected' : '' }}>hourly — Por hora</option>
-                                        <option value="daily"   {{ $currentFreq == 'daily'   ? 'selected' : '' }}>daily — Diario</option>
-                                        <option value="weekly"  {{ $currentFreq == 'weekly'  ? 'selected' : '' }}>weekly — Semanal</option>
-                                        <option value="monthly" {{ $currentFreq == 'monthly' ? 'selected' : '' }}>monthly — Mensual</option>
-                                        <option value="yearly"  {{ $currentFreq == 'yearly'  ? 'selected' : '' }}>yearly — Anual</option>
-                                        <option value="never"   {{ $currentFreq == 'never'   ? 'selected' : '' }}>never — Nunca</option>
+                                        @foreach($changefreqOptions as $option)
+                                            <option value="{{ $option }}" {{ $currentFreq == $option ? 'selected' : '' }}>{{ $option }} — {{ $changefreqLabels[$option] ?? '' }}</option>
+                                        @endforeach
                                     </select>
                                     @error('changefreq')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -226,53 +236,6 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    $('#formStaticUrl').validate({
-        rules: {
-            url:        { required: true, maxlength: 2048 },
-            priority:   { required: true },
-            changefreq: { required: true }
-        },
-        messages: {
-            url: {
-                required:  'La URL es obligatoria.',
-                maxlength: 'Maximo 2048 caracteres.'
-            },
-            priority:   { required: 'Selecciona una prioridad.' },
-            changefreq: { required: 'Selecciona la frecuencia de cambio.' }
-        },
-        highlight: function (element) {
-            $(element).addClass('is-invalid').removeClass('is-valid');
-        },
-        unhighlight: function (element) {
-            $(element).removeClass('is-invalid').addClass('is-valid');
-        },
-        errorPlacement: function (error, element) {
-            error.addClass('invalid-feedback d-block').insertAfter(element);
-        },
-        submitHandler: function (form) {
-            form.submit();
-        }
-    });
-
-    // Abrir modal de confirmacion para eliminar
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/static-urls/edit.js') }}"></script>
 @endpush

@@ -17,12 +17,11 @@
          como panel fijo -- clic fuera del rail lo cierra. --}}
     <div class="lv-rail-backdrop" id="lvRailBackdrop"></div>
     <aside class="lv-rail {{ $inscription->expire == 1 ? 'd-none' : '' }}" id="lvRail">
+        {{-- Manija de arrastre: solo pinta en mobile, donde .lv-rail pasa a
+             ser una hoja que sube desde abajo (ver @media max-width:1000px
+             en aula.css). En desktop es panel lateral fijo y queda oculta. --}}
+        <div class="lv-rail-grab" aria-hidden="true"></div>
         <div class="lv-rail-head">
-            @unless(request()->routeIs('customers.courses.content'))
-                <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back rail-back">
-                    @include('customers.includes.icon', ['name' => 'arrow-left']) Volver al curso
-                </a>
-            @endunless
             <div class="rc">{{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</div>
             <div class="t">Contenido del curso</div>
             <div class="bar" role="progressbar" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progressPercentage }}% completado"><i style="--pct: {{ $progressPercentage }}%" aria-hidden="true"></i></div>
@@ -126,6 +125,18 @@
                 </div>
             </div>
         @endif
+
+        {{-- Footer fijo (sticky bottom, igual que .lv-rail-head con sticky top):
+             antes "Volver al curso" vivía arriba del todo y se perdía de vista
+             al bajar por la lista de clases -- con el encabezado y este botón
+             fijos, solo el listado de capítulos hace scroll en el medio. --}}
+        @unless(request()->routeIs('customers.courses.content'))
+            <div class="lv-rail-foot">
+                <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back">
+                    Volver al curso
+                </a>
+            </div>
+        @endunless
     </aside>
 
 @else
@@ -135,7 +146,7 @@
 
         @unless(request()->routeIs('customers.courses.content'))
             <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back rail-back">
-                @include('customers.includes.icon', ['name' => 'arrow-left']) Volver al curso
+                Volver al curso
             </a>
         @endunless
 
@@ -244,40 +255,5 @@
 @endif
 
 @push('scripts')
-<script>
-    $(function () {
-        var $active = $('.lv-lesson.active, .lesson-row.active').first();
-        if ($active.length) {
-            var $rail = $active.closest('.lv-rail, .aula-side');
-            if ($rail.length) {
-                var target = $active.offset().top - $rail.offset().top + $rail.scrollTop() - ($rail.innerHeight() / 2) + ($active.outerHeight() / 2);
-                $rail.scrollTop(Math.max(0, target));
-            }
-        }
-    });
-
-    {{-- Toggle del rail en mobile (.lv-rail-toggle, ver lesson-content.blade.php
-         y quiz-questions.blade.php). En desktop .lv-rail es sticky y siempre
-         visible -- este código no tiene efecto ahí (el botón está oculto por
-         CSS), solo aplica al breakpoint donde .lv-rail pasa a position:fixed. --}}
-    $(function () {
-        var $rail = $('#lvRail');
-        var $backdrop = $('#lvRailBackdrop');
-        var $toggles = $('.lv-rail-toggle');
-        if (!$rail.length || !$toggles.length) return;
-
-        function setOpen(open) {
-            $rail.toggleClass('open', open);
-            $backdrop.toggleClass('open', open);
-            $toggles.attr('aria-expanded', open ? 'true' : 'false');
-            document.body.style.overflow = open ? 'hidden' : '';
-        }
-
-        $toggles.on('click', function () { setOpen(!$rail.hasClass('open')); });
-        $backdrop.on('click', function () { setOpen(false); });
-        // Al elegir una clase del rail, se navega de todos modos -- cerrarlo
-        // solo evita el parpadeo del panel abierto durante esa navegación.
-        $rail.on('click', '.lv-lesson:not(.pe-none)', function () { setOpen(false); });
-    });
-</script>
+<script src="{{ asset('customers/js/partials/views/courses/rail.js') }}"></script>
 @endpush

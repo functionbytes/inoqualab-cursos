@@ -5,7 +5,9 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <form id="formReasign" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formReasign" enctype="multipart/form-data" role="form"
+                      data-reasign-url="{{ route('support.enterprises.action.reasign') }}"
+                      data-redirect-url="{{ route('support.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
                     {{ csrf_field() }}
                     <input id="old" name="old" type="hidden" value="{{ $course->slack }}">
                     <input id="enterprise" name="enterprise" type="hidden" value="{{ $enterprise->slack }}">
@@ -57,33 +59,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function() {
-    $("#formReasign").validate({
-        rules: {
-            course: { required: true },
-            'user[]': { required: true },
-        },
-        messages: {
-            course: { required: "Selecciona un curso." },
-            'user[]': { required: "Selecciona al menos un usuario." },
-        },
-        submitHandler: function(form) {
-            var formData = new FormData(form);
-            $.ajax({
-                url: "{{ route('support.enterprises.action.reasign') }}",
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                type: "POST",
-                contentType: false,
-                processData: false,
-                data: formData,
-                success: function(d) {
-                    window.location.href = "{{ route('support.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}";
-                },
-                error: function() { toastr.error('Error al procesar la reasignación.'); }
-            });
-        }
-    });
-});
-</script>
+    <script src="{{ asset('supports/js/enterprises/courses/reasign.js') }}"></script>
 @endpush

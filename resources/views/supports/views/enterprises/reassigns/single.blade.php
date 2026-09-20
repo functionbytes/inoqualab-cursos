@@ -7,10 +7,12 @@
 
             <div class="card w-100">
 
-                <form id="formCourses" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formCourses" enctype="multipart/form-data" role="form"
+                      data-reassign-url="{{ route('support.enterprises.users.reassign.single') }}"
+                      data-redirect-url="{{ route('support.enterprises.users', ':slack') }}">
 
                     {{ csrf_field() }}
-                    
+
                     <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
 
                     <div class="card-body border-top">
@@ -68,98 +70,7 @@
 
 
 @push('scripts')
-
-    <script type="text/javascript">
-        Dropzone.autoDiscover = false;
-
-        $(document).ready(function() {
-
-            $("#formCourses").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    'enterprise': {
-                        required: true,
-                    },
-                },
-                messages: {
-                    'enterprise': {
-                        required: "Es necesario una opción.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formCourses');
-                    var formData = new FormData($form[0]);
-                    var slack = $("#slack").val();
-                    var enterprise = $("#enterprise").val();
-
-                    formData.append('slack', slack);
-                    formData.append('enterprise', enterprise);
-
-                    var $submitButton = $('button[type="submit"]');
-                    $submitButton.prop('disabled', true);
-
-                    $.ajax({
-                        url: "{{ route('support.enterprises.users.reassign.single') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                message = response.message;
-                                slack = response.enterprise;
-
-                                toastr.success(message, "Operación exitosa", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                setTimeout(function() {
-                                    window.location.href = "{{ route('support.enterprises.users', ':slack') }}".replace(':slack', slack);
-                                }, 2000);
-
-                            }else{
-
-                                $submitButton.prop('disabled', false);
-
-                                error = response.message;
-
-                                toastr.warning(error, "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-
-                                $('.errors').text(error);
-                                $('.errors').removeClass('d-none');
-                            }
-
-
-                        }
-                    });
-
-                }
-
-            });
-
-
-
-
-        });
-
-    </script>
-
-
-
+    <script src="{{ asset('supports/js/enterprises/reassigns/single.js') }}"></script>
 @endpush
 
 

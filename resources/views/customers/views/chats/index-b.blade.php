@@ -10,6 +10,13 @@
     $primera = $planas->first();
 @endphp
 
+@section('context-title', 'Bandeja')
+@section('context-icon')@include('customers.includes.icon', ['name' => 'bell'])@endsection
+@section('context-subtitle', 'Avisos sobre tus cursos, pedidos y certificados')
+@section('context-stat-number', $planas->count())
+{{-- Str::plural('notificación', ...) da "notificacións" (reglas en inglés) --}}
+@section('context-stat-label', $planas->count() === 1 ? 'notificación' : 'notificaciones')
+
 @section('content')
 <section class="pnl-section">
 
@@ -29,7 +36,8 @@
 
     @else
 
-    <div class="nb-shell">
+    <div class="nb-shell"
+         data-mark-url="{{ route('customers.notifications.mark') }}">
 
         <div class="nb-list">
             <div class="nb-list-head">
@@ -96,72 +104,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(function () {
-    var seleccionada = null;
-
-    function pintar($row) {
-        seleccionada = $row;
-
-        $('.nb-row').removeClass('is-active');
-        $row.addClass('is-active');
-
-        $('#nbTitle').text($row.data('title'));
-        $('#nbMessage').text($row.data('message'));
-        $('#nbDate').text($row.data('date'));
-
-        var link = $row.data('link');
-        $('#nbLink').toggle(!! link).attr('href', link || '#');
-        $('#nbMarkRead').toggle($row.hasClass('is-new'));
-    }
-
-    function marcar(id, $item, cb) {
-        $.ajax({
-            url: '{{ route('customers.notifications.mark') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            data: { id: id },
-            success: function () {
-                $item.removeClass('is-new');
-                $item.find('.unread-badge').remove();
-                if (cb) { cb(); }
-            },
-            error: function () {
-                toastr.error('Error al marcar la notificación');
-            }
-        });
-    }
-
-    $('.nb-row').on('click', function () { pintar($(this)); });
-
-    $('#nbMarkRead').on('click', function () {
-        if (! seleccionada) { return; }
-
-        marcar(seleccionada.data('id'), seleccionada, function () {
-            $('#nbMarkRead').hide();
-            toastr.success('Notificación marcada como leída');
-        });
-    });
-
-    $('#ntReadAll').on('click', function () {
-        var $pendientes = $('.nb-row.is-new');
-
-        if (! $pendientes.length) { return; }
-
-        $pendientes.each(function () {
-            var $item = $(this);
-            marcar($item.data('id'), $item);
-        });
-
-        $('#nbMarkRead').hide();
-        $(this).remove();
-        $('.nb-list-head .pill').remove();
-        toastr.success('Notificaciones marcadas como leídas');
-    });
-
-    // Estado inicial: la primera notificación de la lista.
-    var $primera = $('.nb-row').first();
-    if ($primera.length) { pintar($primera); }
-});
-</script>
+<script src="{{ asset('customers/js/views/chats/index-b.js') }}"></script>
 @endpush

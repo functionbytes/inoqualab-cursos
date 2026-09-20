@@ -5,9 +5,16 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
 
-            <div class="card w-100">
+            <div class="card w-100" id="orders-edit"
+                 data-config='@php $__jsonInline1 = [
+                    "paymentDate" => \Carbon\Carbon::parse($order->payment_at)->format("Y-m-d"),
+                    "routes" => [
+                        "update" => route("manager.orders.update"),
+                        "view" => route("manager.orders.view", ":id"),
+                    ],
+                 ]; @endphp@json($__jsonInline1)'>
 
-                <form id="formOrders" enctype="multipart/form-data" role="form" onSubmit="return false">
+                <form id="formOrders" enctype="multipart/form-data" role="form">
 
                     {{ csrf_field() }}
 
@@ -27,13 +34,13 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Orden codigo</label>
-                                        <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->slack  }}" disabled>
+                                        <input type="text" class="form-control" id="title_slack"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->slack  }}" disabled>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
                                     <label  class="control-label col-form-label">Orden referencia</label>
-                                    <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->reference  }}" disabled>
+                                    <input type="text" class="form-control" id="title_reference"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->reference  }}" disabled>
                                 </div>
                             </div>
 
@@ -41,7 +48,7 @@
 
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
+                                    <label class="control-label col-form-label">Condición pago</label>
                                     <div class="input-group">
                                         {!! Form::select('condition', $conditions, $order->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                     </div>
@@ -50,7 +57,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="mb-3">
-                                    <label class="control-label col-form-label">Condición pago</label>
+                                    <label class="control-label col-form-label">Metodo pago</label>
                                     <div class="input-group">
                                         {!! Form::select('method', $methods, $order->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
                                     </div>
@@ -66,7 +73,7 @@
                             <div class="col-6">
                                 <div class="mb-3">
                                         <label  class="control-label col-form-label">Fecha creación</label>
-                                        <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($order->created_at)) }}" disabled>
+                                        <input type="text" class="form-control" id="title_created"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($order->created_at)) }}" disabled>
                                 </div>
                             </div>  <div class="col-12">
                             <div class="border-top pt-1 mt-4">
@@ -96,7 +103,7 @@
                     <div class="modal-body text-center">
                         <div class="display-4 text-danger"><i data-feather="x-octagon"></i></div>
                         <h4 class="my-0">¿Deseas visualizar la orden?</h4>
-                        <p>Visualizaras el detalle de la factura que acabaste de genrar</p>
+                        <p>Visualizarás el detalle de la orden que acabas de actualizar</p>
                         <div class="row justify-content-center mt-20  ">
                             <div class="col-sm-12 col-md-5">
                                 <a href="" id="view-link" class="btn btn-danger w-100">Confirmar</a>
@@ -115,110 +122,8 @@
 
 
 @push('scripts')
-
     <script src="{{ url('managers/libs/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}" type="text/javascript"></script>
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-
-
-            $(".datepicker").datepicker({
-                format: 'yyyy-mm-dd', // Formato de año-mes-día
-                autoclose: true,
-                todayHighlight: true
-            });
-
-            // Formatear la fecha de 'Y-m-d' a 'Y-m-d'
-            var paymentDate = '{{ \Carbon\Carbon::parse($order->payment_at)->format('Y-m-d') }}';
-
-            // Establecer la fecha en el datepicker
-            $('.datepicker').datepicker('setDate', paymentDate);
-
-            $("#formOrders").validate({
-                submit: false,
-                ignore: ".ignore",
-                rules: {
-                    condition: {
-                        required: true,
-                    },
-                    method: {
-                        required: true,
-                    },
-                    payment: {
-                        required: function() {
-                            return $("#condition").val() == 4 ? true : false
-                        },
-                    },
-                },
-                messages: {
-                    condition: {
-                        required: "Es necesario un estado.",
-                    },
-                    method: {
-                        required: "Es necesario un estado.",
-                    },
-                    payment: {
-                        required: "Es necesario una fecha.",
-                    },
-                },
-                submitHandler: function(form) {
-
-                    var $form = $('#formOrders');
-                    var formData = new FormData($form[0]);
-                    var slack = $("#slack").val();
-                    var condition = $("#condition").val();
-                    var method = $("#method").val();
-                    var payment = $("#payment").val();
-
-                    formData.append('slack', slack);
-                    formData.append('condition', condition);
-                    formData.append('methods', method);
-                    formData.append('payment', payment);
-
-                    $.ajax({
-                        url: "{{ route('manager.orders.update') }}",
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        type: "POST",
-                        contentType: false,
-                        processData: false,
-                        data: formData,
-                        success: function(response) {
-
-                            if(response.success == true){
-
-                                var url = "{{ route('manager.orders.view', ':id') }}";
-                                url = url.replace(':id', response.data.slack);
-
-                                $("#view-modal").modal("show");
-                                $("#view-link").attr("href", url);
-
-                            }else{
-
-                                toastr.warning("Se ha generado un error.", "Operación fallida", {
-                                    closeButton: true,
-                                    progressBar: true,
-                                    positionClass: "toast-bottom-right"
-                                });
-
-                                error = response.message;
-                                $('.errors').removeClass('d-none');
-                                $('.errors').removeClass('d-none');
-                            }
-
-                        }
-                    });
-
-                }
-
-            });
-
-        });
-
-    </script>
-
-
+    <script src="{{ asset('managers/js/views/orders/orders/edit.js') }}"></script>
 @endpush
 
 

@@ -80,7 +80,7 @@
                                                 <a href="{{ $sitemap['url'] }}"
                                                    target="_blank"
                                                    class="btn btn-sm btn-outline-secondary">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Ver
+                                                    Ver
                                                 </a>
                                             </td>
                                         </tr>
@@ -107,8 +107,9 @@
                     <div class="card-body">
                         <h6 class="fw-bold mb-1">Forzar regeneración</h6>
                         <p class="text-muted mb-3">Regenera todos los sitemaps con el contenido actual del sitio.</p>
-                        <button type="button" id="btn-generate" class="btn btn-primary w-100">
-                            <i class="fas fa-rotate me-1"></i>Forzar regeneración
+                        <button type="button" id="btn-generate" class="btn btn-primary w-100"
+                                data-generate-url="{{ route('manager.seo.sitemap.generate') }}">
+                            Forzar regeneración
                         </button>
                     </div>
                 </div>
@@ -117,8 +118,9 @@
                     <div class="card-body">
                         <h6 class="fw-bold mb-1">Limpiar caché</h6>
                         <p class="text-muted mb-3">Limpia la caché del sitemap. Se volverá a generar automáticamente al siguiente acceso.</p>
-                        <button type="button" id="btn-clear-cache" class="btn btn-outline-secondary w-100">
-                            <i class="fas fa-broom me-1"></i>Limpiar caché
+                        <button type="button" id="btn-clear-cache" class="btn btn-outline-secondary w-100"
+                                data-clear-cache-url="{{ route('manager.seo.sitemap.clear-cache') }}">
+                            Limpiar caché
                         </button>
                     </div>
                 </div>
@@ -132,59 +134,5 @@
 @endsection
 
 @push('scripts')
-<script>
-$(document).ready(function () {
-
-    // Limpiar caché
-    $('#btn-clear-cache').on('click', function () {
-        var $btn = $(this);
-        $btn.html('<span class="spinner-border spinner-border-sm me-1"></span>Limpiando...').prop('disabled', true);
-
-        $.ajax({
-            url: '{{ route('manager.seo.sitemap.clear-cache') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (response) {
-                toastr.success(response.message ?? 'Caché limpiada correctamente');
-                setTimeout(function () { window.location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                var msg = xhr.responseJSON && xhr.responseJSON.message
-                    ? xhr.responseJSON.message
-                    : 'Error al limpiar la caché';
-                toastr.error(msg);
-            },
-            complete: function () {
-                $btn.html('<i class="fas fa-broom me-1"></i>Limpiar caché').prop('disabled', false);
-            }
-        });
-    });
-
-    // Forzar regeneración
-    $('#btn-generate').on('click', function () {
-        var $btn = $(this);
-        $btn.html('<span class="spinner-border spinner-border-sm me-1"></span>Regenerando...').prop('disabled', true);
-
-        $.ajax({
-            url: '{{ route('manager.seo.sitemap.generate') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (response) {
-                toastr.success(response.message ?? 'Sitemap regenerado correctamente');
-                setTimeout(function () { window.location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                var msg = xhr.responseJSON && xhr.responseJSON.message
-                    ? xhr.responseJSON.message
-                    : 'Error al regenerar el sitemap';
-                toastr.error(msg);
-            },
-            complete: function () {
-                $btn.html('<i class="fas fa-rotate me-1"></i>Forzar regeneración').prop('disabled', false);
-            }
-        });
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/seo/sitemap/index.js') }}"></script>
 @endpush

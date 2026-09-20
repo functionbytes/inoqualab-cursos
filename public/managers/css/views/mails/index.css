@@ -1,0 +1,55 @@
+@keyframes rowHighlight {
+    0% { background-color: #fff9c4; }
+    100% { background-color: transparent; }
+}
+
+.row-new-highlight {
+    animation: rowHighlight 4s ease-out forwards;
+}
+
+.row-kb-focus {
+    outline: 2px solid #008bce;
+    outline-offset: -2px;
+    background-color: #f0f8ff !important;
+}
+
+.mails-activity-chart {
+    height: 180px;
+}
+
+.mails-daterange-input {
+    min-width: 200px;
+}
+
+.mails-col-checkbox {
+    width: 40px;
+}
+
+.mails-col-w80 {
+    width: 80px;
+}
+
+.mails-col-w110 {
+    width: 110px;
+}
+
+.mails-select-min-w200 {
+    min-width: 200px;
+}
+
+.mails-alias-btn-wrap {
+    padding-top: 22px;
+}
+
+.mails-preview-pre {
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+.mails-preview-pre-lg {
+    max-height: 300px;
+}
+
+.mails-preview-pre-sm {
+    max-height: 120px;
+}

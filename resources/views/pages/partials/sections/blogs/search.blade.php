@@ -1,4 +1,4 @@
-<div class="widget widget-search wow fadeInUp delay-0-2s animated" style="visibility: visible; animation-name: fadeInUp;">
+<div class="widget widget-search wow fadeInUp delay-0-2s animated">
     {!! Form::open(['route' => ['blogs.filters'], 'class' => 'rbt-search-style-1', 'id' => 'formFilter', 'method' => 'POST', 'files' => true, 'enctype' => 'multipart/form-data']) !!}
     {{ csrf_field() }}
         <input type="text" id="search" name="search" autocomplete="off" placeholder="Buscar artículo..." aria-label="Buscar artículo" required="">
@@ -7,23 +7,5 @@
 </div>
 
 @push('scripts')
-
-    <script>
-        $(document).ready(function() {
-
-            $("#search").keypress(function(e) {
-                if (e.which == 13) {
-
-                    $('#formFilter').submit();
-                }
-            });
-
-
-            $("#searchButton").click(function() {
-                $('#formFilter').submit();
-            });
-
-        });
-    </script>
-
+    <script src="{{ asset('pages/js/partials/sections/blogs/search.js') }}"></script>
 @endpush

@@ -1,0 +1,12 @@
+.bulk-toolbar-float {
+    z-index: 1050;
+}
+
+.courses-col-checkbox {
+    width: 40px;
+}
+
+.reviews-comment-col {
+    white-space: normal;
+    max-width: 360px;
+}

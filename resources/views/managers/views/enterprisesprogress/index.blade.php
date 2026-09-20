@@ -10,7 +10,7 @@
                         <h5 class="mb-0">Progreso — {{ $user->firstname }} {{ $user->lastname }}</h5>
                         <div class="ms-auto">
                             <a href="{{ route('manager.enterprises.courses.view', [$user->relations?->slack ?? '', $course->slack]) }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i> Volver
+                                Volver
                             </a>
                         </div>
                     </div>

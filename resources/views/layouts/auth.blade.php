@@ -82,33 +82,7 @@
 <script src="{{ url('customers/js/sidebarmenu.js') }}" type="text/javascript"></script>
 <script src="{{ url('customers/js/custom.js') }}" type="text/javascript"></script>
 
-
-<script>
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-</script>
-
-<script>
-    "use strict"
-    $(function () {
-
-        deleteConfirmation();
-
-        // delete confirmation
-        function deleteConfirmation() {
-            $(".confirm-delete").click(function (e) {
-                e.preventDefault();
-                var url = $(this).data("href");
-                $("#delete-modal").modal("show");
-                $("#delete-link").attr("href", url);
-            });
-        }
-    });
-
-</script>
+<script src="{{ asset('auth/js/layout.js') }}" type="text/javascript"></script>
 
 @stack('scripts')
 

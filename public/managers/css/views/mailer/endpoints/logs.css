@@ -1,0 +1,11 @@
+.log-detail-pre {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+.log-detail-pre-lg {
+    max-height: 300px;
+}
+.bg-danger-soft {
+    background: rgba(220, 53, 69, 0.10);
+}

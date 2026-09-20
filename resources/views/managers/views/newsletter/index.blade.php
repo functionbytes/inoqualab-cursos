@@ -5,7 +5,12 @@
 @section('content')
 
 
-    <div class="widget-content searchable-container list">
+    <div class="widget-content searchable-container list" id="newsletter-page"
+         data-flash-success="{{ session('success') }}"
+         data-flash-error="{{ session('error') }}"
+         data-bulk-url="{{ route('manager.newsletter.bulk-action') }}"
+         data-store-url="{{ route('manager.newsletter.store') }}"
+         data-import-url="{{ route('manager.newsletter.import') }}">
 
         <div class="card">
 
@@ -148,7 +153,7 @@
                                 title="Filtros avanzados">
                             <i class="fas fa-sliders"></i>
                             @if($activeFilters > 0)
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size:.65rem;">{{ $activeFilters }}</span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary filter-badge-sm">{{ $activeFilters }}</span>
                             @endif
                         </button>
 
@@ -175,7 +180,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width:40px">
+                                <th class="col-checkbox">
                                     <input type="checkbox" class="form-check-input" id="select-all">
                                 </th>
                                 <th>Email</th>
@@ -312,47 +317,14 @@
         </div>
     </div>
 
-    {{-- Bulk toolbar flotante --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none" style="z-index:1050;">
-        <button type="button" class="btn btn-primary shadow-lg px-4"
-                data-bs-toggle="modal" data-bs-target="#bulk-modal">
-            <span data-bulk-count>0</span> seleccionado(s) &mdash; Aplicar acción
-        </button>
-    </div>
-
-    {{-- Bulk modal --}}
-    <div class="modal fade" id="bulk-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Acción masiva</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p class="text-muted mb-3">
-                        Se aplicará la acción sobre <strong><span class="bulk-count-label">0</span> suscriptor(es)</strong> seleccionados.
-                    </p>
-                    <div class="mb-3">
-                        <label for="bulk-action-select" class="form-label fw-semibold">Acción</label>
-                        <select id="bulk-action-select" class="form-select">
-                            <option value="">Seleccionar acción...</option>
-                            <option value="resubscribe">Reactivar</option>
-                            <option value="unsubscribe">Desuscribir</option>
-                            <option value="delete">Eliminar</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button id="btn-bulk-apply" type="button" class="btn btn-primary w-100 mb-2">
-                        Aplicar
-                    </button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'suscriptor(es)',
+        'bulkActions' => [
+            ['value' => 'resubscribe', 'label' => 'Reactivar'],
+            ['value' => 'unsubscribe', 'label' => 'Desuscribir'],
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 
     @include('managers.includes.delete')
 
@@ -464,7 +436,7 @@
                 <div class="modal-body text-center p-4 position-relative">
                     <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     <div class="mb-3 mt-2">
-                        <i class="fas fa-triangle-exclamation text-warning" style="font-size:3.5rem;"></i>
+                        <i class="fas fa-triangle-exclamation text-warning action-modal-icon"></i>
                     </div>
                     <h5 class="fw-bold mb-2" id="action-modal-title"></h5>
                     <p class="text-muted mb-4" id="action-modal-body"></p>
@@ -477,260 +449,10 @@
 
 @endsection
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/newsletter/index.css') }}">
+@endpush
+
 @push('scripts')
-<script>
-$(function () {
-
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-    @if(session('success'))
-        toastr.success('{{ session('success') }}');
-    @endif
-    @if(session('error'))
-        toastr.error('{{ session('error') }}');
-    @endif
-
-    // ── Bulk selection ────────────────────────────────────────────────────────
-    function getChecked() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    function updateBulkToolbar() {
-        var count = getChecked().length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total   = $('.bulk-checkbox').length;
-        var checked = getChecked().length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    $('#bulk-modal').on('show.bs.modal', function () {
-        $('.bulk-count-label').text(getChecked().length);
-    });
-
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#btn-bulk-apply').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids    = getChecked();
-
-        if (!action) { toastr.warning('Selecciona una acción antes de continuar.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos un suscriptor.'); return; }
-
-        if (action === 'delete') {
-            $('#bulk-modal').modal('hide');
-            pendingAction = { action: 'delete', ids: ids };
-            $('#action-modal-title').text('Eliminar suscriptores');
-            $('#action-modal-body').html('Se eliminarán <strong>' + ids.length + ' suscriptor(es)</strong> de forma permanente. Esta acción no se puede deshacer.');
-            $('#action-modal').modal('show');
-            return;
-        }
-
-        $('#btn-bulk-apply').prop('disabled', true).text('Procesando...');
-
-        executeBulkAction(action, ids, function () {
-            $('#bulk-modal').modal('hide');
-        });
-    });
-
-    // ── Desuscribir / Reactivar individual ───────────────────────────────────
-    var pendingAction = null;
-
-    $(document).on('click', '.btn-unsubscribe, .btn-resubscribe', function () {
-        var id     = $(this).data('id');
-        var email  = $(this).data('email');
-        var action = $(this).hasClass('btn-unsubscribe') ? 'unsubscribe' : 'resubscribe';
-
-        pendingAction = { action: action, id: id };
-
-        if (action === 'unsubscribe') {
-            $('#action-modal-title').text('Desuscribir suscriptor');
-            $('#action-modal-body').html('Se dará de baja a <strong>' + $('<span>').text(email).html() + '</strong> del newsletter. También se eliminará de Mailjet si está configurado.');
-        } else {
-            $('#action-modal-title').text('Reactivar suscriptor');
-            $('#action-modal-body').html('Se reactivará la suscripción de <strong>' + $('<span>').text(email).html() + '</strong>. También se añadirá a Mailjet si está configurado.');
-        }
-
-        $('#action-modal').modal('show');
-    });
-
-    $('#btn-action-confirm').on('click', function () {
-        if (!pendingAction) { return; }
-        $('#action-modal').modal('hide');
-        var ids = pendingAction.ids ? pendingAction.ids : [pendingAction.id];
-        executeBulkAction(pendingAction.action, ids, function () {});
-        pendingAction = null;
-    });
-
-    $('#action-modal').on('hidden.bs.modal', function () {
-        pendingAction = null;
-    });
-
-    function executeBulkAction(action, ids, onSuccess) {
-        $.ajax({
-            url: '{{ route('manager.newsletter.bulk-action') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                toastr.success(res.message ?? 'Acción aplicada.');
-                onSuccess();
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar la acción.');
-                $('#btn-bulk-apply').prop('disabled', false).text('Aplicar');
-            }
-        });
-    }
-
-    // ── Añadir suscriptor ─────────────────────────────────────────────────────
-    $('#add-modal').on('show.bs.modal', function () {
-        $('#add-email, #add-name').val('');
-        $('#add-email').removeClass('is-invalid');
-        $('#add-email-error').text('');
-        $('#btn-add-confirm').prop('disabled', false).text('Añadir');
-    });
-
-    $('#btn-add-confirm').on('click', function () {
-        var email = $.trim($('#add-email').val());
-        $('#add-email').removeClass('is-invalid');
-        if (!email) {
-            $('#add-email').addClass('is-invalid');
-            $('#add-email-error').text('El correo electrónico es obligatorio.');
-            return;
-        }
-
-        $('#btn-add-confirm').prop('disabled', true).text('Guardando...');
-
-        $.ajax({
-            url: '{{ route('manager.newsletter.store') }}',
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            contentType: 'application/json',
-            data: JSON.stringify({ email: email, name: $.trim($('#add-name').val()) || null }),
-            success: function (res) {
-                toastr.success(res.message);
-                $('#add-modal').modal('hide');
-                setTimeout(function () { location.reload(); }, 700);
-            },
-            error: function (xhr) {
-                $('#btn-add-confirm').prop('disabled', false).text('Añadir');
-                var errors = xhr.responseJSON?.errors;
-                if (errors?.email) {
-                    $('#add-email').addClass('is-invalid');
-                    $('#add-email-error').text(errors.email[0]);
-                } else {
-                    toastr.error(xhr.responseJSON?.message ?? 'Error al añadir el suscriptor.');
-                }
-            }
-        });
-    });
-
-    // ── Importar CSV ──────────────────────────────────────────────────────────
-    $('#import-modal').on('show.bs.modal', function () {
-        $('#import-file').val('');
-        $('#import-file-error').text('');
-        $('#import-result').addClass('d-none');
-        $('#btn-import-confirm').prop('disabled', false).text('Importar');
-    });
-
-    $('#btn-import-confirm').on('click', function () {
-        var file = $('#import-file')[0].files[0];
-        $('#import-file-error').text('');
-        if (!file) {
-            $('#import-file-error').text('Selecciona un archivo CSV.');
-            return;
-        }
-
-        var formData = new FormData();
-        formData.append('_token', csrfToken);
-        formData.append('file', file);
-
-        $('#btn-import-confirm').prop('disabled', true).text('Importando...');
-        $('#import-result').addClass('d-none');
-
-        $.ajax({
-            url: '{{ route('manager.newsletter.import') }}',
-            method: 'POST',
-            contentType: false,
-            processData: false,
-            data: formData,
-            success: function (res) {
-                $('#import-result-text').text(res.message);
-                $('#import-result').removeClass('d-none');
-                $('#btn-import-confirm').prop('disabled', false).text('Importar otro');
-                if (res.imported > 0) {
-                    toastr.success(res.message);
-                    setTimeout(function () { location.reload(); }, 1500);
-                }
-            },
-            error: function (xhr) {
-                $('#btn-import-confirm').prop('disabled', false).text('Importar');
-                var errors = xhr.responseJSON?.errors;
-                if (errors?.file) {
-                    $('#import-file-error').text(errors.file[0]);
-                } else {
-                    toastr.error(xhr.responseJSON?.message ?? 'Error al importar el archivo.');
-                }
-            }
-        });
-    });
-
-    // ── Select2 en modal de filtros ───────────────────────────────────────────
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('#modalStatus, #modalSource').select2({ allowClear: false, width: '100%', dropdownParent: $('#filters-modal') });
-    }
-
-    // ── Filtros avanzados ─────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filterSource').val($('#modalSource').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
-
-    // ── Reenviar confirmación ─────────────────────────────────────────────────
-    $(document).on('click', '.btn-resend', function () {
-        var url   = $(this).data('url');
-        var email = $(this).data('email');
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            success: function (res) {
-                toastr.success(res.message ?? 'Correo reenviado.');
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al reenviar el correo.');
-            }
-        });
-    });
-
-    // ── Eliminar individual vía modal ─────────────────────────────────────────
-    $(document).on('click', '.btn-delete', function (e) {
-        e.preventDefault();
-        var $btn = $(this);
-        $('#delete-modal .modal-title').text($btn.data('title'));
-        $('#delete-form').attr('action', $btn.data('url'));
-        $('#delete-modal').modal('show');
-    });
-
-});
-</script>
+<script src="{{ asset('managers/js/views/newsletter/index.js') }}"></script>
 @endpush

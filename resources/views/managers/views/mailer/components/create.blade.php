@@ -14,7 +14,8 @@
     <div class="alert alert-danger alert-dismissible fade show"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul><button class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
-<form method="POST" action="{{ route('mailers.components.store') }}" id="formCreate">
+<form method="POST" action="{{ route('mailers.components.store') }}" id="formCreate"
+      data-variables-url="{{ route('mailers.components.variables') }}">
     @csrf
     <div class="row g-3">
 
@@ -55,11 +56,11 @@
                 <div class="card-body border-bottom">
                     <div class="row g-3">
                         <div class="col-12">
-                            <label for="subject" class="form-label fw-semibold">Nombre del componente</label>
-                            <input type="text" class="form-control @error('subject') is-invalid @enderror"
-                                   id="subject" name="subject" value="{{ old('subject', '') }}"
+                            <label for="name" class="form-label fw-semibold">Nombre del componente</label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                   id="name" name="name" value="{{ old('name', '') }}"
                                    placeholder="Ej: Header principal, Footer de emails..." required>
-                            @error('subject')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-md-6">
                             <label for="alias" class="form-label fw-semibold">Alias (ID único)</label>
@@ -80,8 +81,9 @@
                         <div class="col-12 col-md-6">
                             <label for="type" class="form-label fw-semibold">Tipo</label>
                             <select class="form-select select2 @error('type') is-invalid @enderror" id="type" name="type" required>
-                                <option value="partial" @if(old('type') === 'partial') selected @endif>Parcial</option>
-                                <option value="layout" @if(old('type') === 'layout') selected @endif>Layout</option>
+                                <option value="layout" @if(old('type', 'layout') === 'layout') selected @endif>Layout</option>
+                                <option value="header" @if(old('type') === 'header') selected @endif>Header</option>
+                                <option value="footer" @if(old('type') === 'footer') selected @endif>Footer</option>
                                 <option value="component" @if(old('type') === 'component') selected @endif>Componente</option>
                             </select>
                             @error('type')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -102,12 +104,12 @@
                 <ul class="nav nav-tabs nav-fill border-bottom" id="editorTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="code-tab" data-bs-toggle="tab" data-bs-target="#code-panel" type="button" role="tab">
-                            <i class="fas fa-code me-2"></i>Código
+                            Código
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview-panel" type="button" role="tab">
-                            <i class="fas fa-eye me-2"></i>Vista previa
+                            Vista previa
                         </button>
                     </li>
                 </ul>
@@ -136,7 +138,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div id="previewContainerTab" style="min-height:500px;max-height:700px;overflow-y:auto;background:#f8f9fa;border-radius:4px;">
+                        <div id="previewContainerTab" class="mailer-preview-tab">
                             <div class="text-center py-5">
                                 <div class="spinner-border text-primary mb-3" role="status"><span class="visually-hidden">Cargando...</span></div>
                                 <p class="text-muted mb-0">Cargando vista previa...</p>
@@ -172,7 +174,7 @@
                     </div>
                 </div>
                 <div class="card-body p-3">
-                    <div id="variablesPanel" style="max-height:350px;overflow-y:auto;">
+                    <div id="variablesPanel" class="mailer-variables-panel">
                         <div class="text-center py-4 text-muted">
                             <div class="spinner-border spinner-border-sm mb-2" role="status"><span class="visually-hidden">Cargando...</span></div>
                             <p class="mb-0 small">Cargando variables...</p>
@@ -190,7 +192,7 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div id="previewContainer" style="min-height:400px;max-height:600px;overflow-y:auto;background:#f8f9fa;">
+                    <div id="previewContainer" class="mailer-preview-main">
                         <div class="text-center py-5">
                             <div class="spinner-border text-success mb-3" role="status"><span class="visually-hidden">Cargando...</span></div>
                             <p class="text-muted mb-0">Cargando vista previa...</p>
@@ -212,6 +214,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/monokai.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.css">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/components/create.css') }}">
 @endpush
 
 @push('scripts')
@@ -223,88 +226,7 @@
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/closebrackets.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/show-hint.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/hint/html-hint.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/dist/beautify-html.js"></script>
-
-<script>
-let editor;
-
-$(document).ready(function() {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-
-    editor = CodeMirror.fromTextArea(document.getElementById('content'), {
-        mode: 'htmlmixed',
-        theme: 'monokai',
-        lineNumbers: true,
-        autoCloseTags: true,
-        autoCloseBrackets: true,
-        extraKeys: {
-            'Ctrl-Space': 'autocomplete',
-            'Ctrl-S': function() { $('#formCreate').submit(); },
-            'Ctrl-/': 'toggleComment'
-        }
-    });
-
-    editor.setSize(null, 500);
-
-    let previewTimeout;
-
-    function updatePreview() {
-        const html = editor.getValue();
-        const makeIframe = (container, minHeight) => {
-            const $iframe = $('<iframe>').css({ width: '100%', 'min-height': minHeight, border: 'none', display: 'block', background: 'white' });
-            $(container).empty().append($iframe);
-            $iframe[0].srcdoc = html;
-        };
-        makeIframe('#previewContainer', '400px');
-        makeIframe('#previewContainerTab', '500px');
-    }
-
-    function loadVariables() {
-        $.get('{{ route('mailers.components.variables') }}', function(data) {
-            if (!data.success) return;
-            let html = '<div class="d-flex flex-wrap gap-1">';
-            $.each(data.variables, function(i, group) {
-                $.each(group.items, function(j, variable) {
-                    html += '<span class="badge bg-light text-dark border variable-insert" style="cursor:pointer;" data-name="' + variable.name + '" title="' + (variable.description || '') + '">' + variable.name + '</span>';
-                });
-            });
-            html += '</div>';
-            $('#variablesPanel').html(html);
-        }).fail(function() {
-            $('#variablesPanel').html('<div class="text-danger small p-2">Error al cargar variables</div>');
-        });
-    }
-
-    updatePreview();
-    loadVariables();
-
-    editor.on('change', function() {
-        clearTimeout(previewTimeout);
-        previewTimeout = setTimeout(updatePreview, 2000);
-    });
-
-    $(document).on('click', '.variable-insert', function() {
-        editor.replaceSelection('{' + $(this).data('name') + '}');
-        editor.focus();
-    });
-
-    $('#btnRefreshPreview, #btnRefreshPreviewTab').on('click', function(e) { e.preventDefault(); updatePreview(); });
-    $('#btnFormatCode').on('click', function(e) {
-        e.preventDefault();
-        if (typeof html_beautify !== 'undefined') {
-            editor.setValue(html_beautify(editor.getValue(), { indent_size: 2 }));
-        }
-    });
-    $('#btnLoadVariables').on('click', function(e) { e.preventDefault(); loadVariables(); });
-    $('#btnDesktopView').on('click', function(e) { e.preventDefault(); $('#previewContainerTab').css('width', '100%'); $(this).addClass('active'); $('#btnMobileView').removeClass('active'); });
-    $('#btnMobileView').on('click', function(e) { e.preventDefault(); $('#previewContainerTab').css('width', '375px'); $(this).addClass('active'); $('#btnDesktopView').removeClass('active'); });
-    $('#preview-tab').on('shown.bs.tab', updatePreview);
-
-    $('#formCreate').on('submit', function() {
-        $('#content').val(editor.getValue());
-    });
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-beautify@1.14.9/js/lib/beautify-html.js"></script>
+<script src="{{ asset('managers/js/views/mailer/components/create.js') }}"></script>
 @endpush

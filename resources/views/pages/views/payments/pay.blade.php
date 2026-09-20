@@ -2,6 +2,10 @@
 
 @section('title', 'Pago')
 
+@push('css')
+    <link rel="stylesheet" href="{{ asset('pages/css/views/payments/payments.css') }}">
+@endpush
+
 @section('content')
 
 <main class="cartx">
@@ -15,7 +19,7 @@
 
     <section class="cartx-checkout">
         <div class="container">
-            <div class="cartx-grid" style="grid-template-columns:1fr 390px;">
+            <div class="cartx-grid">
 
                 {{-- Resumen --}}
                 <div class="cartx-reveal">
@@ -28,7 +32,7 @@
                                 $isBundle = $it->item_type === \App\Models\Bundle\Bundle::class;
                                 $entity = $it->itemable;
                             @endphp
-                            <div class="cp-item" style="grid-template-columns:1fr 150px;">
+                            <div class="cp-item cp-item--summary">
                                 <div class="cp-prod">
                                     <div class="cp-info">
                                         <span class="cp-tag">{{ $isBundle ? 'Paquete' : 'Curso' }}</span>
@@ -51,14 +55,14 @@
                         <div class="summary-body">
 
                             {{-- ===== Opción A: Widget embebido ===== --}}
-                            <p class="cp-sub" style="margin-bottom:10px;"><b>Opción 1 — Pago rápido</b></p>
+                            <p class="cp-sub cp-sub--tight"><b>Opción 1 — Pago rápido</b></p>
                             <div class="payment-widget">
                                 @include('pages.partials.sections.payments.wompi')
                             </div>
 
                             {{-- ===== Opción B: Web Checkout (redirección) ===== --}}
                             <div class="pay-or"><span>o</span></div>
-                            <a href="{{ $checkoutUrl }}" class="go-pay" style="background:#0d1b2a;">
+                            <a href="{{ $checkoutUrl }}" class="go-pay">
                                 <i class="fas fa-arrow-up-right-from-square"></i> Pagar en la página de Wompi
                             </a>
 
