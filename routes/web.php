@@ -134,6 +134,8 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('/update-qty', [CartController::class, 'updateQty'])->name('cart.update-qty');
         Route::post('/remove', [CartController::class, 'remove'])->name('cart.remove');
         Route::post('/clear', [CartController::class, 'clear'])->name('cart.clear');
+        Route::post('/capture-lead', [CartController::class, 'captureLead'])->name('cart.capture-lead')->middleware('throttle:20,1');
+        Route::get('/restore/{slack}', [CartController::class, 'restore'])->name('cart.restore');
     });
 
     Route::group(['prefix' => 'payments'], function () {

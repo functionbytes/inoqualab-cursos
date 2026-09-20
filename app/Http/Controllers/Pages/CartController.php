@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bundle\Bundle;
+use App\Models\CartAbandonment;
 use App\Models\Course\Course;
 use App\Models\Inscription;
 use Illuminate\Http\Request;
@@ -209,6 +210,101 @@ class CartController extends Controller
             fn ($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 1),
             session('cart', [])
         ));
+    }
+
+    /**
+     * Captura temprana de "carrito incompleto": se llama desde el checkout apenas
+     * se conoce el correo (blur del campo para invitados, o carga de página para
+     * autenticados) -- MUCHO antes de que exista una Order real. Sin esto, alguien
+     * que llega por pauta, escribe su correo y se va sin terminar el formulario
+     * nunca queda registrado en ningún lado (orders:remind-abandoned solo ve
+     * órdenes ya generadas). Se guarda como intento "pendiente"; si más tarde sí
+     * genera la orden, generate() marca converted_at y este flujo deja de recordarle.
+     */
+    public function captureLead(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email', 'max:191'],
+        ]);
+
+        [$lines, $subtotal] = cartCheckoutLines();
+
+        if (empty($lines)) {
+            return response()->json(['success' => true, 'tracked' => false]);
+        }
+
+        $email = mb_strtolower(trim($request->email));
+        $user = auth()->user();
+
+        $abandonment = CartAbandonment::where('email', $email)->whereNull('converted_at')->first();
+
+        if (! $abandonment) {
+            $abandonment = new CartAbandonment;
+            $abandonment->slack = $this->generate_slack('cart_abandonments');
+            $abandonment->email = $email;
+        }
+
+        $abandonment->user_id = $user?->id;
+        $abandonment->items = $lines;
+        $abandonment->total = $subtotal;
+        // Cada nueva captura es una señal fresca de interés (el carrito pudo cambiar):
+        // se resetea reminded_at para que vuelva a entrar en la ventana de recordatorio.
+        $abandonment->reminded_at = null;
+        $abandonment->save();
+
+        return response()->json(['success' => true, 'tracked' => true]);
+    }
+
+    /**
+     * Restaura un carrito capturado (link del correo de "carrito incompleto") y
+     * lleva directo al checkout -- el enlace no sirve de nada si el cliente tiene
+     * que volver a armar el carrito desde cero.
+     */
+    public function restore(string $slack)
+    {
+        $abandonment = CartAbandonment::where('slack', $slack)->whereNull('converted_at')->first();
+
+        if (! $abandonment) {
+            return redirect()->route('courses')->with('info', 'Este enlace ya no es válido.');
+        }
+
+        // Se re-resuelve cada línea contra el curso/paquete actual (no se confía en
+        // el snapshot guardado): la disponibilidad y el precio pudieron cambiar
+        // desde que se capturó el intento, igual que ya valida add().
+        $cart = [];
+        foreach ($abandonment->items as $line) {
+            $item = $line['type'] === 'bundle'
+                ? Bundle::where('slack', $line['slack'])->where('available', 1)->first()
+                : Course::where('slack', $line['slack'])->where('available', 1)->first();
+
+            if (! $item) {
+                continue;
+            }
+
+            if ($line['type'] === 'course') {
+                $onSale = $item->payment != 0 && $item->promotion == 1 && $item->discount < $item->price;
+                $price = $item->payment == 0 ? 0 : ($onSale ? $item->discount : $item->price);
+                $compare = $onSale ? $item->price : null;
+                $thumb = optional($item->getFirstMedia('thumbnail'))->getFullUrl();
+            } else {
+                $price = $item->price;
+                $compare = null;
+                $thumb = optional($item->courses()->first()?->getFirstMedia('thumbnail'))->getFullUrl();
+            }
+
+            $cart[$line['type'].'_'.$line['slack']] = [
+                'type' => $line['type'],
+                'slack' => $line['slack'],
+                'title' => $item->title,
+                'price' => $price ?? 0,
+                'compare' => $compare,
+                'qty' => $line['type'] === 'course' ? 1 : ($line['qty'] ?? 1),
+                'image' => $thumb,
+            ];
+        }
+        session(['cart' => $cart]);
+
+        return redirect()->route('checkout.cart');
     }
 
     public function clear(Request $request)

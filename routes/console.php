@@ -16,6 +16,10 @@ Schedule::command('notification:autodelete')->daily();
 Schedule::command('customers:inactive_delete')->daily();
 Schedule::command('orders:reconcile-pending')->everyFifteenMinutes()->withoutOverlapping();
 Schedule::command('orders:remind-abandoned --hours=12')->dailyAt('09:00');
+// Captura más temprana que orders:remind-abandoned: correo dejado en el checkout
+// sin llegar a generar la orden (candidato típico de tráfico de pauta). Se corre
+// más seguido porque la ventana de recuperación es más corta.
+Schedule::command('orders:remind-incomplete-carts --hours=1')->hourly()->withoutOverlapping();
 Schedule::command('orders:cleanup-abandoned')->daily();
 // Red de seguridad: repara matrículas de órdenes pagadas cuyo enrolamiento falló.
 Schedule::command('orders:repair-enrollments')->hourly()->withoutOverlapping();
