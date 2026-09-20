@@ -42,18 +42,20 @@ class ExamController extends Controller
 
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
 
         $totalClass = $course->lessons()->count();
         $completedClass = count($completedLessonIds);
-        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $progressPercentage = $totalClass > 0 ? min(100, round($completedClass * 100 / $totalClass)) : 0;
         $lastchapter = null;
         $lastlesson = null;
         $percent = $inscription->percent;
@@ -189,7 +191,9 @@ class ExamController extends Controller
         $this->assertInscriptionActive($inscription);
         $topic = $exam->topic;
         $course = $exam->course;
-        $answers = $exam->answers;
+        // with('question'): exam-result.blade.php muestra $answer->question->question
+        // por fila -- sin esto es una query extra por respuesta (N+1).
+        $answers = $exam->answers()->with('question')->get();
         $count = $topic->show_ans;
         $passingScore = $count > 0 ? round(($topic->per_q_mark / $count) * 100, 2) : 100;
         $progress = $inscription->progress;
@@ -226,21 +230,36 @@ class ExamController extends Controller
                     'start_at' => Carbon::now()->setTimezone('America/Bogota'),
                     'end_at' => Carbon::now()->setTimezone('America/Bogota')->addYear(),
                 ]);
+            } elseif ($certificate->end_at && Carbon::parse($certificate->end_at)->isPast()) {
+                // Re-aprobar un examen cuyo certificado ya venció debe renovarlo,
+                // no dejar las fechas viejas -- antes esta rama no existía y el
+                // certificado (y la página de "Mis certificados") seguían
+                // mostrando "VENCIDO" pese a la nueva aprobación. Se actualiza el
+                // mismo registro (mismo slack) para no invalidar enlaces ya
+                // compartidos/descargados del certificado.
+                $certificate->update([
+                    'exam_id' => $exam->id,
+                    'certifier_id' => $course->certifier_id,
+                    'start_at' => Carbon::now()->setTimezone('America/Bogota'),
+                    'end_at' => Carbon::now()->setTimezone('America/Bogota')->addYear(),
+                ]);
             }
 
             // Se cuentan lecciones DISTINTAS y se capa a 100, igual que en
             // CoursesController::createOrUpdateProgress. Sin esto, una inscripción
-            // con progreso duplicado (course_progress no tiene índice único sobre
+            // con progreso duplicado (course_progress no tenía índice único sobre
             // inscription_id + lesson_id) terminaba con porcentajes imposibles:
-            // en la base hay una inscripción marcada al 531,25 %.
+            // en la base hay una inscripción marcada al 531,25 %. lesson_id NULL
+            // (filas huérfanas legadas, sin duplicar) se excluye igual que en
+            // ResolvesInscription::assertExamAccessible.
             $lessons = $course->lessons()->count();
-            $completadas = $inscription->progress()->distinct()->count('lesson_id');
+            $completedLessons = $inscription->progress()->whereNotNull('lesson_id')->distinct()->count('lesson_id');
 
             $inscription->update([
                 'enroll_culminated' => Carbon::now(),
                 'culminated' => 1,
                 'percent' => $lessons > 0
-                    ? min(100, round(($completadas / $lessons) * 100, 2))
+                    ? min(100, round(($completedLessons / $lessons) * 100, 2))
                     : 100,
             ]);
 
@@ -259,18 +278,20 @@ class ExamController extends Controller
 
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
 
         $totalClass = $course->lessons()->count();
         $completedClass = count($completedLessonIds);
-        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $progressPercentage = $totalClass > 0 ? min(100, round($completedClass * 100 / $totalClass)) : 0;
         $lastchapter = null;
         $lastlesson = null;
         $percent = $inscription->percent;

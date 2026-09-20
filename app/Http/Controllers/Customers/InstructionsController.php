@@ -13,8 +13,14 @@ class InstructionsController extends Controller
     public function index(): View
     {
 
-        $instructions = Instruction::available()->get();
-        $categories = InstructionCategorie::available()->get();
+        // with('categorie'): index.blade.php usa $instruction->categorie->title
+        // en el listado -- sin esto es una query extra por instrucción (N+1),
+        // mismo fix que ya tiene filter() más abajo.
+        $instructions = Instruction::available()->with('categorie')->get();
+        // withCount: el contador junto a cada categoría en el panel lateral
+        // salía recorriendo $instructions en la vista (otro N+1 en potencia
+        // si esa colección crece) -- una sola query aquí lo resuelve.
+        $categories = InstructionCategorie::available()->withCount('instructions')->get();
 
         return view('customers.views.instructions.index')->with([
             'instructions' => $instructions,
@@ -26,7 +32,7 @@ class InstructionsController extends Controller
     public function view($slack)
     {
 
-        $instruction = Instruction::slack($slack);
+        $instruction = Instruction::with('categorie')->slack($slack);
         abort_unless($instruction instanceof Instruction, 404);
 
         return view('customers.views.instructions.view')->with([
@@ -48,6 +54,12 @@ class InstructionsController extends Controller
                 ->get();
         }
 
-        return response()->json($instructions);
+        // Devuelve el HTML ya renderizado (mismo patrón que quiz-result/
+        // exam-result) en vez de JSON crudo -- antes el JS reconstruía las
+        // tarjetas a mano con template strings, duplicando el markup/estilos
+        // de la vista y quedando desincronizado con cualquier cambio acá.
+        return view('customers.partials.views.instructions.list', [
+            'instructions' => $instructions,
+        ])->render();
     }
 }

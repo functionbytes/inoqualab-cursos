@@ -40,18 +40,20 @@ class QuizController extends Controller
 
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
 
         $totalClass = $course->lessons()->count();
         $completedClass = count($completedLessonIds);
-        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $progressPercentage = $totalClass > 0 ? min(100, round($completedClass * 100 / $totalClass)) : 0;
         $lastchapter = $lesson->chapter_id;
         $lastlesson = $lesson->id;
         $percent = $inscription->percent;
@@ -258,18 +260,20 @@ class QuizController extends Controller
 
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
 
         $totalClass = $course->lessons()->count();
         $completedClass = count($completedLessonIds);
-        $progressPercentage = $totalClass > 0 ? round($completedClass * 100 / $totalClass) : 0;
+        $progressPercentage = $totalClass > 0 ? min(100, round($completedClass * 100 / $totalClass)) : 0;
         $lastchapter = $lesson->chapter_id;
         $lastlesson = $lesson->id;
         $percent = $inscription->percent;

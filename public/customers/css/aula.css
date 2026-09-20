@@ -1322,15 +1322,18 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .lv-shell { width: 100%; margin: 0; display: grid; grid-template-columns: 360px 1fr; align-items: stretch; min-height: calc(100vh - 56px); }
 
 /* left rail */
-.lv-rail { position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
-.lv-rail::-webkit-scrollbar { width: 9px; }
-.lv-rail::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
-.lv-rail-head { padding: 20px 22px 18px; border-bottom: 1px solid var(--line-2); position: sticky; top: 0; background: #fff; z-index: 2; flex: 0 0 auto; }
-/* Footer fijo (sticky bottom) con "Volver al curso": antes vivía arriba del
-   todo, dentro de .lv-rail-head, y se perdía de vista al bajar por la lista
-   de clases. Con .lv-rail-head fijo arriba y esto fijo abajo, solo el
-   listado de capítulos hace scroll en el medio. */
-.lv-rail-foot { padding: 14px 22px; border-top: 1px solid var(--line-2); background: #fff; position: sticky; bottom: 0; z-index: 2; flex: 0 0 auto; }
+.lv-rail { position: sticky; top: 56px; height: calc(100vh - 56px); background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.lv-rail-head { padding: 20px 22px 18px; border-bottom: 1px solid var(--line-2); background: #fff; flex: 0 0 auto; }
+/* Único contenedor con scroll dentro del rail: .lv-rail-head y .lv-rail-foot
+   quedan FUERA de él (hijos flex normales, sin position:sticky) para que
+   nunca se superpongan visualmente con la lección que esté scrolleada en
+   ese momento -- con sticky dentro del mismo contenedor con scroll, el
+   footer tapaba el texto de la última lección visible durante todo el
+   scroll, no solo al llegar al final. */
+.lv-rail-body { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+.lv-rail-body::-webkit-scrollbar { width: 9px; }
+.lv-rail-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 5px; }
+.lv-rail-foot { padding: 14px 22px; border-top: 1px solid var(--line-2); background: #fff; flex: 0 0 auto; }
 /* Mismo padding/tamaño de fuente que .lv-fbtn ("Volver al curso"/"Siguiente"
    en el pie de la lección): antes heredaba el padding chico de .aula-back
    (pensado para un link de breadcrumb), así que quedaba más bajo que el
@@ -1937,13 +1940,16 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 
 /* ===== Resultado de quiz / examen (aula-result) — restaurado tras rediseño ===== */
 .aula-result { max-width: 560px; margin: 40px auto; background:#fff; border:1px solid #e7ecf1; border-radius:22px; box-shadow:0 14px 40px rgba(13,27,42,.10), 0 2px 6px rgba(13,27,42,.05); padding:48px 44px; text-align:center; }
-/* Cuando el resultado vive DENTRO de .quiz-wrap (que ya trae su propio fondo
-   blanco heredado de .lv-content/.lp-body) -- tanto server-rendered en
-   finish.blade.php como inyectado por AJAX desde quiz.blade.php/exam.blade.php
-   al enviar el formulario -- se le quita el card propio (fondo/borde/sombra
-   y el max-width:560px pensado para cuando era un modal aparte) para que
-   ocupe el ancho del panel, igual que las preguntas. */
-.quiz-wrap .aula-result { max-width: 100%; background: transparent; border: none; box-shadow: none; margin: 0 auto; padding: 32px 0; }
+/* Cuando el resultado de un QUIZ de lección vive dentro de .quiz-wrap (que ya
+   trae su propio fondo blanco heredado de .lv-content/.lp-body) -- inyectado
+   por AJAX desde quiz.blade.php al enviar el formulario -- se le quita el
+   card propio (fondo/borde/sombra y el max-width:560px pensado para cuando
+   era un modal aparte) para que ocupe el ancho del panel, igual que las
+   preguntas. El EXAMEN FINAL usa el mismo .quiz-wrap pero además lleva
+   .exam-wrap (ver exam.blade.php) precisamente para quedar afuera de esta
+   regla: a diferencia de un quiz intermedio, el resultado del examen sí debe
+   verse como una tarjeta centrada independiente. */
+.quiz-wrap:not(.exam-wrap) .aula-result { max-width: 100%; background: transparent; border: none; box-shadow: none; margin: 0 auto; padding: 32px 0; }
 /* Franja Anterior/Siguiente del resultado: mismo padding/borde superior que
    .lv-foot de las preguntas, y el <form> que envuelve cada botón se vuelve
    "transparente" en el layout flex (sus hijos participan como si fueran
@@ -1975,7 +1981,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .ar-actions form { width:100%; margin:0; }
 .ar-primary, .ar-secondary { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; padding:15px; border:none; border-radius:12px; font-size:14px; font-weight:800; text-decoration:none; cursor:pointer; font-family:inherit; transition:background .18s,transform .18s,border-color .18s,color .18s; }
 .ar-primary { background:#008bcd; color:#fff; box-shadow:0 10px 24px rgba(0,139,205,.24); }
-.ar-primary:hover { background:#008bcd; transform:translateY(-2px); }
+/* color:#fff explícito -- sin esto, la regla global "a:hover" (customers/css/style.css)
+   le gana por especificidad al color heredado de .ar-primary y el texto queda
+   casi del mismo tono que el fondo azul (ilegible). */
+.ar-primary:hover { background:#0077ad; color:#fff; transform:translateY(-2px); }
 .ar-secondary { background:#fff; color:#0d1b2a; border:1.5px solid #e7ecf1; }
 .ar-secondary:hover { border-color:#008bcd; color:#008bcd; background:#e4f2fb; }
 

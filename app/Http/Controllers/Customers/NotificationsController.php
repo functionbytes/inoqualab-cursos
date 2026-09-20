@@ -5,27 +5,58 @@ namespace App\Http\Controllers\Customers;
 use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class NotificationsController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
 
         $user = app('customer');
+        $searchKey = $request->search;
+
+        $query = $user->notifications();
+
+        // title/message son las claves que de verdad usa la vista (y el único
+        // tipo que se genera hoy, UnprocessableMailNotification) -- buscar
+        // por ticket_id/mailsubject/mailtext (formato viejo, de un dropdown
+        // que ya no se usa en ninguna vista) no encontraría nada visible.
+        if ($searchKey) {
+            $query->where(function ($q) use ($searchKey) {
+                $q->where('data->title', 'LIKE', "%{$searchKey}%")
+                    ->orWhere('data->message', 'LIKE', "%{$searchKey}%");
+            });
+        }
 
         // groupBy() sobre un paginator descarta el paginador y devuelve una Collection:
         // la vista no usa ->links(), así que la paginación no navegaba y solo se veían
         // 10 notificaciones. Traemos las 50 más recientes (notifications() ya ordena desc).
-        $notifications = $user->notifications()->take(50)->get()->groupBy(function ($date) {
+        $notifications = $query->take(50)->get()->groupBy(function ($date) {
             return Carbon::parse($date->created_at)->format('Y-m-d');
         });
 
         $variant = portalVariant('customers_notifications_variant');
 
+        // El buscador se resuelve por AJAX (ver el script en chats/index.blade.php):
+        // se devuelve solo el fragmento re-renderizado en vez de la página completa.
+        if ($request->ajax()) {
+            $planas = $notifications->flatten(1);
+
+            return response()->json([
+                'html' => view('customers.partials.views.chats.list', compact('notifications', 'searchKey'))->render(),
+                'total' => $planas->count(),
+                // Str::plural('notificación', ...) usa reglas de pluralización en
+                // inglés y da "notificacións" -- a mano, como corresponde en español.
+                'label' => $planas->count() === 1 ? 'notificación' : 'notificaciones',
+            ]);
+        }
+
         return view('customers.views.chats.index'.$variant)->with([
             'notifications' => $notifications,
+            'searchKey' => $searchKey,
         ]);
 
     }

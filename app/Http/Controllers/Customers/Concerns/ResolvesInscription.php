@@ -132,7 +132,13 @@ trait ResolvesInscription
     protected function assertExamAccessible($course, $inscription): void
     {
         $totalLessons = $course->lessons()->count();
-        $completed = $inscription->progress()->count();
+        // No es count() plano: course_progress no tiene índice único sobre
+        // (inscription_id, lesson_id) y acumula filas duplicadas -- y filas
+        // con lesson_id NULL -- que inflan el conteo por encima del real y
+        // dejaban pasar al examen final sin haber completado todas las
+        // lecciones. distinct()+lesson_id no nulo cuenta lecciones reales
+        // una sola vez (mismo criterio que courses:deduplicate-progress).
+        $completed = $inscription->progress()->whereNotNull('lesson_id')->distinct()->count('lesson_id');
 
         if ($totalLessons > 0 && $completed < $totalLessons) {
             throw new HttpResponseException(

@@ -44,7 +44,7 @@
     </div>
     @endif
 @else
-    <div class="ar-icon no">@include('customers.includes.icon', ['name' => 'x'])</div>
+    <div class="ar-icon no">@include('customers.includes.icon', ['name' => 'refresh'])</div>
     <p class="ar-score">No superaste el examen</p>
     <p class="ar-sub">Acertaste {{ $correct > 0 ? $correct : 0 }} de {{ $count > 0 ? $count : 0 }} preguntas (necesitas {{ $topic->per_q_mark }}).
         @if ($topic->quiz_again)Revisa el detalle e inténtalo de nuevo.@else Revisa el contenido del curso.@endif

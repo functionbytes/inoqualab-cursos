@@ -10,28 +10,85 @@ use App\Models\Course\CourseLesson;
 use App\Models\Course\CourseProgress;
 use App\Models\Course\CourseReview;
 use App\Models\Inscription;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class CoursesController extends Controller
 {
     use ResolvesInscription;
 
-    public function index(): View
+    public function index(Request $request): View|JsonResponse
     {
 
         $user = app('customer');
-        $courses = $user->inscriptions()->with(['course.media', 'certificate'])->get();
+        $state = $request->state;
+        $searchKey = $request->search;
+
+        // percent es varchar en BD (no numeric), así que el corte de estado
+        // -- igual que hacía la vista con (int) round($inscription->percent)
+        // -- necesita castear antes de redondear. expire manda primero: un
+        // curso vencido es "expired" aunque su percent ya esté en 100.
+        $percentExpr = 'ROUND(CAST(IFNULL(percent, 0) AS DECIMAL(10,2)))';
+
+        $baseQuery = fn () => $user->inscriptions();
+
+        $counts = [
+            'todos' => $baseQuery()->count(),
+            'progress' => $baseQuery()->where('expire', '!=', 1)->whereRaw("{$percentExpr} > 0")->whereRaw("{$percentExpr} < 100")->count(),
+            'pending' => $baseQuery()->where('expire', '!=', 1)->whereRaw("{$percentExpr} <= 0")->count(),
+            'done' => $baseQuery()->where('expire', '!=', 1)->whereRaw("{$percentExpr} >= 100")->count(),
+            'expired' => $baseQuery()->where('expire', 1)->count(),
+        ];
+
+        // Promedio de progreso sobre TODAS las inscripciones (variante B,
+        // panel "Estado global") -- calculado en SQL por la misma razón que
+        // $counts: con paginate() la vista ya no tiene la colección completa
+        // para promediar.
+        // reorder(): inscriptions() trae su propio orderBy (por
+        // enroll_culminated/enroll_start) -- value() le suma un LIMIT 1, y
+        // MySQL en modo estricto rechaza ese ORDER BY (sobre columnas fuera
+        // del SELECT) mezclado con la función AVG() sin GROUP BY.
+        $avgProgress = (int) round((float) $baseQuery()->reorder()->selectRaw("AVG({$percentExpr}) as avg")->value('avg') ?: 0);
+
+        $courses = $user->inscriptions()->with(['course.media', 'certificate']);
+
+        if ($state === 'progress') {
+            $courses->where('expire', '!=', 1)->whereRaw("{$percentExpr} > 0")->whereRaw("{$percentExpr} < 100");
+        } elseif ($state === 'pending') {
+            $courses->where('expire', '!=', 1)->whereRaw("{$percentExpr} <= 0");
+        } elseif ($state === 'done') {
+            $courses->where('expire', '!=', 1)->whereRaw("{$percentExpr} >= 100");
+        } elseif ($state === 'expired') {
+            $courses->where('expire', 1);
+        }
+
+        if ($searchKey) {
+            $courses->whereHas('course', function ($query) use ($searchKey) {
+                $query->where('title', 'like', '%'.$searchKey.'%');
+            });
+        }
+
+        $courses = $courses->latest()->paginate(paginationNumber());
 
         // Variante elegida en Configuración › Portal del alumno.
         $variant = portalVariant('customers_courses_variant');
 
-        return view('customers.views.courses.index'.$variant)->with([
-            'user' => $user,
-            'courses' => $courses,
-        ]);
+        // El filtro por estado, el buscador y el paginador se resuelven por
+        // AJAX (ver el script en courses/index.blade.php): se devuelve solo
+        // el fragmento re-renderizado en vez de la página completa.
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('customers.partials.views.courses.list', compact('courses', 'counts', 'state', 'searchKey', 'avgProgress'))->render(),
+                'total' => $courses->total(),
+                'label' => Str::plural('curso', $courses->total()),
+            ]);
+        }
+
+        return view('customers.views.courses.index'.$variant, compact('user', 'courses', 'counts', 'state', 'searchKey', 'avgProgress'));
     }
 
     public function content($slack)
@@ -66,11 +123,13 @@ class CoursesController extends Controller
         // (mismo patrón ya aplicado en lesion()).
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
@@ -123,12 +182,14 @@ class CoursesController extends Controller
         // C1: set de lecciones culminadas (evita N+1 de CourseProgress::validate en la vista)
         $completedLessonIds = $inscription->progress()
             ->where('culminated', 1)
+            ->whereNotNull('lesson_id')
+            ->distinct()
             ->pluck('lesson_id')
             ->all();
 
         // C2: progreso por capítulo en una sola query (evita count() por capítulo en la vista)
         $chapterProgress = $inscription->progress()
-            ->selectRaw('chapter_id, count(*) as total')
+            ->selectRaw('chapter_id, count(DISTINCT lesson_id) as total')
             ->groupBy('chapter_id')
             ->pluck('total', 'chapter_id')
             ->all();
@@ -363,7 +424,10 @@ class CoursesController extends Controller
             }
 
             $totalLessons = $course->lessons()->count();
-            $completedLessons = $inscription->progress()->count();
+            // distinct()+lesson_id no nulo, no count() plano -- ver nota igual
+            // en ResolvesInscription::assertExamAccessible sobre las filas
+            // duplicadas/huérfanas de course_progress que inflan el conteo.
+            $completedLessons = $inscription->progress()->whereNotNull('lesson_id')->distinct()->count('lesson_id');
             $percent = $totalLessons > 0
                 ? min(100, round(($completedLessons / $totalLessons) * 100, 2))
                 : 100;

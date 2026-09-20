@@ -31,7 +31,7 @@
             <main class="lv-main">
                 <div class="lv-content">
                     <div class="lv-quiz">
-                        <div class="quiz-wrap">
+                        <div class="quiz-wrap exam-wrap">
                             @include('customers.partials.views.exams.exam-questions')
                         </div>
                     </div>
@@ -44,7 +44,7 @@
         <div class="aula-grid">
             <div class="lesson-panel">
                 <div class="lp-body">
-                    <div class="quiz-wrap">
+                    <div class="quiz-wrap exam-wrap">
                         @include('customers.partials.views.exams.exam-questions')
                     </div>
                 </div>

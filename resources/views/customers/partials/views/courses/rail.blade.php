@@ -28,6 +28,13 @@
             <div class="sub"><b>{{ $completedClass }} de {{ $totalClass }}</b> clases · {{ $progressPercentage }}% completado</div>
         </div>
 
+        {{-- Único contenedor con scroll: así .lv-rail-head y .lv-rail-foot
+             quedan fuera del área scrolleable en vez de "sticky" dentro de
+             ella -- con sticky, el footer se superponía visualmente sobre
+             la lección que quedara debajo al hacer scroll (no solo al
+             llegar al final), tapando su texto. --}}
+        <div class="lv-rail-body">
+
         @if($chapters->isNotEmpty())
             @foreach ($chapters as $chapter)
                 @php
@@ -126,10 +133,11 @@
             </div>
         @endif
 
-        {{-- Footer fijo (sticky bottom, igual que .lv-rail-head con sticky top):
-             antes "Volver al curso" vivía arriba del todo y se perdía de vista
-             al bajar por la lista de clases -- con el encabezado y este botón
-             fijos, solo el listado de capítulos hace scroll en el medio. --}}
+        </div>
+
+        {{-- Footer fijo: fuera de .lv-rail-body, así nunca se superpone con
+             la lista de capítulos mientras se hace scroll (ver comentario
+             arriba, en la apertura de .lv-rail-body). --}}
         @unless(request()->routeIs('customers.courses.content'))
             <div class="lv-rail-foot">
                 <a href="{{ route('customers.courses.content', $inscription->slack) }}" class="aula-back">

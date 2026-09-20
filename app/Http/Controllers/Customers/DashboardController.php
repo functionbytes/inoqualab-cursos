@@ -10,7 +10,9 @@ class DashboardController extends Controller
     {
 
         $user = app('customer');
-        $courses = $user->inscriptions()->with(['course.media', 'certificate'])->get();
+        // course.categorie: index.blade.php/index-b.blade.php lo usan para la
+        // "ruta formativa" -- sin precargarlo es una query extra por curso (N+1).
+        $courses = $user->inscriptions()->with(['course.media', 'course.categorie', 'certificate'])->get();
 
         // La variante la elige el manager en Configuración › Portal del alumno.
         $variant = portalVariant('customers_dashboard_variant');

@@ -8,12 +8,14 @@ use App\Models\Course\Course;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class OrdersController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $user = app('customer');
         $searchKey = $request->search;
@@ -23,6 +25,15 @@ class OrdersController extends Controller
         // pedido; cargarlo aquí evita el N+1 y no penaliza a la variante A.
         $orders = $user->orders()->with(['condition', 'items.itemable'])->latest();
         $conditions = OrderCondition::latest()->get();
+
+        // Conteo por estado para las pestañas de filtro -- independiente de
+        // $searchKey/$condition (si no, la pestaña activa "se comería" el
+        // conteo de las demás al filtrar la query base).
+        $conditionCounts = $user->orders()
+            ->selectRaw('condition_id, count(*) as total')
+            ->groupBy('condition_id')
+            ->pluck('total', 'condition_id');
+        $totalOrdersCount = $conditionCounts->sum();
 
         if ($searchKey) {
             $orders->where('slack', 'like', '%'.$searchKey.'%');
@@ -36,8 +47,22 @@ class OrdersController extends Controller
 
         $variant = portalVariant('customers_orders_variant');
 
+        // El filtro por estado, la búsqueda y el paginador se resuelven por
+        // AJAX (ver el script en orders/index.blade.php): se devuelve solo el
+        // fragmento re-renderizado en vez de la página completa, así la
+        // pestaña activa/el buscador no fuerzan un recargo de toda la vista.
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('customers.partials.views.orders.list', compact(
+                    'orders', 'conditions', 'condition', 'searchKey', 'conditionCounts', 'totalOrdersCount'
+                ))->render(),
+                'total' => $orders->total(),
+                'label' => Str::plural('pedido', $orders->total()),
+            ]);
+        }
+
         return view('customers.views.orders.index'.$variant, compact(
-            'orders', 'conditions', 'condition', 'searchKey'
+            'orders', 'conditions', 'condition', 'searchKey', 'conditionCounts', 'totalOrdersCount'
         ));
     }
 
@@ -87,8 +112,9 @@ class OrdersController extends Controller
     public function invoice($slack)
     {
         $user = app('customer');
+        // coupon: invoice.blade.php lo usa para mostrar el descuento aplicado.
         $order = Order::where('slack', $slack)->where('user_id', $user->id)
-            ->with(['items.itemable', 'condition', 'method', 'user'])
+            ->with(['items.itemable', 'condition', 'method', 'user', 'coupon'])
             ->firstOrFail();
 
         // Solo se genera recibo de órdenes pagadas.
@@ -101,6 +127,10 @@ class OrdersController extends Controller
             'order' => $order,
             'user' => $order->user,
             'brand' => setting('page_title') ?: 'INOQUALAB',
+            // getlogo() da una URL (posiblemente de producción, ver
+            // getLogoBase64()) que DomPDF no puede cargar de forma confiable
+            // sin red habilitada -- se embebe el archivo local como data URI.
+            'logo' => getLogoBase64(),
         ]);
 
         return $pdf->download('recibo-'.($order->reference ?? $order->slack).'.pdf');
