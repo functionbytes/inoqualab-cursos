@@ -114,7 +114,26 @@ Convencion de permisos: `{alias}.action` — por ejemplo `orders.view`, `users.c
 
 ## Notas
 
-- Los cambios de archivo son inmediatos; no hay proceso worker de larga duracion que reiniciar.
+- Los cambios de archivo son inmediatos para requests HTTP normales — **pero SÍ
+  hay un worker de colas de larga duración** (`com.training.queue-worker`, un
+  LaunchAgent de macOS con `KeepAlive`, ver
+  `~/Library/LaunchAgents/com.training.queue-worker.plist`). Ese proceso carga
+  todo el código PHP (Mailables, Listeners, `app/helpers.php`, etc.) **una sola
+  vez al arrancar** y lo mantiene en memoria: si editas algo que corre dentro de
+  un job encolado (cualquier `Mailable implements ShouldQueue`, un Listener, una
+  función global que ellos llamen) y lo pruebas con `Mail::to(...)->send(...)`
+  o disparando el flujo real, verás el resultado **viejo** hasta reiniciar ese
+  proceso — no es cache de Redis ni de la app, es memoria del propio worker.
+  Detectado dos veces en la práctica: un cambio a `humanize_date()` y otro al
+  layout de `MailerLayout` (este último además tenía su propio cache de 1h sin
+  invalidar, ver `MailerLayout::booted()`). Reiniciar con:
+  ```bash
+  launchctl unload ~/Library/LaunchAgents/com.training.queue-worker.plist
+  launchctl load ~/Library/LaunchAgents/com.training.queue-worker.plist
+  ```
+  Nota: `Mail::to($x)->send($mailable)` con un Mailable `ShouldQueue` en
+  realidad SÍ lo encola (Laravel enruta `send()` a `queue()` para esas clases) —
+  aunque el nombre del método sugiera lo contrario, pasa por este mismo worker.
 - Para el queue worker en desarrollo, **siempre con la lista de colas**:
   ```bash
   php artisan queue:work redis --queue=$(php artisan queue:app-queues)
@@ -123,7 +142,10 @@ Convencion de permisos: `{alias}.action` — por ejemplo `orders.view`, `users.c
   `emails`, `mails`, `newsletter` o `seo` se queda pendiente para siempre **sin
   fallar ni aparecer en `failed_jobs`**. Las colas se declaran en
   `config/queue.php` → `app_queues`; `QueueNamesAreCoveredTest` rompe el CI si se
-  añade una cola al código y no a esa lista.
+  añade una cola al código y no a esa lista. El LaunchAgent de arriba ya trae
+  `--queue=default,emails,mails,newsletter,seo` (corregido en sep-2026; antes
+  corría sin `--queue`, así que nunca procesaba `emails` — el correo de "olvidé
+  mi contraseña" nunca salía y no daba ningún error visible).
 - Variables de entorno en `.env` (raiz del proyecto).
 - NUNCA ejecutar `migrate:fresh` — destruye todos los datos.
 - NUNCA usar `config:cache`, `route:cache` ni `view:cache` en desarrollo (dificulta debug).
