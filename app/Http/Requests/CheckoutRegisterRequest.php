@@ -31,17 +31,27 @@ class CheckoutRegisterRequest extends FormRequest
 
     public function rules(): array
     {
+        // El controller solo lee email/password para crear una cuenta nueva
+        // (usuario invitado); un usuario ya autenticado solo actualiza su
+        // perfil y esos campos ni siquiera van en el formulario (ver
+        // register.blade.php, @if(!Auth::check())). Exigirlos siempre hacía
+        // que el JS mandara el string literal "undefined" (de $("#email").val()
+        // sobre un input inexistente) y bloqueaba la recompra de todo cliente
+        // ya logueado con un 422 -- password.uncompromised incluido, porque
+        // "undefined" está en una filtración de datos conocida.
+        $guest = ! $this->user();
+
         return [
             'firstname' => ['required', 'string', 'max:100'],
             'lastname' => ['required', 'string', 'max:100'],
             'identification_type' => ['required', 'in:CC,CE,TI,NIT,PAS,PEP'],
             'identification' => ['required', 'string', 'max:20'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => [$guest ? 'required' : 'sometimes', 'email', 'max:255'],
             'cellphone' => ['required', 'regex:/^3\d{9}$/'],
             'company' => ['nullable', 'string', 'max:150'],
             'address' => ['nullable', 'string', 'max:255'],
             'citie' => ['nullable', 'integer', 'exists:cities,id'],
-            'password' => ['nullable', 'string', Password::defaults()],
+            'password' => [$guest ? 'required' : 'sometimes', 'string', Password::defaults()],
             'terms' => ['accepted'],
             'newsletter' => ['nullable', 'boolean'],
         ];

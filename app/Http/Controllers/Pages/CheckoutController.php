@@ -11,6 +11,7 @@ use App\Mail\Customers\Orders\PendingMails;
 use App\Mail\Customers\Orders\VoidedMails;
 use App\Model\Wompi;
 use App\Models\Bundle\Bundle;
+use App\Models\CartAbandonment;
 use App\Models\Citie;
 use App\Models\Coupon\Coupon;
 use App\Models\Coupon\CouponUsage;
@@ -144,7 +145,7 @@ class CheckoutController extends Controller
         return redirect()->route('checkout.cart');
     }
 
-    public function register(CheckoutRegisterRequest $request)
+    public function register(CheckoutRegisterRequest $request): \Illuminate\Http\Response
     {
 
         $user = User::auth();
@@ -164,13 +165,13 @@ class CheckoutController extends Controller
             $user->updated_at = Carbon::now()->setTimezone('America/Bogota');
             $user->save();
 
-            return 'success';
+            return response('success')->header('X-CSRF-TOKEN', csrf_token());
         }
 
         $existingUser = User::where('email', $request->email)->first();
 
         if ($existingUser) {
-            return 'email';
+            return response('email')->header('X-CSRF-TOKEN', csrf_token());
         } else {
 
             $user = new User;
@@ -201,7 +202,12 @@ class CheckoutController extends Controller
 
             $this->guard()->login($user);
 
-            return 'success';
+            // login() regenera la sesión (y con ella el token CSRF); el JS del
+            // checkout sigue el meta[csrf-token] cargado al abrir la página, así
+            // que sin devolver el token nuevo aquí, la siguiente llamada AJAX
+            // (checkout.generate) falla con 419 "CSRF token mismatch" -- rompe
+            // la compra de todo cliente nuevo (el camino más común).
+            return response('success')->header('X-CSRF-TOKEN', csrf_token());
 
         }
 
@@ -762,7 +768,14 @@ class CheckoutController extends Controller
 
             // lockForUpdate serializa la asignación del número entre transacciones
             // concurrentes (evita números de orden duplicados bajo carga).
-            $number = (DB::table('orders')->lockForUpdate()->max('number') ?? 0) + 1;
+            // `number` es varchar(30): un MAX('number') plano compara como STRING, no
+            // numéricamente -- '999999' > '1000000' porque '9' > '1' en el primer
+            // carácter. Al cruzar cualquier frontera de dígitos (99999->100000,
+            // 999999->1000000, ...) el siguiente número calculado colisiona para
+            // siempre con el ya existente (orders.number es UNIQUE): TODA venta nueva
+            // queda bloqueada con un 500 hasta corregirlo. CAST a UNSIGNED para
+            // comparar numéricamente.
+            $number = (DB::table('orders')->lockForUpdate()->max(DB::raw('CAST(number AS UNSIGNED)')) ?? 0) + 1;
 
             $order = new Order;
             $order->slack = $this->generate_slack('orders');
@@ -815,6 +828,13 @@ class CheckoutController extends Controller
 
         // El cupón ya se consumió (o se descartó): se limpia de la sesión.
         removeCoupon();
+
+        // La orden real ya existe: el "carrito incompleto" (captureLead) queda
+        // obsoleto para este correo -- de aquí en adelante lo cubre
+        // orders:remind-abandoned si tampoco paga esta orden.
+        CartAbandonment::where('email', mb_strtolower($user->email))
+            ->whereNull('converted_at')
+            ->update(['converted_at' => $now]);
 
         $isFree = $order->total_order_amount <= 0;
 

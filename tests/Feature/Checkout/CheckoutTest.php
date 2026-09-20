@@ -502,4 +502,74 @@ class CheckoutTest extends TestCase
         $this->assertSame(6658333, $wompi->amount);
         $this->assertSame((int) round(66583.33 * 100), $wompi->amount);
     }
+
+    /**
+     * register() no debe exigir email/password a un usuario ya autenticado: el
+     * formulario ni siquiera los envía (@if(!Auth::check()) en la vista), y el
+     * controller solo actualiza el perfil en esa rama. Antes del fix, la regla
+     * 'required' incondicional rechazaba la recompra de todo cliente logueado.
+     */
+    public function test_authenticated_user_can_update_checkout_profile_without_email_or_password(): void
+    {
+        $this->seedLookups();
+        $user = $this->makeUser();
+
+        $response = $this->actingAs($user)->postJson(route('checkout.register'), [
+            'firstname' => 'Cliente',
+            'lastname' => 'Actualizado',
+            'identification_type' => 'CC',
+            'identification' => '123456789',
+            'cellphone' => '3001234567',
+            'address' => 'Calle 1 # 2-3',
+            'terms' => 1,
+        ]);
+
+        $response->assertOk();
+        $this->assertSame('Actualizado', $user->fresh()->lastname);
+    }
+
+    /**
+     * orders.number es varchar(30): un MAX('number') plano compara como STRING,
+     * no numéricamente -- '999999' > '1000000' porque '9' > '1' en el primer
+     * carácter. Sin el CAST a UNSIGNED, la segunda orden generada tras cruzar la
+     * frontera de dígitos vuelve a calcular 1000000 y choca con la primera
+     * (orders.number es UNIQUE): toda venta nueva quedaría bloqueada con un 500.
+     */
+    public function test_order_number_does_not_collide_across_digit_length_boundary(): void
+    {
+        $this->seedLookups();
+
+        $seedUser = $this->makeUser();
+        Order::create([
+            'slack' => 'seed-999999',
+            'number' => '999999',
+            'reference' => 'FAC999999',
+            'user_id' => $seedUser->id,
+            'type_id' => OrderType::where('slug', 'online')->first()->id,
+            'method_id' => OrderMethod::where('slug', 'card')->first()->id,
+            'condition_id' => OrderCondition::where('slug', 'generada')->first()->id,
+            'total_before_discount' => 10000,
+            'total_discount_amount' => 0,
+            'total_tax_amount' => 0,
+            'total_order_amount' => 10000,
+        ]);
+
+        $firstBuyer = $this->makeUser();
+        $firstCourse = $this->makeCourse(50000);
+        $this->actingAs($firstBuyer)
+            ->withSession(['cart' => $this->cartWithCourse($firstCourse)])
+            ->postJson(route('checkout.generate'))
+            ->assertOk();
+
+        $secondBuyer = $this->makeUser();
+        $secondCourse = $this->makeCourse(50000);
+        $response = $this->actingAs($secondBuyer)
+            ->withSession(['cart' => $this->cartWithCourse($secondCourse)])
+            ->postJson(route('checkout.generate'));
+
+        $response->assertOk()->assertJsonPath('success', true);
+
+        $numbers = Order::whereIn('user_id', [$firstBuyer->id, $secondBuyer->id])->pluck('number');
+        $this->assertSame(['1000000', '1000001'], $numbers->sort()->values()->all());
+    }
 }
