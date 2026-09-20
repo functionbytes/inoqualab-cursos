@@ -46,11 +46,28 @@ class UserController extends Controller
         }
         $users = $users->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('enterprise_user')
+            ->join('users', 'users.id', '=', 'enterprise_user.user_id')
+            ->where('enterprise_user.enterprise_id', $enterprise->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(EXISTS(SELECT 1 FROM certificates WHERE certificates.user_id = users.id)) with_certificates,
+                 SUM(EXISTS(SELECT 1 FROM inscriptions WHERE inscriptions.user_id = users.id)) with_inscriptions'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'with_certificates' => (int) $agg->with_certificates,
+            'with_inscriptions' => (int) $agg->with_inscriptions,
+        ];
+
         return view('supports.views.enterprises.users.users.index')->with([
             'users' => $users,
             'enterprise' => $enterprise,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -114,11 +131,11 @@ class UserController extends Controller
 
     public function update(Request $request)
     {
-        $user = User::slack($request->slack);
-
-        if (! $user) {
-            return response()->json(['success' => false, 'message' => 'Usuario no encontrado.'], 404);
-        }
+        // Sin este guard, cualquier soporte podia cambiar password/email de
+        // CUALQUIER usuario del sistema (incluidos manager/support) enviando
+        // su slack aqui: a diferencia de edit()/view() en este mismo
+        // controller, update() no verificaba el rol del usuario objetivo.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         if ($error = $this->uniqueUserFieldError($request->email, $request->identification, $user)) {
             return response()->json(['success' => false, 'message' => $error]);
@@ -201,9 +218,25 @@ class UserController extends Controller
         $inscriptions = $user->inscriptions()->with('course');
         $inscriptions = $inscriptions->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('inscriptions')
+            ->where('user_id', $user->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(culminated = 1) culminated,
+                 SUM(culminated = 0 OR culminated IS NULL) pending'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'culminated' => (int) $agg->culminated,
+            'pending' => (int) $agg->pending,
+        ];
+
         return view('supports.views.enterprises.users.courses.index')->with([
             'user' => $user,
             'inscriptions' => $inscriptions,
+            'stats' => $stats,
         ]);
     }
 

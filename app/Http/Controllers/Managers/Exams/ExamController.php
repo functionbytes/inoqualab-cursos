@@ -9,6 +9,7 @@ use App\Http\Requests\Managers\Exams\UpdateExamRequest;
 use App\Models\Course\Course;
 use App\Models\Exam\Exam;
 use App\Models\Exam\ExamTopic;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -143,5 +144,47 @@ class ExamController extends Controller
         });
 
         return back()->with('success', 'Examen eliminado correctamente.');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:exam_topics,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'exams.delete' : 'exams.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        if ($request->action === 'delete') {
+            $topics = ExamTopic::whereIn('id', $request->ids)->get();
+
+            // Mismo resguardo que destroy(): un examen que ya rindieron alumnos
+            // no se elimina (se perderían los resultados de sus intentos).
+            $attemptedTopicIds = Exam::whereIn('topic_id', $topics->pluck('id'))
+                ->distinct()->pluck('topic_id');
+            $deletable = $topics->reject(fn ($topic) => $attemptedTopicIds->contains($topic->id));
+            $count = $deletable->count();
+
+            DB::transaction(function () use ($deletable) {
+                foreach ($deletable as $topic) {
+                    $topic->questions()->delete();
+                    $topic->delete();
+                }
+            });
+
+            return response()->json(['success' => true, 'message' => $count.' examen(es) procesados.']);
+        }
+
+        $query = ExamTopic::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' examen(es) procesados.']);
     }
 }

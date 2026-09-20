@@ -35,6 +35,10 @@ class DashboardController extends Controller
             ->orderByRaw('MIN(created_at)')
             ->get();
 
+        // 'online' y 'agreements' son el mismo conteo (mismo where, mismo
+        // resultado) -- antes se calculaba dos veces con dos queries idénticas.
+        $paidOnlineOrders = Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count();
+
         return view('supports.views.dashboard.index', [
             'viewOrders' => $viewOrders->values(),
             'monthEanings' => $weeklyOrders->pluck('date'),
@@ -45,13 +49,13 @@ class DashboardController extends Controller
             'courses' => Course::count(),
             'total' => 0,
             'orders' => Order::count(),
-            'online' => Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count(),
+            'online' => $paidOnlineOrders,
             'newsletters' => Newsletter::count(),
             'useradmins' => User::where('role', 'manager')->count(),
             'usercustomers' => User::where('role', 'customer')->count(),
             'userenterprises' => User::where('role', 'enterprise')->count(),
             'enterprises' => Enterprise::count(),
-            'agreements' => Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count(),
+            'agreements' => $paidOnlineOrders,
         ]);
     }
 }

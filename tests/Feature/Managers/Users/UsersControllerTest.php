@@ -360,4 +360,85 @@ class UsersControllerTest extends TestCase
             return $event->user->id === $target->id;
         });
     }
+
+    public function test_update_customer_without_enterprise_selection_does_not_fail(): void
+    {
+        // La mayoria de clientes no pertenece a ninguna empresa: el combo
+        // "Empresa" queda vacio y no debe intentar crear un EnterpriseUser
+        // con enterprise_id NULL (columna NOT NULL -> 500).
+        $actor = User::factory()->manager()->create();
+        $customer = User::factory()->customer()->create(['address' => 'Direccion vieja']);
+
+        $this->actingAs($actor)
+            ->post(route('manager.users.update'), [
+                'slack' => $customer->slack,
+                'firstname' => $customer->firstname,
+                'lastname' => $customer->lastname,
+                'email' => $customer->email,
+                'identification' => $customer->identification,
+                'role' => 'customer',
+                'enterprises' => '',
+                'address' => 'Direccion nueva',
+                'available' => '1',
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $customer->refresh();
+        $this->assertSame('Direccion nueva', $customer->address);
+        $this->assertNull($customer->relation);
+    }
+
+    // ── Regresión: store()/update() leían `$request->enterprise` (singular) ──
+    // ── para el rol 'enterprise', pero el <select> real del form (create y ───
+    // ── edit blade) se llama `enterprises` (plural, mismo campo que usa el ───
+    // ── rol 'customer') -- la empresa seleccionada nunca se guardaba, ────────
+    // ── enterprise_id quedaba siempre NULL. Ver tambien los typos 'enterprise'
+    // ── vs 'enterprises' en create.js/edit.js que ademas ocultaban el campo.
+
+    public function test_store_with_enterprise_role_saves_selected_enterprise_id(): void
+    {
+        $actor = User::factory()->manager()->create();
+        $enterprise = Enterprise::create([
+            'slack' => (string) Str::uuid(),
+            'title' => 'QA Empresa Test',
+            'available' => 1,
+        ]);
+
+        $this->actingAs($actor)->post(route('manager.users.store'), [
+            'firstname' => 'QA',
+            'lastname' => 'Enterprise',
+            'email' => 'qa-enterprise-store@example.com',
+            'role' => 'enterprise',
+            'password' => 'password123',
+            'enterprises' => (string) $enterprise->id,
+        ])->assertOk()->assertJson(['success' => true]);
+
+        $created = User::where('email', 'qa-enterprise-store@example.com')->first();
+        $this->assertSame($enterprise->id, $created->enterprise_id);
+    }
+
+    public function test_update_with_enterprise_role_saves_selected_enterprise_id(): void
+    {
+        $actor = User::factory()->manager()->create();
+        $target = User::factory()->create(['role' => 'enterprise', 'enterprise_id' => null]);
+        $enterprise = Enterprise::create([
+            'slack' => (string) Str::uuid(),
+            'title' => 'QA Empresa Test 2',
+            'available' => 1,
+        ]);
+
+        $this->actingAs($actor)->post(route('manager.users.update'), [
+            'slack' => $target->slack,
+            'firstname' => $target->firstname,
+            'lastname' => $target->lastname,
+            'email' => $target->email,
+            'identification' => $target->identification,
+            'role' => 'enterprise',
+            'available' => '1',
+            'enterprises' => (string) $enterprise->id,
+        ])->assertOk()->assertJson(['success' => true]);
+
+        $this->assertSame($enterprise->id, $target->fresh()->enterprise_id);
+    }
 }

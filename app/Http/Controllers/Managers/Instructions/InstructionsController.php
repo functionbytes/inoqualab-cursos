@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Managers\Instructions;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Instructions\StoreInstructionRequest;
+use App\Http\Requests\Managers\Instructions\UpdateInstructionRequest;
 use App\Models\Instruction\Instruction;
 use App\Models\Instruction\InstructionCategorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -91,10 +93,8 @@ class InstructionsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateInstructionRequest $request)
     {
-        abort_unless(auth()->user()->can('instructions.update'), 403);
-
         $instruction = Instruction::slack($request->slack);
         $instruction->title = $request->title;
         $instruction->description = $request->description;
@@ -121,5 +121,28 @@ class InstructionsController extends Controller
         $instruction->delete();
 
         return redirect()->back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:instructions,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'instructions.delete' : 'instructions.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Instruction::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' instrucción(es) procesadas.']);
     }
 }

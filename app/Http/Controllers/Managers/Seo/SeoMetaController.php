@@ -97,6 +97,17 @@ class SeoMetaController extends Controller
             'schema_custom' => ['nullable', 'json'],
         ]);
 
+        // schema_custom llega como string JSON (regla 'json' solo valida sintaxis,
+        // no decodifica). El modelo castea el atributo a 'array', así que hay que
+        // decodificarlo antes de asignar o Eloquent lo vuelve a codificar sobre el
+        // string ya codificado (doble-encoding) -- mismo patrón ya usado en
+        // SchemaOrgController::update().
+        if (array_key_exists('schema_custom', $validated)) {
+            $validated['schema_custom'] = $validated['schema_custom'] !== null
+                ? json_decode($validated['schema_custom'], true)
+                : null;
+        }
+
         $seoMeta->update($validated);
 
         return response()->json([

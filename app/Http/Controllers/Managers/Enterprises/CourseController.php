@@ -189,7 +189,6 @@ class CourseController extends Controller
             'course' => $course,
             'culminate' => $culminate,
             'users' => $users,
-            'count' => $users,
             'enterprise' => $enterprise,
             'searchKey' => $searchKey,
         ]);
@@ -377,7 +376,6 @@ class CourseController extends Controller
 
         $order = Order::slack($slack);
         $user = $order->user;
-        $enterprise = $user->relations;
         // Order no tiene relación course() directa (checkout multi-item vía
         // OrderItem, polimórfico item_type/item_id — OrderItem::course() usa
         // la convención course_id que no existe en la tabla real, siempre
@@ -390,7 +388,6 @@ class CourseController extends Controller
             'user' => $user,
             'course' => $course,
             'order' => $order,
-            'enterprise' => $enterprise,
             'inscription' => $inscription,
         ]);
     }
@@ -401,14 +398,12 @@ class CourseController extends Controller
 
         $inscription = Inscription::slack($slack);
         $user = $inscription->user;
-        $enterprise = $user->enterprise;
         $course = $inscription->course;
 
         return view('managers.views.enterprises.courses.action')->with([
             'user' => $user,
             'course' => $course,
             'inscription' => $inscription,
-            'enterprise' => $enterprise,
         ]);
     }
 
@@ -549,5 +544,28 @@ class CourseController extends Controller
         $inscription->delete();
 
         return back();
+    }
+
+    public function bulkAction(Request $request, $slack): JsonResponse
+    {
+        abort_unless(auth()->user()->can('enterprises.delete'), 403);
+
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:courses,id'],
+        ]);
+
+        $enterprise = Enterprise::slack($slack);
+
+        $count = EnterpriseCourse::where('enterprise_id', $enterprise->id)
+            ->whereIn('course_id', $request->ids)
+            ->count();
+
+        EnterpriseCourse::where('enterprise_id', $enterprise->id)
+            ->whereIn('course_id', $request->ids)
+            ->delete();
+
+        return response()->json(['success' => true, 'message' => $count.' curso(s) quitados de la empresa.']);
     }
 }

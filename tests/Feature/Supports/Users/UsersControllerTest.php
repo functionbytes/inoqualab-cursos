@@ -273,4 +273,31 @@ class UsersControllerTest extends TestCase
 
         $this->assertSame($enterprise->id, $staff->fresh()->enterprise_id);
     }
+
+    public function test_update_customer_without_enterprise_selection_does_not_fail(): void
+    {
+        // La mayoria de clientes no pertenece a ninguna empresa: el combo
+        // "Empresa" queda vacio y no debe intentar crear un EnterpriseUser
+        // con enterprise_id NULL (columna NOT NULL -> 500).
+        $customer = User::factory()->customer()->create(['address' => 'Direccion vieja']);
+
+        $this->actingAs($this->support)
+            ->post(route('support.users.update'), [
+                'slack' => $customer->slack,
+                'firstname' => $customer->firstname,
+                'lastname' => $customer->lastname,
+                'email' => $customer->email,
+                'identification' => $customer->identification,
+                'role' => 'customer',
+                'enterprises' => '',
+                'address' => 'Direccion nueva',
+                'available' => 1,
+            ])
+            ->assertOk()
+            ->assertJsonPath('success', true);
+
+        $customer->refresh();
+        $this->assertSame('Direccion nueva', $customer->address);
+        $this->assertNull($customer->relation);
+    }
 }

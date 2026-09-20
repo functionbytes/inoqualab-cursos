@@ -6,12 +6,12 @@
         <div class="col-lg-12 d-flex align-items-stretch">
 
             <div class="card w-100" id="users-create"
-                 data-config='@json([
+                 data-config='@php $__jsonInline1 = [
                     "routes" => [
                         "store" => route("manager.users.store"),
                         "inscriptions" => route("manager.users.inscriptions", ":slack"),
                     ],
-                 ])'>
+                 ]; @endphp@json($__jsonInline1)'>
 
                 <form id="formUsers" enctype="multipart/form-data" role="form">
 

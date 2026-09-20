@@ -283,4 +283,27 @@ class InvoiceControllerTest extends TestCase
         $this->assertEquals(1, $invoice->condition_id);
         $this->assertNull($invoice->payment_at);
     }
+
+    // ── Bug: la vista "Detalle factura" leia columnas inexistentes ──────
+    // ($invoice->date/enroll_start/enroll_expire no existen en la tabla
+    // invoices -- son from_at/to_at/payment_at/created_at -- asi que
+    // siempre mostraba 1969-12-31, el epoch de strtotime(null)).
+
+    public function test_view_shows_real_dates_not_the_1969_epoch_bug(): void
+    {
+        $distributor = $this->makeDistributor();
+        $invoice = $this->makeInvoice($distributor, 1);
+        $invoice->from_at = '2025-05-01';
+        $invoice->to_at = '2025-06-01';
+        $invoice->save();
+
+        $response = $this->actingAs($this->manager)
+            ->get(route('manager.invoices.view', $invoice->slack));
+
+        $response->assertOk()
+            ->assertSee($invoice->created_at->format('Y-m-d'))
+            ->assertSee('2025-05-01')
+            ->assertSee('2025-06-01')
+            ->assertDontSee('1969-12-31');
+    }
 }

@@ -207,6 +207,23 @@ class IncomingMailsController extends Controller
         return response()->json(['success' => true, 'message' => 'Correo descartado correctamente.']);
     }
 
+    public function bulkDiscard(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:discard'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:incoming_mails,id'],
+        ]);
+
+        // Misma lógica que discard(): solo marca como ignorados los que aún
+        // no lo estén, sin tocar correos ya procesados de otra forma.
+        $count = IncomingMail::whereIn('id', $request->ids)
+            ->where('status', '!=', IncomingMail::STATUS_IGNORED)
+            ->update(['status' => IncomingMail::STATUS_IGNORED]);
+
+        return response()->json(['success' => true, 'message' => $count.' correo(s) descartados.']);
+    }
+
     public function reparse($slack): JsonResponse
     {
         $mail = IncomingMail::slack($slack);

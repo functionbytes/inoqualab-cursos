@@ -39,8 +39,9 @@ class ResumenController extends Controller
         $orders = Order::filterOrders($filters);
 
         if ($request->enterprise && $request->enterprise !== '0') {
-            $enterprise = Enterprise::id($request->enterprise)->title;
-            $enterprise_id = Enterprise::id($request->enterprise)->id;
+            $selectedEnterprise = Enterprise::id($request->enterprise);
+            $enterprise = $selectedEnterprise->title;
+            $enterprise_id = $selectedEnterprise->id;
         } else {
             $enterprise = 'Todas';
             $enterprise_id = 0;

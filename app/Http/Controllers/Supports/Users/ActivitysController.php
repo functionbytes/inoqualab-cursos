@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -9,13 +10,15 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivitysController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
         $modelSearch = $request->model;
         $propertySearch = $request->property;
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
 
         $models = [
             'Enterprise' => 'Empresas',
@@ -44,6 +47,11 @@ class ActivitysController extends Controller
             $counts[$key] = $grouped[$key] ?? 0;
         }
 
+        $stats = [
+            'total' => array_sum($counts),
+            'counts' => $counts,
+        ];
+
         $query = (clone $base);
 
         if ($modelSearch) {
@@ -62,6 +70,7 @@ class ActivitysController extends Controller
             'user' => $user,
             'activities' => $activities,
             'counts' => $counts,
+            'stats' => $stats,
             'model' => $modelSearch,
             'models' => $models,
         ]);
@@ -70,7 +79,7 @@ class ActivitysController extends Controller
 
     public function lists(Request $request)
     {
-        $user = User::slack($request->slack);
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         $query = Activity::causedBy($user);
 

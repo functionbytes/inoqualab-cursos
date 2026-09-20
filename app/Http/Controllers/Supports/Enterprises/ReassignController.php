@@ -39,19 +39,30 @@ class ReassignController extends Controller
     public function reassignAll(Request $request)
     {
 
-        $users = explode(',', $request->users);
+        $identifications = explode(',', $request->users);
+        // Enterprise::slack() aborta con 404 si no hay match (igual que
+        // User::identification() en el comentario de abajo) -- para acá
+        // abajo $newEnterprise nunca es null.
         $newEnterprise = Enterprise::slack($request->enterprise);
 
-        foreach ($users as $identification) {
+        // Carga en lote (2 queries fijas en vez de 2 por identificación --
+        // antes N identificaciones disparaban 2N queries, un User::where()
+        // y un EnterpriseUser::where() por cada una).
+        $usersByIdentification = User::whereIn('identification', $identifications)->get()->keyBy('identification');
+        $enterpriseUsersByUserId = EnterpriseUser::whereIn('user_id', $usersByIdentification->pluck('id'))->get()->keyBy('user_id');
+
+        $enterpriseUserIdsToReassign = [];
+
+        foreach ($identifications as $identification) {
 
             // User::identification() aborta con 404 si no hay match -- eso hacía
             // que el chequeo "!$user" de abajo fuera código muerto inalcanzable:
             // una identificación con typo abortaba el request COMPLETO con un
             // 404 crudo en vez de devolver el JSON de error ya escrito para
             // este caso (con el mensaje que sí identifica cuál falló).
-            $user = User::where('identification', $identification)->first();
+            $user = $usersByIdentification->get($identification);
 
-            if (! $user || ! $newEnterprise) {
+            if (! $user) {
 
                 return response()->json([
                     'success' => false,
@@ -60,7 +71,7 @@ class ReassignController extends Controller
 
             }
 
-            $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
+            $enterpriseUser = $enterpriseUsersByUserId->get($user->id);
 
             // Sin esta guarda, un usuario sin fila enterprise_user (2,737 casos
             // reales) crashea con "Attempt to assign property on null".
@@ -71,10 +82,14 @@ class ReassignController extends Controller
                 ]);
             }
 
-            $enterpriseUser->enterprise_id = $newEnterprise->id;
-            $enterpriseUser->save();
+            $enterpriseUserIdsToReassign[] = $enterpriseUser->id;
 
         }
+
+        // Todos validados antes de escribir nada, y en 1 sola query: si algún
+        // usuario de la lista fallaba a mitad del loop original, los
+        // anteriores ya habían quedado reasignados sin forma de revertirlos.
+        EnterpriseUser::whereIn('id', $enterpriseUserIdsToReassign)->update(['enterprise_id' => $newEnterprise->id]);
 
         return response()->json([
             'success' => true,

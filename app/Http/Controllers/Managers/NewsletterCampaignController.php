@@ -105,6 +105,26 @@ class NewsletterCampaignController extends Controller
         return response()->json(['success' => true, 'message' => 'Campaña eliminada correctamente.']);
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:newsletter_campaigns,id'],
+        ]);
+
+        abort_unless(auth()->user()->can('newsletters.delete'), 403);
+
+        // Una campaña en envío no se puede eliminar (igual que destroy()):
+        // se excluye del lote en vez de romperlo.
+        $query = NewsletterCampaign::whereIn('id', $request->ids)->where('status', '!=', 'sending');
+        $count = $query->count();
+
+        $query->delete();
+
+        return response()->json(['success' => true, 'message' => $count.' campaña(s) eliminadas.']);
+    }
+
     public function send(NewsletterCampaign $campaign): JsonResponse
     {
         abort_unless(auth()->user()->can('newsletters.update'), 403);
@@ -147,7 +167,7 @@ class NewsletterCampaignController extends Controller
             $variables = [
                 'SITE_NAME' => config('app.name'),
                 'SITE_URL' => config('app.url'),
-                'SITE_LOGO_URL' => config('app.url').'/images/logo.png',
+                'SITE_LOGO_URL' => getlogo(),
                 'SUPPORT_EMAIL' => config('mail.from.address'),
                 'CURRENT_YEAR' => date('Y'),
                 'SUBSCRIBER_EMAIL' => $data['email'],
@@ -221,7 +241,7 @@ class NewsletterCampaignController extends Controller
         $variables = [
             'SITE_NAME' => config('app.name'),
             'SITE_URL' => config('app.url'),
-            'SITE_LOGO_URL' => config('app.url').'/images/logo.png',
+            'SITE_LOGO_URL' => getlogo(),
             'SUPPORT_EMAIL' => config('mail.from.address'),
             'CURRENT_YEAR' => date('Y'),
             'SUBSCRIBER_EMAIL' => 'preview@ejemplo.com',

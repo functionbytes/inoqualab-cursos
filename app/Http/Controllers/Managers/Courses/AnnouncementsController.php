@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers\Courses;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Course\CourseAnnouncement;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class AnnouncementsController extends Controller
@@ -99,5 +100,28 @@ class AnnouncementsController extends Controller
         $announcement->delete();
 
         return back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:course_announcements,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = CourseAnnouncement::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' anuncio(s) procesados.']);
     }
 }

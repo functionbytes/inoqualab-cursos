@@ -9,6 +9,7 @@ use App\Models\Bundle\Bundle;
 use App\Models\Coupon\Coupon;
 use App\Models\Coupon\CouponUsage;
 use App\Models\Course\Course;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CouponsController extends Controller
@@ -170,6 +171,29 @@ class CouponsController extends Controller
         $coupon->delete();
 
         return redirect()->route('manager.coupons');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:coupons,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'coupons.delete' : 'coupons.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Coupon::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['available' => 1]),
+            'deactivate' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' cupón(es) procesados.']);
     }
 
     /**

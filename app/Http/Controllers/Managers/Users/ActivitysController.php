@@ -10,6 +10,20 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivitysController extends Controller
 {
+    /**
+     * Mismo guard que Managers\Users\UsersController::guardNotSuperadmin():
+     * un manager no-superadmin no puede ver la actividad de una cuenta
+     * superadmin (este endpoint no distinguia el rol del usuario objetivo).
+     */
+    private function guardNotSuperadmin(User $user): void
+    {
+        abort_if(
+            $user->role === 'superadmin' && auth()->user()->role !== 'superadmin',
+            403,
+            'No tienes autorización para gestionar esta cuenta.'
+        );
+    }
+
     public function index(Request $request, $slack)
     {
 
@@ -17,6 +31,7 @@ class ActivitysController extends Controller
         $propertySearch = $request->property;
 
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
 
         $query = Activity::causedBy($user);
 
@@ -60,6 +75,7 @@ class ActivitysController extends Controller
     public function lists(Request $request)
     {
         $user = User::slack($request->slack);
+        $this->guardNotSuperadmin($user);
 
         $query = Activity::causedBy($user);
 

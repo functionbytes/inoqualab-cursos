@@ -9,6 +9,7 @@ use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 /**
@@ -82,5 +83,30 @@ class UserControllerTest extends TestCase
             ->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('enterprise', null);
+    }
+
+    public function test_update_rejects_a_target_user_with_a_non_manageable_role(): void
+    {
+        // update() no llamaba a guardManageableUser() (a diferencia de
+        // edit()/view() en este mismo controller): un soporte podia cambiar
+        // password/email de CUALQUIER usuario -- incluidos manager/support --
+        // enviando su slack aqui.
+        $manager = User::factory()->create(['role' => 'manager', 'firstname' => 'Intacto']);
+
+        $this->actingAs($this->support)
+            ->post(route('support.enterprises.users.update'), [
+                'slack' => $manager->slack,
+                'firstname' => 'Hackeado',
+                'lastname' => $manager->lastname,
+                'email' => $manager->email,
+                'identification' => $manager->identification,
+                'available' => 1,
+                'password' => 'pwned12345',
+            ])
+            ->assertForbidden();
+
+        $manager->refresh();
+        $this->assertSame('Intacto', $manager->firstname);
+        $this->assertFalse(Hash::check('pwned12345', $manager->password));
     }
 }

@@ -67,15 +67,12 @@ class BundlesController extends Controller
 
         $availables = $this->availableOptions();
 
-        $keywords = collect(explode(',', $bundle->meta_keywords));
-
         $thumbnail = $bundle->getMedia('thumbnail')->count() > 0 ? 'true' : 'false';
 
         return view('managers.views.settings.bundles.edit')->with([
             'bundle' => $bundle,
             'courses' => $courses,
             'availables' => $availables,
-            'keywords' => $keywords,
             'thumbnail' => $thumbnail,
         ]);
     }
@@ -252,5 +249,28 @@ class BundlesController extends Controller
         $bundle->delete();
 
         return redirect()->route('manager.bundles');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:bundles,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'bundles.delete' : 'bundles.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Bundle::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' paquete(s) procesados.']);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course\CourseReview;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ReviewsController extends Controller
@@ -55,5 +56,31 @@ class ReviewsController extends Controller
         }
 
         return redirect()->route('manager.reviews');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:course_reviews,id'],
+        ]);
+
+        abort_unless(auth()->user()->can('courses.delete'), 403);
+
+        $reviews = CourseReview::with('course')->whereIn('id', $request->ids)->get();
+        $count = $reviews->count();
+        $courses = $reviews->pluck('course')->filter()->unique('id');
+
+        foreach ($reviews as $review) {
+            $review->delete();
+        }
+
+        // Recalcular el promedio de cada curso afectado, igual que destroy().
+        foreach ($courses as $course) {
+            $course->recalculateRating();
+        }
+
+        return response()->json(['success' => true, 'message' => $count.' reseña(s) procesados.']);
     }
 }

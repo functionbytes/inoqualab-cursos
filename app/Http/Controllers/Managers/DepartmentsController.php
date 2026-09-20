@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Departments\StoreDepartmentRequest;
 use App\Models\Department;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Str;
 
@@ -104,5 +105,28 @@ class DepartmentsController extends Controller
         $department->delete();
 
         return redirect()->route('manager.departments');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:departments,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'departments.delete' : 'departments.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Department::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['available' => 1]),
+            'deactivate' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' departamento(s) procesados.']);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Faqs\StoreFaqRequest;
 use App\Models\Faq\Faq;
 use App\Models\Faq\FaqCategorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -116,5 +117,28 @@ class FaqsController extends Controller
         $faq->delete();
 
         return redirect()->route('manager.faqs');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:faqs,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'faqs.delete' : 'faqs.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Faq::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' pregunta(s) procesadas.']);
     }
 }

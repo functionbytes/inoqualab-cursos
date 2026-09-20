@@ -15,7 +15,6 @@ class InvoicesController extends Controller
 
         $searchKey = $request->search;
         $condition = $request->condition;
-        $type = $request->type;
         $method = $request->methods;
 
         $invoices = Distributor::slack($slack)->invoices()->with(['condition', 'method'])->orderBy('number', 'desc');
@@ -40,7 +39,6 @@ class InvoicesController extends Controller
             'invoices' => $invoices,
             'conditions' => $conditions,
             'condition' => $condition,
-            'type' => $type,
             'methods' => $methods,
             'method' => $method,
             'searchKey' => $searchKey,

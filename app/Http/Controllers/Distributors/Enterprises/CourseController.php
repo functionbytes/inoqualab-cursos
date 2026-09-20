@@ -10,6 +10,7 @@ use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\Inscription;
 use App\Models\User;
 use App\Services\InscriptionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -272,6 +273,28 @@ class CourseController extends Controller
         // vez de la ruta equivalente de este portal -- un distribuidor sin
         // rol manager caía en el middleware IsManager y terminaba en /validation.
         return redirect()->route('distributor.enterprises.courses', $enterprise->slack);
+    }
+
+    public function bulkAction(Request $request, $slack): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:courses,id'],
+        ]);
+
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($slack);
+
+        $count = EnterpriseCourse::where('enterprise_id', $enterprise->id)
+            ->whereIn('course_id', $request->ids)
+            ->count();
+
+        EnterpriseCourse::where('enterprise_id', $enterprise->id)
+            ->whereIn('course_id', $request->ids)
+            ->delete();
+
+        return response()->json(['success' => true, 'message' => $count.' curso(s) quitados de la empresa.']);
     }
 
     public function destroyInscription($slack)

@@ -36,7 +36,7 @@ class SettingsController extends Controller
 
         $user->firstname = Str::upper($request->firstname);
         $user->lastname = Str::upper($request->lastname);
-        $user->support = Str::upper($request->support);
+        $user->support = $request->filled('support') ? Str::upper($request->support) : null;
         $user->email = $request->email;
 
         if ($request->filled('password')) {

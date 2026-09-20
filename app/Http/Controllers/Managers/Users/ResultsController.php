@@ -12,6 +12,20 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ResultsController extends Controller
 {
+    /**
+     * Mismo guard que Managers\Users\UsersController::guardNotSuperadmin():
+     * un manager no-superadmin no puede ver los resultados de una cuenta
+     * superadmin.
+     */
+    private function guardNotSuperadmin(User $user): void
+    {
+        abort_if(
+            $user->role === 'superadmin' && auth()->user()->role !== 'superadmin',
+            403,
+            'No tienes autorización para gestionar esta cuenta.'
+        );
+    }
+
     public function index(Request $request, $slack)
     {
 
@@ -20,6 +34,7 @@ class ResultsController extends Controller
 
         $courses = Course::latest()->get();
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
         $certificates = $user->certificates();
 
         if ($searchKey) {
@@ -45,6 +60,9 @@ class ResultsController extends Controller
 
         $certificate = Certificate::slack($slack);
         $this->authorize('view', $certificate);
+        if ($certificate->user) {
+            $this->guardNotSuperadmin($certificate->user);
+        }
 
         $exam = $certificate->exam;
         $answers = $certificate->exam?->answers;
@@ -74,6 +92,7 @@ class ResultsController extends Controller
         // El cliente puede haberse borrado (soft delete) después de emitirse
         // el certificado; sin esto revienta al armar el nombre del archivo.
         abort_unless($user instanceof User, 404, 'El usuario de este certificado ya no existe.');
+        $this->guardNotSuperadmin($user);
 
         return Excel::download(new ResultsExport($exam, $answers), $user->identification.'.xlsx');
 

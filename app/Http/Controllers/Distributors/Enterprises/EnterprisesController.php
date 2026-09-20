@@ -154,6 +154,31 @@ class EnterprisesController extends Controller
         ]);
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:enterprises,id'],
+        ]);
+
+        // Ownership: solo empresas que pertenecen al distribuidor autenticado (evita IDOR).
+        $enterpriseIds = app('distributor')->enterprises()
+            ->whereIn('enterprises.id', $request->ids)
+            ->pluck('enterprises.id');
+
+        $query = Enterprise::whereIn('id', $enterpriseIds);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empresa(s) procesadas.']);
+    }
+
     public function destroy($slack)
     {
         // Solo se puede eliminar una empresa que pertenezca al distribuidor autenticado.

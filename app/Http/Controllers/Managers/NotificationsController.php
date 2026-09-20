@@ -36,4 +36,25 @@ class NotificationsController extends Controller
 
         return response()->noContent();
     }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => ['required', 'in:read,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['string'],
+        ]);
+
+        // Son las notificaciones del propio usuario logueado: no hay permiso
+        // Spatie que revisar, la relación ya scopea a Auth::user().
+        $notifications = Auth::user()->notifications()->whereIn('id', $request->ids)->get();
+        $count = $notifications->count();
+
+        match ($request->action) {
+            'read' => $notifications->markAsRead(),
+            'delete' => $notifications->each->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' notificación(es) procesadas.']);
+    }
 }

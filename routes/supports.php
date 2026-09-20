@@ -66,6 +66,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/update', [DocumentsController::class, 'update'])->name('support.documents.update');
         Route::get('/edit/{slack}', [DocumentsController::class, 'edit'])->name('support.documents.edit');
         Route::delete('/destroy/{slack}', [DocumentsController::class, 'destroy'])->name('support.documents.destroy');
+        Route::post('/bulk-action', [DocumentsController::class, 'bulkAction'])->name('support.documents.bulk-action');
 
         Route::post('/files', [DocumentsController::class, 'storeFiles'])->name('support.documents.files');
         Route::delete('/delete/files/{id}', [DocumentsController::class, 'deleteFiles'])->name('support.documents.files.delete');
@@ -80,6 +81,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/edit/{slack}', [ContactsController::class, 'edit'])->name('support.contacts.edit');
         Route::get('/view/{slack}', [ContactsController::class, 'view'])->name('support.contacts.view');
         Route::delete('/destroy/{slack}', [ContactsController::class, 'destroy'])->name('support.contacts.destroy');
+        Route::post('/bulk-action', [ContactsController::class, 'bulkAction'])->name('support.contacts.bulk-action');
 
     });
 
@@ -91,6 +93,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/update', [InstructionsController::class, 'update'])->name('support.instructions.update');
         Route::get('/edit/{slack}', [InstructionsController::class, 'edit'])->name('support.instructions.edit');
         Route::delete('/destroy/{slack}', [InstructionsController::class, 'destroy'])->name('support.instructions.destroy');
+        Route::post('/bulk-action', [InstructionsController::class, 'bulkAction'])->name('support.instructions.bulk-action');
 
         Route::get('/categories', [InstructionsCategoriesController::class, 'index'])->name('support.instructions.categories');
         Route::get('/categories/create', [InstructionsCategoriesController::class, 'create'])->name('support.instructions.categories.create');
@@ -98,6 +101,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/categories/update', [InstructionsCategoriesController::class, 'update'])->name('support.instructions.categories.update');
         Route::get('/categories/edit/{slack}', [InstructionsCategoriesController::class, 'edit'])->name('support.instructions.categories.edit');
         Route::delete('/categories/destroy/{slack}', [InstructionsCategoriesController::class, 'destroy'])->name('support.instructions.categories.destroy');
+        Route::post('/categories/bulk-action', [InstructionsCategoriesController::class, 'bulkAction'])->name('support.instructions.categories.bulk-action');
 
     });
 
@@ -110,6 +114,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/{slack}/confirm', [IncomingMailsController::class, 'confirm'])->name('support.mails.confirm');
         Route::post('/{slack}/discard', [IncomingMailsController::class, 'discard'])->name('support.mails.discard');
         Route::post('/{slack}/reparse', [IncomingMailsController::class, 'reparse'])->name('support.mails.reparse');
+        Route::post('/bulk-discard', [IncomingMailsController::class, 'bulkDiscard'])->name('support.mails.bulk-discard');
 
     });
 
@@ -121,6 +126,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/update', [FaqsController::class, 'update'])->name('support.faqs.update');
         Route::get('/edit/{slack}', [FaqsController::class, 'edit'])->name('support.faqs.edit');
         Route::delete('/destroy/{slack}', [FaqsController::class, 'destroy'])->name('support.faqs.destroy');
+        Route::post('/bulk-action', [FaqsController::class, 'bulkAction'])->name('support.faqs.bulk-action');
 
         Route::get('/categories', [FaqsCategoriesController::class, 'index'])->name('support.faqs.categories');
         Route::get('/categories/create', [FaqsCategoriesController::class, 'create'])->name('support.faqs.categories.create');
@@ -128,6 +134,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/categories/update', [FaqsCategoriesController::class, 'update'])->name('support.faqs.categories.update');
         Route::get('/categories/edit/{slack}', [FaqsCategoriesController::class, 'edit'])->name('support.faqs.categories.edit');
         Route::delete('/categories/destroy/{slack}', [FaqsCategoriesController::class, 'destroy'])->name('support.faqs.categories.destroy');
+        Route::post('/categories/bulk-action', [FaqsCategoriesController::class, 'bulkAction'])->name('support.faqs.categories.bulk-action');
 
     });
 
@@ -140,6 +147,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('support.enterprises.edit');
         Route::get('/reassign/{slack}', [EnterpriseReassignController::class, 'all'])->name('support.enterprises.reassign');
         Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->name('support.enterprises.destroy');
+        Route::post('/bulk-action', [EnterprisesController::class, 'bulkAction'])->name('support.enterprises.bulk-action');
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('support.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterpriseInscriptionsController::class, 'index'])->name('support.enterprises.inscriptions');
         Route::get('/courses/{slack}', [EnterpriseCourseController::class, 'index'])->name('support.enterprises.courses');
@@ -174,6 +182,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/staff/create/{slack}', [EnterpriseStaffController::class, 'create'])->name('support.enterprises.staffs.create');
         Route::get('/staff/edit/{slack}', [EnterpriseStaffController::class, 'edit'])->name('support.enterprises.staffs.edit');
         Route::delete('/staff/destroy/{slack}', [EnterpriseStaffController::class, 'destroy'])->name('support.enterprises.staffs.destroy');
+        Route::post('/staff/bulk-action', [EnterpriseStaffController::class, 'bulkAction'])->name('support.enterprises.staffs.bulk-action');
         Route::get('/users/courses/{slack}', [EnterpriseUserController::class, 'courses'])->name('support.enterprises.users.courses');
         Route::get('/users/courses/progress/{user}', [EnterpriseCourseController::class, 'progress'])->name('support.enterprises.courses.progress');
         Route::get('/users/courses/details/{slack}', [EnterpriseCourseController::class, 'details'])->name('support.enterprises.courses.details');
@@ -194,14 +203,20 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/users/courses/managements/{slack}', [EnterpriseUserManagementController::class, 'index'])->name('support.enterprises.users.managements');
 
         Route::get('/users/courses/managements/inscription/progress/view/{inscription}', [EnterpriseUserManagementController::class, 'progressView'])->name('support.enterprises.users.managements.progress.view');
-        Route::get('/users/courses/managements/inscription/progress/restore/{inscription}', [EnterpriseUserManagementController::class, 'progressRestore'])->name('support.enterprises.users.managements.progress.restore');
-        Route::get('/users/courses/managements/inscription/progress/single/{inscription}', [EnterpriseUserManagementController::class, 'progressRestoreSingle'])->name('support.enterprises.users.managements.progress.restore.single');
+        // DELETE, no GET: son operaciones destructivas (borran progreso real).
+        // El JS de .confirm-delete (public/supports/js/includes/scripts.js) ya
+        // envia POST+_method=DELETE con CSRF -- con la ruta como GET, el click
+        // normal del boton daba 405 (Method Not Allowed) SIEMPRE, y ademas la
+        // ruta GET seguia siendo alcanzable directo (vulnerable a CSRF por
+        // <img>/prefetch, sin token).
+        Route::delete('/users/courses/managements/inscription/progress/restore/{inscription}', [EnterpriseUserManagementController::class, 'progressRestore'])->name('support.enterprises.users.managements.progress.restore');
+        Route::delete('/users/courses/managements/inscription/progress/single/{inscription}', [EnterpriseUserManagementController::class, 'progressRestoreSingle'])->name('support.enterprises.users.managements.progress.restore.single');
 
         Route::get('/users/courses/managements/inscription/quiz/view/{inscription}', [EnterpriseUserManagementController::class, 'quizView'])->name('support.enterprises.users.managements.quiz.view');
-        Route::get('/users/courses/managements/inscription/quiz/restore/{inscription}', [EnterpriseUserManagementController::class, 'quizRestore'])->name('support.enterprises.users.managements.quiz.restore');
+        Route::delete('/users/courses/managements/inscription/quiz/restore/{inscription}', [EnterpriseUserManagementController::class, 'quizRestore'])->name('support.enterprises.users.managements.quiz.restore');
 
         Route::get('/users/courses/managements/inscription/exam/view/{inscription}', [EnterpriseUserManagementController::class, 'examView'])->name('support.enterprises.users.managements.exam.view');
-        Route::get('/users/courses/managements/inscription/exam/restore/{inscription}', [EnterpriseUserManagementController::class, 'examRestore'])->name('support.enterprises.users.managements.exam.restore');
+        Route::delete('/users/courses/managements/inscription/exam/restore/{inscription}', [EnterpriseUserManagementController::class, 'examRestore'])->name('support.enterprises.users.managements.exam.restore');
 
     });
 
@@ -214,6 +229,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/edit/{slack}', [DistributorsController::class, 'edit'])->name('support.distributors.edit');
         Route::get('/view/{slack}', [DistributorsController::class, 'view'])->name('support.distributors.view');
         Route::delete('/destroy/{slack}', [DistributorsController::class, 'destroy'])->name('support.distributors.destroy');
+        Route::post('/bulk-action', [DistributorsController::class, 'bulkAction'])->name('support.distributors.bulk-action');
         Route::get('/navegation/{slack}', [DistributorsController::class, 'navegation'])->name('support.distributors.navegation');
 
         Route::get('/courses/{slack}', [DistributorCourseController::class, 'index'])->name('support.distributors.courses');
@@ -231,6 +247,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::post('/enterprises/update', [DistributorEnterpriseController::class, 'update'])->name('support.distributors.enterprises.update');
         Route::post('/enterprises/store', [DistributorEnterpriseController::class, 'store'])->name('support.distributors.enterprises.store');
         Route::delete('/enterprises/destroy/{slack}', [DistributorEnterpriseController::class, 'destroy'])->name('support.distributors.enterprises.destroy');
+        Route::post('/enterprises/bulk-action', [DistributorEnterpriseController::class, 'bulkAction'])->name('support.distributors.enterprises.bulk-action');
 
         Route::get('/orders/reports/generate', [OrdersReportController::class, 'generate'])->name('support.distributors.orders.generate');
         Route::get('/orders/resumen/generate', [OrdersResumenController::class, 'generate'])->name('support.distributors.orders.resumen.generate');
@@ -252,6 +269,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/staff/reports/generate', [DistributorStaffController::class, 'generate'])->name('support.distributors.staffs.reports.generate');
         Route::get('/staff/reports/{slack}', [DistributorStaffController::class, 'reports'])->name('support.distributors.staffs.reports');
         Route::delete('/staff/destroy/{slack}', [DistributorStaffController::class, 'destroy'])->name('support.distributors.staffs.destroy');
+        Route::post('/staff/bulk-action', [DistributorStaffController::class, 'bulkAction'])->name('support.distributors.staffs.bulk-action');
         Route::get('/staff/history/{slack}', [DistributorStaffController::class, 'history'])->name('support.distributors.staffs.history');
 
         Route::get('/orders/{slack}', [DistributorsOrdersController::class, 'index'])->name('support.distributors.orders');
@@ -286,6 +304,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/edit/{slack}', [UsersController::class, 'edit'])->name('support.users.edit');
         Route::get('/view/{slack}', [UsersController::class, 'view'])->name('support.users.view');
         Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->name('support.users.destroy');
+        Route::post('/bulk-action', [UsersController::class, 'bulkAction'])->name('support.users.bulk-action');
         Route::get('/navegation/{slack}', [UsersController::class, 'navegation'])->name('support.users.navegation');
 
         Route::post('/information/update', [UsersController::class, 'information'])->name('support.users.information');
@@ -299,6 +318,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
 
         Route::get('/courses/postpone/{slack}', [UsersCoursesController::class, 'postpone'])->name('support.users.courses.postpone');
         Route::delete('/courses/destroy/{user}', [UsersCoursesController::class, 'destroy'])->name('support.users.courses.destroy');
+        Route::post('/courses/bulk-action', [UsersCoursesController::class, 'bulkAction'])->name('support.users.courses.bulk-action');
 
         Route::get('/orders/{slack}', [UsersOrdersController::class, 'index'])->name(name: 'support.users.orders.index');
         Route::post('/orders/update', [UsersOrdersController::class, 'update'])->name('support.users.orders.update');
@@ -306,6 +326,7 @@ Route::group(['prefix' => 'support', 'middleware' => ['auth', 'support', 'sessio
         Route::get('/orders/edit/{slack}', [UsersOrdersController::class, 'edit'])->name('support.users.orders.edit');
         Route::get('/orders/print/{slack}', [UsersOrdersController::class, 'print'])->name('support.users.orders.print');
         Route::delete('/orders/destroy/{slack}', [UsersOrdersController::class, 'destroy'])->name('support.users.orders.destroy');
+        Route::post('/orders/bulk-action', [UsersOrdersController::class, 'bulkAction'])->name('support.users.orders.bulk-action');
 
         Route::get('/activity/{slack}', [UsersActivitysController::class, 'index'])->name('support.users.activitys');
         Route::post('/activitys/lists', [UsersActivitysController::class, 'lists'])->name('support.users.activitys.lists');

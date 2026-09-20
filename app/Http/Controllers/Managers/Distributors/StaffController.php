@@ -56,16 +56,8 @@ class StaffController extends Controller
 
         $distributor = Distributor::slack($slack);
 
-        $availables = collect([
-            ['id' => '1', 'label' => 'Activo'],
-            ['id' => '0', 'label' => 'Inactivo'],
-        ]);
-
-        $availables = $availables->pluck('label', 'id');
-
         return view('managers.views.distributors.staffs.create')->with([
             'distributor' => $distributor,
-            'availables' => $availables,
         ]);
 
     }
@@ -99,16 +91,8 @@ class StaffController extends Controller
 
         $user = $this->guardManageableUser(User::slack($slack));
 
-        $availables = collect([
-            ['id' => '1', 'label' => 'Activo'],
-            ['id' => '0', 'label' => 'Inactivo'],
-        ]);
-
-        $availables = $availables->pluck('label', 'id');
-
         return view('managers.views.distributors.staffs.view')->with([
             'user' => $user,
-            'availables' => $availables,
         ]);
     }
 
@@ -225,5 +209,37 @@ class StaffController extends Controller
 
         return redirect()->back();
 
+    }
+
+    public function bulkAction(Request $request, $slack)
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'distributors.delete' : 'distributors.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $distributor = Distributor::slack($slack);
+
+        // Igual que guardManageableUser(): solo roles gestionables y solo
+        // empleados que realmente pertenecen a este distribuidor (IDOR).
+        $memberIds = $distributor->staffs()
+            ->whereIn('users.id', $request->ids)
+            ->whereIn('users.role', $this->manageableRoles)
+            ->pluck('users.id');
+
+        $query = User::whereIn('id', $memberIds);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['available' => 1]),
+            'deactivate' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empleado(s) procesados.']);
     }
 }

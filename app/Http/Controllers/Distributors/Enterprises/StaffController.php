@@ -198,4 +198,31 @@ class StaffController extends Controller
         return redirect()->back();
 
     }
+
+    public function bulkAction(Request $request, $slack): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
+        $enterprise = $this->managedEnterprise($slack);
+
+        $memberIds = $enterprise->staffs()
+            ->whereIn('users.id', $request->ids)
+            ->pluck('users.id');
+
+        $query = User::whereIn('id', $memberIds);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['available' => 1]),
+            'deactivate' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empleado(s) procesados.']);
+    }
 }

@@ -76,11 +76,11 @@ class SeoAuditHistoryController extends Controller
         return response()->json(['success' => true, 'count' => $count, 'message' => $count.' entrada(s) eliminadas.']);
     }
 
-    public function clear(): RedirectResponse
+    public function clear(): JsonResponse
     {
         SeoAuditLog::truncate();
 
-        return back()->with('success', 'Historial de auditorías eliminado correctamente.');
+        return response()->json(['success' => true, 'message' => 'Historial de auditorías eliminado correctamente.']);
     }
 
     public function destroy(SeoAuditLog $seoAuditLog): RedirectResponse

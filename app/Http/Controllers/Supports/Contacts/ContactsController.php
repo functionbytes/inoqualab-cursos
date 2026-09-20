@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Supports\Contacts;
 use App\Http\Controllers\Controller;
 use App\Models\Contact;
 use DB;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ContactsController extends Controller
@@ -30,10 +31,24 @@ class ContactsController extends Controller
 
         $contacts = $contacts->paginate(paginationNumber());
 
+        // Total + desglose por estado en 1 sola query de agregación.
+        $agg = Contact::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(reviewed = 1) reviewed,
+             SUM(reviewed = 0) pending'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'reviewed' => (int) $agg->reviewed,
+            'pending' => (int) $agg->pending,
+        ];
+
         return view('supports.views.contacts.index')->with([
             'contacts' => $contacts,
             'reviewed' => $reviewed,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -100,5 +115,23 @@ class ContactsController extends Controller
         $contact->delete();
 
         return redirect()->route('support.contacts');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:contacts,id'],
+        ]);
+
+        $query = Contact::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' contacto(s) procesados.']);
     }
 }

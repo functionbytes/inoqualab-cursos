@@ -10,10 +10,25 @@ use Illuminate\Http\Request;
 
 class InscriptionsController extends Controller
 {
+    /**
+     * Mismo guard que Managers\Users\UsersController::guardNotSuperadmin():
+     * un manager no-superadmin no puede ver/editar las inscripciones de una
+     * cuenta superadmin.
+     */
+    private function guardNotSuperadmin(User $user): void
+    {
+        abort_if(
+            $user->role === 'superadmin' && auth()->user()->role !== 'superadmin',
+            403,
+            'No tienes autorización para gestionar esta cuenta.'
+        );
+    }
+
     public function index(Request $request, $slack)
     {
 
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
 
         $allInscriptions = Inscription::query()
             ->with('course')
@@ -36,15 +51,14 @@ class InscriptionsController extends Controller
         // inscripción; sin este guard, ->enterprise sobre null tira un 500.
         // Mismo bug ya arreglado en Supports\Users\InscriptionsController::edit().
         abort_unless($user instanceof User, 404, 'El cliente de esta inscripción ya no existe.');
+        $this->guardNotSuperadmin($user);
 
-        $enterprise = $user->enterprise;
         $course = $inscription->course;
 
         return view('managers.views.users.users.inscriptions.edit')->with([
             'user' => $user,
             'course' => $course,
             'inscription' => $inscription,
-            'enterprise' => $enterprise,
         ]);
 
     }
@@ -74,6 +88,10 @@ class InscriptionsController extends Controller
         }
 
         $inscription = Inscription::slack($request->inscription);
+
+        if ($inscription instanceof Inscription && $inscription->user) {
+            $this->guardNotSuperadmin($inscription->user);
+        }
 
         $inscription->enroll_start = $start;
         $inscription->enroll_expire = $expire;

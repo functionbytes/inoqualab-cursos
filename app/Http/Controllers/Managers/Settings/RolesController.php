@@ -170,6 +170,42 @@ class RolesController extends Controller
     }
 
     /**
+     * Eliminación en lote. Replica exactamente las protecciones de destroy():
+     * los roles del sistema (PROTECTED_ROLES) y los roles con usuarios
+     * asignados no se pueden eliminar — en vez de rechazar todo el lote, se
+     * omiten y se informa cuántos se omitieron.
+     */
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:roles,id'],
+        ]);
+
+        abort_unless(auth()->user()->can('roles.delete'), 403);
+
+        $roles = Role::whereIn('id', $request->ids)->withCount('users')->get();
+
+        $deletable = $roles->filter(fn (Role $role) => ! in_array($role->name, self::PROTECTED_ROLES, true)
+            && $role->users_count === 0
+        );
+
+        $skipped = $roles->count() - $deletable->count();
+
+        $deletable->each->delete();
+
+        $this->forgetCache();
+
+        $message = $deletable->count().' rol(es) eliminados.';
+        if ($skipped > 0) {
+            $message .= ' '.$skipped.' rol(es) omitidos (del sistema o con usuarios asignados).';
+        }
+
+        return response()->json(['success' => true, 'message' => $message]);
+    }
+
+    /**
      * @return array{name?: string}
      */
     private function validateRole(Request $request, ?int $ignoreId = null, bool $skipName = false): array

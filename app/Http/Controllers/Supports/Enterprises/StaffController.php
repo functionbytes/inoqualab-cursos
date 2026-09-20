@@ -9,6 +9,7 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseStaff;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -40,11 +41,28 @@ class StaffController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('enterprise_staff')
+            ->join('users', 'users.id', '=', 'enterprise_staff.user_id')
+            ->where('enterprise_staff.enterprise_id', $enterprise->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(users.available = 1) active,
+                 SUM(users.available = 0) inactive'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'active' => (int) $agg->active,
+            'inactive' => (int) $agg->inactive,
+        ];
+
         return view('supports.views.enterprises.staffs.index')->with([
             'users' => $users,
             'enterprise' => $enterprise,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -162,5 +180,25 @@ class StaffController extends Controller
         $user->delete();
 
         return redirect()->back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        // Mismo guard que destroy(): un soporte no puede eliminar en lote
+        // usuarios con roles no gestionables (manager/support).
+        $query = User::whereIn('id', $request->ids)->whereIn('role', $this->manageableRoles);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empleado(s) procesados.']);
     }
 }

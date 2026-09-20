@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\NewsletterMailjetService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -153,6 +154,116 @@ class NewsletterTest extends TestCase
             ->assertStatus(422);
 
         Queue::assertNotPushed(SendNewsletterCampaignJob::class);
+    }
+
+    // ── Ronda 3: ciclo individual (toggle/resend/destroy) sin cobertura previa ──
+
+    public function test_toggle_unsubscribes_an_active_subscriber(): void
+    {
+        $mock = $this->mock(NewsletterMailjetService::class);
+        $mock->shouldReceive('removeContact')->once();
+
+        $subscriber = $this->subscriber(['is_active' => true]);
+
+        $this->actingAs($this->manager)
+            ->patchJson(route('manager.newsletter.toggle', $subscriber))
+            ->assertOk();
+
+        $this->assertFalse($subscriber->fresh()->is_active);
+        $this->assertNotNull($subscriber->fresh()->unsubscribed_at);
+    }
+
+    public function test_toggle_resubscribes_an_inactive_subscriber(): void
+    {
+        $mock = $this->mock(NewsletterMailjetService::class);
+        $mock->shouldReceive('addContact')->once();
+
+        $subscriber = $this->subscriber(['is_active' => false]);
+
+        $this->actingAs($this->manager)
+            ->patchJson(route('manager.newsletter.toggle', $subscriber))
+            ->assertOk();
+
+        $this->assertTrue($subscriber->fresh()->is_active);
+    }
+
+    public function test_resend_confirmation_sends_mail_for_pending_subscriber(): void
+    {
+        Mail::fake();
+        $subscriber = $this->subscriber(['is_active' => false, 'confirmation_token' => 'old-token']);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.newsletter.resend-confirmation', $subscriber))
+            ->assertOk();
+
+        $this->assertNotSame('old-token', $subscriber->fresh()->confirmation_token);
+    }
+
+    public function test_resend_confirmation_rejects_a_subscriber_that_is_not_pending(): void
+    {
+        $subscriber = $this->subscriber(['is_active' => true, 'confirmation_token' => null]);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.newsletter.resend-confirmation', $subscriber))
+            ->assertStatus(422);
+    }
+
+    public function test_manager_can_destroy_a_single_subscriber(): void
+    {
+        $mock = $this->mock(NewsletterMailjetService::class);
+        $mock->shouldReceive('removeContact')->once();
+
+        $subscriber = $this->subscriber();
+
+        $this->actingAs($this->manager)
+            ->delete(route('manager.newsletter.destroy', $subscriber))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('newsletters', ['id' => $subscriber->id]);
+    }
+
+    public function test_destroy_requires_delete_permission_not_just_update(): void
+    {
+        $subscriber = $this->subscriber();
+
+        $limited = User::factory()->manager()->create();
+        $limited->syncRoles([]);
+        $limited->syncPermissions(['newsletters.view', 'newsletters.update']);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        $this->actingAs($limited->fresh())
+            ->delete(route('manager.newsletter.destroy', $subscriber))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('newsletters', ['id' => $subscriber->id]);
+    }
+
+    public function test_manager_can_import_subscribers_via_csv(): void
+    {
+        $csv = "email,name\nqa-import-a@example.com,QA Import A\nqa-import-b@example.com,QA Import B\n";
+        $file = UploadedFile::fake()->createWithContent('subscribers.csv', $csv);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.newsletter.import'), ['file' => $file])
+            ->assertOk()
+            ->assertJson(['success' => true, 'imported' => 2, 'skipped' => 0, 'errors' => 0]);
+
+        $this->assertDatabaseHas('newsletters', ['email' => 'qa-import-a@example.com', 'source' => 'import']);
+        $this->assertDatabaseHas('newsletters', ['email' => 'qa-import-b@example.com', 'source' => 'import']);
+    }
+
+    public function test_export_streams_a_csv_with_the_expected_header(): void
+    {
+        $this->subscriber(['email' => 'qa-export@example.com']);
+
+        $response = $this->actingAs($this->manager)->get(route('manager.newsletter.export'));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $content = $response->streamedContent();
+        $this->assertStringContainsString('qa-export@example.com', $content);
+        $this->assertStringContainsString('ID,Email,Nombre,Estado', $content);
     }
 
     public function test_send_campaign_requires_update_permission(): void

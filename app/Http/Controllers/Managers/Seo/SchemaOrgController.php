@@ -84,11 +84,10 @@ class SchemaOrgController extends Controller
     public function edit(SeoMeta $seoMeta): View
     {
         $types = array_keys(self::TEMPLATES);
-        $templates = self::TEMPLATES;
         $currentType = $seoMeta->schema_type;
         $currentSchema = $seoMeta->schema_custom;
 
-        return view('managers.views.seo.schema-org.edit', compact('seoMeta', 'types', 'templates', 'currentType', 'currentSchema'));
+        return view('managers.views.seo.schema-org.edit', compact('seoMeta', 'types', 'currentType', 'currentSchema'));
     }
 
     public function update(Request $request, SeoMeta $seoMeta): RedirectResponse

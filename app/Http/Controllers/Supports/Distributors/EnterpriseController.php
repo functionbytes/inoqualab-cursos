@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorEnterprise;
 use App\Models\Enterprise\Enterprise;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -31,15 +32,42 @@ class EnterpriseController extends Controller
         }
 
         if ($request->available != null) {
-            $enterprises = $enterprises->where('available', $available);
+            // Calificado con la tabla: `available` existe tanto en enterprises
+            // como en el pivot distributor_enterprises (join de belongsToMany),
+            // sin calificar MySQL lo rechaza como columna ambigua. El filtro de
+            // estado nunca se exponía en la vista antes de este ajuste de estilo,
+            // así que este bug estaba latente pero inalcanzable desde la UI.
+            $enterprises = $enterprises->where('enterprises.available', $available);
         }
 
         $enterprises = $enterprises->paginate(paginationNumber());
+
+        // Stats en 1 query con agregación condicional, scopeadas a las empresas
+        // de este distribuidor (no a los resultados filtrados de arriba).
+        // `available` existe tanto en distributor_enterprises (pivot) como en
+        // enterprises: sin calificar la columna, la agregación es ambigua.
+        // toBase()->reorder(): sin esto, BelongsToMany::get() agrega las
+        // columnas pivot_* al SELECT (para el hydrate de la relación) y
+        // MySQL rechaza mezclar columnas agregadas con columnas sueltas
+        // sin GROUP BY (error 1140).
+        $agg = $distributor->enterprises()->toBase()->reorder()->selectRaw(
+            'COUNT(*) total,
+             SUM(enterprises.available = 1) `public`,
+             SUM(enterprises.available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
 
         return view('supports.views.distributors.enterprises.index')->with([
             'distributor' => $distributor,
             'enterprises' => $enterprises,
             'searchKey' => $searchKey,
+            'available' => $available,
+            'stats' => $stats,
         ]);
 
     }
@@ -116,6 +144,24 @@ class EnterpriseController extends Controller
         }
 
         return redirect()->route('support.distributors.enterprises', $distributor->slack);
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:enterprises,id'],
+        ]);
+
+        $query = Enterprise::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empresa(s) procesadas.']);
     }
 
     public function create($slack)

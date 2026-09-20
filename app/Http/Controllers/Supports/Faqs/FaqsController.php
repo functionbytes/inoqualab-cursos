@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Faqs\StoreFaqRequest;
 use App\Models\Faq\Faq;
 use App\Models\Faq\FaqCategorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,7 +18,9 @@ class FaqsController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $faqs = Faq::descending();
+        // with('categorie'): la vista muestra $faq->categorie->title por fila
+        // -- sin esto es una query extra por FAQ listada (N+1).
+        $faqs = Faq::with('categorie')->descending();
 
         if ($searchKey) {
             $faqs = $faqs->where('title', 'like', '%'.$searchKey.'%');
@@ -29,10 +32,24 @@ class FaqsController extends Controller
 
         $faqs = $faqs->paginate(paginationNumber());
 
+        // Total + desglose por estado en 1 sola query de agregación.
+        $agg = Faq::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.faqs.faqs.index')->with([
             'faqs' => $faqs,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -123,5 +140,23 @@ class FaqsController extends Controller
         $faq->delete();
 
         return redirect()->route('support.faqs');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:faqs,id'],
+        ]);
+
+        $query = Faq::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' pregunta(s) procesadas.']);
     }
 }

@@ -31,10 +31,27 @@ class CourseController extends Controller
 
         $courses = $courses->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('enterprise_course')
+            ->join('courses', 'courses.id', '=', 'enterprise_course.course_id')
+            ->where('enterprise_course.enterprise_id', $enterprise->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(courses.available = 1) `public`,
+                 SUM(courses.available = 0) hidden'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.enterprises.courses.index')->with([
             'enterprise' => $enterprise,
             'courses' => $courses,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
 
     }
@@ -119,7 +136,10 @@ class CourseController extends Controller
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
-        $class = $course->lessons;
+        // with('chapter'): la vista agrupa por chapter_id y muestra
+        // $chapter->title por lección -- sin esto es una query extra por
+        // lección del curso (N+1).
+        $class = $course->lessons()->with('chapter')->get();
 
         return view('supports.views.enterprises.courses.progress')->with([
             'user' => $user,

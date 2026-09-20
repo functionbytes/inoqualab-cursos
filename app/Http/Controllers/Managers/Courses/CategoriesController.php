@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Courses\StoreCourseCategoryRequest;
 use App\Http\Requests\Managers\Courses\UpdateCourseCategoryRequest;
 use App\Models\Course\CourseCategorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -127,5 +128,37 @@ class CategoriesController extends Controller
         $categorie->delete();
 
         return redirect()->route('manager.categories.courses');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:course_categories,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        if ($request->action === 'delete') {
+            // Mismo resguardo que destroy(): una categoría con cursos asociados
+            // no se elimina (dejaría cursos huérfanos); se omite del conteo.
+            $count = CourseCategorie::whereIn('id', $request->ids)
+                ->whereDoesntHave('courses')
+                ->delete();
+
+            return response()->json(['success' => true, 'message' => $count.' categoria(s) procesados.']);
+        }
+
+        $query = CourseCategorie::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' categoria(s) procesados.']);
     }
 }

@@ -42,9 +42,7 @@ class MailerComponentController extends Controller
 
     public function create(): View
     {
-        $variables = MailerVariableService::getGroupedForModule('core');
-
-        return view('managers.views.mailer.components.create', compact('variables'));
+        return view('managers.views.mailer.components.create');
     }
 
     public function store(StoreMailerComponentRequest $request): RedirectResponse
@@ -63,9 +61,8 @@ class MailerComponentController extends Controller
     public function edit(string $uid): View
     {
         $component = MailerLayout::where('uid', $uid)->firstOrFail();
-        $variables = MailerVariableService::getGroupedForModule('core');
 
-        return view('managers.views.mailer.components.edit', compact('component', 'variables'));
+        return view('managers.views.mailer.components.edit', compact('component'));
     }
 
     public function update(UpdateMailerComponentRequest $request, string $uid): RedirectResponse
@@ -157,6 +154,34 @@ class MailerComponentController extends Controller
         $status = $component->is_enabled ? 'habilitado' : 'deshabilitado';
 
         return back()->with('success', "Componente '{$component->name}' {$status}.");
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:enable,disable,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:mailer_layouts,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        // Los componentes protegidos (header/footer/wrapper) nunca se pueden
+        // eliminar, igual que destroy() — se excluyen en vez de romper el lote.
+        $query = MailerLayout::whereIn('id', $request->ids);
+        if ($request->action === 'delete') {
+            $query->where('is_protected', false);
+        }
+        $count = $query->count();
+
+        match ($request->action) {
+            'enable' => $query->update(['is_enabled' => true]),
+            'disable' => $query->update(['is_enabled' => false]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' componente(s) procesados.']);
     }
 
     public function variables(): JsonResponse

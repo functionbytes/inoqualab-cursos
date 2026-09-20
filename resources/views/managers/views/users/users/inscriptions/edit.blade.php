@@ -6,14 +6,17 @@
         <div class="col-lg-12 d-flex align-items-stretch">
 
             <div class="card w-100" id="users-inscriptions-edit"
-                 data-config='@json([
-                    "enrollStart" => date("d/m/Y", strtotime($inscription->enroll_start)),
-                    "enrollExpire" => date("d/m/Y", strtotime($inscription->enroll_expire)),
-                    "routes" => [
-                        "action" => route("manager.users.inscriptions.action"),
-                        "back" => route("manager.users.inscriptions", $user->slack),
-                    ],
-                 ])'>
+                 @php
+                    $__jsonInline1 = [
+                        "enrollStart" => date("d/m/Y", strtotime($inscription->enroll_start)),
+                        "enrollExpire" => date("d/m/Y", strtotime($inscription->enroll_expire)),
+                        "routes" => [
+                            "action" => route("manager.users.inscriptions.action"),
+                            "back" => route("manager.users.inscriptions", $user->slack),
+                        ],
+                    ];
+                 @endphp
+                 data-config='@json($__jsonInline1)'>
 
                 <form id="formAction" enctype="multipart/form-data" role="form">
 

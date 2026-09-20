@@ -16,6 +16,7 @@ class StoreMailerComponentRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'alias' => ['required', 'string', 'max:100', 'unique:mailer_layouts,alias', 'regex:/^[a-z0-9_]+$/'],
+            'code' => ['nullable', 'string', 'max:100'],
             'type' => ['required', 'in:layout,header,footer,component'],
             'group_name' => ['nullable', 'string', 'max:100'],
             'subject' => ['nullable', 'string', 'max:255'],

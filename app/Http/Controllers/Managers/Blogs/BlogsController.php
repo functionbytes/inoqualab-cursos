@@ -194,6 +194,29 @@ class BlogsController extends Controller
 
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:blogs,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'blogs.delete' : 'blogs.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Blog::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' noticia(s) procesadas.']);
+    }
+
     public function getThumbnails($slack): JsonResponse
     {
         abort_unless(auth()->user()->can('blogs.update'), 403);

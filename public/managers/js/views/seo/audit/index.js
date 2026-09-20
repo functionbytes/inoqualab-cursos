@@ -129,10 +129,11 @@ $(function () {
             return;
         }
         items.forEach(function (item) {
+            var message = (item && typeof item === 'object') ? (item.message ?? '') : item;
             $list.append(
                 '<li class="list-group-item px-0 py-1 border-0 border-bottom">' +
                 '<i class="fas fa-circle-' + (type === 'danger' ? 'xmark text-danger' : 'check text-success') + ' me-2 small"></i>' +
-                '<span class="small">' + $('<div>').text(item).html() + '</span>' +
+                '<span class="small">' + $('<div>').text(message).html() + '</span>' +
                 '</li>'
             );
         });
@@ -249,14 +250,13 @@ $(function () {
             } else {
                 var $tbody = $('#canonical-results-tbody').empty();
                 res.results.forEach(function (row) {
-                    var isOk = row.status_code >= 200 && row.status_code < 400;
-                    var badge = isOk
-                        ? '<span class="badge bg-success">' + row.status_code + '</span>'
-                        : '<span class="badge bg-danger">' + (row.status_code ?? 'Error') + '</span>';
+                    var badge = row.ok
+                        ? '<span class="badge bg-success">' + row.status + '</span>'
+                        : '<span class="badge bg-danger">' + (row.status || 'Error') + '</span>';
                     $tbody.append(
                         '<tr>' +
                         '<td><small class="fw-semibold">' + $('<div>').text(row.title ?? '—').html() + '</small></td>' +
-                        '<td><code class="small">' + $('<div>').text(row.canonical ?? '—').html() + '</code></td>' +
+                        '<td><code class="small">' + $('<div>').text(row.canonical_url ?? '—').html() + '</code></td>' +
                         '<td class="text-center">' + badge + '</td>' +
                         '</tr>'
                     );
@@ -315,7 +315,7 @@ $(function () {
                         res.broken.forEach(function (link) {
                             $list.append(
                                 '<li class="list-group-item d-flex align-items-center gap-3">' +
-                                '<span class="badge bg-danger flex-shrink-0">' + (link.status_code ?? 'Error') + '</span>' +
+                                '<span class="badge bg-danger flex-shrink-0">' + (link.status || 'Error') + '</span>' +
                                 '<div class="flex-grow-1 min-w-0">' +
                                 '<code class="small text-break">' + $('<div>').text(link.url ?? '').html() + '</code>' +
                                 (link.source ? '<div class="text-muted broken-link-source">Desde: ' + $('<div>').text(link.source).html() + '</div>' : '') +

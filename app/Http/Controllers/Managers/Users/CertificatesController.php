@@ -11,6 +11,21 @@ use Illuminate\Http\Request;
 
 class CertificatesController extends Controller
 {
+    /**
+     * Mismo guard que Managers\Users\UsersController::guardNotSuperadmin():
+     * un manager no-superadmin no puede ver los certificados de una cuenta
+     * superadmin. UserPolicy::view() no distingue el rol del modelo, asi
+     * que $this->authorize('view', $user) por si solo no basta.
+     */
+    private function guardNotSuperadmin(User $user): void
+    {
+        abort_if(
+            $user->role === 'superadmin' && auth()->user()->role !== 'superadmin',
+            403,
+            'No tienes autorización para gestionar esta cuenta.'
+        );
+    }
+
     public function index(Request $request, $slack)
     {
 
@@ -19,6 +34,7 @@ class CertificatesController extends Controller
 
         $courses = Course::latest()->get();
         $user = User::slack($slack);
+        $this->guardNotSuperadmin($user);
         $certificates = $user->certificates()->latest()->with('course');
 
         if ($searchKey) {
@@ -46,6 +62,9 @@ class CertificatesController extends Controller
 
         $certificate = Certificate::slack($slack);
         $this->authorize('view', $certificate);
+        if ($certificate->user) {
+            $this->guardNotSuperadmin($certificate->user);
+        }
 
         return $this->streamCertificate($certificate);
 
@@ -68,6 +87,9 @@ class CertificatesController extends Controller
         abort_unless($certificate instanceof Certificate, 404, 'El alumno aún no tiene certificado emitido para este curso.');
 
         $this->authorize('view', $certificate);
+        if ($certificate->user) {
+            $this->guardNotSuperadmin($certificate->user);
+        }
 
         return $this->streamCertificate($certificate);
 
@@ -78,6 +100,9 @@ class CertificatesController extends Controller
 
         $certificate = Certificate::slack($slack);
         $this->authorize('view', $certificate);
+        if ($certificate->user) {
+            $this->guardNotSuperadmin($certificate->user);
+        }
 
         return $this->streamCertificate($certificate);
 
@@ -88,6 +113,7 @@ class CertificatesController extends Controller
 
         $user = User::slack($slack);
         $this->authorize('view', $user);
+        $this->guardNotSuperadmin($user);
 
         $certificates = $user->certificates;
         $pdf = \Pdf::loadView('managers.views.users.certificates.broad', compact('certificates'))->setPaper('a4', 'landscape');

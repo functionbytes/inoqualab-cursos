@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Managers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Certifiers\StoreCertifierFileRequest;
 use App\Http\Requests\Managers\Certifiers\StoreCertifierRequest;
+use App\Http\Requests\Managers\Certifiers\UpdateCertifierRequest;
 use App\Models\Certifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -77,16 +78,16 @@ class CertifiersController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateCertifierRequest $request)
     {
-        abort_unless(auth()->user()->can('certifiers.update'), 403);
+        $data = $request->validated();
 
-        $certifier = Certifier::slack($request->slack);
-        $certifier->firstname = Str::upper($request->firstname);
-        $certifier->lastname = Str::upper($request->lastname);
-        $certifier->identification = $request->identification;
-        $certifier->profession = $request->profession;
-        $certifier->available = $request->available;
+        $certifier = Certifier::slack($data['slack']);
+        $certifier->firstname = Str::upper($data['firstname']);
+        $certifier->lastname = Str::upper($data['lastname']);
+        $certifier->identification = $data['identification'] ?? null;
+        $certifier->profession = $data['profession'] ?? null;
+        $certifier->available = $data['available'];
         $certifier->update();
 
         return response()->json([
@@ -127,6 +128,29 @@ class CertifiersController extends Controller
         $certifier->delete();
 
         return redirect()->route('manager.certifiers');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:certifiers,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'certifiers.delete' : 'certifiers.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Certifier::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' capacitador(es) procesados.']);
     }
 
     public function getThumbnails($slack)

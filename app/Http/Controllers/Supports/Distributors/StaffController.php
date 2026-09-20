@@ -10,6 +10,7 @@ use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorStaff;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -42,11 +43,30 @@ class StaffController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
+        // Stats en 1 query con agregación condicional, scopeadas al staff de
+        // este distribuidor. `available` existe tanto en distributor_staff
+        // (pivot) como en users: sin calificar la columna, es ambigua.
+        // toBase()->reorder(): sin esto, BelongsToMany::get() agrega las
+        // columnas pivot_* al SELECT y MySQL rechaza mezclar columnas
+        // agregadas con columnas sueltas sin GROUP BY (error 1140).
+        $agg = $distributor->staffs()->toBase()->reorder()->selectRaw(
+            'COUNT(*) total,
+             SUM(users.available = 1) active,
+             SUM(users.available = 0) inactive'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'active' => (int) $agg->active,
+            'inactive' => (int) $agg->inactive,
+        ];
+
         return view('supports.views.distributors.staffs.index')->with([
             'users' => $users,
             'distributor' => $distributor,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -213,5 +233,25 @@ class StaffController extends Controller
         $user->delete();
 
         return redirect()->back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        // Mismo guard que destroy(): un soporte no puede eliminar en lote
+        // usuarios con roles no gestionables (manager/support).
+        $query = User::whereIn('id', $request->ids)->whereIn('role', $this->manageableRoles);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empleado(s) procesados.']);
     }
 }

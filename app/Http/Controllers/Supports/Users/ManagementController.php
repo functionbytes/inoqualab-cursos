@@ -44,7 +44,10 @@ class ManagementController extends Controller
         $progress = $inscription->progress;
         $user = $inscription->user;
         $course = $inscription->course;
-        $class = $course->lessons;
+        // with('chapter'): la vista agrupa por chapter_id y muestra
+        // $chapter->title por lección -- sin esto es una query extra por
+        // lección del curso (N+1).
+        $class = $course->lessons()->with('chapter')->get();
 
         return view('supports.views.users.managements.progress')->with([
             'user' => $user,
@@ -277,11 +280,23 @@ class ManagementController extends Controller
     {
 
         $enterprise = Enterprise::slack($slack);
-        $users = $enterprise->users()->with(['certificates', 'inscriptions'])->get();
+        // paginate(), no get(): la vista llama $users->hasPages()/->links(),
+        // métodos que no existen en una Collection -- con get() esta página
+        // rompía con un BadMethodCallException en cuanto se renderizaba.
+        $users = $enterprise->users()->with(['certificates', 'inscriptions'])->paginate(paginationNumber());
+
+        // La vista también esperaba $stats (undefined) -- sobre el total de
+        // usuarios de la empresa, no solo la página cargada.
+        $stats = [
+            'total' => $enterprise->users()->count(),
+            'with_certificates' => $enterprise->users()->whereHas('certificates')->count(),
+            'with_inscriptions' => $enterprise->users()->whereHas('inscriptions')->count(),
+        ];
 
         return view('supports.views.enterprises.users.users.index')->with([
             'enterprise' => $enterprise,
             'users' => $users,
+            'stats' => $stats,
         ]);
     }
 

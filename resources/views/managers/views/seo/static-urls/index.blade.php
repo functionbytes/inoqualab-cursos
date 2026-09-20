@@ -50,7 +50,7 @@
                         <div class="card bg-light-secondary h-100">
                             <div class="card-body">
                                 <h6 class="card-title mb-2">Inactivas</h6>
-                                <h4 class="mb-1 fw-bold">{{ number_format($total - $totalActive) }}</h4>
+                                <h4 class="mb-1 fw-bold">{{ number_format($totalInactive) }}</h4>
                                 <span class="text-muted">Excluidas del sitemap</span>
                             </div>
                         </div>

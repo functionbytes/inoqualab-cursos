@@ -133,6 +133,39 @@ class NewsletterListController extends Controller
         return redirect()->route('manager.newsletter.lists.index')->with('success', 'Lista eliminada correctamente.');
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:newsletter_lists,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        if ($request->action === 'delete') {
+            // Igual que destroy(): las listas dinámicas y las que tienen campañas
+            // asociadas no se pueden eliminar; se excluyen del lote en vez de
+            // romperlo.
+            $lists = NewsletterList::whereIn('id', $request->ids)
+                ->where('trigger', 'manual')
+                ->get()
+                ->filter(fn (NewsletterList $list) => ! $list->campaigns()->exists());
+
+            $count = $lists->count();
+            $lists->each->delete();
+
+            return response()->json(['success' => true, 'message' => $count.' lista(s) eliminadas.']);
+        }
+
+        $query = NewsletterList::whereIn('id', $request->ids);
+        $count = $query->count();
+        $query->update(['is_active' => $request->action === 'activate']);
+
+        return response()->json(['success' => true, 'message' => $count.' lista(s) procesadas.']);
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([

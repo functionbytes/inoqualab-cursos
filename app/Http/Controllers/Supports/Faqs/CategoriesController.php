@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Supports\Faqs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Faqs\StoreFaqCategoryRequest;
 use App\Models\Faq\FaqCategorie;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -28,10 +29,24 @@ class CategoriesController extends Controller
 
         $categories = $categories->paginate(paginationNumber());
 
+        // Total + desglose por estado en 1 sola query de agregación.
+        $agg = FaqCategorie::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.faqs.categories.index')->with([
             'categories' => $categories,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
 
     }
@@ -117,5 +132,23 @@ class CategoriesController extends Controller
         // garantizada en cada borrado exitoso.
         return redirect()->route('support.faqs.categories');
 
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:faq_categories,id'],
+        ]);
+
+        $query = FaqCategorie::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' categoría(s) procesadas.']);
     }
 }

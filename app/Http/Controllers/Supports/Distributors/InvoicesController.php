@@ -58,6 +58,35 @@ class InvoicesController extends Controller
         // Paginar los resultados
         $invoices = $invoices->paginate(paginationNumber());
 
+        // Stats en 1 query con agregación condicional, scopeadas a las
+        // facturas de este distribuidor (no a los resultados filtrados de
+        // arriba). Los ids de condición se resuelven por slug (no se
+        // hardcodean) para no depender del orden de inserción del seeder.
+        $conditionIds = InvoiceCondition::whereIn('slug', ['pagada', 'pendiente', 'rechazada'])->pluck('id', 'slug');
+
+        // toBase()->reorder(): la relación invoices() trae su propio
+        // ->orderBy('created_at','desc'); sin limpiarlo, MySQL rechaza
+        // mezclar columnas agregadas con una columna suelta en ORDER BY
+        // sin GROUP BY (error 1140).
+        $agg = $distributor->invoices()->toBase()->reorder()->selectRaw(
+            'COUNT(*) total,
+             SUM(condition_id = ?) paid,
+             SUM(condition_id = ?) pending,
+             SUM(condition_id = ?) rejected',
+            [
+                $conditionIds['pagada'] ?? 0,
+                $conditionIds['pendiente'] ?? 0,
+                $conditionIds['rechazada'] ?? 0,
+            ]
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'paid' => (int) $agg->paid,
+            'pending' => (int) $agg->pending,
+            'rejected' => (int) $agg->rejected,
+        ];
+
         return view('supports.views.distributors.invoices.invoices.index')->with([
             'invoices' => $invoices,
             'conditions' => $conditions,
@@ -65,6 +94,8 @@ class InvoicesController extends Controller
             'methods' => $methods,
             'method' => $method,
             'searchKey' => $searchKey,
+            'stats' => $stats,
+            'distributor' => $distributor,
         ]);
     }
 
@@ -96,9 +127,15 @@ class InvoicesController extends Controller
             foreach ($courses as $courseId => $detail) {
                 $course = $detail->first()->course->title ?? 'N/D';
                 $quantity = $detail->sum('quantity');
+                // $amount ya es la suma de los totales de linea de cada
+                // InvoiceDetails agrupado (no un precio unitario): volver a
+                // multiplicar por $quantity inflaba el total cuadraticamente
+                // -- una factura real con 204 inscripciones del mismo curso
+                // mostraba $104.040.000 en vez de $510.000 (204x). Managers
+                // y Accountings ya calculaban esto bien (totalAmount = $amount).
                 $amount = $detail->sum('amount');
 
-                $totalAmount = $quantity * $amount;
+                $totalAmount = $amount;
                 $totalEnterprise += $totalAmount;
 
                 $details[$enterprise][] = [

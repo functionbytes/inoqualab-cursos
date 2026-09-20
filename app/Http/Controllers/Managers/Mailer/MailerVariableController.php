@@ -36,8 +36,8 @@ class MailerVariableController extends Controller
         }
 
         $variables = $query->paginate(30);
-        $modules = MailerVariable::distinct('module')->pluck('module')->filter()->toArray();
-        $categories = MailerVariable::distinct('category')->pluck('category')->filter()->toArray();
+        $modules = MailerVariable::MODULES;
+        $categories = MailerVariable::CATEGORIES;
 
         return view('managers.views.mailer.variables.index', compact('variables', 'search', 'module', 'category', 'modules', 'categories'));
     }
@@ -89,6 +89,15 @@ class MailerVariableController extends Controller
 
         $validated['is_enabled'] = $request->boolean('is_enabled');
 
+        if (
+            MailerVariable::where('key', $validated['key'])
+                ->where('module', $validated['module'])
+                ->where('id', '!=', $variable->id)
+                ->exists()
+        ) {
+            return back()->withInput()->with('error', 'Ya existe una variable con esta clave en este módulo.');
+        }
+
         $variable->update($validated);
 
         return redirect()->route('mailers.variables.index')
@@ -113,6 +122,35 @@ class MailerVariableController extends Controller
         $variable->save();
 
         return back()->with('success', "Variable '{$variable->key}' ".($variable->is_enabled ? 'habilitada' : 'deshabilitada').'.');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:enable,disable,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:mailer_variables,id'],
+        ]);
+
+        // Los métodos store/update/destroy de este controller no llevan
+        // abort_unless propio: la autorización vive en el middleware `can:` de
+        // cada ruta (ver routes/managers.php). Una sola ruta bulk-action no
+        // puede expresar ese matiz por acción, así que se replica aquí.
+        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        // Las variables de sistema no se pueden editar ni eliminar (igual que
+        // update()/destroy()), así que se excluyen del lote en vez de romperlo.
+        $query = MailerVariable::whereIn('id', $request->ids)->where('is_system', false);
+        $count = $query->count();
+
+        match ($request->action) {
+            'enable' => $query->update(['is_enabled' => true]),
+            'disable' => $query->update(['is_enabled' => false]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' variable(s) procesadas.']);
     }
 
     public function getByModule(Request $request): JsonResponse

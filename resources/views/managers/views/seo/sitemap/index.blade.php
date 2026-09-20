@@ -23,7 +23,7 @@
                                 <div class="card bg-light h-100">
                                     <div class="card-body">
                                         <h6 class="card-title mb-2">Total sitemaps</h6>
-                                        <h4 class="mb-1 fw-bold">{{ count($sitemaps) }}</h4>
+                                        <h4 class="mb-1 fw-bold">{{ $totalSitemaps }}</h4>
                                         <p class="text-muted">Tipos disponibles</p>
                                     </div>
                                 </div>
@@ -33,8 +33,8 @@
                                     <div class="card-body">
                                         <h6 class="card-title mb-2">Sitemaps en caché</h6>
                                         <h4 class="mb-1 fw-bold">
-                                            {{ collect($sitemaps)->where('has_cache', true)->count() }}
-                                            <small class="fs-6 text-muted fw-normal">/ {{ count($sitemaps) }}</small>
+                                            {{ $cachedCount }}
+                                            <small class="fs-6 text-muted fw-normal">/ {{ $totalSitemaps }}</small>
                                         </h4>
                                         <p class="text-muted">Con caché activo</p>
                                     </div>

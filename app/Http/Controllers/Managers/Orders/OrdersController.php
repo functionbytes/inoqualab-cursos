@@ -93,14 +93,10 @@ class OrdersController extends Controller
         $conditions = OrderCondition::latest()->get();
         $conditions = $conditions->pluck('title', 'id');
 
-        $types = OrderType::latest()->get();
-        $types = $types->pluck('title', 'id');
-
         return view('managers.views.orders.orders.edit')->with([
             'order' => $order,
             'conditions' => $conditions,
             'methods' => $methods,
-            'types' => $types,
         ]);
     }
 

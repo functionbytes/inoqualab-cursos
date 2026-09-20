@@ -169,4 +169,53 @@ class ChapterController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Orden actualizado.']);
     }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:course_chapters,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        if ($request->action === 'delete') {
+            $chapters = CourseChapter::whereIn('id', $request->ids)->get();
+            $count = $chapters->count();
+            $courseIds = $chapters->pluck('course_id')->unique();
+
+            DB::transaction(function () use ($chapters, $courseIds) {
+                foreach ($chapters as $chapter) {
+                    // Borrado por modelo (no mass-delete): dispara los eventos Eloquent
+                    // para que Spatie MediaLibrary limpie los archivos/registros de media
+                    // de cada lección en vez de dejarlos huérfanos (mismo criterio que destroy()).
+                    $chapter->lessons()->get()->each->delete();
+                    $chapter->delete();
+                }
+
+                // Renumera 1..N el resto de capítulos de cada curso afectado.
+                foreach ($courseIds as $courseId) {
+                    CourseChapter::where('course_id', $courseId)
+                        ->orderBy('position')->orderBy('id')->get(['id'])
+                        ->each(function ($remaining, $index) {
+                            $remaining->update(['position' => $index + 1]);
+                        });
+                }
+            });
+
+            return response()->json(['success' => true, 'message' => $count.' tema(s) procesados.']);
+        }
+
+        $query = CourseChapter::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' tema(s) procesados.']);
+    }
 }

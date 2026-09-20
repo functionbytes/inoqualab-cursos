@@ -43,7 +43,7 @@ class SeoTemplateController extends Controller
             'priority' => ['integer', 'min:0', 'max:255'],
         ]);
 
-        SeoTemplate::create($validated);
+        SeoTemplate::create($this->withoutNullNotNullableColumns($validated));
 
         return redirect()
             ->route('manager.seo.templates.index')
@@ -69,11 +69,32 @@ class SeoTemplateController extends Controller
             'priority' => ['integer', 'min:0', 'max:255'],
         ]);
 
-        $seoTemplate->update($validated);
+        $seoTemplate->update($this->withoutNullNotNullableColumns($validated));
 
         return redirect()
             ->route('manager.seo.templates.index')
             ->with('success', 'Plantilla SEO actualizada correctamente.');
+    }
+
+    /**
+     * og_type/twitter_card/robots son NOT NULL con default en la BD (migración
+     * 2026_06_10_100003). El select "Sin definir" del formulario envía value="",
+     * y el middleware ConvertEmptyStringsToNull lo convierte a null antes de
+     * llegar aquí -- como la regla es 'nullable', pasa la validación, pero
+     * Eloquent inserta un NULL explícito y MySQL lo rechaza (constraint NOT
+     * NULL), 500 garantizado en cualquier creación/edición que deje alguno de
+     * estos 3 selects en "Sin definir". Se quitan del array para que la BD
+     * aplique su propio default en vez de forzar NULL.
+     */
+    private function withoutNullNotNullableColumns(array $validated): array
+    {
+        foreach (['og_type', 'twitter_card', 'robots'] as $column) {
+            if (array_key_exists($column, $validated) && $validated[$column] === null) {
+                unset($validated[$column]);
+            }
+        }
+
+        return $validated;
     }
 
     public function destroy(SeoTemplate $seoTemplate): RedirectResponse

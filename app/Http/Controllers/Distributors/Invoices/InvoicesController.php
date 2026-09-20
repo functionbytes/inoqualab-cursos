@@ -76,9 +76,13 @@ class InvoicesController extends Controller
             foreach ($courses as $courseId => $detail) {
                 $course = $detail->first()->course->title ?? 'N/D';
                 $quantity = $detail->sum('quantity');
+                // $amount ya es la suma de los totales de linea de cada
+                // InvoiceDetails agrupado (no un precio unitario): volver a
+                // multiplicar por $quantity inflaba el total cuadraticamente
+                // -- misma causa que en Supports\Distributors\InvoicesController.
                 $amount = $detail->sum('amount');
 
-                $totalAmount = $quantity * $amount;
+                $totalAmount = $amount;
                 $totalEnterprise += $totalAmount;
 
                 $details[$enterprise][] = [

@@ -13,9 +13,8 @@ class SeoLlmsController extends Controller
     {
         $content = setting('llms_txt', '');
         $public_url = url('/llms.txt');
-        $site_name = config('app.name');
 
-        return view('managers.views.seo.llms.index', compact('content', 'public_url', 'site_name'));
+        return view('managers.views.seo.llms.index', compact('content', 'public_url'));
     }
 
     public function update(Request $request): JsonResponse

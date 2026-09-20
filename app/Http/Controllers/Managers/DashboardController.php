@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Managers;
 
-use App\Enums\OrderCondition;
 use App\Http\Controllers\Controller;
 use App\Models\Blog\Blog;
 use App\Models\Contact;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
-use App\Models\Newsletter;
 use App\Models\Order\Order;
 use App\Models\User;
 use App\Structure\Elements;
@@ -22,19 +20,11 @@ class DashboardController extends Controller
 
         $enterprises = Enterprise::latest()->count();
         $blogs = Blog::latest()->count();
-        $users = User::latest()->count();
         $courses = Course::latest()->count();
-        $newsletters = Newsletter::latest()->count();
         $contacts = Contact::latest()->take(5)->get();
 
         $useradmins = User::where('role', 'manager')->count();
-        $usercustomers = User::where('role', 'customers')->count();
-        $userenterprises = User::where('role', 'enterprises')->count();
-
-        $orders = Order::count();
-        $online = Order::where('method_id', 1)->where('condition_id', OrderCondition::Pagada->value)->count();
-        $agreements = $online;
-        $total = 0;
+        $usercustomers = User::where('role', 'customer')->count();
 
         $analyticsOrders = Order::where('created_at', '>=', Carbon::now()->startOfYear())->get();
 
@@ -77,21 +67,13 @@ class DashboardController extends Controller
             'analyticsEanings' => $analyticsEanings,
             'analyticsEaning' => $analyticsEaning,
             'numberEanings' => $numberEanings,
-            'analyticsOrders' => $analyticsOrders,
             'monthEanings' => $monthEanings,
             'contacts' => $contacts,
-            'users' => $users,
             'blogs' => $blogs,
             'courses' => $courses,
-            'total' => $total,
-            'orders' => $orders,
-            'online' => $online,
-            'newsletters' => $newsletters,
             'useradmins' => $useradmins,
             'usercustomers' => $usercustomers,
-            'userenterprises' => $userenterprises,
             'enterprises' => $enterprises,
-            'agreements' => $agreements,
         ]);
 
     }

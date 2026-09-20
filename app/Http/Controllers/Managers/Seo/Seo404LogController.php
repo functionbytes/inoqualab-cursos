@@ -16,7 +16,7 @@ class Seo404LogController extends Controller
     {
         $logs = Seo404Log::query()
             ->when(
-                $request->input('has_redirect') !== null,
+                $request->filled('has_redirect'),
                 fn ($q) => $q->where('has_redirect', $request->boolean('has_redirect'))
             )
             ->orderByHits()

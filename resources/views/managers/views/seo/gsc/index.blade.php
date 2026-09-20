@@ -5,7 +5,9 @@
 @section('content')
 
 
-    <div class="widget-content">
+    <div class="widget-content"
+         data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
+         data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
 
         {{-- ── Tarjeta de estado ─────────────────────────────────────────────── --}}
         <div class="row g-3 mb-3">
@@ -265,5 +267,6 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
 @endpush
 
 @push('scripts')
+<script src="{{ asset('managers/js/flash-toastr.js') }}"></script>
 <script src="{{ asset('managers/js/views/seo/gsc/index.js') }}"></script>
 @endpush

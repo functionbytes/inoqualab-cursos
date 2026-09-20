@@ -103,4 +103,50 @@ class UsersCoursesControllerTest extends TestCase
 
         $this->assertSoftDeleted('inscriptions', ['id' => $inscription->id]);
     }
+
+    public function test_destroy_refuses_to_remove_a_manager_inscription(): void
+    {
+        // Sin guard de rol, un soporte podia borrar la inscripcion de un
+        // usuario manager/support solo conociendo su slack.
+        $manager = User::factory()->create(['role' => 'manager']);
+        $inscription = Inscription::factory()->for($manager)->create();
+
+        $this->actingAs($this->support)
+            ->delete(route('support.users.courses.destroy', $inscription->slack))
+            ->assertForbidden();
+
+        $this->assertNotNull(Inscription::find($inscription->id));
+    }
+
+    public function test_bulk_action_skips_a_manager_inscription(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $inscription = Inscription::factory()->for($manager)->create();
+
+        $this->actingAs($this->support)
+            ->postJson(route('support.users.courses.bulk-action'), [
+                'action' => 'delete',
+                'ids' => [$inscription->id],
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', '0 inscripción(es) procesadas.');
+
+        $this->assertNotNull(Inscription::find($inscription->id));
+    }
+
+    public function test_inscriptions_action_refuses_to_touch_a_manager_inscription(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $inscription = Inscription::factory()->for($manager)->create();
+        $originalEnrollStart = $inscription->enroll_start;
+
+        $this->actingAs($this->support)
+            ->postJson(route('support.users.inscriptions.action'), [
+                'inscription' => $inscription->slack,
+                'range' => '01/01/2026 - 01/06/2026',
+            ])
+            ->assertForbidden();
+
+        $this->assertEquals($originalEnrollStart, $inscription->fresh()->enroll_start);
+    }
 }

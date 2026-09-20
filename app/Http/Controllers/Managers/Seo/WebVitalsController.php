@@ -30,18 +30,19 @@ class WebVitalsController extends Controller
             ->groupBy('device', 'metric')
             ->get();
 
-        $thresholds = SeoWebVital::THRESHOLDS;
         $totalSamples = SeoWebVital::where('captured_at', '>=', $since)->count();
 
         return view('managers.views.seo.web-vitals.index', compact(
-            'globalP75', 'worstPages', 'byDevice', 'thresholds', 'totalSamples', 'since'
+            'globalP75', 'worstPages', 'byDevice', 'totalSamples', 'since'
         ));
     }
 
     public function show(string $path): View
     {
         $since = now()->subDays(28);
-        $normalizedPath = '/'.ltrim($path, '/');
+        // '_root' es el placeholder que usa la vista de índice para la home
+        // ("/"), porque route() no acepta un parámetro vacío en la URL.
+        $normalizedPath = $path === '_root' ? '/' : '/'.ltrim($path, '/');
 
         $p75 = $this->computeP75($normalizedPath, $since);
 
@@ -53,10 +54,8 @@ class WebVitalsController extends Controller
             ->orderBy('date')
             ->get();
 
-        $thresholds = SeoWebVital::THRESHOLDS;
-
         return view('managers.views.seo.web-vitals.show', compact(
-            'normalizedPath', 'p75', 'trend', 'thresholds', 'since'
+            'normalizedPath', 'p75', 'trend', 'since'
         ));
     }
 

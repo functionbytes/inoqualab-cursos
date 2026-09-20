@@ -21,8 +21,8 @@ class StoreBundleRequest extends FormRequest
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:2000'],
             'meta_keywords' => ['nullable', 'string', 'max:1000'],
-            'start_date' => ['required', 'date'],
-            'expire_at' => ['required', 'date', 'after:start_date'],
+            'start_date' => ['nullable', 'date'],
+            'expire_at' => ['nullable', 'date', 'after:start_date'],
             'courses' => ['nullable', 'string'],
         ];
     }
@@ -35,9 +35,7 @@ class StoreBundleRequest extends FormRequest
             'price.required' => 'El precio es obligatorio.',
             'price.numeric' => 'El precio debe ser un número.',
             'price.min' => 'El precio no puede ser negativo.',
-            'start_date.required' => 'La fecha de inicio es obligatoria.',
             'start_date.date' => 'La fecha de inicio no es válida.',
-            'expire_at.required' => 'La fecha final es obligatoria.',
             'expire_at.date' => 'La fecha final no es válida.',
             'expire_at.after' => 'La fecha final debe ser posterior a la fecha de inicio.',
         ];

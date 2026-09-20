@@ -19,7 +19,11 @@ class UpdateSupportProfileRequest extends FormRequest
         return [
             'firstname' => ['required', 'string', 'min:3', 'max:100'],
             'lastname' => ['required', 'string', 'min:3', 'max:100'],
-            'support' => ['required', 'string', 'min:3', 'max:100'],
+            // Nullable: no se usa en ningun otro punto del sistema (ni
+            // listados, ni tickets) y los soportes reales de la BD nunca lo
+            // tuvieron poblado -- marcado required bloqueaba editar el
+            // propio perfil (incluso solo el password) para el 100% de ellos.
+            'support' => ['nullable', 'string', 'min:3', 'max:100'],
             'email' => [
                 'required',
                 'email',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Supports\Instructions;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Instructions\StoreInstructionRequest;
+use App\Http\Requests\Managers\Instructions\UpdateInstructionRequest;
 use App\Models\Instruction\Instruction;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,9 @@ class InstructionsController extends Controller
         $searchKey = $request->search;
         $available = $request->available;
 
-        $instructions = Instruction::descending();
+        // with('categorie'): la vista muestra $instruction->categorie->title por
+        // fila -- sin esto es una query extra por instrucción listada (N+1).
+        $instructions = Instruction::with('categorie')->descending();
 
         if ($searchKey) {
             $instructions = $instructions->where('title', 'like', '%'.$searchKey.'%');
@@ -32,10 +35,24 @@ class InstructionsController extends Controller
 
         $instructions = $instructions->paginate(paginationNumber());
 
+        // Total + desglose por estado en 1 sola query de agregación.
+        $agg = Instruction::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.instructions.instructions.index')->with([
             'instructions' => $instructions,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -103,9 +120,8 @@ class InstructionsController extends Controller
 
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateInstructionRequest $request): JsonResponse
     {
-
         $instruction = Instruction::slack($request->slack);
         $instruction->title = $request->title;
         $instruction->description = $request->description;
@@ -131,5 +147,23 @@ class InstructionsController extends Controller
         $instruction->delete();
 
         return redirect()->back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:instructions,id'],
+        ]);
+
+        $query = Instruction::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' instrucción(es) procesadas.']);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\StoreEnterpriseRequest;
+use App\Http\Requests\Managers\Enterprises\UpdateEnterpriseRequest;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Services\InscriptionService;
@@ -68,26 +70,26 @@ class EnterprisesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateEnterpriseRequest $request)
     {
-        abort_unless(auth()->user()->can('enterprises.update'), 403);
-        $enterprise = Enterprise::slack($request->slack);
+        $data = $request->validated();
+        $enterprise = Enterprise::slack($data['slack']);
 
-        if (Enterprise::where('email', $request->email)->where('id', '!=', $enterprise->id)->exists()) {
+        if (Enterprise::where('email', $data['email'])->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->where('id', '!=', $enterprise->id)->exists()) {
+        if (! empty($data['nit']) && Enterprise::where('nit', $data['nit'])->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
-        $enterprise->title = Str::upper($request->title);
-        $enterprise->slug = Str::slug($request->title, '-');
-        $enterprise->address = $request->address;
-        $enterprise->cellphone = $request->cellphone;
-        $enterprise->nit = $request->nit;
-        $enterprise->email = $request->email;
-        $enterprise->available = $request->available;
+        $enterprise->title = Str::upper($data['title']);
+        $enterprise->slug = Str::slug($data['title'], '-');
+        $enterprise->address = $data['address'];
+        $enterprise->cellphone = $data['cellphone'] ?? null;
+        $enterprise->nit = $data['nit'] ?? null;
+        $enterprise->email = $data['email'];
+        $enterprise->available = $data['available'];
         $enterprise->save();
 
         return response()->json([
@@ -96,25 +98,26 @@ class EnterprisesController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreEnterpriseRequest $request)
     {
-        abort_unless(auth()->user()->can('enterprises.create'), 403);
-        if (Enterprise::where('email', $request->email)->exists()) {
+        $data = $request->validated();
+
+        if (Enterprise::where('email', $data['email'])->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->exists()) {
+        if (Enterprise::where('nit', $data['nit'])->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
         $enterprise = new Enterprise;
         $enterprise->slack = $this->generate_slack('enterprises');
-        $enterprise->title = Str::upper($request->title);
-        $enterprise->slug = Str::slug($request->title, '-');
-        $enterprise->address = $request->address;
-        $enterprise->cellphone = $request->cellphone;
-        $enterprise->nit = $request->nit;
-        $enterprise->email = $request->email;
+        $enterprise->title = Str::upper($data['title']);
+        $enterprise->slug = Str::slug($data['title'], '-');
+        $enterprise->address = $data['address'];
+        $enterprise->cellphone = $data['cellphone'] ?? null;
+        $enterprise->nit = $data['nit'];
+        $enterprise->email = $data['email'];
         $enterprise->available = 1;
         $enterprise->save();
 
@@ -133,6 +136,29 @@ class EnterprisesController extends Controller
 
         return redirect()->route('manager.enterprises');
 
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:enterprises,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'enterprises.delete' : 'enterprises.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Enterprise::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empresa(s) procesadas.']);
     }
 
     public function navegation($slack)

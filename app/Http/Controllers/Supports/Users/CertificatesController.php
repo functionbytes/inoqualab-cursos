@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Inscription;
@@ -9,9 +10,12 @@ use App\Models\User;
 use App\Models\Users\Certificate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CertificatesController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
@@ -19,8 +23,10 @@ class CertificatesController extends Controller
         $course = $request->course;
 
         $courses = Course::latest()->get();
-        $user = User::slack($slack);
-        $certificates = $user->certificates()->latest();
+        $user = $this->guardManageableUser(User::slack($slack));
+        // with('course'): la vista muestra $certificate->course->title por fila
+        // -- sin esto es una query extra por certificado listado (N+1).
+        $certificates = $user->certificates()->with('course')->latest();
 
         if ($searchKey) {
             $certificates = $certificates->where('firstname', 'like', '%'.$searchKey.'%');
@@ -32,12 +38,28 @@ class CertificatesController extends Controller
 
         $certificates = $certificates->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('certificates')
+            ->where('user_id', $user->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(end_at >= CURDATE()) current,
+                 SUM(end_at < CURDATE()) expired'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'current' => (int) $agg->current,
+            'expired' => (int) $agg->expired,
+        ];
+
         return view('supports.views.enterprises.users.certificates.index')->with([
             'certificates' => $certificates,
             'searchKey' => $searchKey,
             'courses' => $courses,
             'course' => $course,
             'user' => $user,
+            'stats' => $stats,
         ]);
 
     }
@@ -69,7 +91,7 @@ class CertificatesController extends Controller
     public function broad($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
         $certificates = $user->certificates;
         $pdf = Pdf::loadview('supports.views.enterprises.users.certificates.broad', compact('certificates'))->setWarnings(false)->setPaper('a4', 'landscape');
 

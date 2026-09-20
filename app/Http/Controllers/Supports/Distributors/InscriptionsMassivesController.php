@@ -177,7 +177,7 @@ class InscriptionsMassivesController extends Controller
                     $errors[] = [
                         'enterprise_enroll' => $enterprise->id,
                         'course_enroll' => $course->id,
-                        'customer_name' => $user->first_name.' '.$user->last_name,
+                        'customer_name' => $user->firstname.' '.$user->lastname,
                         'customer_enroll' => $user->id,
                         'customer_identification' => $user->identification,
                         'course' => $course->title,

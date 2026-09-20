@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Supports\Users;
 
 use App\Exports\Managers\ResultsExport;
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\User;
 use App\Models\Users\Certificate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ResultsController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
@@ -20,7 +24,7 @@ class ResultsController extends Controller
         $year = $request->year;
 
         $courses = Course::latest()->get();
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
         $certificates = $user->certificates()->with('course')->latest();
 
         $years = $user->certificates()
@@ -45,6 +49,21 @@ class ResultsController extends Controller
 
         $certificates = $certificates->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = DB::table('certificates')
+            ->where('user_id', $user->id)
+            ->selectRaw(
+                'COUNT(*) total,
+                 SUM(exam_id IS NOT NULL) with_exam,
+                 SUM(YEAR(start_at) = YEAR(CURDATE())) current_year'
+            )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'with_exam' => (int) $agg->with_exam,
+            'current_year' => (int) $agg->current_year,
+        ];
+
         return view('supports.views.enterprises.users.results.index')->with([
             'certificates' => $certificates,
             'searchKey' => $searchKey,
@@ -53,6 +72,7 @@ class ResultsController extends Controller
             'years' => $years,
             'year' => $year,
             'user' => $user,
+            'stats' => $stats,
         ]);
     }
 
@@ -62,7 +82,9 @@ class ResultsController extends Controller
         $certificate = Certificate::slack($slack);
         $course = $certificate->course;
         $exam = $certificate->exam;
-        $answers = $certificate->exam?->answers;
+        // with('question'): la vista muestra $answer->question->question por
+        // fila -- sin esto es una query extra por respuesta (N+1).
+        $answers = $certificate->exam?->answers()->with('question')->get();
         $wrongs = $certificate->exam?->answers()?->wrong()->count();
         $corrects = $certificate->exam?->answers()?->correct()->count();
 

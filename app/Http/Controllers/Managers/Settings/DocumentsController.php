@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Settings\Documents\StoreDocumentRequest;
 use App\Http\Requests\Managers\Settings\Documents\UpdateDocumentRequest;
 use App\Models\Document;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -86,7 +87,7 @@ class DocumentsController extends Controller
         abort_unless(auth()->user()->can('documents.create'), 403);
 
         $document = new Document;
-        $document->slack = $this->generate_slack('trusteds');
+        $document->slack = $this->generate_slack('documents');
         $document->title = Str::upper($request->title);
         $document->description = $request->description;
         $document->available = 1;
@@ -108,6 +109,29 @@ class DocumentsController extends Controller
         $document->delete();
 
         return redirect()->route('manager.documents');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:documents,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'documents.delete' : 'documents.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Document::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' documento(s) procesados.']);
     }
 
     public function getFiles($slack)

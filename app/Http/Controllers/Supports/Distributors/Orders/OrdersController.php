@@ -23,7 +23,9 @@ class OrdersController extends Controller
 
         $distributor = Distributor::slack($slack);
         $orders = $distributor->ordersActititys()?->descending()
-            ->with(['user', 'activity.enterprise']);
+            // 'condition' agregado al eager-load: la vista ahora pinta el badge
+            // de estado por fila (antes no se mostraba), evita N+1 por orden.
+            ->with(['user', 'activity.enterprise', 'condition']);
 
         $methods = OrderMethod::latest()->get();
         $conditions = OrderCondition::latest()->get();
@@ -57,6 +59,35 @@ class OrdersController extends Controller
 
         $orders = $orders->paginate(paginationNumber());
 
+        // Stats en 1 query con agregación condicional, scopeadas a las
+        // órdenes de este distribuidor (no a los resultados filtrados de
+        // arriba). Los ids de condición se resuelven por slug (no se
+        // hardcodean) para no depender del orden de inserción del seeder.
+        $conditionIds = OrderCondition::whereIn('slug', ['payment', 'pendiente', 'rechazada'])->pluck('id', 'slug');
+
+        // toBase()->reorder(): sin esto, HasManyThrough::get() agrega la
+        // columna laravel_through_key al SELECT (para el hydrate de la
+        // relación) y MySQL rechaza mezclar columnas agregadas con columnas
+        // sueltas sin GROUP BY (error 1140).
+        $agg = $distributor->ordersActititys()?->toBase()->reorder()->selectRaw(
+            'COUNT(*) total,
+             SUM(orders.condition_id = ?) paid,
+             SUM(orders.condition_id = ?) pending,
+             SUM(orders.condition_id = ?) rejected',
+            [
+                $conditionIds['payment'] ?? 0,
+                $conditionIds['pendiente'] ?? 0,
+                $conditionIds['rechazada'] ?? 0,
+            ]
+        )->first();
+
+        $stats = [
+            'total' => (int) ($agg->total ?? 0),
+            'paid' => (int) ($agg->paid ?? 0),
+            'pending' => (int) ($agg->pending ?? 0),
+            'rejected' => (int) ($agg->rejected ?? 0),
+        ];
+
         return view('supports.views.distributors.orders.orders.index')->with([
             'orders' => $orders,
             'conditions' => $conditions,
@@ -67,6 +98,7 @@ class OrdersController extends Controller
             'method' => $method,
             'searchKey' => $searchKey,
             'distributor' => $distributor,
+            'stats' => $stats,
         ]);
     }
 

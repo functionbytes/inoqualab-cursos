@@ -24,7 +24,6 @@ class InvoicesController extends Controller
 
         $searchKey = $request->search;
         $condition = $request->condition;
-        $type = $request->type;
         $method = $request->methods;
 
         $invoices = Invoice::with(['distributor', 'condition', 'method'])->latest()->orderBy('number', 'desc');
@@ -49,7 +48,6 @@ class InvoicesController extends Controller
             'invoices' => $invoices,
             'conditions' => $conditions,
             'condition' => $condition,
-            'type' => $type,
             'methods' => $methods,
             'method' => $method,
             'searchKey' => $searchKey,

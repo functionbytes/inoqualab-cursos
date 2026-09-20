@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Exports\Managers\IncomesExport;
 use App\Exports\Managers\UsersExport;
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Enterprises\ImportUsersRequest;
 use App\Imports\Managers\UsersImport;
@@ -11,6 +12,7 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -19,6 +21,8 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class UserController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
         abort_unless(auth()->user()->can('enterprises.view'), 403);
@@ -54,16 +58,8 @@ class UserController extends Controller
 
         $enterprise = Enterprise::slack($slack);
 
-        $availables = collect([
-            ['id' => '1', 'label' => 'Activo'],
-            ['id' => '0', 'label' => 'Inactivo'],
-        ]);
-
-        $availables = $availables->pluck('label', 'id');
-
         return view('managers.views.enterprises.users.create')->with([
             'enterprise' => $enterprise,
-            'availables' => $availables,
         ]);
 
     }
@@ -99,9 +95,10 @@ class UserController extends Controller
     {
         abort_unless(auth()->user()->can('enterprises.update'), 403);
 
-        $user = User::slack($request->slack);
-
-        abort_unless($user instanceof User, 404);
+        // Sin este guard, un manager con solo el permiso enterprises.update
+        // podia cambiar password/email de CUALQUIER usuario del sistema
+        // (incluidos otros manager/support) enviando su slack aqui.
+        $user = $this->guardManageableUser(User::slack($request->slack));
 
         if ($user->email !== $request->email) {
             $emailExists = User::where('email', $request->email)->where('id', '!=', $user->id)->exists();
@@ -208,6 +205,34 @@ class UserController extends Controller
             'success' => true,
             'message' => 'Se ha crado correctamente',
         ]);
+    }
+
+    public function bulkAction(Request $request, $slack): JsonResponse
+    {
+        abort_unless(auth()->user()->can('enterprises.update'), 403);
+
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $enterprise = Enterprise::slack($slack);
+
+        // Acotado a los ids que realmente pertenecen a esta empresa (mismo
+        // criterio que actionReasign()): sin esto se podría activar/desactivar
+        // un usuario ajeno a la empresa (IDOR).
+        $memberIds = $enterprise->users()->whereIn('users.id', $request->ids)->pluck('users.id');
+
+        $query = User::whereIn('id', $memberIds);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['available' => 1]),
+            'deactivate' => $query->update(['available' => 0]),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' usuario(s) procesados.']);
     }
 
     public function report($slack)

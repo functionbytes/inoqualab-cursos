@@ -59,8 +59,17 @@ class FormBuilder
         $attrs = array_merge(['name' => $name, 'id' => $name], $attributes);
         $html = '<select'.$this->buildAttributes($attrs).'>';
 
+        // $selected llega como array en los <select multiple> (p. ej. cursos/paquetes
+        // de un cupón): castear un array a string revienta con "Array to string
+        // conversion", así que se normaliza a una lista de strings comparables.
+        $selectedValues = match (true) {
+            is_array($selected) => array_map('strval', $selected),
+            $selected !== null => [(string) $selected],
+            default => [],
+        };
+
         foreach ($list as $value => $label) {
-            $isSelected = ($selected !== null && (string) $value === (string) $selected) ? ' selected' : '';
+            $isSelected = in_array((string) $value, $selectedValues, true) ? ' selected' : '';
             $html .= '<option value="'.e($value).'"'.$isSelected.'>'.e($label).'</option>';
         }
 

@@ -9,6 +9,7 @@ use App\Http\Requests\Managers\Quizs\UpdateQuizRequest;
 use App\Models\Course\Course;
 use App\Models\Quiz\Quiz;
 use App\Models\Quiz\QuizTopic;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -155,5 +156,47 @@ class QuizController extends Controller
 
         return back()->with('success', 'Quiz eliminado correctamente.');
 
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:quiz_topics,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'quizzes.delete' : 'quizzes.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        if ($request->action === 'delete') {
+            $topics = QuizTopic::whereIn('id', $request->ids)->get();
+
+            // Mismo resguardo que destroy(): un quiz que ya resolvieron alumnos
+            // no se elimina (se perderían los resultados de sus intentos).
+            $attemptedTopicIds = Quiz::whereIn('topic_id', $topics->pluck('id'))
+                ->distinct()->pluck('topic_id');
+            $deletable = $topics->reject(fn ($topic) => $attemptedTopicIds->contains($topic->id));
+            $count = $deletable->count();
+
+            DB::transaction(function () use ($deletable) {
+                foreach ($deletable as $topic) {
+                    $topic->questions()->delete();
+                    $topic->delete();
+                }
+            });
+
+            return response()->json(['success' => true, 'message' => $count.' quiz(zes) procesados.']);
+        }
+
+        $query = QuizTopic::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' quiz(zes) procesados.']);
     }
 }

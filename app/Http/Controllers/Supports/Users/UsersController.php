@@ -11,6 +11,7 @@ use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -42,10 +43,26 @@ class UsersController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
+        // Stats con una sola query de agregación (en vez de 4 counts separados).
+        $agg = User::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(role = "customer") customers,
+             SUM(role = "enterprise") enterprises,
+             SUM(available = 1) actives'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'customers' => (int) $agg->customers,
+            'enterprises' => (int) $agg->enterprises,
+            'actives' => (int) $agg->actives,
+        ];
+
         return view('supports.views.users.users.index')->with([
             'users' => $users,
             'role' => $role,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -256,18 +273,26 @@ class UsersController extends Controller
             // enterprise_id en cada guardado de un usuario staff.
             $user->enterprise_id = $request->enterprises;
         } elseif ($request->role == 'customer') {
-            $enterprise = $user->relation;
-            if ($enterprise) {
-                $enterprise->enterprise_id = $request->enterprises;
-                $enterprise->save();
-            } else {
-                EnterpriseUser::create([
-                    'user_id' => $user->id,
-                    'enterprise_id' => $request->enterprises,
-                    'available' => 1,
-                    'created_at' => Carbon::now()->setTimezone('America/Bogota'),
-                    'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
-                ]);
+            // Un cliente sin empresa asignada (la mayoría) deja el combo
+            // "Empresa" vacío: crear/actualizar el EnterpriseUser en ese caso
+            // intentaba grabar enterprise_id NULL, y esa columna es NOT NULL
+            // -> 500 al guardar CUALQUIER cambio de un cliente sin empresa.
+            $relation = $user->relation;
+            if ($request->enterprises) {
+                if ($relation) {
+                    $relation->enterprise_id = $request->enterprises;
+                    $relation->save();
+                } else {
+                    EnterpriseUser::create([
+                        'user_id' => $user->id,
+                        'enterprise_id' => $request->enterprises,
+                        'available' => 1,
+                        'created_at' => Carbon::now()->setTimezone('America/Bogota'),
+                        'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
+                    ]);
+                }
+            } elseif ($relation) {
+                $relation->delete();
             }
         } else {
             $user->enterprise_id = null;
@@ -297,6 +322,26 @@ class UsersController extends Controller
         $user->delete();
 
         return redirect()->back();
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        // Mismo guard que destroy(): solo permite eliminar en lote usuarios
+        // con rol gestionable (no managers/supports).
+        $query = User::whereIn('id', $request->ids)->whereIn('role', $this->manageableRoles);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' usuario(s) procesados.']);
     }
 
     public function information(Request $request)

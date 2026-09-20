@@ -43,6 +43,7 @@ class ScheduledCommandsTest extends TestCase
             'purga de clientes inactivos' => ['customers:inactive_delete'],
             'reconciliar pagos pendientes' => ['orders:reconcile-pending'],
             'recordatorio de carrito' => ['orders:remind-abandoned --hours=12'],
+            'recordatorio de carrito incompleto' => ['orders:remind-incomplete-carts --hours=1'],
             'limpiar órdenes abandonadas' => ['orders:cleanup-abandoned'],
             'reparar matrículas' => ['orders:repair-enrollments'],
             'aviso certificados 30d' => ['certificates:notify-expiring --days=30'],

@@ -6,7 +6,7 @@
         <div class="col-lg-12 d-flex align-items-stretch">
 
             <div class="card w-100" id="courses-edit"
-                 data-config='@json([
+                 data-config='@php $__jsonInline1 = [
                     "routes" => [
                         "update" => route("manager.courses.update"),
                         "index" => route("manager.courses"),
@@ -14,7 +14,7 @@
                         "thumbnailsGet" => route("manager.courses.thumbnails.get", ":item"),
                         "thumbnailDelete" => route("manager.courses.thumbnails.delete", ":id"),
                     ],
-                 ])'>
+                 ]; @endphp@json($__jsonInline1)'>
 
                 <form id="formCourses" enctype="multipart/form-data" role="form">
 

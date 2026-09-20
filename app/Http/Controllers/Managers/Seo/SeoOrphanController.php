@@ -143,7 +143,7 @@ class SeoOrphanController extends Controller
             ], 404);
         }
 
-        $title = $model->title ?? $model->name ?? '';
+        $title = $this->resolveTitle($model);
 
         SeoMeta::firstOrCreate(
             [
@@ -199,7 +199,7 @@ class SeoOrphanController extends Controller
                 continue;
             }
 
-            $title = $model->title ?? $model->name ?? '';
+            $title = $this->resolveTitle($model);
 
             $record = SeoMeta::firstOrCreate(
                 [
@@ -222,5 +222,18 @@ class SeoOrphanController extends Controller
             'message' => "Se generaron {$created} registros SEO.",
             'created' => $created,
         ]);
+    }
+
+    /**
+     * Certifier no tiene title/name (solo firstname/lastname), a diferencia
+     * del resto de modelos huérfanos soportados.
+     */
+    private function resolveTitle(Course|Blog|Bundle|Instruction|Certifier $model): string
+    {
+        if ($model instanceof Certifier) {
+            return trim("{$model->firstname} {$model->lastname}");
+        }
+
+        return $model->title ?? $model->name ?? '';
     }
 }

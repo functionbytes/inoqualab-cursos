@@ -333,7 +333,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 return 'Empresa';
                 break;
             case 'support':
-                return 'Suporte';
+                return 'Soporte';
             case 'accounting':
                 return 'Contabilidad';
                 break;

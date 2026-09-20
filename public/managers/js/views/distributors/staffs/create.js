@@ -22,7 +22,6 @@ $(document).ready(function () {
             identification: { required: false, minlength: 3, maxlength: 100 },
             cellphone: { required: false, number: true, minlength: 6, maxlength: 10 },
             email: { required: true, email: true, emailExt: true },
-            available: { required: true },
             role: { required: true },
             address: { required: false, minlength: 3, maxlength: 100 },
             password: { required: true, minlength: 3, maxlength: 100 },
@@ -53,7 +52,6 @@ $(document).ready(function () {
                 required: 'Tu email ingresar correo electrónico es necesario.',
                 email: 'Por favor, introduce una dirección de correo electrónico válida.',
             },
-            available: { required: 'Es necesario un estado.' },
             role: { required: 'Es necesario un estado.' },
             address: {
                 required: 'El parametro es necesario.',
@@ -76,7 +74,6 @@ $(document).ready(function () {
             var email = $('#email').val();
             var address = $('#address').val();
             var password = $('#password').val();
-            var available = $('#available').val();
             var role = $('#roles').val();
             var enterprise = $('#enterprises').val();
 
@@ -88,7 +85,6 @@ $(document).ready(function () {
             formData.append('email', email);
             formData.append('address', address);
             formData.append('password', password);
-            formData.append('available', available);
             formData.append('role', role);
             formData.append('enterprises', enterprise);
 

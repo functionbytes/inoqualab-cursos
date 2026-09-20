@@ -17,7 +17,9 @@ $(document).ready(function () {
         rules: {
             title: { required: true, minlength: 3, maxlength: 100 },
             address: { required: true, minlength: 3, maxlength: 100 },
-            nit: { required: true, minlength: 6, maxlength: 100 },
+            // required: false porque existen empresas reales sin NIT registrado
+            // (datos legados/importados) que deben poder seguir editándose.
+            nit: { required: false, minlength: 6, maxlength: 100 },
             cellphone: { required: false, number: true, minlength: 6, maxlength: 10 },
             email: { required: true, email: true, emailExt: true },
             available: { required: true },

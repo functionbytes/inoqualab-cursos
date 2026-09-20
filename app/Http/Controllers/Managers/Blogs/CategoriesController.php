@@ -124,4 +124,27 @@ class CategoriesController extends Controller
 
         return redirect()->route('manager.blogs.categories');
     }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:blog_categories,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'blogs.delete' : 'blogs.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = BlogCategorie::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' categoria(s) procesadas.']);
+    }
 }

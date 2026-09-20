@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Supports\StoreDocumentRequest;
 use App\Http\Requests\Supports\UpdateDocumentRequest;
 use App\Models\Document;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -17,7 +18,9 @@ class DocumentsController extends Controller
 
         $searchKey = $request->search;
         $available = $request->available;
-        $documents = Document::descending();
+        // with('media'): la vista llama getfirstMedia('files') por fila -- sin
+        // esto es una query extra por documento listado (N+1).
+        $documents = Document::with('media')->descending();
 
         if ($searchKey != null) {
             $documents = $documents->where('title', 'like', '%'.$searchKey.'%');
@@ -29,10 +32,24 @@ class DocumentsController extends Controller
 
         $documents = $documents->paginate(paginationNumber());
 
+        // Total + desglose por estado en 1 sola query de agregación.
+        $agg = Document::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.documents.index')->with([
             'documents' => $documents,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -118,6 +135,24 @@ class DocumentsController extends Controller
         $document->delete();
 
         return redirect()->route('support.documents');
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:documents,id'],
+        ]);
+
+        $query = Document::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' documento(s) procesados.']);
     }
 
     public function getFiles($slack)

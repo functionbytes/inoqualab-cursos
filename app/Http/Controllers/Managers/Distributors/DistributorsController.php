@@ -95,7 +95,7 @@ class DistributorsController extends Controller
                 if ($existingDistributor->email == $data['email'] && $distributor->email != $data['email']) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'El correo electronico ya está registrado en nuestro sistema.',
+                        'message' => 'El correo electrónico ya está registrado en nuestro sistema.',
                     ]);
                 }
 
@@ -170,6 +170,29 @@ class DistributorsController extends Controller
         $distributor->delete();
 
         return redirect()->route('manager.distributors');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:distributors,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'distributors.delete' : 'distributors.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Distributor::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' distribuidor(es) procesados.']);
     }
 
     public function navegation($slack)

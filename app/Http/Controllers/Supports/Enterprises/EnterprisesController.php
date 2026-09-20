@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Supports\Enterprises;
 
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise\Enterprise;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -31,10 +32,24 @@ class EnterprisesController extends Controller
 
         $enterprises = $enterprises->paginate(paginationNumber());
 
+        // 1 query de agregación en vez de 3 counts sueltos.
+        $agg = Enterprise::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+        ];
+
         return view('supports.views.enterprises.enterprises.enterprises.index')->with([
             'enterprises' => $enterprises,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
     }
 
@@ -175,5 +190,23 @@ class EnterprisesController extends Controller
             'enterprise' => $enterprise,
         ]);
 
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:enterprises,id'],
+        ]);
+
+        $query = Enterprise::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' empresa(s) procesadas.']);
     }
 }

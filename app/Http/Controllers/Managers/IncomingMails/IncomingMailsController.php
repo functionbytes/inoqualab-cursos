@@ -122,10 +122,6 @@ class IncomingMailsController extends Controller
             ->orderBy('firstname')
             ->get(['id', 'firstname', 'lastname']);
 
-        $selectedReviewer = is_numeric($assignedTo)
-            ? $reviewers->firstWhere('id', (int) $assignedTo)
-            : null;
-
         return view('managers.views.mails.index')->with([
             'mails' => $mails,
             'counts' => $counts,
@@ -140,7 +136,6 @@ class IncomingMailsController extends Controller
             'assignedTo' => $assignedTo,
             'chartData' => $chartData,
             'reviewers' => $reviewers,
-            'selectedReviewer' => $selectedReviewer,
         ]);
     }
 

@@ -184,4 +184,52 @@ class UsersOrdersControllerTest extends TestCase
             ->assertSessionHas('error');
         $this->assertNotNull(Order::find($order->id));
     }
+
+    public function test_destroy_refuses_to_delete_a_manager_order(): void
+    {
+        // Sin guard de rol, un soporte podia borrar la orden de un usuario
+        // manager/support solo conociendo su slack.
+        $manager = User::factory()->create(['role' => 'manager']);
+        $order = $this->makeOrder(1, $manager);
+
+        $this->actingAs($this->support)
+            ->delete(route('support.users.orders.destroy', $order->slack))
+            ->assertForbidden();
+
+        $this->assertNotNull(Order::find($order->id));
+    }
+
+    public function test_update_refuses_to_touch_a_manager_order(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $order = $this->makeOrder(1, $manager);
+        $method = OrderMethod::where('slug', 'card')->first();
+
+        $this->actingAs($this->support)
+            ->postJson(route('support.users.orders.update'), [
+                'slack' => $order->slack,
+                'condition' => 4,
+                'methods' => $method->id,
+                'payment' => '2026-02-10',
+            ])
+            ->assertForbidden();
+
+        $this->assertEquals(1, $order->fresh()->condition_id);
+    }
+
+    public function test_bulk_action_skips_a_manager_order(): void
+    {
+        $manager = User::factory()->create(['role' => 'manager']);
+        $order = $this->makeOrder(1, $manager);
+
+        $this->actingAs($this->support)
+            ->postJson(route('support.users.orders.bulk-action'), [
+                'action' => 'delete',
+                'ids' => [$order->id],
+            ])
+            ->assertOk()
+            ->assertJsonPath('message', '0 orden(es) eliminadas.');
+
+        $this->assertNotNull(Order::find($order->id));
+    }
 }

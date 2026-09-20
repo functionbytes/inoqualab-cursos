@@ -67,6 +67,7 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
 
         Route::get('/', [EnterprisesController::class, 'index'])->name('distributor.enterprises');
         Route::get('/create', [EnterprisesController::class, 'create'])->name('distributor.enterprises.create');
+        Route::post('/bulk-action', [EnterprisesController::class, 'bulkAction'])->name('distributor.enterprises.bulk-action');
         Route::post('/store', [EnterprisesController::class, 'store'])->name('distributor.enterprises.store');
         Route::post('/update', [EnterprisesController::class, 'update'])->name('distributor.enterprises.update');
         Route::get('/edit/{slack}', [EnterprisesController::class, 'edit'])->name('distributor.enterprises.edit');
@@ -75,8 +76,10 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('distributor.enterprises.navegation');
         Route::get('/inscriptions/{slack}', [EnterpriseInscriptionsController::class, 'index'])->name('distributor.enterprises.inscriptions');
         Route::get('/courses/{slack}', [EnterpriseCourseController::class, 'index'])->name('distributor.enterprises.courses');
+        Route::post('/courses/{slack}/bulk-action', [EnterpriseCourseController::class, 'bulkAction'])->name('distributor.enterprises.courses.bulk-action');
         Route::get('/users/{slack}', [EnterpriseUserController::class, 'index'])->name('distributor.enterprises.users');
         Route::get('/staff/{slack}', [EnterpriseStaffController::class, 'index'])->name('distributor.enterprises.staffs');
+        Route::post('/staff/{slack}/bulk-action', [EnterpriseStaffController::class, 'bulkAction'])->name('distributor.enterprises.staffs.bulk-action');
         Route::post('/staff/store', [EnterpriseStaffController::class, 'store'])->name('distributor.enterprises.staffs.store');
         Route::post('/staff/update', [EnterpriseStaffController::class, 'update'])->name('distributor.enterprises.staffs.update');
         Route::post('/users/update', [EnterpriseUserController::class, 'update'])->name('distributor.enterprises.users.update');

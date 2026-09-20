@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Inscription;
 use App\Models\User;
@@ -10,10 +11,12 @@ use Illuminate\Http\Request;
 
 class InscriptionsController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
 
         $inscriptions = Inscription::query()
             ->with('course')
@@ -21,8 +24,23 @@ class InscriptionsController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
+        // Stats con una sola query de agregación.
+        $agg = Inscription::query()->where('user_id', $user->id)->selectRaw(
+            'COUNT(*) total,
+             SUM(culminated = 1) culminated,
+             SUM(culminated = 0) pending'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'culminated' => (int) $agg->culminated,
+            'pending' => (int) $agg->pending,
+        ];
+
         return view('supports.views.users.users.inscriptions.index')->with([
+            'user' => $user,
             'inscriptions' => $inscriptions,
+            'stats' => $stats,
         ]);
 
     }
@@ -35,6 +53,7 @@ class InscriptionsController extends Controller
         // El cliente puede haberse borrado (soft delete) después de crear la
         // inscripción; sin este guard, ->enterprise sobre null tira un 500.
         abort_unless($user instanceof User, 404, 'El cliente de esta inscripción ya no existe.');
+        $this->guardManageableUser($user);
 
         $enterprise = $user->enterprise;
         $course = $inscription->course;
@@ -73,6 +92,10 @@ class InscriptionsController extends Controller
         }
 
         $inscription = Inscription::slack($request->inscription);
+
+        if ($inscription instanceof Inscription && $inscription->user) {
+            $this->guardManageableUser($inscription->user);
+        }
 
         $inscription->enroll_start = $start;
         $inscription->enroll_expire = $expire;

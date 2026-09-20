@@ -21,7 +21,22 @@ class NotificationsController extends Controller
             return Carbon::parse($date->created_at)->format('Y-m-d');
         });
 
-        return view('supports.views.notifications.index', compact('notifications'));
+        // Stats con una sola query de agregación (sobre el total real, no solo
+        // las 50 traídas arriba para la vista). La relación notifications()
+        // trae un ->orderBy('created_at') heredado del trait Notifiable —
+        // mezclar eso con funciones de agregación sin GROUP BY revienta en
+        // MySQL (error 1140), por eso ->toBase()->reorder() antes de agregar.
+        $agg = $user->notifications()->toBase()->reorder()->selectRaw(
+            'COUNT(*) total,
+             SUM(read_at IS NULL) unread'
+        )->first();
+
+        $stats = [
+            'total' => (int) ($agg->total ?? 0),
+            'unread' => (int) ($agg->unread ?? 0),
+        ];
+
+        return view('supports.views.notifications.index', compact('notifications', 'stats'));
     }
 
     public function show(Request $request): RedirectResponse

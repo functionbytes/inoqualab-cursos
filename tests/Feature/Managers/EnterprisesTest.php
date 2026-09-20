@@ -90,6 +90,7 @@ class EnterprisesTest extends TestCase
                 'title' => 'Otra Empresa',
                 'nit' => '800000001-9',
                 'email' => 'duplicado@empresa.com',
+                'address' => 'Calle 1 # 2-3',
             ])
             ->assertOk()
             ->assertJson(['success' => false]);

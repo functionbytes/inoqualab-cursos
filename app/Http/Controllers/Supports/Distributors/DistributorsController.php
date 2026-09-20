@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Supports\Distributors;
 
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -31,10 +32,27 @@ class DistributorsController extends Controller
 
         $distributors = $distributors->paginate(paginationNumber());
 
+        // 4 counts en 1 query con agregación condicional, igual que
+        // Managers\Courses\CoursesController::index().
+        $agg = Distributor::query()->selectRaw(
+            'COUNT(*) total,
+             SUM(available = 1) `public`,
+             SUM(available = 0) hidden,
+             SUM(enterprise_generate = 1) enterprise_generate'
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'public' => (int) $agg->public,
+            'hidden' => (int) $agg->hidden,
+            'enterprise_generate' => (int) $agg->enterprise_generate,
+        ];
+
         return view('supports.views.distributors.distributors.index')->with([
             'distributors' => $distributors,
             'available' => $available,
             'searchKey' => $searchKey,
+            'stats' => $stats,
         ]);
 
     }
@@ -205,5 +223,23 @@ class DistributorsController extends Controller
             'distributor' => $distributor,
         ]);
 
+    }
+
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:distributors,id'],
+        ]);
+
+        $query = Distributor::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' distribuidor(es) procesados.']);
     }
 }

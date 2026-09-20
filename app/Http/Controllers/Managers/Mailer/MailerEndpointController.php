@@ -115,6 +115,29 @@ class MailerEndpointController extends Controller
             ->with('success', "Endpoint '{$name}' eliminado.");
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:mailer_endpoints,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = MailerEndpoint::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'activate' => $query->update(['is_active' => true]),
+            'deactivate' => $query->update(['is_active' => false]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' endpoint(s) procesados.']);
+    }
+
     public function logs(Request $request, MailerEndpoint $endpoint): View
     {
         $searchEmail = $request->input('email');

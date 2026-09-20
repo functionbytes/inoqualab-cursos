@@ -107,7 +107,7 @@ class UsersController extends Controller
         $user->setting = 1;
         $user->validation = 1;
         $user->email_verified_at = Carbon::now()->setTimezone('America/Bogota');
-        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprise : null;
+        $user->enterprise_id = $request->role === 'enterprise' ? $request->enterprises : null;
         $user->save();
 
         UserCreated::dispatch($user);
@@ -165,7 +165,7 @@ class UsersController extends Controller
             ['id' => 'enterprise', 'title' => 'Empresa'],
             ['id' => 'distributor', 'title' => 'Distribuidor'],
             ['id' => 'accounting', 'title' => 'Contabilidad'],
-            ['id' => 'support', 'title' => 'Suporte'],
+            ['id' => 'support', 'title' => 'Soporte'],
         ])->pluck('title', 'id');
     }
 
@@ -176,12 +176,9 @@ class UsersController extends Controller
 
         $roles = $this->roleOptions();
 
-        $availables = $this->availableOptions();
-
         return view('managers.views.users.users.view')->with([
             'user' => $user,
             'roles' => $roles,
-            'availables' => $availables,
         ]);
 
     }
@@ -281,20 +278,28 @@ class UsersController extends Controller
         }
 
         if ($request->role == 'enterprise') {
-            $user->enterprise_id = $request->enterprise;
+            $user->enterprise_id = $request->enterprises;
         } elseif ($request->role == 'customer') {
-            $enterprise = $user->relation;
-            if ($enterprise) {
-                $enterprise->enterprise_id = $request->enterprises;
-                $enterprise->save();
-            } else {
-                EnterpriseUser::create([
-                    'user_id' => $user->id,
-                    'enterprise_id' => $request->enterprises,
-                    'available' => 1,
-                    'created_at' => Carbon::now()->setTimezone('America/Bogota'),
-                    'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
-                ]);
+            // Un cliente sin empresa asignada (la mayoría) deja el combo
+            // "Empresa" vacío: crear/actualizar el EnterpriseUser en ese caso
+            // intentaba grabar enterprise_id NULL, y esa columna es NOT NULL
+            // -> 500 al guardar CUALQUIER cambio de un cliente sin empresa.
+            $relation = $user->relation;
+            if ($request->enterprises) {
+                if ($relation) {
+                    $relation->enterprise_id = $request->enterprises;
+                    $relation->save();
+                } else {
+                    EnterpriseUser::create([
+                        'user_id' => $user->id,
+                        'enterprise_id' => $request->enterprises,
+                        'available' => 1,
+                        'created_at' => Carbon::now()->setTimezone('America/Bogota'),
+                        'updated_at' => Carbon::now()->setTimezone('America/Bogota'),
+                    ]);
+                }
+            } elseif ($relation) {
+                $relation->delete();
             }
         } else {
             $user->enterprise_id = null;
@@ -334,6 +339,50 @@ class UsersController extends Controller
 
         return redirect()->route('manager.users');
 
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => ['required', 'in:activate,deactivate,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:users,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'users.delete' : 'users.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $actor = auth()->user();
+        $users = User::whereIn('id', $request->ids)->get();
+
+        // Igual que guardNotSuperadmin(): un actor no-superadmin no puede tocar
+        // cuentas superadmin, así que se excluyen en silencio del lote en vez
+        // de abortar toda la operación.
+        if ($actor->role !== 'superadmin') {
+            $users = $users->reject(fn (User $user) => $user->role === 'superadmin');
+        }
+
+        $count = 0;
+
+        DB::transaction(function () use ($users, $request, &$count) {
+            foreach ($users as $user) {
+                match ($request->action) {
+                    'activate' => $user->update(['available' => 1]),
+                    'deactivate' => $user->update(['available' => 0]),
+                    'delete' => $user->delete(),
+                };
+
+                match ($request->action) {
+                    'activate' => UserReactivated::dispatch($user),
+                    'deactivate' => UserDeactivated::dispatch($user),
+                    'delete' => UserDeleted::dispatch($user),
+                };
+
+                $count++;
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => $count.' usuario(s) procesados.']);
     }
 
     public function orders(Request $request, $slack)

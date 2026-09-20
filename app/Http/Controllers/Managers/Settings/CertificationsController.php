@@ -117,6 +117,29 @@ class CertificationsController extends Controller
 
     }
 
+    public function bulkAction(Request $request): JsonResponse
+    {
+        $request->validate([
+            'action' => ['required', 'in:publish,hide,delete'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:certifications,id'],
+        ]);
+
+        $permission = $request->action === 'delete' ? 'certifications.delete' : 'certifications.update';
+        abort_unless(auth()->user()->can($permission), 403);
+
+        $query = Certification::whereIn('id', $request->ids);
+        $count = $query->count();
+
+        match ($request->action) {
+            'publish' => $query->update(['available' => 1]),
+            'hide' => $query->update(['available' => 0]),
+            'delete' => $query->delete(),
+        };
+
+        return response()->json(['success' => true, 'message' => $count.' certificado(s) procesados.']);
+    }
+
     public function getThumbnails($slack)
     {
 
