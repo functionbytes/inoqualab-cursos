@@ -63,6 +63,11 @@ body {
   line-height: 1.82;
   font-size: 16px;
   font-family: "Figtree", sans-serif;
+  /* Cal Sans solo existe en weight 400 (ver Google Fonts). Cualquier
+     font-weight distinto pedido para ese tipo (los h1-h6 del sitio piden
+     600 en la seccion "03. Repeat Style") fuerza una negrita sintetica que
+     infla los trazos y separa visualmente las letras en todos los titulos. */
+  font-synthesis: none;
 }
 
 a {
@@ -5186,6 +5191,26 @@ h1, h2, h3, h4, h5, h6, .bg-text, .coach-filter li, .newsletter-radios {
   margin-right: 15px;
   margin: 0;
 }
+
+/* Coach Section — grid de 4 columnas (courses.blade.php), tarjeta más angosta
+   que el .coach-item de 3 columnas por defecto: imagen más baja, menos padding
+   y título limitado a 2 líneas para que las 4 tarjetas de una fila no queden
+   con alturas distintas. Escapado bajo .coach-section para no tocar el slider
+   de populars.blade.php (.events-section), que reusa el mismo .coach-item. */
+.coach-section .coach-image img { height: 200px; }
+.coach-section .coach-image .category { top: 14px; left: 14px; font-size: 11px; padding: 3px 10px 2px; white-space: nowrap; }
+.coach-section .coach-content { padding: 20px 22px; margin-top: -40px; }
+.coach-section .coach-content h4 {
+  font-size: 15px;
+  text-transform: uppercase;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.coach-section .coach-content .ratting-price { margin-bottom: 12px; padding-bottom: 12px; }
+.coach-section .coach-content .price { font-size: 17px; }
 
 /* Coach Style Two */
 .coach-slider {

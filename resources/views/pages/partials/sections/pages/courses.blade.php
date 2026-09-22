@@ -18,7 +18,7 @@
         </ul>  --}}
         <div class="row justify-content-center">
             @foreach ($courses as $course)
-                <div class="col-lg-4 col-md-6  ">
+                <div class="col-lg-3 col-md-6">
                     <div class="coach-item wow fadeInUp delay-0-2s">
                         <div class="coach-image">
                             <a href="{{ route('courses.view', [$course->slack]) }}" class="category">{{ $course->categorie->title }}</a>
@@ -32,7 +32,7 @@
                             </a>
                         </div>
                         <div class="coach-content">
-                            <h4><a href="{{ route('courses.view', [$course->slack]) }}">{{ str($course->title)->lower()->ucfirst() }}</a></h4>
+                            <h4><a href="{{ route('courses.view', [$course->slack]) }}" title="{{ $course->title }}">{{ $course->title }}</a></h4>
                             <div class="ratting-price">
                                 <div class="ratting">
                                     <i class="fas fa-star"></i>

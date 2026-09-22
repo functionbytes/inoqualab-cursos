@@ -108,7 +108,10 @@ class PanelRoutesSmokeTest extends TestCase
         );
 
         // Guardarraíl del propio test: si la siembra se rompe, la cobertura cae
-        // en silencio y el barrido pasaría sin comprobar casi nada.
-        $this->assertGreaterThan(200, $ok, 'El barrido cubrió menos rutas de las esperadas: revisa la siembra.');
+        // en silencio y el barrido pasaría sin comprobar casi nada. Umbral
+        // bajado de 200 a 180 tras la auditoría de código muerto que eliminó
+        // ~54 rutas huérfanas de manager.*/mailers.* (sep-2026): el total real
+        // de rutas con {param} bajó a ~198, cifra esperada, no una regresión.
+        $this->assertGreaterThan(180, $ok, 'El barrido cubrió menos rutas de las esperadas: revisa la siembra.');
     }
 }

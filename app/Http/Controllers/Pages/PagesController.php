@@ -27,7 +27,7 @@ class PagesController extends Controller
             'courses' => Course::latest()->available()->two(5)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'bpms' => Course::latest()->available()->one(23)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'populars' => Course::latest()->available()->featured()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
-            'bundles' => Bundle::available()->latest()->withCount('courses')->limit(4)->get(),
+            'bundles' => Bundle::available()->latest()->withCount('courses')->with('courses')->limit(4)->get(),
             'homeFaqs' => Faq::take(5)->get(),
             // limit(12), no 6: los testimonios previos a esta feature (sin position
             // ni fecha reciente) empatan en position=0 con los nuevos y, ordenados

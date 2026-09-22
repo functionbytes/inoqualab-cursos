@@ -22,7 +22,7 @@ class CoursesController extends Controller
             ->get();
 
         $categories = CourseCategorie::available()->get();
-        $bundles = Bundle::available()->latest()->withCount('courses')->limit(4)->get();
+        $bundles = Bundle::available()->latest()->withCount('courses')->with('courses')->limit(4)->get();
 
         return view('pages.views.courses.index')->with([
             'courses' => $courses,
