@@ -29,9 +29,11 @@ class SeoStaticUrlController extends Controller
         $totalActive = SeoStaticUrl::query()->where('is_active', true)->count();
         $totalInactive = SeoStaticUrl::query()->where('is_active', false)->count();
 
-        $staticUrls = $query->latest()->paginate(15)->withQueryString();
+        $staticUrls = $query->latest()->paginate(paginationNumber(15))->withQueryString();
 
-        return view('managers.views.seo.static-urls.index', compact('staticUrls', 'total', 'totalActive', 'totalInactive'));
+        $view = request()->ajax() ? 'managers.views.seo.static-urls._table' : 'managers.views.seo.static-urls.index';
+
+        return view($view, compact('staticUrls', 'total', 'totalActive', 'totalInactive'));
     }
 
     public function create(): View

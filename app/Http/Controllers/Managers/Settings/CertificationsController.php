@@ -31,7 +31,9 @@ class CertificationsController extends Controller
 
         $certifications = $certifications->paginate(paginationNumber());
 
-        return view('managers.views.settings.certifications.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.certifications._table' : 'managers.views.settings.certifications.index';
+
+        return view($view)->with([
             'certifications' => $certifications,
             'available' => $available,
             'searchKey' => $searchKey,

@@ -30,7 +30,9 @@ class SlidersController extends Controller
         }
         $sliders = $sliders->paginate(paginationNumber());
 
-        return view('managers.views.settings.sliders.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.sliders._table' : 'managers.views.settings.sliders.index';
+
+        return view($view)->with([
             'sliders' => $sliders,
             'available' => $available,
             'searchKey' => $searchKey,

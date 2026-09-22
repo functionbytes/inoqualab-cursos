@@ -33,7 +33,9 @@ class CategoriesController extends Controller
 
         $categories = $categories->paginate(paginationNumber());
 
-        return view('managers.views.blogs.categories.index')->with([
+        $view = request()->ajax() ? 'managers.views.blogs.categories._table' : 'managers.views.blogs.categories.index';
+
+        return view($view)->with([
             'categories' => $categories,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -49,18 +51,6 @@ class CategoriesController extends Controller
 
         return view('managers.views.blogs.categories.create')->with([
             'availables' => $availables,
-        ]);
-
-    }
-
-    public function view($slack): View
-    {
-        abort_unless(auth()->user()->can('blogs.view'), 403);
-
-        $categorie = BlogCategorie::slack($slack);
-
-        return view('managers.views.blogs.categories.view')->with([
-            'categorie' => $categorie,
         ]);
 
     }

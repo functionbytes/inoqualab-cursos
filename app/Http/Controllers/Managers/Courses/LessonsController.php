@@ -51,7 +51,9 @@ class LessonsController extends Controller
 
         $lessons = $lessons->paginate(paginationNumber());
 
-        return view('managers.views.courses.lessons.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.lessons._table' : 'managers.views.courses.lessons.index';
+
+        return view($view)->with([
             'course' => $course,
             'types' => $types,
             'lessons' => $lessons,

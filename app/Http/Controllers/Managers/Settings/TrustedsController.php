@@ -31,7 +31,9 @@ class TrustedsController extends Controller
 
         $trusteds = $trusteds->paginate(paginationNumber());
 
-        return view('managers.views.settings.trusteds.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.trusteds._table' : 'managers.views.settings.trusteds.index';
+
+        return view($view)->with([
             'trusteds' => $trusteds,
             'available' => $available,
             'searchKey' => $searchKey,

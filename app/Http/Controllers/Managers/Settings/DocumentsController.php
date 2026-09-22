@@ -30,7 +30,9 @@ class DocumentsController extends Controller
 
         $documents = $documents->paginate(paginationNumber());
 
-        return view('managers.views.settings.documents.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.documents._table' : 'managers.views.settings.documents.index';
+
+        return view($view)->with([
             'documents' => $documents,
             'available' => $available,
             'searchKey' => $searchKey,

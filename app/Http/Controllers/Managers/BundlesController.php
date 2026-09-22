@@ -34,7 +34,9 @@ class BundlesController extends Controller
 
         $bundles = $bundles->paginate(paginationNumber());
 
-        return view('managers.views.settings.bundles.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.bundles._table' : 'managers.views.settings.bundles.index';
+
+        return view($view)->with([
             'bundles' => $bundles,
             'available' => $available,
             'searchKey' => $searchKey,

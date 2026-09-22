@@ -41,7 +41,7 @@ class MailerEndpointController extends Controller
             $query->inactive();
         }
 
-        $endpoints = $query->paginate(20);
+        $endpoints = $query->paginate(paginationNumber(20));
 
         $stats = [
             'total' => MailerEndpoint::count(),
@@ -52,7 +52,9 @@ class MailerEndpointController extends Controller
 
         $sources = ['api', 'internal', 'webhook'];
 
-        return view('managers.views.mailer.endpoints.index', compact('endpoints', 'stats', 'search', 'status', 'sources'));
+        $view = request()->ajax() ? 'managers.views.mailer.endpoints._table' : 'managers.views.mailer.endpoints.index';
+
+        return view($view, compact('endpoints', 'stats', 'search', 'status', 'sources'));
     }
 
     public function create(): View
@@ -156,7 +158,7 @@ class MailerEndpointController extends Controller
             $query->period($period);
         }
 
-        $logs = $query->paginate(30);
+        $logs = $query->paginate(paginationNumber(30));
 
         $stats = [
             'total' => $endpoint->logs()->count(),
@@ -165,7 +167,9 @@ class MailerEndpointController extends Controller
             'success_rate' => $endpoint->successRate(),
         ];
 
-        return view('managers.views.mailer.endpoints.logs', compact('endpoint', 'logs', 'stats', 'searchEmail', 'filterStatus', 'period'));
+        $view = $request->ajax() ? 'managers.views.mailer.endpoints._logs' : 'managers.views.mailer.endpoints.logs';
+
+        return view($view, compact('endpoint', 'logs', 'stats', 'searchEmail', 'filterStatus', 'period'));
     }
 
     public function regenerateToken(MailerEndpoint $endpoint): RedirectResponse
@@ -175,14 +179,6 @@ class MailerEndpointController extends Controller
         $endpoint->update(['api_token' => MailerEndpoint::generateToken()]);
 
         return back()->with('success', 'Token regenerado exitosamente.');
-    }
-
-    public function documentation(): View
-    {
-        $endpoints = MailerEndpoint::active()->with('template')->orderBy('name')->get();
-        $appUrl = rtrim(config('app.url'), '/');
-
-        return view('managers.views.mailer.endpoints.documentation', compact('endpoints', 'appUrl'));
     }
 
     // ─── API pública ──────────────────────────────────────────────────────────

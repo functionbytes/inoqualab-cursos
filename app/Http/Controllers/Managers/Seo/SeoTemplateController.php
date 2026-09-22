@@ -14,14 +14,16 @@ class SeoTemplateController extends Controller
 {
     public function index(): View
     {
-        $templates = SeoTemplate::query()->orderByDesc('priority')->orderBy('name')->paginate(20);
+        $templates = SeoTemplate::query()->orderByDesc('priority')->orderBy('name')->paginate(paginationNumber(20));
 
         $stats = [
             'total' => SeoTemplate::count(),
             'active' => SeoTemplate::active()->count(),
         ];
 
-        return view('managers.views.seo.templates.index', compact('templates', 'stats'));
+        $view = request()->ajax() ? 'managers.views.seo.templates._table' : 'managers.views.seo.templates.index';
+
+        return view($view, compact('templates', 'stats'));
     }
 
     public function create(): View

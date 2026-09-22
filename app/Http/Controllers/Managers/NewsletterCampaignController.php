@@ -33,7 +33,7 @@ class NewsletterCampaignController extends Controller
             }))
             ->when($status, fn ($q) => $q->where('status', $status))
             ->latest()
-            ->paginate(20)
+            ->paginate(paginationNumber(20))
             ->withQueryString();
 
         $hasSending = NewsletterCampaign::query()->where('status', 'sending')->exists();
@@ -44,7 +44,9 @@ class NewsletterCampaignController extends Controller
             ->pluck('count', 'status')
             ->toArray();
 
-        return view('managers.views.newsletter.campaigns.index', compact('campaigns', 'hasSending', 'stats', 'search', 'status'));
+        $view = request()->ajax() ? 'managers.views.newsletter.campaigns._table' : 'managers.views.newsletter.campaigns.index';
+
+        return view($view, compact('campaigns', 'hasSending', 'stats', 'search', 'status'));
     }
 
     public function create(): View

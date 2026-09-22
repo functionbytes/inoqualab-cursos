@@ -56,7 +56,9 @@ class OrdersController extends Controller
 
         $orders = $orders->paginate(paginationNumber());
 
-        return view('managers.views.orders.orders.index')->with([
+        $view = request()->ajax() ? 'managers.views.orders.orders._table' : 'managers.views.orders.orders.index';
+
+        return view($view)->with([
             'orders' => $orders,
             'conditions' => $conditions,
             'condition' => $condition,

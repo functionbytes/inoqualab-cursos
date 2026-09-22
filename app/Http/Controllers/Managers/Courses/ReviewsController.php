@@ -33,7 +33,9 @@ class ReviewsController extends Controller
 
         $reviews = $reviews->paginate(paginationNumber());
 
-        return view('managers.views.courses.reviews.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.reviews._table' : 'managers.views.courses.reviews.index';
+
+        return view($view)->with([
             'reviews' => $reviews,
             'searchKey' => $searchKey,
             'rating' => $rating,

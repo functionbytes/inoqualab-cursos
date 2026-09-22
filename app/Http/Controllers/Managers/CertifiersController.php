@@ -30,7 +30,9 @@ class CertifiersController extends Controller
 
         $certifiers = $certifiers->paginate(paginationNumber());
 
-        return view('managers.views.certifiers.index')->with([
+        $view = request()->ajax() ? 'managers.views.certifiers._table' : 'managers.views.certifiers.index';
+
+        return view($view)->with([
             'certifiers' => $certifiers,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -44,17 +46,6 @@ class CertifiersController extends Controller
 
         return view('managers.views.certifiers.create')->with([
             'availables' => $availables,
-        ]);
-
-    }
-
-    public function view($slack)
-    {
-
-        $certifier = Certifier::slack($slack);
-
-        return view('managers.views.certifiers.view')->with([
-            'certifier' => $certifier,
         ]);
 
     }

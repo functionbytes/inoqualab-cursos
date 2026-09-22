@@ -30,7 +30,9 @@ class FaqsController extends Controller
 
         $faqs = $faqs->paginate(paginationNumber());
 
-        return view('managers.views.settings.faqs.faqs.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.faqs.faqs._table' : 'managers.views.settings.faqs.faqs.index';
+
+        return view($view)->with([
             'faqs' => $faqs,
             'available' => $available,
             'searchKey' => $searchKey,

@@ -34,7 +34,9 @@ class TestimoniesController extends Controller
 
         $testimonies = $testimonies->paginate(paginationNumber());
 
-        return view('managers.views.settings.testimonies.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.testimonies._table' : 'managers.views.settings.testimonies.index';
+
+        return view($view)->with([
             'testimonies' => $testimonies,
             'available' => $available,
             'searchKey' => $searchKey,

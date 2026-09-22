@@ -31,7 +31,9 @@ class CategoriesController extends Controller
 
         $categories = $categories->paginate(paginationNumber());
 
-        return view('managers.views.courses.categories.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.categories._table' : 'managers.views.courses.categories.index';
+
+        return view($view)->with([
             'categories' => $categories,
             'available' => $available,
             'searchKey' => $searchKey,

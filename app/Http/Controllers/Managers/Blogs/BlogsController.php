@@ -37,7 +37,9 @@ class BlogsController extends Controller
 
         $blogs = $blogs->paginate(paginationNumber());
 
-        return view('managers.views.blogs.blogs.index')->with([
+        $view = request()->ajax() ? 'managers.views.blogs.blogs._table' : 'managers.views.blogs.blogs.index';
+
+        return view($view)->with([
             'blogs' => $blogs,
             'available' => $available,
             'searchKey' => $searchKey,

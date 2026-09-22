@@ -13,7 +13,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -47,7 +46,7 @@ class SeoMetaController extends Controller
             }))
             ->orderBy($sortBy, $sortDir);
 
-        $metas = $query->paginate(20)->withQueryString();
+        $metas = $query->paginate(paginationNumber(20))->withQueryString();
 
         $stats = SeoMeta::query()->selectRaw('
             COUNT(*) as total,
@@ -69,7 +68,9 @@ class SeoMetaController extends Controller
 
         $seoableTypes = SeoMeta::query()->select('seoable_type')->distinct()->pluck('seoable_type')->filter()->values()->toArray();
 
-        return view('managers.views.seo.metas.index', compact('metas', 'tab', 'stats', 'seoableTypes'));
+        $view = request()->ajax() ? 'managers.views.seo.metas._table' : 'managers.views.seo.metas.index';
+
+        return view($view, compact('metas', 'tab', 'stats', 'seoableTypes'));
     }
 
     public function edit(SeoMeta $seoMeta): View
@@ -376,163 +377,5 @@ class SeoMetaController extends Controller
 
         return redirect()->route('manager.seo.metas.index')
             ->with('success', "Importación JSON: {$imported} metas importados.");
-    }
-
-    // ── Phase 6: Keyword suggestions ─────────────────────────────────────────────
-
-    public function keywordSuggestions(Request $request): JsonResponse
-    {
-        $keyword = $request->validate(['q' => 'required|string|min:2|max:100'])['q'];
-
-        $related = SeoMeta::where(function ($q) use ($keyword) {
-            $q->where('title', 'like', "%{$keyword}%")
-                ->orWhere('target_keyword', 'like', "%{$keyword}%")
-                ->orWhere('keywords', 'like', "%{$keyword}%");
-        })
-            ->whereNotNull('gsc_clicks')
-            ->orderByDesc('gsc_clicks')
-            ->limit(10)
-            ->get(['title', 'target_keyword', 'keywords', 'gsc_clicks', 'gsc_position']);
-
-        $suggestions = collect();
-
-        foreach ($related as $meta) {
-            if ($meta->target_keyword && stripos($meta->target_keyword, $keyword) !== false) {
-                $suggestions->push([
-                    'keyword' => $meta->target_keyword,
-                    'source' => 'target_keyword',
-                    'clicks' => $meta->gsc_clicks,
-                    'position' => $meta->gsc_position,
-                ]);
-            }
-
-            if ($meta->keywords) {
-                foreach (explode(',', $meta->keywords) as $kw) {
-                    $kw = trim($kw);
-                    if (strlen($kw) > 2 && stripos($kw, $keyword) !== false) {
-                        $suggestions->push([
-                            'keyword' => $kw,
-                            'source' => 'keywords',
-                            'clicks' => $meta->gsc_clicks,
-                            'position' => $meta->gsc_position,
-                        ]);
-                    }
-                }
-            }
-        }
-
-        $variations = [
-            'cómo '.$keyword,
-            $keyword.' online',
-            'mejor '.$keyword,
-            $keyword.' precio',
-            'aprender '.$keyword,
-        ];
-
-        return response()->json([
-            'suggestions' => $suggestions->unique('keyword')->take(10)->values(),
-            'variations' => $variations,
-        ]);
-    }
-
-    // ── Phase 10: Hreflang y multiidioma ─────────────────────────────────────────
-
-    public function hreflangIndex(): View
-    {
-        $metas = SeoMeta::whereNotNull('locale')
-            ->where('locale', '!=', '')
-            ->orderBy('locale')
-            ->get(['id', 'title', 'canonical_url', 'locale', 'seoable_type', 'seoable_id']);
-
-        $grouped = $metas->groupBy('locale');
-
-        $conflicts = [];
-        $byPath = $metas->groupBy(fn ($m) => parse_url($m->canonical_url ?? '', PHP_URL_PATH));
-
-        foreach ($byPath as $path => $group) {
-            if ($group->count() > 1) {
-                $locales = $group->pluck('locale')->unique();
-                if ($locales->count() < $group->count()) {
-                    $conflicts[] = ['path' => $path, 'count' => $group->count()];
-                }
-            }
-        }
-
-        $withoutLocale = SeoMeta::whereNull('locale')->orWhere('locale', '')->count();
-
-        return view('managers.views.seo.metas.hreflang', compact('metas', 'grouped', 'conflicts', 'withoutLocale'));
-    }
-
-    public function translateMeta(Request $request, SeoMeta $seoMeta): JsonResponse
-    {
-        $validated = $request->validate([
-            'fields' => ['required', 'array'],
-            'fields.*' => ['string', 'in:title,description,og_title,og_description,keywords'],
-            'target_lang' => ['required', 'string', 'max:10'],
-        ]);
-
-        if (! class_exists('DeepL\Translator')) {
-            return response()->json(['error' => 'DeepL SDK no instalado. Ejecuta: composer require deeplcom/deepl-php'], 422);
-        }
-
-        $apiKey = config('services.deepl.key');
-        if (empty($apiKey)) {
-            return response()->json(['error' => 'DeepL API key no configurada. Establece DEEPL_API_KEY en .env'], 422);
-        }
-
-        $translatorClass = 'DeepL\Translator';
-        $translator = new $translatorClass($apiKey);
-        $results = [];
-
-        foreach ($validated['fields'] as $field) {
-            $originalText = $seoMeta->{$field} ?? '';
-            if (empty($originalText)) {
-                continue;
-            }
-
-            try {
-                $result = $translator->translateText($originalText, null, $validated['target_lang']);
-                $results[$field] = $result->text;
-            } catch (\Throwable $e) {
-                Log::error('SEO meta translation failed', ['error' => $e->getMessage()]);
-
-                return response()->json(['error' => 'Error al traducir. Por favor, inténtalo de nuevo.'], 422);
-            }
-        }
-
-        return response()->json([
-            'translations' => $results,
-            'target_lang' => $validated['target_lang'],
-            'message' => 'Traducción completada. Revisa y guarda los cambios.',
-        ]);
-    }
-
-    public function createLocale(Request $request, SeoMeta $seoMeta): RedirectResponse
-    {
-        $validated = $request->validate([
-            'locale' => ['required', 'string', 'max:10', 'regex:/^[a-z]{2}(-[A-Z]{2})?$/'],
-        ]);
-
-        $locale = $validated['locale'];
-
-        $existing = SeoMeta::where('seoable_type', $seoMeta->seoable_type)
-            ->where('seoable_id', $seoMeta->seoable_id)
-            ->where('locale', $locale)
-            ->first();
-
-        if ($existing) {
-            return redirect()->route('manager.seo.metas.edit', $existing)
-                ->with('info', 'Ya existe un meta para este idioma.');
-        }
-
-        $newMeta = SeoMeta::create([
-            'seoable_type' => $seoMeta->seoable_type,
-            'seoable_id' => $seoMeta->seoable_id,
-            'locale' => $locale,
-            'robots' => 'index,follow',
-        ]);
-
-        return redirect()->route('manager.seo.metas.edit', $newMeta)
-            ->with('success', 'Meta SEO creado para el idioma '.strtoupper($locale).'.');
     }
 }

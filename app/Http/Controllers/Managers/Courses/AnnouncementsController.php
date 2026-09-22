@@ -29,7 +29,9 @@ class AnnouncementsController extends Controller
 
         $announcements = $announcements->paginate(paginationNumber());
 
-        return view('managers.views.courses.announcements.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.announcements._table' : 'managers.views.courses.announcements.index';
+
+        return view($view)->with([
             'course' => $course,
             'announcements' => $announcements,
             'available' => $available,

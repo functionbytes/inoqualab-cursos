@@ -44,7 +44,9 @@ class InvoicesController extends Controller
 
         $invoices = $invoices->paginate(paginationNumber());
 
-        return view('managers.views.invoices.invoices.index')->with([
+        $view = request()->ajax() ? 'managers.views.invoices.invoices._table' : 'managers.views.invoices.invoices.index';
+
+        return view($view)->with([
             'invoices' => $invoices,
             'conditions' => $conditions,
             'condition' => $condition,

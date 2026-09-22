@@ -5,18 +5,12 @@ namespace App\Http\Controllers\Managers\Enterprises;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Enterprises\StoreEnterpriseRequest;
 use App\Http\Requests\Managers\Enterprises\UpdateEnterpriseRequest;
-use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
-use App\Services\InscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class EnterprisesController extends Controller
 {
-    public function __construct(
-        private readonly InscriptionService $inscriptionService
-    ) {}
-
     public function index(Request $request)
     {
 
@@ -35,7 +29,9 @@ class EnterprisesController extends Controller
 
         $enterprises = $enterprises->paginate(paginationNumber());
 
-        return view('managers.views.enterprises.enterprises.index')->with([
+        $view = request()->ajax() ? 'managers.views.enterprises.enterprises._table' : 'managers.views.enterprises.enterprises.index';
+
+        return view($view)->with([
             'enterprises' => $enterprises,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -171,41 +167,5 @@ class EnterprisesController extends Controller
             'enterprise' => $enterprise,
         ]);
 
-    }
-
-    public function inscriptions($slack)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $enterprise = Enterprise::slack($slack);
-        $users = $enterprise->users()->available()->get();
-        $courses = $enterprise->courses()->available()->get();
-        $users = $users->pluck('identification', 'identification');
-        $courses = $courses->pluck('title', 'id');
-
-        return view('managers.views.enterprises.enterprises.inscription')->with([
-            'enterprise' => $enterprise,
-            'users' => $users,
-            'courses' => $courses,
-        ]);
-
-    }
-
-    public function generate(Request $request)
-    {
-        abort_unless(auth()->user()->can('enterprises.update'), 403);
-
-        $enterprise = Enterprise::slack($request->enterprise);
-        $course = Course::id($request->course);
-
-        $identifications = array_filter(array_map('trim', explode(',', $request->users)));
-
-        $this->inscriptionService->enrollSimpleBulk($identifications, $course, $enterprise);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Se generado correctamente la empresa',
-            'slack' => $enterprise->slack,
-        ]);
     }
 }

@@ -20,7 +20,7 @@ class Seo404LogController extends Controller
                 fn ($q) => $q->where('has_redirect', $request->boolean('has_redirect'))
             )
             ->orderByHits()
-            ->paginate(30)
+            ->paginate(paginationNumber(30))
             ->withQueryString();
 
         $stats = [
@@ -29,7 +29,9 @@ class Seo404LogController extends Controller
             'resolved' => Seo404Log::where('has_redirect', true)->count(),
         ];
 
-        return view('managers.views.seo.logs.index', compact('logs', 'stats'));
+        $view = request()->ajax() ? 'managers.views.seo.logs._table' : 'managers.views.seo.logs.index';
+
+        return view($view, compact('logs', 'stats'));
     }
 
     public function createRedirect(Request $request): JsonResponse

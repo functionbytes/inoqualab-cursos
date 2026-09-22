@@ -22,7 +22,7 @@ class CartAbandonmentsController extends Controller
             ->when($status === 'reminded', fn ($q) => $q->whereNotNull('reminded_at')->whereNull('converted_at'))
             ->when($status === 'converted', fn ($q) => $q->whereNotNull('converted_at'))
             ->latest()
-            ->paginate(25)
+            ->paginate(paginationNumber(25))
             ->withQueryString();
 
         // Sin Cache::remember: a diferencia de newsletter (miles de filas,
@@ -46,7 +46,9 @@ class CartAbandonmentsController extends Controller
             'conversion_rate' => $row->total > 0 ? round($row->converted / $row->total * 100, 1) : 0.0,
         ];
 
-        return view('managers.views.cart-abandonments.index', compact(
+        $view = request()->ajax() ? 'managers.views.cart-abandonments._table' : 'managers.views.cart-abandonments.index';
+
+        return view($view, compact(
             'abandonments', 'stats', 'search', 'status'
         ));
     }

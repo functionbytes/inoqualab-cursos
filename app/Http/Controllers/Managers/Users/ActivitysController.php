@@ -62,7 +62,9 @@ class ActivitysController extends Controller
 
         $activities = $query->orderBy('created_at', 'desc')->paginate(paginationNumber());
 
-        return view('managers.views.users.activitys.index')->with([
+        $view = request()->ajax() ? 'managers.views.users.activitys._table' : 'managers.views.users.activitys.index';
+
+        return view($view)->with([
             'user' => $user,
             'activities' => $activities,
             'counts' => $counts,

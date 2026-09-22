@@ -61,7 +61,7 @@ class NewsletterController extends Controller
             ->when($status === 'inactive', fn ($q) => $q->where('is_active', false)->whereNull('confirmation_token'))
             ->when($status === 'pending', fn ($q) => $q->where('is_active', false)->whereNotNull('confirmation_token'))
             ->latest()
-            ->paginate(25)
+            ->paginate(paginationNumber(25))
             ->withQueryString();
 
         $stats = Cache::remember('newsletter:subscriber_stats', 300, function () {
@@ -87,7 +87,9 @@ class NewsletterController extends Controller
             ];
         });
 
-        return view('managers.views.newsletter.index', compact(
+        $view = request()->ajax() ? 'managers.views.newsletter._table' : 'managers.views.newsletter.index';
+
+        return view($view, compact(
             'subscribers', 'stats', 'search', 'source', 'status'
         ));
     }

@@ -42,7 +42,9 @@ class StaffController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
-        return view('managers.views.distributors.staffs.index')->with([
+        $view = request()->ajax() ? 'managers.views.distributors.staffs._table' : 'managers.views.distributors.staffs.index';
+
+        return view($view)->with([
             'users' => $users,
             'distributor' => $distributor,
             'available' => $available,
@@ -94,16 +96,6 @@ class StaffController extends Controller
         return view('managers.views.distributors.staffs.view')->with([
             'user' => $user,
         ]);
-    }
-
-    public function history($slack)
-    {
-        $user = User::slack($slack);
-
-        return view('managers.views.distributors.staffs.history')->with([
-            'user' => $user,
-        ]);
-
     }
 
     public function update(UpdateDistributorStaffRequest $request)

@@ -29,7 +29,9 @@ class DepartmentsController extends Controller
 
         $departments = $departments->paginate(paginationNumber());
 
-        return view('managers.views.settings.departments.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.departments._table' : 'managers.views.settings.departments.index';
+
+        return view($view)->with([
             'departments' => $departments,
             'available' => $available,
             'searchKey' => $searchKey,

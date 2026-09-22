@@ -17,9 +17,11 @@ class MailLogsController extends Controller
                 ->orWhere('recipient_email', $user->email);
         })
             ->orderByDesc('sent_at')
-            ->paginate(20);
+            ->paginate(paginationNumber(20));
 
-        return view('managers.views.users.emails.index', compact('user', 'logs'));
+        $view = request()->ajax() ? 'managers.views.users.emails._table' : 'managers.views.users.emails.index';
+
+        return view($view, compact('user', 'logs'));
     }
 
     public function show($id)

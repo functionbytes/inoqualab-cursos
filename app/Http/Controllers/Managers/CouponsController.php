@@ -32,7 +32,9 @@ class CouponsController extends Controller
 
         $coupons = $coupons->paginate(paginationNumber());
 
-        return view('managers.views.settings.coupons.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.coupons._table' : 'managers.views.settings.coupons.index';
+
+        return view($view)->with([
             'coupons' => $coupons,
             'available' => $available,
             'searchKey' => $searchKey,

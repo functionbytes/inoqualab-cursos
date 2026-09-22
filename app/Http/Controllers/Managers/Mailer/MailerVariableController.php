@@ -35,11 +35,13 @@ class MailerVariableController extends Controller
             $query->where('category', $category);
         }
 
-        $variables = $query->paginate(30);
+        $variables = $query->paginate(paginationNumber(30));
         $modules = MailerVariable::MODULES;
         $categories = MailerVariable::CATEGORIES;
 
-        return view('managers.views.mailer.variables.index', compact('variables', 'search', 'module', 'category', 'modules', 'categories'));
+        $view = request()->ajax() ? 'managers.views.mailer.variables._table' : 'managers.views.mailer.variables.index';
+
+        return view($view, compact('variables', 'search', 'module', 'category', 'modules', 'categories'));
     }
 
     public function create(): View
@@ -151,38 +153,5 @@ class MailerVariableController extends Controller
         };
 
         return response()->json(['success' => true, 'message' => $count.' variable(s) procesadas.']);
-    }
-
-    public function getByModule(Request $request): JsonResponse
-    {
-        $module = $request->query('module', 'core');
-        $variables = MailerVariable::enabled()
-            ->where(function ($q) use ($module) {
-                $q->where('module', $module)->orWhere('module', 'core');
-            })
-            ->orderBy('category')->orderBy('key')
-            ->get();
-
-        return response()->json(['success' => true, 'variables' => $variables]);
-    }
-
-    public function getGroupedByCategory(Request $request): JsonResponse
-    {
-        $module = $request->query('module', 'core');
-        $grouped = MailerVariable::enabled()
-            ->where(function ($q) use ($module) {
-                $q->where('module', $module)->orWhere('module', 'core');
-            })
-            ->get()
-            ->groupBy('category');
-
-        return response()->json(['success' => true, 'groups' => $grouped]);
-    }
-
-    public function getAvailableKeys(): JsonResponse
-    {
-        $keys = MailerVariable::enabled()->pluck('key');
-
-        return response()->json(['success' => true, 'keys' => $keys]);
     }
 }

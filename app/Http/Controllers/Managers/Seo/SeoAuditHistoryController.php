@@ -13,7 +13,7 @@ use Illuminate\View\View;
 
 class SeoAuditHistoryController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $search = request('search');
         $grade = request('grade');
@@ -23,7 +23,7 @@ class SeoAuditHistoryController extends Controller
             ->when($search, fn ($q) => $q->where('url', 'like', "%{$search}%"))
             ->when($grade, fn ($q) => $q->where('grade', $grade))
             ->latest('audited_at')
-            ->paginate(25)
+            ->paginate(paginationNumber(25))
             ->withQueryString();
 
         $row = SeoAuditLog::query()->selectRaw('
@@ -40,7 +40,9 @@ class SeoAuditHistoryController extends Controller
             'grade_f' => (int) $row->grade_f,
         ];
 
-        return view('managers.views.seo.audit.history', compact('logs', 'stats'));
+        $view = $request->ajax() ? 'managers.views.seo.audit._history' : 'managers.views.seo.audit.history';
+
+        return view($view, compact('logs', 'stats'));
     }
 
     public function forMeta(SeoMeta $seoMeta): View
@@ -48,19 +50,9 @@ class SeoAuditHistoryController extends Controller
         $logs = SeoAuditLog::query()
             ->where('seo_meta_id', $seoMeta->id)
             ->latest('audited_at')
-            ->paginate(20);
+            ->paginate(paginationNumber(20));
 
         return view('managers.views.seo.audit.meta-history', compact('logs', 'seoMeta'));
-    }
-
-    public function forMetaJson(SeoMeta $seoMeta): JsonResponse
-    {
-        $logs = SeoAuditLog::forMeta($seoMeta->id)
-            ->orderByDesc('audited_at')
-            ->limit(10)
-            ->get(['id', 'score', 'grade', 'issues', 'audited_at']);
-
-        return response()->json($logs);
     }
 
     public function bulkAction(Request $request): JsonResponse

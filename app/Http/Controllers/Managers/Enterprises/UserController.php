@@ -43,7 +43,9 @@ class UserController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
-        return view('managers.views.enterprises.users.index')->with([
+        $view = request()->ajax() ? 'managers.views.enterprises.users._table' : 'managers.views.enterprises.users.index';
+
+        return view($view)->with([
             'users' => $users,
             'enterprise' => $enterprise,
             'available' => $available,
@@ -267,18 +269,6 @@ class UserController extends Controller
 
         return view('managers.views.enterprises.users.income')->with([
             'courses' => $courses,
-            'enterprise' => $enterprise,
-        ]);
-
-    }
-
-    public function import($slack)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $enterprise = Enterprise::slack($slack);
-
-        return view('managers.views.enterprises.users.import')->with([
             'enterprise' => $enterprise,
         ]);
 

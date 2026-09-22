@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Spatie\Analytics\Facades\Analytics;
 use Spatie\Analytics\OrderBy;
@@ -18,8 +19,23 @@ class AnalyticsController extends Controller
     public function index(Request $request): View
     {
         $range = $request->input('range', 'last_7_days');
+        $configured = $this->isConfigured();
 
-        return view('managers.views.analytics.index', compact('range'));
+        return view('managers.views.analytics.index', compact('range', 'configured'));
+    }
+
+    /**
+     * El dashboard necesita las 3 cosas a la vez: el toggle habilitado, un
+     * Property ID cargado y el JSON de la cuenta de servicio subido (ver
+     * AnalyticsSettingsController::update()). Sin esto, cada widget del
+     * dashboard fallaba su propia llamada AJAX por separado y mostraba un
+     * mosaico de "Sin datos"/"Error al cargar" en vez de un estado claro.
+     */
+    private function isConfigured(): bool
+    {
+        return setting('google_analytics_enable') === 'true'
+            && filled(setting('google_analytics_property_id'))
+            && Storage::exists('analytics/service-account-credentials.json');
     }
 
     private function bootAnalytics(): void

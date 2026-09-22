@@ -51,7 +51,9 @@ class UsersController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
-        return view('managers.views.users.users.index')->with([
+        $view = request()->ajax() ? 'managers.views.users.users._table' : 'managers.views.users.users.index';
+
+        return view($view)->with([
             'users' => $users,
             'role' => $role,
             'searchKey' => $searchKey,
@@ -167,20 +169,6 @@ class UsersController extends Controller
             ['id' => 'accounting', 'title' => 'Contabilidad'],
             ['id' => 'support', 'title' => 'Soporte'],
         ])->pluck('title', 'id');
-    }
-
-    public function view($slack)
-    {
-        $user = User::slack($slack);
-        $this->guardNotSuperadmin($user);
-
-        $roles = $this->roleOptions();
-
-        return view('managers.views.users.users.view')->with([
-            'user' => $user,
-            'roles' => $roles,
-        ]);
-
     }
 
     public function edit($slack)
@@ -393,7 +381,9 @@ class UsersController extends Controller
         // La vista pagina ($orders->links()): debe ser un paginador, no la Collection de la relación.
         $orders = $user->orders()->latest()->paginate(paginationNumber());
 
-        return view('managers.views.users.users.orders')->with([
+        $view = $request->ajax() ? 'managers.views.users.users._orders' : 'managers.views.users.users.orders';
+
+        return view($view)->with([
             'orders' => $orders,
         ]);
 

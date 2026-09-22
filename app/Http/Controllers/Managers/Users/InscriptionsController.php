@@ -36,7 +36,9 @@ class InscriptionsController extends Controller
             ->latest()
             ->paginate(paginationNumber());
 
-        return view('managers.views.users.users.inscriptions.index')->with([
+        $view = request()->ajax() ? 'managers.views.users.users.inscriptions._table' : 'managers.views.users.users.inscriptions.index';
+
+        return view($view)->with([
             'inscriptions' => $allInscriptions,
         ]);
 

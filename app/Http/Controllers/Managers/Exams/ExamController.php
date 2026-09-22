@@ -38,7 +38,9 @@ class ExamController extends Controller
 
         $exams = $exams->paginate(paginationNumber());
 
-        return view('managers.views.exams.exams.index')->with([
+        $view = request()->ajax() ? 'managers.views.exams.exams._table' : 'managers.views.exams.exams.index';
+
+        return view($view)->with([
             'course' => $course,
             'exams' => $exams,
             'available' => $available,

@@ -62,7 +62,9 @@ class CoursesController extends Controller
             'website' => (int) $agg->website,
         ];
 
-        return view('managers.views.courses.courses.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.courses._table' : 'managers.views.courses.courses.index';
+
+        return view($view)->with([
             'courses' => $courses,
             'available' => $available,
             'website' => $website,

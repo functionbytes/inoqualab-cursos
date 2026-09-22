@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Mailer\StoreMailerComponentRequest;
 use App\Http\Requests\Managers\Mailer\UpdateMailerComponentRequest;
 use App\Models\Mailer\MailerLayout;
-use App\Services\Mailer\MailerTemplateRendererService;
 use App\Services\Mailer\MailerVariableService;
 use App\Traits\BuildsJsonResponses;
 use Illuminate\Http\JsonResponse;
@@ -35,9 +34,11 @@ class MailerComponentController extends Controller
             $query->where('type', $type);
         }
 
-        $components = $query->paginate(20);
+        $components = $query->paginate(paginationNumber(20));
 
-        return view('managers.views.mailer.components.index', compact('components', 'search', 'type'));
+        $view = $request->ajax() ? 'managers.views.mailer.components._table' : 'managers.views.mailer.components.index';
+
+        return view($view, compact('components', 'search', 'type'));
     }
 
     public function create(): View
@@ -101,30 +102,6 @@ class MailerComponentController extends Controller
             ->with('success', "Componente '{$name}' eliminado.");
     }
 
-    public function preview(string $uid)
-    {
-        $component = MailerLayout::where('uid', $uid)->firstOrFail();
-        $content = $component->content ?? '';
-
-        return response($content)->header('Content-Type', 'text/html');
-    }
-
-    public function previewAjax(Request $request, string $uid): JsonResponse
-    {
-        // findOrFail() fuera del try/catch, igual que duplicate() más abajo:
-        // si el uid no existe debe ser un 404 normal, no un 500.
-        $component = MailerLayout::where('uid', $uid)->firstOrFail();
-
-        try {
-            $content = $request->input('content', $component->content ?? '');
-            $html = MailerTemplateRendererService::replaceVariables($content, []);
-
-            return response()->json(['success' => true, 'html' => $html]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'html' => '<div class="text-danger p-3">Error al generar preview.</div>'], 500);
-        }
-    }
-
     public function duplicate(string $uid): RedirectResponse
     {
         abort_unless(auth()->user()->can('newsletters.create'), 403);
@@ -143,17 +120,6 @@ class MailerComponentController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Error al duplicar el componente.');
         }
-    }
-
-    public function toggleStatus(string $uid): RedirectResponse
-    {
-        $component = MailerLayout::where('uid', $uid)->firstOrFail();
-        $component->is_enabled = ! $component->is_enabled;
-        $component->save();
-
-        $status = $component->is_enabled ? 'habilitado' : 'deshabilitado';
-
-        return back()->with('success', "Componente '{$component->name}' {$status}.");
     }
 
     public function bulkAction(Request $request): JsonResponse

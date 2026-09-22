@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Managers\Enterprises;
 
-use App\Exports\Managers\CoursesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Enterprises\ImportCoursesRequest;
 use App\Imports\Managers\CoursesImport;
@@ -16,7 +15,6 @@ use App\Models\Quiz\QuizAnswer;
 use App\Models\User;
 use App\Services\InscriptionService;
 use App\Structure\Courses;
-use App\Structure\Users;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,7 +44,9 @@ class CourseController extends Controller
 
         $courses = $courses->paginate(paginationNumber());
 
-        return view('managers.views.enterprises.courses.index')->with([
+        $view = request()->ajax() ? 'managers.views.enterprises.courses._table' : 'managers.views.enterprises.courses.index';
+
+        return view($view)->with([
             'enterprise' => $enterprise,
             'courses' => $courses,
             'searchKey' => $searchKey,
@@ -185,7 +185,9 @@ class CourseController extends Controller
 
         $users = $users->paginate(paginationNumber());
 
-        return view('managers.views.enterprises.courses.view')->with([
+        $view = $request->ajax() ? 'managers.views.enterprises.courses._view' : 'managers.views.enterprises.courses.view';
+
+        return view($view)->with([
             'course' => $course,
             'culminate' => $culminate,
             'users' => $users,
@@ -343,16 +345,6 @@ class CourseController extends Controller
         return $validate;
     }
 
-    public static function createUsers($slack, $identification, $email)
-    {
-        $validate = new Users;
-        $validate->slack = $slack;
-        $validate->identification = $identification;
-        $validate->email = $email;
-
-        return $validate;
-    }
-
     public function insert($enterprise, $course)
     {
         abort_unless(auth()->user()->can('enterprises.view'), 403);
@@ -388,21 +380,6 @@ class CourseController extends Controller
             'user' => $user,
             'course' => $course,
             'order' => $order,
-            'inscription' => $inscription,
-        ]);
-    }
-
-    public function postponeUsers($slack)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $inscription = Inscription::slack($slack);
-        $user = $inscription->user;
-        $course = $inscription->course;
-
-        return view('managers.views.enterprises.courses.action')->with([
-            'user' => $user,
-            'course' => $course,
             'inscription' => $inscription,
         ]);
     }
@@ -451,52 +428,6 @@ class CourseController extends Controller
         $this->inscriptionService->enrollSimpleBulk($identifications, $course, $enterprise);
 
         return response()->json($enterprise->slack);
-    }
-
-    public function report($enterprise, $course)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $enterprise = Enterprise::slack($enterprise);
-        $course = Course::slack($course);
-
-        $modalities = collect([
-            ['id' => '0', 'title' => 'Todos'],
-            ['id' => '1', 'title' => 'Culminado'],
-            ['id' => '2', 'title' => 'Pendiente'],
-        ]);
-
-        $modalities = $modalities->pluck('title', 'id');
-
-        return view('managers.views.enterprises.courses.report')->with([
-            'modalities' => $modalities,
-            'enterprise' => $enterprise,
-            'course' => $course,
-        ]);
-    }
-
-    public function generate(Request $request)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $enterprise = $request->enterprise;
-        $course = $request->course;
-        $modalitie = $request->modalitie;
-
-        return Excel::download(new CoursesExport($course, $enterprise, $modalitie), 'REPORTE CURSO '.date('Y-m-d').'.xlsx');
-    }
-
-    public function import($enterprise, $course)
-    {
-        abort_unless(auth()->user()->can('enterprises.view'), 403);
-
-        $enterprise = Enterprise::slack($enterprise);
-        $course = Course::slack($course);
-
-        return view('managers.views.enterprises.courses.import')->with([
-            'enterprise' => $enterprise,
-            'course' => $course,
-        ]);
     }
 
     public function importation(ImportCoursesRequest $request)

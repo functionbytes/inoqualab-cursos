@@ -21,9 +21,11 @@ class ContactsController extends Controller
 
         if ($searchKey != null) {
             $contacts->when(! strpos($searchKey, '-'), function ($query) use ($searchKey) {
-                $query->where('contacts.firstname', 'like', '%'.$searchKey.'%')
-                    ->orWhere('contacts.lastname', 'like', '%'.$searchKey.'%')
-                    ->orWhere(DB::raw("CONCAT(contacts.firstname, ' ', contacts.lastname)"), 'like', '%'.$searchKey.'%');
+                $query->where(function ($q) use ($searchKey) {
+                    $q->where('contacts.firstname', 'like', '%'.$searchKey.'%')
+                        ->orWhere('contacts.lastname', 'like', '%'.$searchKey.'%')
+                        ->orWhere(DB::raw("CONCAT(contacts.firstname, ' ', contacts.lastname)"), 'like', '%'.$searchKey.'%');
+                });
             });
         }
 
@@ -33,7 +35,9 @@ class ContactsController extends Controller
 
         $contacts = $contacts->paginate(paginationNumber());
 
-        return view('managers.views.settings.contacts.index')->with([
+        $view = $request->ajax() ? 'managers.views.settings.contacts._table' : 'managers.views.settings.contacts.index';
+
+        return view($view)->with([
             'contacts' => $contacts,
             'reviewed' => $reviewed,
             'searchKey' => $searchKey,

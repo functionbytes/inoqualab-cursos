@@ -15,7 +15,7 @@ class SeoAlertsController extends Controller
     {
         $alerts = SeoAlert::query()
             ->orderByDesc('created_at')
-            ->paginate(30);
+            ->paginate(paginationNumber(30));
 
         $row = SeoAlert::unacknowledged()->selectRaw('
             COUNT(*) as unacknowledged,
@@ -31,7 +31,9 @@ class SeoAlertsController extends Controller
             'info' => (int) $row->info,
         ];
 
-        return view('managers.views.seo.alerts.index', compact('alerts', 'stats'));
+        $view = request()->ajax() ? 'managers.views.seo.alerts._table' : 'managers.views.seo.alerts.index';
+
+        return view($view, compact('alerts', 'stats'));
     }
 
     public function acknowledge(SeoAlert $seoAlert): RedirectResponse

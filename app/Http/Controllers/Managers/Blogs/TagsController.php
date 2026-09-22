@@ -33,7 +33,9 @@ class TagsController extends Controller
 
         $tags = $tags->paginate(paginationNumber());
 
-        return view('managers.views.blogs.tags.index')->with([
+        $view = request()->ajax() ? 'managers.views.blogs.tags._table' : 'managers.views.blogs.tags.index';
+
+        return view($view)->with([
             'tags' => $tags,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -48,18 +50,6 @@ class TagsController extends Controller
 
         return view('managers.views.blogs.tags.create')->with([
             'availables' => $availables,
-        ]);
-
-    }
-
-    public function view($slack): View
-    {
-        abort_unless(auth()->user()->can('blogs.view'), 403);
-
-        $tag = BlogTag::slack($slack);
-
-        return view('managers.views.blogs.tags.view')->with([
-            'tag' => $tag,
         ]);
 
     }

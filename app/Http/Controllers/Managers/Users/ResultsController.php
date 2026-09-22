@@ -47,7 +47,9 @@ class ResultsController extends Controller
 
         $certificates = $certificates->paginate(paginationNumber());
 
-        return view('managers.views.exams.results.index')->with([
+        $view = request()->ajax() ? 'managers.views.exams.results._table' : 'managers.views.exams.results.index';
+
+        return view($view)->with([
             'certificates' => $certificates,
             'searchKey' => $searchKey,
             'courses' => $courses,

@@ -37,10 +37,12 @@ class MailerTemplateController extends Controller
             $query->module($module);
         }
 
-        $templates = $query->paginate(20);
+        $templates = $query->paginate(paginationNumber(20));
         $modules = MailerTemplate::distinct('module')->pluck('module')->filter()->toArray();
 
-        return view('managers.views.mailer.templates.index', compact('templates', 'search', 'module', 'modules'));
+        $view = request()->ajax() ? 'managers.views.mailer.templates._table' : 'managers.views.mailer.templates.index';
+
+        return view($view, compact('templates', 'search', 'module', 'modules'));
     }
 
     public function create(Request $request): View
@@ -106,15 +108,18 @@ class MailerTemplateController extends Controller
                 'change_note' => $request->input('change_note'),
             ]);
 
-            // Trim versions to max allowed
+            // Trim versions to max allowed. `skip()` sin `take()` compila a un
+            // `OFFSET` sin `LIMIT`, sintaxis inválida en MySQL/MariaDB (rompía
+            // el guardado de CUALQUIER plantilla, siempre) — en cambio, se
+            // conservan los $maxVersions más recientes por `id` y se borra el resto.
             $maxVersions = config('mailer-module.retention.versions_per_template', 50);
-            $versionIds = MailerTemplateVersion::where('mailer_template_id', $template->id)
+            $idsToKeep = MailerTemplateVersion::where('mailer_template_id', $template->id)
                 ->latest()
-                ->skip($maxVersions)
+                ->take($maxVersions)
                 ->pluck('id');
-            if ($versionIds->isNotEmpty()) {
-                MailerTemplateVersion::whereIn('id', $versionIds)->delete();
-            }
+            MailerTemplateVersion::where('mailer_template_id', $template->id)
+                ->whereNotIn('id', $idsToKeep)
+                ->delete();
 
             $template->update([
                 'layout_id' => $validated['layout_id'] ?? null,
@@ -185,9 +190,11 @@ class MailerTemplateController extends Controller
         $versions = MailerTemplateVersion::where('mailer_template_id', $template->id)
             ->with('author:id,name,email')
             ->latest()
-            ->paginate(20);
+            ->paginate(paginationNumber(20));
 
-        return view('managers.views.mailer.templates.versions', compact('template', 'versions'));
+        $view = $request->ajax() ? 'managers.views.mailer.templates._versions' : 'managers.views.mailer.templates.versions';
+
+        return view($view, compact('template', 'versions'));
     }
 
     public function restoreVersion(Request $request, string $uid, MailerTemplateVersion $version): RedirectResponse
@@ -328,18 +335,5 @@ class MailerTemplateController extends Controller
             'success' => true,
             'variables' => MailerVariableService::getGroupedForModule($module),
         ]);
-    }
-
-    public function formatHtml(Request $request): JsonResponse
-    {
-        $request->validate(['html' => ['required', 'string']]);
-
-        try {
-            $formatted = MailerTemplateRendererService::beautifyHtml($request->html);
-
-            return response()->json(['success' => true, 'formatted' => $formatted]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error al formatear'], 500);
-        }
     }
 }

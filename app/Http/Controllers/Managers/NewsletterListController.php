@@ -19,7 +19,9 @@ class NewsletterListController extends Controller
             ->orderBy('name')
             ->paginate(paginationNumber());
 
-        return view('managers.views.newsletter.lists.index', compact('lists'));
+        $view = request()->ajax() ? 'managers.views.newsletter.lists._table' : 'managers.views.newsletter.lists.index';
+
+        return view($view, compact('lists'));
     }
 
     public function create(): View
@@ -70,13 +72,15 @@ class NewsletterListController extends Controller
         return response()->json(['success' => true, 'message' => 'Lista actualizada correctamente.']);
     }
 
-    public function show(NewsletterList $list): View
+    public function show(Request $request, NewsletterList $list): View
     {
         $members = $list->subscribers()
             ->orderByPivot('created_at', 'desc')
             ->paginate(paginationNumber());
 
-        return view('managers.views.newsletter.lists.members', compact('list', 'members'));
+        $view = $request->ajax() ? 'managers.views.newsletter.lists._members' : 'managers.views.newsletter.lists.members';
+
+        return view($view, compact('list', 'members'));
     }
 
     public function addMember(Request $request, NewsletterList $list): JsonResponse

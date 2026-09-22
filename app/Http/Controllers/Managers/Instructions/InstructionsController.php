@@ -31,7 +31,9 @@ class InstructionsController extends Controller
 
         $instructions = $instructions->paginate(paginationNumber());
 
-        return view('managers.views.settings.instructions.instructions.index')->with([
+        $view = request()->ajax() ? 'managers.views.settings.instructions.instructions._table' : 'managers.views.settings.instructions.instructions.index';
+
+        return view($view)->with([
             'instructions' => $instructions,
             'available' => $available,
             'searchKey' => $searchKey,

@@ -29,7 +29,9 @@ class DistributorsController extends Controller
 
         $distributors = $distributors->paginate(paginationNumber());
 
-        return view('managers.views.distributors.distributors.index')->with([
+        $view = request()->ajax() ? 'managers.views.distributors.distributors._table' : 'managers.views.distributors.distributors.index';
+
+        return view($view)->with([
             'distributors' => $distributors,
             'available' => $available,
             'searchKey' => $searchKey,

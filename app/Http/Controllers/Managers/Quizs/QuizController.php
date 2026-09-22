@@ -44,7 +44,9 @@ class QuizController extends Controller
 
         $lessonOptions = $course->lessons()->get()->prepend('', '')->pluck('title', 'id');
 
-        return view('managers.views.quizs.quizs.index')->with([
+        $view = request()->ajax() ? 'managers.views.quizs.quizs._table' : 'managers.views.quizs.quizs.index';
+
+        return view($view)->with([
             'course' => $course,
             'quizs' => $quizs,
             'lessons' => $lessons,

@@ -35,7 +35,9 @@ class RolesController extends Controller
             ->orderBy('name')
             ->paginate(paginationNumber());
 
-        return view('managers.views.settings.roles.index', [
+        $view = request()->ajax() ? 'managers.views.settings.roles._table' : 'managers.views.settings.roles.index';
+
+        return view($view, [
             'roles' => $roles,
             'searchKey' => $searchKey,
             'protectedRoles' => self::PROTECTED_ROLES,

@@ -36,7 +36,9 @@ class TopicController extends Controller
 
         $questions = $questions->paginate(paginationNumber());
 
-        return view('managers.views.exams.topics.index')->with([
+        $view = request()->ajax() ? 'managers.views.exams.topics._table' : 'managers.views.exams.topics.index';
+
+        return view($view)->with([
             'topic' => $topic,
             'questions' => $questions,
             'available' => $available,

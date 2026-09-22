@@ -61,7 +61,9 @@ class SeoPageUrlsController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('managers.views.seo.page-urls.index', compact(
+        $view = request()->ajax() ? 'managers.views.seo.page-urls._table' : 'managers.views.seo.page-urls.index';
+
+        return view($view, compact(
             'pages', 'totalPages', 'withSeo', 'withoutSeo', 'search', 'typeFilter', 'seoStatus'
         ));
     }
@@ -77,7 +79,7 @@ class SeoPageUrlsController extends Controller
             ->latest()
             ->limit(self::LIMIT_PER_TYPE)
             ->get()
-            ->map(fn (Course $course) => $this->mapItem('Curso', $course->title, $course->url, $course->seoMeta));
+            ->map(fn (Course $course) => $this->mapItem('Curso', $course->title, $course->url, $course->seoMeta, $course->id, Course::class));
     }
 
     private function collectBlogs(?string $search): Collection
@@ -91,7 +93,7 @@ class SeoPageUrlsController extends Controller
             ->latest()
             ->limit(self::LIMIT_PER_TYPE)
             ->get()
-            ->map(fn (Blog $blog) => $this->mapItem('Blog', $blog->title, $blog->url, $blog->seoMeta));
+            ->map(fn (Blog $blog) => $this->mapItem('Blog', $blog->title, $blog->url, $blog->seoMeta, $blog->id, Blog::class));
     }
 
     private function collectBundles(?string $search): Collection
@@ -105,10 +107,10 @@ class SeoPageUrlsController extends Controller
             ->latest()
             ->limit(self::LIMIT_PER_TYPE)
             ->get()
-            ->map(fn (Bundle $bundle) => $this->mapItem('Bundle', $bundle->title, $bundle->url, $bundle->seoMeta));
+            ->map(fn (Bundle $bundle) => $this->mapItem('Bundle', $bundle->title, $bundle->url, $bundle->seoMeta, $bundle->id, Bundle::class));
     }
 
-    private function mapItem(string $type, ?string $title, ?string $url, $seoMeta): array
+    private function mapItem(string $type, ?string $title, ?string $url, $seoMeta, int $id, string $modelClass): array
     {
         return [
             'type' => $type,
@@ -118,6 +120,8 @@ class SeoPageUrlsController extends Controller
             'seo_id' => $seoMeta?->id,
             'seo_robots' => $seoMeta?->robots,
             'seo_score' => $seoMeta?->seo_score,
+            'id' => $id,
+            'model_class' => $modelClass,
         ];
     }
 }

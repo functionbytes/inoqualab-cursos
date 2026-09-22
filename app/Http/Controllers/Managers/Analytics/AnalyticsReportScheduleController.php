@@ -43,7 +43,7 @@ class AnalyticsReportScheduleController extends Controller
             $query->where('is_active', $status === '1');
         }
 
-        $schedules = $query->paginate(10)->withQueryString();
+        $schedules = $query->paginate(paginationNumber(10))->withQueryString();
 
         $statsRaw = AnalyticsReportSchedule::query()
             ->selectRaw('COUNT(*) as total')
@@ -59,8 +59,9 @@ class AnalyticsReportScheduleController extends Controller
             'pending' => (int) $statsRaw->pending,
         ];
 
-        return view(
-            'managers.views.settings.analytics.schedules.index',
+        $view = request()->ajax() ? 'managers.views.settings.analytics.schedules._table' : 'managers.views.settings.analytics.schedules.index';
+
+        return view($view,
             compact('schedules', 'stats', 'search', 'frequency', 'format', 'status')
         );
     }

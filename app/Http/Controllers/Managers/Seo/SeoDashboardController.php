@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Seo\Seo404Log;
 use App\Models\Seo\SeoMeta;
 use App\Models\Seo\SeoRedirect;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,7 +108,7 @@ class SeoDashboardController extends Controller
                     ->orWhere('canonical_url', 'like', "%{$search}%");
             }))
             ->orderByDesc('gsc_clicks')
-            ->paginate(20)
+            ->paginate(paginationNumber(20))
             ->withQueryString();
 
         $gscStats = SeoMeta::query()
@@ -124,44 +123,9 @@ class SeoDashboardController extends Controller
 
         $lastUpdated = SeoMeta::whereNotNull('gsc_updated_at')->max('gsc_updated_at');
 
-        return view('managers.views.seo.dashboard.analytics', compact('pages', 'gscStats', 'lastUpdated'));
-    }
+        $view = $request->ajax() ? 'managers.views.seo.dashboard._analytics' : 'managers.views.seo.dashboard.analytics';
 
-    public function verification(): View
-    {
-        $settings = [
-            'seo_google_verification' => setting('seo_google_verification'),
-            'seo_bing_verification' => setting('seo_bing_verification'),
-            'seo_pinterest_verification' => setting('seo_pinterest_verification'),
-            'seo_baidu_verification' => setting('seo_baidu_verification'),
-            'seo_yandex_verification' => setting('seo_yandex_verification'),
-        ];
-
-        return view('managers.views.seo.dashboard.verification', compact('settings'));
-    }
-
-    public function verificationUpdate(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'seo_google_verification' => ['nullable', 'string', 'max:100'],
-            'seo_bing_verification' => ['nullable', 'string', 'max:100'],
-            'seo_pinterest_verification' => ['nullable', 'string', 'max:100'],
-            'seo_baidu_verification' => ['nullable', 'string', 'max:100'],
-            'seo_yandex_verification' => ['nullable', 'string', 'max:100'],
-        ]);
-
-        updateSettings([
-            'seo_google_verification' => $validated['seo_google_verification'] ?? '',
-            'seo_bing_verification' => $validated['seo_bing_verification'] ?? '',
-            'seo_pinterest_verification' => $validated['seo_pinterest_verification'] ?? '',
-            'seo_baidu_verification' => $validated['seo_baidu_verification'] ?? '',
-            'seo_yandex_verification' => $validated['seo_yandex_verification'] ?? '',
-        ]);
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Códigos de verificación guardados correctamente.',
-        ]);
+        return view($view, compact('pages', 'gscStats', 'lastUpdated'));
     }
 
     public function showSearchConsoleImport(): View

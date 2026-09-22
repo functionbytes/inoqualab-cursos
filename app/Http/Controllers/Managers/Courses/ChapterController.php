@@ -33,7 +33,9 @@ class ChapterController extends Controller
 
         $chapters = $chapters->paginate(paginationNumber());
 
-        return view('managers.views.courses.chapters.index')->with([
+        $view = request()->ajax() ? 'managers.views.courses.chapters._table' : 'managers.views.courses.chapters.index';
+
+        return view($view)->with([
             'course' => $course,
             'chapters' => $chapters,
             'available' => $available,
