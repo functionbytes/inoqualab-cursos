@@ -55,17 +55,6 @@ class InvoicesController extends Controller
         ]);
     }
 
-    public function print($slack)
-    {
-
-        $invoice = Invoice::slack($slack);
-
-        return view('accountings.views.invoices.invoices.print')->with([
-            'invoice' => $invoice,
-        ]);
-
-    }
-
     public function view($slack)
     {
         $invoice = Invoice::slack($slack);
