@@ -1,5 +1,24 @@
 @extends('layouts.managers')
 
+
+@php ob_start(); @endphp
+Visualizar
+                                @if ($user->role == 'manager')
+                                    administrador
+                                @elseif($user->role == 'customer')
+                                    cliente
+                                @elseif($user->role == 'enterprise')
+                                    empresa
+                                @elseif($user->role == 'distributor')
+                                    distribuidor
+                                @elseif($user->role == 'accounting')
+                                    contabilidad
+                                @endif
+                            @php $__pageTitle = trim(preg_replace('/\s+/', ' ', ob_get_clean())); @endphp
+
+@section('page_header')
+    @include('supports.includes.card', ['title' => $__pageTitle])
+@endsection
 @section('content')
 
     <div class="row">

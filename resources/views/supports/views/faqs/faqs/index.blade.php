@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.faqs.create') }}" class="btn btn-primary">
+                            Nueva pregunta
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Preguntas frecuentes',
+        'description' => 'Gestiona las preguntas frecuentes del portal',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list" id="faqs-list"
@@ -8,19 +21,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Preguntas frecuentes</h5>
-                        <p class="mb-0 text-muted">Gestiona las preguntas frecuentes del portal</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.faqs.create') }}" class="btn btn-primary">
-                            Nueva pregunta
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

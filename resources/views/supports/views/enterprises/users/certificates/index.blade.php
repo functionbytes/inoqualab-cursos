@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.enterprises.users.certificate.broad', $user->slack) }}" class="btn btn-primary" title="Certificado global">
+                                <i class="fa-solid fa-certificate"></i>
+                            </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Certificados',
+        'description' => 'Certificados de ' . $user->firstname . ' ' . $user->lastname,
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list">
@@ -7,21 +20,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Certificados</h5>
-                        <p class="mb-0 text-muted">Certificados de {{ $user->firstname }} {{ $user->lastname }}</p>
-                    </div>
-                    @if(count($certificates) > 1)
-                        <div class="ms-auto">
-                            <a href="{{ route('support.enterprises.users.certificate.broad', $user->slack) }}" class="btn btn-primary" title="Certificado global">
-                                <i class="fa-solid fa-certificate"></i>
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

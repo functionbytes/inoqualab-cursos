@@ -1,5 +1,12 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('supports.includes.card', [
+        'title' => 'Correos entrantes',
+        'description' => 'Correos interceptados por IMAP en espera de convertirse en órdenes',
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list" id="mails-list"
@@ -9,12 +16,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div>
-                    <h5 class="mb-1 fw-bold">Correos entrantes</h5>
-                    <p class="mb-0 text-muted">Correos interceptados por IMAP en espera de convertirse en órdenes</p>
-                </div>
-            </div>
+            
 
             {{-- Stats / filtro por estado --}}
             <div class="card-body border-bottom">

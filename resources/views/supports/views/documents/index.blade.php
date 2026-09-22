@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.documents.create') }}" class="btn btn-primary">
+                            Nuevo documento
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Documentos',
+        'description' => 'Gestiona los documentos y archivos del portal',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list" id="documents-list"
@@ -8,19 +21,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Documentos</h5>
-                        <p class="mb-0 text-muted">Gestiona los documentos y archivos del portal</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.documents.create') }}" class="btn btn-primary">
-                            Nuevo documento
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

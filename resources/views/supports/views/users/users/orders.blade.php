@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('supports.includes.card', ['title' => 'Ordenes - ' . $user->firstname . ' ' . $user->lastname])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list"
          data-bulk-url="{{ route('support.users.orders.bulk-action') }}"

@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.distributors.invoices.report') }}" class="btn btn-primary">
+                            Reporte
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Facturación de ' . $distributor->title,
+        'description' => 'Consulta las facturas emitidas a este distribuidor',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list"
@@ -8,19 +21,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Facturación de {{ $distributor->title }}</h5>
-                        <p class="mb-0 text-muted">Consulta las facturas emitidas a este distribuidor</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.distributors.invoices.report') }}" class="btn btn-primary">
-                            Reporte
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">
@@ -124,12 +125,12 @@
                                         </td>
                                         <td>{{ $invoice->distributor->title ?? 'N/D' }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-light-{{ $invoice->condition->slug }} text-primary rounded-3 py-2 fw-semibold">
+                                            <span class="badge {{ $invoice->condition->badge_class }} rounded-3 py-2 fw-semibold">
                                                 {{ $invoice->condition->title }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-light-{{ $invoice->method->slug }} text-primary rounded-3 py-2 fw-semibold">
+                                            <span class="badge bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold">
                                                 {{ $invoice->method->title }}
                                             </span>
                                         </td>

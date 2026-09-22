@@ -1,5 +1,12 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('supports.includes.card', [
+        'title' => 'Contactos',
+        'description' => 'Solicitudes recibidas desde el formulario de contacto',
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list" id="contacts-list"
@@ -8,14 +15,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Contactos</h5>
-                        <p class="mb-0 text-muted">Solicitudes recibidas desde el formulario de contacto</p>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

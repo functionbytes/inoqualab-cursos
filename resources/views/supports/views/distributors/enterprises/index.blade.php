@@ -1,23 +1,8 @@
 @extends('layouts.managers')
 
-@section('content')
-
-    <div class="widget-content searchable-container list"
-         data-flash-success="{{ session('success') }}"
-         data-bulk-url="{{ route('support.distributors.enterprises.bulk-action') }}"
-         data-bulk-entity-label="empresa(s)">
-
-        <div class="card">
-
-            {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Empresas de {{ $distributor->title }}</h5>
-                        <p class="mb-0 text-muted">Gestiona las empresas asignadas a este distribuidor</p>
-                    </div>
-                    <div class="ms-auto d-flex gap-2">
-                        <a href="{{ route('support.distributors.enterprises.assignments', $distributor->slack) }}"
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.distributors.enterprises.assignments', $distributor->slack) }}"
                            class="btn btn-outline-secondary" title="Reasignar empresas">
                             <i class="fa-duotone fa-solid fa-right-left"></i>
                         </a>
@@ -28,9 +13,25 @@
                         <a href="{{ route('support.distributors.enterprises.create', $distributor->slack) }}" class="btn btn-primary">
                             Nueva empresa
                         </a>
-                    </div>
-                </div>
-            </div>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Empresas de ' . $distributor->title,
+        'description' => 'Gestiona las empresas asignadas a este distribuidor',
+        'actions' => $headerActions,
+    ])
+@endsection
+
+@section('content')
+
+    <div class="widget-content searchable-container list"
+         data-flash-success="{{ session('success') }}"
+         data-bulk-url="{{ route('support.distributors.enterprises.bulk-action') }}"
+         data-bulk-entity-label="empresa(s)">
+
+        <div class="card">
+
+            {{-- Header --}}
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

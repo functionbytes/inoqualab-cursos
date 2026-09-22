@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('supports.includes.card', ['title' => 'Posponer fecha - ' . $course->title])
+@endsection
+
+@section('content')
 
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">

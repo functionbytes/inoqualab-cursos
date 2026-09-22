@@ -1,5 +1,12 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('supports.includes.card', [
+        'title' => 'Cursos inscritos' . (isset($user) ? ' - '.$user->firstname.' '.$user->lastname : ''),
+        'description' => 'Cursos en los que este usuario está inscrito',
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list"
@@ -9,12 +16,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div>
-                    <h5 class="mb-1 fw-bold">Cursos inscritos{{ isset($user) ? ' - '.$user->firstname.' '.$user->lastname : '' }}</h5>
-                    <p class="mb-0 text-muted">Cursos en los que este usuario está inscrito</p>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

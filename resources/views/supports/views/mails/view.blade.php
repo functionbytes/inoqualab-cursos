@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('supports.includes.card', ['title' => 'Revisar correo entrante'])
+@endsection
+
+@section('content')
 
     @if($mail->status === 'failed' && $mail->error_log)
         <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">

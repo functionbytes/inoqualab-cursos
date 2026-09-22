@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.distributors.create') }}" class="btn btn-primary">
+                            Nuevo distribuidor
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Distribuidores',
+        'description' => 'Gestiona los distribuidores registrados en la plataforma',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list"
@@ -10,19 +23,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Distribuidores</h5>
-                        <p class="mb-0 text-muted">Gestiona los distribuidores registrados en la plataforma</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.distributors.create') }}" class="btn btn-primary">
-                            Nuevo distribuidor
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

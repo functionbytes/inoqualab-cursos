@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.notifications.markasread') }}" class="btn btn-primary" id="btn-mark-all">
+                            Marcar todas como leídas
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Notificaciones',
+        'description' => 'Avisos y eventos recientes de tu cuenta',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list">
@@ -7,19 +20,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Notificaciones</h5>
-                        <p class="mb-0 text-muted">Avisos y eventos recientes de tu cuenta</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.notifications.markasread') }}" class="btn btn-primary" id="btn-mark-all">
-                            Marcar todas como leídas
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

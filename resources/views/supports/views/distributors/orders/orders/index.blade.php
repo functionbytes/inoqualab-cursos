@@ -1,5 +1,21 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.distributors.orders.resumen', $distributor->slack) }}" class="btn btn-outline-secondary">
+                            Resumen
+                        </a>
+                        <a href="{{ route('support.distributors.orders.reports', $distributor->slack) }}" class="btn btn-primary">
+                            Reporte
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Ordenes de ' . $distributor->title,
+        'description' => 'Gestiona y consulta las órdenes registradas para este distribuidor',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list"
@@ -8,22 +24,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Ordenes de {{ $distributor->title }}</h5>
-                        <p class="mb-0 text-muted">Gestiona y consulta las órdenes registradas para este distribuidor</p>
-                    </div>
-                    <div class="ms-auto d-flex gap-2">
-                        <a href="{{ route('support.distributors.orders.resumen', $distributor->slack) }}" class="btn btn-outline-secondary">
-                            Resumen
-                        </a>
-                        <a href="{{ route('support.distributors.orders.reports', $distributor->slack) }}" class="btn btn-primary">
-                            Reporte
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">
@@ -133,7 +134,7 @@
                                         <td>{{ Str::upper(($order->user->firstname ?? 'N/D').' '.($order->user->lastname ?? '')) }}</td>
                                         <td>{{ Str::upper($order->activity->enterprise->title ?? 'N/D') }}</td>
                                         <td class="text-center">
-                                            <span class="badge bg-light-{{ $order->condition->slug }} text-primary rounded-3 py-2 fw-semibold">
+                                            <span class="badge {{ $order->condition->badge_class }} rounded-3 py-2 fw-semibold">
                                                 {{ $order->condition->title }}
                                             </span>
                                         </td>

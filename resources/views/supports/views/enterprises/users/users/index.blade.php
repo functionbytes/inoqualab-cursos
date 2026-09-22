@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.enterprises.users.create', $enterprise->slack) }}" class="btn btn-primary">
+                            Nuevo usuario
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Usuarios',
+        'description' => 'Usuarios de ' . Str::words(Str::upper(Str::lower($enterprise->title)), 8, '...'),
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list">
@@ -7,19 +20,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Usuarios</h5>
-                        <p class="mb-0 text-muted">Usuarios de {{ Str::words(Str::upper(Str::lower($enterprise->title)), 8, '...') }}</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.enterprises.users.create', $enterprise->slack) }}" class="btn btn-primary">
-                            Nuevo usuario
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

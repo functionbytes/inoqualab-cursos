@@ -1,5 +1,18 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('support.enterprises.create') }}" class="btn btn-primary">
+                            Nueva empresa
+                        </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('supports.includes.card', [
+        'title' => 'Empresas',
+        'description' => 'Gestiona las empresas registradas en la plataforma',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list">
@@ -7,19 +20,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Empresas</h5>
-                        <p class="mb-0 text-muted">Gestiona las empresas registradas en la plataforma</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('support.enterprises.create') }}" class="btn btn-primary">
-                            Nueva empresa
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">

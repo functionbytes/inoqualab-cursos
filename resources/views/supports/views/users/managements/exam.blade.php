@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('supports.includes.card', ['title' => 'Examen final - '.$course->title])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
 
