@@ -13,3 +13,30 @@
 .bulk-toolbar-float {
     z-index: 1050;
 }
+
+/* Pestañas Todas/Indexables/No indexables/Sin optimizar: estilo underline
+   (como el monitor de colas), no el "pill" con fondo solido que trae
+   .nav-tabs .nav-link.active por defecto del tema. */
+#seo-meta-tab.nav-tabs {
+    border-bottom: 1px solid #e5e7eb;
+    gap: 4px;
+}
+
+#seo-meta-tab .nav-link {
+    background-color: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    color: #64748b !important;
+}
+
+#seo-meta-tab .nav-link:hover,
+#seo-meta-tab .nav-link:focus {
+    color: #334155 !important;
+}
+
+#seo-meta-tab .nav-link.active {
+    color: #008bce !important;
+    border-bottom-color: #008bce !important;
+    font-weight: 600;
+}
