@@ -8,9 +8,15 @@ $(function () {
     });
 
     // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+    function initCartAbandonmentsTable() {
+        BulkActions.init({
         url: config.routes.bulkAction,
         entityLabel: 'registro(s)',
     });
+    }
+
+    initCartAbandonmentsTable();
+
+    AjaxTable.init({ onLoaded: initCartAbandonmentsTable });
 
 });

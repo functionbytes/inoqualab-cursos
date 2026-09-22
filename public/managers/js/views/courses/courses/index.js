@@ -7,18 +7,21 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filterWebsite').val($('#modalWebsite').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initCoursesCoursesTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available', filterWebsite: 'popover_Website' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: config.routes.bulkAction,
         entityLabel: 'curso(s)',
     });
+    }
+
+    initCoursesCoursesTable();
+
+    AjaxTable.init({ onLoaded: initCoursesCoursesTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

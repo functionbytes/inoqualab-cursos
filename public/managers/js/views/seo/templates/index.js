@@ -83,10 +83,16 @@ $(function () {
     });
 
     // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+    function initSeoTemplatesTable() {
+        BulkActions.init({
         url: $('#bulk-config').data('bulk-url'),
         entityLabel: 'plantilla(s)',
     });
+    }
+
+    initSeoTemplatesTable();
+
+    AjaxTable.init({ onLoaded: initSeoTemplatesTable });
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

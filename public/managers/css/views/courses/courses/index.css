@@ -1,3 +1,11 @@
 .courses-col-checkbox {
     width: 40px;
 }
+
+/* Más aire entre columnas (Público/Estado/Actualización/Acciones quedaban
+   muy pegadas entre sí con el padding por defecto de Bootstrap). */
+#courses-index .table > :not(caption) > * > th,
+#courses-index .table > :not(caption) > * > td {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+}

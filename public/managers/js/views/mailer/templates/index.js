@@ -1,10 +1,16 @@
 $(document).ready(function () {
     var $bulkConfig = $('#bulk-config');
 
-    BulkActions.init({
+    function initMailerTemplatesTable() {
+        BulkActions.init({
         url: $bulkConfig.data('bulk-url'),
         entityLabel: 'plantilla(s)',
     });
+    }
+
+    initMailerTemplatesTable();
+
+    AjaxTable.init({ onLoaded: initMailerTemplatesTable });
 
     // select2 sobre el <select> del modal compartido; requiere dropdownParent
     // porque el select vive oculto dentro de #bulk-modal hasta que se abre.

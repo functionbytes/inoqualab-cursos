@@ -1,0 +1,76 @@
+/* managers.includes.pagination-footer — contador + selector de items por
+   pagina + paginador. Layout propio (no confia en las utilities de wrap de
+   Bootstrap a secas) para que el contador+selector y el paginador se
+   envuelvan como bloques completos, sin romperse entre si en pantallas
+   angostas o cuando el paginador tiene muchas paginas. */
+
+.pagination-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+}
+
+.pagination-footer-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.pagination-footer-count {
+    color: #6b7280;
+    font-size: 13.5px;
+    white-space: nowrap;
+}
+
+.pagination-footer-per-page {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-footer-per-page label {
+    color: #9ca3af;
+    font-size: 12.5px;
+    white-space: nowrap;
+}
+
+.pagination-footer-per-page select {
+    width: auto;
+    padding: 4px 28px 4px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #374151;
+    background-color: #fff;
+}
+
+.pagination-footer-per-page select:focus {
+    border-color: #008bce;
+    box-shadow: 0 0 0 2px rgba(0, 139, 206, .12);
+    outline: none;
+}
+
+.pagination-footer .pagination {
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+@media (max-width: 576px) {
+    .pagination-footer {
+        justify-content: center;
+        text-align: center;
+    }
+
+    .pagination-footer-info {
+        justify-content: center;
+    }
+
+    .pagination-footer .pagination {
+        justify-content: center;
+    }
+}

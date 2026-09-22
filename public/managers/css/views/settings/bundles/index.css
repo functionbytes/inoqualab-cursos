@@ -6,8 +6,3 @@
     object-fit: cover;
     flex-shrink: 0;
 }
-
-.bundles-thumb-placeholder {
-    width: 38px;
-    height: 38px;
-}

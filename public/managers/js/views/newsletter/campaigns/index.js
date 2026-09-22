@@ -1,20 +1,20 @@
 (function () {
     var $page = $('#campaigns-page');
 
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('#modalStatus').select2({ allowClear: false, width: '100%', dropdownParent: $('#filters-modal') });
-    }
-
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initNewsletterCampaignsTable() {
+        FilterToolbar.init({
+        fields: { filterStatus: 'popover_Status' },
     });
-
-    BulkActions.init({
+        BulkActions.init({
         url: $page.data('bulk-url'),
         entityLabel: 'campaña(s)',
     });
+    }
+
+    initNewsletterCampaignsTable();
+
+    AjaxTable.init({ onLoaded: initNewsletterCampaignsTable });
+
 
     var sendUrl = null;
 

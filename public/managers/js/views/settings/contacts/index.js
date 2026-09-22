@@ -6,18 +6,24 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterReviewed').val($('#modalReviewed').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    // ── Filtros (popover) + bulk selection ──────────────────────────────────
+    // Se re-ejecuta tras cada carga AJAX (buscar/filtrar/paginar) porque sus
+    // binds son directos sobre el HTML de la tabla, que AjaxTable reemplaza.
+    function initContactsTable() {
+        FilterToolbar.init({
+            fields: { filterReviewed: 'popover_reviewed' },
+        });
 
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
-        url: page.data('bulk-action-url'),
-        entityLabel: 'contacto(s)',
-    });
+        BulkActions.init({
+            url: page.data('bulk-action-url'),
+            entityLabel: 'contacto(s)',
+        });
+    }
+
+    initContactsTable();
+
+    // ── Búsqueda/filtro/paginación sin recargar la página ───────────────────
+    AjaxTable.init({ onLoaded: initContactsTable });
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

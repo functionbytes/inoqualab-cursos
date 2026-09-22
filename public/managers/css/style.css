@@ -411,7 +411,7 @@ pre code {
 code {
     font-size: 0.875em;
     word-wrap: break-word;
-    color: #fff !important;
+    color: inherit;
 }
 a > code {
     color: inherit;
@@ -31852,10 +31852,28 @@ body .text-danger {
     justify-content: center;
 }
 
-.side-mini-panel .mini-nav .mini-nav-item.selected > a i {
-    color: #ffffff !important;
+/* Iconos SVG propios (App\Html\NavIconHelper): el mismo SVG sirve para los
+   tres estados (normal/hover/activo) cambiando solo --icon-stroke/--icon-fill,
+   igual que modules/Theme/public/theme/css/nav.css de webadmin. */
+.side-mini-panel .mini-nav .mini-nav-item > a .nav-icon {
+    display: block;
+    width: 21px;
+    height: 21px;
     position: relative;
     z-index: 2;
+    --icon-stroke: var(--bs-body-color, #5a6a85);
+    --icon-fill: #e9ecef;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item > a .nav-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.side-mini-panel .mini-nav .mini-nav-item.selected > a .nav-icon {
+    --icon-stroke: #ffffff;
+    --icon-fill: #ffffff;
 }
 
 .side-mini-panel .mini-nav .mini-nav-item.selected > a:before {
@@ -31873,9 +31891,10 @@ body .text-danger {
     transition: all 0.2s ease;
 }
 
-.side-mini-panel .mini-nav .mini-nav-item:not(.selected) > a:hover i {
-    color: #008bce !important;
-    transition: color 0.2s ease;
+.side-mini-panel .mini-nav .mini-nav-item:not(.selected) > a:hover .nav-icon {
+    --icon-stroke: #008bce;
+    --icon-fill: rgba(0, 139, 206, 0.15);
+    transition: all 0.2s ease;
 }
 
 .side-mini-panel .mini-nav .mini-nav-item:not(.selected) > a:hover:before {
@@ -31992,4 +32011,91 @@ body[data-sidebartype="full"] .side-mini-panel {
     width: auto;
     max-width: 180px;
     object-fit: contain;
+}
+
+/* ========================================
+   MC CONTENT HEADER
+   Portado de modules/Theme/public/theme/css/extra.css (webadmin) — barra de
+   título + breadcrumb + acciones, usada por resources/views/managers/includes/card.blade.php.
+   Reemplaza el header anterior (h5 uppercase dentro de un .card).
+   ======================================== */
+
+:root {
+    --space-3: 12px;
+}
+
+.mc-content-header {
+    /* Padding solo vertical: el horizontal lo da .container (misma clase que
+       usa <main class="mc-content"> para el contenido), no un valor propio —
+       si no, se suma al gutter de .container y desalinea con lo de abajo. */
+    padding: 16px 0;
+    margin-bottom: 20px;
+    background-color: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.mc-content-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.mc-page-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000000;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.mc-page-subtitle,
+.mc-section-desc {
+    font-size: 0.875rem;
+    color: #5a6a85;
+    margin-bottom: 0;
+}
+
+.mc-content-header .breadcrumb {
+    --bs-breadcrumb-padding-x: 0;
+    --bs-breadcrumb-padding-y: 0;
+    --bs-breadcrumb-margin-bottom: 0;
+    --bs-breadcrumb-font-size: 0.875rem;
+    --bs-breadcrumb-divider-color: var(--bs-secondary-color);
+    --bs-breadcrumb-item-padding-x: 1rem;
+    --bs-breadcrumb-item-active-color: #5a6a85;
+    margin-bottom: 0;
+}
+
+.mc-content-header .breadcrumb-item + .breadcrumb-item {
+    padding-left: var(--bs-breadcrumb-item-padding-x);
+}
+
+.mc-content-header .breadcrumb-item + .breadcrumb-item::before {
+    float: left;
+    padding-right: var(--bs-breadcrumb-item-padding-x);
+    color: var(--bs-breadcrumb-divider-color);
+    content: var(--bs-breadcrumb-divider, "/");
+}
+
+.mc-content-header .breadcrumb-item.active {
+    color: var(--bs-breadcrumb-item-active-color);
+}
+
+.mc-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Nombre/título dentro de las tablas de listados del panel: siempre en
+   mayúscula. Escapado a elementos DENTRO de <table> (nunca headers de
+   card, botones, etc. que reusan las mismas clases utilitarias de
+   Bootstrap fuera de una tabla). */
+table .fw-semibold,
+table .fw-medium,
+table td > strong {
+    text-transform: uppercase;
 }

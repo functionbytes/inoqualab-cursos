@@ -1,4 +1,8 @@
 $(function () {
+    // Paginacion sin recargar la pagina: el resto de los handlers de este
+    // archivo estan delegados en document, asi que no necesitan re-init.
+    AjaxTable.init({});
+
     var $addButton = $('#btnAddMember');
 
     $addButton.on('click', function () {

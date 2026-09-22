@@ -1,81 +1,62 @@
 document.addEventListener('DOMContentLoaded', function () {
     'use strict';
 
-    // Tooltips del rail de iconos (inicializados en public/managers/js/custom.js):
-    // al estar tan pegados unos a otros, el hover/click entre iconos consecutivos
-    // puede dejar un tooltip "pegado" sin ocultarse. Forzamos ocultar cualquier
-    // otro tooltip abierto al mostrar uno nuevo, y ocultar el propio al hacer clic.
-    document.querySelectorAll('.mini-nav-item [data-bs-toggle="tooltip"]').forEach(function (trigger) {
-        trigger.addEventListener('show.bs.tooltip', function () {
-            document.querySelectorAll('.mini-nav-item [data-bs-toggle="tooltip"]').forEach(function (other) {
-                if (other === trigger) return;
-                var instance = bootstrap.Tooltip.getInstance(other);
-                if (instance) instance.hide();
-            });
-        });
+    var menubar = document.getElementById('appMenubar');
+    if (!menubar) return;
 
-        trigger.addEventListener('click', function () {
-            var instance = bootstrap.Tooltip.getInstance(trigger);
-            if (instance) instance.hide();
-        });
-    });
+    // El ítem activo ya llega marcado con .active desde el servidor, pero
+    // eso solo pinta la clase — nada movía el scroll del panel para que
+    // quedara a la vista. En secciones largas (p. ej. Configuración) el
+    // usuario tenía que desplazarse a mano para encontrar dónde estaba.
+    function scrollActiveIntoView(pane) {
+        var active = pane.querySelector('.menu-link.active');
+        if (!active) return;
 
-    document.querySelectorAll('.mini-nav-item').forEach(function (item) {
-        item.addEventListener('click', function (e) {
-            var directUrl = this.dataset.directUrl;
-            if (directUrl) {
-                return;
-            }
+        var scrollEl = active.closest('[data-simplebar]');
+        if (!scrollEl) return;
 
-            e.preventDefault();
+        var instance = SimpleBar.instances.get(scrollEl);
+        var container = instance ? instance.getScrollElement() : scrollEl;
 
-            var sidebarId = this.dataset.sidebarId;
-            if (!sidebarId) {
-                return;
-            }
+        var containerRect = container.getBoundingClientRect();
+        var activeRect = active.getBoundingClientRect();
+        var margin = 24;
 
-            document.querySelectorAll('.mini-nav-item').forEach(function (navItem) {
-                navItem.classList.remove('selected');
-            });
-            this.classList.add('selected');
+        if (activeRect.top >= containerRect.top + margin && activeRect.bottom <= containerRect.bottom - margin) {
+            return;
+        }
 
-            document.querySelectorAll('.sidebarmenu .sidebar-nav').forEach(function (nav) {
-                nav.classList.remove('d-block');
-                nav.classList.add('d-none');
-            });
+        var offset = (activeRect.top - containerRect.top) + container.scrollTop
+            - (containerRect.height / 2) + (activeRect.height / 2);
+        container.scrollTop = Math.max(0, offset);
+    }
 
-            var targetSidebar = document.querySelector('#menu-right-' + sidebarId);
-            if (targetSidebar) {
-                targetSidebar.classList.remove('d-none');
-                targetSidebar.classList.add('d-block');
-
-                var sidebarmenu = document.querySelector('.sidebarmenu');
-                if (sidebarmenu) sidebarmenu.classList.remove('d-none');
-
-                var miniPanel = document.querySelector('aside.side-mini-panel');
-                if (miniPanel) miniPanel.classList.add('with-vertical');
-            }
-        });
-    });
-
-    document.querySelectorAll('.sidebarmenu .sidebar-link.has-arrow').forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            var isActive = this.classList.contains('active');
-            var parentUl = this.closest('ul');
-            var submenu = this.nextElementSibling;
-
-            if (!isActive) {
-                parentUl.querySelectorAll('ul').forEach(function (ul) { ul.classList.remove('in'); });
-                parentUl.querySelectorAll('a').forEach(function (navLink) { navLink.classList.remove('active'); });
-
-                if (submenu) submenu.classList.add('in');
-                this.classList.add('active');
+    function recalcSimplebars(pane) {
+        pane.querySelectorAll('[data-simplebar]').forEach(function (el) {
+            var instance = SimpleBar.instances.get(el);
+            if (instance) {
+                instance.recalculate();
             } else {
-                this.classList.remove('active');
-                if (submenu) submenu.classList.remove('in');
+                new SimpleBar(el);
             }
         });
+    }
+
+    document.querySelectorAll('#appMenubarTabs [data-bs-toggle="tab"]').forEach(function (tab) {
+        tab.addEventListener('show.bs.tab', function () {
+            menubar.classList.remove('no-sidebar-open');
+        });
+
+        tab.addEventListener('shown.bs.tab', function (e) {
+            var pane = document.querySelector(e.target.getAttribute('href'));
+            if (!pane) return;
+            recalcSimplebars(pane);
+            scrollActiveIntoView(pane);
+        });
+    });
+
+    document.querySelectorAll('#appMenubarTabsContent .tab-pane.active').forEach(function (pane) {
+        recalcSimplebars(pane);
+        scrollActiveIntoView(pane);
     });
 });

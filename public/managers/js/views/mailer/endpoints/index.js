@@ -12,8 +12,14 @@ $(document).ready(function () {
         $('#delete-form').attr('action', $(this).data('delete-url'));
     });
 
-    BulkActions.init({
+    function initMailerEndpointsTable() {
+        BulkActions.init({
         url: $('#bulk-config').data('bulk-url'),
         entityLabel: 'endpoint(s)',
     });
+    }
+
+    initMailerEndpointsTable();
+
+    AjaxTable.init({ onLoaded: initMailerEndpointsTable });
 });

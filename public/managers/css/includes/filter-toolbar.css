@@ -1,0 +1,271 @@
+/* managers.includes.filter-toolbar — boton icon-only con popover anclado + chips.
+   Patron nuevo (propuesta 2 aprobada). El patron legacy (icon+modal Bootstrap)
+   sigue usando .btn/.badge normales de theme.css, sin estilos propios aqui. */
+
+.filter-popover-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* El input de busqueda hereda .form-control global (altura ~50px, ver
+   public/managers/css/style.css) pero en esta barra compacta va al lado de
+   botones de 40px (filtro/buscar/agregar) -- se acota SOLO aca para no
+   afectar los inputs de 50px del resto de los formularios del panel. */
+.filter-toolbar-bar .input-group,
+.filter-toolbar-bar .input-group-text,
+.filter-toolbar-bar .form-control {
+    height: 40px !important;
+}
+
+.filter-toolbar-bar .form-control {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.filter-toolbar-bar .input-group-text {
+    display: flex;
+    align-items: center;
+}
+
+.filter-trigger-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    background: #f5f6f8;
+    color: #495057;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.filter-trigger-btn:hover {
+    background: #e9ecef;
+    border-color: #ced4da;
+}
+
+.filter-trigger-btn.has-active {
+    border-style: solid;
+    border-color: #495057;
+    color: #212529;
+}
+
+.filter-trigger-btn svg {
+    flex-shrink: 0;
+}
+
+.filter-trigger-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #495057;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+}
+
+.filter-popover {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 260px;
+    background: #ffffff;
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, .16);
+    padding: 16px;
+    z-index: 1030;
+    display: none;
+}
+
+.filter-popover.is-open {
+    display: block;
+}
+
+.filter-popover::before {
+    content: '';
+    position: absolute;
+    top: -7px;
+    right: 13px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border-left: 1px solid #eef0f2;
+    border-top: 1px solid #eef0f2;
+    transform: rotate(45deg);
+}
+
+.filter-popover-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.filter-popover-field + .filter-popover-field {
+    margin-top: 16px;
+}
+
+.filter-popover-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+}
+
+.filter-popover-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-popover-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 13.5px;
+    color: #374151;
+    margin: 0;
+}
+
+.filter-popover-option:hover {
+    background: #f9fafb;
+}
+
+.filter-popover-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.filter-popover-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    border: 1.5px solid #cbd5e1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+}
+
+.filter-popover-option input:checked + .filter-popover-dot {
+    background: #008bce;
+    border-color: #008bce;
+}
+
+.filter-popover-option input:checked + .filter-popover-dot::after {
+    content: '';
+    width: 8px;
+    height: 5px;
+    border-left: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.filter-popover-option input:checked ~ span:last-child {
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.filter-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.filter-popover-clear {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9ca3af;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.filter-popover-clear:hover {
+    color: #6b7280;
+}
+
+.filter-popover-apply {
+    padding: 9px 18px;
+    border-radius: 9px;
+    border: none;
+    background: #008bce;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.filter-popover-apply:hover {
+    background: #0077b3;
+}
+
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef6fb;
+    color: #008bce;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 8px 6px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    border: none;
+    transition: background .15s ease;
+}
+
+.filter-chip:hover {
+    background: #dcedf7;
+    color: #008bce;
+}
+
+.filter-chip svg {
+    flex-shrink: 0;
+}
+
+.filter-chip-clear-all {
+    font-size: 12.5px;
+    color: #9ca3af;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.filter-chip-clear-all:hover {
+    color: #6b7280;
+}

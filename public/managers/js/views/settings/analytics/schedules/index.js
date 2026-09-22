@@ -2,19 +2,21 @@ $(function () {
     var page = $('#schedulesPage');
 
     // ── Filters modal ───────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterFrequency').val($('#modalFrequency').val());
-        $('#filterFormat').val($('#modalFormat').val());
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initSettingsAnalyticsSchedulesTable() {
+        FilterToolbar.init({
+        fields: { filterFrequency: 'popover_Frequency', filterFormat: 'popover_Format', filterStatus: 'popover_Status' },
     });
-
-    // ── Bulk selection ──────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: page.data('bulk-action-url'),
         entityLabel: 'reporte(s)',
     });
+    }
+
+    initSettingsAnalyticsSchedulesTable();
+
+    AjaxTable.init({ onLoaded: initSettingsAnalyticsSchedulesTable });
+
+    // ── Bulk selection ──────────────────────────────────────────────────────
 
     // ── Toggle activo/inactivo ──────────────────────────────────────────────
     $(document).on('click', '.toggle-btn', function (e) {

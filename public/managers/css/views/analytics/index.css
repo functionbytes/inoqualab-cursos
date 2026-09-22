@@ -122,3 +122,24 @@
         min-width: 420px;
     }
 }
+
+/* Estado "no configurado": ver AnalyticsController::isConfigured() */
+.analytics-empty-card.border-dashed {
+    border: 1px dashed var(--bs-border-color, #dee2e6);
+    background: var(--bs-body-bg, #fff);
+}
+
+.analytics-empty-icon {
+    width: 72px;
+    height: 72px;
+    font-size: 28px;
+}
+
+.analytics-empty-steps {
+    max-width: 560px;
+}
+
+.analytics-empty-steps li {
+    color: var(--bs-body-color);
+}
+}

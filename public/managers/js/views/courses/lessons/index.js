@@ -8,13 +8,19 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filterChapter').val($('#modalChapter').val());
-        $('#filterType').val($('#modalType').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initCoursesLessonsTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available', filterChapter: 'popover_Chapter', filterType: 'popover_Type' },
     });
+        BulkActions.init({
+        url: config.routes.bulkAction,
+        entityLabel: 'clase(s)',
+    });
+    }
+
+    initCoursesLessonsTable();
+
+    AjaxTable.init({ onLoaded: initCoursesLessonsTable });
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {
@@ -26,10 +32,6 @@ $(function () {
     });
 
     // ── Selección masiva ─────────────────────────────────────────────────────
-    BulkActions.init({
-        url: config.routes.bulkAction,
-        entityLabel: 'clase(s)',
-    });
 
     // ── Reordenar por drag&drop ──────────────────────────────────────────────
     var $sortable = $('#lessons-sortable');

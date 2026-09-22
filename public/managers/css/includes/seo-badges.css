@@ -1,0 +1,64 @@
+/* ========================================
+   Tabla de colores para los badges de SEO (metas, dashboard, reporte).
+
+   El tema del panel (style.css/theme.css/nav.css) trae varias paletas de
+   skin sin scopear, todas redefiniendo las mismas variables Bootstrap
+   (--bs-success, --bs-info, --bs-danger, --bs-warning...) a colores
+   distintos -- cual gana depende del orden de carga y termina siendo
+   inconsistente (p. ej. bg-info salia morado, bg-danger-subtle salia
+   navy). Ademas "bg-orange", usado para el grado D del score, no existe
+   como clase en ningun CSS compilado: esas notas quedaban invisibles
+   (texto blanco sobre fondo blanco).
+
+   Esta hoja fija una unica tabla de colores explicita (no depende de
+   variables del tema) para los dos usos de badges de SEO:
+
+   1. Estado (.seo-badge--*): Indexables/No indexables/Sin optimizar en
+      las pestañas, y la columna Robots.
+   2. Score (.seo-score--*): grado A-F en metas, dashboard y reporte.
+   ======================================== */
+
+.seo-badge--neutral {
+    background-color: #e5e7eb !important;
+    color: #4b5563 !important;
+}
+
+.seo-badge--positive {
+    background-color: #e6f7ec !important;
+    color: #15803d !important;
+}
+
+.seo-badge--negative {
+    background-color: #fdecea !important;
+    color: #b91c1c !important;
+}
+
+.seo-badge--warning {
+    background-color: #fff4e0 !important;
+    color: #92610a !important;
+}
+
+.seo-score--a {
+    background-color: #16a34a !important;
+    color: #fff !important;
+}
+
+.seo-score--b {
+    background-color: #0d9488 !important;
+    color: #fff !important;
+}
+
+.seo-score--c {
+    background-color: #f59e0b !important;
+    color: #fff !important;
+}
+
+.seo-score--d {
+    background-color: #ea580c !important;
+    color: #fff !important;
+}
+
+.seo-score--f {
+    background-color: #dc2626 !important;
+    color: #fff !important;
+}

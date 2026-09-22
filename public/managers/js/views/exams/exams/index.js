@@ -10,17 +10,21 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initExamsExamsTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: config.routes.bulkAction,
         entityLabel: 'examen(es)',
     });
+    }
+
+    initExamsExamsTable();
+
+    AjaxTable.init({ onLoaded: initExamsExamsTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual via modal ─────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

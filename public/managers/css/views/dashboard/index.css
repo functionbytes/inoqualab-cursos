@@ -1,5 +1,58 @@
+/* Static layout helpers (replace inline style="" from the Blade template) */
+.realtime-dot {
+    width: 10px;
+    height: 10px;
+    background: #008bce;
+}
+
+.realtime-dot-badge {
+    width: 8px;
+    height: 8px;
+    top: -1px;
+    right: -1px;
+}
+
+.realtime-updated-text {
+    font-size: 0.7rem;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 36px;
+    background: #e9ecef;
+}
+
+.dashboard-pills-col { min-width: 0; position: relative; }
+#rangePills { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#rangePills::-webkit-scrollbar { display: none; }
+#rangePills .nav-link.active { background: #008bce; color: #fff !important; }
+#rangePills .nav-link:hover:not(.active) { background: #e8f4fd; color: #008bce; }
+#rangePills .nav-link { white-space: nowrap; }
+
+/* Fade hint: shown by JS while the pills list has more content off-screen to the right */
+.dashboard-pills-col::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 28px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0), #fff);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+}
+.dashboard-pills-col.has-scroll-more::after { opacity: 1; }
+
+.dashboard-main-chart { height: 300px; }
+
 /* KPI cards: mismo tratamiento responsivo que analytics/index.blade.php */
 @media (max-width: 575.98px) {
     #dashboard-kpi-row .col-8 { flex: 0 0 100%; max-width: 100%; }
     #dashboard-kpi-row .col-4 { display: none !important; }
+    #dashboard-kpi-row .card-title { font-size: 0.8rem; white-space: nowrap; }
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-main-chart { height: 220px; }
 }

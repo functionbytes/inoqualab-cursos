@@ -3,10 +3,16 @@ $(document).ready(function () {
         $('.select2').select2({ allowClear: false, width: '100%' });
     }
 
-    BulkActions.init({
+    function initMailerVariablesTable() {
+        BulkActions.init({
         url: $('#bulk-config').data('bulk-url'),
         entityLabel: 'variable(s)',
     });
+    }
+
+    initMailerVariablesTable();
+
+    AjaxTable.init({ onLoaded: initMailerVariablesTable });
 
     $(document).on('click', '.js-delete-variable', function () {
         $('#delete-form').attr('action', $(this).data('delete-url'));

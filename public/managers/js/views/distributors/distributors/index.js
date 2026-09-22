@@ -6,16 +6,20 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initDistributorsDistributorsTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    BulkActions.init({
+        BulkActions.init({
         url: $page.data('bulk-url'),
         entityLabel: 'distribuidor(es)',
     });
+    }
+
+    initDistributorsDistributorsTable();
+
+    AjaxTable.init({ onLoaded: initDistributorsDistributorsTable });
+
 
     $(document).on('click', '.btn-delete', function (e) {
         e.preventDefault();

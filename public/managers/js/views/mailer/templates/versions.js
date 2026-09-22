@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    // Paginacion sin recargar la pagina: .btn-restore esta delegado en
+    // document, asi que no necesita re-init tras cada carga AJAX.
+    AjaxTable.init({});
+
     let $pendingRestoreForm = null;
 
     $(document).on('click', '.btn-restore', function (e) {

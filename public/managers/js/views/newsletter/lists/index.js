@@ -5,10 +5,16 @@ $(function () {
         toastr.success(flashSuccess);
     }
 
-    BulkActions.init({
+    function initNewsletterListsTable() {
+        BulkActions.init({
         url: $page.data('bulk-url'),
         entityLabel: 'lista(s)',
     });
+    }
+
+    initNewsletterListsTable();
+
+    AjaxTable.init({ onLoaded: initNewsletterListsTable });
 
     $(document).on('click', '.btn-delete', function (e) {
         e.preventDefault();

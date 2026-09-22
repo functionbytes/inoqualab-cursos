@@ -3,10 +3,16 @@ $(function () {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     // ── Bulk selection ────────────────────────────────────────────────────────
-    BulkActions.init({
+    function initSeoStaticUrlsTable() {
+        BulkActions.init({
         url: $('#bulk-config').data('bulk-url'),
         entityLabel: 'URL(s)',
     });
+    }
+
+    initSeoStaticUrlsTable();
+
+    AjaxTable.init({ onLoaded: initSeoStaticUrlsTable });
 
     // ── Toggle activo vía AJAX ────────────────────────────────────────────────
     $(document).on('click', '.toggle-active', function (e) {

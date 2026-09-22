@@ -5,7 +5,9 @@ $(document).ready(function () {
 
     $(document).on('click', '[data-action="reload"]', function () { window.location.reload(); });
 
-    $('.delete-btn').on('click', function () {
+    // .delete-btn vive dentro de #ajax-table-root (se recrea en cada carga
+    // AJAX), por eso el bind es delegado en document en vez de directo.
+    $(document).on('click', '.delete-btn', function () {
         $('#delete-modal .modal-title').text($(this).data('title'));
         $('#delete-form').attr('action', $(this).data('url'));
     });
@@ -44,10 +46,19 @@ $(document).ready(function () {
         $('#bulk-count').text(ids.length);
     }
 
-    $('#select-all-metas').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
-        updateBulkState();
-    });
+    // #select-all-metas vive dentro de #ajax-table-root y se recrea en cada
+    // carga AJAX (buscar/filtrar/paginar), por eso se re-bindea vía
+    // AjaxTable.init({ onLoaded: ... }) más abajo.
+    function initMetasTable() {
+        $('#select-all-metas').off('change.metasBulk').on('change.metasBulk', function () {
+            $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
+            updateBulkState();
+        });
+    }
+
+    initMetasTable();
+    AjaxTable.init({ onLoaded: initMetasTable });
+
     $(document).on('change', '.bulk-checkbox', updateBulkState);
     $('#bulk-cancel').on('click', function () {
         $('.bulk-checkbox, #select-all-metas').prop('checked', false);

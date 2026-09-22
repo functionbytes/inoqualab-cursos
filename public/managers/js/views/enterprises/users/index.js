@@ -6,17 +6,21 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initEnterprisesUsersTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    BulkActions.init({
+        BulkActions.init({
         url: $page.data('bulk-url'),
         entityLabel: 'usuario(s)',
         deleteActions: [],
     });
+    }
+
+    initEnterprisesUsersTable();
+
+    AjaxTable.init({ onLoaded: initEnterprisesUsersTable });
+
 
     $(document).on('click', '.btn-delete', function (e) {
         e.preventDefault();

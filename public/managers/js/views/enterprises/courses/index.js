@@ -6,10 +6,16 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
-    BulkActions.init({
+    function initEnterprisesCoursesTable() {
+        BulkActions.init({
         url: $page.data('bulk-url'),
         entityLabel: 'curso(s)',
     });
+    }
+
+    initEnterprisesCoursesTable();
+
+    AjaxTable.init({ onLoaded: initEnterprisesCoursesTable });
 
     $(document).on('click', '.btn-delete', function (e) {
         e.preventDefault();

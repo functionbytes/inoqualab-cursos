@@ -7,17 +7,21 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initSettingsDocumentsTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: page.data('bulk-action-url'),
         entityLabel: 'documento(s)',
     });
+    }
+
+    initSettingsDocumentsTable();
+
+    AjaxTable.init({ onLoaded: initSettingsDocumentsTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

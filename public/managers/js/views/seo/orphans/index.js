@@ -7,9 +7,17 @@ $(function () {
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
+    function decrementStat(id) {
+        var $stat = $('#' + id);
+        var value = Math.max(0, (parseInt($stat.text(), 10) || 0) - 1);
+        $stat.text(value);
+    }
+
     function removeRow(type, id) {
         $('#row-' + type + '-' + id).fadeOut(300, function () {
             $(this).remove();
+            decrementStat('stat-total');
+            decrementStat('stat-' + type);
             if ($('#orphans-table tbody tr:visible').length === 0) {
                 showEmptyState();
             }
@@ -17,6 +25,7 @@ $(function () {
     }
 
     function showEmptyState() {
+        $('[id^="stat-"]').text('0');
         $('#orphans-table').closest('.table-responsive').replaceWith(
             '<div class="text-center py-5">' +
             '<i class="fas fa-check-circle fa-3x mb-3 text-success opacity-75"></i>' +
@@ -114,7 +123,7 @@ $(function () {
                     if (pending === 0) {
                         toastr.success(success + ' elemento(s) generados correctamente.');
                         $btn.prop('disabled', false).text('Generar seleccionados');
-                        $('#bulk-toolbar').addClass('d-none');
+                        updateBulkToolbar();
                     }
                 }
             });

@@ -6,4 +6,6 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
+    AjaxTable.init({});
+
 });

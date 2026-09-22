@@ -8,17 +8,21 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initSettingsBundlesTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: page.data('bulk-action-url'),
         entityLabel: 'paquete(s)',
     });
+    }
+
+    initSettingsBundlesTable();
+
+    AjaxTable.init({ onLoaded: initSettingsBundlesTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Toggle disponibilidad individual ────────────────────────────────────
     $(document).on('click', '.btn-toggle-available', function () {

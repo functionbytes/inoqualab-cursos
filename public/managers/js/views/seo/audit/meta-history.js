@@ -7,7 +7,7 @@ $(function () {
             html = '<p class="text-muted">No hay issues registrados.</p>';
         } else {
             issues.forEach(function (issue) {
-                var badgeClass = issue.status === 'error' ? 'bg-danger' : 'bg-warning text-dark';
+                var badgeClass = issue.status === 'error' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning';
                 html += '<div class="border rounded p-3 mb-2">';
                 html += '<div class="d-flex align-items-start gap-2">';
                 html += '<span class="badge ' + badgeClass + ' mt-1">' + issue.status + '</span>';

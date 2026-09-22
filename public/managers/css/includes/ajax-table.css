@@ -1,0 +1,13 @@
+/* managers/js/ajax-table.js — estado de carga mientras se hace fetch de
+   busqueda/filtro/paginacion sin recargar la pagina. */
+
+#ajax-table-root {
+    position: relative;
+    min-height: 40px;
+}
+
+#ajax-table-root.ajax-table-loading {
+    opacity: .55;
+    pointer-events: none;
+    transition: opacity .12s ease;
+}

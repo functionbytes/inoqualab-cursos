@@ -9,17 +9,21 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterRole').val($('#modalRole').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initUsersUsersTable() {
+        FilterToolbar.init({
+        fields: { filterRole: 'popover_Role' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: config.routes.bulkAction,
         entityLabel: 'usuario(s)',
     });
+    }
+
+    initUsersUsersTable();
+
+    AjaxTable.init({ onLoaded: initUsersUsersTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

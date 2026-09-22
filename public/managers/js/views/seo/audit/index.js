@@ -212,8 +212,8 @@ $(function () {
                     '<td><code class="small">' + $('<div>').text(row.url ?? row.title ?? '—').html() + '</code></td>' +
                     '<td class="text-center"><strong>' + row.score + '</strong></td>' +
                     '<td class="text-center">' + renderGradeBadge(grade) + '</td>' +
-                    '<td class="text-center"><span class="badge bg-' + (row.issues_count > 0 ? 'danger' : 'light text-dark border') + '">' + (row.issues_count ?? 0) + '</span></td>' +
-                    '<td class="text-center"><span class="badge bg-success">' + (row.passed_count ?? 0) + '</span></td>' +
+                    '<td class="text-center"><span class="badge ' + (row.issues_count > 0 ? 'bg-danger-subtle text-danger' : 'bg-secondary-subtle text-secondary') + '">' + (row.issues_count ?? 0) + '</span></td>' +
+                    '<td class="text-center"><span class="badge bg-success-subtle text-success">' + (row.passed_count ?? 0) + '</span></td>' +
                     '<td class="text-center">' +
                     (row.meta_id ? '<a href="' + metaEditUrlTemplate.replace(':id', row.meta_id) + '" class="btn btn-sm btn-light">Ver meta</a>' : '—') +
                     '</td>' +
@@ -251,8 +251,8 @@ $(function () {
                 var $tbody = $('#canonical-results-tbody').empty();
                 res.results.forEach(function (row) {
                     var badge = row.ok
-                        ? '<span class="badge bg-success">' + row.status + '</span>'
-                        : '<span class="badge bg-danger">' + (row.status || 'Error') + '</span>';
+                        ? '<span class="badge bg-success-subtle text-success">' + row.status + '</span>'
+                        : '<span class="badge bg-danger-subtle text-danger">' + (row.status || 'Error') + '</span>';
                     $tbody.append(
                         '<tr>' +
                         '<td><small class="fw-semibold">' + $('<div>').text(row.title ?? '—').html() + '</small></td>' +
@@ -315,7 +315,7 @@ $(function () {
                         res.broken.forEach(function (link) {
                             $list.append(
                                 '<li class="list-group-item d-flex align-items-center gap-3">' +
-                                '<span class="badge bg-danger flex-shrink-0">' + (link.status || 'Error') + '</span>' +
+                                '<span class="badge bg-danger-subtle text-danger flex-shrink-0">' + (link.status || 'Error') + '</span>' +
                                 '<div class="flex-grow-1 min-w-0">' +
                                 '<code class="small text-break">' + $('<div>').text(link.url ?? '').html() + '</code>' +
                                 (link.source ? '<div class="text-muted broken-link-source">Desde: ' + $('<div>').text(link.source).html() + '</div>' : '') +

@@ -10,63 +10,18 @@ $(function () {
     });
 
     // ── Bulk selection ──────────────────────────────────────────────────────
-    function updateBulkToolbar() {
-        var count = $('.bulk-checkbox:checked').length;
-        $('[data-bulk-count]').text(count);
-        count > 0 ? $('#bulk-toolbar').removeClass('d-none') : $('#bulk-toolbar').addClass('d-none');
-    }
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    $('#select-all').on('change', function () {
-        $('.bulk-checkbox').prop('checked', $(this).prop('checked'));
-        updateBulkToolbar();
-    });
-
-    $(document).on('change', '.bulk-checkbox', function () {
-        var total = $('.bulk-checkbox').length;
-        var checked = $('.bulk-checkbox:checked').length;
-        $('#select-all').prop('indeterminate', checked > 0 && checked < total);
-        $('#select-all').prop('checked', checked === total);
-        updateBulkToolbar();
-    });
-
-    // ── Bulk modal ──────────────────────────────────────────────────────────
-    $('#bulk-modal').on('hide.bs.modal', function () {
-        $('#bulk-action-select').val('');
-        $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-    });
-
-    $('#bulk-apply-btn').on('click', function () {
-        var action = $('#bulk-action-select').val();
-        var ids = getSelectedIds();
-
-        if (!action) { toastr.warning('Selecciona una accion.'); return; }
-        if (!ids.length) { toastr.warning('Selecciona al menos un redirect.'); return; }
-
-        if (action === 'delete' && !confirm('¿Eliminar los ' + ids.length + ' redirect(s)?')) return;
-
-        $('#bulk-apply-btn').prop('disabled', true).text('Procesando...');
-
-        $.ajax({
+    // Se re-ejecuta tras cada carga AJAX (buscar/filtrar/paginar) porque el
+    // checkbox #select-all vive dentro de #ajax-table-root y se recrea.
+    function initRedirectsTable() {
+        BulkActions.init({
             url: bulkDestroyUrl,
-            method: 'POST',
-            contentType: 'application/json',
-            headers: { 'X-CSRF-TOKEN': csrfToken },
-            data: JSON.stringify({ action: action, ids: ids }),
-            success: function (res) {
-                $('#bulk-modal').modal('hide');
-                toastr.success(res.message ?? 'Redirects eliminados.');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function (xhr) {
-                toastr.error(xhr.responseJSON?.message ?? 'Error al procesar.');
-                $('#bulk-apply-btn').prop('disabled', false).text('Aplicar');
-            }
+            applyBtn: '#bulk-apply-btn',
+            entityLabel: 'redirect(s)',
         });
-    });
+    }
+
+    initRedirectsTable();
+    AjaxTable.init({ onLoaded: initRedirectsTable });
 
     // ── Nuevo redirect — resetear modal ─────────────────────────────────────
     $('[data-bs-target="#modalRedirect"]').on('click', function () {

@@ -1,0 +1,163 @@
+/*
+ * Fix aislado para el layout y los colores de estado (.badge, .bg-*, .text-*,
+ * .btn-info/.btn-danger) del panel manager.
+ *
+ * theme.css (tema de terceros, Modernize/Materialize) trae varios bloques
+ * ":root" con presets de color alternativos (Blue_Theme, Aqua_Theme, etc.)
+ * y uno de esos bloques quedo filtrado sin selector [data-color-theme=...]
+ * que lo aisle, pisando en cascada los valores correctos de style.css con
+ * colores rotos: success/info/danger mapeados al mismo tono oscuro de marca,
+ * variables --bs-*-rgb con un hex en vez de un triplete numerico (invalida
+ * cualquier rgba(var(--bs-success-rgb),...) — el navegador descarta toda la
+ * declaracion, el fondo queda transparente en vez de solo "del color
+ * equivocado"), y sintaxis SASS sin compilar como shade-color(...).
+ *
+ * Auditoria del 22-sep-2026 confirmo que el problema NO es solo de .badge:
+ * - .bg-success/.bg-info/.bg-danger (y -subtle) sueltos: contadores de
+ *   correos procesados/fallidos, salud de endpoints del mailer, Web Vitals
+ *   bueno/malo, notas A/B de SEO — se ven transparentes o del color
+ *   equivocado en decenas de vistas reales.
+ * - .text-success/.text-danger quedan en #fff (blanco sobre fondo claro =
+ *   invisible) y .text-info/.text-warning en negro plano, en el texto de
+ *   estado (activo/inactivo, valido/invalido) de la mayoria de listados.
+ * - .btn-info/.btn-danger quedan del mismo navy que .btn-primary: botones
+ *   de acciones destructivas (confirmar descarte, envio de campana, borrado
+ *   masivo) pierden la señal visual de "esto es peligroso".
+ *
+ * Ademas, nav.css redefine .badge (block-size/line-height fijos) despues de
+ * style.css, y entra en conflicto con el text-align/line-height de la
+ * definicion base — el texto queda pegado a la izquierda en vez de centrado.
+ *
+ * Arreglar theme.css/nav.css de raiz implica tocar archivos de terceros de
+ * decenas de miles de lineas — alto riesgo de romper otras reglas que
+ * dependen de las mismas variables. En su lugar, este archivo fija
+ * explicitamente el layout y el color de los selectores de arriba y se
+ * carga al final de la cascada para ganar sobre theme.css/nav.css, igual
+ * que ya hace nav.css con .app-header.
+ */
+
+/* Layout: centrado real (horizontal y vertical) sin depender de line-height */
+.badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1.2 !important;
+    border-radius: 6px !important;
+}
+
+/*
+ * Paleta armonizada con el azul corporativo (#008bce): "success" (positivo)
+ * usa un azul mas oscuro/profundo en vez del verde de Bootstrap (pedido
+ * explicito: nada de verde en los badges), "danger" rojo suave y "warning"
+ * ambar suave se mantienen para poder distinguir negativo/advertencia de
+ * un vistazo, y "secondary" gris azulado para estados neutros.
+ */
+
+/* Solidos: fondo de color fuerte + texto blanco (badge por defecto) */
+.badge.bg-primary   { background-color: #008bce !important; }
+.badge.bg-secondary { background-color: #5b7285 !important; }
+.badge.bg-success   { background-color: #0a6ca0 !important; }
+.badge.bg-info      { background-color: #2ea8e0 !important; }
+.badge.bg-warning   { background-color: #d98c1f !important; }
+.badge.bg-danger    { background-color: #c1594c !important; }
+
+/* Subtle: fondo pastel + texto del mismo tono, oscurecido para contraste */
+.badge.bg-primary-subtle   { background-color: #dcf0fb !important; color: #0074a8 !important; }
+.badge.bg-secondary-subtle { background-color: #e6ebed !important; color: #4f6672 !important; }
+.badge.bg-success-subtle   { background-color: #dde9f2 !important; color: #0a5478 !important; }
+.badge.bg-info-subtle      { background-color: #e2f4fc !important; color: #1f7fa8 !important; }
+.badge.bg-warning-subtle   { background-color: #faedd7 !important; color: #93630f !important; }
+.badge.bg-danger-subtle    { background-color: #f7e2df !important; color: #a8402f !important; }
+
+/*
+ * Mismo problema, fuera de .badge: fondos y texto de estado usados sueltos
+ * en contadores, iconos, barras de progreso y tarjetas (no llevan class
+ * "badge"). Misma paleta que arriba, para que un "success" se vea igual
+ * sea badge o no.
+ */
+
+/* Fondos solidos sueltos (iconos, barras de progreso, indicadores) */
+.bg-success:not(.badge) { background-color: #0a6ca0 !important; }
+.bg-info:not(.badge)    { background-color: #2ea8e0 !important; }
+.bg-danger:not(.badge)  { background-color: #c1594c !important; }
+
+/* Fondos subtle sueltos (tarjetas, icon-boxes de KPIs) */
+.bg-success-subtle:not(.badge) { background-color: #dde9f2 !important; }
+.bg-info-subtle:not(.badge)    { background-color: #e2f4fc !important; }
+.bg-danger-subtle:not(.badge)  { background-color: #f7e2df !important; }
+
+/* Texto de estado plano (activo/inactivo, valido/invalido en listados) */
+.text-success:not(.badge) { color: #0a5478 !important; }
+.text-info:not(.badge)    { color: #1f7fa8 !important; }
+.text-warning:not(.badge) { color: #93630f !important; }
+.text-danger:not(.badge)  { color: #a8402f !important; }
+
+/* Botones de accion destructiva/informativa: hoy tienen el mismo navy que
+   btn-primary; se fija toda la cadena bg/border/hover/active/disabled. */
+.btn.btn-info {
+    --bs-btn-color: #fff !important;
+    --bs-btn-bg: #2ea8e0 !important;
+    --bs-btn-border-color: #2ea8e0 !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-hover-bg: #1f8fc2 !important;
+    --bs-btn-hover-border-color: #1c84b3 !important;
+    --bs-btn-active-color: #fff !important;
+    --bs-btn-active-bg: #1c84b3 !important;
+    --bs-btn-active-border-color: #1a7aa8 !important;
+    --bs-btn-disabled-color: #fff !important;
+    --bs-btn-disabled-bg: #2ea8e0 !important;
+    --bs-btn-disabled-border-color: #2ea8e0 !important;
+}
+
+.btn.btn-danger {
+    --bs-btn-color: #fff !important;
+    --bs-btn-bg: #c1594c !important;
+    --bs-btn-border-color: #c1594c !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-hover-bg: #ac4d41 !important;
+    --bs-btn-hover-border-color: #a3483c !important;
+    --bs-btn-active-color: #fff !important;
+    --bs-btn-active-bg: #a3483c !important;
+    --bs-btn-active-border-color: #994338 !important;
+    --bs-btn-disabled-color: #fff !important;
+    --bs-btn-disabled-bg: #c1594c !important;
+    --bs-btn-disabled-border-color: #c1594c !important;
+}
+
+/* Alerts: color/fondo/borde heredan la misma cadena shade-color() sin
+   compilar (ver cabecera) — success queda navy semitransparente, info
+   queda gris liso (pierde el tinte). Impacto bajo (pocos usos reales) pero
+   igual de barato de fijar con el mismo patron. */
+.alert-success {
+    --bs-alert-color: #0a5478 !important;
+    --bs-alert-bg: #dde9f2 !important;
+    --bs-alert-border-color: #b9d3e3 !important;
+    --bs-alert-link-color: #0a5478 !important;
+}
+
+.alert-info {
+    --bs-alert-color: #1f7fa8 !important;
+    --bs-alert-bg: #e2f4fc !important;
+    --bs-alert-border-color: #b8e2f5 !important;
+    --bs-alert-link-color: #1f7fa8 !important;
+}
+
+.alert-warning {
+    --bs-alert-color: #93630f !important;
+    --bs-alert-bg: #faedd7 !important;
+    --bs-alert-border-color: #f0d7a8 !important;
+    --bs-alert-link-color: #93630f !important;
+}
+
+.alert-danger {
+    --bs-alert-color: #a8402f !important;
+    --bs-alert-bg: #f7e2df !important;
+    --bs-alert-border-color: #edc3bc !important;
+    --bs-alert-link-color: #a8402f !important;
+}
+
+/* Bordes sueltos: mismo rgba(var(--bs-*-rgb)) invalido que .bg-*, el
+   borde queda transparente. Uso real bajo (2 archivos) pero mismo costo. */
+.border-success { border-color: #0a6ca0 !important; }
+.border-danger  { border-color: #c1594c !important; }

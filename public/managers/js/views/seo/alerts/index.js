@@ -4,18 +4,21 @@ $(function () {
     var $bulkConfig = $('#bulk-config');
 
     // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+    function initSeoAlertsTable() {
+        BulkActions.init({
         url: $bulkConfig.data('bulk-url'),
         entityLabel: 'alerta(s)',
     });
+        FilterToolbar.init({
+        fields: { filterSeverity: 'popover_Severity', filterStatus: 'popover_Status' },
+    });
+    }
+
+    initSeoAlertsTable();
+
+    AjaxTable.init({ onLoaded: initSeoAlertsTable });
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterSeverity').val($('#modalSeverity').val());
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
 
     // ── Acknowledge single alert ─────────────────────────────────────────────
     $(document).on('click', '.acknowledge-btn', function (e) {

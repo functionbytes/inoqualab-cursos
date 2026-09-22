@@ -7,10 +7,14 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCourse').val($('#modalCourse').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initUsersCertificatesTable() {
+        FilterToolbar.init({
+        fields: { filterCourse: 'popover_Course' },
     });
+    }
+
+    initUsersCertificatesTable();
+
+    AjaxTable.init({ onLoaded: initUsersCertificatesTable });
 
 });

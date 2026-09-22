@@ -44,15 +44,4 @@ $(function () {
             img.src = img.dataset.fallbackSrc;
         }, { once: true });
     });
-
-    // Marcar todas las notificaciones como leídas desde el header
-    $(document).on('click', '#markAllReadHeader', function (e) {
-        e.preventDefault();
-        var url = $('#main-wrapper').data('notifications-mark-all-read-url');
-        $.get(url, function () {
-            $('#notifBadge').remove();
-            $('#markAllReadHeader').closest('.d-flex').find('#markAllReadHeader').remove();
-            toastr.success('Notificaciones marcadas como leídas', '', { timeOut: 2000 });
-        });
-    });
 });

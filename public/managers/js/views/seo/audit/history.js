@@ -4,10 +4,17 @@ $(function () {
     var $config = $('#audit-history-config');
 
     // ── Bulk selection ────────────────────────────────────────────────────────
-    BulkActions.init({
-        url: $config.data('bulk-url'),
-        entityLabel: 'auditoría(s)',
-    });
+    // Se re-ejecuta tras cada carga AJAX (buscar/filtrar/paginar) porque el
+    // checkbox #select-all vive dentro de #ajax-table-root y se recrea.
+    function initHistoryTable() {
+        BulkActions.init({
+            url: $config.data('bulk-url'),
+            entityLabel: 'auditoría(s)',
+        });
+    }
+
+    initHistoryTable();
+    AjaxTable.init({ onLoaded: initHistoryTable });
 
     // ── Delete individual ─────────────────────────────────────────────────────
     $(document).on('click', '.btn-delete-log', function () {

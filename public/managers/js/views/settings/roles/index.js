@@ -6,10 +6,16 @@ $(function () {
     });
 
     // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+    function initSettingsRolesTable() {
+        BulkActions.init({
         url: page.data('bulk-action-url'),
         entityLabel: 'rol(es)',
     });
+    }
+
+    initSettingsRolesTable();
+
+    AjaxTable.init({ onLoaded: initSettingsRolesTable });
 
     var flashSuccess = page.data('flash-success');
     var flashError = page.data('flash-error');

@@ -7,19 +7,22 @@ $(function () {
     var flashSuccess = $page.data('flash-success');
     if (flashSuccess) { toastr.success(flashSuccess); }
 
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterLesson').val($('#modalLesson').val());
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    // ── Filtros (popover) ────────────────────────────────────────────────────
+    function initQuizsQuizsTable() {
+        FilterToolbar.init({
+        fields: { filterLesson: 'popover_Lesson', filterAvailable: 'popover_Available' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: config.routes.bulkAction,
         entityLabel: 'quiz(zes)',
     });
+    }
+
+    initQuizsQuizsTable();
+
+    AjaxTable.init({ onLoaded: initQuizsQuizsTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

@@ -5,17 +5,21 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initSettingsCouponsTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
-
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
+        BulkActions.init({
         url: page.data('bulk-action-url'),
         entityLabel: 'cupón(es)',
     });
+    }
+
+    initSettingsCouponsTable();
+
+    AjaxTable.init({ onLoaded: initSettingsCouponsTable });
+
+    // ── Bulk selection ───────────────────────────────────────────────────────
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {

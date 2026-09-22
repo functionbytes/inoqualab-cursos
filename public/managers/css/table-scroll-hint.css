@@ -1,0 +1,41 @@
+/*
+ * Pista visual de scroll horizontal para .table-responsive en mobile.
+ *
+ * Auditoria del 22-sep-2026 con Chrome DevTools (viewport 390x844) confirmo
+ * que practicamente todas las tablas del panel manager (patron estandar
+ * "table-responsive" usado en decenas de vistas) se desbordan en mobile sin
+ * ningun indicador: en /panel/courses, por ejemplo, solo se ve la columna
+ * "Titulo" y el resto (Publico/Estado/Actualizacion/Acciones) queda fuera de
+ * la vista sin pista de que se puede deslizar. El usuario solo lo descubre
+ * si arrastra con el dedo por accidente.
+ *
+ * Fix: un degradado hacia transparente sobre el borde derecho de cada
+ * .table-responsive, visible SOLO mientras queda contenido oculto por hacer
+ * scroll. managers/js/table-scroll-hint.js calcula scrollWidth/clientWidth/
+ * scrollLeft de cada .table-responsive y alterna la clase .has-scroll-right
+ * (hay mas contenido a la derecha) — este archivo solo dibuja el degradado
+ * cuando esa clase esta presente. Se carga al final de la cascada, igual que
+ * badge-colors.css, porque .table-responsive de theme.css ya trae
+ * position/overflow propios y no conviene competir con ellos por specificity.
+ */
+
+.table-responsive {
+    position: relative;
+}
+
+.table-responsive::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.12));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease-in-out;
+}
+
+.table-responsive.has-scroll-right::after {
+    opacity: 1;
+}

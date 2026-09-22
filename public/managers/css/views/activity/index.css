@@ -1,3 +1,33 @@
 .activity-description-col {
     max-width: 280px;
 }
+
+.act-filter-badge {
+    font-size: .6rem;
+}
+
+/* Tabla de colores explicita para el badge de Evento: NO usar las clases
+   sueltas bg-success-subtle/bg-danger-subtle/bg-warning-subtle/bg-info de
+   Bootstrap -- el tema del panel (style.css/theme.css/nav.css) trae varias
+   paletas de skin sin scopear que redefinen esas mismas variables con
+   colores distintos entre si (ver public/managers/css/includes/seo-badges.css
+   para el mismo problema ya diagnosticado en SEO Metas). */
+.act-badge--created {
+    background-color: #e6f7ec !important;
+    color: #15803d !important;
+}
+
+.act-badge--updated {
+    background-color: #e7f4fc !important;
+    color: #008bce !important;
+}
+
+.act-badge--deleted {
+    background-color: #fdecea !important;
+    color: #b91c1c !important;
+}
+
+.act-badge--other {
+    background-color: #e5e7eb !important;
+    color: #4b5563 !important;
+}

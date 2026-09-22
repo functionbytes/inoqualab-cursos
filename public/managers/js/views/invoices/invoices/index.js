@@ -7,11 +7,14 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCondition').val($('#modalCondition').val());
-        $('#filterMethods').val($('#modalMethods').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initInvoicesInvoicesTable() {
+        FilterToolbar.init({
+        fields: { filterCondition: 'popover_Condition', filterMethods: 'popover_Methods' },
     });
+    }
+
+    initInvoicesInvoicesTable();
+
+    AjaxTable.init({ onLoaded: initInvoicesInvoicesTable });
 
 });

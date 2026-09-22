@@ -8,11 +8,15 @@ $(function () {
     if (flashError) { toastr.error(flashError); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initSettingsSlidersTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
+    }
+
+    initSettingsSlidersTable();
+
+    AjaxTable.init({ onLoaded: initSettingsSlidersTable });
 
     // ── Bulk selection ───────────────────────────────────────────────────────
     function updateBulkToolbar() {

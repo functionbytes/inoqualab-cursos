@@ -1,32 +1,501 @@
-.header-notif-badge {
-    top: 2px;
-    right: 2px;
-    font-size: 9px;
-    padding: 2px 5px;
-    min-width: 16px;
+/* ========================================
+   Buscador rápido del menú (centro del header). No es el buscador global
+   de webadmin (#gs-trigger real busca en datos vía API) — aquí solo indexa
+   los links que ya están en el DOM del rail/paneles, sin backend propio.
+   ======================================== */
+.app-header-start {
+    flex: 1;
+    justify-content: center;
+    position: relative;
 }
 
-.header-notif-dropdown {
-    min-width: 320px;
-    max-width: 360px;
+.gs-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
 }
 
-.header-notif-list {
+.gs-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--bs-border-color, #e5eaef);
+    background: var(--bs-body-bg, #f5f6f8);
+    color: #6b7280;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.gs-trigger span {
+    flex: 1;
+    text-align: left;
+}
+
+.gs-kbd {
+    font-size: 11px;
+    background: #fff;
+    border: 1px solid #e5eaef;
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #9ca3af;
+}
+
+.gs-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    z-index: 1060;
+    overflow: hidden;
+}
+
+.gs-dropdown.open {
+    display: block;
+}
+
+.gs-search-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #9ca3af;
+}
+
+.gs-search-field input {
+    border: none;
+    outline: none;
+    flex: 1;
+    font-size: 14px;
+    color: #111827;
+}
+
+.gs-results {
     max-height: 320px;
     overflow-y: auto;
+    padding: 6px;
 }
 
-.header-notif-icon-circle {
+.gs-result-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #111827;
+    font-size: 13px;
+}
+
+.gs-result-item:hover,
+.gs-result-item.active {
+    background: #f3f4f6;
+    color: #111827;
+    text-decoration: none;
+}
+
+.gs-result-item .gs-result-group {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.gs-empty {
+    padding: 16px;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 13px;
+}
+
+/* ========================================
+   Overrides sobre managers/css/nav.css (copia literal de webadmin).
+   Se cargan despues para: 1) corregir un hueco real de esa copia (el aside
+   no reduce su propio ancho en .no-sidebar-open, solo oculta el panel —
+   tapaba el contenido con su fondo blanco de 320px) y 2) reemplazar el
+   verde de marca #90bb13 por el azul #008bce en todo lo que toca al rail.
+   ======================================== */
+
+/* Bug real de nav.css: `.no-sidebar-open .app-tab-content{display:none}`
+   oculta el panel, pero el <aside> conserva `width:var(--app-menubar-tabs)`
+   (320px) con fondo blanco opaco -> tapaba los primeros ~240px del
+   contenido en cualquier pagina de un solo item (ej. Dashboard). */
+.app-menubar-tabs.no-sidebar-open {
+    width: 80px;
+}
+
+.app-navbar-tabs .nav-item .menu-link.active,
+.app-navbar-tabs .nav-item .menu-link:hover,
+.app-navbar-tabs .nav-item .menu-link:focus {
+    background: #008bce !important;
+}
+
+.app-menubar-tabs .side-menubar .menu-item .menu-link.active {
+    color: #008bce !important;
+}
+
+.app-toggler:focus-visible {
+    outline: 2px solid #008bce;
+    outline-offset: 2px;
+}
+
+/* Bug real de theme.css: `.bg-primary { background-color: var(--bs-primary-rgb,var(--bs-bg-opacity))!important }`
+   usa --bs-primary-rgb (lista "r,g,b") directo como color, sin envolver en rgb(...) —
+   valor invalido, el navegador lo descarta y el fondo queda transparente. Afecta a
+   cualquier badge/boton/alerta con bg-primary en todo el panel (ej. badges de tipo en
+   tablas). style.css ya trae la regla correcta pero theme.css se carga despues y gana. */
+.bg-primary {
+    background-color: #008bce !important;
+}
+
+/* ========================================
+   Notificaciones + dock de usuario del header.
+   Portado de modules/Notification/public/css/notifications.css (webadmin),
+   con el verde de marca #90bb13 reemplazado por el azul #008bce.
+   ======================================== */
+
+/* ── Badge (punto pulsante) sobre la campana ── */
+#notification-badge {
+    width: 12px;
+    height: 12px;
+    background-color: #dc3545;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    border: 2px solid #fff;
+    box-sizing: border-box;
+    z-index: 10;
+    display: none;
+}
+
+#notification-badge.badge-pulse {
+    display: block;
+    animation: header-pulse-badge 2s infinite;
+}
+
+@keyframes header-pulse-badge {
+    0%   { box-shadow: 0 0 0 0 rgba(220, 53, 69, .7); }
+    70%  { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* ── Panel de notificaciones ── */
+.notif-panel-dd {
+    width: 360px;
+    max-width: 360px;
+    padding: 0;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    overflow: hidden;
+}
+
+.notif-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notif-panel-icon {
     width: 32px;
     height: 32px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #374151;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
-.header-notif-time {
-    font-size: 11px;
+.notif-panel-title-wrap { flex: 1; min-width: 0; }
+
+.notif-panel-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 2px;
 }
 
-.header-notif-dot {
-    width: 8px;
-    height: 8px;
+.notif-panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.2;
+}
+
+.notif-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #008bce;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 2px 7px;
+    line-height: 1.4;
+}
+
+.notif-panel-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: #f5f5f5;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 12px;
+    flex-shrink: 0;
     padding: 0;
+    transition: background .15s;
 }
+
+.notif-panel-close:hover { background: #e5e7eb; }
+
+.notif-panel-body {
+    overflow-y: auto;
+    max-height: 340px;
+}
+
+.notif-panel-empty { padding: 2rem; text-align: center; }
+.notif-panel-empty i { font-size: 2rem; opacity: .5; color: #6c757d; display: block; margin-bottom: .75rem; }
+
+/* Iconos SVG propios (App\Html\IconHelper::render('bell'/'bell-slash', ...))
+   en vez de fa-bell/fa-bell-slash, mismo estilo "trazo cercano" del nav rail.
+   Color negro fijo (no hereda el gris de .btn-action-gray) para que combine
+   con el trazo negro por defecto de los iconos del rail (NavIconHelper). */
+.notif-trigger-ico { display: inline-flex; color: #000; }
+.notif-empty-ico { display: inline-flex; justify-content: center; opacity: .5; color: #6c757d; margin-bottom: .75rem; }
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unread { background: #f5f6f8; }
+.notif-item:hover { background: #f3f4f6; }
+
+.notif-item .ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #374151;
+    flex-shrink: 0;
+}
+
+.notif-item.unread .ico { background: rgba(0, 139, 206, .17); color: #008bce; }
+.notif-item .body { flex: 1; min-width: 0; }
+
+.notif-item .head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.notif-item .title { font-size: 13px; font-weight: 600; color: #111827; line-height: 1.3; }
+
+.notif-item .badge-new {
+    flex-shrink: 0;
+    font-size: 9px;
+    font-weight: 700;
+    background: #008bce;
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 5px;
+    letter-spacing: .4px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.notif-item .desc {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.notif-item .meta { font-size: 11px; color: #9ca3af; }
+.notif-item .meta i { font-size: 10px; margin-right: 3px; }
+
+.notif-extra {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #9ca3af;
+    border-bottom: 1px solid #f3f4f6;
+    text-align: center;
+    background: #f5f6f8;
+}
+
+.notif-panel-foot {
+    padding: 10px 12px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.notif-panel-foot .btn { font-size: 13px; padding: 7px 12px; width: 100%; }
+
+/* ── Dock de usuario ── */
+.dock-wrap { position: relative; list-style: none; }
+
+.dock-anchor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: transparent;
+    padding: 4px 0;
+    cursor: pointer;
+}
+
+.dock-anchor .av,
+.dock-head .av {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #f5f6f8;
+    color: #000;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    overflow: hidden;
+    user-select: none;
+}
+
+.dock-anchor .av img,
+.dock-head .av img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
+.dock-anchor .av .pres {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #13c672;
+    border: 2px solid #fff;
+}
+
+.dock {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 12px);
+    width: 240px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    z-index: 1060;
+    display: none;
+    overflow: hidden;
+}
+
+.dock.open { display: block; }
+
+.dock-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dock-head .body { flex: 1; min-width: 0; }
+
+.dock-head .nm {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: none;
+}
+
+.dock-head .em {
+    display: block;
+    font-size: 11px;
+    color: #6b7280;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dock-list { padding: 4px 0; }
+
+.dock-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .12s;
+    line-height: 1.4;
+}
+
+.dock-item:hover { background: #f3f4f6; color: #111827; text-decoration: none; }
+.dock-item i { font-size: 13px; width: 16px; text-align: center; color: #6b7280; flex-shrink: 0; }
+.dock-item.danger { color: #dc3545; }
+.dock-item.danger i { color: #dc3545; }
+.dock-item.danger:hover { background: #fff5f5; color: #dc3545; }
+.dock-divider { height: 1px; background: #f0f0f0; margin: 4px 0; }

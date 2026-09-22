@@ -8,11 +8,19 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
 
     // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    function initCoursesChaptersTable() {
+        FilterToolbar.init({
+        fields: { filterAvailable: 'popover_Available' },
     });
+        BulkActions.init({
+        url: config.routes.bulkAction,
+        entityLabel: 'tema(s)',
+    });
+    }
+
+    initCoursesChaptersTable();
+
+    AjaxTable.init({ onLoaded: initCoursesChaptersTable });
 
     // ── Eliminar individual vía modal ────────────────────────────────────────
     $(document).on('click', '.btn-delete', function (e) {
@@ -24,10 +32,6 @@ $(function () {
     });
 
     // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
-        url: config.routes.bulkAction,
-        entityLabel: 'tema(s)',
-    });
 
     // ── Reordenar por drag&drop ──────────────────────────────────────────────
     var $sortable = $('#chapters-sortable');
