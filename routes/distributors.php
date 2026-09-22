@@ -96,7 +96,6 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
         Route::get('/users/create/{slack}', [EnterpriseUserController::class, 'create'])->name('distributor.enterprises.users.create');
         Route::get('/users/edit/{slack}', [EnterpriseUserController::class, 'edit'])->name('distributor.enterprises.users.edit');
         Route::get('/users/view/{slack}', [EnterpriseUserController::class, 'view'])->name('distributor.enterprises.users.view');
-        Route::get('/users/reports/{slack}', [EnterpriseUserController::class, 'report'])->name('distributor.enterprises.users.reports');
         Route::get('/users/income/{slack}', [EnterpriseUserController::class, 'income'])->name('distributor.enterprises.users.income');
         Route::get('/users/results/{slack}', [ResultsController::class, 'index'])->name('distributor.enterprises.users.results');
 
@@ -114,7 +113,6 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
         Route::get('/users/certifications/{slack}', [CertificatesController::class, 'index'])->name('distributor.enterprises.users.certificates');
         Route::get('/users/results/view/{slack}', [ResultsController::class, 'view'])->name('distributor.enterprises.users.results.view');
         Route::get('/users/results/download/{slack}', [ResultsController::class, 'download'])->name('distributor.enterprises.users.results.download');
-        Route::delete('/users/courses/destroy/{user}', [EnterpriseCourseController::class, 'destroyInscription'])->name('distributor.enterprises.courses.user.destroy');
         Route::get('/users/certificate/user/{slack}', [CertificatesController::class, 'user'])->name('distributor.enterprises.users.certificate.user');
         Route::get('/users/certificate/broad/{slack}', [CertificatesController::class, 'broad'])->name('distributor.enterprises.users.certificate.broad');
         Route::get('/users/certificate/course/{slack}', [CertificatesController::class, 'course'])->name('distributor.enterprises.users.certificate.course');
@@ -122,7 +120,6 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
         Route::delete('/users/courses/destroy/{enterprice}/{course}', [EnterpriseCourseController::class, 'destroy'])->name('distributor.enterprises.courses.destroy');
         Route::get('/users/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('distributor.enterprises.courses.reasign');
         Route::post('/users/courses/reasign/action', [EnterpriseCourseController::class, 'includes'])->name('distributor.enterprises.action.reasign');
-        Route::get('/users/courses/reports/{enterprises}/{course}', [EnterpriseCourseController::class, 'report'])->name('distributor.enterprises.courses.reports');
         Route::get('/users/courses/view/{enterprises}/{course}', [EnterpriseCourseController::class, 'view'])->name('distributor.enterprises.courses.view');
 
     });
@@ -142,7 +139,6 @@ Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor',
     Route::group(['prefix' => 'invoices'], function () {
 
         Route::get('/', [InvoicesController::class, 'index'])->name('distributor.invoices');
-        Route::get('/reports', [InvoicesController::class, 'report'])->name('distributor.invoices.report');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('distributor.invoices.view');
         Route::get('/detail/{slack}', [InvoicesController::class, 'detail'])->name('distributor.invoices.detail');
         Route::get('/report/generate', [InvoicesController::class, 'generate'])->name('distributor.invoices.generate');

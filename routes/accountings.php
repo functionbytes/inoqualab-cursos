@@ -26,7 +26,6 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
     });
 
     Route::group(['prefix' => 'enterprises'], function () {
-        Route::get('/', [EnterprisesController::class, 'index'])->name('accounting.enterprises');
         Route::get('/view/{slack}', [EnterprisesController::class, 'view'])->name('accounting.enterprises.view');
         Route::get('/orders/{slack}', [EnterprisesOrdersController::class, 'index'])->name('accounting.enterprises.orders');
     });
@@ -38,7 +37,6 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
         Route::get('/orders/{slack}', [DistributorsOrdersController::class, 'index'])->name('accounting.distributors.orders');
 
         Route::get('/enterprises/{slack}', [EnterprisesDistributorsController::class, 'index'])->name('accounting.distributors.enterprises');
-        Route::get('/enterprises/orders/{slack}', [EnterprisesDistributorsController::class, 'orders'])->name('accounting.distributors.enterprises.orders');
 
     });
 
@@ -66,7 +64,6 @@ Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', '
         Route::get('/create', [InvoicesController::class, 'create'])->name('accounting.invoices.create');
         Route::post('/store', [InvoicesController::class, 'store'])->name('accounting.invoices.store');
         Route::post('/update', [InvoicesController::class, 'update'])->name('accounting.invoices.update');
-        Route::get('/print/{slack}', [InvoicesController::class, 'print'])->name('accounting.invoices.print');
         Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('accounting.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('accounting.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('accounting.invoices.details');

@@ -22,7 +22,6 @@ use App\Http\Controllers\Managers\Distributors\CourseController as DistributorCo
 use App\Http\Controllers\Managers\Distributors\DistributorsController;
 use App\Http\Controllers\Managers\Distributors\EnterpriseController as DistributorEnterpriseController;
 use App\Http\Controllers\Managers\Distributors\InvoicesController as DistributorsInvoicesController;
-use App\Http\Controllers\Managers\Distributors\OrdersController as DistributorsOrdersController;
 use App\Http\Controllers\Managers\Distributors\RatesController as DistributorRatesController;
 use App\Http\Controllers\Managers\Distributors\StaffController as DistributorStaffController;
 use App\Http\Controllers\Managers\Enterprises\CourseController as EnterpriseCourseController;
@@ -37,7 +36,6 @@ use App\Http\Controllers\Managers\IncomingMails\IncomingMailsController as Manag
 use App\Http\Controllers\Managers\IncomingMails\MailAutoConfirmRulesController;
 use App\Http\Controllers\Managers\Instructions\CategoriesController as InstructionsCategoriesController;
 use App\Http\Controllers\Managers\Instructions\InstructionsController;
-use App\Http\Controllers\Managers\Invoices\GenerateController as InvoicesGenerateController;
 use App\Http\Controllers\Managers\Invoices\InvoicesController;
 use App\Http\Controllers\Managers\Invoices\ReportController as InvoicesReportController;
 use App\Http\Controllers\Managers\Mailer\MailerComponentController;
@@ -56,7 +54,6 @@ use App\Http\Controllers\Managers\ProfileController;
 use App\Http\Controllers\Managers\Quizs\QuizController;
 use App\Http\Controllers\Managers\Quizs\TopicController as QuizTopicController;
 use App\Http\Controllers\Managers\RemarketingController;
-use App\Http\Controllers\Managers\ReportController;
 use App\Http\Controllers\Managers\Seo\GscController;
 use App\Http\Controllers\Managers\Seo\SchemaOrgController;
 use App\Http\Controllers\Managers\Seo\Seo404LogController;
@@ -98,6 +95,7 @@ use App\Http\Controllers\Managers\Settings\SettingsController;
 use App\Http\Controllers\Managers\Settings\SlidersController;
 use App\Http\Controllers\Managers\Settings\TestimoniesController;
 use App\Http\Controllers\Managers\Settings\TrustedsController;
+use App\Http\Controllers\Managers\Settings\UploadingSettingsController;
 use App\Http\Controllers\Managers\Users\ActivitysController;
 use App\Http\Controllers\Managers\Users\CertificatesController;
 use App\Http\Controllers\Managers\Users\InscriptionsController as UsersInscriptionsController;
@@ -114,6 +112,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('manager.dashboard');
+    Route::get('/data/overview', [DashboardController::class, 'overview'])->name('manager.dashboard.overview');
 
     // Perfil propio del manager autenticado (no requiere permiso de recurso).
     Route::group(['prefix' => 'profile'], function () {
@@ -159,7 +158,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
 
         Route::get('/', [NotificationsController::class, 'index'])->name('manager.notifications');
         Route::get('/mark-as-read', [NotificationsController::class, 'markasread'])->name('manager.notifications.markasread');
-        Route::get('/all', [NotificationsController::class, 'show'])->name('manager.notifications.markallnotify');
         Route::post('/bulk-action', [NotificationsController::class, 'bulkAction'])->name('manager.notifications.bulk-action');
 
     });
@@ -230,10 +228,8 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::get('/staff/edit/{slack}', [DistributorStaffController::class, 'edit'])->name('manager.distributors.staffs.edit');
         Route::get('/staff/view/{slack}', [DistributorStaffController::class, 'view'])->name('manager.distributors.staffs.view');
         Route::delete('/staff/destroy/{slack}', [DistributorStaffController::class, 'destroy'])->name('manager.distributors.staffs.destroy');
-        Route::get('/staff/history/{slack}', [DistributorStaffController::class, 'history'])->name('manager.distributors.staffs.history');
 
         Route::get('/invoices/{slack}', [DistributorsInvoicesController::class, 'index'])->name('manager.distributors.invoices');
-        Route::get('/orders/{slack}', [DistributorsOrdersController::class, 'index'])->name('manager.distributors.orders');
 
     });
 
@@ -247,7 +243,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::delete('/destroy/{slack}', [EnterprisesController::class, 'destroy'])->name('manager.enterprises.destroy');
         Route::post('/bulk-action', [EnterprisesController::class, 'bulkAction'])->name('manager.enterprises.bulk-action');
         Route::get('/navegation/{slack}', [EnterprisesController::class, 'navegation'])->name('manager.enterprises.navegation');
-        Route::get('/inscriptions/{slack}', [EnterprisesController::class, 'inscriptions'])->name('manager.enterprises.inscriptions');
 
         Route::get('/rates/{slack}', [EnterprisesRatesController::class, 'index'])->name('manager.enterprises.rates');
         Route::post('/rates/update', [EnterprisesRatesController::class, 'update'])->name('manager.enterprises.rates.update');
@@ -256,21 +251,16 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/users/{slack}/bulk-action', [EnterpriseUserController::class, 'bulkAction'])->name('manager.enterprises.users.bulk-action');
         Route::post('/users/update', [EnterpriseUserController::class, 'update'])->name('manager.enterprises.users.update');
         Route::post('/users/store', [EnterpriseUserController::class, 'store'])->name('manager.enterprises.users.store');
-        Route::post('/reports/generate', [ReportController::class, 'generate'])->name('manager.enterprises.reports.generate');
         Route::post('/users/importation', [EnterpriseUserController::class, 'importation'])->name('manager.enterprises.users.importation');
         Route::post('/courses/importation', [EnterpriseCourseController::class, 'importation'])->name('manager.enterprises.courses.importation');
-        Route::post('/inscriptions/generate', [EnterprisesController::class, 'generate'])->name('manager.enterprises.inscriptions.generate');
 
         Route::get('/users/income/generate', [EnterpriseUserController::class, 'incoming'])->name('manager.enterprises.users.incoming');
         Route::get('/users/reports/generate', [EnterpriseUserController::class, 'generate'])->name('manager.enterprises.users.generate');
-        Route::get('/courses/reports/generate', [EnterpriseCourseController::class, 'generate'])->name('manager.enterprises.courses.generate');
         Route::post('/users/courses/action', [EnterpriseCourseController::class, 'actionUsers'])->name('manager.enterprises.courses.users');
 
         Route::get('/users/create/{slack}', [EnterpriseUserController::class, 'create'])->name('manager.enterprises.users.create');
         Route::get('/users/edit/{slack}', [EnterpriseUserController::class, 'edit'])->name('manager.enterprises.users.edit');
-        Route::get('/users/postpone/{slack}', [EnterpriseCourseController::class, 'postponeUsers'])->name('manager.enterprises.postpone.users');
         Route::get('/users/reports/{slack}', [EnterpriseUserController::class, 'report'])->name('manager.enterprises.users.reports');
-        Route::get('/users/import/{slack}', [EnterpriseUserController::class, 'import'])->name('manager.enterprises.users.import');
         Route::get('/users/income/{slack}', [EnterpriseUserController::class, 'income'])->name('manager.enterprises.users.income');
 
         Route::get('/courses/{slack}', [EnterpriseCourseController::class, 'index'])->name('manager.enterprises.courses');
@@ -282,15 +272,12 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
 
         Route::get('/courses/progress/{user}', [EnterpriseCourseController::class, 'progress'])->name('manager.enterprises.courses.progress');
         Route::get('/courses/create/{slack}', [EnterpriseCourseController::class, 'create'])->name('manager.enterprises.courses.create');
-        Route::get('/courses/orders/edit/{slack}', [OrdersController::class, 'edit'])->name('manager.order.edit');
         Route::get('/courses/certificate/download/{slack}', [CertificatesController::class, 'download'])->name('manager.certificate.download');
         Route::get('/courses/users/postpone/{slack}', [EnterpriseCourseController::class, 'postponeCourses'])->name('manager.enterprises.postpone.courses');
         Route::delete('/courses/destroy/{enterprice}/{course}', [EnterpriseCourseController::class, 'destroy'])->name('manager.enterprises.courses.destroy');
         Route::get('/courses/reasign/{enterprises}/{course}', [EnterpriseCourseController::class, 'reasign'])->name('manager.enterprises.courses.reasign');
         Route::get('/courses/insert/{enterprises}/{course}', [EnterpriseCourseController::class, 'insert'])->name('manager.enterprises.courses.insert');
-        Route::get('/courses/reports/{enterprises}/{course}', [EnterpriseCourseController::class, 'report'])->name('manager.enterprises.courses.reports');
         Route::get('/courses/view/{enterprises}/{course}', [EnterpriseCourseController::class, 'view'])->name('manager.enterprises.courses.view');
-        Route::get('/courses/import/{enterprises}/{course}', [EnterpriseCourseController::class, 'import'])->name('manager.enterprises.courses.import');
         Route::delete('/users/courses/destroy/{slack}', [EnterpriseCourseController::class, 'destroys'])->name('manager.enterprises.courses.user.destroy');
     });
 
@@ -335,7 +322,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/store', [CertifiersController::class, 'store'])->name('manager.certifiers.store');
         Route::post('/update', [CertifiersController::class, 'update'])->name('manager.certifiers.update');
         Route::get('/edit/{slack}', [CertifiersController::class, 'edit'])->name('manager.certifiers.edit');
-        Route::get('/view/{slack}', [CertifiersController::class, 'view'])->name('manager.certifiers.view');
         Route::delete('/destroy/{slack}', [CertifiersController::class, 'destroy'])->name('manager.certifiers.destroy');
         Route::post('/bulk-action', [CertifiersController::class, 'bulkAction'])->name('manager.certifiers.bulk-action');
 
@@ -457,7 +443,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/categories/store', [BlogsCategoriesController::class, 'store'])->name('manager.blogs.categories.store');
         Route::post('/categories/update', [BlogsCategoriesController::class, 'update'])->name('manager.blogs.categories.update');
         Route::get('/categories/edit/{slack}', [BlogsCategoriesController::class, 'edit'])->name('manager.blogs.categories.edit');
-        Route::get('/categories/view/{slack}', [BlogsCategoriesController::class, 'view'])->name('manager.blogs.categories.view');
         Route::delete('/categories/destroy/{slack}', [BlogsCategoriesController::class, 'destroy'])->name('manager.blogs.categories.destroy');
         Route::post('/categories/bulk-action', [BlogsCategoriesController::class, 'bulkAction'])->name('manager.blogs.categories.bulk-action');
 
@@ -466,7 +451,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/tags/store', [BlogsTagsController::class, 'store'])->name('manager.blogs.tags.store');
         Route::post('/tags/update', [BlogsTagsController::class, 'update'])->name('manager.blogs.tags.update');
         Route::get('/tags/edit/{slack}', [BlogsTagsController::class, 'edit'])->name('manager.blogs.tags.edit');
-        Route::get('/tags/view/{slack}', [BlogsTagsController::class, 'view'])->name('manager.blogs.tags.view');
         Route::delete('/tags/destroy/{slack}', [BlogsTagsController::class, 'destroy'])->name('manager.blogs.tags.destroy');
         Route::post('/tags/bulk-action', [BlogsTagsController::class, 'bulkAction'])->name('manager.blogs.tags.bulk-action');
 
@@ -505,17 +489,14 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
     Route::group(['prefix' => 'invoices'], function () {
 
         Route::get('/', [InvoicesController::class, 'index'])->name('manager.invoices');
-        Route::get('/create', [InvoicesController::class, 'create'])->name('manager.invoices.create');
         Route::post('/store', [InvoicesController::class, 'store'])->name('manager.invoices.store');
         Route::post('/update', [InvoicesController::class, 'update'])->name('manager.invoices.update');
-        Route::get('/print/{slack}', [InvoicesController::class, 'print'])->name('manager.invoices.print');
         Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('manager.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('manager.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('manager.invoices.details');
 
         Route::get('/report', [InvoicesReportController::class, 'report'])->name('manager.invoices.report');
         Route::get('/report/generate', [InvoicesReportController::class, 'generate'])->name('manager.invoices.generate');
-        Route::get('/pdf/{slack}', [InvoicesGenerateController::class, 'generate'])->name('manager.invoices.pdf');
 
     });
 
@@ -588,6 +569,9 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::get('/modules', [ModulesSettingsController::class, 'index'])->name('manager.settings.modules');
         Route::post('/modules/update', [ModulesSettingsController::class, 'update'])->name('manager.settings.modules.update');
 
+        Route::get('/system/uploading', [UploadingSettingsController::class, 'index'])->name('manager.settings.system.uploading');
+        Route::post('/system/uploading/update', [UploadingSettingsController::class, 'update'])->name('manager.settings.system.uploading.update');
+
         // Nombradas manager.mails.* (no manager.settings.mails.*) a propósito:
         // EnforcePanelPermission deriva el dominio del 2º segmento del nombre
         // de ruta. Con "settings" ahí, exigía settings.create/delete -- que
@@ -609,7 +593,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/bulk-action', [ManagerIncomingMailsController::class, 'bulkAction'])->name('manager.mails.bulk-action');
         Route::get('/export', [ManagerIncomingMailsController::class, 'export'])->name('manager.mails.export');
         Route::post('/create-alias', [ManagerIncomingMailsController::class, 'createAlias'])->name('manager.mails.create-alias');
-        Route::get('/pending-count', [ManagerIncomingMailsController::class, 'pendingCount'])->name('manager.mails.pending-count');
         Route::get('/get-reviewers', [ManagerIncomingMailsController::class, 'getReviewers'])->name('manager.mails.reviewers');
         Route::get('/{slack}', [ManagerIncomingMailsController::class, 'show'])->name('manager.mails.show');
         Route::get('/{slack}/preview', [ManagerIncomingMailsController::class, 'preview'])->name('manager.mails.preview');
@@ -628,7 +611,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::post('/store', [UsersController::class, 'store'])->name('manager.users.store');
         Route::post('/update', [UsersController::class, 'update'])->name('manager.users.update');
         Route::get('/edit/{slack}', [UsersController::class, 'edit'])->name('manager.users.edit');
-        Route::get('/view/{slack}', [UsersController::class, 'view'])->name('manager.users.view');
         Route::delete('/destroy/{slack}', [UsersController::class, 'destroy'])->name('manager.users.destroy');
         Route::post('/bulk-action', [UsersController::class, 'bulkAction'])->name('manager.users.bulk-action');
         Route::get('/activitys/{slack}', [ActivitysController::class, 'index'])->name('manager.users.activitys');
@@ -735,8 +717,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::delete('/exam/questions/destroy/{slack}', [ExamTopicController::class, 'destroy'])->name('manager.courses.exam.questions.destroy');
         Route::post('/exam/questions/bulk-action', [ExamTopicController::class, 'bulkAction'])->name('manager.courses.exam.questions.bulk-action');
 
-        Route::post('/reports/generate', [ReportController::class, 'generate'])->name('manager.courses.generate');
-
         Route::get('/certifications/{slack}', [CertificatesController::class, 'broad'])->name('manager.certificate.broad');
         Route::get('/certificate/course/{slack}', [CertificatesController::class, 'course'])->name('manager.certificate.course');
         Route::get('/certificate/user/{slack}', [CertificatesController::class, 'user'])->name('manager.certificate.user');
@@ -746,8 +726,11 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
 
     });
 
-    // Audit trail (Spatie activitylog) — visor de solo lectura
+    // Audit trail (Spatie activitylog) — visor de solo lectura salvo bulk-action (purgar ruido histórico)
     Route::get('/activity', [ActivityLogController::class, 'index'])->name('manager.activity.index');
+    Route::get('/activity/export', [ActivityLogController::class, 'export'])->name('manager.activity.export');
+    Route::get('/activity/stats', [ActivityLogController::class, 'stats'])->name('manager.activity.stats');
+    Route::post('/activity/bulk-action', [ActivityLogController::class, 'bulkAction'])->name('manager.activity.bulk-action');
 
     // ─── SEO ────────────────────────────────────────────────────────────────────
 
@@ -762,30 +745,18 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::post('/import', [SeoMetaController::class, 'import'])->name('import.process');
             Route::get('/import-json', [SeoMetaController::class, 'showImportJson'])->name('import-json');
             Route::post('/import-json', [SeoMetaController::class, 'importJson'])->name('import-json.process');
-            Route::get('/hreflang', [SeoMetaController::class, 'hreflangIndex'])->name('hreflang');
-            Route::get('/keywords/suggestions', [SeoMetaController::class, 'keywordSuggestions'])->name('keyword-suggestions');
             Route::get('/{seoMeta}', [SeoMetaController::class, 'edit'])->name('edit');
             Route::put('/{seoMeta}', [SeoMetaController::class, 'update'])->name('update');
             Route::patch('/{seoMeta}/inline', [SeoMetaController::class, 'inlineUpdate'])->name('inline-update');
             Route::delete('/{seoMeta}', [SeoMetaController::class, 'destroy'])->name('destroy');
             Route::post('/bulk-destroy', [SeoMetaController::class, 'bulkDestroy'])->name('bulk-destroy');
-            Route::post('/{seoMeta}/translate', [SeoMetaController::class, 'translateMeta'])->name('translate');
-            Route::post('/{seoMeta}/create-locale', [SeoMetaController::class, 'createLocale'])->name('create-locale');
         });
 
         // Redirects
         Route::prefix('redirects')->name('manager.seo.redirects.')->group(function () {
             Route::get('/', [SeoRedirectController::class, 'index'])->name('index');
-            Route::get('/export', [SeoRedirectController::class, 'export'])->name('export');
-            Route::get('/htaccess-import', [SeoRedirectController::class, 'showHtaccessImport'])->name('htaccess-import');
-            Route::post('/htaccess-import', [SeoRedirectController::class, 'importHtaccess'])->name('htaccess-import.process');
-            Route::get('/detect-chains', [SeoRedirectController::class, 'detectChains'])->name('detect-chains');
-            Route::post('/resolve-chains', [SeoRedirectController::class, 'resolveChains'])->name('resolve-chains');
-            Route::get('/create', [SeoRedirectController::class, 'create'])->name('create');
             Route::post('/', [SeoRedirectController::class, 'store'])->name('store');
-            Route::get('/{seoRedirect}/analytics', [SeoRedirectController::class, 'analytics'])->name('analytics');
             Route::post('/{seoRedirect}/test', [SeoRedirectController::class, 'test'])->name('test');
-            Route::get('/{seoRedirect}', [SeoRedirectController::class, 'edit'])->name('edit');
             Route::put('/{seoRedirect}', [SeoRedirectController::class, 'update'])->name('update');
             Route::delete('/{seoRedirect}', [SeoRedirectController::class, 'destroy'])->name('destroy');
             Route::post('/{seoRedirect}/toggle', [SeoRedirectController::class, 'toggleActive'])->name('toggle');
@@ -804,8 +775,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         // Dashboard SEO
         Route::get('/dashboard', [SeoDashboardController::class, 'index'])->name('manager.seo.dashboard');
         Route::get('/analytics', [SeoDashboardController::class, 'analytics'])->name('manager.seo.analytics');
-        Route::get('/verification', [SeoDashboardController::class, 'verification'])->name('manager.seo.verification');
-        Route::put('/verification', [SeoDashboardController::class, 'verificationUpdate'])->name('manager.seo.verification.update');
         Route::get('/search-console/import', [SeoDashboardController::class, 'showSearchConsoleImport'])->name('manager.seo.search-console.import');
         Route::post('/search-console/import', [SeoDashboardController::class, 'importSearchConsole'])->name('manager.seo.search-console.import.store');
 
@@ -876,7 +845,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::post('/history/clear', [SeoAuditHistoryController::class, 'clear'])->name('history.clear');
             Route::delete('/history/{seoAuditLog}', [SeoAuditHistoryController::class, 'destroy'])->name('history.destroy');
             Route::get('/history/{seoMeta}', [SeoAuditHistoryController::class, 'forMeta'])->name('history.meta');
-            Route::get('/history/{seoMeta}/json', [SeoAuditHistoryController::class, 'forMetaJson'])->name('history.meta.json');
         });
 
         // Alertas SEO
@@ -1024,7 +992,6 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::post('/{uid}/toggle-status', [MailerTemplateController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
             Route::post('/{uid}/send-test', [MailerTemplateController::class, 'sendTest'])->name('send-test')->middleware('can:newsletters.update');
             Route::post('/bulk-action', [MailerTemplateController::class, 'bulkAction'])->name('bulk-action')->middleware('can:newsletters.delete');
-            Route::post('/format-html', [MailerTemplateController::class, 'formatHtml'])->name('format-html');
             Route::get('/{uid}/variables', [MailerTemplateController::class, 'variables'])->name('variables');
             Route::get('/variables-by-module', [MailerTemplateController::class, 'variablesByModule'])->name('variables-by-module');
         });
@@ -1037,10 +1004,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::get('/{uid}/edit', [MailerComponentController::class, 'edit'])->name('edit');
             Route::patch('/{uid}', [MailerComponentController::class, 'update'])->name('update')->middleware('can:newsletters.update');
             Route::delete('/{uid}', [MailerComponentController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
-            Route::get('/{uid}/preview', [MailerComponentController::class, 'preview'])->name('preview');
-            Route::post('/{uid}/preview-ajax', [MailerComponentController::class, 'previewAjax'])->name('preview-ajax');
             Route::post('/{uid}/duplicate', [MailerComponentController::class, 'duplicate'])->name('duplicate')->middleware('can:newsletters.create');
-            Route::post('/{uid}/toggle-status', [MailerComponentController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
             Route::post('/bulk-action', [MailerComponentController::class, 'bulkAction'])->name('bulk-action')->middleware('can:newsletters.update');
             Route::get('/variables', [MailerComponentController::class, 'variables'])->name('variables');
         });
@@ -1055,14 +1019,10 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::delete('/{variable}', [MailerVariableController::class, 'destroy'])->name('destroy')->middleware('can:newsletters.delete');
             Route::post('/{variable}/toggle-status', [MailerVariableController::class, 'toggleStatus'])->name('toggle-status')->middleware('can:newsletters.update');
             Route::post('/bulk-action', [MailerVariableController::class, 'bulkAction'])->name('bulk-action')->middleware('can:newsletters.update');
-            Route::get('/by-module', [MailerVariableController::class, 'getByModule'])->name('by-module');
-            Route::get('/grouped-by-category', [MailerVariableController::class, 'getGroupedByCategory'])->name('grouped-by-category');
-            Route::get('/available-keys', [MailerVariableController::class, 'getAvailableKeys'])->name('available-keys');
         });
 
         // Endpoints
         Route::prefix('endpoints')->name('endpoints.')->group(function () {
-            Route::get('/documentation', [MailerEndpointController::class, 'documentation'])->name('documentation');
             Route::get('/', [MailerEndpointController::class, 'index'])->name('index');
             Route::get('/create', [MailerEndpointController::class, 'create'])->name('create');
             Route::post('/', [MailerEndpointController::class, 'store'])->name('store')->middleware('can:newsletters.create');
