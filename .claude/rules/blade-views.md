@@ -21,3 +21,8 @@ globs: "resources/views/{managers,supports,distributors,enterprises,accountings,
 - Modals: ALWAYS `modal-dialog-centered` with footer buttons w-100 stacked (primary mb-2 top, secondary bottom)
 - select2: NEVER use `theme: 'bootstrap-5'` (CSS not loaded)
 - Primary color: `#008bce` (Bootstrap Modernize — `--bs-primary`)
+
+## Ver también
+
+- `.claude/rules/detail-forms.md` — layout de 2 columnas (form + sidebar) para crear/editar UNA entidad.
+- `.claude/rules/data-tables.md` — layout de listados (`index.blade.php` con `<table>`).

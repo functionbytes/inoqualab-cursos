@@ -21,13 +21,13 @@ class SupportNavService extends BaseNavService
     {
         return [
             'miniItems' => [
-                ['id' => 'home', 'icon' => 'fa-duotone fa-house', 'tooltip' => 'Inicio', 'sidebar_id' => 'home', 'url' => 'support.dashboard', 'order' => 1],
-                ['id' => 'enterprises', 'icon' => 'fa-duotone fa-building', 'tooltip' => 'Empresas', 'sidebar_id' => 'enterprises', 'order' => 2],
-                ['id' => 'distributors', 'icon' => 'fa-duotone fa-people-arrows', 'tooltip' => 'Distribuidor', 'sidebar_id' => 'distributors', 'order' => 3],
-                ['id' => 'users', 'icon' => 'fa-duotone fa-users', 'tooltip' => 'Usuarios', 'sidebar_id' => 'users', 'order' => 4],
-                ['id' => 'mails', 'icon' => 'fa-duotone fa-inbox', 'tooltip' => 'Correos entrantes', 'sidebar_id' => 'mails', 'order' => 5],
-                ['id' => 'system', 'icon' => 'fa-duotone fa-headset', 'tooltip' => 'Configuración Sistema', 'sidebar_id' => 'system', 'order' => 6],
-                ['id' => 'settings', 'icon' => 'fa-duotone fa-gear', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 7],
+                ['id' => 'home', 'icon' => 'home', 'tooltip' => 'Inicio', 'sidebar_id' => 'home', 'url' => 'support.dashboard', 'order' => 1],
+                ['id' => 'enterprises', 'icon' => 'building', 'tooltip' => 'Empresas', 'sidebar_id' => 'enterprises', 'order' => 2],
+                ['id' => 'distributors', 'icon' => 'people-arrows', 'tooltip' => 'Distribuidor', 'sidebar_id' => 'distributors', 'order' => 3],
+                ['id' => 'users', 'icon' => 'users', 'tooltip' => 'Usuarios', 'sidebar_id' => 'users', 'order' => 4],
+                ['id' => 'mails', 'icon' => 'inbox', 'tooltip' => 'Correos entrantes', 'sidebar_id' => 'mails', 'order' => 5],
+                ['id' => 'system', 'icon' => 'chat', 'tooltip' => 'Configuración Sistema', 'sidebar_id' => 'system', 'order' => 6],
+                ['id' => 'settings', 'icon' => 'sliders', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 7],
             ],
             'sidebars' => [
                 'enterprises' => [

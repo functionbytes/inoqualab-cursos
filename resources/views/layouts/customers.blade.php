@@ -107,6 +107,7 @@
 @endif
 
 <script src="{{ asset('customers/js/layout.js') }}" type="text/javascript"></script>
+<script src="{{ asset('customers/js/includes/style-vars.js') }}" type="text/javascript"></script>
 
 @stack('scripts')
 

@@ -16,12 +16,12 @@ class EnterpriseNavService extends BaseNavService
     {
         return [
             'miniItems' => [
-                ['id' => 'dashboard', 'icon' => 'fa-duotone fa-house', 'tooltip' => 'Inicio', 'sidebar_id' => 'dashboard', 'url' => 'enterprise.dashboard', 'order' => 1],
-                ['id' => 'courses', 'icon' => 'fa-duotone fa-graduation-cap', 'tooltip' => 'Cursos', 'sidebar_id' => 'courses', 'order' => 2],
-                ['id' => 'documents', 'icon' => 'fa-duotone fa-folder-open', 'tooltip' => 'Documentos', 'sidebar_id' => 'documents', 'order' => 3],
-                ['id' => 'users', 'icon' => 'fa-duotone fa-users', 'tooltip' => 'Usuarios', 'sidebar_id' => 'users', 'order' => 4],
-                ['id' => 'enterprise', 'icon' => 'fa-duotone fa-building', 'tooltip' => 'Empresa', 'sidebar_id' => 'enterprise', 'order' => 5],
-                ['id' => 'settings', 'icon' => 'fa-duotone fa-gear', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 6],
+                ['id' => 'dashboard', 'icon' => 'home', 'tooltip' => 'Inicio', 'sidebar_id' => 'dashboard', 'url' => 'enterprise.dashboard', 'order' => 1],
+                ['id' => 'courses', 'icon' => 'courses', 'tooltip' => 'Cursos', 'sidebar_id' => 'courses', 'order' => 2],
+                ['id' => 'documents', 'icon' => 'folder', 'tooltip' => 'Documentos', 'sidebar_id' => 'documents', 'order' => 3],
+                ['id' => 'users', 'icon' => 'users', 'tooltip' => 'Usuarios', 'sidebar_id' => 'users', 'order' => 4],
+                ['id' => 'enterprise', 'icon' => 'building', 'tooltip' => 'Empresa', 'sidebar_id' => 'enterprise', 'order' => 5],
+                ['id' => 'settings', 'icon' => 'sliders', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 6],
             ],
             'sidebars' => [
                 'courses' => [

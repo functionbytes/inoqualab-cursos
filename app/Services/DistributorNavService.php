@@ -21,13 +21,13 @@ class DistributorNavService extends BaseNavService
     {
         return [
             'miniItems' => [
-                ['id' => 'home', 'icon' => 'fa-duotone fa-house', 'tooltip' => 'Inicio', 'sidebar_id' => 'home', 'url' => 'distributor.dashboard', 'order' => 1],
-                ['id' => 'enterprises', 'icon' => 'fa-duotone fa-building', 'tooltip' => 'Empresas', 'sidebar_id' => 'enterprises', 'order' => 2],
-                ['id' => 'registers', 'icon' => 'fa-duotone fa-user-plus', 'tooltip' => 'Crear usuario', 'sidebar_id' => 'registers', 'order' => 3],
-                ['id' => 'inscriptions', 'icon' => 'fa-duotone fa-list-check', 'tooltip' => 'Inscripciones', 'sidebar_id' => 'inscriptions', 'order' => 4],
-                ['id' => 'invoices', 'icon' => 'fa-duotone fa-file-invoice', 'tooltip' => 'Facturas', 'sidebar_id' => 'invoices', 'order' => 5],
-                ['id' => 'orders', 'icon' => 'fa-duotone fa-receipt', 'tooltip' => 'Ordenes', 'sidebar_id' => 'orders', 'order' => 6],
-                ['id' => 'settings', 'icon' => 'fa-duotone fa-gear', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 7],
+                ['id' => 'home', 'icon' => 'home', 'tooltip' => 'Inicio', 'sidebar_id' => 'home', 'url' => 'distributor.dashboard', 'order' => 1],
+                ['id' => 'enterprises', 'icon' => 'building', 'tooltip' => 'Empresas', 'sidebar_id' => 'enterprises', 'order' => 2],
+                ['id' => 'registers', 'icon' => 'user-plus', 'tooltip' => 'Crear usuario', 'sidebar_id' => 'registers', 'order' => 3],
+                ['id' => 'inscriptions', 'icon' => 'list-check', 'tooltip' => 'Inscripciones', 'sidebar_id' => 'inscriptions', 'order' => 4],
+                ['id' => 'invoices', 'icon' => 'invoice', 'tooltip' => 'Facturas', 'sidebar_id' => 'invoices', 'order' => 5],
+                ['id' => 'orders', 'icon' => 'wallet', 'tooltip' => 'Ordenes', 'sidebar_id' => 'orders', 'order' => 6],
+                ['id' => 'settings', 'icon' => 'sliders', 'tooltip' => 'Configuración', 'sidebar_id' => 'settings', 'order' => 7],
             ],
             'sidebars' => [
                 'enterprises' => [

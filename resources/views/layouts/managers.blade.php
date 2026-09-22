@@ -33,26 +33,53 @@
     <link rel="stylesheet" href="{{ url('managers/libs/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ url('managers/css/style.css') }}?v={{ filemtime(public_path('managers/css/style.css')) }}">
     <link rel="stylesheet" href="{{ url('managers/css/theme.css') }}?v={{ filemtime(public_path('managers/css/theme.css')) }}">
-
-
+    {{-- Copia literal de modules/Theme/public/theme/css/nav.css (webadmin):
+         define .app-header/.app-wrapper/.app-menubar-tabs. Se carga despues
+         de style.css/theme.css a proposito para ganar en cascada sobre las
+         reglas .app-header antiguas de Bootstrap Modernize (mismo nombre de
+         clase, sistema de shell distinto). --}}
+    <link rel="stylesheet" href="{{ url('managers/css/nav.css') }}?v={{ filemtime(public_path('managers/css/nav.css')) }}">
+    {{-- Directo, no @push: @stack('css') se renderiza aqui en <head>, pero
+         includes.header vive en <body> (mas abajo) — cualquier @push('css')
+         suyo se registra demasiado tarde para este @stack y nunca sale. --}}
+    <link rel="stylesheet" href="{{ url('managers/css/includes/header.css') }}?v={{ filemtime(public_path('managers/css/includes/header.css')) }}">
 
     @stack('css')
     @yield('head')
+
+    {{-- Se carga en ultimo lugar a proposito, despues de @stack('css') (CSS
+         especifico de cada vista): fija el color real de .badge por encima
+         de los presets de color rotos de theme.css. Ver comentario en el
+         propio archivo. --}}
+    <link rel="stylesheet" href="{{ url('managers/css/badge-colors.css') }}?v={{ filemtime(public_path('managers/css/badge-colors.css')) }}">
+
+    {{-- Pista visual de scroll horizontal en .table-responsive (mobile).
+         Fix generico para todas las vistas, no depende de @stack('css') de
+         ninguna en particular. Ver comentario en el propio archivo. --}}
+    <link rel="stylesheet" href="{{ url('managers/css/table-scroll-hint.css') }}?v={{ filemtime(public_path('managers/css/table-scroll-hint.css')) }}">
+
+    {{-- Estado de carga de managers/js/ajax-table.js (busqueda/filtro/paginacion
+         sin recargar la pagina). --}}
+    <link rel="stylesheet" href="{{ url('managers/css/includes/ajax-table.css') }}?v={{ filemtime(public_path('managers/css/includes/ajax-table.css')) }}">
+
+    {{-- FOUC: el estado contraido del riel se guarda en localStorage y se
+         aplica antes del primer pintado para que al navegar no se vea el
+         menu abrirse y cerrarse (ver managers/js/includes/app-toggler.js). --}}
+    <script>
+    (function () {
+        try {
+            if (window.innerWidth > 1480 && localStorage.getItem('mc-app-sidebar') === 'mini') {
+                document.documentElement.setAttribute('data-app-sidebar', 'mini');
+            }
+        } catch (e) {}
+    })();
+    </script>
 
 </head>
 
 <body class="">
 
-<div
-        class="page-wrapper"
-        id="main-wrapper"
-        data-layout="vertical"
-        data-navbarbg="skin6"
-        data-sidebartype="full"
-        data-sidebar-position="fixed"
-        data-header-position="fixed"
-        data-notifications-mark-all-read-url="{{ route('manager.notifications.markasread') }}"
->
+<div class="mc-app" id="mc-app" data-notifications-mark-all-read-url="{{ route('manager.notifications.markasread') }}">
 
     @php
         // Layout unificado: resuelve nav/header/delete según el rol del usuario.
@@ -68,16 +95,22 @@
 
     @include($__panel.'.includes.nav')
 
-    <!-- Main wrapper -->
-
-    <div class="body-wrapper">
-
+    <div class="mc-app-body app-wrapper">
 
         @include($__panel.'.includes.header')
 
-        <div class="container-fluid">
-            @yield('content')
-        </div>
+        {{-- mc-content-header (managers.includes.card): va full-bleed, fuera
+             del container-fluid, igual que en webadmin (@yield('page_header')
+             antes de <main>). El contenido de la pagina si va contenido. --}}
+        @hasSection('page_header')
+            @yield('page_header')
+        @endif
+
+        <main class="mc-content">
+            <div class="container">
+                @yield('content')
+            </div>
+        </main>
 
         @includeFirst([$__panel.'.includes.delete', 'managers.includes.delete'])
 
@@ -105,8 +138,11 @@
 <script src="{{ url('managers/js/flatpickr.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/custom.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/js/bulk-actions.js') }}" type="text/javascript"></script>
+<script src="{{ url('managers/js/filter-toolbar.js') }}" type="text/javascript"></script>
+<script src="{{ url('managers/js/ajax-table.js') }}" type="text/javascript"></script>
 
 <script src="{{ asset('managers/js/layout.js') }}" type="text/javascript"></script>
+<script src="{{ asset('managers/js/table-scroll-hint.js') }}" type="text/javascript"></script>
 
 @stack('scripts')
 
