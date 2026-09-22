@@ -2,6 +2,10 @@
 
 @section('title', 'Historial de auditorías — ' . ($seoMeta->title ?? 'Meta SEO'))
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Historial de auditorías — ' . ($seoMeta->title ?? 'Meta SEO')])
+@endsection
+
 @section('content')
 
 
@@ -50,7 +54,7 @@
         <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
             <h6 class="mb-0 fw-bold">
                 Auditorías registradas
-                <span class="badge bg-secondary ms-1">{{ $logs->total() }}</span>
+                <span class="badge bg-secondary-subtle text-secondary ms-1">{{ $logs->total() }}</span>
             </h6>
             <a href="{{ route('manager.seo.audit.index') }}" class="btn btn-outline-primary btn-sm">
                 Nueva auditoría
@@ -131,11 +135,10 @@
                 </table>
             </div>
 
-            @if($logs->hasPages())
-                <div class="card-footer">
-                    {{ $logs->links() }}
-                </div>
-            @endif
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $logs,
+                'itemLabel' => 'registros',
+            ])
         @endif
     </div>
 

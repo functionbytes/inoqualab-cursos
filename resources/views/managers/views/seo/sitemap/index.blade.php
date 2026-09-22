@@ -2,6 +2,10 @@
 
 @section('title', 'Sitemap XML')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Sitemap XML'])
+@endsection
+
 @section('content')
 
 
@@ -71,9 +75,9 @@
                                             </td>
                                             <td class="text-center">
                                                 @if($sitemap['has_cache'])
-                                                    <span class="badge bg-success">En caché</span>
+                                                    <span class="badge bg-success-subtle text-success">En caché</span>
                                                 @else
-                                                    <span class="badge bg-warning text-dark">Sin caché</span>
+                                                    <span class="badge bg-warning-subtle text-warning">Sin caché</span>
                                                 @endif
                                             </td>
                                             <td class="text-end">

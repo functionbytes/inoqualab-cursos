@@ -2,6 +2,10 @@
 
 @section('title', 'Dashboard SEO')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Dashboard SEO'])
+@endsection
+
 @section('content')
 
 
@@ -262,12 +266,15 @@
                             <div class="list-group list-group-flush">
                                 @foreach($worstPages as $page)
                                     @php
+                                        // Mismos cortes y colores que metas/index y reporte (ver
+                                        // public/managers/css/includes/seo-badges.css).
                                         $sc = $page->seo_score;
                                         $scoreBg = match(true) {
-                                            $sc >= 90 => 'bg-success',
-                                            $sc >= 75 => 'bg-info',
-                                            $sc >= 60 => 'bg-warning text-dark',
-                                            default   => 'bg-danger',
+                                            $sc >= 90 => 'seo-score--a',
+                                            $sc >= 75 => 'seo-score--b',
+                                            $sc >= 60 => 'seo-score--c',
+                                            $sc >= 40 => 'seo-score--d',
+                                            default   => 'seo-score--f',
                                         };
                                         $typeLabel = match(true) {
                                             str_contains($page->seoable_type ?? '', 'Course') => 'Curso',
@@ -379,6 +386,7 @@
 @endsection
 
 @push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/includes/seo-badges.css') }}">
 <link rel="stylesheet" href="{{ asset('managers/css/views/seo/dashboard/index.css') }}">
 @endpush
 

@@ -2,6 +2,10 @@
 
 @section('title', 'Editar componente: ' . ($component->name ?? $component->alias))
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar componente: ' . ($component->name ?? $component->alias)])
+@endsection
+
 @section('content')
 
 @if(session('success'))

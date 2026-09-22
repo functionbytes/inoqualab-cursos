@@ -2,6 +2,10 @@
 
 @section('title', $role ? 'Editar rol' : 'Crear rol')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => $role ? 'Editar rol' : 'Crear rol'])
+@endsection
+
 @php
     $isProtected = $role && in_array($role->name, $protectedRoles, true);
     $grouped = $permissions->groupBy(fn ($perm) => explode('.', $perm->name)[0]);

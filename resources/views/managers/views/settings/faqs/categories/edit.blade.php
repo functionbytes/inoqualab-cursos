@@ -1,64 +1,76 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar categoria'])
+@endsection
 @section('content')
 
-  <div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
+  <div class="row g-4 align-items-start">
 
-      <div class="card w-100">
+    {{-- Columna izquierda: formulario --}}
+    <div class="col-lg-8">
 
-        <form id="formCategories" enctype="multipart/form-data" role="form"
-              data-urls='@json([
-                  "update" => route("manager.faqs.categories.update"),
-                  "index" => route("manager.faqs.categories"),
-              ])'>
+      <form id="formCategories" enctype="multipart/form-data" role="form"
+            data-urls='@php $__jsonInline1 = [
+                "update" => route("manager.faqs.categories.update"),
+                "index" => route("manager.faqs.categories"),
+            ]; @endphp@json($__jsonInline1)'>
 
-          {{ csrf_field() }}
+        {{ csrf_field() }}
 
-          <input type="hidden" id="id" name="id" value="{{ $categorie->id }}">
-          <input type="hidden" id="slack" name="slack" value="{{ $categorie->slack }}">
+        <input type="hidden" id="id" name="id" value="{{ $categorie->id }}">
+        <input type="hidden" id="slack" name="slack" value="{{ $categorie->slack }}">
 
-          <div class="card-body border-top">
-            <div class="d-flex no-block align-items-center">
-              <h5 class="mb-0">Editar categoria</h5>
+        <div class="card">
 
-            </div>
-            <p class="card-subtitle mb-3 mt-3">
+          <div class="card-body">
+            <h6 class="fw-bold text-dark mb-1">Editar categoria</h6>
+            <p class="text-muted mb-3">
               Actualiza los datos de la categoria de preguntas frecuentes. Los cambios se guardarán al hacer clic en Guardar.
             </p>
 
-            <div class="row">
+            <div class="row g-3">
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Titulo</label>
-                    <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ $categorie->title  }}" >
-                </div>
+                <label class="form-label fw-semibold">Titulo</label>
+                <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ $categorie->title  }}" >
               </div>
 
               <div class="col-6">
-                <div class="mb-3">
-                  <label class="control-label col-form-label">Estado</label>
-                  <div class="input-group">
-                    {!! Form::select('available', $availables, $categorie->available , ['class' => 'select2 form-control' ,'name' => 'available', 'id' => 'available' ]) !!}
-                  </div>
-                  <label id="available-error" class="error d-none" for="available"></label>
+                <label class="form-label fw-semibold">Estado</label>
+                <div class="input-group">
+                  {!! Form::select('available', $availables, $categorie->available , ['class' => 'select2 form-control' ,'name' => 'available', 'id' => 'available' ]) !!}
                 </div>
+                <label id="available-error" class="error d-none" for="available"></label>
               </div>
-<div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
-
             </div>
 
           </div>
 
-        </form>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary w-100">
+              Guardar
+            </button>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    {{-- Columna derecha: sidebar informativo --}}
+    <div class="col-lg-4">
+
+      <div class="card">
+        <div class="card-header border-bottom">
+          <h6 class="mb-0 fw-bold">Sobre las categorías</h6>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-0">Agrupan las preguntas frecuentes en el sitio público. Solo las categorías <strong>activas</strong> se muestran.</p>
+        </div>
       </div>
+
     </div>
 
   </div>

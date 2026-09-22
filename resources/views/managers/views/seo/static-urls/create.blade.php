@@ -2,6 +2,10 @@
 
 @section('title', 'Nueva URL estática')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Nueva URL estática'])
+@endsection
+
 @section('content')
 
 

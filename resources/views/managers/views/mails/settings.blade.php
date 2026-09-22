@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Configuración de correos entrantes'])
+@endsection
+
 @section('content')
 
 

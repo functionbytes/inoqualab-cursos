@@ -2,6 +2,10 @@
 
 @section('title', 'Crear email endpoint')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Crear email endpoint'])
+@endsection
+
 @section('content')
 
 @if(session('success'))
@@ -14,6 +18,10 @@
     <div class="alert alert-danger alert-dismissible fade show"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul><button class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
+<div class="row g-4 align-items-start">
+
+{{-- Columna izquierda: formulario --}}
+<div class="col-lg-8">
 <div class="card">
     <form method="POST" action="{{ route('mailers.endpoints.store') }}" id="formCreate">
         @csrf
@@ -215,6 +223,31 @@ Header: X-API-Token: abc123...
         </div>
 
     </form>
+</div>
+</div>
+
+{{-- Columna derecha: sidebar informativo --}}
+<div class="col-lg-4">
+
+    <div class="card">
+        <div class="card-header border-bottom">
+            <h6 class="mb-0 fw-bold">Información útil</h6>
+        </div>
+        <div class="card-body">
+            <ul class="text-muted ps-3 mb-3">
+                <li class="mb-2">El <strong>token API</strong> se genera automáticamente al crear el endpoint</li>
+                <li class="mb-2">Podrás ver <strong>estadísticas</strong> y <strong>logs</strong> de uso</li>
+                <li>Los endpoints inactivos <strong>rechazarán</strong> todas las peticiones</li>
+            </ul>
+            <p class="small mb-1 fw-semibold">Ejemplo de request:</p>
+            <pre class="bg-dark text-light p-2 rounded mb-0 example-request-pre"><code>POST /api/email-endpoints/slug/send
+Header: X-API-Token: abc123...
+{"email": "user@example.com"}</code></pre>
+        </div>
+    </div>
+
+</div>
+
 </div>
 
 @endsection

@@ -2,94 +2,29 @@
 
 @section('title', 'Suscriptores de la lista')
 
-@section('content')
-
-    <div class="widget-content searchable-container list">
-
-        <div class="card">
-
-            {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">{{ $list->name }}</h5>
-                        <p class="small mb-0 text-muted">
-                            {{ number_format($members->total()) }} suscriptor(es)
-                            @if($list->trigger !== 'manual')
-                                · lista dinámica (se actualiza sola por eventos)
-                            @endif
-                        </p>
-                    </div>
-                    <div class="ms-auto d-flex gap-2">
-                        <a href="{{ route('manager.newsletter.lists.index') }}" class="btn btn-outline-secondary">
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('manager.newsletter.lists.index') }}" class="btn btn-outline-secondary">
                             Volver a listas
                         </a>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-member-modal">
                             + Agregar suscriptor
                         </button>
-                    </div>
-                </div>
-            </div>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('managers.includes.card', [
+        'title' => $list->name,
+        'description' => number_format($members->total()) . ' suscriptor(es)'
+            . ($list->trigger !== 'manual' ? ' · lista dinámica (se actualiza sola por eventos)' : ''),
+        'actions' => $headerActions,
+    ])
+@endsection
 
-            {{-- Tabla --}}
-            <div class="card-body">
-                @if($members->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle text-nowrap mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Email</th>
-                                    <th>Nombre</th>
-                                    <th>Motivo de alta</th>
-                                    <th class="text-center">Estado</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($members as $member)
-                                    <tr id="member-row-{{ $member->id }}">
-                                        <td class="fw-semibold">{{ $member->email }}</td>
-                                        <td>{{ $member->name ?: '—' }}</td>
-                                        <td class="small text-muted">{{ $member->pivot->added_reason ?: '—' }}</td>
-                                        <td class="text-center">
-                                            @if($member->is_active)
-                                                <span class="badge bg-success-subtle text-success">Suscrito</span>
-                                            @else
-                                                <span class="badge bg-secondary-subtle text-secondary">Baja</span>
-                                            @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <button type="button" class="btn btn-sm btn-link text-danger p-0 border-0 btn-remove-member"
-                                                    data-url="{{ route('manager.newsletter.lists.members.remove', [$list->id, $member->id]) }}">
-                                                Quitar
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-users fa-3x mb-3 text-muted opacity-50"></i>
-                        <h5 class="fw-bold mb-2">Sin suscriptores</h5>
-                        <p class="text-muted mb-0">
-                            @if($list->trigger !== 'manual')
-                                Esta lista se llenará sola cuando ocurra su evento (curso completado, certificado o acceso por vencer).
-                            @else
-                                Aún no hay suscriptores en esta lista.
-                            @endif
-                        </p>
-                    </div>
-                @endif
-            </div>
+@section('content')
 
-            @if($members->hasPages())
-                <div class="card-footer bg-white border-top">
-                    {{ $members->links() }}
-                </div>
-            @endif
+    <div class="widget-content searchable-container list">
 
+        <div id="ajax-table-root">
+            @include('managers.views.newsletter.lists._members', ['list' => $list, 'members' => $members])
         </div>
     </div>
 

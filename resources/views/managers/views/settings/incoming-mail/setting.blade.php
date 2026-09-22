@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Correos entrantes'])
+@endsection
 @section('content')
 
 @php
@@ -7,69 +11,69 @@
     $autoProcess      = setting('incoming_mail_auto_process') !== '' ? setting('incoming_mail_auto_process') === 'true' : config('incoming_mail.auto_process');
     $threshold        = setting('incoming_mail_confidence_threshold') !== '' ? (int) setting('incoming_mail_confidence_threshold') : config('incoming_mail.confidence_threshold');
     $trustAll         = setting('incoming_mail_trust_all_senders') !== '' ? setting('incoming_mail_trust_all_senders') === 'true' : config('incoming_mail.trust_all_senders');
+
+    $stats = [
+        'processed'      => \App\Models\Mail\IncomingMail::where('status', 'processed')->count(),
+        'pending_review' => \App\Models\Mail\IncomingMail::where('status', 'pending_review')->count(),
+        'failed'         => \App\Models\Mail\IncomingMail::where('status', 'failed')->count(),
+        'ignored'        => \App\Models\Mail\IncomingMail::where('status', 'ignored')->count(),
+    ];
 @endphp
 
-<div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
-        <div class="card w-100">
+<div class="row g-4 align-items-start">
 
-            <form id="formIncomingMail" data-update-url="{{ route('manager.settings.incoming-mail.update') }}">
-                @csrf
+    {{-- Columna izquierda: formulario --}}
+    <div class="col-lg-8">
+        <form id="formIncomingMail" data-update-url="{{ route('manager.settings.incoming-mail.update') }}">
+            @csrf
+
+            <div class="card">
 
                 {{-- Habilitar servicio --}}
-                <div class="card-body border-top">
-                    <div class="row align-items-center">
-                        <div class="col-sm-11">
-                            <label class="control-label col-form-label fw-semibold">Servicio habilitado</label>
-                            <p class="card-subtitle mb-0 mt-1">
-                                Activa o desactiva el polling IMAP por completo. Si está desactivado,
-                                el comando <code>mail:fetch-orders</code> no hace nada aunque el scheduler lo ejecute.
-                            </p>
-                        </div>
-                        <div class="col-sm-1 justify-content-end d-flex">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox"
-                                    name="incoming_mail_enabled" id="incoming_mail_enabled"
-                                    @checked($enabled) />
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Servicio habilitado</h6>
+                    <p class="text-muted mb-3">
+                        Activa o desactiva el polling IMAP por completo. Si está desactivado,
+                        el comando <code>mail:fetch-orders</code> no hace nada aunque el scheduler lo ejecute.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox"
+                            name="incoming_mail_enabled" id="incoming_mail_enabled"
+                            @checked($enabled) />
+                        <label class="form-check-label fw-semibold" for="incoming_mail_enabled">Habilitar servicio</label>
                     </div>
                 </div>
+
+                <hr class="my-0">
 
                 {{-- Auto-proceso --}}
-                <div class="card-body border-top">
-                    <div class="row align-items-center">
-                        <div class="col-sm-11">
-                            <label class="control-label col-form-label fw-semibold">Procesamiento automático</label>
-                            <p class="card-subtitle mb-0 mt-1">
-                                Cuando está <strong>activado</strong>, los correos con confianza ≥ umbral se procesan
-                                inmediatamente y crean la orden sin intervención humana.<br>
-                                Cuando está <strong>desactivado</strong>, <em>todos</em> los correos van a la
-                                bandeja de revisión (en el panel de soporte)
-                                sin importar el nivel de confianza.
-                            </p>
-                        </div>
-                        <div class="col-sm-1 justify-content-end d-flex">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox"
-                                    name="incoming_mail_auto_process" id="incoming_mail_auto_process"
-                                    @checked($autoProcess) />
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Procesamiento automático</h6>
+                    <p class="text-muted mb-3">
+                        Cuando está <strong>activado</strong>, los correos con confianza ≥ umbral se procesan
+                        inmediatamente y crean la orden sin intervención humana.
+                        Cuando está <strong>desactivado</strong>, <em>todos</em> los correos van a la
+                        bandeja de revisión (en el panel de soporte) sin importar el nivel de confianza.
+                    </p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox"
+                            name="incoming_mail_auto_process" id="incoming_mail_auto_process"
+                            @checked($autoProcess) />
+                        <label class="form-check-label fw-semibold" for="incoming_mail_auto_process">Procesamiento automático</label>
                     </div>
                 </div>
 
+                <hr class="my-0">
+
                 {{-- Umbral de confianza --}}
-                <div class="card-body border-top">
-                    <div class="d-flex no-block align-items-center mb-2">
-                        <h5 class="mb-0">Umbral de confianza</h5>
-                    </div>
-                    <p class="card-subtitle mb-3 mt-1">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Umbral de confianza</h6>
+                    <p class="text-muted mb-3">
                         Puntuación mínima (0–100) para auto-procesar un correo. Por debajo de este valor
                         el correo pasa a revisión manual aunque el procesamiento automático esté activo.
-                        <br><p class="text-muted">Recomendado: 90 — garantiza que empresa y todos los cursos estén perfectamente mapeados.</p>
+                        Recomendado: 90 — garantiza que empresa y todos los cursos estén perfectamente mapeados.
                     </p>
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-4">
                             <div class="input-group">
                                 <input type="number" class="form-control" id="incoming_mail_confidence_threshold"
@@ -81,110 +85,73 @@
                     </div>
                 </div>
 
+                <hr class="my-0">
+
                 {{-- Modo pruebas --}}
-                <div class="card-body border-top">
-                    <div class="row align-items-center">
-                        <div class="col-sm-11">
-                            <label class="control-label col-form-label fw-semibold">
-                                Modo de prueba
-                                @if($trustAll)
-                                    <span class="badge bg-danger ms-1">ACTIVO</span>
-                                @endif
-                            </label>
-                            <p class="card-subtitle mb-0 mt-1">
-                                Procesa correos de <strong>cualquier remitente</strong> usando el parser por defecto
-                                (ignora la lista de remitentes de confianza).<br>
-                                <strong class="text-danger">
-                                    <i class="fas fa-triangle-exclamation me-1"></i>
-                                    Solo para pruebas. Desactivar antes de pasar a producción.
-                                </strong>
-                            </p>
-                        </div>
-                        <div class="col-sm-1 justify-content-end d-flex">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox"
-                                    name="incoming_mail_trust_all_senders" id="incoming_mail_trust_all_senders"
-                                    @checked($trustAll) />
-                            </div>
-                        </div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">
+                        Modo de prueba
+                        @if($trustAll)
+                            <span class="badge bg-danger ms-1">ACTIVO</span>
+                        @endif
+                    </h6>
+                    <p class="text-muted mb-3">
+                        Procesa correos de <strong>cualquier remitente</strong> usando el parser por defecto
+                        (ignora la lista de remitentes de confianza).
+                        <strong class="text-danger d-block mt-1">
+                            <i class="fas fa-triangle-exclamation me-1"></i>
+                            Solo para pruebas. Desactivar antes de pasar a producción.
+                        </strong>
+                    </p>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox"
+                            name="incoming_mail_trust_all_senders" id="incoming_mail_trust_all_senders"
+                            @checked($trustAll) />
+                        <label class="form-check-label fw-semibold" for="incoming_mail_trust_all_senders">Modo de prueba</label>
                     </div>
                 </div>
 
-                {{-- Guardar --}}
-                <div class="card-body">
-                    <button type="submit" class="btn btn-primary" id="btnSaveIncomingMail">
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100" id="btnSaveIncomingMail">
                         Guardar configuración
                     </button>
                 </div>
 
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
-</div>
 
-{{-- Stats rápidas --}}
-<div class="row mt-3">
-    @php
-        $stats = [
-            'processed'      => \App\Models\Mail\IncomingMail::where('status', 'processed')->count(),
-            'pending_review' => \App\Models\Mail\IncomingMail::where('status', 'pending_review')->count(),
-            'failed'         => \App\Models\Mail\IncomingMail::where('status', 'failed')->count(),
-            'ignored'        => \App\Models\Mail\IncomingMail::where('status', 'ignored')->count(),
-        ];
-    @endphp
+    {{-- Columna derecha: sidebar informativo --}}
+    <div class="col-lg-4">
 
-    <div class="col-md-3">
-        <div class="card border-0 shadow-none bg-light-success">
-            <div class="card-body py-3 px-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-check-circle fs-4 text-success"></i></div>
-                    <div>
-                        <div class="fs-5 fw-semibold">{{ $stats['processed'] }}</div>
-                        <div class="text-muted small">Procesados</div>
-                    </div>
-                </div>
+        <div class="card">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">Estadísticas</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted"><i class="fas fa-check-circle text-success me-1"></i> Procesados</span>
+                        <strong>{{ $stats['processed'] }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted"><i class="fas fa-clock text-warning me-1"></i> Pendientes revisión</span>
+                        <strong>{{ $stats['pending_review'] }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted"><i class="fas fa-times-circle text-danger me-1"></i> Fallidos</span>
+                        <strong>{{ $stats['failed'] }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="fas fa-ban text-secondary me-1"></i> Ignorados</span>
+                        <strong>{{ $stats['ignored'] }}</strong>
+                    </li>
+                </ul>
             </div>
         </div>
+
     </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-none bg-light-warning">
-            <div class="card-body py-3 px-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-clock fs-4 text-warning"></i></div>
-                    <div>
-                        <div class="fs-5 fw-semibold">{{ $stats['pending_review'] }}</div>
-                        <div class="text-muted small">Pendientes revisión</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-none bg-light-danger">
-            <div class="card-body py-3 px-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-times-circle fs-4 text-danger"></i></div>
-                    <div>
-                        <div class="fs-5 fw-semibold">{{ $stats['failed'] }}</div>
-                        <div class="text-muted small">Fallidos</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card border-0 shadow-none bg-light-secondary">
-            <div class="card-body py-3 px-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3"><i class="fas fa-ban fs-4 text-secondary"></i></div>
-                    <div>
-                        <div class="fs-5 fw-semibold">{{ $stats['ignored'] }}</div>
-                        <div class="text-muted small">Ignorados</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 @endsection

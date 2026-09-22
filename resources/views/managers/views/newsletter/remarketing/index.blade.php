@@ -2,22 +2,23 @@
 
 @section('title', 'Automatizaciones de remarketing')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<a href="{{ route('manager.newsletter.lists.index') }}" class="btn btn-outline-secondary">Listas</a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('managers.includes.card', [
+        'title' => 'Automatizaciones de remarketing',
+        'description' => 'Correos de ciclo de vida programados y su actividad reciente.',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
     <div class="widget-content searchable-container list">
 
         <div class="card">
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Automatizaciones de remarketing</h5>
-                        <p class="small mb-0 text-muted">Correos de ciclo de vida programados y su actividad reciente.</p>
-                    </div>
-                    <div class="ms-auto">
-                        <a href="{{ route('manager.newsletter.lists.index') }}" class="btn btn-outline-secondary">Listas</a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Tarjetas por automatización --}}
             <div class="card-body">

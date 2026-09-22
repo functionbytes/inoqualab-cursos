@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Detalle de categoría'])
+@endsection
 @section('content')
 
     <div class="row">

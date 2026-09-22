@@ -2,6 +2,13 @@
 
 @section('title', 'Auditoria SEO')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Auditoría por URL',
+        'description' => 'Analiza una URL específica y obtén el score SEO con detalles',
+    ])
+@endsection
+
 @section('content')
 
 
@@ -20,10 +27,7 @@
 
         {{-- ── Auditoría por URL ────────────────────────────────────────────── --}}
         <div class="card mb-3">
-            <div class="card-header p-4 border-bottom border-light">
-                <h5 class="mb-1 fw-bold">Auditoría por URL</h5>
-                <p class="mb-0 text-muted">Analiza una URL específica y obtén el score SEO con detalles</p>
-            </div>
+            
             <div class="card-body">
                 <div class="row g-2 align-items-end mb-3">
                     <div class="col-12 col-md">
@@ -65,7 +69,7 @@
                                     <h6 class="fw-semibold mb-2 text-danger">
                                         <i class="fas fa-circle-xmark me-1"></i>
                                         Problemas detectados
-                                        <span id="url-issues-count" class="badge bg-danger ms-1">0</span>
+                                        <span id="url-issues-count" class="badge bg-danger-subtle text-danger ms-1">0</span>
                                     </h6>
                                     <ul class="list-group list-group-flush" id="url-issues-list">
                                         <li class="list-group-item text-muted small px-0">Sin resultados</li>
@@ -75,7 +79,7 @@
                                     <h6 class="fw-semibold mb-2 text-success">
                                         <i class="fas fa-circle-check me-1"></i>
                                         Verificaciones correctas
-                                        <span id="url-passed-count" class="badge bg-success ms-1">0</span>
+                                        <span id="url-passed-count" class="badge bg-success-subtle text-success ms-1">0</span>
                                     </h6>
                                     <ul class="list-group list-group-flush" id="url-passed-list">
                                         <li class="list-group-item text-muted small px-0">Sin resultados</li>

@@ -2,6 +2,10 @@
 
 @section('title', 'Editar variable: ' . $variable->key)
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar variable: ' . $variable->key])
+@endsection
+
 @section('content')
 
 @if(session('success'))
@@ -14,8 +18,10 @@
     <div class="alert alert-danger alert-dismissible fade show"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul><button class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
-<div class="row">
-    <div class="col-lg-12">
+<div class="row g-4 align-items-start">
+
+    {{-- Columna izquierda: formulario --}}
+    <div class="col-lg-8">
         <div class="card">
             <form action="{{ route('mailers.variables.update', $variable) }}" method="POST">
                 @csrf
@@ -143,6 +149,31 @@
             </form>
         </div>
     </div>
+
+    {{-- Columna derecha: sidebar informativo --}}
+    <div class="col-lg-4">
+        @if($variable->is_system)
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-2"><i class="fas fa-shield-alt me-1 text-info"></i>Variable del sistema</h6>
+                    <p class="text-muted small mb-0">La clave, categoría y módulo no se pueden modificar. Solo puedes cambiar el nombre, la descripción, el estado y el valor de prueba.</p>
+                </div>
+            </div>
+        @endif
+        <div class="card">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">Sobre las variables</h6>
+            </div>
+            <div class="card-body">
+                <ul class="text-muted ps-3 mb-0">
+                    <li class="mb-2">La <strong>clave</strong> se usa entre llaves dentro de las plantillas, ej: <code>{CUSTOMER_NAME}</code></li>
+                    <li class="mb-2">La <strong>categoría</strong> y el <strong>módulo</strong> agrupan la variable al listarla</li>
+                    <li>El <strong>valor de prueba</strong> se usa solo en previsualizaciones de plantillas</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection

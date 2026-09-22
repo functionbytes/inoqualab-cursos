@@ -2,16 +2,26 @@
 
 @section('title', 'Reporte SEO')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Exportar datos',
+    ])
+@endsection
+
 @section('content')
 
 
     @php
+        // Misma tabla de colores que metas/index y dashboard (ver
+        // public/managers/css/includes/seo-badges.css) -- antes cada vista
+        // de SEO armaba su propia mezcla de clases bg-success/bg-info/...
+        // con resultados distintos entre si.
         $gradeConfig = [
-            'A' => ['label' => 'A (90–100)', 'class' => 'bg-success'],
-            'B' => ['label' => 'B (75–89)',  'class' => 'bg-info'],
-            'C' => ['label' => 'C (60–74)',  'class' => 'bg-warning text-dark'],
-            'D' => ['label' => 'D (40–59)',  'class' => 'bg-orange'],
-            'F' => ['label' => 'F (<40)',    'class' => 'bg-danger'],
+            'A' => ['label' => 'A (90–100)', 'class' => 'seo-score--a'],
+            'B' => ['label' => 'B (75–89)',  'class' => 'seo-score--b'],
+            'C' => ['label' => 'C (60–74)',  'class' => 'seo-score--c'],
+            'D' => ['label' => 'D (40–59)',  'class' => 'seo-score--d'],
+            'F' => ['label' => 'F (<40)',    'class' => 'seo-score--f'],
         ];
 
         $gradeDistribution = $stats['grade_distribution'] ?? [];
@@ -102,9 +112,7 @@
             {{-- ── Exportar datos ───────────────────────────────────────────────── --}}
             <div class="col-12 col-lg-4">
                 <div class="card h-100">
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-0 fw-bold">Exportar datos</h5>
-                    </div>
+                    
                     <div class="card-body d-flex flex-column gap-3">
 
                         <div class="border rounded p-3">
@@ -190,6 +198,7 @@
 @endsection
 
 @push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/includes/seo-badges.css') }}">
 <link rel="stylesheet" href="{{ asset('managers/css/views/seo/report/index.css') }}">
 @endpush
 

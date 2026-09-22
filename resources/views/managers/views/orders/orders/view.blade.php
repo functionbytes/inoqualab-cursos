@@ -1,5 +1,17 @@
 @extends('layouts.managers')
 
+@section('title', 'Orden ' . $order->slack)
+
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Orden ' . $order->slack,
+        'breadcrumbs' => [
+            ['label' => 'Órdenes', 'url' => route('manager.orders')],
+            ['label' => $order->slack],
+        ],
+    ])
+@endsection
+
 @section('content')
 
 

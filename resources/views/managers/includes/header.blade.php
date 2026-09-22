@@ -1,132 +1,164 @@
-<!-- Header Start -->
-
+{{--
+    Header portado de modules/Theme/resources/views/theme/includes/header.blade.php
+    (webadmin), estilizado con managers/css/nav.css. El buscador central es una
+    búsqueda rápida sobre los items del propio menú (rail + paneles) — no hay
+    endpoint de búsqueda global en training, así que no busca en datos (usuarios,
+    órdenes, etc.), solo navega el menú. Ver managers/js/includes/app-search.js.
+--}}
 <header class="app-header">
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link sidebartoggler nav-icon-hover ms-n3" id="headerCollapse" href="javascript:void(0)">
-                    <i class="fas fa-bars"></i>
-                </a>
-            </li>
-        </ul>
-        <div class="d-block d-lg-none">
-            @if(count($setting->getMedia('logo'))>0)
-                <img src="{{ $setting->getfirstMedia('logo')->getfullUrl() }}" width="180" alt="" />
-            @endif
-        </div>
-        <button class="navbar-toggler p-0 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="p-2">
-                <i class="fas fa-ellipsis fs-7"></i>
-              </span>
+    <div class="app-header-inner">
+        <button class="app-toggler" type="button"
+                aria-controls="appMenubar"
+                aria-expanded="true"
+                aria-label="Contraer menú lateral">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <path d="M7.66699 12.6668L3.66699 8.00016L7.66699 3.3335" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                <path opacity="0.5" d="M12.667 12.6668L8.66699 8.00016L12.667 3.3335" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <div class="d-flex align-items-center justify-content-between">
-                <a href="javascript:void(0)" class="nav-link d-flex d-lg-none align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobilenavbar" aria-controls="offcanvasWithBothOptions">
-                    <i class="fas fa-align-justify fs-7"></i>
-                </a>
-                <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-center">
 
-                    @php
-                        $unreadCount = Auth::user()->unreadNotifications()->count();
-                        $recentNotifs = Auth::user()->unreadNotifications()->latest()->take(5)->get();
-                    @endphp
-
-                    {{-- Campana de notificaciones --}}
-                    <li class="nav-item dropdown me-1">
-                        <a class="nav-link nav-icon-hover position-relative" href="javascript:void(0)"
-                           id="dropNotif" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-bell fs-6"></i>
-                            @if($unreadCount > 0)
-                                <span class="badge rounded-pill bg-danger position-absolute header-notif-badge"
-                                      id="notifBadge">{{ $unreadCount > 99 ? '99+' : $unreadCount }}</span>
-                            @endif
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end content-dd dropdown-menu-animate-up p-0 header-notif-dropdown"
-                             aria-labelledby="dropNotif">
-                            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom bg-light rounded-top">
-                                <span class="fw-semibold small">Notificaciones</span>
-                                @if($unreadCount > 0)
-                                    <a href="javascript:void(0)" class="text-primary small" id="markAllReadHeader">
-                                        Marcar todas como leídas
-                                    </a>
-                                @endif
-                            </div>
-                            <div class="header-notif-list">
-                                @forelse($recentNotifs as $notif)
-                                    <a href="{{ route('manager.notifications') }}"
-                                       class="d-flex align-items-start gap-2 px-3 py-2 border-bottom text-dark text-decoration-none hover-bg-light notif-item"
-                                       data-notif-id="{{ $notif->id }}">
-                                        <div class="flex-shrink-0 mt-1">
-                                            <span class="rounded-circle d-flex align-items-center justify-content-center bg-primary-subtle header-notif-icon-circle">
-                                                <i class="fas fa-bell fs-6 text-primary"></i>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 overflow-hidden">
-                                            <div class="fw-semibold small text-truncate">{{ $notif->data['title'] ?? 'Notificación' }}</div>
-                                            <div class="text-muted small text-truncate">{{ $notif->data['message'] ?? '' }}</div>
-                                            <div class="text-muted header-notif-time">{{ $notif->created_at->diffForHumans() }}</div>
-                                        </div>
-                                        <span class="badge bg-primary rounded-pill flex-shrink-0 align-self-start mt-1 header-notif-dot"></span>
-                                    </a>
-                                @empty
-                                    <div class="text-center py-4 text-muted small">
-                                        <i class="fas fa-bell-slash fs-4 d-block mb-2"></i>
-                                        Sin notificaciones nuevas
-                                    </div>
-                                @endforelse
-                            </div>
-                            <div class="px-3 py-2 border-top text-center">
-                                <a href="{{ route('manager.notifications') }}" class="text-primary small">
-                                    Ver todas las notificaciones
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link pe-0" href="javascript:void(0)" id="drop1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <div class="d-flex align-items-center">
-                                <div class="user-profile-img">
-                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="35" height="35" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
-                                </div>
-                            </div>
-                        </a>
-                        <div class="dropdown-menu content-dd dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop1">
-                            <div class="profile-dropdown position-relative" data-simplebar>
-
-                                <div class="d-flex align-items-center py-9 mx-7 border-bottom">
-                                    <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" class="rounded-circle object-fit-cover" width="50" height="50" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
-                                    <div class="ms-3">
-                                        <h5 class="mb-1 fs-3 text-uppercase">{{ Str::words(Auth::user()->firstname ,1,'') }} {{ Str::words(Auth::user()->lastname,1,'') }} </h5>
-                                        <span class="mb-1 d-block text-dark">
-                                            @if (Auth::user()->role == 'manager')
-                                                Administrador
-                                            @elseif (Auth::user()->role == 'customer')
-                                                Cliente
-                                            @endif
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="d-grid py-4 px-7 pt-8">
-                                    <a href="{{ route('manager.profile.edit') }}" class="btn btn-outline-primary px-4 w-100 mb-2">Mi perfil</a>
-                                    <form action="{{ route('logout') }}" method="POST" class="w-100">
-                                        @csrf
-                                        <button type="submit" class="btn btn-info px-4 waves-effect waves-light w-100">Salir</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
+        <div class="app-header-start d-none d-md-flex">
+            <div class="gs-wrap">
+                <button type="button" id="gs-trigger" class="gs-trigger">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar en el menú…</span>
+                    <kbd class="gs-kbd">⌘K</kbd>
+                </button>
+                <div class="gs-dropdown" id="gs-dropdown">
+                    <div class="gs-search-field">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="gs-input" placeholder="Buscar en el menú…" autocomplete="off">
+                    </div>
+                    <div id="gs-results" class="gs-results"></div>
+                </div>
             </div>
         </div>
-    </nav>
+
+        <div class="app-header-end">
+            @php
+                $unreadCount = Auth::user()->unreadNotifications()->count();
+                $recentNotifs = Auth::user()->unreadNotifications()->latest()->take(4)->get();
+                $extraCount = max(0, $unreadCount - $recentNotifs->count());
+            @endphp
+
+            <div class="vr my-3"></div>
+            <div class="d-flex align-items-center gap-sm-2 gap-0 px-lg-4 px-sm-2 px-1">
+                {{-- Notificaciones: mismo html/css que .notif-panel-* de webadmin,
+                     con los datos reales de Auth::user()->unreadNotifications(). --}}
+                <div class="dropdown text-end">
+                    <button type="button"
+                            class="btn btn-icon btn-action-gray rounded-circle waves-effect waves-light position-relative"
+                            id="dropNotif"
+                            data-bs-toggle="dropdown"
+                            data-bs-auto-close="outside"
+                            aria-expanded="false"
+                            aria-label="Notificaciones">
+                        <span class="notif-trigger-ico">{!! \App\Html\IconHelper::render('bell', 20) !!}</span>
+                        <div id="notification-badge" class="{{ $unreadCount > 0 ? 'badge-pulse' : '' }}"></div>
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-end notif-panel-dd" aria-labelledby="dropNotif">
+                        <div class="notif-panel-head">
+                            <div class="notif-panel-icon">{!! \App\Html\IconHelper::render('bell', 18) !!}</div>
+                            <div class="notif-panel-title-wrap">
+                                <div class="notif-panel-label">CUENTA</div>
+                                <div class="notif-panel-title">
+                                    Notificaciones
+                                    @if($unreadCount > 0)
+                                        <span class="notif-chip">{{ $unreadCount }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <button class="notif-panel-close" id="btn-notif-close" type="button" aria-label="Cerrar">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="notif-panel-body">
+                            @forelse($recentNotifs as $notif)
+                                <a href="{{ route('manager.notifications') }}" class="notif-item unread">
+                                    <div class="ico">{!! \App\Html\IconHelper::render('bell', 18) !!}</div>
+                                    <div class="body">
+                                        <div class="head">
+                                            <div class="title">{{ $notif->data['title'] ?? 'Notificación' }}</div>
+                                            <span class="badge-new">Nuevo</span>
+                                        </div>
+                                        <div class="desc">{{ $notif->data['message'] ?? '' }}</div>
+                                        <div class="meta"><i class="far fa-clock"></i>{{ $notif->created_at->diffForHumans() }}</div>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="notif-panel-empty">
+                                    <span class="notif-empty-ico">{!! \App\Html\IconHelper::render('bell-slash', 32) !!}</span>
+                                    <h6 class="fw-semibold mb-1">Sin notificaciones</h6>
+                                    <p class="text-muted mb-0 small">No tienes notificaciones nuevas</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        @if($extraCount > 0)
+                            <div class="notif-extra">+{{ $extraCount }} notificaciones adicionales</div>
+                        @endif
+
+                        <div class="notif-panel-foot">
+                            <a href="{{ route('manager.notifications') }}" class="btn btn-primary">Ver todas las notificaciones</a>
+                            @if($unreadCount > 0)
+                                <button class="btn btn-outline-secondary" id="markAllReadHeader" type="button">Marcar todas como leídas</button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="vr my-3"></div>
+
+            {{-- Dock de usuario: mismo html/css que .dock-wrap/.dock-anchor/.dock
+                 de webadmin, con foto de perfil de Auth::user() en vez de
+                 iniciales cuando existe. --}}
+            <div class="dock-wrap" id="user-dock-wrap">
+                <button class="dock-anchor" id="user-dock-trigger" type="button">
+                    <div class="av">
+                        <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
+                        <span class="pres"></span>
+                    </div>
+                </button>
+
+                <div class="dock" id="user-dock">
+                    <div class="dock-head">
+                        <div class="av">
+                            <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
+                        </div>
+                        <div class="body">
+                            <span class="nm">{{ Str::words(Auth::user()->firstname, 1, '') }} {{ Str::words(Auth::user()->lastname, 1, '') }}</span>
+                            <span class="em">{{ Auth::user()->email }}</span>
+                        </div>
+                    </div>
+                    <div class="dock-list">
+                        <a href="{{ route('manager.profile.edit') }}" class="dock-item">
+                            <i class="fas fa-user"></i> Ver perfil
+                        </a>
+                        <a href="{{ route('manager.profile.edit') }}" class="dock-item">
+                            <i class="fas fa-gear"></i> Configuración
+                        </a>
+                        <a href="{{ route('manager.notifications') }}" class="dock-item">
+                            <i class="fas fa-bell"></i> Notificaciones
+                        </a>
+                        <div class="dock-divider"></div>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dock-item danger">
+                                <i class="fas fa-arrow-right-from-bracket"></i> Cerrar sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
 
-<!-- Header End -->
-
-@push('css')
-<link rel="stylesheet" href="{{ asset('managers/css/includes/header.css') }}">
+@push('scripts')
+<script src="{{ asset('managers/js/includes/header.js') }}" type="text/javascript"></script>
+<script src="{{ asset('managers/js/includes/app-toggler.js') }}" type="text/javascript"></script>
+<script src="{{ asset('managers/js/includes/app-search.js') }}" type="text/javascript"></script>
 @endpush
-

@@ -2,6 +2,10 @@
 
 @section('title', 'Editar plantilla: ' . $template->name)
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar plantilla: ' . $template->name])
+@endsection
+
 @section('content')
 
     @if(session('success'))

@@ -2,6 +2,10 @@
 
 @section('title', 'Notificaciones de analytics')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Notificaciones de analytics'])
+@endsection
+
 @section('content')
 
 

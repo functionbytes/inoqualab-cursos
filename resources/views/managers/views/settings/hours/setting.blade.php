@@ -1,56 +1,59 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Horario de soporte'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
 
-                <form id="formHours" enctype="multipart/form-data" role="form"
-                      data-urls='@json([
-                          "update" => route("manager.settings.hours.update"),
-                          "dashboard" => route("manager.dashboard"),
-                      ])'>
+            <form id="formHours" enctype="multipart/form-data" role="form"
+                  data-urls='@php $__jsonInline1 = [
+                      "update" => route("manager.settings.hours.update"),
+                      "dashboard" => route("manager.dashboard"),
+                  ]; @endphp@json($__jsonInline1)'>
 
-                    {{ csrf_field() }}
+                {{ csrf_field() }}
 
+                <div class="card">
 
-                    <div class="card-body border-top">
-                        <div class=" row align-items-center">
-                            <div class=" col-sm-11 ">
-                                <h5 class="mb-3">Horario soporte</h5>
-                                <p class="card-subtitle mb-3 mt-0">(Si "habilita" esta configuración, los clientes solo podrán ver el nombre que proporcione en el campo de entrada a continuación. No podrán ver el nombre ni la función de los empleados).</p>
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Horario soporte</h6>
+                        <p class="text-muted mb-3">Titulo y subtitulo que se muestran a los usuarios en la seccion de horario de soporte.</p>
+
+                        <div class="row g-3 align-items-center mb-3">
+                            <div class="col-sm-11">
+                                <label class="form-label fw-semibold mb-0" for="hoursswitch">Mostrar horario de soporte</label>
                             </div>
-                            <div class="col-sm-1 justify-content-end d-flex align-items">
+                            <div class="col-sm-1 justify-content-end d-flex">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" name="hoursswitch" id="hoursswitch"   @if(setting('hoursswitch')=='true' ) checked @endif/>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-12">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Titulo</label>
+                                        <label  class="form-label fw-semibold">Titulo</label>
                                         <input type="text" class="form-control" id="hourstitle"  name="hourstitle" value="{{ setting('hourstitle') }}" placeholder="Ingresar titulo">
-                                </div>
                             </div>
                             <div class="col-12">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Subtitulo</label>
+                                        <label  class="form-label fw-semibold">Subtitulo</label>
                                         <input type="text" class="form-control" id="hourssubtitle"  name="hourssubtitle" value="{{ setting('hourssubtitle') }}" placeholder="Ingresar subtitulo">
-
-                                </div>
                             </div>
 
                         </div>
 
                     </div>
 
+                    <hr class="my-0">
 
-                    <div class="card-body border-top">
+                    <div class="card-body">
 
                         <div class="row mt-50">
 
@@ -58,8 +61,8 @@
                                 <div class="mb-4 mt-3">
                                     <div class=" row align-items-center">
                                         <div class=" col-sm-11 ">
-                                            <h5 class="mb-3">Horarios</h5>
-                                            <p class="card-subtitle mb-3 mt-0">(Este sera el horario que vera todos los usuarios al momento de solicitar soporte).</p>
+                                            <h6 class="fw-bold text-dark mb-1">Horarios</h6>
+                                            <p class="text-muted mb-3">Este sera el horario que vera todos los usuarios al momento de solicitar soporte.</p>
                                         </div>
                                     </div>
                                     <div class=" row align-items-center">
@@ -380,18 +383,34 @@
                                 </div>
                             </div>
 
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" id="bussinesshourSubmit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
-
                         </div>
 
                     </div>
-                </form>
+
+                    <div class="card-footer">
+                        <button type="submit" id="bussinesshourSubmit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre el horario</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Este horario se muestra a los clientes para indicarles cuándo pueden esperar respuesta del equipo de soporte.</p>
+
+                    <hr class="my-3">
+
+                    <p class="text-muted mb-0"><strong>24H</strong> significa que ese día se atiende las 24 horas, sin hora de cierre.</p>
+                </div>
             </div>
 
         </div>

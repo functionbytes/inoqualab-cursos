@@ -2,22 +2,9 @@
 
 @section('title', 'Notificaciones')
 
-@section('content')
-
-
-    <div class="widget-content searchable-container list">
-
-        <div class="card">
-
-            {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Notificaciones</h5>
-                        <p class="mb-0 text-muted">Historial de notificaciones recibidas</p>
-                    </div>
-                    <div class="ms-auto d-flex align-items-center gap-3">
-                        <div class="form-check mb-0">
+@section('page_header')
+    @php ob_start(); @endphp
+<div class="form-check mb-0">
                             <input type="checkbox" class="form-check-input" id="select-all">
                             <label class="form-check-label text-muted" for="select-all">Seleccionar todo</label>
                         </div>
@@ -26,9 +13,23 @@
                                 data-bulk-url="{{ route('manager.notifications.bulk-action') }}">
                             Marcar todas como leidas
                         </button>
-                    </div>
-                </div>
-            </div>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('managers.includes.card', [
+        'title' => 'Notificaciones',
+        'description' => 'Historial de notificaciones recibidas',
+        'actions' => $headerActions,
+    ])
+@endsection
+
+@section('content')
+
+
+    <div class="widget-content searchable-container list">
+
+        <div class="card">
+
+            {{-- Header --}}
+            
 
             {{-- Lista de notificaciones --}}
             <div class="card-body">

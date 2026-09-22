@@ -2,20 +2,24 @@
 
 @section('title', 'Configuración SEO')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Configuración SEO'])
+@endsection
+
 @section('content')
 
 
-    <div class="row g-3">
+    <div class="row g-4 align-items-start">
 
-        {{-- Card 1: General --}}
-        <div class="col-12">
-            <div class="card">
+        {{-- Columna izquierda: formularios --}}
+        <div class="col-lg-8">
+
+            {{-- Card 1: General --}}
+            <div class="card mb-4">
                 <form id="formSeoGeneral">
-                    <div class="card-header border-bottom p-3">
-                        <h6 class="mb-0 fw-bold">General</h6>
-                        <p class="text-muted">Configuración básica del SEO del sitio</p>
-                    </div>
                     <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">General</h6>
+                        <p class="text-muted mb-3">Configuración básica del SEO del sitio</p>
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Nombre del sitio</label>
@@ -53,8 +57,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-top">
-                        <button type="button" class="btn btn-primary" data-form="formSeoGeneral"
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary w-100" data-form="formSeoGeneral"
                                 data-url="{{ route('manager.settings.seo.update') }}"
                                 id="btn-save-general">
                             Guardar configuración general
@@ -62,17 +66,13 @@
                     </div>
                 </form>
             </div>
-        </div>
 
-        {{-- Card 2: Verificaciones de buscadores --}}
-        <div class="col-12">
-            <div class="card">
+            {{-- Card 2: Verificaciones de buscadores --}}
+            <div class="card mb-4">
                 <form id="formSeoVerifications">
-                    <div class="card-header border-bottom p-3">
-                        <h6 class="mb-0 fw-bold">Verificaciones de buscadores</h6>
-                        <p class="text-muted">Códigos de verificación para webmaster tools</p>
-                    </div>
                     <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Verificaciones de buscadores</h6>
+                        <p class="text-muted mb-3">Códigos de verificación para webmaster tools</p>
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Google Search Console</label>
@@ -148,8 +148,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-top">
-                        <button type="button" class="btn btn-primary" data-form="formSeoVerifications"
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary w-100" data-form="formSeoVerifications"
                                 data-url="{{ route('manager.settings.seo.update') }}"
                                 id="btn-save-verifications">
                             Guardar verificaciones
@@ -157,17 +157,13 @@
                     </div>
                 </form>
             </div>
-        </div>
 
-        {{-- Card 3: robots.txt y llms.txt --}}
-        <div class="col-12 col-lg-6">
-            <div class="card h-100">
+            {{-- Card 3: robots.txt --}}
+            <div class="card mb-4">
                 <form id="formRobots">
-                    <div class="card-header border-bottom p-3">
-                        <h6 class="mb-0 fw-bold">robots.txt</h6>
-                        <p class="text-muted">Controla qué rastreadores pueden indexar</p>
-                    </div>
                     <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">robots.txt</h6>
+                        <p class="text-muted mb-3">Controla qué rastreadores pueden indexar</p>
                         <textarea class="form-control font-monospace" name="robots_txt" rows="10"
                                   placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /panel/">{{ $settings['robots_txt'] ?? '' }}</textarea>
                         <div class="form-text mt-2">
@@ -175,8 +171,8 @@
                             Este contenido se publicará en <code>/robots.txt</code>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-top">
-                        <button type="button" class="btn btn-primary" data-form="formRobots"
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary w-100" data-form="formRobots"
                                 data-url="{{ route('manager.settings.seo.robots') }}"
                                 id="btn-save-robots">
                             Guardar robots.txt
@@ -184,16 +180,13 @@
                     </div>
                 </form>
             </div>
-        </div>
 
-        <div class="col-12 col-lg-6">
-            <div class="card h-100">
+            {{-- Card 4: llms.txt --}}
+            <div class="card">
                 <form id="formLlms">
-                    <div class="card-header border-bottom p-3">
-                        <h6 class="mb-0 fw-bold">llms.txt</h6>
-                        <p class="text-muted">Instrucciones para modelos de lenguaje (LLMs)</p>
-                    </div>
                     <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">llms.txt</h6>
+                        <p class="text-muted mb-3">Instrucciones para modelos de lenguaje (LLMs)</p>
                         <textarea class="form-control font-monospace" name="llms_txt" rows="8"
                                   placeholder="# Mi Sitio&#10;&#10;Descripción breve del sitio para LLMs...">{{ $settings['llms_txt'] ?? '' }}</textarea>
                         <div class="form-text mt-2">
@@ -201,8 +194,8 @@
                             Este contenido se publicará en <code>/llms.txt</code>
                         </div>
                     </div>
-                    <div class="card-footer bg-white border-top">
-                        <button type="button" class="btn btn-primary" data-form="formLlms"
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary w-100" data-form="formLlms"
                                 data-url="{{ route('manager.settings.seo.llms') }}"
                                 id="btn-save-llms">
                             Guardar llms.txt
@@ -210,6 +203,36 @@
                     </div>
                 </form>
             </div>
+
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre estos ajustes</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Cada tarjeta se guarda de forma independiente: los cambios en "General" no afectan a "Verificaciones" ni a los archivos de texto, y viceversa.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">IndexNow y los archivos .txt</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-2">IndexNow</h6>
+                    <p class="text-muted mb-3">Notifica automáticamente a Bing y Yandex cuando publicas o actualizas contenido, sin esperar a que lo rastreen.</p>
+
+                    <hr class="my-3">
+
+                    <h6 class="fw-semibold mb-2">robots.txt / llms.txt</h6>
+                    <p class="text-muted mb-0">Se publican tal cual en la raíz del dominio. Ten cuidado al restringir rutas: un <code>Disallow: /</code> mal puesto puede desindexar todo el sitio.</p>
+                </div>
+            </div>
+
         </div>
 
     </div>

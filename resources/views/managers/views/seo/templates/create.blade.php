@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Nueva plantilla SEO'])
+@endsection
+
 @section('content')
 
 

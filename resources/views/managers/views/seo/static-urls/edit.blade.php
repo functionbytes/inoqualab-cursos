@@ -2,6 +2,10 @@
 
 @section('title', 'Editar URL estática')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar URL estática'])
+@endsection
+
 @section('content')
 
 

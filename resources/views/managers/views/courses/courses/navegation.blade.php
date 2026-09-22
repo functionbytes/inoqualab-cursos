@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => $course->title])
+@endsection
         @section('content')
 
             <div class="container-fluid">

@@ -1,122 +1,114 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Crear testimonio'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
 
-                <form id="formTestimonies" enctype="multipart/form-data" role="form"
-                      data-urls='@json([
-                          "store" => route("manager.testimonies.store"),
-                          "index" => route("manager.testimonies"),
-                      ])'>
+            <form id="formTestimonies" enctype="multipart/form-data" role="form"
+                  data-urls='@php $__jsonInline1 = [
+                      "store" => route("manager.testimonies.store"),
+                      "index" => route("manager.testimonies"),
+                  ]; @endphp@json($__jsonInline1)'>
 
-                    {{ csrf_field() }}
+                {{ csrf_field() }}
 
-                    <input type="hidden" id="id" name="id" value="">
-                    <input type="hidden" id="slack" name="slack" value="">
-                    <input type="hidden" id="description" name="description" value="">
+                <input type="hidden" id="id" name="id" value="">
+                <input type="hidden" id="slack" name="slack" value="">
+                <input type="hidden" id="description" name="description" value="">
 
-                    <div class="card-body border-top">
-                            <div class="d-flex no-block align-items-center">
-                                <h5 class="mb-0">Crear testimonio</h5>
+                <div class="card">
+
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Crear testimonio</h6>
+                        <p class="text-muted mb-3">
+                            Completa los datos del testimonio. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
+                        </p>
+                        <div class="row g-3">
+
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Nombres</label>
+                                <input type="text" class="form-control" id="firstname"  name="firstname" value="" placeholder="Ingresar nombres">
                             </div>
-                            <p class="card-subtitle mb-3 mt-3">
-                                Completa los datos del testimonio. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
-                            </p>
-                            <div class="row">
-
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Nombres</label>
-                                            <input type="text" class="form-control" id="firstname"  name="firstname" value="" placeholder="Ingresar nombres">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Apellidos</label>
-                                            <input type="text" class="form-control" id="lastname"  name="lastname" value="" placeholder="Ingresar apellido">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Rol</label>
-                                            <input type="text" class="form-control" id="role"  name="role" value="" placeholder="Ej: Estudiante certificado">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Ícono (Font Awesome)</label>
-                                            <input type="text" class="form-control" id="icon"  name="icon" value="" placeholder="Ej: fas fa-user-graduate">
-                                            <label id="icon-error" class="error d-none" for="icon"></label>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        <label class="control-label col-form-label">Calificación</label>
-                                        <div class="input-group">
-                                            {!! Form::select('rating', [1 => '1 estrella', 2 => '2 estrellas', 3 => '3 estrellas', 4 => '4 estrellas', 5 => '5 estrellas'], 5, ['class' => 'select2 form-control','id' => 'rating']) !!}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Número del contador</label>
-                                            <input type="text" class="form-control" id="counter_value"  name="counter_value" value="" placeholder="Ej: 50">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Sufijo del contador</label>
-                                            <input type="text" class="form-control" id="counter_suffix"  name="counter_suffix" value="" placeholder="Ej: K+, %, +">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Descripción del contador</label>
-                                            <input type="text" class="form-control" id="benefit"  name="benefit" value="" placeholder="Ej: Estudiantes certificados con nuestros cursos">
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                            <label  class="control-label col-form-label">Orden</label>
-                                            <input type="number" class="form-control" id="position"  name="position" value="0" min="0" placeholder="0">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label class="control-label col-form-label">Estado</label>
-                                        <div class="input-group">
-                                            {!! Form::select('available', $availables, null , ['class' => 'select2 form-control','id' => 'available']) !!}
-                                        </div>
-                                        <label id="available-error" class="error d-none" for="available"></label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="mb-3">
-                                        <label class="col-form-label">Testimonio</label>
-                                        <div class="quill-wrapper">
-                                            <div  id="descriptions"></div>
-                                        </div>
-                                        <label id="description-error" class="error d-none" for="description"></label>
-                                    </div>
-                                </div>
-                                 <div class="col-12">
-                                     <div class="action-form border-top mt-4">
-                                         <div class="text-center">
-                                             <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                                 Guardar
-                                             </button>
-                                         </div>
-                                     </div>
-                                 </div>
-
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Apellidos</label>
+                                <input type="text" class="form-control" id="lastname"  name="lastname" value="" placeholder="Ingresar apellido">
                             </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Rol</label>
+                                <input type="text" class="form-control" id="role"  name="role" value="" placeholder="Ej: Estudiante certificado">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Ícono (Font Awesome)</label>
+                                <input type="text" class="form-control" id="icon"  name="icon" value="" placeholder="Ej: fas fa-user-graduate">
+                                <label id="icon-error" class="error d-none" for="icon"></label>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Calificación</label>
+                                <div class="input-group">
+                                    {!! Form::select('rating', [1 => '1 estrella', 2 => '2 estrellas', 3 => '3 estrellas', 4 => '4 estrellas', 5 => '5 estrellas'], 5, ['class' => 'select2 form-control','id' => 'rating']) !!}
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Número del contador</label>
+                                <input type="text" class="form-control" id="counter_value"  name="counter_value" value="" placeholder="Ej: 50">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Sufijo del contador</label>
+                                <input type="text" class="form-control" id="counter_suffix"  name="counter_suffix" value="" placeholder="Ej: K+, %, +">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Descripción del contador</label>
+                                <input type="text" class="form-control" id="benefit"  name="benefit" value="" placeholder="Ej: Estudiantes certificados con nuestros cursos">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Orden</label>
+                                <input type="number" class="form-control" id="position"  name="position" value="0" min="0" placeholder="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Estado</label>
+                                <div class="input-group">
+                                    {!! Form::select('available', $availables, null , ['class' => 'select2 form-control','id' => 'available']) !!}
+                                </div>
+                                <label id="available-error" class="error d-none" for="available"></label>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Testimonio</label>
+                                <div class="quill-wrapper">
+                                    <div  id="descriptions"></div>
+                                </div>
+                                <label id="description-error" class="error d-none" for="description"></label>
+                            </div>
+
+                        </div>
                     </div>
 
-                </form>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre los testimonios</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Se muestran en las secciones de testimonios del sitio público. El <strong>número</strong> y <strong>sufijo del contador</strong> son opcionales, para testimonios tipo estadística.</p>
+                </div>
             </div>
 
         </div>

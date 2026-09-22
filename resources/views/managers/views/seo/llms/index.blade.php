@@ -2,6 +2,10 @@
 
 @section('title', 'llms.txt')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'llms.txt'])
+@endsection
+
 @section('content')
 
 

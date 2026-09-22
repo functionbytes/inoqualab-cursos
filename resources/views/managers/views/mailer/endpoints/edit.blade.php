@@ -2,6 +2,10 @@
 
 @section('title', 'Editar endpoint: ' . $endpoint->name)
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar endpoint: ' . $endpoint->name])
+@endsection
+
 @section('content')
 
 @if(session('success'))
@@ -14,6 +18,10 @@
     <div class="alert alert-danger alert-dismissible fade show"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul><button class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
+<div class="row g-4 align-items-start">
+
+{{-- Columna izquierda: formulario --}}
+<div class="col-lg-8">
 <div class="card">
     <form method="POST" action="{{ route('mailers.endpoints.update', $endpoint) }}" id="formEdit">
         @csrf
@@ -312,10 +320,17 @@
                                 </thead>
                                 <tbody>
                                     @foreach($recentLogs as $log)
+                                        @php
+                                            $logBadgeClass = match ($log->status) {
+                                                \App\Enums\EndpointLogStatus::Success => 'bg-success',
+                                                \App\Enums\EndpointLogStatus::Failed => 'bg-danger',
+                                                \App\Enums\EndpointLogStatus::Pending => 'bg-warning',
+                                            };
+                                        @endphp
                                         <tr>
                                             <td>
-                                                <span class="badge rounded-pill {{ $log->status === 'success' ? 'bg-success' : 'bg-danger' }} text-white">
-                                                    {{ ucfirst($log->status) }}
+                                                <span class="badge rounded-pill {{ $logBadgeClass }} text-white">
+                                                    {{ ucfirst($log->status->value) }}
                                                 </span>
                                             </td>
                                             <td class="text-muted">{{ Str::limit($log->recipient_email, 30) }}</td>
@@ -342,6 +357,53 @@
         </div>
 
     </form>
+</div>
+</div>
+
+{{-- Columna derecha: sidebar informativo --}}
+<div class="col-lg-4">
+
+    <div class="card mb-3">
+        <div class="card-header border-bottom">
+            <h6 class="mb-0 fw-bold">Información del endpoint</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                <div class="list-group-item px-3 py-2">
+                    <small class="text-muted d-block">Total solicitudes</small>
+                    <span class="small fw-semibold">{{ number_format($endpoint->requests_count) }}</span>
+                </div>
+                <div class="list-group-item px-3 py-2">
+                    <small class="text-muted d-block">Creado</small>
+                    <span class="small">{{ $endpoint->created_at->format('d/m/Y H:i') }}</span>
+                </div>
+                <div class="list-group-item px-3 py-2">
+                    <small class="text-muted d-block">Última actualización</small>
+                    <span class="small">{{ $endpoint->updated_at->diffForHumans() }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header border-bottom">
+            <h6 class="mb-0 fw-bold">Información útil</h6>
+        </div>
+        <div class="card-body">
+            <ul class="text-muted ps-3 mb-3">
+                <li class="mb-2">El <strong>token API</strong> se envía en el header <code>X-API-Token</code></li>
+                <li class="mb-2">Regenerar el token invalida el anterior de inmediato</li>
+                <li>Los endpoints inactivos <strong>rechazarán</strong> todas las peticiones</li>
+            </ul>
+            <p class="small mb-1 fw-semibold">Ejemplo de request:</p>
+            <pre class="bg-dark text-light p-2 rounded mb-0 example-request-pre"><code>POST /api/email-endpoints/{{ $endpoint->slug }}/send
+Header: X-API-Token: {{ Str::limit($endpoint->api_token, 12, '...') }}
+{"email": "user@example.com"}</code></pre>
+        </div>
+    </div>
+
+</div>
+
 </div>
 
 {{-- Regenerate Token Modal --}}

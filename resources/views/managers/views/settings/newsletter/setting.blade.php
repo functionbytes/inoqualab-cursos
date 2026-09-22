@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="{{ asset('managers/css/views/settings/newsletter/setting.css') }}">
 @endpush
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Configuración del newsletter'])
+@endsection
+
 @section('content')
 
 <div class="row g-4 align-items-start">

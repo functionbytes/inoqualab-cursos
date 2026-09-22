@@ -6,18 +6,17 @@
 <link rel="stylesheet" href="{{ asset('managers/css/views/settings/roles/matrix.css') }}">
 @endpush
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Matriz de permisos por rol',
+        'description' => 'Qué puede hacer cada rol (✓) y qué no (–), de un vistazo',
+    ])
+@endsection
+
 @section('content')
 
     <div class="card">
-        <div class="card-header p-4 border-bottom border-light">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h5 class="mb-1 fw-bold">Matriz de permisos por rol</h5>
-                    <p class="small mb-0 text-muted">Qué puede hacer cada rol (✓) y qué no (–), de un vistazo</p>
-                </div>
-                <a href="{{ route('manager.roles.index') }}" class="btn btn-outline-secondary">Atrás</a>
-            </div>
-        </div>
+        
 
         {{-- Stats + leyenda --}}
         <div class="card-body border-bottom d-flex flex-wrap gap-4 align-items-center">

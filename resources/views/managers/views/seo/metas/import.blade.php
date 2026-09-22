@@ -2,6 +2,13 @@
 
 @section('title', 'Importar metas SEO desde CSV')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Importar desde CSV',
+        'description' => 'Carga un archivo CSV para importar o actualizar metadatos SEO',
+    ])
+@endsection
+
 @section('content')
 
 
@@ -12,10 +19,7 @@
             <div class="card">
                 <form action="{{ route('manager.seo.metas.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-1 fw-bold">Importar desde CSV</h5>
-                        <p class="mb-0 text-muted small">Carga un archivo CSV para importar o actualizar metadatos SEO</p>
-                    </div>
+                    
                     <div class="card-body">
 
                         @if($errors->any())
@@ -95,14 +99,14 @@
                         <p class="fw-semibold small mb-2">Columnas requeridas</p>
                         <div class="d-flex flex-column gap-2">
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-danger mt-1">req</span>
+                                <span class="badge bg-danger-subtle text-danger mt-1">req</span>
                                 <div>
                                     <code class="small">seoable_type</code>
                                     <div class="form-text">Clase del modelo (ej: <code>App\Models\Course</code>)</div>
                                 </div>
                             </div>
                             <div class="d-flex align-items-start gap-2">
-                                <span class="badge bg-danger mt-1">req</span>
+                                <span class="badge bg-danger-subtle text-danger mt-1">req</span>
                                 <div>
                                     <code class="small">seoable_id</code>
                                     <div class="form-text">ID del registro al que pertenece</div>

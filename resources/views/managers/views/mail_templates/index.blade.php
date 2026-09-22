@@ -2,6 +2,13 @@
 
 @section('title', 'Plantillas de correo')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Plantillas de correo electrónico',
+        'description' => 'Gestiona el asunto y el contenido HTML de los correos que envía la plataforma',
+    ])
+@endsection
+
 @section('content')
 
 
@@ -12,14 +19,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Plantillas de correo electrónico</h5>
-                        <p class="mb-0 text-muted">Gestiona el asunto y el contenido HTML de los correos que envía la plataforma</p>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Tabla --}}
             <div class="card-body">

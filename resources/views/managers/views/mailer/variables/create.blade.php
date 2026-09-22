@@ -2,6 +2,10 @@
 
 @section('title', 'Crear variable de email')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Crear variable de email'])
+@endsection
+
 @section('content')
 
 @if(session('success'))
@@ -14,8 +18,10 @@
     <div class="alert alert-danger alert-dismissible fade show"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul><button class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
 
-<div class="row">
-    <div class="col-lg-12">
+<div class="row g-4 align-items-start">
+
+    {{-- Columna izquierda: formulario --}}
+    <div class="col-lg-8">
         <div class="card">
             <form action="{{ route('mailers.variables.store') }}" method="POST">
                 @csrf
@@ -116,6 +122,24 @@
             </form>
         </div>
     </div>
+
+    {{-- Columna derecha: sidebar informativo --}}
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">Sobre las variables</h6>
+            </div>
+            <div class="card-body">
+                <ul class="text-muted ps-3 mb-0">
+                    <li class="mb-2">La <strong>clave</strong> se usa entre llaves dentro de las plantillas, ej: <code>{CUSTOMER_NAME}</code></li>
+                    <li class="mb-2">Debe comenzar con mayúscula y usar solo mayúsculas, números y guiones bajos</li>
+                    <li class="mb-2">La <strong>categoría</strong> y el <strong>módulo</strong> agrupan la variable al listarla</li>
+                    <li>Marca <strong>variable del sistema</strong> solo si es crítica: luego no podrá editarse ni eliminarse</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 @endsection

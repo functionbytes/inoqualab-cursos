@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar plantilla: ' . $template->name])
+@endsection
+
 @section('content')
 
 
@@ -339,10 +343,10 @@
                 <div id="testEmailResult" class="d-none"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-info" id="btnSendTestEmail">
+                <button type="button" class="btn btn-info w-100 mb-2" id="btnSendTestEmail">
                     Enviar prueba
                 </button>
+                <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>

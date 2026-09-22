@@ -1,33 +1,37 @@
 @extends('layouts.managers')
 
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar metadata'])
+@endsection
 @section('content')
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
-            <div class="card w-100">
-                <form id="formMetadata" enctype="multipart/form-data" role="form"
-                      data-urls='@php $__jsonInline1 = [
-                          "update" => route("manager.settings.metadata.update"),
-                          "store" => route("manager.settings.metadata.store"),
-                          "get" => route("manager.settings.metadata.get", ":item"),
-                          "delete" => route("manager.settings.metadata.delete", ":id"),
-                          "dashboard" => route("manager.dashboard"),
-                      ]; @endphp@json($__jsonInline1)'>
-                    {{ csrf_field() }}
+    <div class="row g-4 align-items-start">
 
-                    <input type="hidden" id="meta_description" name="meta_description" value="{{ setting('meta_description') }}">
-                    <input type="hidden" id="slack" name="slack" value="{{ setting('meta_image') }}">
-                    <input type="hidden" id="statuMetas" name="statuMetas" value="{{ $metadata }}">
-                    <input type="hidden" id="statuEdit" name="statuEdit" value="true">
-                    <input type="hidden" id="metadata" name="metadata">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formMetadata" enctype="multipart/form-data" role="form"
+                  data-urls='@php $__jsonInline1 = [
+                      "update" => route("manager.settings.metadata.update"),
+                      "store" => route("manager.settings.metadata.store"),
+                      "get" => route("manager.settings.metadata.get", ":item"),
+                      "delete" => route("manager.settings.metadata.delete", ":id"),
+                      "dashboard" => route("manager.dashboard"),
+                  ]; @endphp@json($__jsonInline1)'>
+                {{ csrf_field() }}
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Imagen</h5>
+                <input type="hidden" id="meta_description" name="meta_description" value="{{ setting('meta_description') }}">
+                <input type="hidden" id="slack" name="slack" value="{{ setting('meta_image') }}">
+                <input type="hidden" id="statuMetas" name="statuMetas" value="{{ $metadata }}">
+                <input type="hidden" id="statuEdit" name="statuEdit" value="true">
+                <input type="hidden" id="metadata" name="metadata">
 
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la foto de tu perfil es necesario actualizar para mantener tus datos al día.
+                <div class="card">
+
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Imagen por defecto</h6>
+                        <p class="text-muted mb-3">
+                            Se usa como miniatura social (og:image) cuando un curso, blog o paquete no tiene portada propia.
                         </p>
                         <div class="dropzone dz-clickable" id="metadata">
                             <div class="fallback">
@@ -37,47 +41,59 @@
                         <label id="metadata-error" class="error d-none" for="metadata"></label>
                     </div>
 
+                    <hr class="my-0">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar metadata</h5>
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Configura los metadatos SEO por defecto del sitio: título, palabras clave y descripción.
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Metadatos SEO por defecto</h6>
+                        <p class="text-muted mb-3">
+                            Título, palabras clave y descripción que usan las páginas que no definen sus propios metadatos.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Título</label>
-                                    <input type="text" class="form-control" id="meta_title" name="meta_title" value="{{ setting('meta_title') }}" placeholder="Ingresar título">
-                                </div>
+                                <label for="meta_title" class="form-label fw-semibold">Título</label>
+                                <input type="text" class="form-control" id="meta_title" name="meta_title" value="{{ setting('meta_title') }}" placeholder="Ingresar título">
                             </div>
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Palabras clave</label>
-                                    <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ setting('meta_keywords') }}" >
-                                </div>
+                                <label for="meta_keywords" class="form-label fw-semibold">Palabras clave</label>
+                                <input type="text" class="form-control" id="meta_keywords" name="meta_keywords" value="{{ setting('meta_keywords') }}">
                             </div>
-                            <div class="col-12 mt-3">
-                                <label class="control-label col-form-label">Descripción</label>
-                                <div class="">
-                                    <div id="descriptions">{!! clean(setting('meta_description'), 'content') !!}</div>
-                                </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Descripción</label>
+                                <div id="descriptions">{!! clean(setting('meta_description'), 'content') !!}</div>
                                 <label id="description-error" class="error d-none" for="description"></label>
                             </div>
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
                         </div>
                     </div>
-                </form>
-            </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
         </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre estos metadatos</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Estos valores son el respaldo general del sitio: se usan solo cuando una página (curso, blog, sección) no define su propio título, descripción o imagen.</p>
+
+                    <hr class="my-3">
+
+                    <p class="text-muted mb-0">Para editar el SEO de una página específica, usa <strong>Analytics y SEO → Plantillas</strong> o el SEO propio de cada curso/blog.</p>
+                </div>
+            </div>
+
+        </div>
+
     </div>
 @endsection
 

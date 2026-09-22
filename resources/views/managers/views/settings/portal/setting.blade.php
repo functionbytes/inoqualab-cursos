@@ -109,6 +109,10 @@
     ];
 @endphp
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Portal del alumno'])
+@endsection
+
 @section('content')
 
 <div class="row">

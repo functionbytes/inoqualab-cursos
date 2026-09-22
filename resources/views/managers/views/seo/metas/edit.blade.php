@@ -2,6 +2,10 @@
 
 @section('title', 'Editar SEO')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar SEO'])
+@endsection
+
 @section('content')
 
 

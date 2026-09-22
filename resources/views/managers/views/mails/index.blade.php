@@ -2,6 +2,34 @@
 
 @section('title', 'Correos entrantes')
 
+@section('page_header')
+    @php ob_start(); @endphp
+    <div class="btn-group">
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Acciones
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <button type="button" class="dropdown-item" id="aliases-btn">
+                Alias faltantes (últimos 30 días)
+            </button>
+            <a class="dropdown-item" href="{{ route('manager.mails') }}">
+                Configuración de correos
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" id="export-btn">
+                Exportar CSV
+            </a>
+        </div>
+    </div>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('managers.includes.card', [
+        'title' => 'Correos entrantes',
+        'description' => 'Gestiona y procesa los correos recibidos de empresas',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
 
@@ -29,28 +57,7 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Correos entrantes</h5>
-                        <p class="mb-0 text-muted">Gestiona y procesa los correos recibidos de empresas</p>
-                    </div>
-                    <div class="d-flex gap-2 ms-auto">
-                        <button type="button" class="btn btn-outline-secondary" id="aliases-btn"
-                                data-bs-toggle="tooltip" title="Alias faltantes (últimos 30 días)">
-                            <i class="fas fa-key"></i>
-                        </button>
-                        <a href="{{ route('manager.mails') }}" class="btn btn-outline-secondary"
-                           data-bs-toggle="tooltip" title="Configuración de correos">
-                            <i class="fas fa-gear"></i>
-                        </a>
-                        <a href="#" id="export-btn" class="btn btn-outline-secondary"
-                           data-bs-toggle="tooltip" title="Exportar CSV">
-                            <i class="fas fa-file-csv"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">
@@ -159,8 +166,8 @@
                     <div class="d-flex gap-2 align-items-center flex-wrap">
                         <div class="flex-fill">
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
+                                <span class="input-group-text bg-white border-end-0 text-muted">
+                                    {!! \App\Html\IconHelper::render('search') !!}
                                 </span>
                                 <input type="search" name="search" class="form-control border-start-0 ps-0"
                                        placeholder="Buscar por remitente o asunto..."
@@ -180,16 +187,16 @@
                                 + (int)(request('confidence', '') !== '')
                                 + (int)(request('assigned_to', '') !== '');
                         @endphp
-                        <button type="button" class="btn btn-outline-secondary flex-shrink-0" title="Filtros"
+                        <button type="button" class="btn btn-outline-secondary btn-icon flex-shrink-0" title="Filtros"
                                 data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            <i class="fas fa-sliders"></i>
+                            {!! \App\Html\IconHelper::render('sliders') !!}
                             @if($activeFilters > 0)
                                 <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
                             @endif
                         </button>
 
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
+                        <button type="submit" class="btn btn-primary btn-icon flex-shrink-0" title="Buscar" aria-label="Buscar">
+                            {!! \App\Html\IconHelper::render('search') !!}
                         </button>
 
                         @if(request('search') || request('status') || request('enterprise_id') || request('confidence') || request('assigned_to') || request('date_from'))

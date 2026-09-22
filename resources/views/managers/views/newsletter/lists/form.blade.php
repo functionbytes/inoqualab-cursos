@@ -2,22 +2,22 @@
 
 @section('title', $list ? 'Editar lista' : 'Nueva lista')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => $list ? 'Editar lista' : 'Nueva lista',
+        'description' => ($list && $list->trigger !== 'manual')
+            ? 'Lista dinámica del sistema: se puebla sola por eventos. Solo puedes editar nombre, descripción y estado.'
+            : 'Segmento manual de suscriptores para tus campañas.',
+    ])
+@endsection
+
 @section('content')
 
-    <div class="row justify-content-center">
-        <div class="col-12 col-lg-7">
-            <div class="card">
-                <div class="card-header p-4 border-bottom border-light">
-                    <h5 class="mb-1 fw-bold">{{ $list ? 'Editar lista' : 'Nueva lista' }}</h5>
-                    <p class="small mb-0 text-muted">
-                        @if($list && $list->trigger !== 'manual')
-                            Lista dinámica del sistema: se puebla sola por eventos. Solo puedes editar nombre, descripción y estado.
-                        @else
-                            Segmento manual de suscriptores para tus campañas.
-                        @endif
-                    </p>
-                </div>
+    <div class="row g-4 align-items-start">
 
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <div class="card">
                 <div class="card-body p-4">
                     <form id="formList"
                           data-is-new="{{ $list ? 'false' : 'true' }}"
@@ -50,6 +50,26 @@
                 </div>
             </div>
         </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre las listas</h6>
+                </div>
+                <div class="card-body">
+                    @if($list && $list->trigger !== 'manual')
+                        <p class="text-muted small mb-0">Esta es una lista dinámica del sistema: se puebla sola cuando ocurre el evento que la origina. Solo puedes editar su nombre, descripción y estado.</p>
+                    @else
+                        <ul class="text-muted ps-3 mb-0">
+                            <li class="mb-2">Las listas manuales se usan para segmentar suscriptores y enviarles campañas específicas</li>
+                            <li>Una lista <strong>inactiva</strong> no aparecerá como destino al crear campañas</li>
+                        </ul>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </div>
 
 @endsection

@@ -2,6 +2,10 @@
 
 @section('title', 'Mi perfil')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Mi perfil'])
+@endsection
+
 @section('content')
 <div class="container-fluid" id="profile-edit"
      data-config='@php $__jsonInline1 = [
@@ -10,12 +14,6 @@
             "passwordUpdate" => route("manager.profile.password"),
         ],
      ]; @endphp@json($__jsonInline1)'>
-
-    <div class="row">
-        <div class="col-12">
-            <h4 class="fw-semibold mb-4">Mi perfil</h4>
-        </div>
-    </div>
 
     <div class="row">
         {{-- Información básica --}}

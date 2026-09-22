@@ -2,6 +2,10 @@
 
 @section('title', $campaign ? 'Editar campaña' : 'Nueva campaña')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => $campaign ? 'Editar campaña' : 'Nueva campaña'])
+@endsection
+
 @section('content')
 
     <div class="row g-3" id="campaign-form-page"

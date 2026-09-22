@@ -2,6 +2,10 @@
 
 @section('title', 'Schema.org — ' . Str::limit($seoMeta->title ?? 'Meta #' . $seoMeta->id, 40))
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Schema.org — ' . Str::limit($seoMeta->title ?? 'Meta #' . $seoMeta->id, 40)])
+@endsection
+
 @section('content')
 
 

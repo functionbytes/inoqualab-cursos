@@ -2,6 +2,13 @@
 
 @section('title', 'Importar backup JSON')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Importar backup JSON',
+        'description' => 'Restaura metadatos SEO a partir de un archivo de backup',
+    ])
+@endsection
+
 @section('content')
 
 
@@ -12,10 +19,7 @@
             <div class="card">
                 <form action="{{ route('manager.seo.metas.import-json') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-1 fw-bold">Importar backup JSON</h5>
-                        <p class="mb-0 text-muted small">Restaura metadatos SEO a partir de un archivo de backup</p>
-                    </div>
+                    
                     <div class="card-body">
 
                         @if($errors->any())
@@ -108,8 +112,8 @@
                     <div class="mb-3">
                         <p class="fw-semibold small mb-2">Campos reconocidos</p>
                         <div class="d-flex flex-column gap-1">
-                            <div><code class="small">seoable_type</code> <span class="badge bg-danger ms-1">req</span></div>
-                            <div><code class="small">seoable_id</code> <span class="badge bg-danger ms-1">req</span></div>
+                            <div><code class="small">seoable_type</code> <span class="badge bg-danger-subtle text-danger ms-1">req</span></div>
+                            <div><code class="small">seoable_id</code> <span class="badge bg-danger-subtle text-danger ms-1">req</span></div>
                             <div><code class="small">title</code></div>
                             <div><code class="small">description</code></div>
                             <div><code class="small">keywords</code></div>

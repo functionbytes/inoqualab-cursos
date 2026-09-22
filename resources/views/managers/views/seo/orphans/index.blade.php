@@ -2,6 +2,22 @@
 
 @section('title', 'Contenido sin SEO')
 
+@section('page_header')
+    @php ob_start(); @endphp
+<button type="button" id="btn-generate-all" class="btn btn-primary"
+                                data-generate-url="{{ route('manager.seo.orphans.generate') }}"
+                                data-bulk-url="{{ route('manager.seo.orphans.bulk-generate') }}"
+                                {{ $total === 0 ? 'disabled' : '' }}>
+                            Generar todo
+                        </button>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('managers.includes.card', [
+        'title' => 'Contenido sin SEO',
+        'description' => 'Contenido publicado que no tiene metadatos SEO configurados',
+        'actions' => $headerActions,
+    ])
+@endsection
+
 @section('content')
 
 
@@ -15,11 +31,11 @@
             'Certifier'   => ['label' => 'Certificadores', 'subtitle' => 'Sin metadatos'],
         ];
         $badgeConfig = [
-            'Course'      => 'bg-primary',
-            'Blog'        => 'bg-success',
-            'Bundle'      => 'bg-warning text-dark',
-            'Instruction' => 'bg-info',
-            'Certifier'   => 'bg-secondary',
+            'Course'      => 'bg-primary-subtle text-primary',
+            'Blog'        => 'bg-success-subtle text-success',
+            'Bundle'      => 'bg-warning-subtle text-warning',
+            'Instruction' => 'bg-info-subtle text-info',
+            'Certifier'   => 'bg-secondary-subtle text-secondary',
         ];
     @endphp
 
@@ -29,41 +45,26 @@
         <div class="card">
 
             {{-- Header --}}
-            <div class="card-header p-4 border-bottom border-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1 fw-bold">Contenido sin SEO</h5>
-                        <p class="mb-0 text-muted">Contenido publicado que no tiene metadatos SEO configurados</p>
-                    </div>
-                    <div class="ms-auto">
-                        <button type="button" id="btn-generate-all" class="btn btn-primary"
-                                data-generate-url="{{ route('manager.seo.orphans.generate') }}"
-                                data-bulk-url="{{ route('manager.seo.orphans.bulk-generate') }}"
-                                {{ $total === 0 ? 'disabled' : '' }}>
-                            Generar todo
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
 
             {{-- Stats --}}
             <div class="card-body border-bottom">
                 <div class="row g-3">
-                    <div class="col-6 col-md-2">
+                    <div class="col-6 col-md-4 col-xl-2">
                         <div class="card bg-light-secondary h-100">
                             <div class="card-body">
-                                <h6 class="card-title mb-2">Total sin SEO</h6>
-                                <h4 class="mb-1 fw-bold">{{ $total }}</h4>
+                                <h6 class="card-title mb-2 text-nowrap">Total sin SEO</h6>
+                                <h4 class="mb-1 fw-bold" id="stat-total">{{ $total }}</h4>
                                 <span class="text-muted">Sin metadatos</span>
                             </div>
                         </div>
                     </div>
                     @foreach($typeConfig as $typeKey => $cfg)
-                        <div class="col-6 col-md-2">
+                        <div class="col-6 col-md-4 col-xl-2">
                             <div class="card bg-light-secondary h-100">
                                 <div class="card-body">
-                                    <h6 class="card-title mb-2">{{ $cfg['label'] }}</h6>
-                                    <h4 class="mb-1 fw-bold">{{ $counts[$typeKey] ?? 0 }}</h4>
+                                    <h6 class="card-title mb-2 text-nowrap">{{ $cfg['label'] }}</h6>
+                                    <h4 class="mb-1 fw-bold" id="stat-{{ $typeKey }}">{{ $counts[$typeKey] ?? 0 }}</h4>
                                     <span class="text-muted">{{ $cfg['subtitle'] }}</span>
                                 </div>
                             </div>
@@ -101,7 +102,7 @@
                             <tbody>
                                 @foreach($orphans as $item)
                                     @php
-                                        $badge = $badgeConfig[$item['type']] ?? 'bg-secondary';
+                                        $badge = $badgeConfig[$item['type']] ?? 'bg-secondary-subtle text-secondary';
                                         $label = $typeConfig[$item['type']]['label'] ?? ucfirst($item['type']);
                                     @endphp
                                     <tr id="row-{{ $item['type'] }}-{{ $item['id'] }}">

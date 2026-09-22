@@ -1,7 +1,51 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Analytics'])
+@endsection
+
 @section('content')
 
+@if(! $configured)
+
+    {{-- Sin habilitar/configurar: antes cada widget del dashboard fallaba su
+         propia llamada AJAX por separado (18 endpoints) y mostraba un mosaico
+         de "Sin datos"/"Error al cargar"/spinners colgados. Un solo estado
+         claro server-side, en vez de eso. --}}
+    <div class="widget-content searchable-container list">
+        <div class="analytics-empty-card card border-dashed">
+            <div class="card-body text-center py-5">
+                <div class="analytics-empty-icon mx-auto mb-4 d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle">
+                    <i class="fas fa-chart-bar text-primary"></i>
+                </div>
+                <h4 class="fw-bold mb-2">Google Analytics no está configurado</h4>
+                <p class="text-muted mb-4">Para ver estadísticas y métricas de tu sitio web, necesitas configurar Google Analytics GA4.</p>
+
+                <div class="analytics-empty-steps text-start mx-auto mb-4 rounded-3 bg-light-secondary p-4">
+                    <p class="fw-semibold mb-3">Pasos para configurar:</p>
+                    <ul class="mb-0 ps-3">
+                        <li class="mb-2">Crea una cuenta de Google Analytics en <a href="https://analytics.google.com" target="_blank" rel="noopener">analytics.google.com</a></li>
+                        <li class="mb-2">Obtén tu Property ID (número de 9-10 dígitos)</li>
+                        <li class="mb-2">Crea una cuenta de servicio en <a href="https://console.cloud.google.com" target="_blank" rel="noopener">Google Cloud Console</a></li>
+                        <li class="mb-2">Descarga el archivo JSON de credenciales</li>
+                        <li class="mb-0">Configura los datos en la página de configuración</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    <a href="{{ route('manager.settings.analytics') }}" class="btn btn-primary px-4">Ir a Configuración</a>
+                    <a href="https://github.com/spatie/laravel-analytics#readme" target="_blank" rel="noopener" class="btn btn-outline-secondary px-4">Ver Documentación</a>
+                </div>
+
+                <p class="small text-muted mb-0">
+                    <i class="fas fa-lock me-1"></i>
+                    Tus credenciales se almacenan de forma segura y solo son usadas para consultar estadísticas.
+                </p>
+            </div>
+        </div>
+    </div>
+
+@else
 
     <div class="widget-content searchable-container list" id="analytics-page"
          data-range="{{ $range }}"
@@ -25,7 +69,7 @@
             "hourlyHeatmap"  => route("manager.analytics.hourly-heatmap"),
             "searchTerms"    => route("manager.analytics.search-terms"),
             "userFlow"       => route("manager.analytics.user-flow"),
-         ]; @endphp@json($__jsonInline1) }}'>
+         ]; @endphp@json($__jsonInline1)'>
 
         {{-- Filters bar --}}
         <div class="card card-body mb-4 border-0 shadow-sm">
@@ -453,16 +497,23 @@
         </div>
     </div>
 
+@endif
+
 @endsection
 
 
 @push('css')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 <link rel="stylesheet" href="{{ asset('managers/css/views/analytics/index.css') }}">
 @endpush
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="{{ asset('managers/js/views/analytics/index.js') }}"></script>
-@endpush
+@if($configured)
+    @push('css')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    @endpush
+
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.54.1/dist/apexcharts.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="{{ asset('managers/js/views/analytics/index.js') }}"></script>
+    @endpush
+@endif

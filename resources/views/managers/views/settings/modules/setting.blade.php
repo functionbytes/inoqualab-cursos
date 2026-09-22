@@ -4,6 +4,10 @@
 <link rel="stylesheet" href="{{ asset('managers/css/views/settings/modules/setting.css') }}">
 @endpush
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Módulos'])
+@endsection
+
 @section('content')
 
 <div class="row g-4 align-items-start">

@@ -2,6 +2,12 @@
 
 @section('title', 'Core Web Vitals — Detalle')
 
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Tendencia histórica (28 días)',
+    ])
+@endsection
+
 @section('content')
 
 
@@ -91,9 +97,7 @@
 
         {{-- ── Tendencia histórica ──────────────────────────────────────────── --}}
         <div class="card">
-            <div class="card-header p-4 border-bottom border-light">
-                <h5 class="mb-0 fw-bold">Tendencia histórica (28 días)</h5>
-            </div>
+            
             <div class="card-body p-0">
                 @if($trend->isEmpty())
                     <div class="text-center py-5">

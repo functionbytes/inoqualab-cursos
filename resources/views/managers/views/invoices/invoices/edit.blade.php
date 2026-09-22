@@ -1,11 +1,17 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar factura'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100" id="invoices-edit"
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+
+            <div id="invoices-edit"
                  data-config='@php $__jsonInline1 = [
                     "paymentDate" => \Carbon\Carbon::parse($invoice->payment_at)->format("Y-m-d"),
                     "routes" => [
@@ -20,80 +26,79 @@
 
                     <input type="hidden" id="slack" name="slack" value="{{ $invoice->slack }}">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar factura</h5>
+                    <div class="card">
 
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Editar factura</h6>
+                        <p class="text-muted mb-3">
                             Actualiza los datos de la factura. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Orden</label>
-                                        <input type="text" class="form-control" id="reference"  name="reference"  placeholder="Ingresa" value=" {{ $invoice->reference  }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Orden</label>
+                                <input type="text" class="form-control" id="reference"  name="reference"  placeholder="Ingresa" value=" {{ $invoice->reference  }}" disabled>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha desde</label>
-                                    <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->from_at)) }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Fecha desde</label>
+                                <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->from_at)) }}" disabled>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha hasta</label>
-                                    <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->to_at)) }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Fecha hasta</label>
+                                <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->to_at)) }}" disabled>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha creación</label>
-                                    <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->created_at)) }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Fecha creación</label>
+                                <input type="text" class="form-control" id="title"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($invoice->created_at)) }}" disabled>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Condición pago</label>
-                                    <div class="input-group">
-                                        {!! Form::select('condition', $conditions, $invoice->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
-                                    </div>
-                                    <label id="condition-error" class="error d-none" for="condition"></label>
+                                <label class="form-label fw-semibold">Condición pago</label>
+                                <div class="input-group">
+                                    {!! Form::select('condition', $conditions, $invoice->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                 </div>
+                                <label id="condition-error" class="error d-none" for="condition"></label>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
-                                    <div class="input-group">
-                                        {!! Form::select('method', $methods, $invoice->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
-                                    </div>
-                                    <label id="method-error" class="error d-none" for="method"></label>
+                                <label class="form-label fw-semibold">Metodo pago</label>
+                                <div class="input-group">
+                                    {!! Form::select('method', $methods, $invoice->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
                                 </div>
+                                <label id="method-error" class="error d-none" for="method"></label>
                             </div>
                             <div class="col-12">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Fecha pago</label>
-                                        <input type="text" class="form-control datepicker" id="payment"  name="payment"  data-date-format="yyyy-mm-dd"  value="" >
-                                </div>
+                                <label class="form-label fw-semibold">Fecha pago</label>
+                                <input type="text" class="form-control datepicker" id="payment"  name="payment"  data-date-format="yyyy-mm-dd"  value="" >
                             </div>
 
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
                         </div>
+                    </div>
 
-                        </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
                     </div>
 
 
                 </form>
             </div>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre esta factura</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">La orden y las fechas son generadas por el sistema y no se pueden modificar. Cambia la condición, el método de pago y la fecha de pago según corresponda.</p>
+                </div>
+            </div>
+
         </div>
 
     </div>

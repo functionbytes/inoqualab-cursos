@@ -2,6 +2,10 @@
 
 @section('title', 'Google Search Console')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Google Search Console'])
+@endsection
+
 @section('content')
 
 
@@ -23,9 +27,9 @@
                             <p class="text-muted small mb-0">API Keys</p>
                             <h6 class="fw-semibold mb-0">
                                 @if($status['configured'])
-                                    <span class="badge bg-success">Configurado</span>
+                                    <span class="badge bg-success-subtle text-success">Configurado</span>
                                 @else
-                                    <span class="badge bg-secondary">No configurado</span>
+                                    <span class="badge bg-secondary-subtle text-secondary">No configurado</span>
                                 @endif
                             </h6>
                         </div>
@@ -44,9 +48,9 @@
                             <p class="text-muted small mb-0">Token OAuth</p>
                             <h6 class="fw-semibold mb-0">
                                 @if($status['connected'])
-                                    <span class="badge bg-success">Conectado</span>
+                                    <span class="badge bg-success-subtle text-success">Conectado</span>
                                 @else
-                                    <span class="badge bg-secondary">Sin conexion</span>
+                                    <span class="badge bg-secondary-subtle text-secondary">Sin conexion</span>
                                 @endif
                             </h6>
                         </div>
@@ -67,7 +71,7 @@
                                 @if($status['property_url'])
                                     <small class="font-monospace text-primary">{{ $status['property_url'] }}</small>
                                 @else
-                                    <span class="badge bg-secondary">No definida</span>
+                                    <span class="badge bg-secondary-subtle text-secondary">No definida</span>
                                 @endif
                             </h6>
                         </div>
@@ -122,7 +126,7 @@ GSC_PROPERTY_URL=https://tusitio.com/</pre>
                     <div class="card h-100">
                         <div class="card-header border-bottom p-3">
                             <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                                <span class="badge bg-success">Conectado</span>
+                                <span class="badge bg-success-subtle text-success">Conectado</span>
                                 Importar datos
                             </h5>
                             <p class="text-muted">Trae métricas de rendimiento desde GSC</p>

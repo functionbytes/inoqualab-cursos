@@ -1,11 +1,28 @@
 @extends('layouts.managers')
 
+
+@php ob_start(); @endphp
+Editar
+                                @if ($user->role == 'manager')
+                                    administrador
+                                @elseif($user->role == 'customer')
+                                    cliente
+                                @elseif($user->role == 'enterprise')
+                                    empresa
+                                @endif
+                            @php $__pageTitle = trim(preg_replace('/\s+/', ' ', ob_get_clean())); @endphp
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => $__pageTitle])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100" id="users-edit"
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+
+            <div id="users-edit"
                  data-config='@php $__jsonInline1 = [
                     "routes" => [
                         "update" => route("manager.users.update"),
@@ -21,115 +38,100 @@
                     <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
                     <input type="hidden" id="edit" name="edit" value="true">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
+                    <div class="card">
 
-                            <h5 class="mb-0">Editar
-                                @if ($user->role == 'manager')
-                                    administrador
-                                @elseif($user->role == 'customer')
-                                    cliente
-                                @elseif($user->role == 'enterprise')
-                                    empresa
-                                @endif
-                            </h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">{{ $__pageTitle }}</h6>
+                        <p class="text-muted mb-3">
                             Actualiza los datos del usuario. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Nombres</label>
-                                        <input type="text" class="form-control" id="firstname"  name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres">
-                                </div>
+                                <label class="form-label fw-semibold">Nombres</label>
+                                <input type="text" class="form-control" id="firstname"  name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres">
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Apellidos</label>
-                                        <input type="text" class="form-control" id="lastname"  name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido">
-                                </div>
+                                <label class="form-label fw-semibold">Apellidos</label>
+                                <input type="text" class="form-control" id="lastname"  name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido">
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Identificación</label>
-                                        <input type="text" class="form-control" id="identification"  name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación">
-                                </div>
+                                <label class="form-label fw-semibold">Identificación</label>
+                                <input type="text" class="form-control" id="identification"  name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación">
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Correo electronico</label>
-                                        <input type="text" class="form-control" id="email"  name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico">
-                                </div>
+                                <label class="form-label fw-semibold">Correo electronico</label>
+                                <input type="text" class="form-control" id="email"  name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico">
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Dirección</label>
-                                        <input type="text" class="form-control" id="address"  name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
-                                </div>
+                                <label class="form-label fw-semibold">Dirección</label>
+                                <input type="text" class="form-control" id="address"  name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Celular</label>
-                                        <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular">
-                                </div>
+                                <label class="form-label fw-semibold">Celular</label>
+                                <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular">
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Contraseña</label>
-                                        <input type="password" class="form-control" id="password"  name="password" value="" placeholder="Ingresar contraseña">
-                                </div>
+                                <label class="form-label fw-semibold">Contraseña</label>
+                                <input type="password" class="form-control" id="password"  name="password" value="" placeholder="Ingresar contraseña">
                             </div>
                             <div class="col-6 divEnterprise {{ $user->role == 'customer' || $user->role == 'enterprise' ? '' : 'd-none' }}">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Empresa</label>
-                                    <div class="input-group">
-                                        {!! Form::select('enterprises', $enterprises, $enterprise, ['class' => 'select2 form-control','id' => 'enterprises']) !!}
-                                    </div>
-                                    <label id="enterprises-error" class="error d-none" for="enterprises"></label>
+                                <label class="form-label fw-semibold">Empresa</label>
+                                <div class="input-group">
+                                    {!! Form::select('enterprises', $enterprises, $enterprise, ['class' => 'select2 form-control','id' => 'enterprises']) !!}
                                 </div>
+                                <label id="enterprises-error" class="error d-none" for="enterprises"></label>
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Estado</label>
-                                    <div class="input-group">
-                                        {!! Form::select('available', $availables, $user->available , ['class' => 'select2 form-control','id' => 'available']) !!}
-                                    </div>
-                                    <label id="available-error" class="error d-none" for="available"></label>
+                                <label class="form-label fw-semibold">Estado</label>
+                                <div class="input-group">
+                                    {!! Form::select('available', $availables, $user->available , ['class' => 'select2 form-control','id' => 'available']) !!}
                                 </div>
+                                <label id="available-error" class="error d-none" for="available"></label>
                             </div>
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Perfil</label>
-                                    <div class="input-group">
-                                            {!! Form::select('role', $roles, $user->role , ['class' => 'select2 form-control','id' => 'roles']) !!}
-                                    </div>
-                                    <label id="role-error" class="error d-none" for="role"></label>
+                                <label class="form-label fw-semibold">Perfil</label>
+                                <div class="input-group">
+                                        {!! Form::select('role', $roles, $user->role , ['class' => 'select2 form-control','id' => 'roles']) !!}
                                 </div>
+                                <label id="role-error" class="error d-none" for="role"></label>
                             </div>
                             <div class="col-12">
                                 <div class="errors d-none">
                                 </div>
                             </div>
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
+
                         </div>
                     </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                    </div>
                 </form>
+            </div>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre los perfiles</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El campo <strong>Empresa</strong> solo aparece cuando el perfil seleccionado lo requiere (por ejemplo, Empresa o Cliente asociado a una empresa).</p>
+                </div>
             </div>
 
         </div>

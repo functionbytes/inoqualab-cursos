@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('managers.includes.card', ['title' => 'Detalle actividad'])
+@endsection
+
+@section('content')
 
     <div class="row g-3">
 

@@ -1,11 +1,17 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar orden'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100" id="orders-edit"
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+
+            <div id="orders-edit"
                  data-config='@php $__jsonInline1 = [
                     "paymentDate" => \Carbon\Carbon::parse($order->payment_at)->format("Y-m-d"),
                     "routes" => [
@@ -20,73 +26,74 @@
 
                     <input type="hidden" id="slack" name="slack" value="{{ $order->slack }}">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar orden</h5>
+                    <div class="card">
 
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Editar orden</h6>
+                        <p class="text-muted mb-3">
                             Actualiza los datos de la orden. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Orden codigo</label>
-                                        <input type="text" class="form-control" id="title_slack"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->slack  }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Orden codigo</label>
+                                <input type="text" class="form-control" id="title_slack"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->slack  }}" disabled>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Orden referencia</label>
-                                    <input type="text" class="form-control" id="title_reference"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->reference  }}" disabled>
-                                </div>
+                                <label class="form-label fw-semibold">Orden referencia</label>
+                                <input type="text" class="form-control" id="title_reference"  name="title"  placeholder="Ingresa titulo" value=" {{ $order->reference  }}" disabled>
                             </div>
 
-
-
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Condición pago</label>
-                                    <div class="input-group">
-                                        {!! Form::select('condition', $conditions, $order->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
-                                    </div>
-                                    <label id="condition-error" class="error d-none" for="condition"></label>
+                                <label class="form-label fw-semibold">Condición pago</label>
+                                <div class="input-group">
+                                    {!! Form::select('condition', $conditions, $order->condition_id , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                 </div>
+                                <label id="condition-error" class="error d-none" for="condition"></label>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
-                                    <div class="input-group">
-                                        {!! Form::select('method', $methods, $order->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
-                                    </div>
-                                    <label id="method-error" class="error d-none" for="method"></label>
+                                <label class="form-label fw-semibold">Metodo pago</label>
+                                <div class="input-group">
+                                    {!! Form::select('method', $methods, $order->method_id , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
                                 </div>
+                                <label id="method-error" class="error d-none" for="method"></label>
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Fecha pago</label>
-                                        <input type="text" class="form-control datepicker" id="payment"  name="payment"  data-date-format="yyyy-mm-dd"  value="" >
-                                </div>
+                                <label class="form-label fw-semibold">Fecha pago</label>
+                                <input type="text" class="form-control datepicker" id="payment"  name="payment"  data-date-format="yyyy-mm-dd"  value="" >
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                        <label  class="control-label col-form-label">Fecha creación</label>
-                                        <input type="text" class="form-control" id="title_created"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($order->created_at)) }}" disabled>
-                                </div>
-                            </div>  <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
+                                <label class="form-label fw-semibold">Fecha creación</label>
+                                <input type="text" class="form-control" id="title_created"  name="title"  placeholder="Ingresa titulo" value=" {{ date('Y-m-d', strtotime($order->created_at)) }}" disabled>
                             </div>
-                        </div>
 
                         </div>
                     </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                    </div>
                 </form>
             </div>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre esta orden</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El código y la referencia son generados por el sistema y no se pueden modificar. Cambia el estado, el método de pago y la fecha de pago según corresponda.</p>
+                </div>
+            </div>
+
         </div>
 
     </div>

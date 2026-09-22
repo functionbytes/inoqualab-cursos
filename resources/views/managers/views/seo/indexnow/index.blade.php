@@ -2,6 +2,10 @@
 
 @section('title', 'IndexNow')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'IndexNow'])
+@endsection
+
 @section('content')
 
 
@@ -18,9 +22,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Activado</span>
                             @if($enabled === '1')
-                                <span class="badge bg-success">Sí</span>
+                                <span class="badge bg-success-subtle text-success">Sí</span>
                             @else
-                                <span class="badge bg-secondary">No</span>
+                                <span class="badge bg-secondary-subtle text-secondary">No</span>
                             @endif
                         </div>
 
@@ -29,7 +33,7 @@
                             @if($key)
                                 <code class="small text-break">{{ $key }}</code>
                             @else
-                                <span class="badge bg-warning text-dark">No configurada</span>
+                                <span class="badge bg-warning-subtle text-warning">No configurada</span>
                             @endif
                         </div>
 

@@ -1,34 +1,38 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Editar aliado'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
-            
-            <div class="card w-100">
+    <div class="row g-4 align-items-start">
 
-                <form id="formTrusted" enctype="multipart/form-data" role="form"
-                      data-urls='@php $__jsonInline1 = [
-                          "update" => route("manager.trusteds.update"),
-                          "index" => route("manager.trusteds"),
-                          "thumbnails" => route("manager.trusteds.thumbnails"),
-                          "thumbnailsGet" => route("manager.trusteds.thumbnails.get", ":item"),
-                          "thumbnailDelete" => route("manager.trusteds.thumbnails.delete", ":id"),
-                      ]; @endphp@json($__jsonInline1)'>
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
 
-                    {{ csrf_field() }}
+            <form id="formTrusted" enctype="multipart/form-data" role="form"
+                  data-urls='@php $__jsonInline1 = [
+                      "update" => route("manager.trusteds.update"),
+                      "index" => route("manager.trusteds"),
+                      "thumbnails" => route("manager.trusteds.thumbnails"),
+                      "thumbnailsGet" => route("manager.trusteds.thumbnails.get", ":item"),
+                      "thumbnailDelete" => route("manager.trusteds.thumbnails.delete", ":id"),
+                  ]; @endphp@json($__jsonInline1)'>
 
-                    <input type="hidden" id="id" name="id" value="{{ $trusted->id }}">
-                    <input type="hidden" id="slack" name="slack" value="{{ $trusted->slack }}">
-                    <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
-                    <input type="hidden" id="edit" name="edit" value="true">
-                    <input type="hidden" id="thumbnail" name="thumbnail">
+                {{ csrf_field() }}
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Imagen</h5>
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                <input type="hidden" id="id" name="id" value="{{ $trusted->id }}">
+                <input type="hidden" id="slack" name="slack" value="{{ $trusted->slack }}">
+                <input type="hidden" id="status" name="status" value="{{ $thumbnail }}">
+                <input type="hidden" id="edit" name="edit" value="true">
+                <input type="hidden" id="thumbnail" name="thumbnail">
+
+                <div class="card">
+
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Imagen</h6>
+                        <p class="text-muted mb-3">
                             Sube el logo de la empresa aliada.
                         </p>
                         <div class="dropzone dz-clickable dz-started" id="thumbnail">
@@ -39,57 +43,59 @@
                         <label id="thumbnail-error" class="error d-none" for="thumbnail"></label>
                     </div>
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Editar aliado</h5>
+                    <hr class="my-0">
 
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Editar aliado</h6>
+                        <p class="text-muted mb-3">
                             Actualiza los datos de la empresa aliada. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <div class="mb-3">
-                                        <label for="cono1" class="control-label col-form-label">Titulo</label>
-                                        <input type="text" class="form-control" id="title"  name="title" value="{{ $trusted->title }}" placeholder="Ingresar titulo">
-                                    </div>
-                                </div>
+                                <label for="cono1" class="form-label fw-semibold">Titulo</label>
+                                <input type="text" class="form-control" id="title"  name="title" value="{{ $trusted->title }}" placeholder="Ingresar titulo">
                             </div>
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Estado</label>
-                                    <div class="input-group">
-                                        {!! Form::select('available', $availables, $trusted->available, ['class' => 'select2 form-control','id' => 'available']) !!}
-                                    </div>
-                                    <label id="available-error" class="error" for="available"></label>
+                                <label class="form-label fw-semibold">Estado</label>
+                                <div class="input-group">
+                                    {!! Form::select('available', $availables, $trusted->available, ['class' => 'select2 form-control','id' => 'available']) !!}
                                 </div>
+                                <label id="available-error" class="error" for="available"></label>
                             </div>
 
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <div class="mb-3">
-                                        <label for="cono1" class="control-label col-form-label">Link</label>
-                                        <input type="text" class="form-control" id="url"  name="url" value="{{ $trusted->url }}" placeholder="Ingresar la url">
-                                    </div>
-                                </div>
+                                <label for="cono1" class="form-label fw-semibold">Link</label>
+                                <input type="text" class="form-control" id="url"  name="url" value="{{ $trusted->url }}" placeholder="Ingresar la url">
                             </div>
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
 
                         </div>
 
                     </div>
 
-                </form>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre los aliados</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Los logos de empresas aliadas se muestran en el sitio público. El <strong>link</strong> es la URL a la que redirige el logo al hacer clic.</p>
+                </div>
             </div>
+
         </div>
 
     </div>

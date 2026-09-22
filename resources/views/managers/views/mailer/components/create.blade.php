@@ -2,6 +2,10 @@
 
 @section('title', 'Crear componente de email')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Crear componente de email'])
+@endsection
+
 @section('content')
 
 @if(session('success'))

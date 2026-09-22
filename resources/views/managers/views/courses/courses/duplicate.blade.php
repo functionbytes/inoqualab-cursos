@@ -1,12 +1,25 @@
 @extends('layouts.managers')
 
+@section('title', 'Duplicar: ' . $course->title)
+
+@section('page_header')
+    @include('managers.includes.card', [
+        'title' => 'Duplicar curso',
+        'breadcrumbs' => [
+            ['label' => 'Cursos', 'url' => route('manager.courses')],
+            ['label' => $course->title],
+            ['label' => 'Duplicar'],
+        ],
+    ])
+@endsection
+
 @section('content')
 
     <div class="page-content-wrapper ">
-       
+
         <div class="content ">
 
-            
+
             <div class=" container-fluid   container-fixed-lg">
 
 
@@ -14,18 +27,6 @@
                     <div class="tab-content">
 
                         <div class="pane padding-20 sm-no-padding">
-
-                            <ul class="breadcrumb">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('manager.dashboard') }}">Dashboard</a>
-                                </li>
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('manager.courses') }}">Cursos</a>
-                                </li>
-                                <li class="breadcrumb-item active">Duplicar
-                                </li>
-                            </ul>
-
 
                             <div class="row row-same-height">
                                 <div class="col-md-12">

@@ -2,6 +2,10 @@
 
 @section('title', 'Robots.txt')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Robots.txt'])
+@endsection
+
 @section('content')
 
 
@@ -64,19 +68,19 @@
                     <div class="d-flex flex-column gap-2">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">User-agent</span>
-                            <span class="badge bg-primary rounded-pill">{{ $stats['user_agents'] }}</span>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill">{{ $stats['user_agents'] }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">Allow</span>
-                            <span class="badge bg-success rounded-pill">{{ $stats['allow'] }}</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill">{{ $stats['allow'] }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">Disallow</span>
-                            <span class="badge bg-danger rounded-pill">{{ $stats['disallow'] }}</span>
+                            <span class="badge bg-danger-subtle text-danger rounded-pill">{{ $stats['disallow'] }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small">Sitemap</span>
-                            <span class="badge bg-info rounded-pill">{{ $stats['sitemaps'] }}</span>
+                            <span class="badge bg-info-subtle text-info rounded-pill">{{ $stats['sitemaps'] }}</span>
                         </div>
                     </div>
 

@@ -2,6 +2,10 @@
 
 @section('title', 'Nuevo reporte programado')
 
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Nuevo reporte programado'])
+@endsection
+
 @section('content')
 
 

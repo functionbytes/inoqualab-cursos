@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('managers.includes.card', ['title' => 'Tarifas de cursos'])
+@endsection
 @section('content')
 
     <div class="row">
@@ -41,7 +45,11 @@
                                                 <div class="d-flex align-items-center">
                                                     <div>
                                                         <h6 class="fw-semibold mb-1">{{ $rate->course->title }}</h6>
-                                                        <p class="fs-2 mb-0 text-muted">{{ $rate->course?->categorie?->title ?? 'Sin categoría' }}</p>
+                                                        @if($rate->course?->categorie)
+                                                            <span class="badge bg-primary-subtle text-primary">{{ $rate->course->categorie->title }}</span>
+                                                        @else
+                                                            <span class="badge bg-secondary-subtle text-secondary">Sin categoría</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
