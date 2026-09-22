@@ -1,7 +1,9 @@
 @extends('layouts.managers')
-@section('content')
-    
+@section('page_header')
     @include('distributors.includes.card', ['title' => 'Detalle Factura '. $invoice->slack])
+@endsection
+
+@section('content')
     
     <div class="row">
         <div class="col-lg-12 ">

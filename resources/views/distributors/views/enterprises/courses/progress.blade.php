@@ -3,9 +3,11 @@
 
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => "Progreso - " . $course->title ])
+@endsection
+
+@section('content')
 
     <div class="row">
         <div class="col-lg-6 col-md-6 col-sm-12">
@@ -97,7 +99,7 @@
                                             </td>
 
                                             <td>
-                                                    <span class="badge {{ $validate  ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                                    <span class="badge {{ $validate  ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                                     {{ $validate == 1 ? 'Culminado' : 'Pendiente' }}
                                                 </span>
                                             </td>

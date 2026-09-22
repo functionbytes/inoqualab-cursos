@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
+@section('page_header')
+    @include('distributors.includes.card', ['title' => 'Empresas'])
+@endsection
 
-  @include('distributors.includes.card', ['title' => 'Empresas'])
+@section('content')
 
   <div class="widget-content searchable-container list"
        data-bulk-url="{{ route('distributor.enterprises.bulk-action') }}"
@@ -62,7 +64,7 @@
               </td>
 
               <td>
-                 <span class="badge {{ $enterprise->available == 1 ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                 <span class="badge {{ $enterprise->available == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                    {{ $enterprise->available == 1 ? 'Publico' : 'Oculto' }}
                  </span>
               </td>

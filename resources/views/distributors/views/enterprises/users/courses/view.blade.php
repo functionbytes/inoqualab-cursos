@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => "Usuarios - " . $course->title ])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
         
@@ -63,7 +65,7 @@
                                 <span class="usr-email-addr" data-email="{{ date(' Y', strtotime($user->culminated_at)) }}">{{ date(' Y', strtotime($user->culminated_at)) }}</span>
                             </td>
                             <td>
-                                    <span class="badge {{ $user->culminated == 1 ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                    <span class="badge {{ $user->culminated == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                         {{ $user->culminated == 1 ? 'Culminado' : 'Pendiente' }}
                                     </span>
                             </td>

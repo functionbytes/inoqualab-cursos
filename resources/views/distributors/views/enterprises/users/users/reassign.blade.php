@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('distributors.includes.card', ['title' => 'Reasignar usuario — ' . $user->firstname . ' ' . $user->lastname])
+@endsection
 @section('content')
 
     <div class="row">

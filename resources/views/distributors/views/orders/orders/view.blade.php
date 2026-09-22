@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => 'Detalle Ordenes '. $order->slack])
+@endsection
+
+@section('content')
 
     <div class="row">
         <div class="col-lg-12 ">

@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => 'Ordenes'])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
         

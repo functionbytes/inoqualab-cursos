@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('distributors.includes.card', ['title' => 'Inscripciones'])
+@endsection
 @section('content')
 
     <div class="row">

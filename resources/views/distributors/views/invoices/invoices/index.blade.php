@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => 'Facturación'])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
         
@@ -78,12 +80,12 @@
                                 <span class="usr-email-addr" data-email="{{ ($invoice->distributor->title ?? 'N/D')  }}">{{($invoice->distributor->title ?? 'N/D')}}</span>
                             </td>
                             <td>
-                                <span class="badge bg-light-{{$invoice->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                <span class="badge {{ $invoice->condition->badge_class }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                     {{ $invoice->condition->title }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge  bg-light-{{ $invoice->method->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                <span class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                      {{ $invoice->method->title }}
                                 </span>
                             </td>

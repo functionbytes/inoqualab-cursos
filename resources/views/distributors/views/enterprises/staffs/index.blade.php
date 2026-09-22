@@ -77,7 +77,7 @@
                                 <span class="usr-email-addr" data-email="{{ $user->email }}">{{ $user->email }}</span>
                             </td>
                             <td>
-                              <span class="badge {{ $user->available == 1 ? 'bg-light-primary' : 'bg-light-secondary' }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                              <span class="badge {{ $user->available == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
 
                                    {{ $user->available == 1 ? 'Activo' : 'Inactivo' }}
                               </span>

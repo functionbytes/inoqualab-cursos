@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('distributors.includes.card', ['title' => 'Cursos'])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list"
          data-bulk-url="{{ route('distributor.enterprises.courses.bulk-action', $enterprise->slack) }}"
