@@ -661,8 +661,22 @@ if (! function_exists('revokeUserSessions')) {
 }
 
 if (! function_exists('paginationNumber')) {
+    /**
+     * Tamaño de página para los listados del panel. Respeta ?per_page=X de
+     * la request (selector "items por página" de managers.includes.pagination-footer)
+     * cuando el valor está en la whitelist; si no, cae al $value explícito
+     * del caller (para las vistas que ya pedían un tamaño propio, ej.
+     * ->paginate(paginationNumber(20))) o al default de config.
+     */
     function paginationNumber($value = null)
     {
+        $allowed = [10, 20, 50, 100, 200];
+        $requested = request()->input('per_page');
+
+        if ($requested !== null && in_array((int) $requested, $allowed, true)) {
+            return (int) $requested;
+        }
+
         return $value ?? config('settings.pagination', 15);
     }
 }
