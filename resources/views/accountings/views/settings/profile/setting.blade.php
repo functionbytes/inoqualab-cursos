@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('accountings.includes.card', ['title' => 'Editar usuario'])
+@endsection
 @section('content')
 
     <div class="row">

@@ -5,6 +5,9 @@ $(function () {
         $content.css('opacity', .5);
         $.get(url, function (data) {
             $content.html(data.html);
+            if (window.applyDynamicStyleVars) {
+                window.applyDynamicStyleVars($content[0]);
+            }
             $content.css('opacity', 1);
             $('#cxStatNumber').text(data.total);
             $('#cxStatLabel').text(data.label);

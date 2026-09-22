@@ -176,7 +176,7 @@
                             <a class="act" href="{{ route('customers.courses.content', $insc->slack) }}">Repasar</a>
                         @endif
                     @else
-                        <div class="bar"><i style="--p:{{ $percent }}%"></i></div>
+                        <div class="bar"><i data-var-p="{{ $percent }}"></i></div>
                         <span class="pct">{{ $percent }}%</span>
                     @endif
                 </div>

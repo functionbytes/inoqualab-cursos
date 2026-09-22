@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('enterprises.includes.card', ['title' => 'Visualizar estado curso'])
+@endsection
 @section('content')
 
 <div class="row">

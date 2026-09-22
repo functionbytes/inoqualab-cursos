@@ -57,7 +57,7 @@
             @endif
 
             <div class="user">
-                <p class="text-user" style="--name-size: {{ $nameSize }}">{{ $fullName }}</p>
+                <p class="text-user" data-var-name-size="{{ $nameSize }}">{{ $fullName }}</p>
             </div>
 
             <div class="identification">
@@ -99,6 +99,7 @@
         </div>
     </div>
 
+    <script src="{{ asset('customers/js/includes/style-vars.js') }}"></script>
     <script src="{{ asset('customers/js/views/certificates/view.js') }}"></script>
 </body>
 </html>

@@ -125,7 +125,7 @@
                         </div>
 
                         <div class="cx-prog">
-                            <div class="bar"><i style="--p:{{ $progress }}%"></i></div>
+                            <div class="bar"><i data-var-p="{{ $progress }}"></i></div>
                             <div class="sub">{{ $progress }}% completado</div>
                         </div>
 
@@ -162,7 +162,7 @@
             <div class="cx-panel">
                 <div class="eyebrow">Estado global</div>
                 <div class="big">{{ $promedio }}<span>%</span></div>
-                <div class="bar"><i style="--p:{{ $promedio }}%"></i></div>
+                <div class="bar"><i data-var-p="{{ $promedio }}"></i></div>
                 <div class="figs">
                     <div><b>{{ $conAcceso }}</b><span>Con acceso</span></div>
                     <div><b>{{ $counts['done'] }}</b><span>Completados</span></div>

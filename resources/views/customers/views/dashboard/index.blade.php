@@ -114,7 +114,7 @@
 
         {{-- ===== Resume hero ===== --}}
         <div class="resume">
-            <div class="resume-media has-thumb" style="--thumb: url('{{ $heroThumb }}')" data-default-thumb="{{ $defaultThumb }}">
+            <div class="resume-media has-thumb" data-var-thumb="{{ $heroThumb }}" data-default-thumb="{{ $defaultThumb }}">
                 <a class="resume-play" href="{{ $heroUrl }}" aria-label="{{ $heroExpired ? 'Renovar acceso' : 'Reanudar curso' }}">
                     @include('customers.includes.icon', ['name' => $heroExpired ? 'refresh' : 'play'])
                 </a>
@@ -136,7 +136,7 @@
                     {{ $statusLabels[$heroStatus] }}
                 </div>
                 <div class="resume-prog">
-                    <div class="track"><i style="--p:{{ $heroPercent }}%"></i></div>
+                    <div class="track"><i data-var-p="{{ $heroPercent }}"></i></div>
                     <span class="pct">{{ $heroPercent }}% completado</span>
                 </div>
                 <div class="resume-actions">
@@ -208,7 +208,7 @@
                             $url = route('customers.courses.content', $insc->slack);
                         @endphp
                         <div class="pc-card" data-status="{{ $st }}">
-                            <div class="pc-media has-thumb" style="--thumb: url('{{ $thumb }}')" data-default-thumb="{{ $defaultThumb }}">
+                            <div class="pc-media has-thumb" data-var-thumb="{{ $thumb }}" data-default-thumb="{{ $defaultThumb }}">
                                 @if($cat)
                                     <span class="pc-cat">{{ $cat }}</span>
                                 @endif
@@ -219,7 +219,7 @@
                                     <span class="pc-badge st-{{ $st }}">{{ $statusLabels[$st] }}</span>
                                 </div>
                                 <div class="pc-title">{{ $insc->course?->title }}</div>
-                                <div class="pc-track"><div class="pc-fill" style="--p:{{ $percent }}%"></div></div>
+                                <div class="pc-track"><div class="pc-fill" data-var-p="{{ $percent }}"></div></div>
                                 <div class="pc-foot">
                                     <div class="col">
                                         <div class="k">Progreso</div>

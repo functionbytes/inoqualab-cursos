@@ -52,13 +52,16 @@
 
     <div class="ar-review">
         @foreach ($answers as $answer)
-            <div class="q">
-                <span>{{ $answer->question->question }}</span>
-                @if ($answer->approved == 1)
-                    @include('customers.includes.icon', ['name' => 'circle-check'])
-                @else
-                    @include('customers.includes.icon', ['name' => 'circle-x'])
-                @endif
+            @php $isCorrect = $answer->approved == 1; @endphp
+            <div class="q {{ $isCorrect ? 'is-ok' : 'is-no' }}">
+                <span class="q-icon">
+                    @if ($isCorrect)
+                        @include('customers.includes.icon', ['name' => 'circle-check'])
+                    @else
+                        @include('customers.includes.icon', ['name' => 'circle-x'])
+                    @endif
+                </span>
+                <span class="q-text">{{ $answer->question->question }}</span>
             </div>
         @endforeach
     </div>

@@ -106,7 +106,7 @@
                         @endphp
 
                         <div class="pc-card" data-status="{{ $status }}">
-                            <div class="pc-media has-thumb-dim" style="--thumb: url('{{ $thumb }}')">
+                            <div class="pc-media has-thumb-dim" data-var-thumb="{{ $thumb }}">
                                 <span class="pc-cat">{{ $category }}</span>
                             </div>
 
@@ -118,7 +118,7 @@
 
                                 <div class="pc-title">{{ $course?->title ?? 'Curso' }}</div>
 
-                                <div class="pc-track" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progress }}% completado"><div class="pc-fill" style="--p:{{ $progress }}%"></div></div>
+                                <div class="pc-track" role="progressbar" aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progress }}% completado"><div class="pc-fill" data-var-p="{{ $progress }}"></div></div>
 
                                 <div class="pc-foot">
                                     <div class="col">

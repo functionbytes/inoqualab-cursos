@@ -152,12 +152,12 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-light-{{$invoice->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                                <span class="badge {{ $invoice->condition->badge_class }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                                     {{ $invoice->condition->title }}
                                                 </span>
                                                             </td>
                                                             <td>
-                                                <span class="badge  bg-light-{{ $invoice->method->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                                <span class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                                      {{ $invoice->method->title }}
                                                 </span>
                                             </td>

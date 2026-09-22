@@ -1,82 +1,92 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('accountings.includes.card', ['title' => 'Crear factura'])
+@endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
 
-                <form id="formInvoices" enctype="multipart/form-data" role="form"
-                      data-store-url="{{ route('accounting.invoices.store') }}"
-                      data-view-url-template="{{ route('accounting.invoices.view', ':id') }}">
+            <form id="formInvoices" enctype="multipart/form-data" role="form"
+                  data-store-url="{{ route('accounting.invoices.store') }}"
+                  data-view-url-template="{{ route('accounting.invoices.view', ':id') }}">
 
-                    {{ csrf_field() }}
+                {{ csrf_field() }}
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0">Crear factura</h5>
+                <div class="card">
 
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Crear factura</h6>
+                        <p class="text-muted mb-3">
+                            Completa los datos para generar una nueva factura: distribuidor, condición y método de pago, y el rango de fechas correspondiente.
                         </p>
 
-                        <div class="row">
+                        <div class="row g-3">
 
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Distribuidor</label>
-                                    <div class="input-group">
-                                        {!! Form::select('distributor', $distributors, null , ['class' => 'select2 form-control' ,'name' => 'distributor', 'id' => 'distributor' ]) !!}
-                                    </div>
-                                    <label id="distributor-error" class="error d-none" for="distributor"></label>
+                                <label class="form-label fw-semibold">Distribuidor</label>
+                                <div class="input-group">
+                                    {!! Form::select('distributor', $distributors, null , ['class' => 'select2 form-control' ,'name' => 'distributor', 'id' => 'distributor' ]) !!}
                                 </div>
+                                <label id="distributor-error" class="error d-none" for="distributor"></label>
                             </div>
+
                             <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Estado de factura</label>
-                                    <div class="input-group">
-                                        {!! Form::select('condition', $conditions, null , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
-                                    </div>
-                                    <label id="condition-error" class="error d-none" for="condition"></label>
-                                </div>  
-                            </div>
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="control-label col-form-label">Metodo pago</label>
-                                    <div class="input-group">
-                                        {!! Form::select('method', $methods, null , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
-                                    </div>
-                                    <label id="method-error" class="error d-none" for="method"></label>
+                                <label class="form-label fw-semibold">Estado de factura</label>
+                                <div class="input-group">
+                                    {!! Form::select('condition', $conditions, null , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
                                 </div>
+                                <label id="condition-error" class="error d-none" for="condition"></label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Metodo pago</label>
+                                <div class="input-group">
+                                    {!! Form::select('method', $methods, null , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
+                                </div>
+                                <label id="method-error" class="error d-none" for="method"></label>
                             </div>
 
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha</label>
-                                    <div class="input-group">
-                                        <input type="text" id="range" name="range" class="form-control daterange" />
-                                        <span class="input-group-text">
-                                          <i class="fas fa-calendar fs-5"></i>
-                                        </span>
-                                    </div>
+                                <label class="form-label fw-semibold">Fecha</label>
+                                <div class="input-group">
+                                    <input type="text" id="range" name="range" class="form-control daterange" />
+                                    <span class="input-group-text">
+                                      <i class="fas fa-calendar fs-5"></i>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
 
                         </div>
                     </div>
 
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
 
-                </form>
+                </div>
+
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre esta factura</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Se generará una factura con las órdenes del distribuidor que coincidan con la condición, el método de pago y el rango de fechas seleccionados.</p>
+                </div>
             </div>
+
         </div>
 
     </div>
@@ -114,6 +124,5 @@
     <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}" type="text/javascript"></script>
     <script src="{{ asset('accountings/js/views/invoices/invoices/create.js') }}"></script>
 @endpush
-
 
 

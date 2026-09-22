@@ -24,7 +24,7 @@
         <div class="lv-rail-head">
             <div class="rc">{{ Str::ucfirst(Str::lower($course->categorie?->title ?? 'Curso')) }}</div>
             <div class="t">Contenido del curso</div>
-            <div class="bar" role="progressbar" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progressPercentage }}% completado"><i style="--pct: {{ $progressPercentage }}%" aria-hidden="true"></i></div>
+            <div class="bar" role="progressbar" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progressPercentage }}% completado"><i data-var-pct="{{ $progressPercentage }}" aria-hidden="true"></i></div>
             <div class="sub"><b>{{ $completedClass }} de {{ $totalClass }}</b> clases · {{ $progressPercentage }}% completado</div>
         </div>
 
@@ -163,7 +163,7 @@
                 <span class="t">Tu avance</span>
                 <span class="pct">{{ $progressPercentage }}%</span>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progressPercentage }}% completado"><div class="progress-fill" style="--pct: {{ $progressPercentage }}%"></div></div>
+            <div class="progress-track" role="progressbar" aria-valuenow="{{ $progressPercentage }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $progressPercentage }}% completado"><div class="progress-fill" data-var-pct="{{ $progressPercentage }}"></div></div>
             <div class="sub">
                 <span>Clases completadas</span>
                 <b>{{ $completedClass }} / {{ $totalClass }}</b>

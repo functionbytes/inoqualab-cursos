@@ -1,84 +1,92 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('enterprises.includes.card', ['title' => 'Editar empresa'])
+@endsection
 @section('content')
 
-  <div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
+  <div class="row g-4 align-items-start">
 
-      <div class="card w-100">
+    {{-- Columna izquierda: formulario --}}
+    <div class="col-lg-8">
 
-        <form id="formEnterprises" enctype="multipart/form-data" role="form" onSubmit="return false"
-              data-update-url="{{ route('enterprise.enterprise.update') }}"
-              data-redirect-url="{{ route('enterprise.dashboard') }}">
+      <form id="formEnterprises" enctype="multipart/form-data" role="form" onSubmit="return false"
+            data-update-url="{{ route('enterprise.enterprise.update') }}"
+            data-redirect-url="{{ route('enterprise.dashboard') }}">
 
-          {{ csrf_field() }}
+        {{ csrf_field() }}
 
-          <input type="hidden" id="slack" name="slack" value="{{ $enterprise->slack }}">
+        <input type="hidden" id="slack" name="slack" value="{{ $enterprise->slack }}">
 
+        <div class="card">
 
-          <div class="card-body border-top">
-            <div class="d-flex no-block align-items-center">
-              <h5 class="mb-0">Editar empresa</h5>
-            </div>
-            <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+          <div class="card-body">
+            <h6 class="fw-bold text-dark mb-1">Editar empresa</h6>
+            <p class="text-muted mb-3">
+              Actualiza los datos de contacto de la empresa. El título y el NIT son gestionados por el distribuidor y no se pueden modificar aquí.
             </p>
 
-            <div class="row">
+            <div class="row g-3">
+
               <div class="col-6">
-                <div class="mb-3">
-                  <div class="mb-3">
-                    <label  class="control-label col-form-label">Titulo</label>
-                    <input type="text" class="form-control" id="title"  name="title"  value="{{ $enterprise->title }}"   placeholder="Ingresa titulo" disabled>
-                  </div>
-                </div>
+                <label class="form-label fw-semibold">Titulo</label>
+                <input type="text" class="form-control" id="title"  name="title"  value="{{ $enterprise->title }}"   placeholder="Ingresa titulo" disabled>
               </div>
+
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Nit</label>
-                    <input type="text" class="form-control" id="nit"  name="nit"  value="{{ $enterprise->nit }}"  placeholder="Ingresa nit" disabled>
-                  </div>
+                <label class="form-label fw-semibold">Nit</label>
+                <input type="text" class="form-control" id="nit"  name="nit"  value="{{ $enterprise->nit }}"  placeholder="Ingresa nit" disabled>
               </div>
+
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Celular</label>
-                    <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $enterprise->cellphone }}"   placeholder="Ingresa telefono">
-                  </div>
+                <label class="form-label fw-semibold">Celular</label>
+                <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $enterprise->cellphone }}"   placeholder="Ingresa telefono">
               </div>
+
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Dirección</label>
-                    <input type="text" class="form-control" id="address"  name="address" value="{{ $enterprise->address }}"   placeholder="Ingresa dirección">
-                  </div>
+                <label class="form-label fw-semibold">Dirección</label>
+                <input type="text" class="form-control" id="address"  name="address" value="{{ $enterprise->address }}"   placeholder="Ingresa dirección">
               </div>
+
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Correo electronico</label>
-                    <input type="text" class="form-control" id="email"  name="email" value="{{ $enterprise->email }}"   placeholder="Ingresa correo electronico">
-                  </div>
+                <label class="form-label fw-semibold">Correo electronico</label>
+                <input type="text" class="form-control" id="email"  name="email" value="{{ $enterprise->email }}"   placeholder="Ingresa correo electronico">
               </div>
+
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Encargado</label>
-                    <input type="text" class="form-control" id="supporting" name="supporting" value="{{ $enterprise->supporting }}" placeholder="Ingresa un encargado">
-                  </div>
+                <label class="form-label fw-semibold">Encargado</label>
+                <input type="text" class="form-control" id="supporting" name="supporting" value="{{ $enterprise->supporting }}" placeholder="Ingresa un encargado">
               </div>
+
               <div class="col-12">
-                <div class="errors d-none">
-                </div>
+                <div class="errors d-none"></div>
               </div>
-                <div class="col-12">
-                    <div class="action-form border-top">
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-info rounded-pill px-4 waves-effect waves-light">
-                                Guardar
-                            </button>
-                        </div>
-                    </div>
-                </div>
+
             </div>
           </div>
-        </form>
+
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary w-100">
+              Guardar
+            </button>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    {{-- Columna derecha: sidebar informativo --}}
+    <div class="col-lg-4">
+
+      <div class="card">
+        <div class="card-header border-bottom">
+          <h6 class="mb-0 fw-bold">Sobre tu empresa</h6>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-0">El nombre de contacto que registres en <strong>Encargado</strong> es quien recibirá las comunicaciones relacionadas con la empresa.</p>
+        </div>
       </div>
 
     </div>

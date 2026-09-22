@@ -1,5 +1,9 @@
 @extends('layouts.managers')
 
+
+@section('page_header')
+    @include('accountings.includes.card', ['title' => 'Reporte ordenes'])
+@endsection
 @section('content')
 
     <div class="row">

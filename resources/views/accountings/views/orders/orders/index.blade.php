@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('accountings.includes.card', ['title' => 'Ordenes'])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
         
@@ -102,13 +104,13 @@
                                 <span class="usr-email-addr" >{{strtoupper(($order->user->firstname ?? 'N/D') . ' ' . ($order->user->lastname ?? '')) }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-light-{{$order->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                <span class="badge {{ $order->condition->badge_class }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                     {{ $order->condition->title }}
                                 </span>
                             </td>
                             <td>
                                 <span
-                                    class="badge  bg-light-{{ $order->type->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                    class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                     {{ $order->type->title }}
                                 </span>
                             </td>

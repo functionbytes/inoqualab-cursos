@@ -1,8 +1,10 @@
 @extends('layouts.managers')
 
-@section('content')
-
+@section('page_header')
     @include('accountings.includes.card', ['title' => 'Ordenes'])
+@endsection
+
+@section('content')
 
     <div class="widget-content searchable-container list">
         
@@ -97,18 +99,18 @@
                                 <span class="usr-email-addr" data-email="{{ ($item->order->user->firstname ?? 'N/D') . ' ' . ($item->order->user->lastname ?? '')  }}">{{ ($item->order->user->firstname ?? 'N/D') . ' ' . ($item->order->user->lastname ?? '') }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-light-{{$item->order->condition->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                <span class="badge {{ $item->order->condition->badge_class }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                     {{ $item->order->condition->title }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge  bg-light-{{ $item->order->method->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                <span class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                      {{ $item->order->method->title }}
                                 </span>
                             </td>
                             <td>
                                 <span
-                                    class="badge  bg-light-{{ $item->order->type->slug }} rounded-3 py-2 text-primary fw-semibold fs-2 d-inline-flex align-items-center gap-1">
+                                    class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
                                     {{ $item->order->type->title }}
                                 </span>
                             </td>

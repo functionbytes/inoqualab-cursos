@@ -11,7 +11,7 @@
 <div class="quiz-rule"></div>
 
 <div class="progress-track" aria-label="Progreso">
-    <div id="progressbar" class="progress-fill" style="--pct: 0%"></div>
+    <div id="progressbar" class="progress-fill"></div>
 </div>
 
 <div id="question_block" class="question-block">
