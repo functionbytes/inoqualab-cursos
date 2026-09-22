@@ -199,18 +199,6 @@ class UserController extends Controller
         return response()->json(['success' => true, 'message' => 'Se ha creado correctamente']);
     }
 
-    public function users($slack)
-    {
-
-        $enterprise = Enterprise::slack($slack);
-        $users = $enterprise->users;
-
-        return view('supports.views.enterprises.users.users.index')->with([
-            'enterprise' => $enterprise,
-            'users' => $users,
-        ]);
-    }
-
     public function courses($slack)
     {
 

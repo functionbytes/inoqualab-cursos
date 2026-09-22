@@ -105,21 +105,6 @@ class IncomingMailsController extends Controller
         return response()->json($formatted);
     }
 
-    public function getEnterprises(Request $request): JsonResponse
-    {
-        $q = $request->input('q', '');
-
-        $enterprises = Enterprise::query()
-            ->when($q !== '', fn ($query) => $query->where('title', 'like', "%{$q}%"))
-            ->descending()
-            ->limit(50)
-            ->get(['id', 'title']);
-
-        $formatted = $enterprises->map(fn ($e) => ['id' => $e->id, 'text' => $e->title])->values();
-
-        return response()->json($formatted);
-    }
-
     public function confirm(Request $request, $slack): JsonResponse
     {
         $mail = IncomingMail::slack($slack);
@@ -222,50 +207,6 @@ class IncomingMailsController extends Controller
             ->update(['status' => IncomingMail::STATUS_IGNORED]);
 
         return response()->json(['success' => true, 'message' => $count.' correo(s) descartados.']);
-    }
-
-    public function reparse($slack): JsonResponse
-    {
-        $mail = IncomingMail::slack($slack);
-
-        if (! $mail instanceof IncomingMail) {
-            return response()->json(['success' => false, 'message' => 'Correo no encontrado.']);
-        }
-
-        try {
-            $enterpriseMatcher = new EnterpriseMatcher;
-            $courseMatcher = new CourseMatcher;
-
-            $payload = $mail->parsed_payload ?? [];
-            $enterprise = $enterpriseMatcher->match(
-                $payload['enterprise_code'] ?? null,
-                $payload['enterprise_name'] ?? null
-            );
-
-            $courseMatches = array_map(
-                fn (string $txt) => $courseMatcher->match($txt, $enterprise),
-                $payload['courses'] ?? []
-            );
-
-            $allMatched = count($payload['courses'] ?? []) > 0
-                && ! in_array(null, $courseMatches, true);
-
-            $mail->matched_enterprise_id = $enterprise?->id;
-            $mail->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Re-análisis completado.',
-                'enterprise_id' => $enterprise?->id,
-                'enterprise_name' => $enterprise?->title,
-                'all_matched' => $allMatched,
-                'course_matches' => collect($payload['courses'] ?? [])->zip($courseMatches)->map(
-                    fn ($pair) => ['text' => $pair[0], 'matched_id' => $pair[1]?->id, 'matched_title' => $pair[1]?->title]
-                )->values(),
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
-        }
     }
 
     private function persistEnterpriseAlias(IncomingMail $mail, Enterprise $enterprise): void

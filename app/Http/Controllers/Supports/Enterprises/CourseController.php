@@ -6,7 +6,6 @@ use App\Exports\Supports\CoursesExport;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
-use App\Models\Enterprise\EnterpriseCourse;
 use App\Models\Inscription;
 use App\Models\User;
 use App\Services\InscriptionService;
@@ -243,29 +242,6 @@ class CourseController extends Controller
         $modalitie = $request->modalitie;
 
         return Excel::download(new CoursesExport($course, $enterprise, $modalitie), 'REPORTE CURSO '.date('Y-m-d').'.xlsx');
-    }
-
-    public function destroy($enterprise, $course)
-    {
-
-        $enterprise = Enterprise::slack($enterprise);
-        $course = Course::slack($course);
-
-        $inscription = EnterpriseCourse::validate($enterprise->id, $course->id);
-        abort_if($inscription === null, 404);
-        $inscription->delete();
-
-        // Bug: 'support.supports.courses' no existe como ruta -- RouteNotFoundException
-        // garantizada en cada borrado exitoso.
-        return redirect()->route('support.enterprises.courses', $enterprise->slack);
-    }
-
-    public function destroyInscription($slack)
-    {
-        $inscription = Inscription::slack($slack);
-        $inscription->delete();
-
-        return back();
     }
 
     public function details($slack)

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
-use App\Exports\Managers\ResultsExport;
+use App\Exports\Supports\ResultsExport;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;

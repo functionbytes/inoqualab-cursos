@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
-use App\Events\Auth\Password\ForgotPasswordCreated;
 use App\Events\Auth\Password\ResetPasswordCreated;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
@@ -160,20 +159,6 @@ class UsersController extends Controller
 
         return view('supports.views.users.users.navegation')->with([
             'user' => $user,
-        ]);
-
-    }
-
-    public function orders(Request $request, $slack)
-    {
-
-        $user = $this->guardManageableUser(User::slack($slack));
-
-        $orders = $user->orders()->latest()->paginate(paginationNumber());
-
-        return view('supports.views.users.users.orders')->with([
-            'user' => $user,
-            'orders' => $orders,
         ]);
 
     }
@@ -411,61 +396,6 @@ class UsersController extends Controller
             'success' => true,
             'message' => 'Contraseña actualizada correctamente.',
         ]);
-    }
-
-    public function forgotpassword(Request $request)
-    {
-        // Escalada: un soporte NO puede disparar reset de un manager/support.
-        $user = $this->guardManageableUser(User::slack($request->slack));
-
-        $reset_tries = 0;
-
-        if ($user->password_reset_last_tried_on != '') {
-
-            $current_date = date('Y-m-d');
-            $last_tried_date = date('Y-m-d', strtotime($user->password_reset_last_tried_on));
-
-            if ($last_tried_date == $current_date && $user->password_reset_max_tries >= 3) {
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ya lo has probado 3 veces hoy. Comuníquese con el administrador para restablecer la contraseña.',
-                ]);
-
-            }
-
-            if ($last_tried_date == $current_date && $user->password_reset_max_tries < 3) {
-                $reset_tries = $user->password_reset_max_tries + 1;
-            } elseif ($last_tried_date != $current_date) {
-                $reset_tries = $reset_tries + 1;
-            }
-        } else {
-            $reset_tries = $reset_tries + 1;
-        }
-
-        $password_token = Str::random(50);
-
-        $user->password_reset_token = $password_token;
-        $user->password_reset_max_tries = $reset_tries;
-        $user->password_reset_last_tried_on = now();
-
-        event(new ForgotPasswordCreated($user));
-
-        if ($user->isDirty()) {
-
-            $user->update();
-
-            activity()
-                ->performedOn($user)
-                ->withProperties($user->getChanges())
-                ->log('updated');
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Se ha actualizado correctamente.',
-        ]);
-
     }
 
     public function notification(Request $request)

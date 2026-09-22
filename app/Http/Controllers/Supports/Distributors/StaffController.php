@@ -124,15 +124,6 @@ class StaffController extends Controller
         ]);
     }
 
-    public function history($slack)
-    {
-        $user = User::slack($slack);
-
-        return view('supports.views.distributors.staffs.history')->with([
-            'user' => $user,
-        ]);
-    }
-
     public function reports($slack)
     {
         $distributor = Distributor::slack($slack);
