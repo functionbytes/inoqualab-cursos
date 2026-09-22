@@ -225,27 +225,6 @@ class CourseController extends Controller
         return response()->json($enterprise->slack);
     }
 
-    public function report($enterprise, $course)
-    {
-
-        $enterprise = $this->managedEnterprise($enterprise);
-        $course = Course::slack($course);
-
-        $modalities = collect([
-            ['id' => '0', 'title' => 'Todos'],
-            ['id' => '1', 'title' => 'Culminado'],
-            ['id' => '2', 'title' => 'Pendiente'],
-        ]);
-
-        $modalities = $modalities->pluck('title', 'id');
-
-        return view('distributors.views.enterprises.courses.reports')->with([
-            'modalities' => $modalities,
-            'enterprise' => $enterprise,
-            'course' => $course,
-        ]);
-    }
-
     public function generate(Request $request)
     {
         // Ownership: la empresa debe pertenecer al distribuidor autenticado
@@ -295,14 +274,6 @@ class CourseController extends Controller
             ->delete();
 
         return response()->json(['success' => true, 'message' => $count.' curso(s) quitados de la empresa.']);
-    }
-
-    public function destroyInscription($slack)
-    {
-        $inscription = $this->managedInscription($slack);
-        $inscription->delete();
-
-        return back();
     }
 
     public function details($slack)

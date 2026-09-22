@@ -116,24 +116,6 @@ class InvoicesController extends Controller
 
     }
 
-    public function report()
-    {
-
-        $methods = InvoiceMethod::latest()->get();
-        $methods = $methods->pluck('title', 'id');
-        $methods->prepend('Todos', '0');
-
-        $conditions = InvoiceCondition::latest()->get();
-        $conditions = $conditions->pluck('title', 'id');
-        $conditions->prepend('Todos', '0');
-
-        return view('distributors.views.invoices.invoices.report')->with([
-            'methods' => $methods,
-            'conditions' => $conditions,
-        ]);
-
-    }
-
     public function generate(Request $request)
     {
 

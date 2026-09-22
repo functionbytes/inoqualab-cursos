@@ -223,25 +223,6 @@ class UserController extends Controller
         ]);
     }
 
-    public function report($slack)
-    {
-
-        $enterprise = $this->managedEnterprise($slack);
-
-        $modalities = collect([
-            ['id' => '0', 'title' => 'Todos'],
-            ['id' => '1', 'title' => 'Publico'],
-            ['id' => '2', 'title' => 'Inactivos'],
-        ]);
-
-        $modalities = $modalities->pluck('title', 'id');
-
-        return view('distributors.views.enterprises.users.users.report')->with([
-            'modalities' => $modalities,
-            'enterprise' => $enterprise,
-        ]);
-    }
-
     public function income($slack)
     {
 
