@@ -1,0 +1,16 @@
+.dist-stat-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+}
+
+.dist-stat-icon--enterprises { background-color: #008bce; }
+.dist-stat-icon--users { background-color: #5A7093; }
+.dist-stat-icon--orders { background-color: #8D9DB5; }
+.dist-stat-icon--invoices { background-color: #081A28; }

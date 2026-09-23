@@ -6,10 +6,16 @@ $(function () {
         toastr.success(flashSuccess);
     }
 
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCondition').val($('#modalCondition').val());
-        $('#filterMethod').val($('#modalMethod').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initInvoicesTable() {
+        FilterToolbar.init({
+            fields: {
+                filterCondition: 'popover_Condition',
+                filterMethod: 'popover_Method',
+            },
+        });
+    }
+
+    initInvoicesTable();
+
+    AjaxTable.init({ onLoaded: initInvoicesTable });
 });

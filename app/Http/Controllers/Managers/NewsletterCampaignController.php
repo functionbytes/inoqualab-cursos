@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Newsletter\BulkActionNewsletterCampaignRequest;
 use App\Http\Requests\Managers\Newsletter\StoreNewsletterCampaignRequest;
 use App\Http\Requests\Managers\Newsletter\TestNewsletterCampaignRequest;
 use App\Http\Requests\Managers\Newsletter\UpdateNewsletterCampaignRequest;
@@ -26,7 +27,7 @@ class NewsletterCampaignController extends Controller
         $status = $request->input('status', '');
 
         $campaigns = NewsletterCampaign::query()
-            ->with('creator')
+            ->with('creator', 'list')
             ->when($search, fn ($q) => $q->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('subject', 'like', "%{$search}%");
@@ -107,16 +108,8 @@ class NewsletterCampaignController extends Controller
         return response()->json(['success' => true, 'message' => 'Campaña eliminada correctamente.']);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionNewsletterCampaignRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:newsletter_campaigns,id'],
-        ]);
-
-        abort_unless(auth()->user()->can('newsletters.delete'), 403);
-
         // Una campaña en envío no se puede eliminar (igual que destroy()):
         // se excluye del lote en vez de romperlo.
         $query = NewsletterCampaign::whereIn('id', $request->ids)->where('status', '!=', 'sending');

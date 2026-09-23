@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Certifications\BulkActionCertificationRequest;
 use App\Http\Requests\Managers\Settings\Certifications\StoreCertificationRequest;
 use App\Http\Requests\Managers\Settings\Certifications\UpdateCertificationRequest;
 use App\Models\Certification;
@@ -83,7 +84,7 @@ class CertificationsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $certification->slack,
-            'message' => 'Se actualizo el certificado correctamente',
+            'message' => 'Se actualizó el certificado correctamente',
         ]);
 
     }
@@ -103,7 +104,7 @@ class CertificationsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $certification->slack,
-            'message' => 'Se creo el certificado correctamente',
+            'message' => 'Se creó el certificado correctamente',
         ]);
 
     }
@@ -119,17 +120,8 @@ class CertificationsController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionCertificationRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:certifications,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'certifications.delete' : 'certifications.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Certification::whereIn('id', $request->ids);
         $count = $query->count();
 

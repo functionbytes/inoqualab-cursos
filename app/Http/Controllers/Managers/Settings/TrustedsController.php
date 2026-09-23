@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Trusteds\BulkActionTrustedRequest;
 use App\Http\Requests\Managers\Settings\Trusteds\StoreTrustedRequest;
 use App\Http\Requests\Managers\Settings\Trusteds\UpdateTrustedRequest;
 use App\Models\Trusted;
@@ -83,7 +84,7 @@ class TrustedsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $trusted->slack,
-            'message' => 'Se actualizo el aliado correctamente',
+            'message' => 'Se actualizó el aliado correctamente',
         ]);
 
     }
@@ -103,7 +104,7 @@ class TrustedsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $trusted->slack,
-            'message' => 'Se creo el aliado correctamente',
+            'message' => 'Se creó el aliado correctamente',
         ]);
 
     }
@@ -119,17 +120,8 @@ class TrustedsController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionTrustedRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:trusteds,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'trusteds.delete' : 'trusteds.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Trusted::whereIn('id', $request->ids);
         $count = $query->count();
 

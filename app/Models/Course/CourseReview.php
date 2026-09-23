@@ -19,6 +19,7 @@ class CourseReview extends Model
         'inscription_id',
         'rating',
         'comment',
+        'available',
         'created_at',
         'updated_at',
     ];
@@ -27,6 +28,7 @@ class CourseReview extends Model
     {
         return [
             'rating' => 'integer',
+            'available' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];

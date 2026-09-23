@@ -1,18 +1,21 @@
 $(function () {
+    var page = $('#faqsPage');
 
-    var bulkUrl = $('#faqs-list').data('bulk-url');
+    var flashSuccess = page.data('flash-success');
+    if (flashSuccess) { toastr.success(flashSuccess); }
 
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initFaqsTable() {
+        FilterToolbar.init({
+            fields: { filterAvailable: 'popover_Available' },
+        });
 
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
-        url: bulkUrl,
-        entityLabel: 'pregunta(s)',
-    });
+        BulkActions.init({
+            url: page.data('bulk-action-url'),
+            entityLabel: 'pregunta(s)',
+        });
+    }
 
+    initFaqsTable();
+
+    AjaxTable.init({ onLoaded: initFaqsTable });
 });

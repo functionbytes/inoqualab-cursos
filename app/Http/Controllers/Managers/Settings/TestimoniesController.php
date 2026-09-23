@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Testimonies\BulkActionTestimonieRequest;
 use App\Http\Requests\Managers\Settings\Testimonies\StoreTestimonieRequest;
 use App\Http\Requests\Managers\Settings\Testimonies\UpdateTestimonieRequest;
 use App\Models\Testimonie;
@@ -22,9 +23,11 @@ class TestimoniesController extends Controller
         if ($searchKey != null) {
 
             $testimonies->when(! strpos($searchKey, '-'), function ($query) use ($searchKey) {
-                $query->where('testimonies.firstname', 'like', '%'.$searchKey.'%')
-                    ->orWhere('testimonies.lastname', 'like', '%'.$searchKey.'%')
-                    ->orWhere(DB::raw("CONCAT(testimonies.firstname, ' ', testimonies.lastname)"), 'like', '%'.$searchKey.'%');
+                $query->where(function ($q) use ($searchKey) {
+                    $q->where('testimonies.firstname', 'like', '%'.$searchKey.'%')
+                        ->orWhere('testimonies.lastname', 'like', '%'.$searchKey.'%')
+                        ->orWhere(DB::raw("CONCAT(testimonies.firstname, ' ', testimonies.lastname)"), 'like', '%'.$searchKey.'%');
+                });
             });
         }
 
@@ -89,7 +92,7 @@ class TestimoniesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo el testimonio correctamente',
+            'message' => 'Se actualizó el testimonio correctamente',
         ]);
 
     }
@@ -115,7 +118,7 @@ class TestimoniesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creado el testimonio correctamente',
+            'message' => 'Se creó el testimonio correctamente',
         ]);
 
     }
@@ -131,17 +134,8 @@ class TestimoniesController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionTestimonieRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:testimonies,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'testimonies.delete' : 'testimonies.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Testimonie::whereIn('id', $request->ids);
         $count = $query->count();
 

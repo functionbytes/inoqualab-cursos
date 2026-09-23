@@ -1,8 +1,14 @@
 $(function () {
     var $container = $('.searchable-container');
 
-    BulkActions.init({
-        url: $container.data('bulkUrl'),
-        entityLabel: $container.data('bulkEntityLabel'),
-    });
+    function initUserOrdersTable() {
+        BulkActions.init({
+            url: $container.data('bulkUrl'),
+            entityLabel: $container.data('bulkEntityLabel'),
+        });
+    }
+
+    initUserOrdersTable();
+
+    AjaxTable.init({ onLoaded: initUserOrdersTable });
 });

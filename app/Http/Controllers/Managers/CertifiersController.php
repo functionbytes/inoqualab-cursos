@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Certifiers\BulkActionCertifierRequest;
 use App\Http\Requests\Managers\Certifiers\StoreCertifierFileRequest;
 use App\Http\Requests\Managers\Certifiers\StoreCertifierRequest;
 use App\Http\Requests\Managers\Certifiers\UpdateCertifierRequest;
@@ -84,7 +85,7 @@ class CertifiersController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $certifier->slack,
-            'message' => 'Se actualizo el certificado correctamente',
+            'message' => 'Se actualizó el capacitador correctamente',
         ]);
 
     }
@@ -106,7 +107,7 @@ class CertifiersController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $certifier->slack,
-            'message' => 'Se creo el certificado correctamente',
+            'message' => 'Se creó el capacitador correctamente',
         ]);
 
     }
@@ -121,17 +122,8 @@ class CertifiersController extends Controller
         return redirect()->route('manager.certifiers');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(BulkActionCertifierRequest $request)
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:certifiers,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'certifiers.delete' : 'certifiers.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Certifier::whereIn('id', $request->ids);
         $count = $query->count();
 

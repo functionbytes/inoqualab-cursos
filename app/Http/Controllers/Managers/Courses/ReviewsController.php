@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionReviewRequest;
 use App\Models\Course\CourseReview;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -60,16 +61,27 @@ class ReviewsController extends Controller
         return redirect()->route('manager.reviews');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function toggleAvailable($id): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:course_reviews,id'],
+        abort_unless(auth()->user()->can('courses.update'), 403);
+
+        $review = CourseReview::findOrFail($id);
+        $review->available = ! $review->available;
+        $review->save();
+
+        if ($review->course) {
+            $review->course->recalculateRating();
+        }
+
+        return response()->json([
+            'success' => true,
+            'available' => $review->available,
+            'message' => $review->available ? 'Reseña visible en el sitio publico.' : 'Reseña ocultada del sitio publico.',
         ]);
+    }
 
-        abort_unless(auth()->user()->can('courses.delete'), 403);
-
+    public function bulkAction(BulkActionReviewRequest $request): JsonResponse
+    {
         $reviews = CourseReview::with('course')->whereIn('id', $request->ids)->get();
         $count = $reviews->count();
         $courses = $reviews->pluck('course')->filter()->unique('id');

@@ -86,8 +86,11 @@ class SettingsFileDeleteRoutesTest extends TestCase
         $response = $this->actingAs($manager)->get(route('manager.settings.metadata'));
 
         $response->assertOk();
-        $response->assertSee(route('manager.settings.metadata.delete', [':id']), false);
-        $response->assertDontSee('certifiers/delete/thumbnails');
+        // La URL viaja dentro de un atributo data-urls generado con @json(),
+        // que escapa las barras ('/' -> '\/') -- hay que buscarla tal cual
+        // aparece en el HTML, no la URL "cruda" de route().
+        $response->assertSee(Str::replace('/', '\/', route('manager.settings.metadata.delete', [':id'])), false);
+        $response->assertDontSee('certifiers\/delete\/thumbnails');
     }
 
     public function test_trusteds_create_view_points_to_its_own_delete_route_not_sliders(): void
@@ -97,8 +100,8 @@ class SettingsFileDeleteRoutesTest extends TestCase
         $response = $this->actingAs($manager)->get(route('manager.trusteds.create'));
 
         $response->assertOk();
-        $response->assertSee(route('manager.trusteds.thumbnails.delete', [':id']), false);
-        $response->assertDontSee('sliders/delete/thumbnails');
+        $response->assertSee(Str::replace('/', '\/', route('manager.trusteds.thumbnails.delete', [':id'])), false);
+        $response->assertDontSee('sliders\/delete\/thumbnails');
     }
 
     public function test_bundles_delete_thumbnails_requires_permission(): void

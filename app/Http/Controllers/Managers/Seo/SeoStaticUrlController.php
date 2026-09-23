@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkActionSeoStaticUrlRequest;
+use App\Http\Requests\Managers\Seo\StoreSeoStaticUrlRequest;
+use App\Http\Requests\Managers\Seo\UpdateSeoStaticUrlRequest;
 use App\Models\Seo\SeoStaticUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SeoStaticUrlController extends Controller
@@ -44,17 +46,9 @@ class SeoStaticUrlController extends Controller
         return view('managers.views.seo.static-urls.create', compact('changefreqOptions', 'priorityOptions'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSeoStaticUrlRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'url' => ['required', 'url', 'max:500', 'unique:seo_static_urls,url'],
-            'priority' => ['nullable', 'numeric', 'in:'.implode(',', SeoStaticUrl::PRIORITY_OPTIONS)],
-            'changefreq' => ['nullable', 'string', 'in:'.implode(',', SeoStaticUrl::CHANGEFREQ_OPTIONS)],
-            'is_active' => ['boolean'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        SeoStaticUrl::create($validated);
+        SeoStaticUrl::create($request->validated());
 
         return redirect()->route('manager.seo.static-urls.index')
             ->with('success', 'URL estática creada correctamente.');
@@ -70,17 +64,9 @@ class SeoStaticUrlController extends Controller
         return view('managers.views.seo.static-urls.edit', compact('staticUrl', 'changefreqOptions', 'priorityOptions'));
     }
 
-    public function update(Request $request, SeoStaticUrl $seoStaticUrl): RedirectResponse
+    public function update(UpdateSeoStaticUrlRequest $request, SeoStaticUrl $seoStaticUrl): RedirectResponse
     {
-        $validated = $request->validate([
-            'url' => ['required', 'url', 'max:500', Rule::unique('seo_static_urls', 'url')->ignore($seoStaticUrl->id)],
-            'priority' => ['nullable', 'numeric', 'in:'.implode(',', SeoStaticUrl::PRIORITY_OPTIONS)],
-            'changefreq' => ['nullable', 'string', 'in:'.implode(',', SeoStaticUrl::CHANGEFREQ_OPTIONS)],
-            'is_active' => ['boolean'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-        ]);
-
-        $seoStaticUrl->update($validated);
+        $seoStaticUrl->update($request->validated());
 
         return redirect()->route('manager.seo.static-urls.index')
             ->with('success', 'URL estática actualizada correctamente.');
@@ -109,14 +95,8 @@ class SeoStaticUrlController extends Controller
         ]);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionSeoStaticUrlRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'string', 'in:delete,activate,deactivate'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_static_urls,id'],
-        ]);
-
         $ids = $request->input('ids');
         $action = $request->input('action');
 

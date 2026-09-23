@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Users;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Course\CourseProgress;
 use App\Models\Inscription;
@@ -9,10 +10,17 @@ use Illuminate\Http\Request;
 
 class ManagementController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
         $inscription = Inscription::slack($slack);
+        // Este controller no tenía NINGÚN guard de rol: un soporte podía ver
+        // Y BORRAR (restore de examen/quiz/progreso) el avance de cualquier
+        // usuario, incluido otro manager/support, solo enumerando el slack
+        // de la inscripción. Mismo guard que el resto de Users/*.
+        $this->guardManageableUser($inscription->user);
         $course = $inscription->course;
 
         return view('supports.views.users.managements.index')->with([
@@ -25,8 +33,8 @@ class ManagementController extends Controller
     {
 
         $inscription = Inscription::slack($slack);
+        $user = $this->guardManageableUser($inscription->user);
         $progress = $inscription->progress;
-        $user = $inscription->user;
         $course = $inscription->course;
         // with('chapter'): la vista agrupa por chapter_id y muestra
         // $chapter->title por lección -- sin esto es una query extra por
@@ -48,6 +56,7 @@ class ManagementController extends Controller
         $inscription = null;
         $progress = CourseProgress::id($slack);
         $inscription = $progress->inscription;
+        $this->guardManageableUser($inscription->user);
         $progress->delete();
 
         return redirect()->route('support.enterprises.users.managements.progress.view', $inscription->slack);
@@ -56,6 +65,7 @@ class ManagementController extends Controller
     public function progressRestore($slack)
     {
         $inscription = Inscription::slack($slack);
+        $this->guardManageableUser($inscription->user);
         $inscription->progress()->delete(); // Elimina todos los registros relacionados
 
         return redirect()->route('support.enterprises.users.managements.progress.view', $inscription->slack);
@@ -65,6 +75,7 @@ class ManagementController extends Controller
     {
         $inscription = Inscription::slack($slack);
         abort_unless($inscription instanceof Inscription, 404);
+        $this->guardManageableUser($inscription->user);
 
         $quizs = $inscription->quizs()->with('lesson')->get();
 
@@ -80,6 +91,7 @@ class ManagementController extends Controller
     {
         $inscription = Inscription::slack($slack);
         abort_unless($inscription instanceof Inscription, 404);
+        $this->guardManageableUser($inscription->user);
 
         // Reinicia los intentos: el quiz se recrea cuando el estudiante vuelve a entrar.
         foreach ($inscription->quizs as $quiz) {
@@ -94,6 +106,7 @@ class ManagementController extends Controller
     {
         $inscription = Inscription::slack($slack);
         abort_unless($inscription instanceof Inscription, 404);
+        $this->guardManageableUser($inscription->user);
 
         return view('supports.views.users.managements.exam')->with([
             'inscription' => $inscription,
@@ -107,6 +120,7 @@ class ManagementController extends Controller
     {
         $inscription = Inscription::slack($slack);
         abort_unless($inscription instanceof Inscription, 404);
+        $this->guardManageableUser($inscription->user);
 
         // Mismo reinicio que el "intentar de nuevo" del aula: puntaje en cero y respuestas fuera.
         $exam = $inscription->exam;

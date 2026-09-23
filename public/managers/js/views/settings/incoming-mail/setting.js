@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    $('#incoming_mail_enabled').on('change', function () {
+        $('#incomingMailFields').toggleClass('d-none', !this.checked);
+    });
+
     $('#formIncomingMail').on('submit', function (e) {
         e.preventDefault();
 

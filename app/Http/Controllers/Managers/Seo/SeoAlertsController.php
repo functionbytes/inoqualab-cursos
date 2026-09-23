@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkActionSeoAlertRequest;
 use App\Models\Seo\SeoAlert;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SeoAlertsController extends Controller
@@ -60,14 +60,8 @@ class SeoAlertsController extends Controller
         return back()->with('success', 'Alerta eliminada.');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionSeoAlertRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:acknowledge,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_alerts,id'],
-        ]);
-
         $query = SeoAlert::whereIn('id', $request->ids);
         $count = $query->count();
 

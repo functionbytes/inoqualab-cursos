@@ -91,15 +91,27 @@ class ManagerNavService extends BaseNavService
                     ]],
                 ],
                 'platform' => [
-                    'sections' => [[
-                        'title' => 'Plataforma',
-                        'items' => [
-                            ['label' => 'Certificados', 'route' => 'manager.certifications', 'setting' => 'module_certifications'],
-                            ['label' => 'Capacitadores', 'route' => 'manager.certifiers', 'permission' => 'certifiers.view', 'setting' => 'module_certifiers'],
-                            ['label' => 'Empresas', 'route' => 'manager.enterprises', 'permission' => 'enterprises.view', 'setting' => 'module_enterprises'],
-                            ['label' => 'Distribuidores', 'route' => 'manager.distributors', 'permission' => 'distributors.view', 'setting' => 'module_distributors'],
+                    'sections' => [
+                        [
+                            'title' => 'Plataforma',
+                            'items' => [
+                                ['label' => 'Certificados', 'route' => 'manager.certifications', 'setting' => 'module_certifications'],
+                                ['label' => 'Capacitadores', 'route' => 'manager.certifiers', 'permission' => 'certifiers.view', 'setting' => 'module_certifiers'],
+                                ['label' => 'Empresas', 'route' => 'manager.enterprises', 'permission' => 'enterprises.view', 'setting' => 'module_enterprises'],
+                                ['label' => 'Distribuidores', 'route' => 'manager.distributors', 'permission' => 'distributors.view', 'setting' => 'module_distributors'],
+                                ['label' => 'Banners', 'route' => 'manager.sliders', 'permission' => 'sliders.view'],
+                                ['label' => 'Aliados', 'route' => 'manager.trusteds', 'permission' => 'trusteds.view'],
+                            ],
                         ],
-                    ]],
+                        [
+                            'title' => 'Blog',
+                            'items' => [
+                                ['label' => 'Noticias', 'route' => 'manager.blogs', 'permission' => 'blogs.view'],
+                                ['label' => 'Categorías', 'route' => 'manager.blogs.categories', 'permission' => 'blogs.view'],
+                                ['label' => 'Etiquetas', 'route' => 'manager.blogs.tags', 'permission' => 'blogs.view'],
+                            ],
+                        ],
+                    ],
                 ],
                 'users' => [
                     'sections' => [[
@@ -146,11 +158,18 @@ class ManagerNavService extends BaseNavService
                             'title' => 'SEO',
                             'items' => [
                                 ['label' => 'Dashboard', 'route' => 'manager.seo.dashboard'],
+                                ['label' => 'Analytics', 'route' => 'manager.seo.analytics'],
                                 ['label' => 'Meta tags', 'route' => 'manager.seo.metas.index'],
+                                ['label' => 'Plantillas SEO', 'route' => 'manager.seo.templates.index'],
                                 ['label' => 'URLs del sitio', 'route' => 'manager.seo.page-urls.index'],
                                 ['label' => 'Sin SEO', 'route' => 'manager.seo.orphans.index'],
                                 ['label' => 'Redirecciones', 'route' => 'manager.seo.redirects.index'],
                                 ['label' => 'Errores 404', 'route' => 'manager.seo.logs.index'],
+                                ['label' => 'Alertas SEO', 'route' => 'manager.seo.alerts.index'],
+                                ['label' => 'Auditorías', 'route' => 'manager.seo.audit.history'],
+                                ['label' => 'Core Web Vitals', 'route' => 'manager.seo.web-vitals.index'],
+                                ['label' => 'Reporte SEO', 'route' => 'manager.seo.report.index'],
+                                ['label' => 'Google Search Console', 'route' => 'manager.seo.gsc.index'],
                                 ['label' => 'URLs sitemap', 'route' => 'manager.seo.static-urls.index'],
                                 ['label' => 'Sitemap', 'route' => 'manager.seo.sitemap.index'],
                                 ['label' => 'robots.txt', 'route' => 'manager.seo.robots.index'],
@@ -178,6 +197,11 @@ class ManagerNavService extends BaseNavService
                             ['label' => 'Pagos / Wompi', 'route' => 'manager.settings.payments'],
                             ['label' => 'Newsletter', 'route' => 'manager.settings.newsletter'],
                             ['label' => 'Correos entrantes', 'route' => 'manager.settings.incoming-mail'],
+                            ['label' => 'Reglas de correos entrantes', 'route' => 'manager.mails', 'permission' => 'incoming-mails.view'],
+                            ['label' => 'Plantillas de email', 'route' => 'mailers.templates.index', 'permission' => 'newsletters.view'],
+                            ['label' => 'Componentes de email', 'route' => 'mailers.components.index', 'permission' => 'newsletters.view'],
+                            ['label' => 'Variables de email', 'route' => 'mailers.variables.index', 'permission' => 'newsletters.view'],
+                            ['label' => 'Email endpoints', 'route' => 'mailers.endpoints.index', 'permission' => 'newsletters.view'],
                             ['label' => 'Módulos', 'route' => 'manager.settings.modules'],
                             ['label' => 'Carga de archivos', 'route' => 'manager.settings.system.uploading'],
                             ['label' => 'Registro de actividad', 'route' => 'manager.activity.index', 'permission' => 'activity.view'],

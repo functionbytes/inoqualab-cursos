@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Quizs;
 
 use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Quizs\BulkActionQuizRequest;
 use App\Http\Requests\Managers\Quizs\StoreQuizRequest;
 use App\Http\Requests\Managers\Quizs\UpdateQuizRequest;
 use App\Models\Course\Course;
@@ -42,7 +43,11 @@ class QuizController extends Controller
 
         $quizs = $quizs->paginate(paginationNumber());
 
-        $lessonOptions = $course->lessons()->get()->prepend('', '')->pluck('title', 'id');
+        // Solo lecciones de tipo Quiz (type_id 6, ver CourseLesson::scopeQuizzes):
+        // el estudiante ve el quiz a traves de CourseLesson::quiztopic() al abrir
+        // ESA leccion especifica. Asociar un quiz a una leccion de otro tipo
+        // (texto/video) lo dejaba guardado pero invisible, sin ningun error.
+        $lessonOptions = $course->lessons()->quizzes()->get()->prepend('', '')->pluck('title', 'id');
 
         $view = request()->ajax() ? 'managers.views.quizs.quizs._table' : 'managers.views.quizs.quizs.index';
 
@@ -160,17 +165,8 @@ class QuizController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionQuizRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:quiz_topics,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'quizzes.delete' : 'quizzes.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         if ($request->action === 'delete') {
             $topics = QuizTopic::whereIn('id', $request->ids)->get();
 

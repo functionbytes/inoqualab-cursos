@@ -103,17 +103,18 @@ $(function () {
     });
 
     // ── Toggle estado ───────────────────────────────────────────────────────
-    $(document).on('change', '.toggle-active', function () {
-        var $toggle = $(this);
+    $(document).on('click', '.toggle-active-link', function (e) {
+        e.preventDefault();
+        var $link = $(this);
         $.ajax({
-            url: $toggle.data('url'),
+            url: $link.data('url'),
             method: 'POST',
             headers: { 'X-CSRF-TOKEN': csrfToken },
             success: function (response) {
                 toastr.success(response.message ?? 'Estado actualizado');
+                setTimeout(function () { location.reload(); }, 600);
             },
             error: function () {
-                $toggle.prop('checked', !$toggle.is(':checked'));
                 toastr.error('Error al cambiar el estado');
             }
         });

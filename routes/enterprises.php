@@ -3,6 +3,7 @@
 use App\Http\Controllers\Enterprises\Dashboard\DashboardController;
 use App\Http\Controllers\Enterprises\Enterprises\CoursesController;
 use App\Http\Controllers\Enterprises\Enterprises\EnterprisesController;
+use App\Http\Controllers\Enterprises\NotificationsController;
 use App\Http\Controllers\Enterprises\Settings\DocumentsController;
 use App\Http\Controllers\Enterprises\Settings\SettingsController;
 use App\Http\Controllers\Enterprises\Users\CertificatesController;
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'enterprise', 'middleware' => ['auth', 'enterprise', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('enterprise.dashboard');
+
+    Route::group(['prefix' => 'notifications'], function () {
+
+        Route::get('/', [NotificationsController::class, 'index'])->name('enterprise.notifications');
+        Route::get('/mark-as-read', [NotificationsController::class, 'markasread'])->name('enterprise.notifications.markasread');
+
+    });
 
     Route::group(['prefix' => 'documents'], function () {
         Route::get('/', [DocumentsController::class, 'index'])->name('enterprise.documents');

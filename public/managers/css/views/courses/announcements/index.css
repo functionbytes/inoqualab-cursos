@@ -1,3 +1,7 @@
 .courses-col-checkbox {
     width: 40px;
 }
+
+.announcements-title-normal {
+    text-transform: none !important;
+}

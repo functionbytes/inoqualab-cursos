@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionBundleRequest;
 use App\Http\Requests\Managers\StoreBundleRequest;
 use App\Http\Requests\Managers\UpdateBundleRequest;
 use App\Models\Bundle\Bundle;
@@ -110,7 +111,7 @@ class BundlesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $bundle->slack,
-            'message' => 'Se actualizo el paquete correctamente',
+            'message' => 'Se actualizó el paquete correctamente',
         ]);
 
     }
@@ -161,7 +162,7 @@ class BundlesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $bundle->slack,
-            'message' => 'Se creado el paquete correctamente',
+            'message' => 'Se creó el paquete correctamente',
         ]);
 
     }
@@ -253,17 +254,8 @@ class BundlesController extends Controller
         return redirect()->route('manager.bundles');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionBundleRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:bundles,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'bundles.delete' : 'bundles.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Bundle::whereIn('id', $request->ids);
         $count = $query->count();
 

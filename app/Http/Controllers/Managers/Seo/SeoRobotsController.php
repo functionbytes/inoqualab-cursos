@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\UpdateSeoRobotsRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -42,12 +43,8 @@ class SeoRobotsController extends Controller
         return view('managers.views.seo.robots.index', compact('content', 'stats', 'public_url'));
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateSeoRobotsRequest $request): JsonResponse
     {
-        $request->validate([
-            'robots_txt' => ['required', 'string'],
-        ]);
-
         // La fuente de verdad es el ajuste: /robots.txt lo sirve
         // RobotsTxtController, que además genera la línea Sitemap con el dominio
         // real del entorno. Antes se escribía también public/robots.txt, y ese

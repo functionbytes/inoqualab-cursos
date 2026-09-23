@@ -1,12 +1,3 @@
-.filter-select-lg {
-    min-width: 180px;
-}
-.filter-select-md {
-    min-width: 160px;
-}
-.filter-select-sm {
-    min-width: 150px;
-}
 .editable-cell {
     cursor: pointer;
 }
@@ -28,6 +19,7 @@
     border-bottom: 2px solid transparent !important;
     border-radius: 0 !important;
     color: #64748b !important;
+    font-size: 14px;
 }
 
 #seo-meta-tab .nav-link:hover,

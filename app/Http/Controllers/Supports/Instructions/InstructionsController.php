@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Supports\Instructions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Instructions\StoreInstructionRequest;
 use App\Http\Requests\Managers\Instructions\UpdateInstructionRequest;
+use App\Http\Requests\Supports\BulkActionInstructionRequest;
 use App\Models\Instruction\Instruction;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\JsonResponse;
@@ -48,7 +49,9 @@ class InstructionsController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.instructions.instructions.index')->with([
+        $view = $request->ajax() ? 'supports.views.instructions.instructions._table' : 'supports.views.instructions.instructions.index';
+
+        return view($view)->with([
             'instructions' => $instructions,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -115,7 +118,7 @@ class InstructionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $instruction->slack,
-            'message' => 'Se creo la instrucción correctamente',
+            'message' => 'Se creó la instrucción correctamente',
         ]);
 
     }
@@ -135,7 +138,7 @@ class InstructionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $instruction->slack,
-            'message' => 'Se actualizado la instrucción correctamente',
+            'message' => 'Se actualizó la instrucción correctamente',
         ]);
 
     }
@@ -149,14 +152,8 @@ class InstructionsController extends Controller
         return redirect()->back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionInstructionRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:instructions,id'],
-        ]);
-
         $query = Instruction::whereIn('id', $request->ids);
         $count = $query->count();
 

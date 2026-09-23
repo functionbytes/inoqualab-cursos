@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionNotificationRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,16 +38,8 @@ class NotificationsController extends Controller
         return response()->noContent();
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(BulkActionNotificationRequest $request)
     {
-        $request->validate([
-            'action' => ['required', 'in:read,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['string'],
-        ]);
-
-        // Son las notificaciones del propio usuario logueado: no hay permiso
-        // Spatie que revisar, la relación ya scopea a Auth::user().
         $notifications = Auth::user()->notifications()->whereIn('id', $request->ids)->get();
         $count = $notifications->count();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Analytics;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Analytics\BulkActionScheduleRequest;
 use App\Http\Requests\Managers\Analytics\StoreScheduleRequest;
 use App\Models\AnalyticsReportSchedule;
 use App\Services\AnalyticsReportService;
@@ -121,16 +122,8 @@ class AnalyticsReportScheduleController extends Controller
         return response()->json(['is_active' => $schedule->is_active]);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionScheduleRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('analytics.update'), 403);
-
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:analytics_report_schedules,id'],
-        ]);
-
         $query = AnalyticsReportSchedule::whereIn('id', $request->ids);
         $count = $query->count();
 

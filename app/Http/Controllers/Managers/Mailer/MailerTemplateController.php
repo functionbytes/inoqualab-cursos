@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Mailer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Mailer\BulkActionMailerTemplateRequest;
+use App\Http\Requests\Mailer\SendMailerTemplateTestRequest;
 use App\Http\Requests\Mailer\StoreMailerTemplateRequest;
 use App\Http\Requests\Mailer\UpdateMailerTemplateRequest;
 use App\Models\Mailer\MailerLayout;
@@ -251,13 +253,9 @@ class MailerTemplateController extends Controller
         return back()->with('success', "Template '{$template->name}' {$status}.");
     }
 
-    public function sendTest(Request $request, string $uid): RedirectResponse
+    public function sendTest(SendMailerTemplateTestRequest $request, string $uid): RedirectResponse
     {
-        abort_unless(auth()->user()->can('newsletters.update'), 403);
-
         $template = MailerTemplate::where('uid', $uid)->with('layout')->firstOrFail();
-
-        $request->validate(['test_email' => ['required', 'email']]);
 
         try {
             $variables = MailerVariableReplacementService::getPreviewVariablesForTemplate($template);
@@ -277,16 +275,8 @@ class MailerTemplateController extends Controller
         }
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionMailerTemplateRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('newsletters.update'), 403);
-
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer'],
-        ]);
-
         $templates = MailerTemplate::whereIn('id', $request->ids)->get();
         $count = $templates->count();
 

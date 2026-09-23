@@ -3,22 +3,15 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSeoWebVitalRequest;
 use App\Models\Seo\SeoWebVital;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class SeoWebVitalsController extends Controller
 {
-    public function store(Request $request): JsonResponse
+    public function store(StoreSeoWebVitalRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'metric' => ['required', 'string', 'in:LCP,INP,CLS,FCP,TTFB'],
-            'value' => ['required', 'numeric', 'min:0'],
-            'url' => ['required', 'string', 'max:500'],
-            'device' => ['nullable', 'string', 'in:mobile,desktop,unknown'],
-            'connection' => ['nullable', 'string', 'max:16'],
-            'navigation_type' => ['nullable', 'string', 'max:32'],
-        ]);
+        $validated = $request->validated();
 
         $url = $validated['url'];
         $urlPath = parse_url($url, PHP_URL_PATH) ?: '/';

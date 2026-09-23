@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\ImportSearchConsoleRequest;
 use App\Models\Seo\Seo404Log;
 use App\Models\Seo\SeoMeta;
 use App\Models\Seo\SeoRedirect;
@@ -133,12 +134,8 @@ class SeoDashboardController extends Controller
         return view('managers.views.seo.dashboard.search-console-import');
     }
 
-    public function importSearchConsole(Request $request): RedirectResponse
+    public function importSearchConsole(ImportSearchConsoleRequest $request): RedirectResponse
     {
-        $request->validate([
-            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:5120'],
-        ]);
-
         $handle = fopen($request->file('csv_file')->getPathname(), 'r');
         $header = fgetcsv($handle);
 

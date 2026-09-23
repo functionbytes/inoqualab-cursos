@@ -1,18 +1,21 @@
 $(function () {
+    var page = $('#contactsPage');
 
-    var bulkUrl = $('#contacts-list').data('bulk-url');
+    var flashSuccess = page.data('flash-success');
+    if (flashSuccess) { toastr.success(flashSuccess); }
 
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterReviewed').val($('#modalReviewed').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initContactsTable() {
+        FilterToolbar.init({
+            fields: { filterReviewed: 'popover_reviewed' },
+        });
 
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
-        url: bulkUrl,
-        entityLabel: 'contacto(s)',
-    });
+        BulkActions.init({
+            url: page.data('bulk-action-url'),
+            entityLabel: 'contacto(s)',
+        });
+    }
 
+    initContactsTable();
+
+    AjaxTable.init({ onLoaded: initContactsTable });
 });

@@ -1,0 +1,38 @@
+.alert-plain-gray {
+    background-color: #F1F3F5;
+    color: #5A7093;
+    border: 0;
+}
+
+.stat-icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+/* Paleta corporativa (rules/pages-views.md): oscuro #081A28, azul de
+   acento #008bce, texto secundario #5A7093, texto suave #8D9DB5, y el
+   rojo de marca #b10100 ya usado en el resto del panel para errores
+   (ver public/managers/css/includes/seo-badges.css) — mismo criterio,
+   sin depender de las clases bg-*-subtle del tema, rotas/inconsistentes. */
+.stat-icon-circle--processed {
+    background-color: #008bce;
+}
+
+.stat-icon-circle--pending {
+    background-color: #5A7093;
+}
+
+.stat-icon-circle--failed {
+    background-color: #b10100;
+}
+
+.stat-icon-circle--ignored {
+    background-color: #8D9DB5;
+}

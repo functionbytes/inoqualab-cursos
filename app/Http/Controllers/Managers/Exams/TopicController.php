@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Exams;
 
 use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Exams\BulkActionExamQuestionRequest;
 use App\Http\Requests\Managers\Exams\StoreExamQuestionRequest;
 use App\Http\Requests\Managers\Exams\UpdateExamQuestionRequest;
 use App\Models\Course\Course;
@@ -87,7 +88,7 @@ class TopicController extends Controller
             'slack' => $question->slack,
             'question' => $question->question,
             'available' => (int) $question->available,
-            'answer' => $question->answer,
+            'answer' => $this->answerForEdit($question->answer),
             'a' => $question->a,
             'b' => $question->b,
             'c' => $question->c,
@@ -124,17 +125,8 @@ class TopicController extends Controller
         return back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionExamQuestionRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:exam_questions,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'exams.delete' : 'exams.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = ExamQuestion::whereIn('id', $request->ids);
         $count = $query->count();
 

@@ -1,4 +1,10 @@
 $(document).ready(function () {
+    $(document).on('change', '#wompi_sandbox', function () {
+        var isSandbox = $(this).is(':checked');
+        $('.wompi-credentials-group[data-env="sandbox"]').toggleClass('d-none', !isSandbox);
+        $('.wompi-credentials-group[data-env="production"]').toggleClass('d-none', isSandbox);
+    });
+
     $('#formPayments').on('submit', function (e) {
         e.preventDefault();
 

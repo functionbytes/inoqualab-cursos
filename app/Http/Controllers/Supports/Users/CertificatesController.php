@@ -53,7 +53,9 @@ class CertificatesController extends Controller
             'expired' => (int) $agg->expired,
         ];
 
-        return view('supports.views.enterprises.users.certificates.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.users.certificates._table' : 'supports.views.enterprises.users.certificates.index';
+
+        return view($view)->with([
             'certificates' => $certificates,
             'searchKey' => $searchKey,
             'courses' => $courses,
@@ -68,6 +70,10 @@ class CertificatesController extends Controller
     {
 
         $inscription = Inscription::slack($slack);
+        // Mismo guard que index(): sin esto, cualquier soporte podía
+        // descargar el certificado de una inscripción de un manager/support
+        // solo conociendo o enumerando su slack.
+        $this->guardManageableUser($inscription->user);
         $certificate = $inscription->certificate;
         // El curso puede no estar completado todavía: sin certificado emitido,
         // la vista revienta al leer sus propiedades.
@@ -82,6 +88,7 @@ class CertificatesController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        $this->guardManageableUser($certificate->user);
         $pdf = Pdf::loadview('supports.views.enterprises.users.certificates.download', compact('certificate'))->setPaper('a4', 'landscape');
 
         return $pdf->stream();

@@ -6,11 +6,17 @@ $(function () {
         toastr.success(flashSuccess);
     }
 
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCondition').val($('#modalCondition').val());
-        $('#filterType').val($('#modalType').val());
-        $('#filterMethods').val($('#modalMethods').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initDistributorOrdersTable() {
+        FilterToolbar.init({
+            fields: {
+                filterCondition: 'popover_Condition',
+                filterType: 'popover_Type',
+                filterMethods: 'popover_Methods',
+            },
+        });
+    }
+
+    initDistributorOrdersTable();
+
+    AjaxTable.init({ onLoaded: initDistributorOrdersTable });
 });

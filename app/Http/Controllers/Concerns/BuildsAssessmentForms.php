@@ -57,4 +57,17 @@ trait BuildsAssessmentForms
 
         $question->answer = $request->answer;
     }
+
+    /**
+     * Normaliza `answer` a minúsculas para precargar el <select> de edición.
+     * Las opciones del <select> son siempre minúsculas ('true'/'false',
+     * 'a'/'b'/'c'/'d'), pero los datos reales de Falso/Verdadero se guardan
+     * en mayúsculas ('TRUE'/'FALSE' -- ver ValidatesAssessmentAnswer). Sin
+     * esto, el <select> no encuentra ninguna opción que coincida y queda sin
+     * seleccionar al editar, aunque la pregunta sí tenga una respuesta real.
+     */
+    protected function answerForEdit(?string $answer): ?string
+    {
+        return $answer === null ? null : strtolower($answer);
+    }
 }

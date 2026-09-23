@@ -30,6 +30,23 @@ $(function () {
         load(this.action + '?' + $(this).serialize());
     });
 
+    // La fila del pedido completa lleva al detalle (ya no hay botón "Ver
+    // detalle" aparte) -- excepto clicks dentro de .od-act ("Pagar"), que
+    // debe seguir siendo una acción explícita, no disparada por cualquier
+    // punto de la fila. role="link"+tabindex hace la fila focuseable (sin
+    // un <a> real que la envuelva) -- Enter/Espacio la activan igual que un
+    // link de verdad.
+    $(document).on('click', '#ordersContent .od-row[data-href]', function (e) {
+        if ($(e.target).closest('.od-act').length) { return; }
+        window.location = $(this).data('href');
+    });
+    $(document).on('keydown', '#ordersContent .od-row[data-href]', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') { return; }
+        if ($(e.target).closest('.od-act').length) { return; }
+        e.preventDefault();
+        window.location = $(this).data('href');
+    });
+
     window.addEventListener('popstate', function () {
         load(window.location.href, false);
     });

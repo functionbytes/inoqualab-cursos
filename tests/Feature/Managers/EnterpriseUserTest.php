@@ -44,7 +44,7 @@ class EnterpriseUserTest extends TestCase
                 'lastname' => 'Perez',
                 'email' => 'juan.perez@test.com',
                 'role' => 'enterprise',
-                'enterprise' => $enterprise->id,
+                'enterprises' => $enterprise->id,
                 'password' => 'password123',
             ])
             ->assertOk()
@@ -94,7 +94,7 @@ class EnterpriseUserTest extends TestCase
                 'lastname' => 'Ruiz',
                 'email' => 'carlos.ruiz@test.com',
                 'role' => 'enterprise',
-                'enterprise' => $enterprise->id,
+                'enterprises' => $enterprise->id,
                 'password' => $password,
             ])
             ->assertJson(['success' => true]);
@@ -106,5 +106,42 @@ class EnterpriseUserTest extends TestCase
             Hash::check($password, $user->password),
             'La contraseña del usuario enterprise creado por manager debe estar hasheada una sola vez.'
         );
+    }
+
+    public function test_users_search_does_not_leak_users_from_other_enterprises(): void
+    {
+        // Regresión: Managers/Enterprises/UserController::index() encadenaba
+        // ->where(...)->orWhere(...)->orWhere(...)->orWhere(...) sin closure,
+        // lo que rompía el scope de $enterprise->users() (el where de
+        // enterprise_id quedaba fuera del OR) y devolvía usuarios de TODAS
+        // las empresas en cuanto la búsqueda matcheaba cualquiera de las
+        // condiciones OR.
+        $manager = User::factory()->manager()->create();
+        $enterpriseA = $this->createEnterprise();
+        $enterpriseB = $this->createEnterprise();
+
+        $userA = User::factory()->create([
+            'firstname' => 'Ana',
+            'lastname' => 'Alvarez',
+            'role' => 'enterprise',
+            'enterprise_id' => $enterpriseA->id,
+        ]);
+        $userB = User::factory()->create([
+            'firstname' => 'Andres',
+            'lastname' => 'Bravo',
+            'role' => 'enterprise',
+            'enterprise_id' => $enterpriseB->id,
+        ]);
+        $enterpriseA->users()->attach($userA);
+        $enterpriseB->users()->attach($userB);
+
+        $response = $this->actingAs($manager)
+            ->get(route('manager.enterprises.users', ['slack' => $enterpriseA->slack, 'search' => 'A']))
+            ->assertOk();
+
+        $users = $response->viewData('users');
+
+        $this->assertTrue($users->contains('id', $userA->id), 'Debe incluir al usuario de la propia empresa que matchea la búsqueda.');
+        $this->assertFalse($users->contains('id', $userB->id), 'NO debe incluir usuarios de otra empresa aunque matcheen la búsqueda.');
     }
 }

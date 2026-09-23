@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Supports\Users;
 use App\Events\Auth\Password\ResetPasswordCreated;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\Users\BulkActionUserRequest;
 use App\Http\Requests\Supports\Users\StoreUserRequest;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
@@ -57,7 +58,9 @@ class UsersController extends Controller
             'actives' => (int) $agg->actives,
         ];
 
-        return view('supports.views.users.users.index')->with([
+        $view = $request->ajax() ? 'supports.views.users.users._table' : 'supports.views.users.users.index';
+
+        return view($view)->with([
             'users' => $users,
             'role' => $role,
             'searchKey' => $searchKey,
@@ -157,8 +160,16 @@ class UsersController extends Controller
     {
         $user = $this->guardManageableUser(User::slack($slack));
 
+        $counts = [
+            'orders' => $user->orders()->count(),
+            'inscriptions' => $user->inscriptions()->count(),
+            'certificates' => $user->certificates()->count(),
+            'results' => $user->certificates()->count(),
+        ];
+
         return view('supports.views.users.users.navegation')->with([
             'user' => $user,
+            'counts' => $counts,
         ]);
 
     }
@@ -309,14 +320,8 @@ class UsersController extends Controller
         return redirect()->back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionUserRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
         // Mismo guard que destroy(): solo permite eliminar en lote usuarios
         // con rol gestionable (no managers/supports).
         $query = User::whereIn('id', $request->ids)->whereIn('role', $this->manageableRoles);

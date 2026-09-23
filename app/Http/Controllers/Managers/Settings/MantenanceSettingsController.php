@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\UpdateMaintenanceRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Str;
 
@@ -51,21 +51,9 @@ class MantenanceSettingsController extends Controller
         return $secret;
     }
 
-    public function update(Request $request)
+    public function update(UpdateMaintenanceRequest $request)
     {
-        abort_unless(auth()->user()->can('settings.update'), 403);
-
         if ($request->maintenance_mode == 'true') {
-
-            // Un secreto vacío dejaría el sitio sin bypass usable; se exige uno
-            // válido (mínimo 8 chars, sin espacios) antes de bajar el sitio.
-            $request->validate([
-                'maintenance_mode_value' => ['required', 'string', 'min:8', 'regex:/^\S+$/'],
-            ], [
-                'maintenance_mode_value.required' => 'La llave de acceso es obligatoria para activar el mantenimiento.',
-                'maintenance_mode_value.min' => 'La llave de acceso debe tener al menos 8 caracteres.',
-                'maintenance_mode_value.regex' => 'La llave de acceso no puede contener espacios.',
-            ]);
 
             $data['maintenance_mode'] = $request->maintenance_mode;
             $data['maintenance_mode_value'] = $request->maintenance_mode_value;
@@ -83,7 +71,7 @@ class MantenanceSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo correctamente el modo mantenimiento',
+            'message' => 'Se actualizó correctamente el modo mantenimiento',
         ]);
 
     }

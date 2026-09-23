@@ -105,7 +105,7 @@ class InscriptionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $inscription->slack,
-            'message' => 'Se actualizo la inscription correctamente',
+            'message' => 'Se actualizó la inscripción correctamente',
         ]);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Supports\Faqs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Faqs\StoreFaqCategoryRequest;
+use App\Http\Requests\Supports\BulkActionFaqCategoryRequest;
+use App\Http\Requests\Supports\UpdateFaqCategoryRequest;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -42,7 +44,9 @@ class CategoriesController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.faqs.categories.index')->with([
+        $view = $request->ajax() ? 'supports.views.faqs.categories._table' : 'supports.views.faqs.categories.index';
+
+        return view($view)->with([
             'categories' => $categories,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -86,7 +90,7 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateFaqCategoryRequest $request)
     {
 
         $categorie = FaqCategorie::slack($request->slack);
@@ -134,14 +138,8 @@ class CategoriesController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionFaqCategoryRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:faq_categories,id'],
-        ]);
-
         $query = FaqCategorie::whereIn('id', $request->ids);
         $count = $query->count();
 

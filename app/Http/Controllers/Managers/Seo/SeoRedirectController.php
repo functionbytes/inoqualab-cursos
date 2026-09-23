@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkDestroySeoRedirectRequest;
+use App\Http\Requests\Managers\Seo\StoreSeoRedirectRequest;
+use App\Http\Requests\Managers\Seo\UpdateSeoRedirectRequest;
 use App\Models\Seo\SeoRedirect;
 use App\Services\RedirectChainDetector;
 use Illuminate\Http\JsonResponse;
@@ -28,16 +31,9 @@ class SeoRedirectController extends Controller
         return view($view, compact('redirects'));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreSeoRedirectRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'source_path' => ['required', 'string', 'max:500'],
-            'target_path' => ['required', 'string', 'max:500'],
-            'status_code' => ['required', 'in:301,302'],
-            'is_regex' => ['boolean'],
-            'is_wildcard' => ['boolean'],
-            'note' => ['nullable', 'string', 'max:255'],
-        ]);
+        $validated = $request->validated();
 
         $this->guardAgainstRedirectLoop(
             $validated['source_path'],
@@ -55,17 +51,9 @@ class SeoRedirectController extends Controller
         ]);
     }
 
-    public function update(Request $request, SeoRedirect $seoRedirect): JsonResponse
+    public function update(UpdateSeoRedirectRequest $request, SeoRedirect $seoRedirect): JsonResponse
     {
-        $validated = $request->validate([
-            'source_path' => ['required', 'string', 'max:500'],
-            'target_path' => ['required', 'string', 'max:500'],
-            'status_code' => ['required', 'in:301,302'],
-            'is_regex' => ['boolean'],
-            'is_wildcard' => ['boolean'],
-            'is_active' => ['boolean'],
-            'note' => ['nullable', 'string', 'max:255'],
-        ]);
+        $validated = $request->validated();
 
         $this->guardAgainstRedirectLoop(
             $validated['source_path'],
@@ -131,13 +119,8 @@ class SeoRedirectController extends Controller
         ]);
     }
 
-    public function bulkDestroy(Request $request): JsonResponse
+    public function bulkDestroy(BulkDestroySeoRedirectRequest $request): JsonResponse
     {
-        $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_redirects,id'],
-        ]);
-
         SeoRedirect::query()->whereIn('id', $request->input('ids'))->delete();
         SeoRedirect::clearCache();
 

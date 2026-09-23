@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionCourseRequest;
 use App\Http\Requests\Managers\Courses\StoreCourseRequest;
 use App\Http\Requests\Managers\Courses\StoreThumbnailRequest;
 use App\Http\Requests\Managers\Courses\UpdateCourseRequest;
 use App\Models\Certification;
 use App\Models\Certifier;
 use App\Models\Course\Course;
+use App\Models\Course\CourseAnnouncement;
 use App\Models\Course\CourseCategorie;
 use App\Models\Course\CourseChapter;
 use App\Models\Course\CourseLesson;
@@ -79,8 +81,17 @@ class CoursesController extends Controller
 
         $course = Course::slack($slack);
 
+        $counts = [
+            'chapters' => CourseChapter::query()->where('course_id', $course->id)->count(),
+            'lessons' => CourseLesson::query()->where('course_id', $course->id)->count(),
+            'announcements' => CourseAnnouncement::query()->where('course_id', $course->id)->count(),
+            'quizs' => QuizTopic::query()->where('course_id', $course->id)->count(),
+            'exams' => ExamTopic::query()->where('course_id', $course->id)->count(),
+        ];
+
         return view('managers.views.courses.courses.navegation')->with([
             'course' => $course,
+            'counts' => $counts,
         ]);
 
     }
@@ -128,9 +139,11 @@ class CoursesController extends Controller
         $categories = $categories->pluck('title', 'id');
 
         $certifications = Certification::latest()->get();
+        $certifications->prepend('', '');
         $certifications = $certifications->pluck('title', 'id');
 
         $certifiers = Certifier::latest()->get();
+        $certifiers->prepend('', '');
         $certifiers = $certifiers->pluck('firstname', 'id');
 
         $availables = $this->availableOptions();
@@ -212,7 +225,7 @@ class CoursesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $course->slack,
-            'message' => 'Se actualizo la clase correctamente',
+            'message' => 'Se actualizó el curso correctamente',
         ]);
 
     }
@@ -370,7 +383,7 @@ class CoursesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $course->slack,
-            'message' => 'Se creo el curso correctamente',
+            'message' => 'Se creó el curso correctamente',
         ]);
 
     }
@@ -433,18 +446,8 @@ class CoursesController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionCourseRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:courses,id'],
-        ]);
-
-        // El borrado en masa exige el mismo permiso que destroy() (antes se saltaba).
-        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Course::whereIn('id', $request->ids);
         $count = $query->count();
 

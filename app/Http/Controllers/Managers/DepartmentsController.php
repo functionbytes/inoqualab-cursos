@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Departments\BulkActionDepartmentRequest;
 use App\Http\Requests\Managers\Departments\StoreDepartmentRequest;
+use App\Http\Requests\Managers\Departments\UpdateDepartmentRequest;
 use App\Models\Department;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,9 +66,8 @@ class DepartmentsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDepartmentRequest $request)
     {
-        abort_unless(auth()->user()->can('departments.update'), 403);
         $department = Department::slack($request->slack);
         $department->title = Str::upper($request->title);
         $department->slug = Str::slug($request->title, '-');
@@ -76,7 +77,7 @@ class DepartmentsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $department->slack,
-            'message' => 'Se actualizo el paquete correctamente',
+            'message' => 'Se actualizó el departamento correctamente',
         ]);
 
     }
@@ -95,7 +96,7 @@ class DepartmentsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $department->slack,
-            'message' => 'Se creado el paquete correctamente',
+            'message' => 'Se creó el departamento correctamente',
         ]);
 
     }
@@ -109,17 +110,8 @@ class DepartmentsController extends Controller
         return redirect()->route('manager.departments');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDepartmentRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:departments,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'departments.delete' : 'departments.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Department::whereIn('id', $request->ids);
         $count = $query->count();
 

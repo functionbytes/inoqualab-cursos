@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Contacts\BulkActionContactRequest;
 use App\Http\Requests\Managers\Settings\Contacts\UpdateContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\JsonResponse;
@@ -75,7 +76,7 @@ class ContactsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo correctamente el formulario de contacto',
+            'message' => 'Se actualizó correctamente el formulario de contacto',
         ]);
 
     }
@@ -90,17 +91,8 @@ class ContactsController extends Controller
         return redirect()->route('manager.contacts');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionContactRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:reviewed,pending,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:contacts,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'contacts.delete' : 'contacts.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Contact::whereIn('id', $request->ids);
         $count = $query->count();
 

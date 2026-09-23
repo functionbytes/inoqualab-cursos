@@ -26,7 +26,7 @@ class PixelSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo el pixel correctamente',
+            'message' => 'Se actualizó el pixel correctamente',
         ]);
     }
 }

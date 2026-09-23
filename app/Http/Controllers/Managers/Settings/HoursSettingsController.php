@@ -54,7 +54,7 @@ class HoursSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo correctamente el horario de soporte',
+            'message' => 'Se actualizó correctamente el horario de soporte',
         ]);
     }
 }

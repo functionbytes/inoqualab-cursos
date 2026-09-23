@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Distributors\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Distributors\Enterprises\BulkActionEnterpriseRequest;
 use App\Http\Requests\Distributors\Enterprises\StoreEnterpriseRequest;
 use App\Http\Requests\Distributors\Enterprises\UpdateEnterpriseRequest;
 use App\Models\Distributor\DistributorEnterprise;
@@ -93,7 +94,7 @@ class EnterprisesController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->where('id', '!=', $enterprise->id)->exists()) {
+        if (Enterprise::withTrashed()->where('nit', $request->nit)->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
@@ -122,7 +123,7 @@ class EnterprisesController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->exists()) {
+        if (Enterprise::withTrashed()->where('nit', $request->nit)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
@@ -154,14 +155,8 @@ class EnterprisesController extends Controller
         ]);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionEnterpriseRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:enterprises,id'],
-        ]);
-
         // Ownership: solo empresas que pertenecen al distribuidor autenticado (evita IDOR).
         $enterpriseIds = app('distributor')->enterprises()
             ->whereIn('enterprises.id', $request->ids)
@@ -202,9 +197,16 @@ class EnterprisesController extends Controller
         $distributor = app('distributor');
         $enterprise = $distributor->enterprises()->where('enterprises.slack', $slack)->firstOrFail();
 
+        $counts = [
+            'users' => $enterprise->users()->count(),
+            'staffs' => $enterprise->staffs()->count(),
+            'courses' => $enterprise->courses()->count(),
+        ];
+
         return view('distributors.views.enterprises.enterprises.navegation')->with([
             'distributor' => $distributor,
             'enterprise' => $enterprise,
+            'counts' => $counts,
         ]);
 
     }

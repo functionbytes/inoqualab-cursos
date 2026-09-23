@@ -87,8 +87,14 @@ class OrdersController extends Controller
             ->where('orders.slack', $slack)
             ->firstOrFail();
 
-        $pdf = Pdf::loadView('distributors.views.orders.orders.print', compact('order'))
-            ->setPaper('A4', 'portrait');
+        $pdf = Pdf::loadView('distributors.views.orders.orders.print', [
+            'order' => $order,
+            'brand' => setting('page_title') ?: 'INOQUALAB',
+            // getlogo() da una URL (posiblemente de producción) que DomPDF no
+            // puede cargar sin red habilitada -- se embebe el archivo local
+            // como data URI (mismo patron que customers.views.orders.invoice).
+            'logo' => getLogoBase64(),
+        ])->setPaper('A4', 'portrait');
 
         return $pdf->download('order-details.pdf');
     }

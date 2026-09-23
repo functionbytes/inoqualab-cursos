@@ -5,3 +5,16 @@
 .filter-badge-sm {
     font-size: .65rem;
 }
+
+.campaigns-progress-col {
+    min-width: 120px;
+}
+
+.campaigns-progress-bar {
+    height: 4px;
+    margin-top: 4px;
+}
+
+.campaigns-creator {
+    font-size: .75rem;
+}

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\BulkActionBlogCategoryRequest;
 use App\Http\Requests\Managers\Blogs\StoreBlogCategoryRequest;
 use App\Http\Requests\Managers\Blogs\UpdateBlogCategoryRequest;
 use App\Models\Blog\BlogCategorie;
@@ -82,7 +83,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo la categoria correctamente',
+            'message' => 'Se actualizó la categoría correctamente',
         ]);
 
     }
@@ -100,7 +101,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creo la categoria correctamente',
+            'message' => 'Se creó la categoría correctamente',
         ]);
 
     }
@@ -115,17 +116,8 @@ class CategoriesController extends Controller
         return redirect()->route('manager.blogs.categories');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionBlogCategoryRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:blog_categories,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'blogs.delete' : 'blogs.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = BlogCategorie::whereIn('id', $request->ids);
         $count = $query->count();
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Roles\BulkActionRoleRequest;
+use App\Http\Requests\Managers\Settings\Roles\StoreRoleRequest;
+use App\Http\Requests\Managers\Settings\Roles\UpdateRoleRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +22,7 @@ use Spatie\Permission\PermissionRegistrar;
 class RolesController extends Controller
 {
     /** Roles del sistema que no se pueden renombrar ni eliminar. */
-    private const PROTECTED_ROLES = [
+    public const PROTECTED_ROLES = [
         'superadmin', 'manager', 'customer', 'support', 'distributor', 'enterprise', 'accounting',
     ];
 
@@ -100,10 +103,9 @@ class RolesController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRoleRequest $request): RedirectResponse
     {
-        abort_unless(auth()->user()->can('roles.create'), 403);
-        $data = $this->validateRole($request);
+        $data = $request->validated();
 
         $role = Role::create(['name' => $data['name'], 'guard_name' => 'web']);
         $role->syncPermissions($this->permissionsFrom($request));
@@ -115,13 +117,12 @@ class RolesController extends Controller
             ->with('success', 'Rol creado correctamente.');
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(UpdateRoleRequest $request, int $id): RedirectResponse
     {
-        abort_unless(auth()->user()->can('roles.update'), 403);
         $role = Role::findOrFail($id);
         $isProtected = in_array($role->name, self::PROTECTED_ROLES, true);
 
-        $data = $this->validateRole($request, $role->id, skipName: $isProtected);
+        $data = $request->validated();
 
         if (! $isProtected && isset($data['name'])) {
             $role->update(['name' => $data['name']]);
@@ -177,16 +178,8 @@ class RolesController extends Controller
      * asignados no se pueden eliminar — en vez de rechazar todo el lote, se
      * omiten y se informa cuántos se omitieron.
      */
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionRoleRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:roles,id'],
-        ]);
-
-        abort_unless(auth()->user()->can('roles.delete'), 403);
-
         $roles = Role::whereIn('id', $request->ids)->withCount('users')->get();
 
         $deletable = $roles->filter(fn (Role $role) => ! in_array($role->name, self::PROTECTED_ROLES, true)
@@ -205,27 +198,6 @@ class RolesController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => $message]);
-    }
-
-    /**
-     * @return array{name?: string}
-     */
-    private function validateRole(Request $request, ?int $ignoreId = null, bool $skipName = false): array
-    {
-        $rules = [
-            'permissions' => ['array'],
-            'permissions.*' => ['integer', 'exists:permissions,id'],
-        ];
-
-        if (! $skipName) {
-            $unique = 'unique:roles,name'.($ignoreId ? ",{$ignoreId}" : '');
-            $rules['name'] = ['required', 'string', 'max:125', $unique];
-        }
-
-        return $request->validate($rules, [
-            'name.required' => 'El nombre del rol es obligatorio.',
-            'name.unique' => 'Ya existe un rol con ese nombre.',
-        ]);
     }
 
     private function permissionsFrom(Request $request)

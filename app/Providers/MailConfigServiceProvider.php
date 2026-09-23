@@ -28,11 +28,22 @@ class MailConfigServiceProvider extends ServiceProvider
 
             $rows = DB::table('settings')
                 ->whereIn('key', [
-                    'mail_driver', 'mail_host', 'mail_port',
+                    'mail_status', 'mail_driver', 'mail_host', 'mail_port',
                     'mail_from_address', 'mail_from_name',
                     'mail_encryption', 'mail_username', 'mail_password',
                 ])
                 ->pluck('value', 'key');
+
+            // Toggle "Habilitar envío de correos" (panel/settings/emails): si se
+            // deshabilita, los correos no deben llegar de verdad -- se enrutan al
+            // mailer 'log' de Laravel (quedan escritos en storage/logs) en vez de
+            // intentar una conexión SMTP real. Default habilitado (no rompe
+            // instalaciones existentes que nunca tocaron este toggle nuevo).
+            if ($rows->get('mail_status') === 'false') {
+                Config::set('mail.default', 'log');
+
+                return;
+            }
 
             $driver = $rows->get('mail_driver', 'smtp');
 

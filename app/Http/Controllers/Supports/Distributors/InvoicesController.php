@@ -87,7 +87,9 @@ class InvoicesController extends Controller
             'rejected' => (int) $agg->rejected,
         ];
 
-        return view('supports.views.distributors.invoices.invoices.index')->with([
+        $view = $request->ajax() ? 'supports.views.distributors.invoices.invoices._table' : 'supports.views.distributors.invoices.invoices.index';
+
+        return view($view)->with([
             'invoices' => $invoices,
             'conditions' => $conditions,
             'condition' => $condition,

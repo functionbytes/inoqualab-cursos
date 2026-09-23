@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Pages;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Pages\AddCartItemRequest;
+use App\Http\Requests\Pages\CaptureCartLeadRequest;
+use App\Http\Requests\Pages\RemoveCartItemRequest;
+use App\Http\Requests\Pages\UpdateCartItemQtyRequest;
 use App\Models\Bundle\Bundle;
 use App\Models\CartAbandonment;
 use App\Models\Course\Course;
@@ -26,14 +30,8 @@ class CartController extends Controller
         return view('pages.includes.cart-drawer-content');
     }
 
-    public function add(Request $request)
+    public function add(AddCartItemRequest $request)
     {
-        $request->validate([
-            'type' => 'required|in:course,bundle',
-            'slack' => 'required|string',
-            'qty' => 'nullable|integer|min:1|max:10',
-        ]);
-
         $type = $request->type;
         $slack = $request->slack;
         // Un curso se matricula una sola vez por usuario: el checkout fuerza qty=1
@@ -151,10 +149,8 @@ class CartController extends Controller
         return back()->with('success', 'Agregado al carrito.');
     }
 
-    public function remove(Request $request)
+    public function remove(RemoveCartItemRequest $request)
     {
-        $request->validate(['key' => 'required|string']);
-
         $cart = session('cart', []);
         unset($cart[$request->key]);
         session(['cart' => $cart]);
@@ -171,13 +167,8 @@ class CartController extends Controller
         return back()->with('success', 'Eliminado del carrito.');
     }
 
-    public function updateQty(Request $request)
+    public function updateQty(UpdateCartItemQtyRequest $request)
     {
-        $request->validate([
-            'key' => 'required|string',
-            'qty' => 'required|integer|min:1|max:10',
-        ]);
-
         $cart = session('cart', []);
 
         if (! isset($cart[$request->key])) {
@@ -221,12 +212,8 @@ class CartController extends Controller
      * órdenes ya generadas). Se guarda como intento "pendiente"; si más tarde sí
      * genera la orden, generate() marca converted_at y este flujo deja de recordarle.
      */
-    public function captureLead(Request $request)
+    public function captureLead(CaptureCartLeadRequest $request)
     {
-        $request->validate([
-            'email' => ['required', 'email', 'max:191'],
-        ]);
-
         [$lines, $subtotal] = cartCheckoutLines();
 
         if (empty($lines)) {

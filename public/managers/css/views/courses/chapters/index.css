@@ -2,6 +2,18 @@
     width: 40px;
 }
 
+.chapters-col-handle {
+    width: 32px;
+    padding-left: 12px !important;
+    padding-right: 0 !important;
+}
+
+.chapters-title-truncate {
+    max-width: 260px;
+    vertical-align: middle;
+    text-transform: none !important;
+}
+
 .drag-handle {
     cursor: grab;
 }

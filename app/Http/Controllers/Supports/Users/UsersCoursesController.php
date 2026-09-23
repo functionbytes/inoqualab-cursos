@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Supports\Users;
 
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\Users\BulkActionUserInscriptionRequest;
 use App\Models\Inscription;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,12 @@ class UsersCoursesController extends Controller
         $inscriptions = $user->inscriptions()->with('course');
 
         if ($searchKey != null) {
-            $inscriptions = $inscriptions->where('title', 'like', '%'.$searchKey.'%');
+            // 'inscriptions' no tiene columna 'title' (pertenece a 'courses'):
+            // el where() plano buscaba en una columna inexistente y rompía
+            // la búsqueda con un QueryException en cuanto se usaba.
+            $inscriptions = $inscriptions->whereHas('course', function ($query) use ($searchKey) {
+                $query->where('title', 'like', '%'.$searchKey.'%');
+            });
         }
 
         $inscriptions = $inscriptions->paginate(paginationNumber());
@@ -43,7 +49,9 @@ class UsersCoursesController extends Controller
             'pending' => (int) $agg->pending,
         ];
 
-        return view('supports.views.users.courses.index')->with([
+        $view = $request->ajax() ? 'supports.views.users.courses._table' : 'supports.views.users.courses.index';
+
+        return view($view)->with([
             'user' => $user,
             'inscriptions' => $inscriptions,
             'searchKey' => $searchKey,
@@ -78,14 +86,8 @@ class UsersCoursesController extends Controller
         return back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionUserInscriptionRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:inscriptions,id'],
-        ]);
-
         // No se elimina en lote la inscripcion de un usuario no gestionable
         // (manager/support) aunque su id venga en el payload.
         // with('user'): el filter() de abajo lee $inscription->user->role --

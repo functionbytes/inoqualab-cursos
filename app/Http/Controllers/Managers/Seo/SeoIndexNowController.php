@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\SubmitIndexNowRequest;
 use App\Services\IndexNowService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SeoIndexNowController extends Controller
@@ -25,7 +25,7 @@ class SeoIndexNowController extends Controller
         ));
     }
 
-    public function submit(Request $request): JsonResponse
+    public function submit(SubmitIndexNowRequest $request): JsonResponse
     {
         $service = new IndexNowService;
 
@@ -35,11 +35,6 @@ class SeoIndexNowController extends Controller
                 'message' => 'IndexNow no está habilitado.',
             ], 422);
         }
-
-        $request->validate([
-            'urls' => ['required', 'array', 'min:1', 'max:50'],
-            'urls.*' => ['url'],
-        ]);
 
         $service->submit($request->urls);
 

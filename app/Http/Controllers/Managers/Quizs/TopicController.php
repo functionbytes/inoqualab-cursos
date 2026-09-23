@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Quizs;
 
 use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Quizs\BulkActionQuizQuestionRequest;
 use App\Http\Requests\Managers\Quizs\StoreQuizQuestionRequest;
 use App\Http\Requests\Managers\Quizs\UpdateQuizQuestionRequest;
 use App\Models\Quiz\QuizQuestion;
@@ -82,7 +83,7 @@ class TopicController extends Controller
             'slack' => $question->slack,
             'question' => $question->question,
             'available' => (int) $question->available,
-            'answer' => $question->answer,
+            'answer' => $this->answerForEdit($question->answer),
             'a' => $question->a,
             'b' => $question->b,
             'c' => $question->c,
@@ -104,7 +105,7 @@ class TopicController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se ha actualizado  correctamente',
+            'message' => 'Se ha actualizado correctamente',
         ]);
 
     }
@@ -120,17 +121,8 @@ class TopicController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionQuizQuestionRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:quiz_questions,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'quizzes.delete' : 'quizzes.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = QuizQuestion::whereIn('id', $request->ids);
         $count = $query->count();
 

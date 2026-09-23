@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Enterprises;
 
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 
 class ReassignController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function all($slack)
     {
         $enterprise = Enterprise::slack($slack);
@@ -71,6 +74,18 @@ class ReassignController extends Controller
 
             }
 
+            // Mismo patrón que el resto del guard: JSON de error en vez de
+            // abortar con 403 crudo, para no cortar el request en medio del
+            // lote sin decir cuál identificación falló.
+            if (! in_array($user->role, $this->manageableRoles, true)) {
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tienes autorización para reasignar al usuario '.$identification.'.',
+                ]);
+
+            }
+
             $enterpriseUser = $enterpriseUsersByUserId->get($user->id);
 
             // Sin esta guarda, un usuario sin fila enterprise_user (2,737 casos
@@ -102,7 +117,7 @@ class ReassignController extends Controller
     public function single($slack)
     {
 
-        $user = User::slack($slack);
+        $user = $this->guardManageableUser(User::slack($slack));
         $enterprise = $user->getEnterprise();
 
         abort_if($enterprise === null, 404, 'El usuario no tiene ninguna empresa asignada.');
@@ -132,6 +147,8 @@ class ReassignController extends Controller
                 'success' => false,
                 'message' => 'Usuario o empresa no encontrados.']);
         }
+
+        $this->guardManageableUser($user);
 
         $enterpriseUser = EnterpriseUser::where('user_id', $user->id)->first();
 

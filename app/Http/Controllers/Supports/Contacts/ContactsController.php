@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Supports\Contacts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkActionContactRequest;
+use App\Http\Requests\Supports\UpdateContactRequest;
 use App\Models\Contact;
 use DB;
 use Illuminate\Http\JsonResponse;
@@ -44,7 +46,9 @@ class ContactsController extends Controller
             'pending' => (int) $agg->pending,
         ];
 
-        return view('supports.views.contacts.index')->with([
+        $view = $request->ajax() ? 'supports.views.contacts._table' : 'supports.views.contacts.index';
+
+        return view($view)->with([
             'contacts' => $contacts,
             'reviewed' => $reviewed,
             'searchKey' => $searchKey,
@@ -71,7 +75,7 @@ class ContactsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateContactRequest $request)
     {
 
         $contact = Contact::slack($request->slack);
@@ -85,7 +89,7 @@ class ContactsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizado correctamente',
+            'message' => 'Se actualizó correctamente',
         ]);
 
     }
@@ -117,14 +121,8 @@ class ContactsController extends Controller
         return redirect()->route('support.contacts');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionContactRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:contacts,id'],
-        ]);
-
         $query = Contact::whereIn('id', $request->ids);
         $count = $query->count();
 

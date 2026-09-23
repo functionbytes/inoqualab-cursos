@@ -6,11 +6,18 @@ $(function () {
     if (flashSuccess) { toastr.success(flashSuccess); }
     if (flashError) { toastr.error(flashError); }
 
-    // ── Filters modal ────────────────────────────────────────────────────────
+    // ── Filtros + selección masiva ───────────────────────────────────────────
+    // Se re-ejecuta tras cada carga AJAX (buscar/filtrar/paginar) porque
+    // #select-all vive dentro de #ajax-table-root y se recrea.
     function initOrdersOrdersTable() {
         FilterToolbar.init({
-        fields: { filterCondition: 'popover_Condition', filterType: 'popover_Type', filterMethods: 'popover_Methods' },
-    });
+            fields: { filterCondition: 'popover_Condition', filterType: 'popover_Type', filterMethods: 'popover_Methods' },
+        });
+
+        BulkActions.init({
+            url: $page.data('bulk-action-url'),
+            entityLabel: 'orden(es)',
+        });
     }
 
     initOrdersOrdersTable();

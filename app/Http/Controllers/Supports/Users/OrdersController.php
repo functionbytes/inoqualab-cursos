@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Supports\Users;
 use App\Enums\OrderCondition as Condition;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\Users\BulkActionUserOrderRequest;
 use App\Http\Requests\Supports\Users\UpdateUserOrderRequest;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
@@ -22,12 +23,21 @@ class OrdersController extends Controller
     {
 
         $user = $this->guardManageableUser(User::slack($slack));
+        $searchKey = $request->search;
 
-        $orders = $user->orders()->latest()->paginate(paginationNumber());
+        $orders = $user->orders()
+            ->when($searchKey, fn ($q) => $q->where(fn ($q) => $q
+                ->where('slack', 'like', '%'.$searchKey.'%')
+                ->orWhere('reference', 'like', '%'.$searchKey.'%')))
+            ->latest()
+            ->paginate(paginationNumber());
 
-        return view('supports.views.users.users.orders')->with([
+        $view = $request->ajax() ? 'supports.views.users.users._orders_table' : 'supports.views.users.users.orders';
+
+        return view($view)->with([
             'user' => $user,
             'orders' => $orders,
+            'searchKey' => $searchKey,
         ]);
 
     }
@@ -68,14 +78,8 @@ class OrdersController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionUserOrderRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:orders,id'],
-        ]);
-
         // Mismo guard que destroy(): una orden pagada arrastraría en cascada
         // las matrículas y certificados del alumno, así que no se elimina en lote.
         // Tampoco se elimina en lote la orden de un usuario no gestionable

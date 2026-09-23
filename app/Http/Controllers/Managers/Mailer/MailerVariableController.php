@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Mailer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Mailer\BulkActionMailerVariableRequest;
 use App\Http\Requests\Managers\Mailer\StoreMailerVariableRequest;
 use App\Http\Requests\Managers\Mailer\UpdateMailerVariableRequest;
 use App\Models\Mailer\MailerVariable;
@@ -126,21 +127,8 @@ class MailerVariableController extends Controller
         return back()->with('success', "Variable '{$variable->key}' ".($variable->is_enabled ? 'habilitada' : 'deshabilitada').'.');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionMailerVariableRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:enable,disable,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:mailer_variables,id'],
-        ]);
-
-        // Los métodos store/update/destroy de este controller no llevan
-        // abort_unless propio: la autorización vive en el middleware `can:` de
-        // cada ruta (ver routes/managers.php). Una sola ruta bulk-action no
-        // puede expresar ese matiz por acción, así que se replica aquí.
-        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         // Las variables de sistema no se pueden editar ni eliminar (igual que
         // update()/destroy()), así que se excluyen del lote en vez de romperlo.
         $query = MailerVariable::whereIn('id', $request->ids)->where('is_system', false);

@@ -227,7 +227,7 @@ class Course extends Model implements HasMedia
      */
     public function recalculateRating(): void
     {
-        $avg = $this->reviews()->avg('rating');
+        $avg = $this->reviews()->where('available', true)->avg('rating');
         $this->rating = $avg ? round($avg, 1) : 0;
         $this->save();
     }

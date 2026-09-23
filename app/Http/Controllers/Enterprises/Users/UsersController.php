@@ -39,11 +39,13 @@ class UsersController extends Controller
         }
 
         $users->when(! $isDateSearch, function ($query) use ($searchKey) {
-            $query->where('users.firstname', 'like', '%'.$searchKey.'%')
-                ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
-                ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')
-                ->orWhere('users.email', 'like', '%'.$searchKey.'%')
-                ->orWhere('users.identification', 'like', '%'.$searchKey.'%');
+            $query->where(function ($query) use ($searchKey) {
+                $query->where('users.firstname', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
+                    ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.email', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.identification', 'like', '%'.$searchKey.'%');
+            });
         });
 
         $users = $users->paginate(paginationNumber());

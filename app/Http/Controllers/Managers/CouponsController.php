@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionCouponRequest;
 use App\Http\Requests\Managers\StoreCouponRequest;
 use App\Http\Requests\Managers\UpdateCouponRequest;
 use App\Models\Bundle\Bundle;
@@ -160,7 +161,7 @@ class CouponsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $coupon->slack,
-            'message' => 'Se creado el cupon correctamente',
+            'message' => 'Se creó el cupón correctamente',
         ]);
 
     }
@@ -175,17 +176,8 @@ class CouponsController extends Controller
         return redirect()->route('manager.coupons');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionCouponRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:coupons,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'coupons.delete' : 'coupons.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Coupon::whereIn('id', $request->ids);
         $count = $query->count();
 

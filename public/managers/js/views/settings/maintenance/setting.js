@@ -67,7 +67,7 @@ $(document).ready(function () {
 
     $('#formMaintenance').validate({
         submit: false,
-        ignore: '.ignore',
+        ignore: ':hidden',
         rules: {
             maintenance_mode_value: {
                 required: true,

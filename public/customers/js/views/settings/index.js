@@ -19,9 +19,9 @@ $(function () {
     $(window).on('scroll', marcarVisible);
     marcarVisible();
 
-    // Mostrar/ocultar contraseña
-    $('#cfgPwToggle').on('click', function () {
-        var $i = $('#password');
+    // Mostrar/ocultar contraseña: uno por campo (actual, nueva, confirmar).
+    $(document).on('click', '.pw-toggle', function () {
+        var $i = $('#' + $(this).data('target'));
         $i.attr('type', $i.attr('type') === 'password' ? 'text' : 'password');
         $(this).toggleClass('is-on');
     });
@@ -57,6 +57,10 @@ $(function () {
                 if (response.success === true) {
                     toastr.success(response.message, 'Operación exitosa', { closeButton: true, progressBar: true, positionClass: 'toast-bottom-right' });
                     $('#password, #password_confirmation').val('');
+                    // El sidebar "Completa tu perfil" y el % se calculan solo al
+                    // renderizar la vista -- sin recargar, quedaban desactualizados
+                    // (seguían en "pendiente"/67% aunque el guardado ya los completó).
+                    setTimeout(function () { window.location.reload(); }, 1200);
                 }
             },
             error: function (xhr) {

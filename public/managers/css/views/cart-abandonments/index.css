@@ -1,3 +1,164 @@
 .cart-abandonments-col-checkbox {
     width: 40px;
 }
+
+/* Modal "Ver detalle" */
+.abandonment-modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.abandonment-modal-header {
+    position: relative;
+    padding: 26px 32px;
+    background: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.abandonment-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+}
+
+.abandonment-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #008bce;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.abandonment-modal-name {
+    font-weight: 700;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+.abandonment-modal-email {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.abandonment-modal-total {
+    font-weight: 800;
+    font-size: 20px;
+    color: #ffffff;
+}
+
+.abandonment-modal-total-label {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.abandonment-info-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.abandonment-info-card {
+    flex: 1;
+    background: #f8f9fb;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.abandonment-info-label {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.abandonment-cart-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f172a;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.abandonment-cart-table {
+    border: 1px solid #eef0f2;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.abandonment-cart-table table {
+    margin-bottom: 0;
+}
+
+.abandonment-cart-table thead th {
+    background: #ffffff;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #eef0f2;
+}
+
+#abandonment-detail-items td {
+    vertical-align: middle;
+}
+
+.abandonment-cart-table tfoot td {
+    background: #f5f9fc;
+    border-top: 1px solid #eef0f2;
+}
+
+.abandonment-cart-total {
+    font-weight: 800;
+    font-size: 18px;
+    color: #008bce;
+}
+
+.abandonment-cart-total-currency {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.abandonment-btn-primary {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 700;
+}
+
+.abandonment-btn-primary:hover {
+    background: #008bce;
+    color: #ffffff;
+}
+
+.abandonment-btn-primary:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+}
+
+.abandonment-btn-outline {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 13px;
+    font-weight: 600;
+}
+
+.abandonment-btn-outline:hover {
+    border-color: #008bce;
+    color: #008bce;
+}

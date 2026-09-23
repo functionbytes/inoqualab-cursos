@@ -1,4 +1,9 @@
 $(document).ready(function () {
+    // Mostrar/ocultar clave IndexNow según el toggle
+    $('#seo_indexnow_enabled').on('change', function () {
+        $('#indexNowFields').toggleClass('d-none', !this.checked);
+    });
+
     // Generar UUID para IndexNow
     $('#btn-gen-uuid').on('click', function () {
         var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

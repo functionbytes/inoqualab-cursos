@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Managers\Orders;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionOrderRequest;
 use App\Http\Requests\Managers\UpdateOrderRequest;
 use App\Models\Order\Order;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
 use App\Models\Order\OrderType;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -125,6 +127,14 @@ class OrdersController extends Controller
             ],
         ]);
 
+    }
+
+    public function bulkAction(BulkActionOrderRequest $request): JsonResponse
+    {
+        $count = Order::whereIn('id', $request->ids)->count();
+        Order::whereIn('id', $request->ids)->delete();
+
+        return response()->json(['success' => true, 'message' => $count.' orden(es) eliminada(s).']);
     }
 
     public function destroy($slack)

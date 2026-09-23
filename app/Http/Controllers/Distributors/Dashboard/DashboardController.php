@@ -2,29 +2,35 @@
 
 namespace App\Http\Controllers\Distributors\Dashboard;
 
-use App\Events\Inscriptions\InscriptionCreated;
 use App\Http\Controllers\Controller;
-use App\Models\Inscription;
-use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(): View
     {
+        $distributor = app('distributor');
 
-        $user = User::auth();
+        $enterpriseIds = $distributor->enterprises()->pluck('enterprises.id');
 
-        // $inscription = Inscription::slack('pS39LK');
-        // InscriptionCreated::dispatch($inscription);
+        $usersCount = DB::table('enterprise_user')
+            ->whereIn('enterprise_id', $enterpriseIds)
+            ->distinct('user_id')
+            ->count('user_id');
 
-        // $enterprise = $user->enterprise;
-
-        // $users = $enterprise->users()->latest()->take(10)->get();
+        $recentOrders = $distributor->ordersActititys()
+            ->descending()
+            ->with(['user', 'activity.enterprise'])
+            ->take(5)
+            ->get();
 
         return view('distributors.views.dashboard.index')->with([
-            // 'enterprises' => $enterprise,
-            // 'users' => $users,
+            'enterprisesCount' => $enterpriseIds->count(),
+            'usersCount' => $usersCount,
+            'ordersCount' => $distributor->ordersActititys()->count(),
+            'invoicesCount' => $distributor->invoices()->count(),
+            'recentOrders' => $recentOrders,
         ]);
-
     }
 }

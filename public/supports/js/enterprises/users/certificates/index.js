@@ -1,7 +1,11 @@
 $(function () {
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterCourse').val($('#modalCourse').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initCertificatesTable() {
+        FilterToolbar.init({
+            fields: { filterCourse: 'popover_Course' },
+        });
+    }
+
+    initCertificatesTable();
+
+    AjaxTable.init({ onLoaded: initCertificatesTable });
 });

@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkActionSeoMetaRequest;
+use App\Http\Requests\Managers\Seo\ImportSeoMetaJsonRequest;
+use App\Http\Requests\Managers\Seo\ImportSeoMetaRequest;
+use App\Http\Requests\Managers\Seo\InlineUpdateSeoMetaRequest;
+use App\Http\Requests\Managers\Seo\UpdateSeoMetaRequest;
 use App\Models\Blog\Blog;
 use App\Models\Bundle\Bundle;
 use App\Models\Certifier;
@@ -80,23 +85,9 @@ class SeoMetaController extends Controller
         return view('managers.views.seo.metas.edit', compact('seoMeta'));
     }
 
-    public function update(Request $request, SeoMeta $seoMeta): JsonResponse
+    public function update(UpdateSeoMetaRequest $request, SeoMeta $seoMeta): JsonResponse
     {
-        $validated = $request->validate([
-            'title' => ['nullable', 'string', 'max:70'],
-            'description' => ['nullable', 'string', 'max:170'],
-            'keywords' => ['nullable', 'string', 'max:500'],
-            'og_title' => ['nullable', 'string', 'max:95'],
-            'og_description' => ['nullable', 'string', 'max:200'],
-            'og_image' => ['nullable', 'url'],
-            'og_type' => ['nullable', 'in:website,article,product'],
-            'twitter_card' => ['nullable', 'in:summary,summary_large_image'],
-            'canonical_url' => ['nullable', 'url'],
-            'robots' => ['nullable', 'string', 'max:50'],
-            'target_keyword' => ['nullable', 'string', 'max:100'],
-            'schema_type' => ['nullable', 'string', 'max:50'],
-            'schema_custom' => ['nullable', 'json'],
-        ]);
+        $validated = $request->validated();
 
         // schema_custom llega como string JSON (regla 'json' solo valida sintaxis,
         // no decodifica). El modelo castea el atributo a 'array', así que hay que
@@ -127,29 +118,22 @@ class SeoMetaController extends Controller
         ]);
     }
 
-    public function bulkDestroy(Request $request): JsonResponse
+    public function bulkAction(BulkActionSeoMetaRequest $request): JsonResponse
     {
-        $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_metas,id'],
-        ]);
-
+        $count = SeoMeta::query()->whereIn('id', $request->input('ids'))->count();
         SeoMeta::query()->whereIn('id', $request->input('ids'))->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Registros eliminados correctamente.',
+            'message' => $count.' registro(s) meta SEO eliminado(s) correctamente.',
         ]);
     }
 
     // ── Phase 6: Inline update ────────────────────────────────────────────────────
 
-    public function inlineUpdate(Request $request, SeoMeta $seoMeta): JsonResponse
+    public function inlineUpdate(InlineUpdateSeoMetaRequest $request, SeoMeta $seoMeta): JsonResponse
     {
-        $validated = $request->validate([
-            'field' => ['required', 'string', 'in:title,description,keywords,robots,canonical_url,target_keyword,og_title,og_description,og_type,twitter_card'],
-            'value' => ['nullable', 'string', 'max:500'],
-        ]);
+        $validated = $request->validated();
 
         $seoMeta->update([$validated['field'] => $validated['value'] ?: null]);
 
@@ -206,13 +190,8 @@ class SeoMetaController extends Controller
         return view('managers.views.seo.metas.import');
     }
 
-    public function import(Request $request): RedirectResponse
+    public function import(ImportSeoMetaRequest $request): RedirectResponse
     {
-        $request->validate([
-            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:10240'],
-            'update_existing' => ['boolean'],
-        ]);
-
         $handle = fopen($request->file('csv_file')->getPathname(), 'r');
 
         $bom = fread($handle, 3);
@@ -338,13 +317,8 @@ class SeoMetaController extends Controller
         return view('managers.views.seo.metas.import-json');
     }
 
-    public function importJson(Request $request): RedirectResponse
+    public function importJson(ImportSeoMetaJsonRequest $request): RedirectResponse
     {
-        $request->validate([
-            'json_file' => ['required', 'file', 'mimes:json,txt', 'max:51200'],
-            'skip_existing' => ['boolean'],
-        ]);
-
         $content = file_get_contents($request->file('json_file')->getPathname());
         $data = json_decode($content, true);
 

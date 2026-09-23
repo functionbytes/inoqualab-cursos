@@ -48,7 +48,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'invoices.view', 'invoices.create', 'invoices.update',
             'orders.view', 'orders.update',
             'distributors.view', 'enterprises.view', 'analytics.view',
-            'dashboard.view', 'profile.view', 'profile.update',
+            'dashboard.view', 'profile.view', 'profile.update', 'notifications.view',
         ],
         'support' => [
             'users.*', 'contacts.*', 'faqs.*', 'instructions.*', 'documents.*',
@@ -67,12 +67,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'enterprises.*', 'staff.*',
             'registers.*', 'orders.view', 'invoices.view',
             'settings.view', 'settings.update',
-            'dashboard.view', 'certificates.view',
+            'dashboard.view', 'certificates.view', 'notifications.view',
         ],
         'enterprise' => [
             'courses.view', 'users.view', 'users.update', 'inscriptions.view',
             'certificates.view', 'staff.view', 'documents.view', 'enterprises.view', 'enterprises.update',
-            'dashboard.view', 'profile.view', 'profile.update',
+            'dashboard.view', 'profile.view', 'profile.update', 'notifications.view',
         ],
         'customer' => [
             'courses.view', 'orders.view', 'invoices.view', 'quizzes.view',

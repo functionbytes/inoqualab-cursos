@@ -2,3 +2,45 @@
     font-size: 0.72rem;
     white-space: pre-wrap;
 }
+
+/* #urls-input (id, no la clase) para ganarle en especificidad a la regla
+   global "textarea.form-control { min-height: ... }" de style.css. */
+#urls-input.indexnow-urls-input {
+    min-height: 420px;
+    height: 420px;
+    font-size: 0.9rem;
+}
+
+/* .btn-primary queda oscuro (#081A28) por theme.css, que sobreescribe
+   --bs-primary (#008bce) definido en style.css. Este botón puntual debe
+   verse azul, asi que se fija el color aqui en vez de en btn-primary global. */
+.btn-seo-config {
+    background-color: #008bce;
+    border-color: #008bce;
+}
+
+.btn-seo-config:hover,
+.btn-seo-config:focus {
+    background-color: #0077ae;
+    border-color: #0077ae;
+}
+
+#urls-counter.indexnow-counter--over {
+    color: #b10100;
+    font-weight: 600;
+}
+
+.indexnow-validation-box {
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.indexnow-validation-box--blocking {
+    background: #fbe9e9;
+    color: #b10100;
+}
+
+.indexnow-validation-box--warning {
+    background: #eef1f5;
+    color: #5a7093;
+}

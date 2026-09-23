@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionLessonRequest;
+use App\Http\Requests\Managers\Courses\ReorderLessonRequest;
 use App\Http\Requests\Managers\Courses\StoreLessonRequest;
 use App\Http\Requests\Managers\Courses\UpdateLessonRequest;
 use App\Models\Course\Course;
@@ -278,16 +280,9 @@ class LessonsController extends Controller
         return back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionLessonRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:course_lessons,id'],
-        ]);
-
-        $permission = $data['action'] === 'delete' ? 'lessons.delete' : 'lessons.update';
-        abort_unless(auth()->user()->can($permission), 403);
+        $data = $request->validated();
 
         $lessons = CourseLesson::whereIn('id', $data['ids'])->get();
         $count = $lessons->count();
@@ -311,14 +306,9 @@ class LessonsController extends Controller
      * orden y permuta entre ellos las posiciones que ya ocupaban, para no
      * alterar el resto de páginas.
      */
-    public function reorder(Request $request): JsonResponse
+    public function reorder(ReorderLessonRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('lessons.update'), 403);
-
-        $data = $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer'],
-        ]);
+        $data = $request->validated();
 
         $first = CourseLesson::find($data['ids'][0]);
         if (! $first) {

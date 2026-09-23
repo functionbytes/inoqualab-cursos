@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Managers\Enterprises;
 use App\Exports\Managers\IncomesExport;
 use App\Exports\Managers\UsersExport;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
+use App\Http\Controllers\Concerns\ValidatesUserPassword;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\BulkActionEnterpriseUserRequest;
 use App\Http\Requests\Managers\Enterprises\ImportUsersRequest;
 use App\Imports\Managers\UsersImport;
 use App\Models\Enterprise\Enterprise;
@@ -21,7 +23,7 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class UserController extends Controller
 {
-    use RestrictsManageableUsers;
+    use RestrictsManageableUsers, ValidatesUserPassword;
 
     public function index(Request $request, $slack)
     {
@@ -34,7 +36,12 @@ class UserController extends Controller
         $users = $enterprise->users()->orderBy('users.updated_at', 'desc');
 
         if ($searchKey) {
-            $users = $users->where('users.firstname', 'like', '%'.$searchKey.'%')->orWhere('users.lastname', 'like', '%'.$searchKey.'%')->orWhere('users.email', $searchKey)->orWhere('users.identification', $searchKey);
+            $users = $users->where(function ($query) use ($searchKey) {
+                $query->where('users.firstname', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
+                    ->orWhere('users.email', $searchKey)
+                    ->orWhere('users.identification', $searchKey);
+            });
         }
 
         if ($available != null) {
@@ -114,6 +121,10 @@ class UserController extends Controller
             if ($identificationExists) {
                 return response()->json(['success' => false, 'message' => 'El nit ya estan regitrada en nuestro sistema']);
             }
+        }
+
+        if ($error = $this->passwordValidationError($request->password)) {
+            return response()->json(['success' => false, 'message' => $error]);
         }
 
         DB::transaction(function () use ($request, $user) {
@@ -209,16 +220,8 @@ class UserController extends Controller
         ]);
     }
 
-    public function bulkAction(Request $request, $slack): JsonResponse
+    public function bulkAction(BulkActionEnterpriseUserRequest $request, $slack): JsonResponse
     {
-        abort_unless(auth()->user()->can('enterprises.update'), 403);
-
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
         $enterprise = Enterprise::slack($slack);
 
         // Acotado a los ids que realmente pertenecen a esta empresa (mismo

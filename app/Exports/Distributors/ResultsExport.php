@@ -2,6 +2,7 @@
 
 namespace App\Exports\Distributors;
 
+use App\Models\Exam\ExamAnswer;
 use App\Models\Exam\ExamQuestion;
 use Illuminate\Contracts\Support\Responsable;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -29,7 +30,11 @@ class ResultsExport implements FromQuery, Responsable, WithHeadings, WithMapping
 
     public function query()
     {
-        return $this->exam?->answers();
+        // Certificados sin examen asociado (exam_id null, 4 casos reales):
+        // $this->exam?->answers() da null y Maatwebsite\Excel revienta con
+        // "__clone method called on non-object". Query que nunca matchea en
+        // vez de null, para que el archivo se descargue vacío.
+        return $this->exam?->answers() ?? ExamAnswer::whereRaw('1 = 0');
     }
 
     public function map($row): array

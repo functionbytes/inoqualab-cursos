@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionAnnouncementRequest;
+use App\Http\Requests\Managers\Courses\StoreAnnouncementRequest;
+use App\Http\Requests\Managers\Courses\UpdateAnnouncementRequest;
 use App\Models\Course\Course;
 use App\Models\Course\CourseAnnouncement;
 use Illuminate\Http\JsonResponse;
@@ -41,23 +44,22 @@ class AnnouncementsController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreAnnouncementRequest $request)
     {
-        abort_unless(auth()->user()->can('courses.create'), 403);
-
-        $course = Course::slack($request->course);
+        $data = $request->validated();
+        $course = Course::slack($data['course']);
         $announcement = new CourseAnnouncement;
         $announcement->slack = $this->generate_slack('course_announcements');
-        $announcement->title = $request->title;
-        $announcement->description = $request->description;
+        $announcement->title = $data['title'];
+        $announcement->description = $data['description'] ?? null;
         $announcement->course_id = $course->id;
         $announcement->user_id = auth()->id();
-        $announcement->available = $request->available;
+        $announcement->available = $data['available'] ?? null;
         $announcement->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creado la anuncio correctamente',
+            'message' => 'Se creó el anuncio correctamente',
         ]);
 
     }
@@ -77,20 +79,19 @@ class AnnouncementsController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateAnnouncementRequest $request)
     {
-        abort_unless(auth()->user()->can('courses.update'), 403);
-
-        $announcement = CourseAnnouncement::slack($request->slack);
-        $announcement->title = $request->title;
-        $announcement->description = $request->description;
+        $data = $request->validated();
+        $announcement = CourseAnnouncement::slack($data['slack']);
+        $announcement->title = $data['title'];
+        $announcement->description = $data['description'] ?? null;
         $announcement->user_id = auth()->id();
-        $announcement->available = $request->available;
+        $announcement->available = $data['available'] ?? null;
         $announcement->update();
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo el anuncio correctamente',
+            'message' => 'Se actualizó el anuncio correctamente',
         ]);
 
     }
@@ -104,17 +105,8 @@ class AnnouncementsController extends Controller
         return back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionAnnouncementRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:course_announcements,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = CourseAnnouncement::whereIn('id', $request->ids);
         $count = $query->count();
 

@@ -138,4 +138,26 @@ class SeoManagementTest extends TestCase
 
         $this->assertTrue($a->fresh()->is_active);
     }
+
+    public function test_manager_can_bulk_deactivate_templates(): void
+    {
+        $a = SeoTemplate::create(['name' => 'A', 'is_active' => true, 'priority' => 1]);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.seo.templates.bulk-action'), ['action' => 'deactivate', 'ids' => [$a->id]])
+            ->assertOk();
+
+        $this->assertFalse($a->fresh()->is_active);
+    }
+
+    public function test_bulk_action_rejects_invalid_action_on_templates(): void
+    {
+        $a = SeoTemplate::create(['name' => 'A', 'is_active' => true, 'priority' => 1]);
+
+        $this->actingAs($this->manager)
+            ->postJson(route('manager.seo.templates.bulk-action'), ['action' => 'archive', 'ids' => [$a->id]])
+            ->assertUnprocessable();
+
+        $this->assertDatabaseCount('seo_templates', 1);
+    }
 }

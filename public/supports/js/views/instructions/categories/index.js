@@ -2,17 +2,21 @@ $(function () {
 
     var bulkUrl = $('#instructions-categories-list').data('bulk-url');
 
-    // ── Filters modal ────────────────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initInstructionsCategoriesTable() {
+        // ── Filtros (popover) ────────────────────────────────────────────────
+        FilterToolbar.init({
+            fields: { filterAvailable: 'popover_available' },
+        });
 
-    // ── Bulk selection ───────────────────────────────────────────────────────
-    BulkActions.init({
-        url: bulkUrl,
-        entityLabel: 'categoría(s)',
-    });
+        // ── Bulk selection ───────────────────────────────────────────────────
+        BulkActions.init({
+            url: bulkUrl,
+            entityLabel: 'categoría(s)',
+        });
+    }
+
+    initInstructionsCategoriesTable();
+
+    AjaxTable.init({ onLoaded: initInstructionsCategoriesTable });
 
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Sliders\BulkActionSliderRequest;
 use App\Http\Requests\Managers\Settings\Sliders\StoreSliderRequest;
 use App\Http\Requests\Managers\Settings\Sliders\UpdateSliderRequest;
 use App\Models\Slider;
@@ -105,7 +106,7 @@ class SlidersController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $slider->slack,
-            'message' => 'Se creo el slider correctamente',
+            'message' => 'Se creó el slider correctamente',
         ]);
 
     }
@@ -127,7 +128,7 @@ class SlidersController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $slider->slack,
-            'message' => 'Se actualizo el slider correctamente',
+            'message' => 'Se actualizó el slider correctamente',
         ]);
 
     }
@@ -143,17 +144,8 @@ class SlidersController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionSliderRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:sliders,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'sliders.delete' : 'sliders.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Slider::whereIn('id', $request->ids);
         $count = $query->count();
 

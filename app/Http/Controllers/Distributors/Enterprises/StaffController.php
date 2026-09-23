@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Distributors\Enterprises;
 
+use App\Http\Controllers\Concerns\ValidatesUserPassword;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Distributors\Enterprises\BulkActionEnterpriseStaffRequest;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseStaff;
 use App\Models\User;
@@ -14,6 +16,8 @@ use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
+    use ValidatesUserPassword;
+
     /** Empresa que pertenece al distribuidor autenticado, o 404 (evita IDOR). */
     private function managedEnterprise(?string $slack): Enterprise
     {
@@ -128,6 +132,10 @@ class StaffController extends Controller
             return response()->json(['success' => false, 'message' => 'La identificación ya está registrada en nuestro sistema.']);
         }
 
+        if ($error = $this->passwordValidationError($request->password)) {
+            return response()->json(['success' => false, 'message' => $error]);
+        }
+
         $user->firstname = Str::upper($request->firstname);
         $user->lastname = Str::upper($request->lastname);
         $user->cellphone = $request->cellphone;
@@ -167,7 +175,9 @@ class StaffController extends Controller
             $user->cellphone = $request->cellphone;
             $user->identification = $request->identification;
             $user->email = $request->email;
-            $user->password = $request->password;
+            // Sin password explícita, un valor aleatorio (no la identificación,
+            // un dato semi-público) — el cliente la establece vía "olvidé mi contraseña".
+            $user->password = $request->filled('password') ? $request->password : Str::random(16);
             $user->available = 1;
             $user->role = 'enterprise';
             $user->terms = 1;
@@ -199,14 +209,8 @@ class StaffController extends Controller
 
     }
 
-    public function bulkAction(Request $request, $slack): JsonResponse
+    public function bulkAction(BulkActionEnterpriseStaffRequest $request, $slack): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
         // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
         $enterprise = $this->managedEnterprise($slack);
 

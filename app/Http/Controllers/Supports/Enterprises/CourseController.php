@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Enterprises;
 
 use App\Exports\Supports\CoursesExport;
+use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
@@ -16,16 +17,23 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CourseController extends Controller
 {
+    use RestrictsManageableUsers;
+
     public function index(Request $request, $slack)
     {
 
         $searchKey = $request->search;
+        $available = $request->available;
         $enterprise = Enterprise::slack($slack);
 
         $courses = $enterprise->courses();
 
         if ($searchKey != null) {
             $courses = $courses->where('title', 'like', '%'.$searchKey.'%');
+        }
+
+        if ($available != null) {
+            $courses = $courses->where('courses.available', $available);
         }
 
         $courses = $courses->paginate(paginationNumber());
@@ -46,10 +54,13 @@ class CourseController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.enterprises.courses.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.courses._table' : 'supports.views.enterprises.courses.index';
+
+        return view($view)->with([
             'enterprise' => $enterprise,
             'courses' => $courses,
             'searchKey' => $searchKey,
+            'available' => $available,
             'stats' => $stats,
         ]);
 
@@ -132,8 +143,10 @@ class CourseController extends Controller
     {
 
         $inscription = Inscription::slack($slack);
+        // Mismo guard que el resto del portal: sin esto, cualquier soporte
+        // podía ver el progreso de un manager/support enumerando el slack.
+        $user = $this->guardManageableUser($inscription->user);
         $progress = $inscription->progress;
-        $user = $inscription->user;
         $course = $inscription->course;
         // with('chapter'): la vista agrupa por chapter_id y muestra
         // $chapter->title por lección -- sin esto es una query extra por
@@ -248,8 +261,10 @@ class CourseController extends Controller
     {
 
         $inscription = Inscription::slack($slack);
+        // Mismo guard que progress(): sin esto, cualquier soporte podía ver
+        // el detalle de una inscripción de un manager/support por slack.
+        $user = $this->guardManageableUser($inscription->user);
         $progress = $inscription->progress;
-        $user = $inscription->user;
         $course = $inscription->course;
         $class = $course->lessons;
 

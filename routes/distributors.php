@@ -10,6 +10,7 @@ use App\Http\Controllers\Distributors\Enterprises\UserController as EnterpriseUs
 use App\Http\Controllers\Distributors\Inscriptions\InscriptionsController;
 use App\Http\Controllers\Distributors\Inscriptions\InscriptionsMassivesController;
 use App\Http\Controllers\Distributors\Invoices\InvoicesController;
+use App\Http\Controllers\Distributors\NotificationsController;
 use App\Http\Controllers\Distributors\Orders\OrdersController;
 use App\Http\Controllers\Distributors\Orders\ReportController as OrdersReportController;
 use App\Http\Controllers\Distributors\Orders\ResumenController as OrdersResumenController;
@@ -22,6 +23,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'distributor', 'middleware' => ['auth', 'distributor', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('distributor.dashboard');
+
+    Route::group(['prefix' => 'notifications'], function () {
+
+        Route::get('/', [NotificationsController::class, 'index'])->name('distributor.notifications');
+        Route::get('/mark-as-read', [NotificationsController::class, 'markasread'])->name('distributor.notifications.markasread');
+
+    });
 
     Route::group(['prefix' => 'settings'], function () {
 

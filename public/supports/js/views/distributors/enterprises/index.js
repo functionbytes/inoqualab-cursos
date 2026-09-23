@@ -6,14 +6,18 @@ $(function () {
         toastr.success(flashSuccess);
     }
 
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initDistributorEnterprisesTable() {
+        FilterToolbar.init({
+            fields: { filterAvailable: 'popover_Available' },
+        });
 
-    BulkActions.init({
-        url: $container.data('bulkUrl'),
-        entityLabel: $container.data('bulkEntityLabel'),
-    });
+        BulkActions.init({
+            url: $container.data('bulkUrl'),
+            entityLabel: $container.data('bulkEntityLabel'),
+        });
+    }
+
+    initDistributorEnterprisesTable();
+
+    AjaxTable.init({ onLoaded: initDistributorEnterprisesTable });
 });

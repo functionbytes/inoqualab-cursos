@@ -3,13 +3,17 @@ $(function () {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     var $config = $('#audit-history-config');
 
-    // ── Bulk selection ────────────────────────────────────────────────────────
+    // ── Bulk selection + filtros ─────────────────────────────────────────────
     // Se re-ejecuta tras cada carga AJAX (buscar/filtrar/paginar) porque el
-    // checkbox #select-all vive dentro de #ajax-table-root y se recrea.
+    // checkbox #select-all y el popover de filtros viven dentro de
+    // #ajax-table-root y se recrean.
     function initHistoryTable() {
         BulkActions.init({
             url: $config.data('bulk-url'),
             entityLabel: 'auditoría(s)',
+        });
+        FilterToolbar.init({
+            fields: { filterGrade: 'popover_Grade' },
         });
     }
 

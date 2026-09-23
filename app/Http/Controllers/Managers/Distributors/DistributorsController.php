@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\BulkActionDistributorRequest;
 use App\Http\Requests\Managers\Distributors\StoreDistributorRequest;
 use App\Http\Requests\Managers\Distributors\UpdateDistributorRequest;
 use App\Models\Distributor\Distributor;
@@ -89,9 +90,14 @@ class DistributorsController extends Controller
 
         if ($distributor->email != $data['email'] || $distributor->nit != $data['nit']) {
 
-            $existingDistributor = Distributor::where('email', $data['email'])
-                ->orWhere('nit', $data['nit'])
-                ->first();
+            // Agrupado en closure: sin él, el orWhere() de nit queda a nivel
+            // superior y por precedencia de operadores escapa del whereNull
+            // deleted_at del scope de SoftDeletes -- un distribuidor
+            // soft-deleted que matcheara por nit se recuperaba igual.
+            $existingDistributor = Distributor::where(function ($query) use ($data) {
+                $query->where('email', $data['email'])
+                    ->orWhere('nit', $data['nit']);
+            })->first();
 
             if ($existingDistributor) {
                 if ($existingDistributor->email == $data['email'] && $distributor->email != $data['email']) {
@@ -174,17 +180,8 @@ class DistributorsController extends Controller
         return redirect()->route('manager.distributors');
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(BulkActionDistributorRequest $request)
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:distributors,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'distributors.delete' : 'distributors.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Distributor::whereIn('id', $request->ids);
         $count = $query->count();
 
@@ -202,8 +199,16 @@ class DistributorsController extends Controller
 
         $distributor = Distributor::slack($slack);
 
+        $counts = [
+            'enterprises' => $distributor->enterprises()->count(),
+            'staffs' => $distributor->staffs()->count(),
+            'courses' => $distributor->courses()->count(),
+            'rates' => $distributor->rates()->count(),
+        ];
+
         return view('managers.views.distributors.distributors.navegation')->with([
             'distributor' => $distributor,
+            'counts' => $counts,
         ]);
 
     }

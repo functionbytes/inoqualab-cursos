@@ -5,40 +5,43 @@ $(function () {
     var authUserId = config.authUserId || null;
     var csrfToken  = $('meta[name="csrf-token"]').attr('content');
 
-    // ── Gráfica de actividad (DevExpress) ─────────────────────────────────────
-    // DevExpress no está incluido en el proyecto (sin librería ni licencia):
-    // llamar dxChart directamente revienta y corta el resto de este script
-    // (daterange picker, filtros, selector de por página, auto-refresh...).
-    if ($.fn.dxChart) {
-        var chartData = config.chartData;
-        $('#mails-activity-chart').dxChart({
-            dataSource: chartData,
-            commonSeriesSettings: { argumentField: 'date', type: 'bar' },
-            series: [
-                { valueField: 'received',  name: 'Recibidos',  color: '#adb5bd' },
-                { valueField: 'processed', name: 'Procesados', color: '#28a745' },
-                { valueField: 'failed',    name: 'Fallidos',   color: '#dc3545' },
-                { valueField: 'pending',   name: 'Pendientes', color: '#ffc107' },
-            ],
-            argumentAxis: {
-                label: {
-                    customizeText: function (e) {
-                        var d = new Date(e.value + 'T00:00:00');
-                        return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
-                    }
-                }
-            },
-            valueAxis: { allowDecimals: false },
-            legend: { verticalAlignment: 'bottom', horizontalAlignment: 'center', itemTextPosition: 'right' },
-            tooltip: { enabled: true, shared: true },
-            barGroupPadding: 0.2,
+    // ── Gráfica de actividad (ApexCharts) ─────────────────────────────────────
+    if (window.ApexCharts && $('#mails-activity-chart').length) {
+        var chartData = config.chartData || [];
+        var categories = chartData.map(function (d) {
+            var date = new Date(d.date + 'T00:00:00');
+            return date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' });
         });
+
+        var chartOptions = {
+            series: [
+                { name: 'Recibidos',  data: chartData.map(function (d) { return d.received; }) },
+                { name: 'Procesados', data: chartData.map(function (d) { return d.processed; }) },
+                { name: 'Fallidos',   data: chartData.map(function (d) { return d.failed; }) },
+                { name: 'Pendientes', data: chartData.map(function (d) { return d.pending; }) },
+            ],
+            colors: ['#cbd5e1', '#008bce', '#0f172a', '#64748b'],
+            chart: { type: 'bar', height: 280, toolbar: { show: false }, fontFamily: "Plus Jakarta Sans', sans-serif" },
+            plotOptions: { bar: { borderRadius: 4, columnWidth: '65%' } },
+            dataLabels: { enabled: false },
+            grid: { borderColor: 'rgba(0,0,0,0.08)', strokeDashArray: 3, xaxis: { lines: { show: false } } },
+            xaxis: { categories: categories, axisBorder: { show: false } },
+            yaxis: { allowDecimals: false },
+            legend: { position: 'bottom', horizontalAlign: 'center' },
+            tooltip: { shared: true, intersect: false },
+        };
+
+        new ApexCharts(document.querySelector('#mails-activity-chart'), chartOptions).render();
     }
 
     // ── Daterange picker ───────────────────────────────────────────────────────
     if ($('#daterange').length) {
         $('#daterange').daterangepicker({
             autoUpdateInput: false,
+            // Ancla el calendario dentro del popover de filtros: si se
+            // renderizara en <body> (default), un click en una fecha se
+            // interpretaria como "click afuera" y cerraria el popover.
+            parentEl: '#filters-popover',
             locale: {
                 format: 'YYYY-MM-DD', separator: ' - ',
                 applyLabel: 'Aplicar', cancelLabel: 'Limpiar',
@@ -59,9 +62,9 @@ $(function () {
         });
     }
 
-    // ── Select2 AJAX para empresa en filters modal ────────────────────────────
+    // ── Select2 AJAX para empresa en el popover de filtros ────────────────────
     $('#modalEnterprise').select2({
-        dropdownParent: $('#filters-modal'),
+        dropdownParent: $('#filters-popover'),
         placeholder: 'Todas las empresas',
         allowClear: true,
         ajax: {
@@ -74,14 +77,14 @@ $(function () {
         }
     });
 
-    // ── Aplicar filtros del modal ─────────────────────────────────────────────
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterStatus').val($('#modalStatus').val());
-        $('#filterEnterprise').val($('#modalEnterprise').val());
-        $('#filterConfidence').val($('#modalConfidence').val());
-        $('#filterAssignedTo').val($('#modalAssignedTo').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
+    // ── Filtros (popover) ───────────────────────────────────────────────────
+    FilterToolbar.init({
+        fields: {
+            filterStatus: 'popover_status',
+            filterEnterprise: 'modalEnterprise',
+            filterConfidence: 'popover_confidence',
+            filterAssignedTo: 'popover_assignedTo',
+        },
     });
 
     // ── Per-page selector ─────────────────────────────────────────────────────

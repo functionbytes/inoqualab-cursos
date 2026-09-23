@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Managers\Instructions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Instructions\BulkActionInstructionCategoryRequest;
 use App\Http\Requests\Managers\Instructions\StoreInstructionCategoryRequest;
+use App\Http\Requests\Managers\Instructions\UpdateInstructionCategoryRequest;
 use App\Models\Instruction\InstructionCategorie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,10 +66,8 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateInstructionCategoryRequest $request)
     {
-        abort_unless(auth()->user()->can('instructions.update'), 403);
-
         $categorie = InstructionCategorie::slack($request->slack);
         $categorie->title = $request->title;
         $categorie->icon = $request->icon;
@@ -78,7 +78,7 @@ class CategoriesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $categorie->slack,
-            'message' => 'Se actualizado la categoria correctamente',
+            'message' => 'Se actualizó la categoría correctamente',
         ]);
 
     }
@@ -98,7 +98,7 @@ class CategoriesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $categorie->slack,
-            'message' => 'Se creado la categoria correctamente',
+            'message' => 'Se creó la categoría correctamente',
         ]);
 
     }
@@ -114,17 +114,8 @@ class CategoriesController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionInstructionCategoryRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:instruction_categories,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'instructions.delete' : 'instructions.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = InstructionCategorie::whereIn('id', $request->ids);
         $count = $query->count();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Instructions;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Instructions\BulkActionInstructionRequest;
 use App\Http\Requests\Managers\Instructions\StoreInstructionRequest;
 use App\Http\Requests\Managers\Instructions\UpdateInstructionRequest;
 use App\Models\Instruction\Instruction;
@@ -90,7 +91,7 @@ class InstructionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $instruction->slack,
-            'message' => 'Se creo la instrucción correctamente',
+            'message' => 'Se creó la instrucción correctamente',
         ]);
 
     }
@@ -110,7 +111,7 @@ class InstructionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $instruction->slack,
-            'message' => 'Se actualizado la instrucción correctamente',
+            'message' => 'Se actualizó la instrucción correctamente',
         ]);
 
     }
@@ -125,17 +126,8 @@ class InstructionsController extends Controller
         return redirect()->back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionInstructionRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:instructions,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'instructions.delete' : 'instructions.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Instruction::whereIn('id', $request->ids);
         $count = $query->count();
 

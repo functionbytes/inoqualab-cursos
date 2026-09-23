@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Settings\Documents\BulkActionDocumentRequest;
 use App\Http\Requests\Managers\Settings\Documents\StoreDocumentRequest;
 use App\Http\Requests\Managers\Settings\Documents\UpdateDocumentRequest;
 use App\Models\Document;
@@ -79,7 +80,7 @@ class DocumentsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $document->slack,
-            'message' => 'Se actualizo el documento correctamente',
+            'message' => 'Se actualizó el documento correctamente',
         ]);
 
     }
@@ -98,7 +99,7 @@ class DocumentsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $document->slack,
-            'message' => 'Se creo el documento correctamente',
+            'message' => 'Se creó el documento correctamente',
         ]);
 
     }
@@ -113,17 +114,8 @@ class DocumentsController extends Controller
         return redirect()->route('manager.documents');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDocumentRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:documents,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'documents.delete' : 'documents.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Document::whereIn('id', $request->ids);
         $count = $query->count();
 

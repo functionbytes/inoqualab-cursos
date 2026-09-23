@@ -23,6 +23,7 @@ class EmailsSettingsController extends Controller
         $data['imap_password'] = $request->imap_password;
         $data['imap_encryption'] = $request->imap_encryption;
 
+        $data['mail_status'] = $request->has('mail_status') ? 'true' : 'false';
         $data['mail_host'] = $request->mail_host;
         $data['mail_port'] = $request->mail_port;
         $data['mail_encryption'] = $request->mail_encryption;

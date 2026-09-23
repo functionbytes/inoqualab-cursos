@@ -5,3 +5,7 @@
 .quizs-col-checkbox {
     width: 40px;
 }
+
+.quizs-title-normal {
+    text-transform: none !important;
+}

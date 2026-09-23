@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkGenerateSeoOrphanRequest;
+use App\Http\Requests\Managers\Seo\GenerateSeoOrphanRequest;
 use App\Models\Blog\Blog;
 use App\Models\Bundle\Bundle;
 use App\Models\Certifier;
@@ -116,13 +118,10 @@ class SeoOrphanController extends Controller
         return view('managers.views.seo.orphans.index', compact('orphans', 'counts', 'total'));
     }
 
-    public function generate(Request $request): JsonResponse
+    public function generate(GenerateSeoOrphanRequest $request): JsonResponse
     {
 
-        $validated = $request->validate([
-            'model_class' => ['required', 'string'],
-            'model_id' => ['required', 'integer'],
-        ]);
+        $validated = $request->validated();
 
         $modelClass = $validated['model_class'];
         $modelId = (int) $validated['model_id'];
@@ -162,14 +161,8 @@ class SeoOrphanController extends Controller
         ]);
     }
 
-    public function bulkGenerate(Request $request): JsonResponse
+    public function bulkGenerate(BulkGenerateSeoOrphanRequest $request): JsonResponse
     {
-
-        $request->validate([
-            'items' => ['nullable', 'array'],
-            'items.*.model_class' => ['required_with:items', 'string'],
-            'items.*.model_id' => ['required_with:items', 'integer'],
-        ]);
 
         // Sin items = generar para todos los modelos huérfanos
         $items = $request->input('items');

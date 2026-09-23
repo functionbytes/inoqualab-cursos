@@ -161,3 +161,29 @@
    borde queda transparente. Uso real bajo (2 archivos) pero mismo costo. */
 .border-success { border-color: #0a6ca0 !important; }
 .border-danger  { border-color: #c1594c !important; }
+
+/* Boton "Acciones" del header de listados (mails, activity, newsletter,
+   newsletter/campaigns, seo/metas): icono cuadrado gris en vez de boton
+   con texto + caret, mismo tamano/forma que los botones icon-only ya
+   usados en el buscador de las tablas (.btn-icon). */
+.btn-actions-icon {
+    background-color: #5b7285 !important;
+    border-color: #5b7285 !important;
+    color: #fff !important;
+}
+
+.btn-actions-icon:hover,
+.btn-actions-icon:focus,
+.btn-actions-icon:active {
+    background-color: #4f6672 !important;
+    border-color: #4f6672 !important;
+    color: #fff !important;
+}
+
+/* Badge "ACTIVO" del modo de prueba en panel/settings/incoming-mail: rojo
+   de marca en vez de bg-danger/bg-primary (mismo tono que .badge.bg-danger
+   de arriba, como clase aparte para no heredar cambios futuros de esa regla). */
+.badge-brand-danger {
+    background-color: #b10100 !important;
+    color: #fff !important;
+}

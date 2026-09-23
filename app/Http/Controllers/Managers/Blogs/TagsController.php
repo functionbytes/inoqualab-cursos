@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\BulkActionBlogTagRequest;
 use App\Http\Requests\Managers\Blogs\StoreBlogTagRequest;
 use App\Http\Requests\Managers\Blogs\UpdateBlogTagRequest;
 use App\Models\Blog\BlogTag;
@@ -81,7 +82,7 @@ class TagsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo la etiqueta correctamente',
+            'message' => 'Se actualizó la etiqueta correctamente',
         ]);
 
     }
@@ -99,7 +100,7 @@ class TagsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creo la etiqueta correctamente',
+            'message' => 'Se creó la etiqueta correctamente',
         ]);
 
     }
@@ -113,17 +114,8 @@ class TagsController extends Controller
         return redirect()->route('manager.blogs.tags');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionBlogTagRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:blog_tags,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'blogs.delete' : 'blogs.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = BlogTag::whereIn('id', $request->ids);
         $count = $query->count();
 

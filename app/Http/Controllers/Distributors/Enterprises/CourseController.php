@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Distributors\Enterprises;
 
 use App\Exports\Distributors\CoursesExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Distributors\Enterprises\BulkActionEnterpriseCourseRequest;
 use App\Models\Course\Course;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseCourse;
@@ -254,14 +255,8 @@ class CourseController extends Controller
         return redirect()->route('distributor.enterprises.courses', $enterprise->slack);
     }
 
-    public function bulkAction(Request $request, $slack): JsonResponse
+    public function bulkAction(BulkActionEnterpriseCourseRequest $request, $slack): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:courses,id'],
-        ]);
-
         // Ownership: la empresa debe pertenecer al distribuidor (evita IDOR por slack).
         $enterprise = $this->managedEnterprise($slack);
 

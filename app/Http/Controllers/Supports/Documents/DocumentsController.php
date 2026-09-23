@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Documents;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkActionDocumentRequest;
 use App\Http\Requests\Supports\StoreDocumentRequest;
 use App\Http\Requests\Supports\UpdateDocumentRequest;
 use App\Models\Document;
@@ -45,7 +46,9 @@ class DocumentsController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.documents.index')->with([
+        $view = $request->ajax() ? 'supports.views.documents._table' : 'supports.views.documents.index';
+
+        return view($view)->with([
             'documents' => $documents,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -137,14 +140,8 @@ class DocumentsController extends Controller
         return redirect()->route('support.documents');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDocumentRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:documents,id'],
-        ]);
-
         $query = Document::whereIn('id', $request->ids);
         $count = $query->count();
 

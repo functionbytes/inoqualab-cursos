@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkActionDistributorEnterpriseRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorEnterprise;
 use App\Models\Enterprise\Enterprise;
@@ -62,7 +63,9 @@ class EnterpriseController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.distributors.enterprises.index')->with([
+        $view = $request->ajax() ? 'supports.views.distributors.enterprises._table' : 'supports.views.distributors.enterprises.index';
+
+        return view($view)->with([
             'distributor' => $distributor,
             'enterprises' => $enterprises,
             'searchKey' => $searchKey,
@@ -77,7 +80,11 @@ class EnterpriseController extends Controller
 
         $distributor = Distributor::slack($slack);
 
-        $enterprise = $distributor->enterprises;
+        // Form::select() compara el 3er parámetro contra las keys (id) de
+        // $enterprises para marcar las opciones seleccionadas: pasar la
+        // Collection de modelos Eloquent tal cual nunca preseleccionaba nada,
+        // aunque el sidebar prometiera "aparecen preseleccionadas".
+        $enterprise = $distributor->enterprises->pluck('id')->toArray();
 
         $enterprises = Enterprise::available()->get();
         $enterprises = $enterprises->pluck('title', 'id');
@@ -98,7 +105,7 @@ class EnterpriseController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->exists()) {
+        if (Enterprise::withTrashed()->where('nit', $request->nit)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
@@ -146,14 +153,8 @@ class EnterpriseController extends Controller
         return redirect()->route('support.distributors.enterprises', $distributor->slack);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDistributorEnterpriseRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:enterprises,id'],
-        ]);
-
         $query = Enterprise::whereIn('id', $request->ids);
         $count = $query->count();
 
@@ -212,7 +213,7 @@ class EnterpriseController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $request->nit)->where('id', '!=', $enterprise->id)->exists()) {
+        if (Enterprise::withTrashed()->where('nit', $request->nit)->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 

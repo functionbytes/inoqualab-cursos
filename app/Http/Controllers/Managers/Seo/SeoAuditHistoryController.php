@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkActionSeoAuditLogRequest;
 use App\Models\Seo\SeoAuditLog;
 use App\Models\Seo\SeoMeta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SeoAuditHistoryController extends Controller
@@ -55,14 +55,8 @@ class SeoAuditHistoryController extends Controller
         return view('managers.views.seo.audit.meta-history', compact('logs', 'seoMeta'));
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionSeoAuditLogRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'string', Rule::in(['delete'])],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_audit_logs,id'],
-        ]);
-
         $count = SeoAuditLog::whereIn('id', $request->input('ids'))->delete();
 
         return response()->json(['success' => true, 'count' => $count, 'message' => $count.' entrada(s) eliminadas.']);

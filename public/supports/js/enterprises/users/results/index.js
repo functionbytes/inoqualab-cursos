@@ -1,8 +1,11 @@
 $(function () {
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterYear').val($('#modalYear').val());
-        $('#filterCourse').val($('#modalCourse').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initResultsTable() {
+        FilterToolbar.init({
+            fields: { filterYear: 'popover_Year', filterCourse: 'popover_Course' },
+        });
+    }
+
+    initResultsTable();
+
+    AjaxTable.init({ onLoaded: initResultsTable });
 });

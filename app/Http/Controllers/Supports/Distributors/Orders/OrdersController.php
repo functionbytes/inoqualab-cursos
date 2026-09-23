@@ -88,7 +88,9 @@ class OrdersController extends Controller
             'rejected' => (int) ($agg->rejected ?? 0),
         ];
 
-        return view('supports.views.distributors.orders.orders.index')->with([
+        $view = $request->ajax() ? 'supports.views.distributors.orders.orders._table' : 'supports.views.distributors.orders.orders.index';
+
+        return view($view)->with([
             'orders' => $orders,
             'conditions' => $conditions,
             'condition' => $condition,

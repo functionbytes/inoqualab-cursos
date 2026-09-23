@@ -3,9 +3,12 @@ $(document).ready(function () {
 
     function initMailerTemplatesTable() {
         BulkActions.init({
-        url: $bulkConfig.data('bulk-url'),
-        entityLabel: 'plantilla(s)',
-    });
+            url: $bulkConfig.data('bulk-url'),
+            entityLabel: 'plantilla(s)',
+        });
+        FilterToolbar.init({
+            fields: { filterModule: 'popover_Module' },
+        });
     }
 
     initMailerTemplatesTable();

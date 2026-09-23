@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkActionEnterpriseRequest;
 use App\Models\Enterprise\Enterprise;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,7 +46,9 @@ class EnterprisesController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.enterprises.enterprises.enterprises.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.enterprises.enterprises._table' : 'supports.views.enterprises.enterprises.enterprises.index';
+
+        return view($view)->with([
             'enterprises' => $enterprises,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -133,7 +136,7 @@ class EnterprisesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $enterprise->slack,
-            'message' => 'Se actualizo la empresa correctamente',
+            'message' => 'Se actualizó la empresa correctamente',
         ]);
     }
 
@@ -168,7 +171,7 @@ class EnterprisesController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $enterprise->slack,
-            'message' => 'Se creado la empresa correctamente',
+            'message' => 'Se creó la empresa correctamente',
         ]);
     }
 
@@ -186,20 +189,21 @@ class EnterprisesController extends Controller
 
         $enterprise = Enterprise::slack($slack);
 
+        $counts = [
+            'users' => $enterprise->users()->count(),
+            'staffs' => $enterprise->staffs()->count(),
+            'courses' => $enterprise->courses()->count(),
+        ];
+
         return view('supports.views.enterprises.enterprises.enterprises.navegation')->with([
             'enterprise' => $enterprise,
+            'counts' => $counts,
         ]);
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionEnterpriseRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:enterprises,id'],
-        ]);
-
         $query = Enterprise::whereIn('id', $request->ids);
         $count = $query->count();
 

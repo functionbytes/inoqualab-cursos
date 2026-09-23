@@ -1,12 +1,16 @@
 $(function () {
-    $('#applyFiltersBtn').on('click', function () {
-        $('#filterAvailable').val($('#modalAvailable').val());
-        $('#filters-modal').modal('hide');
-        $('#searchForm').submit();
-    });
+    function initEnterprisesTable() {
+        FilterToolbar.init({
+            fields: { filterAvailable: 'popover_Available' },
+        });
 
-    BulkActions.init({
-        url: $('#searchForm').data('bulk-url'),
-        entityLabel: 'empresa(s)',
-    });
+        BulkActions.init({
+            url: $('#searchForm').data('bulk-url'),
+            entityLabel: 'empresa(s)',
+        });
+    }
+
+    initEnterprisesTable();
+
+    AjaxTable.init({ onLoaded: initEnterprisesTable });
 });

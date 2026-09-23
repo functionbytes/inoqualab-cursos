@@ -23,7 +23,15 @@ class WebVitalsBeaconTest extends TestCase
 
         $response->assertOk();
         $response->assertSee(route('seo.web-vitals.beacon'), false);
-        $response->assertSee('navigator.sendBeacon', false);
+        $response->assertSee(asset('pages/js/layout-cart.js'), false);
+
+        // El JS que llama navigator.sendBeacon vive en un archivo externo
+        // (regla del proyecto: nada de <script> inline en resources/views/pages/),
+        // no en el HTML servido por route('index').
+        $this->assertStringContainsString(
+            'navigator.sendBeacon',
+            file_get_contents(public_path('pages/js/layout-cart.js'))
+        );
     }
 
     public function test_beacon_endpoint_stores_a_valid_metric(): void

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Newsletter\AddNewsletterListMemberRequest;
+use App\Http\Requests\Managers\Newsletter\BulkActionNewsletterListRequest;
+use App\Http\Requests\Managers\Newsletter\StoreNewsletterListRequest;
+use App\Http\Requests\Managers\Newsletter\UpdateNewsletterListRequest;
 use App\Models\NewsletterList;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -29,11 +33,9 @@ class NewsletterListController extends Controller
         return view('managers.views.newsletter.lists.form', ['list' => null]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreNewsletterListRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('newsletters.create'), 403);
-
-        $data = $this->validated($request);
+        $data = $request->validated();
 
         // Las listas creadas desde el panel son manuales (las dinámicas las siembra
         // el sistema y se gestionan solas por eventos).
@@ -57,11 +59,9 @@ class NewsletterListController extends Controller
         return view('managers.views.newsletter.lists.form', compact('list'));
     }
 
-    public function update(Request $request, NewsletterList $list): JsonResponse
+    public function update(UpdateNewsletterListRequest $request, NewsletterList $list): JsonResponse
     {
-        abort_unless(auth()->user()->can('newsletters.update'), 403);
-
-        $data = $this->validated($request);
+        $data = $request->validated();
 
         $list->update([
             'name' => $data['name'],
@@ -83,17 +83,9 @@ class NewsletterListController extends Controller
         return view($view, compact('list', 'members'));
     }
 
-    public function addMember(Request $request, NewsletterList $list): JsonResponse
+    public function addMember(AddNewsletterListMemberRequest $request, NewsletterList $list): JsonResponse
     {
-        abort_unless(auth()->user()->can('newsletters.update'), 403);
-
-        $data = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
-            'name' => ['nullable', 'string', 'max:255'],
-        ], [
-            'email.required' => 'El email es obligatorio.',
-            'email.email' => 'El email no es válido.',
-        ]);
+        $data = $request->validated();
 
         $list->addByEmail($data['email'], $data['name'] ?? null, 'Agregado manualmente');
 
@@ -137,17 +129,8 @@ class NewsletterListController extends Controller
         return redirect()->route('manager.newsletter.lists.index')->with('success', 'Lista eliminada correctamente.');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionNewsletterListRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:newsletter_lists,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         if ($request->action === 'delete') {
             // Igual que destroy(): las listas dinámicas y las que tienen campañas
             // asociadas no se pueden eliminar; se excluyen del lote en vez de
@@ -168,17 +151,5 @@ class NewsletterListController extends Controller
         $query->update(['is_active' => $request->action === 'activate']);
 
         return response()->json(['success' => true, 'message' => $count.' lista(s) procesadas.']);
-    }
-
-    private function validated(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:500'],
-        ], [
-            'name.required' => 'El nombre de la lista es obligatorio.',
-            'name.max' => 'El nombre no puede superar los 255 caracteres.',
-            'description.max' => 'La descripción no puede superar los 500 caracteres.',
-        ]);
     }
 }

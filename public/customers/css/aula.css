@@ -164,6 +164,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
 .pw-wrap .control { padding-right: 44px; }
 .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); padding: 6px; border-radius: 6px; display: inline-flex; }
 .pw-toggle:hover { color: var(--ink); }
+.pw-toggle .ic-on { display: inline-flex; }
+.pw-toggle .ic-off { display: none; }
+.pw-toggle.is-on .ic-on { display: none; }
+.pw-toggle.is-on .ic-off { display: inline-flex; }
 .form-actions { margin-top: 26px; display: flex; align-items: center; gap: 14px; }
 
 /* ===== Summary column ===== */
@@ -1431,7 +1435,10 @@ select.control { appearance: none; background-image: url("data:image/svg+xml,%3C
    elemento de .lv-content, el video quedaba tocando el borde. */
 .lv-content > .lp-video,
 .lv-content > .lp-embed { margin: 24px 36px 0; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(13,27,42,.16); }
-.lv-lhead { padding: 26px 36px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+/* row-gap mas chico que column-gap: con titulos largos del curso el boton
+   cae a su propia linea (flex-wrap) y un gap de 24px parejo se sumaba al
+   margin-top de .lmeta dejando un salto vertical de ~54px antes del boton. */
+.lv-lhead { padding: 26px 36px 0; display: flex; align-items: flex-start; justify-content: space-between; row-gap: 14px; column-gap: 24px; flex-wrap: wrap; }
 .lv-lhead .lk { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green-deep); display: inline-flex; align-items: center; gap: 7px; }
 .lv-lhead .lk svg { width: 14px; height: 14px; }
 .lv-lhead h1 { font-size: 26px; font-weight: 800; letter-spacing: -.015em; margin: 9px 0 0; }

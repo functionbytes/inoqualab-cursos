@@ -1,4 +1,12 @@
 $(document).ready(function () {
+    $('#mail_status').on('change', function () {
+        $('#smtpFields').toggleClass('d-none', !this.checked);
+    });
+
+    $('#imap_status').on('change', function () {
+        $('#imapFields').toggleClass('d-none', !this.checked);
+    });
+
     $('#formEmails').on('submit', function (e) {
         e.preventDefault();
 
@@ -7,6 +15,7 @@ $(document).ready(function () {
         formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
 
         // SMTP
+        formData.append('mail_status', $('#mail_status').is(':checked') ? 'true' : 'false');
         formData.append('mail_host', $('#mail_host').val());
         formData.append('mail_port', $('#mail_port').val());
         formData.append('mail_encryption', $('#mail_encryption').val());

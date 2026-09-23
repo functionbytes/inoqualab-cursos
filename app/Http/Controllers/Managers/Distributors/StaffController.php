@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Distributors;
 
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Distributors\BulkActionDistributorStaffRequest;
 use App\Http\Requests\Managers\Distributors\StoreDistributorStaffRequest;
 use App\Http\Requests\Managers\Distributors\UpdateDistributorStaffRequest;
 use App\Models\Distributor\Distributor;
@@ -203,17 +204,8 @@ class StaffController extends Controller
 
     }
 
-    public function bulkAction(Request $request, $slack)
+    public function bulkAction(BulkActionDistributorStaffRequest $request, $slack)
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'distributors.delete' : 'distributors.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $distributor = Distributor::slack($slack);
 
         // Igual que guardManageableUser(): solo roles gestionables y solo

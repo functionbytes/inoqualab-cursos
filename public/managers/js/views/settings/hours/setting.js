@@ -2,6 +2,10 @@ $(document).on('submit', '#formHours', function (e) {
     e.preventDefault();
 });
 
+$(document).on('change', '#hoursswitch', function () {
+    $('#hoursFields').toggleClass('d-none', !this.checked);
+});
+
 function bussinesshourSubmit() {
     var startStatus = 0;
     var endStatus = 0;
@@ -154,7 +158,7 @@ $(document).ready(function () {
 
     $('#formHours').validate({
         submit: false,
-        ignore: '.ignore',
+        ignore: ':hidden',
         rules: {
             hourstitle: {
                 required: true,

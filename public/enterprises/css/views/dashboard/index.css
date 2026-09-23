@@ -1,0 +1,69 @@
+.dashboard-content {
+    /* Esta vista no usa @section('page_header'): sin ese bloque, .mc-content
+       no aporta ningún espacio propio y el contenido queda pegado al header.
+       Replica el mismo espacio vertical que .mc-content-header da en las
+       demas paginas (padding 16px + margin-bottom 20px = 36px).
+       padding-top, no margin-top: un margin en el primer hijo de .container
+       colapsa hacia afuera (CSS margin collapsing) y no genera espacio real. */
+    padding-top: 36px;
+    padding-bottom: 36px;
+}
+
+.dashboard-welcome-banner {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 40px 48px;
+    background: linear-gradient(135deg, #081a28, #0d2740);
+}
+
+.dashboard-welcome-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+}
+
+.dashboard-welcome-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #5fb8ec;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.dashboard-welcome-title {
+    margin: 0 0 12px;
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.dashboard-welcome-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #c3d3e0;
+}
+
+.dashboard-welcome-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.dashboard-welcome-glow-1 {
+    right: -40px;
+    top: -40px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(0, 139, 206, 0.35), transparent 70%);
+}
+
+.dashboard-welcome-glow-2 {
+    right: 60px;
+    bottom: -60px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(95, 184, 236, 0.25), transparent 70%);
+}

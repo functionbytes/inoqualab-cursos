@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Mailer;
 
 use App\Enums\EndpointLogStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Mailer\BulkActionMailerEndpointRequest;
 use App\Http\Requests\Managers\Mailer\StoreMailerEndpointRequest;
 use App\Http\Requests\Managers\Mailer\UpdateMailerEndpointRequest;
 use App\Jobs\Mailer\SendEndpointEmailJob;
@@ -25,6 +26,7 @@ class MailerEndpointController extends Controller
     {
         $search = $request->input('search');
         $status = $request->input('status');
+        $source = $request->input('source');
 
         $query = MailerEndpoint::withTrashed(false)->withCount('successLogs')
             ->with('template')
@@ -40,6 +42,9 @@ class MailerEndpointController extends Controller
         } elseif ($status === 'inactive') {
             $query->inactive();
         }
+        if ($source) {
+            $query->bySource($source);
+        }
 
         $endpoints = $query->paginate(paginationNumber(20));
 
@@ -54,7 +59,7 @@ class MailerEndpointController extends Controller
 
         $view = request()->ajax() ? 'managers.views.mailer.endpoints._table' : 'managers.views.mailer.endpoints.index';
 
-        return view($view, compact('endpoints', 'stats', 'search', 'status', 'sources'));
+        return view($view, compact('endpoints', 'stats', 'search', 'status', 'source', 'sources'));
     }
 
     public function create(): View
@@ -117,17 +122,8 @@ class MailerEndpointController extends Controller
             ->with('success', "Endpoint '{$name}' eliminado.");
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionMailerEndpointRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:mailer_endpoints,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = MailerEndpoint::whereIn('id', $request->ids);
         $count = $query->count();
 

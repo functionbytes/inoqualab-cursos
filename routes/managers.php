@@ -310,6 +310,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
     Route::group(['prefix' => 'reviews'], function () {
 
         Route::get('/', [CourseReviewsController::class, 'index'])->name('manager.reviews');
+        Route::post('/toggle/{id}', [CourseReviewsController::class, 'toggleAvailable'])->name('manager.reviews.toggle');
         Route::delete('/destroy/{id}', [CourseReviewsController::class, 'destroy'])->name('manager.reviews.destroy');
         Route::post('/bulk-action', [CourseReviewsController::class, 'bulkAction'])->name('manager.reviews.bulk-action');
 
@@ -475,6 +476,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::get('/edit/{slack}', [OrdersController::class, 'edit'])->name('manager.orders.edit');
         Route::get('/view/{slack}', [OrdersController::class, 'view'])->name('manager.orders.view');
         Route::delete('/destroy/{slack}', [OrdersController::class, 'destroy'])->name('manager.orders.destroy');
+        Route::post('/bulk-action', [OrdersController::class, 'bulkAction'])->name('manager.orders.bulk-action');
 
         Route::get('/report', [OrdersReportController::class, 'report'])->name('manager.orders.report');
         Route::get('/report/generate', [OrdersReportController::class, 'generate'])->name('manager.orders.generate');
@@ -494,6 +496,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::get('/edit/{slack}', [InvoicesController::class, 'edit'])->name('manager.invoices.edit');
         Route::get('/view/{slack}', [InvoicesController::class, 'view'])->name('manager.invoices.view');
         Route::get('/details/{slack}', [InvoicesController::class, 'details'])->name('manager.invoices.details');
+        Route::post('/bulk-action', [InvoicesController::class, 'bulkAction'])->name('manager.invoices.bulk-action');
 
         Route::get('/report', [InvoicesReportController::class, 'report'])->name('manager.invoices.report');
         Route::get('/report/generate', [InvoicesReportController::class, 'generate'])->name('manager.invoices.generate');
@@ -749,7 +752,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
             Route::put('/{seoMeta}', [SeoMetaController::class, 'update'])->name('update');
             Route::patch('/{seoMeta}/inline', [SeoMetaController::class, 'inlineUpdate'])->name('inline-update');
             Route::delete('/{seoMeta}', [SeoMetaController::class, 'destroy'])->name('destroy');
-            Route::post('/bulk-destroy', [SeoMetaController::class, 'bulkDestroy'])->name('bulk-destroy');
+            Route::post('/bulk-action', [SeoMetaController::class, 'bulkAction'])->name('bulk-action');
         });
 
         // Redirects
@@ -968,6 +971,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
     Route::prefix('cart-abandonments')->name('manager.cart-abandonments.')->group(function () {
         Route::get('/', [CartAbandonmentsController::class, 'index'])->name('index');
         Route::post('/bulk-action', [CartAbandonmentsController::class, 'bulkAction'])->name('bulk-action');
+        Route::post('/{cartAbandonment}/remind', [CartAbandonmentsController::class, 'remind'])->name('remind');
     });
 
     // ─── Mailer ──────────────────────────────────────────────────────────────────

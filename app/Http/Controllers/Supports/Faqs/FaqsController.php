@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Supports\Faqs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Faqs\StoreFaqRequest;
+use App\Http\Requests\Managers\Faqs\UpdateFaqRequest;
+use App\Http\Requests\Supports\BulkActionFaqRequest;
 use App\Models\Faq\Faq;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\JsonResponse;
@@ -45,7 +47,9 @@ class FaqsController extends Controller
             'hidden' => (int) $agg->hidden,
         ];
 
-        return view('supports.views.faqs.faqs.index')->with([
+        $view = $request->ajax() ? 'supports.views.faqs.faqs._table' : 'supports.views.faqs.faqs.index';
+
+        return view($view)->with([
             'faqs' => $faqs,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -115,7 +119,7 @@ class FaqsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateFaqRequest $request)
     {
 
         $faq = Faq::slack($request->slack);
@@ -142,14 +146,8 @@ class FaqsController extends Controller
         return redirect()->route('support.faqs');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionFaqRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:faqs,id'],
-        ]);
-
         $query = Faq::whereIn('id', $request->ids);
         $count = $query->count();
 

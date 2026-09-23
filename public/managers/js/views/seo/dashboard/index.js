@@ -65,36 +65,10 @@
         }).render();
     }
 
-    // Donut distribución grados
-    var gradeTotal = config.gradeTotal;
-    if (gradeTotal > 0) {
-        var gd = config.gradeDistribution;
-        new ApexCharts(document.querySelector('#gradeDonut'), {
-            series: [
-                parseInt(gd.A) || 0,
-                parseInt(gd.B) || 0,
-                parseInt(gd.C) || 0,
-                parseInt(gd.D) || 0,
-                parseInt(gd.F) || 0,
-            ],
-            labels: ['A (90+)', 'B (75–89)', 'C (60–74)', 'D (40–59)', 'F (<40)'],
-            colors: ['#081a28', '#008bce', '#5a7093', '#8d9db5', '#b10100'],
-            chart: {
-                type: 'donut',
-                height: 260,
-                fontFamily: 'inherit',
-                toolbar: { show: false },
-            },
-            plotOptions: {
-                pie: { donut: { size: '65%' } },
-            },
-            dataLabels: { enabled: false },
-            legend: { position: 'bottom', fontSize: '12px' },
-            tooltip: {
-                theme: 'light',
-                y: { formatter: function (v) { return v + ' páginas'; } },
-            },
-        }).render();
-    }
+    // Distribución por grado: las barras se renderizan en el servidor,
+    // solo falta animar el ancho (mismo patrón que seo/report/index.js).
+    $('.grade-progress-bar').each(function () {
+        $(this).css('width', $(this).data('width') + '%');
+    });
 
 })();

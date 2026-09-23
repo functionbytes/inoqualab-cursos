@@ -9,7 +9,9 @@ use App\Events\Auth\UserDeleted;
 use App\Events\Auth\UserPasswordChanged;
 use App\Events\Auth\UserReactivated;
 use App\Events\Auth\UserUpdated;
+use App\Http\Controllers\Concerns\ValidatesUserPassword;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Users\BulkActionUserRequest;
 use App\Http\Requests\Managers\Users\StoreUserRequest;
 use App\Models\Enterprise\Enterprise;
 use App\Models\Enterprise\EnterpriseUser;
@@ -24,6 +26,8 @@ use Spatie\Permission\Models\Role;
 
 class UsersController extends Controller
 {
+    use ValidatesUserPassword;
+
     /** Roles asignables desde este panel (excluye 'superadmin', que no se toca desde aquí). */
     private const ASSIGNABLE_ROLES = ['manager', 'customer', 'enterprise', 'distributor', 'accounting', 'support'];
 
@@ -36,12 +40,20 @@ class UsersController extends Controller
         $users = User::descending();
 
         if ($searchKey) {
+            // Los orWhere() deben quedar agrupados en un closure anidado: sin él,
+            // cada orWhere() se aplica a nivel superior del query y por precedencia
+            // de operadores se escapa del AND role=... de abajo y del whereNull
+            // deleted_at del scope de SoftDeletes -- un match por nombre/email
+            // devolvía usuarios de cualquier rol (incluso soft-deleted) sin
+            // importar el filtro de rol seleccionado.
             $users->when(! strpos($searchKey, '-'), function ($query) use ($searchKey) {
-                $query->where('users.firstname', 'like', '%'.$searchKey.'%')
-                    ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
-                    ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')
-                    ->orWhere('users.email', 'like', '%'.$searchKey.'%')
-                    ->orWhere('users.identification', 'like', '%'.$searchKey.'%');
+                $query->where(function ($query) use ($searchKey) {
+                    $query->where('users.firstname', 'like', '%'.$searchKey.'%')
+                        ->orWhere('users.lastname', 'like', '%'.$searchKey.'%')
+                        ->orWhere(DB::raw("CONCAT(users.firstname, ' ', users.lastname)"), 'like', '%'.$searchKey.'%')
+                        ->orWhere('users.email', 'like', '%'.$searchKey.'%')
+                        ->orWhere('users.identification', 'like', '%'.$searchKey.'%');
+                });
             });
         }
 
@@ -225,6 +237,10 @@ class UsersController extends Controller
             ]);
         }
 
+        if ($error = $this->passwordValidationError($request->password)) {
+            return response()->json(['success' => false, 'message' => $error]);
+        }
+
         // Validación de cambios en email o identificación
         if ($user->email != $request->email || $user->identification != $request->identification) {
             $emailExists = User::where('email', $request->email)->where('id', '!=', $user->id)->exists();
@@ -329,17 +345,8 @@ class UsersController extends Controller
 
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(BulkActionUserRequest $request)
     {
-        $request->validate([
-            'action' => ['required', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'users.delete' : 'users.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $actor = auth()->user();
         $users = User::whereIn('id', $request->ids)->get();
 

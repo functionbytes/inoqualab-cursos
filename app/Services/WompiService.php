@@ -21,9 +21,6 @@ class WompiService
 
     public function __construct()
     {
-        $this->publicKey = setting('wompi_public_key') ?: config('services.wompi.public_key', '');
-        $this->integritySecret = setting('wompi_integrity_secret') ?: config('services.wompi.integrity_secret', '');
-        $this->eventsSecret = setting('wompi_events_secret') ?: config('services.wompi.events_secret', '');
         // El helper setting() NUNCA devuelve null: su firma es
         // setting($key, $default = '') y entrega ese default cuando la clave no
         // existe o su valor es vacío. La comprobación `!== null` se cumplía
@@ -35,6 +32,23 @@ class WompiService
         $this->sandbox = $sandboxSetting === ''
             ? (bool) config('services.wompi.sandbox', true)
             : $sandboxSetting === 'true';
+
+        // Credenciales separadas por entorno (sandbox/producción) para poder
+        // guardar ambos juegos de llaves a la vez y solo cambiar cuál está
+        // activo con el toggle. Si aún no se migró a las claves con sufijo,
+        // cae a las claves legacy sin sufijo (config unica de antes de este
+        // cambio) para no romper instalaciones existentes.
+        $envSuffix = $this->sandbox ? '_sandbox' : '_production';
+        $this->publicKey = setting('wompi_public_key'.$envSuffix)
+            ?: setting('wompi_public_key')
+            ?: config('services.wompi.public_key', '');
+        $this->integritySecret = setting('wompi_integrity_secret'.$envSuffix)
+            ?: setting('wompi_integrity_secret')
+            ?: config('services.wompi.integrity_secret', '');
+        $this->eventsSecret = setting('wompi_events_secret'.$envSuffix)
+            ?: setting('wompi_events_secret')
+            ?: config('services.wompi.events_secret', '');
+
         $this->baseUrl = $this->sandbox
             ? 'https://sandbox.wompi.co/v1'
             : 'https://production.wompi.co/v1';

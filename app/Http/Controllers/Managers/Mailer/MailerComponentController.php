@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Mailer;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Mailer\BulkActionMailerComponentRequest;
 use App\Http\Requests\Managers\Mailer\StoreMailerComponentRequest;
 use App\Http\Requests\Managers\Mailer\UpdateMailerComponentRequest;
 use App\Models\Mailer\MailerLayout;
@@ -122,17 +123,8 @@ class MailerComponentController extends Controller
         }
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionMailerComponentRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:enable,disable,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:mailer_layouts,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'newsletters.delete' : 'newsletters.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         // Los componentes protegidos (header/footer/wrapper) nunca se pueden
         // eliminar, igual que destroy() — se excluyen en vez de romper el lote.
         $query = MailerLayout::whereIn('id', $request->ids);

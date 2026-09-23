@@ -19,16 +19,24 @@ class ForgotPasswordController extends Controller
 
     public function sendResetLinkEmail(Request $request)
     {
-        $user = User::where('email', $request->email)
-            ->orWhere('identification', $request->email)
-            ->first();
+        // Agrupado en closure: sin él, el orWhere() de identification queda a
+        // nivel superior y por precedencia de operadores escapa del whereNull
+        // deleted_at del scope de SoftDeletes -- un usuario soft-deleted que
+        // matcheara por identification recibiría el link de reset igual.
+        $user = User::where(function ($query) use ($request) {
+            $query->where('email', $request->email)
+                ->orWhere('identification', $request->email);
+        })->first();
 
+        // No revelar si el email/cédula existe (user enumeration) -- mismo
+        // criterio ya aplicado en LoginController::sendFailedLoginResponse().
+        // Se muestra la misma pantalla de éxito sin enviar nada realmente.
         if ($user === null) {
-            return redirect()->back()
-                ->withInput($request->only('email'))
-                ->withErrors([
-                    'email' => 'El correo o cedula no coincide con nuestros registros.',
-                ]);
+            seo()->setTitle('Correo enviado')->noindex(true);
+
+            return view('auth.passwords.success')->with([
+                'email' => $request->email,
+            ]);
         }
 
         $currentDate = now()->toDateString();

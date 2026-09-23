@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Managers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\Settings\UpdateSeoSettingsRequest;
+use App\Http\Requests\Managers\Settings\UpdateSettingsLlmsRequest;
+use App\Http\Requests\Managers\Settings\UpdateSettingsRobotsRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
@@ -42,12 +43,8 @@ class SeoSettingsController extends Controller
         ]);
     }
 
-    public function updateRobots(Request $request): JsonResponse
+    public function updateRobots(UpdateSettingsRobotsRequest $request): JsonResponse
     {
-        $request->validate([
-            'robots_txt' => ['required', 'string'],
-        ]);
-
         $content = $request->input('robots_txt');
 
         updateSettings(['robots_txt' => $content]);
@@ -68,12 +65,8 @@ class SeoSettingsController extends Controller
         ]);
     }
 
-    public function updateLlms(Request $request): JsonResponse
+    public function updateLlms(UpdateSettingsLlmsRequest $request): JsonResponse
     {
-        $request->validate([
-            'llms_txt' => ['required', 'string'],
-        ]);
-
         updateSettings(['llms_txt' => $request->input('llms_txt')]);
 
         return response()->json([

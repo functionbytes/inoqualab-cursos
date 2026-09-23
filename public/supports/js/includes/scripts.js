@@ -1,28 +1,12 @@
 "use strict";
 $(function () {
 
-    var deleteUrl = null;
-
-    // Abrir modal de confirmacion y guardar la URL destino
+    // Abrir modal de confirmacion: el form real (#delete-form) envia el DELETE
     $(document).on("click", ".confirm-delete", function (e) {
         e.preventDefault();
-        deleteUrl = $(this).data("href");
+        var url = $(this).data("href");
+        $("#delete-form").attr("action", url);
         $("#delete-modal").modal("show");
-    });
-
-    // Confirmar: enviar peticion DELETE via form (preserva el redirect del controlador)
-    $(document).on("click", "#delete-link", function (e) {
-        e.preventDefault();
-        if (!deleteUrl) return;
-
-        var token = $('meta[name="csrf-token"]').attr('content');
-
-        var $form = $('<form>', { method: 'POST', action: deleteUrl, 'class': 'd-none' });
-        $form.append($('<input>', { type: 'hidden', name: '_method', value: 'DELETE' }));
-        $form.append($('<input>', { type: 'hidden', name: '_token', value: token }));
-
-        $('body').append($form);
-        $form.trigger('submit');
     });
 });
 

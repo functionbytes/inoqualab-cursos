@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Managers\Faqs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Faqs\BulkActionFaqRequest;
 use App\Http\Requests\Managers\Faqs\StoreFaqRequest;
+use App\Http\Requests\Managers\Faqs\UpdateFaqRequest;
 use App\Models\Faq\Faq;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\JsonResponse;
@@ -92,10 +94,8 @@ class FaqsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateFaqRequest $request)
     {
-        abort_unless(auth()->user()->can('faqs.update'), 403);
-
         $faq = Faq::slack($request->slack);
         $faq->title = $request->title;
         $faq->description = $request->description;
@@ -121,17 +121,8 @@ class FaqsController extends Controller
         return redirect()->route('manager.faqs');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionFaqRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:faqs,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'faqs.delete' : 'faqs.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Faq::whereIn('id', $request->ids);
         $count = $query->count();
 

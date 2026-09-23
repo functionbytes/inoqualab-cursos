@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\BulkActionEnterpriseCourseRequest;
 use App\Http\Requests\Managers\Enterprises\ImportCoursesRequest;
 use App\Imports\Managers\CoursesImport;
 use App\Models\Course\Course;
@@ -477,16 +478,8 @@ class CourseController extends Controller
         return back();
     }
 
-    public function bulkAction(Request $request, $slack): JsonResponse
+    public function bulkAction(BulkActionEnterpriseCourseRequest $request, $slack): JsonResponse
     {
-        abort_unless(auth()->user()->can('enterprises.delete'), 403);
-
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:courses,id'],
-        ]);
-
         $enterprise = Enterprise::slack($slack);
 
         $count = EnterpriseCourse::where('enterprise_id', $enterprise->id)

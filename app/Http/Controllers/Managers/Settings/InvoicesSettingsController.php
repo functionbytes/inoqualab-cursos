@@ -25,7 +25,7 @@ class InvoicesSettingsController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo correctamente la configuración',
+            'message' => 'Se actualizó correctamente la configuración',
         ]);
 
     }

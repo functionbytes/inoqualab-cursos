@@ -10,6 +10,7 @@ use App\Http\Controllers\Accountings\Enterprises\EnterprisesOrdersController;
 use App\Http\Controllers\Accountings\Invoices\GenerateController as InvoicesGenerateController;
 use App\Http\Controllers\Accountings\Invoices\InvoicesController;
 use App\Http\Controllers\Accountings\Invoices\ReportController as InvoicesReportController;
+use App\Http\Controllers\Accountings\NotificationsController;
 use App\Http\Controllers\Accountings\Orders\OrdersController;
 use App\Http\Controllers\Accountings\Orders\ReportController as OrdersReportController;
 use App\Http\Controllers\Accountings\Orders\ResumenController as OrdersResumenController;
@@ -19,6 +20,13 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'accounting', 'middleware' => ['auth', 'accounting', 'session', 'panel.permission']], function () {
 
     Route::get('/', [DashboardController::class, 'dashboard'])->name('accounting.dashboard');
+
+    Route::group(['prefix' => 'notifications'], function () {
+
+        Route::get('/', [NotificationsController::class, 'index'])->name('accounting.notifications');
+        Route::get('/mark-as-read', [NotificationsController::class, 'markasread'])->name('accounting.notifications.markasread');
+
+    });
 
     Route::group(['prefix' => 'profile'], function () {
         Route::get('/', [SettingsController::class, 'index'])->name('accounting.profile');

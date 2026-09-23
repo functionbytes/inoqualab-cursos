@@ -70,16 +70,19 @@ class OrdersController extends Controller
     {
         $user = app('customer');
         $order = Order::where('slack', $slack)->where('user_id', $user->id)
-            ->with([
-                // Eager-load polimórfico: la categoría solo existe en Course (Bundle no la tiene).
-                'items.itemable' => fn ($morphTo) => $morphTo->morphWith([Course::class => ['categorie']]),
-                'inscription',
-                'condition',
-            ])
+            ->with(['inscription', 'condition', 'method', 'coupon', 'activity.distributor', 'activity.enterprise', 'activity.staff'])
             ->firstOrFail();
+
+        // Paginado aparte (no via with('items')): un pedido puede acumular
+        // muchos artículos (paquetes con varios cursos, renovaciones, etc.)
+        // y listarlos todos sin límite no escala.
+        $items = $order->items()
+            ->with(['itemable' => fn ($morphTo) => $morphTo->morphWith([Course::class => ['categorie']])])
+            ->paginate(10);
 
         return view('customers.views.orders.view', [
             'order' => $order,
+            'items' => $items,
             'user' => $user,
         ]);
     }

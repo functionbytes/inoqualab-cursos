@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\AuditSeoUrlRequest;
+use App\Http\Requests\Managers\Seo\SeoCoreWebVitalsRequest;
 use App\Jobs\BulkSeoAuditJob;
 use App\Jobs\CheckBrokenLinksJob;
 use App\Models\Seo\SeoMeta;
@@ -10,7 +12,6 @@ use App\Models\Seo\SeoPagespeedSnapshot;
 use App\Services\InternalLinkAnalyzer;
 use App\Services\SeoAuditService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -25,9 +26,8 @@ class SeoAuditController extends Controller
         return view('managers.views.seo.audit.index');
     }
 
-    public function auditUrl(Request $request): JsonResponse
+    public function auditUrl(AuditSeoUrlRequest $request): JsonResponse
     {
-        $request->validate(['url' => 'required|url']);
         $result = $this->auditService->auditUrl($request->input('url'));
 
         return response()->json(['status' => true, 'data' => $result]);
@@ -111,13 +111,8 @@ class SeoAuditController extends Controller
         return response()->json(array_merge($results, ['from_cache' => false]));
     }
 
-    public function coreWebVitals(Request $request): JsonResponse
+    public function coreWebVitals(SeoCoreWebVitalsRequest $request): JsonResponse
     {
-        $request->validate([
-            'url' => 'required|url|max:500',
-            'strategy' => 'nullable|in:mobile,desktop',
-        ]);
-
         $url = $request->input('url');
         $strategy = $request->input('strategy', 'mobile');
         $apiKey = config('seo.pagespeed_api_key', '');

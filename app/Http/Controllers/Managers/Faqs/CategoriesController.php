@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Managers\Faqs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Faqs\BulkActionFaqCategoryRequest;
 use App\Http\Requests\Managers\Faqs\StoreFaqCategoryRequest;
+use App\Http\Requests\Managers\Faqs\UpdateFaqCategoryRequest;
 use App\Models\Faq\FaqCategorie;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -82,10 +84,8 @@ class CategoriesController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateFaqCategoryRequest $request)
     {
-        abort_unless(auth()->user()->can('faqs.update'), 403);
-
         $categorie = FaqCategorie::slack($request->slack);
         $categorie->title = $request->title;
         $categorie->slug = Str::slug($request->title, '-');
@@ -110,17 +110,8 @@ class CategoriesController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionFaqCategoryRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:faq_categories,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'faqs.delete' : 'faqs.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = FaqCategorie::whereIn('id', $request->ids);
         $count = $query->count();
 

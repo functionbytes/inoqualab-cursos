@@ -64,7 +64,9 @@ class ResultsController extends Controller
             'current_year' => (int) $agg->current_year,
         ];
 
-        return view('supports.views.enterprises.users.results.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.users.results._table' : 'supports.views.enterprises.users.results.index';
+
+        return view($view)->with([
             'certificates' => $certificates,
             'searchKey' => $searchKey,
             'courses' => $courses,
@@ -80,6 +82,10 @@ class ResultsController extends Controller
     {
 
         $certificate = Certificate::slack($slack);
+        // Mismo guard que index(): sin esto, cualquier soporte podía ver el
+        // detalle de examen de un certificado de un manager/support solo
+        // enumerando su slack.
+        $this->guardManageableUser($certificate->user);
         $course = $certificate->course;
         $exam = $certificate->exam;
         // with('question'): la vista muestra $answer->question->question por
@@ -105,7 +111,7 @@ class ResultsController extends Controller
         $certificate = Certificate::slack($slack);
         $course = $certificate->course;
         $exam = $certificate->exam;
-        $user = $certificate->user;
+        $user = $this->guardManageableUser($certificate->user);
 
         return Excel::download(new ResultsExport($exam), $course->title.' - '.$user->identification.'.xlsx');
 

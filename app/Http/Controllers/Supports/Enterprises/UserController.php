@@ -62,7 +62,9 @@ class UserController extends Controller
             'with_inscriptions' => (int) $agg->with_inscriptions,
         ];
 
-        return view('supports.views.enterprises.users.users.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.users.users._table' : 'supports.views.enterprises.users.users.index';
+
+        return view($view)->with([
             'users' => $users,
             'enterprise' => $enterprise,
             'available' => $available,
@@ -199,11 +201,40 @@ class UserController extends Controller
         return response()->json(['success' => true, 'message' => 'Se ha creado correctamente']);
     }
 
-    public function courses($slack)
+    public function courses(Request $request, $slack)
     {
 
-        $user = User::slack($slack);
+        // Mismo guard que view()/edit()/update(): sin esto, cualquier soporte
+        // podía ver los cursos/inscripciones de un manager/support enumerando su slack.
+        $user = $this->guardManageableUser(User::slack($slack));
+        $searchKey = $request->search;
+        $year = $request->year;
+        $culminated = $request->culminated;
+
         $inscriptions = $user->inscriptions()->with('course');
+
+        // El buscador de la vista enviaba ?search= pero este metodo no lo leia:
+        // la busqueda no filtraba nada.
+        if ($searchKey) {
+            $inscriptions = $inscriptions->whereHas('course', function ($query) use ($searchKey) {
+                $query->where('title', 'like', '%'.$searchKey.'%');
+            });
+        }
+
+        if ($year != null) {
+            $inscriptions = $inscriptions->whereYear('enroll_start', $year);
+        }
+
+        if ($culminated != null) {
+            $inscriptions = $inscriptions->where('culminated', $culminated);
+        }
+
+        $years = $user->inscriptions()
+            ->selectRaw('YEAR(enroll_start) as year')
+            ->groupBy('year')
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
         $inscriptions = $inscriptions->paginate(paginationNumber());
 
         // 1 query de agregación en vez de 3 counts sueltos.
@@ -221,9 +252,15 @@ class UserController extends Controller
             'pending' => (int) $agg->pending,
         ];
 
-        return view('supports.views.enterprises.users.courses.index')->with([
+        $view = $request->ajax() ? 'supports.views.enterprises.users.courses._table' : 'supports.views.enterprises.users.courses.index';
+
+        return view($view)->with([
             'user' => $user,
             'inscriptions' => $inscriptions,
+            'searchKey' => $searchKey,
+            'year' => $year,
+            'years' => $years,
+            'culminated' => $culminated,
             'stats' => $stats,
         ]);
     }
@@ -349,8 +386,6 @@ class UserController extends Controller
             'message' => 'Este usuario ya está registrado y asignado a la empresa: '.$enterprise->title,
             'enterprise' => $enterprise->title,
             'distributor' => $distributor->title,
-            // Bug: 'distributor.supports.users' no existe como ruta -- RouteNotFoundException
-            // garantizada al llegar aquí.
             'url' => route('support.enterprises.users', ['slack' => $enterprise->slack]),
         ]);
     }

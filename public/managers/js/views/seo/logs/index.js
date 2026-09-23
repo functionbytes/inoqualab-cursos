@@ -71,7 +71,7 @@ $(function () {
         });
     });
 
-    // ── Marcar resuelto ───────────────────────────────────────────────────────
+    // ── Eliminar registro ────────────────────────────────────────────────────
     $(document).on('click', '.btn-mark-resolved', function (e) {
         e.preventDefault();
         var $el = $(this);
@@ -81,11 +81,11 @@ $(function () {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': csrfToken },
             success: function (response) {
-                toastr.success(response.message ?? 'Marcado como resuelto');
+                toastr.success(response.message ?? 'Registro eliminado');
                 $el.closest('tr').fadeOut(400, function () { $(this).remove(); });
             },
             error: function () {
-                toastr.error('Error al marcar como resuelto');
+                toastr.error('Error al eliminar el registro');
             }
         });
     });

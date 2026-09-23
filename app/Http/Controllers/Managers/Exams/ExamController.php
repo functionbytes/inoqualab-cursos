@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Exams;
 
 use App\Http\Controllers\Concerns\BuildsAssessmentForms;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Exams\BulkActionExamRequest;
 use App\Http\Requests\Managers\Exams\StoreExamRequest;
 use App\Http\Requests\Managers\Exams\UpdateExamRequest;
 use App\Models\Course\Course;
@@ -148,17 +149,8 @@ class ExamController extends Controller
         return back()->with('success', 'Examen eliminado correctamente.');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionExamRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:exam_topics,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'exams.delete' : 'exams.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         if ($request->action === 'delete') {
             $topics = ExamTopic::whereIn('id', $request->ids)->get();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionCourseCategoryRequest;
 use App\Http\Requests\Managers\Courses\StoreCourseCategoryRequest;
 use App\Http\Requests\Managers\Courses\UpdateCourseCategoryRequest;
 use App\Models\Course\CourseCategorie;
@@ -91,7 +92,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo la categoria correctamente',
+            'message' => 'Se actualizó la categoría correctamente',
         ]);
 
     }
@@ -109,7 +110,7 @@ class CategoriesController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creo la categoria correctamente',
+            'message' => 'Se creó la categoría correctamente',
         ]);
 
     }
@@ -132,17 +133,8 @@ class CategoriesController extends Controller
         return redirect()->route('manager.categories.courses');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionCourseCategoryRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:course_categories,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         if ($request->action === 'delete') {
             // Mismo resguardo que destroy(): una categoría con cursos asociados
             // no se elimina (dejaría cursos huérfanos); se omite del conteo.

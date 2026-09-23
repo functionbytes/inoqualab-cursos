@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Managers\Courses;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Courses\BulkActionChapterRequest;
+use App\Http\Requests\Managers\Courses\ReorderChapterRequest;
+use App\Http\Requests\Managers\Courses\StoreChapterRequest;
+use App\Http\Requests\Managers\Courses\UpdateChapterRequest;
 use App\Models\Course\Course;
 use App\Models\Course\CourseChapter;
 use Illuminate\Http\JsonResponse;
@@ -46,24 +50,23 @@ class ChapterController extends Controller
 
     }
 
-    public function store(Request $request)
+    public function store(StoreChapterRequest $request)
     {
-        abort_unless(auth()->user()->can('courses.create'), 403);
-
-        $course = Course::slack($request->course);
+        $data = $request->validated();
+        $course = Course::slack($data['course']);
 
         $chapter = new CourseChapter;
         $chapter->slack = $this->generate_slack('course_chapters');
-        $chapter->title = Str::upper($request->title);
-        $chapter->description = $request->description;
-        $chapter->position = $request->position;
-        $chapter->available = $request->available;
+        $chapter->title = Str::upper($data['title']);
+        $chapter->description = $data['description'] ?? null;
+        $chapter->position = $data['position'] ?? null;
+        $chapter->available = $data['available'];
         $chapter->course_id = $course->id;
         $chapter->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Se creo el tema correctamente',
+            'message' => 'Se creó el tema correctamente',
         ]);
 
     }
@@ -84,20 +87,19 @@ class ChapterController extends Controller
         ]);
     }
 
-    public function update(Request $request)
+    public function update(UpdateChapterRequest $request)
     {
-        abort_unless(auth()->user()->can('courses.update'), 403);
-
-        $chapter = CourseChapter::slack($request->slack);
-        $chapter->title = Str::upper($request->title);
-        $chapter->description = $request->description;
-        $chapter->position = $request->position;
-        $chapter->available = $request->available;
+        $data = $request->validated();
+        $chapter = CourseChapter::slack($data['slack']);
+        $chapter->title = Str::upper($data['title']);
+        $chapter->description = $data['description'] ?? null;
+        $chapter->position = $data['position'] ?? null;
+        $chapter->available = $data['available'];
         $chapter->update();
 
         return response()->json([
             'success' => true,
-            'message' => 'Se actualizo el tema correctamente',
+            'message' => 'Se actualizó el tema correctamente',
         ]);
 
     }
@@ -132,14 +134,9 @@ class ChapterController extends Controller
      * Reordena los capítulos visibles (drag&drop): permuta entre los ids
      * recibidos las posiciones que ya ocupaban.
      */
-    public function reorder(Request $request): JsonResponse
+    public function reorder(ReorderChapterRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('courses.update'), 403);
-
-        $data = $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer'],
-        ]);
+        $data = $request->validated();
 
         $first = CourseChapter::find($data['ids'][0]);
         if (! $first) {
@@ -172,17 +169,8 @@ class ChapterController extends Controller
         return response()->json(['success' => true, 'message' => 'Orden actualizado.']);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionChapterRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:course_chapters,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'courses.delete' : 'courses.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         if ($request->action === 'delete') {
             $chapters = CourseChapter::whereIn('id', $request->ids)->get();
             $count = $chapters->count();

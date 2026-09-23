@@ -81,7 +81,9 @@
     position: absolute;
     top: calc(100% + 12px);
     right: 0;
-    width: 260px;
+    width: 280px;
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
     background: #ffffff;
     border: 1px solid #eef0f2;
     border-radius: 14px;
@@ -93,6 +95,22 @@
 
 .filter-popover.is-open {
     display: block;
+}
+
+/* Aplicada por filter-toolbar.js cuando no hay espacio debajo del boton
+   trigger dentro del viewport: abre el popover hacia arriba en su lugar. */
+.filter-popover.flip-up {
+    top: auto;
+    bottom: calc(100% + 12px);
+}
+
+.filter-popover.flip-up::before {
+    top: auto;
+    bottom: -7px;
+    border-left: none;
+    border-top: none;
+    border-right: 1px solid #eef0f2;
+    border-bottom: 1px solid #eef0f2;
 }
 
 .filter-popover::before {
@@ -195,6 +213,13 @@
     margin-top: 16px;
     padding-top: 14px;
     border-top: 1px solid #f3f4f6;
+    /* Se mantiene visible al hacer scroll dentro de un popover largo
+       (varios campos, ej. managers.views.mails.index). */
+    position: sticky;
+    bottom: -16px;
+    margin-bottom: -16px;
+    padding-bottom: 16px;
+    background: #ffffff;
 }
 
 .filter-popover-clear {

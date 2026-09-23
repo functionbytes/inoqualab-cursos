@@ -95,8 +95,14 @@ class OrdersController extends Controller
         abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
 
         // Load the view and pass the data to it
-        $pdf = Pdf::loadView('accountings.views.orders.orders.print', compact('order'))
-            ->setPaper('A4', 'portrait'); // You can set paper size and orientation if needed
+        $pdf = Pdf::loadView('accountings.views.orders.orders.print', [
+            'order' => $order,
+            'brand' => setting('page_title') ?: 'INOQUALAB',
+            // getlogo() da una URL (posiblemente de producción) que DomPDF no
+            // puede cargar sin red habilitada -- se embebe el archivo local
+            // como data URI (mismo patron que customers.views.orders.invoice).
+            'logo' => getLogoBase64(),
+        ])->setPaper('A4', 'portrait');
 
         // Return the PDF as a downloadable file
         return $pdf->download('order-details.pdf');

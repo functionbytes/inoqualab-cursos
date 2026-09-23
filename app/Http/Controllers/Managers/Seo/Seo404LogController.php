@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkDestroySeo404LogRequest;
+use App\Http\Requests\Managers\Seo\ClearSeo404LogRequest;
+use App\Http\Requests\Managers\Seo\CreateRedirectFrom404Request;
 use App\Models\Seo\Seo404Log;
 use App\Models\Seo\SeoRedirect;
 use Illuminate\Http\JsonResponse;
@@ -38,14 +41,10 @@ class Seo404LogController extends Controller
         return view($view, compact('logs', 'stats'));
     }
 
-    public function createRedirect(Request $request): JsonResponse
+    public function createRedirect(CreateRedirectFrom404Request $request): JsonResponse
     {
 
-        $validated = $request->validate([
-            'log_id' => ['required', 'integer', 'exists:seo_404_logs,id'],
-            'target_path' => ['required', 'string', 'max:500'],
-            'status_code' => ['nullable', 'in:301,302'],
-        ]);
+        $validated = $request->validated();
 
         $log = Seo404Log::findOrFail($validated['log_id']);
 
@@ -81,13 +80,8 @@ class Seo404LogController extends Controller
         ]);
     }
 
-    public function bulkDestroy(Request $request): JsonResponse
+    public function bulkDestroy(BulkDestroySeo404LogRequest $request): JsonResponse
     {
-
-        $request->validate([
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:seo_404_logs,id'],
-        ]);
 
         Seo404Log::query()->whereIn('id', $request->input('ids'))->delete();
 
@@ -97,12 +91,8 @@ class Seo404LogController extends Controller
         ]);
     }
 
-    public function clear(Request $request): JsonResponse
+    public function clear(ClearSeo404LogRequest $request): JsonResponse
     {
-
-        $request->validate([
-            'all' => ['boolean'],
-        ]);
 
         if ($request->boolean('all')) {
             Seo404Log::query()->delete();

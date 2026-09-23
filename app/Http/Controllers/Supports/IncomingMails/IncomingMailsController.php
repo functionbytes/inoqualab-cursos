@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\IncomingMails;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkDiscardIncomingMailRequest;
 use App\Models\Course\Course;
 use App\Models\Course\CourseAlias;
 use App\Models\Enterprise\Enterprise;
@@ -22,6 +23,7 @@ class IncomingMailsController extends Controller
     public function index(Request $request)
     {
         $status = $request->input('status');
+        $searchKey = $request->input('search');
 
         $mails = IncomingMail::query()
             ->with('enterprise', 'order')
@@ -36,6 +38,13 @@ class IncomingMailsController extends Controller
             ]);
         }
 
+        if ($searchKey) {
+            $mails = $mails->where(function ($query) use ($searchKey) {
+                $query->where('from', 'like', '%'.$searchKey.'%')
+                    ->orWhere('subject', 'like', '%'.$searchKey.'%');
+            });
+        }
+
         $mails = $mails->paginate(paginationNumber());
 
         $counts = IncomingMail::query()
@@ -43,7 +52,9 @@ class IncomingMailsController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        return view('supports.views.mails.index')->with([
+        $view = $request->ajax() ? 'supports.views.mails._table' : 'supports.views.mails.index';
+
+        return view($view)->with([
             'mails' => $mails,
             'counts' => $counts,
             'status' => $status,
@@ -192,14 +203,8 @@ class IncomingMailsController extends Controller
         return response()->json(['success' => true, 'message' => 'Correo descartado correctamente.']);
     }
 
-    public function bulkDiscard(Request $request): JsonResponse
+    public function bulkDiscard(BulkDiscardIncomingMailRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:discard'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:incoming_mails,id'],
-        ]);
-
         // Misma lógica que discard(): solo marca como ignorados los que aún
         // no lo estén, sin tocar correos ya procesados de otra forma.
         $count = IncomingMail::whereIn('id', $request->ids)

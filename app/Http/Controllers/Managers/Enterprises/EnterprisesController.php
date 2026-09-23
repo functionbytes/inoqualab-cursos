@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Enterprises;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Enterprises\BulkActionEnterpriseRequest;
 use App\Http\Requests\Managers\Enterprises\StoreEnterpriseRequest;
 use App\Http\Requests\Managers\Enterprises\UpdateEnterpriseRequest;
 use App\Models\Enterprise\Enterprise;
@@ -75,7 +76,7 @@ class EnterprisesController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (! empty($data['nit']) && Enterprise::where('nit', $data['nit'])->where('id', '!=', $enterprise->id)->exists()) {
+        if (! empty($data['nit']) && Enterprise::withTrashed()->where('nit', $data['nit'])->where('id', '!=', $enterprise->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
@@ -102,7 +103,7 @@ class EnterprisesController extends Controller
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
 
-        if (Enterprise::where('nit', $data['nit'])->exists()) {
+        if (Enterprise::withTrashed()->where('nit', $data['nit'])->exists()) {
             return response()->json(['success' => false, 'message' => 'El NIT ya está registrado en nuestro sistema.']);
         }
 
@@ -134,17 +135,8 @@ class EnterprisesController extends Controller
 
     }
 
-    public function bulkAction(Request $request)
+    public function bulkAction(BulkActionEnterpriseRequest $request)
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:enterprises,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'enterprises.delete' : 'enterprises.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Enterprise::whereIn('id', $request->ids);
         $count = $query->count();
 
@@ -163,8 +155,15 @@ class EnterprisesController extends Controller
 
         $enterprise = Enterprise::slack($slack);
 
+        $counts = [
+            'users' => $enterprise->users()->count(),
+            'courses' => $enterprise->courses()->count(),
+            'rates' => $enterprise->rates()->count(),
+        ];
+
         return view('managers.views.enterprises.enterprises.navegation')->with([
             'enterprise' => $enterprise,
+            'counts' => $counts,
         ]);
 
     }

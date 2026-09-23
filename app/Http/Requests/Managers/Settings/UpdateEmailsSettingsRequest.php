@@ -14,6 +14,8 @@ class UpdateEmailsSettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'mail_status' => ['nullable'],
+            'imap_status' => ['nullable'],
             'imap_host' => ['nullable', 'string', 'max:255'],
             'imap_port' => ['nullable', 'integer', 'between:1,65535'],
             'imap_protocol' => ['nullable', 'string', 'in:imap,pop3'],

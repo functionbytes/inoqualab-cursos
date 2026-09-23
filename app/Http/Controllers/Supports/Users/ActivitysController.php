@@ -66,7 +66,9 @@ class ActivitysController extends Controller
             ->paginate(paginationNumber())
             ->withQueryString();
 
-        return view('supports.views.users.activitys.index')->with([
+        $view = $request->ajax() ? 'supports.views.users.activitys._table' : 'supports.views.users.activitys.index';
+
+        return view($view)->with([
             'user' => $user,
             'activities' => $activities,
             'counts' => $counts,
@@ -108,6 +110,13 @@ class ActivitysController extends Controller
     public function view($slack)
     {
         $activity = Activity::findOrFail($slack);
+
+        // Mismo guard que index(): sin esto, cualquier soporte podía ver el
+        // detalle de una actividad causada por otro soporte/manager
+        // enumerando IDs, aunque el listado ya bloqueaba verla agrupada.
+        if ($activity->causer instanceof User) {
+            $this->guardManageableUser($activity->causer);
+        }
 
         return view('supports.views.users.activitys.view')->with([
             'activity' => $activity,

@@ -65,10 +65,50 @@ window.FilterToolbar = (function ($) {
                 }
             );
 
+            // Si no hay espacio debajo del boton para la altura completa del
+            // popover (max-height en filter-toolbar.css), lo abre hacia arriba
+            // en vez de hacia abajo — sin esto, un trigger cerca del borde
+            // inferior de la ventana corta el popover contra el viewport
+            // (managers.views.mails.index, con 5 campos, es el caso mas comun).
+            //
+            // Un popover con muchas opciones (ej. un filtro de Año con 8+
+            // valores) puede ser mas alto que el espacio libre en AMBAS
+            // direcciones cuando el trigger esta cerca del borde superior de
+            // la ventana -- ahi el flip-up simple lo corta contra el propio
+            // limite superior del viewport (visto en
+            // supports.views.enterprises.courses.view, filtro de Año con
+            // ~8 opciones + trigger justo debajo del header). Por eso ademas
+            // de elegir la direccion con mas espacio, se clampea el
+            // max-height real del popover a ese espacio disponible: el
+            // overflow-y:auto de .filter-popover (filter-toolbar.css) hace
+            // scroll interno en vez de desbordar el viewport.
+            function positionPopover() {
+                // Reset del max-height inline de una apertura anterior antes
+                // de medir, para leer la altura natural (la de la clase CSS:
+                // min(70vh, 560px)) y no la clampeada la ultima vez.
+                $popover.css('max-height', '');
+                var naturalHeight = $popover.outerHeight();
+
+                var triggerRect = $trigger[0].getBoundingClientRect();
+                var margin = 12;
+                var spaceBelow = window.innerHeight - triggerRect.bottom - margin;
+                var spaceAbove = triggerRect.top - margin;
+
+                var fitsBelow = naturalHeight <= spaceBelow;
+                var openUp = !fitsBelow && spaceAbove > spaceBelow;
+                $popover.toggleClass('flip-up', openUp);
+
+                var available = openUp ? spaceAbove : spaceBelow;
+                if (naturalHeight > available) {
+                    $popover.css('max-height', Math.max(160, available) + 'px');
+                }
+            }
+
             $trigger.off('click.filterToolbar').on('click.filterToolbar', function (e) {
                 e.stopPropagation();
                 var open = $popover.toggleClass('is-open').hasClass('is-open');
                 $trigger.attr('aria-expanded', open ? 'true' : 'false');
+                if (open) { positionPopover(); }
             });
 
             $popover.off('click.filterToolbar').on('click.filterToolbar', function (e) {

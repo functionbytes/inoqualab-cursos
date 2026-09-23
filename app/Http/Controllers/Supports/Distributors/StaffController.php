@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Supports\Distributors;
 
 use App\Exports\Distributors\StaffExport;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
+use App\Http\Controllers\Concerns\ValidatesUserPassword;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Supports\Concerns\ValidatesUniqueUserFields;
+use App\Http\Requests\Supports\BulkActionDistributorStaffRequest;
 use App\Models\Distributor\Distributor;
 use App\Models\Distributor\DistributorStaff;
 use App\Models\User;
@@ -18,7 +20,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller
 {
-    use RestrictsManageableUsers, ValidatesUniqueUserFields;
+    use RestrictsManageableUsers, ValidatesUniqueUserFields, ValidatesUserPassword;
 
     public function index(Request $request, $slack)
     {
@@ -61,7 +63,9 @@ class StaffController extends Controller
             'inactive' => (int) $agg->inactive,
         ];
 
-        return view('supports.views.distributors.staffs.index')->with([
+        $view = $request->ajax() ? 'supports.views.distributors.staffs._table' : 'supports.views.distributors.staffs.index';
+
+        return view($view)->with([
             'users' => $users,
             'distributor' => $distributor,
             'available' => $available,
@@ -161,6 +165,10 @@ class StaffController extends Controller
             return response()->json(['success' => false, 'message' => $error]);
         }
 
+        if ($error = $this->passwordValidationError($request->password)) {
+            return response()->json(['success' => false, 'message' => $error]);
+        }
+
         $user->firstname = Str::upper($request->firstname);
         $user->lastname = Str::upper($request->lastname);
         $user->cellphone = $request->cellphone;
@@ -226,14 +234,8 @@ class StaffController extends Controller
         return redirect()->back();
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDistributorStaffRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:users,id'],
-        ]);
-
         // Mismo guard que destroy(): un soporte no puede eliminar en lote
         // usuarios con roles no gestionables (manager/support).
         $query = User::whereIn('id', $request->ids)->whereIn('role', $this->manageableRoles);

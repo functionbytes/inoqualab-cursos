@@ -19,14 +19,6 @@
     font-size: 0.72rem;
     letter-spacing: 0.05em;
 }
-.seo-quick-card {
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
-    cursor: pointer;
-}
-.seo-quick-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 139, 206, .15) !important;
-    transform: translateY(-2px);
-}
 .seo-chart-260 {
     height: 260px;
 }
@@ -38,4 +30,121 @@
 .seo-score-badge {
     min-width: 36px;
     text-align: center;
+}
+
+/* Acceso rápido: chips compactos (antes cards grandes con sombra al pie
+   de la página, movidas arriba del dashboard). */
+.seo-quick-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    height: 100%;
+    background: #ffffff;
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.seo-quick-chip:hover {
+    border-color: #008bce;
+    box-shadow: 0 4px 14px rgba(0, 139, 206, .12);
+    text-decoration: none;
+}
+.seo-quick-chip-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.seo-quick-chip-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.seo-quick-chip-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #081a28;
+}
+.seo-quick-chip-desc {
+    font-size: 12px;
+    color: #8d9db5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Distribución por grado: barras horizontales grandes por grado A-F
+   (sin donut -- más legible cuando un grado domina claramente). */
+.seo-grade-score-inline {
+    font-size: 16px;
+    font-weight: 700;
+    color: #081a28;
+}
+.seo-grade-bar-label {
+    color: #081a28;
+}
+.seo-grade-bar-track {
+    height: 22px;
+    border-radius: 6px;
+    background: #f0f1f3;
+}
+.seo-grade-bar-track .progress-bar {
+    border-radius: 6px;
+}
+
+/* Páginas con peor score: agrupadas por severidad (prioridad <70 /
+   mejorable 70-89), con el ícono de editar como SVG inline. */
+.seo-worst-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.seo-worst-dot--critical {
+    background: #b10100;
+}
+.seo-worst-dot--improvable {
+    background: #008bce;
+}
+.seo-worst-severity-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #5a7093;
+}
+.seo-worst-severity-label--critical {
+    color: #b10100;
+}
+.seo-worst-row {
+    padding: 8px 10px;
+    border-radius: 8px;
+}
+.seo-worst-row:not(:last-child) {
+    margin-bottom: 2px;
+}
+.seo-worst-row--critical {
+    background: #fbe9e9;
+}
+.seo-worst-row-edit {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #f5f6f8;
+    color: #5a7093;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background .15s ease, color .15s ease;
+}
+.seo-worst-row-edit:hover {
+    background: #eaf6fc;
+    color: #008bce;
 }

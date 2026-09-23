@@ -1,3 +1,43 @@
+/*
+ * table-layout: fixed evita que el navegador ensanche columnas por el
+ * min-content de celdas con white-space:nowrap (text-truncate) — con
+ * layout auto, el max-width de una celda es ignorado por el algoritmo
+ * de ancho de columna y la tabla termina con scroll horizontal aunque
+ * el contenido esté truncado visualmente.
+ */
+.users-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
 .users-col-checkbox {
-    width: 40px;
+    width: 4%;
+}
+
+.users-col-id {
+    width: 15%;
+    white-space: nowrap;
+}
+
+.users-col-name {
+    width: 18%;
+}
+
+.users-col-email {
+    width: 24%;
+}
+
+.users-col-role {
+    width: 12%;
+    white-space: nowrap;
+}
+
+.users-col-updated {
+    width: 14%;
+    white-space: nowrap;
+}
+
+.users-col-actions {
+    width: 13%;
+    white-space: nowrap;
 }

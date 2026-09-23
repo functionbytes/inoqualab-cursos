@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var $config = $('#metas-config');
-    var bulkDestroyUrl = $config.data('bulk-destroy-url');
     var inlineBaseUrl = $config.data('inline-base-url');
+    var bulkActionUrl = $config.data('bulk-action-url');
 
     $(document).on('click', '[data-action="reload"]', function () { window.location.reload(); });
 
@@ -33,62 +33,26 @@ $(document).ready(function () {
         });
     });
 
-    const $toolbar = $('#bulk-toolbar');
-
-    function getSelectedIds() {
-        return $('.bulk-checkbox:checked').map(function () { return $(this).val(); }).get();
-    }
-
-    function updateBulkState() {
-        const ids = getSelectedIds();
-        $toolbar.toggleClass('d-none', ids.length === 0);
-        $('[data-bulk-count]').text(ids.length);
-        $('#bulk-count').text(ids.length);
-    }
-
-    // #select-all-metas vive dentro de #ajax-table-root y se recrea en cada
-    // carga AJAX (buscar/filtrar/paginar), por eso se re-bindea vía
+    // #select-all vive dentro de #ajax-table-root y se recrea en cada carga
+    // AJAX (buscar/filtrar/paginar), por eso BulkActions se re-inicializa vía
     // AjaxTable.init({ onLoaded: ... }) más abajo.
     function initMetasTable() {
-        $('#select-all-metas').off('change.metasBulk').on('change.metasBulk', function () {
-            $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
-            updateBulkState();
+        BulkActions.init({
+            url: bulkActionUrl,
+            entityLabel: 'meta(s) SEO',
         });
 
         FilterToolbar.init({
-            fields: { filterSeoableType: 'popover_SeoableType' },
+            fields: {
+                filterSeoableType: 'popover_SeoableType',
+                filterSortBy: 'popover_SortBy',
+                filterSortDirection: 'popover_SortDirection',
+            },
         });
     }
 
     initMetasTable();
     AjaxTable.init({ onLoaded: initMetasTable });
-
-    $(document).on('change', '.bulk-checkbox', updateBulkState);
-    $('#bulk-cancel').on('click', function () {
-        $('.bulk-checkbox, #select-all-metas').prop('checked', false);
-        updateBulkState();
-    });
-
-    $('#bulk-delete-btn').on('click', function () { $('#bulk-modal').modal('show'); });
-
-    $('#bulk-delete-confirm').on('click', function () {
-        const ids = getSelectedIds();
-        if (!ids.length) return;
-        const $btn = $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Eliminando...');
-        $.ajax({
-            url: bulkDestroyUrl,
-            method: 'POST',
-            data: { _token: $('meta[name="csrf-token"]').attr('content'), ids: ids },
-            success: function (res) {
-                toastr.success(res.message, 'Éxito');
-                setTimeout(function () { location.reload(); }, 800);
-            },
-            error: function () {
-                toastr.error('Error al eliminar registros.');
-                $btn.prop('disabled', false).html('Confirmar eliminación');
-            }
-        });
-    });
 
     // Inline edit
     $(document).on('click', '.editable-cell', function (e) {

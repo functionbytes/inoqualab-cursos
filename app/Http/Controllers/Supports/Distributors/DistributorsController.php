@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Supports\Distributors;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Supports\BulkActionDistributorRequest;
+use App\Http\Requests\Supports\StoreDistributorRequest;
+use App\Http\Requests\Supports\UpdateDistributorRequest;
 use App\Models\Distributor\Distributor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -48,7 +51,9 @@ class DistributorsController extends Controller
             'enterprise_generate' => (int) $agg->enterprise_generate,
         ];
 
-        return view('supports.views.distributors.distributors.index')->with([
+        $view = $request->ajax() ? 'supports.views.distributors.distributors._table' : 'supports.views.distributors.distributors.index';
+
+        return view($view)->with([
             'distributors' => $distributors,
             'available' => $available,
             'searchKey' => $searchKey,
@@ -119,23 +124,8 @@ class DistributorsController extends Controller
 
     }
 
-    public function update(Request $request)
+    public function update(UpdateDistributorRequest $request)
     {
-        // Sin esta validacion, un campo faltante (address/cellphone/nit/email/
-        // leading/supporting/available son NOT NULL en BD) lanza un 500 crudo
-        // de MySQL en vez de un 422 con mensaje claro.
-        $request->validate([
-            'title' => ['required', 'string', 'min:3', 'max:100'],
-            'address' => ['required', 'string', 'min:3', 'max:100'],
-            'cellphone' => ['required', 'string', 'min:6', 'max:10'],
-            'nit' => ['required', 'string', 'min:6', 'max:100'],
-            'email' => ['required', 'email'],
-            'leading' => ['required', 'string', 'min:3', 'max:100'],
-            'supporting' => ['required', 'string', 'min:3', 'max:100'],
-            'available' => ['required', 'in:0,1'],
-            'enterprise_generate' => ['nullable', 'in:0,1'],
-        ]);
-
         $distributor = Distributor::slack($request->slack);
 
         if (Distributor::where('email', $request->email)->where('id', '!=', $distributor->id)->exists()) {
@@ -164,19 +154,8 @@ class DistributorsController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreDistributorRequest $request)
     {
-        $request->validate([
-            'title' => ['required', 'string', 'min:3', 'max:100'],
-            'address' => ['required', 'string', 'min:3', 'max:100'],
-            'cellphone' => ['required', 'string', 'min:6', 'max:10'],
-            'nit' => ['required', 'string', 'min:6', 'max:100'],
-            'email' => ['required', 'email'],
-            'leading' => ['required', 'string', 'min:3', 'max:100'],
-            'supporting' => ['required', 'string', 'min:3', 'max:100'],
-            'enterprise_generate' => ['nullable', 'in:0,1'],
-        ]);
-
         if (Distributor::where('email', $request->email)->exists()) {
             return response()->json(['success' => false, 'message' => 'El correo electrónico ya está registrado en nuestro sistema.']);
         }
@@ -219,20 +198,24 @@ class DistributorsController extends Controller
 
         $distributor = Distributor::slack($slack);
 
+        $counts = [
+            'enterprises' => $distributor->enterprises()->count(),
+            'staffs' => $distributor->staffs()->count(),
+            'courses' => $distributor->courses()->count(),
+            'orders' => $distributor->orders()->count(),
+            'invoices' => $distributor->invoices()->count(),
+            'rates' => $distributor->rates()->count(),
+        ];
+
         return view('supports.views.distributors.distributors.navegation')->with([
             'distributor' => $distributor,
+            'counts' => $counts,
         ]);
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionDistributorRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:distributors,id'],
-        ]);
-
         $query = Distributor::whereIn('id', $request->ids);
         $count = $query->count();
 

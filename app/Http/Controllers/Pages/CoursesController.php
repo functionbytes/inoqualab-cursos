@@ -64,8 +64,8 @@ class CoursesController extends Controller
         $categories = CourseCategorie::available()->get();
 
         $reviews = $course->reviews()->with('user')->whereNotNull('comment')
-            ->where('comment', '!=', '')->latest()->limit(12)->get();
-        $reviewsCount = $course->reviews()->count();
+            ->where('comment', '!=', '')->where('available', true)->latest()->limit(12)->get();
+        $reviewsCount = $course->reviews()->where('available', true)->count();
 
         $alreadyOwned = false;
         $inscriptionSlack = null;

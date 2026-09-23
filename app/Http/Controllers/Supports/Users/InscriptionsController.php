@@ -17,12 +17,14 @@ class InscriptionsController extends Controller
     {
 
         $user = $this->guardManageableUser(User::slack($slack));
+        $searchKey = $request->search;
 
         $inscriptions = Inscription::query()
             ->with('course')
             ->where('user_id', $user->id)
+            ->when($searchKey, fn ($q) => $q->whereHas('course', fn ($q) => $q->where('title', 'like', '%'.$searchKey.'%')))
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(paginationNumber());
 
         // Stats con una sola query de agregación.
         $agg = Inscription::query()->where('user_id', $user->id)->selectRaw(
@@ -41,6 +43,7 @@ class InscriptionsController extends Controller
             'user' => $user,
             'inscriptions' => $inscriptions,
             'stats' => $stats,
+            'searchKey' => $searchKey,
         ]);
 
     }
@@ -107,7 +110,7 @@ class InscriptionsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $inscription->slack,
-            'message' => 'Se actualizo la inscription correctamente',
+            'message' => 'Se actualizó la inscripción correctamente',
         ]);
     }
 }

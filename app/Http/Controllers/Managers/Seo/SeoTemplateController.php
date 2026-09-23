@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkActionSeoTemplateRequest;
+use App\Http\Requests\Managers\Seo\StoreSeoTemplateRequest;
+use App\Http\Requests\Managers\Seo\UpdateSeoTemplateRequest;
 use App\Models\Seo\SeoMeta;
 use App\Models\Seo\SeoTemplate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class SeoTemplateController extends Controller
@@ -31,21 +33,9 @@ class SeoTemplateController extends Controller
         return view('managers.views.seo.templates.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreSeoTemplateRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'model_type' => ['nullable', 'string', 'max:255'],
-            'title_pattern' => ['nullable', 'string', 'max:200'],
-            'description_pattern' => ['nullable', 'string', 'max:500'],
-            'og_type' => ['nullable', 'string', 'max:50'],
-            'twitter_card' => ['nullable', 'string', 'max:50'],
-            'robots' => ['nullable', 'string', 'max:100'],
-            'is_active' => ['boolean'],
-            'priority' => ['integer', 'min:0', 'max:255'],
-        ]);
-
-        SeoTemplate::create($this->withoutNullNotNullableColumns($validated));
+        SeoTemplate::create($this->withoutNullNotNullableColumns($request->validated()));
 
         return redirect()
             ->route('manager.seo.templates.index')
@@ -57,21 +47,9 @@ class SeoTemplateController extends Controller
         return view('managers.views.seo.templates.edit', compact('seoTemplate'));
     }
 
-    public function update(Request $request, SeoTemplate $seoTemplate): RedirectResponse
+    public function update(UpdateSeoTemplateRequest $request, SeoTemplate $seoTemplate): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'model_type' => ['nullable', 'string', 'max:255'],
-            'title_pattern' => ['nullable', 'string', 'max:200'],
-            'description_pattern' => ['nullable', 'string', 'max:500'],
-            'og_type' => ['nullable', 'string', 'max:50'],
-            'twitter_card' => ['nullable', 'string', 'max:50'],
-            'robots' => ['nullable', 'string', 'max:100'],
-            'is_active' => ['boolean'],
-            'priority' => ['integer', 'min:0', 'max:255'],
-        ]);
-
-        $seoTemplate->update($this->withoutNullNotNullableColumns($validated));
+        $seoTemplate->update($this->withoutNullNotNullableColumns($request->validated()));
 
         return redirect()
             ->route('manager.seo.templates.index')
@@ -106,13 +84,9 @@ class SeoTemplateController extends Controller
         return back()->with('success', 'Plantilla SEO eliminada correctamente.');
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionSeoTemplateRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'action' => ['required', 'string', 'in:activate,deactivate,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer'],
-        ]);
+        $validated = $request->validated();
 
         match ($validated['action']) {
             'activate' => SeoTemplate::whereIn('id', $validated['ids'])->update(['is_active' => true]),

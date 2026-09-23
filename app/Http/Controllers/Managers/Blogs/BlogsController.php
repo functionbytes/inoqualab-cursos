@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Managers\Blogs;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Blogs\BulkActionBlogRequest;
 use App\Http\Requests\Managers\Blogs\StoreBlogRequest;
+use App\Http\Requests\Managers\Blogs\StoreBlogThumbnailRequest;
 use App\Http\Requests\Managers\Blogs\UpdateBlogRequest;
 use App\Models\Blog\Blog;
 use App\Models\Blog\BlogCategorie;
@@ -149,7 +151,7 @@ class BlogsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $blog->slack,
-            'message' => 'Se actualizo el blog correctamente',
+            'message' => 'Se actualizó el blog correctamente',
         ]);
 
     }
@@ -180,7 +182,7 @@ class BlogsController extends Controller
         return response()->json([
             'success' => true,
             'slack' => $blog->slack,
-            'message' => 'Se creo el blog correctamente',
+            'message' => 'Se creó el blog correctamente',
         ]);
 
     }
@@ -196,17 +198,8 @@ class BlogsController extends Controller
 
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionBlogRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:publish,hide,delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:blogs,id'],
-        ]);
-
-        $permission = $request->action === 'delete' ? 'blogs.delete' : 'blogs.update';
-        abort_unless(auth()->user()->can($permission), 403);
-
         $query = Blog::whereIn('id', $request->ids);
         $count = $query->count();
 
@@ -250,14 +243,8 @@ class BlogsController extends Controller
 
     }
 
-    public function storeThumbnails(Request $request): JsonResponse
+    public function storeThumbnails(StoreBlogThumbnailRequest $request): JsonResponse
     {
-        abort_unless(auth()->user()->can('blogs.update'), 403);
-
-        $request->validate([
-            'file' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ]);
-
         if ($request->hasFile('file') && $request->file('file')->isValid()) {
             $blog = Blog::slack(Str::remove('"', $request->blog));
             $blog->addMediaFromRequest('file')->toMediaCollection('thumbnail');

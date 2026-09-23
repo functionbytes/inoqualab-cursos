@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\BulkApplySeoSchemaRequest;
+use App\Http\Requests\Managers\Seo\UpdateSeoSchemaRequest;
 use App\Models\Seo\SeoMeta;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -90,13 +92,8 @@ class SchemaOrgController extends Controller
         return view('managers.views.seo.schema-org.edit', compact('seoMeta', 'types', 'currentType', 'currentSchema'));
     }
 
-    public function update(Request $request, SeoMeta $seoMeta): RedirectResponse
+    public function update(UpdateSeoSchemaRequest $request, SeoMeta $seoMeta): RedirectResponse
     {
-        $request->validate([
-            'schema_type' => ['nullable', 'string', 'in:Article,Product,FAQPage,Event,HowTo,WebPage,Course'],
-            'schema_custom' => ['nullable', 'string'],
-        ]);
-
         $schema = $request->input('schema_custom');
         $decoded = $schema ? json_decode($schema, true) : null;
 
@@ -159,13 +156,9 @@ class SchemaOrgController extends Controller
         ]);
     }
 
-    public function bulkApply(Request $request): JsonResponse
+    public function bulkApply(BulkApplySeoSchemaRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'model_type' => ['required', 'string', 'max:200'],
-            'schema_type' => ['required', 'string', 'in:Article,Product,FAQPage,Event,HowTo,WebPage,Course'],
-            'force' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
         $query = SeoMeta::query()->where('seoable_type', $data['model_type']);
 

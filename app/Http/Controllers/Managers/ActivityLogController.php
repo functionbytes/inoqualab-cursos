@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionActivityLogRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -96,16 +97,8 @@ class ActivityLogController extends Controller
         }, $filename, ['Content-Type' => 'text/csv']);
     }
 
-    public function bulkAction(Request $request): JsonResponse
+    public function bulkAction(BulkActionActivityLogRequest $request): JsonResponse
     {
-        $request->validate([
-            'action' => ['required', 'in:delete'],
-            'ids' => ['required', 'array', 'min:1'],
-            'ids.*' => ['integer', 'exists:activity_log,id'],
-        ]);
-
-        abort_unless($request->user()->can('activity.delete'), 403);
-
         $count = Activity::query()->whereIn('id', $request->input('ids'))->delete();
 
         Cache::forget('activitylog.stats');

@@ -6,6 +6,7 @@ use App\Models\Inscription;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -38,7 +39,7 @@ class UsersCoursesControllerTest extends TestCase
         $this->actingAs($this->support)
             ->get(route('support.users.courses.index', $customer->slack))
             ->assertOk()
-            ->assertSee($inscription->course->title);
+            ->assertSee(Str::upper($inscription->course->title));
     }
 
     public function test_postpone_view_loads_without_fatal_error(): void

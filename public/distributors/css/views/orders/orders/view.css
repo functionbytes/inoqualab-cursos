@@ -1,0 +1,81 @@
+.order-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 15px;
+}
+
+.order-kv-stack {
+    padding-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 10px;
+}
+
+.order-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.order-status-paid {
+    background: #e7f7ef;
+    color: #0f9d63;
+}
+
+.order-status-paid .order-status-dot {
+    background: #0f9d63;
+}
+
+.order-status-pending {
+    background: #fdf3e7;
+    color: #b8790a;
+}
+
+.order-status-pending .order-status-dot {
+    background: #b8790a;
+}
+
+.order-col-qty {
+    width: 100px;
+}
+
+.order-col-total {
+    width: 160px;
+}
+
+.order-summary-card {
+    background: #081a28;
+    color: #ffffff;
+    border-radius: 0.75rem;
+    padding: 1.5rem 1.75rem;
+}
+
+.order-summary-card .text-muted {
+    color: #94a3b8 !important;
+}
+
+.order-summary-total {
+    padding-top: 0.875rem;
+    margin-top: 0.625rem;
+    border-top: 1px solid #263041;
+}
+
+.order-summary-total span:first-child {
+    font-size: 14px;
+    color: #cbd5e1;
+}
+
+.order-summary-total-amount {
+    font-size: 28px;
+    font-weight: 800;
+}

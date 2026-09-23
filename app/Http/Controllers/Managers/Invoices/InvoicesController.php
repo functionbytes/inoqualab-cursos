@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Managers\Invoices;
 
 use App\Events\Invoices\InvoiceCreated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\BulkActionInvoiceRequest;
 use App\Http\Requests\Managers\StoreInvoiceRequest;
 use App\Http\Requests\Managers\UpdateInvoiceRequest;
 use App\Models\Distributor\Distributor;
@@ -13,6 +14,7 @@ use App\Models\Invoice\InvoiceDetails;
 use App\Models\Invoice\InvoiceItem;
 use App\Models\Invoice\InvoiceMethod;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -179,6 +181,25 @@ class InvoicesController extends Controller
             ],
         ]);
 
+    }
+
+    /**
+     * Cambia el estado de pago de varias facturas a la vez. Mismo criterio
+     * que update(): solo la condicion 'pagada' conserva payment_at (con la
+     * fecha de hoy, ya que el bulk no pide una fecha especifica); el resto
+     * la limpia para no dejar una fecha de pago residual de un estado previo.
+     */
+    public function bulkAction(BulkActionInvoiceRequest $request): JsonResponse
+    {
+        $condition = InvoiceCondition::slug($request->action);
+
+        $count = Invoice::whereIn('id', $request->ids)->count();
+        Invoice::whereIn('id', $request->ids)->update([
+            'condition_id' => $condition->id,
+            'payment_at' => $request->action === 'pagada' ? Carbon::now() : null,
+        ]);
+
+        return response()->json(['success' => true, 'message' => $count.' factura(s) actualizada(s).']);
     }
 
     public function create()

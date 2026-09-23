@@ -1,3 +1,7 @@
 .exams-col-checkbox {
     width: 40px;
 }
+
+.exams-title-normal {
+    text-transform: none !important;
+}

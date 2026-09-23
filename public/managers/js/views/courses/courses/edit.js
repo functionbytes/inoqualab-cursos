@@ -58,22 +58,22 @@ $(document).ready(function () {
                 maxlength: 2000,
             },
             day: {
-                required: true,
+                required: false,
                 number: true,
                 min: 1,
                 max: 365,
             },
             duration: {
-                required: true,
+                required: false,
                 number: true,
                 min: 1,
                 max: 10000,
             },
             certification: {
-                required: true,
+                required: false,
             },
             certifier: {
-                required: true,
+                required: false,
             },
             website: {
                 required: true,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Managers\Seo\UpdateSeoLlmsRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,12 +18,8 @@ class SeoLlmsController extends Controller
         return view('managers.views.seo.llms.index', compact('content', 'public_url'));
     }
 
-    public function update(Request $request): JsonResponse
+    public function update(UpdateSeoLlmsRequest $request): JsonResponse
     {
-        $request->validate([
-            'llms_txt' => ['required', 'string'],
-        ]);
-
         updateSettings(['llms_txt' => $request->llms_txt]);
 
         return response()->json(['success' => true]);

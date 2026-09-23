@@ -4,10 +4,16 @@ $(document).ready(function () {
     var bulkUrl = $list.data('bulk-url');
     var discardUrlTemplate = $list.data('discard-url');
 
-    BulkActions.init({
-        url: bulkUrl,
-        entityLabel: 'correo(s)',
-    });
+    function initMailsTable() {
+        BulkActions.init({
+            url: bulkUrl,
+            entityLabel: 'correo(s)',
+        });
+    }
+
+    initMailsTable();
+
+    AjaxTable.init({ onLoaded: initMailsTable });
 
     var currentSlack = null;
 
