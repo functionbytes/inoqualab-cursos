@@ -17,9 +17,20 @@
         </button>
 
         <div class="app-header-start d-none d-md-flex">
-            <a href="{{ route('home') }}" class="d-flex align-items-center">
-                <img class="logo" src="{{ getlogo() }}" alt="Logo" />
-            </a>
+            <div class="gs-wrap">
+                <button type="button" id="gs-trigger" class="gs-trigger">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar en el menú…</span>
+                    <kbd class="gs-kbd">⌘K</kbd>
+                </button>
+                <div class="gs-dropdown" id="gs-dropdown">
+                    <div class="gs-search-field">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="gs-input" placeholder="Buscar en el menú…" autocomplete="off">
+                    </div>
+                    <div id="gs-results" class="gs-results"></div>
+                </div>
+            </div>
         </div>
 
         <div class="app-header-end">
@@ -101,7 +112,7 @@
             <div class="dock-wrap" id="user-dock-wrap">
                 <button class="dock-anchor" id="user-dock-trigger" type="button">
                     <div class="av">
-                        <img src="/managers/images/profile/profile.jpg" alt="Foto de perfil" />
+                        <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
                         <span class="pres"></span>
                     </div>
                 </button>
@@ -109,7 +120,7 @@
                 <div class="dock" id="user-dock">
                     <div class="dock-head">
                         <div class="av">
-                            <img src="/managers/images/profile/profile.jpg" alt="Foto de perfil" />
+                            <img src="{{ Auth::user()->image ? url(Auth::user()->image) : url('managers/images/profile/profile.jpg') }}" alt="Foto de perfil" data-fallback-src="{{ url('managers/images/profile/profile.jpg') }}" />
                         </div>
                         <div class="body">
                             <span class="nm">{{ Str::words(Auth::user()->firstname, 1, '') }} {{ Str::words(Auth::user()->lastname, 1, '') }}</span>
@@ -143,4 +154,5 @@
 @push('scripts')
 <script src="{{ asset('managers/js/includes/header.js') }}" type="text/javascript"></script>
 <script src="{{ asset('managers/js/includes/app-toggler.js') }}" type="text/javascript"></script>
+<script src="{{ asset('managers/js/includes/app-search.js') }}" type="text/javascript"></script>
 @endpush

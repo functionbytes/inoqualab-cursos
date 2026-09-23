@@ -1,98 +1,83 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('enterprises.includes.card', ['title' => 'Usuarios'])
+@endsection
+
 @section('content')
 
-
     <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+
+        <div class="card">
+
+            {{-- Search --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ route('enterprise.users') }}" id="searchForm">
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por nombre, correo o identificacion...',
+                    ])
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-nowrap mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Identificacion</th>
+                            <th>Cliente</th>
+                            <th>Correo electronico</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        @foreach ($users as $user)
+                            <tr>
+                                <td>{{ ucfirst($user->identification) }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($user->firstname.' '.$user->lastname)), 12, '...') }}</div>
+                                </td>
+                                <td>{{ $user->email }}</td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport">
+                                            <i class="fas fa-ellipsis-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('enterprise.users.results', $user->slack) }}">Resultados</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('enterprise.users.certificates', $user->slack) }}">Certificados</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('enterprise.users.edit', $user->slack) }}">Gestionar</a>
+                                            </li>
+                                        </ul>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th scope="col">Identificación</th>
-                        <th scope="col">Cliente</th>
-                        <th scope="col">Correo electronico</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
 
-                    @foreach ($users as $key => $user)
-                        <tr class="search-items">
-
-
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->identification }}">{{ ucfirst($user->identification) }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->firstname . ' ' . $user->lastname }}">{{ Str::words( Str::upper(Str::lower($user->firstname . ' ' . $user->lastname)), 12, '...')  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $user->email }}">{{ $user->email }}</span>
-                            </td>
-
-                            <td class="text-center">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-                                        <li>
-                                            <a class="dropdown-item  d-flex align-items-center gap-3"  href="{{ route('enterprise.users.results', $user->slack) }}">
-                                                Resultados
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item  d-flex align-items-center gap-3" href="{{ route('enterprise.users.certificates', $user->slack) }}">
-                                                Certificados
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('enterprise.users.edit', $user->slack) }}">
-                                                Gestionar
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $users->firstItem() }}-{{ $users->lastItem() }} de {{ $users->total() }} resultados</span>
-                <nav>
-                    {{ $users->appends(request()->input())->links() }}
-                </nav>
-            </div>
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $users,
+                'itemLabel' => 'usuarios',
+            ])
         </div>
     </div>
 @endsection
 
-
+@push('scripts')
+    <script src="{{ asset('enterprises/js/views/users/users/index.js') }}"></script>
+@endpush

@@ -38,36 +38,48 @@
 
             {{-- Search --}}
             <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if ((request('status') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Estado: ' . (request('status') === 'active' ? 'Activas' : 'Inactivas'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('status')),
+                        ];
+                    }
+                @endphp
                 <form method="GET" action="{{ route('manager.seo.static-urls.index') }}" id="searchForm">
-                    <div class="row g-2">
-                        <div class="col-12 col-lg">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por URL o notas..."
-                                       value="{{ request('search') }}">
-                            </div>
+                    <input type="hidden" name="status" id="filterStatus" value="{{ request('status') ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Status" value="" {{ (request('status') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Status" value="active" {{ request('status') === 'active' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Activas</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Status" value="inactive" {{ request('status') === 'inactive' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Inactivas</span>
+                            </label>
                         </div>
-                        <div class="col-6 col-md-auto">
-                            <select name="status" class="form-select">
-                                <option value="">Estado</option>
-                                <option value="active" @selected(request('status') === 'active')>Activas</option>
-                                <option value="inactive" @selected(request('status') === 'inactive')>Inactivas</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
-                        </div>
-                        @if(request('search') || request('status'))
-                            <div class="col-auto">
-                                <a href="{{ route('manager.seo.static-urls.index') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </div>
-                        @endif
                     </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search') ?? '',
+                        'searchPlaceholder' => 'Buscar por URL o notas...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -150,7 +162,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-link fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-link', 48) !!}</div>
                         <h5 class="fw-bold mb-2">No hay URLs estáticas configuradas</h5>
                         <p class="text-muted mb-4">Comienza agregando tu primera URL estática</p>
                         <a href="{{ route('manager.seo.static-urls.create') }}" class="btn btn-primary">

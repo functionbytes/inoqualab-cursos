@@ -6,26 +6,11 @@
             {{-- Search --}}
             <div class="card-body border-bottom">
                 <form method="GET" action="{{ Request::url() }}" id="searchForm">
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por curso..."
-                                       value="{{ $searchKey ?? '' }}">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        @if(!empty($searchKey))
-                            <a href="{{ Request::url() }}" class="btn btn-outline-secondary flex-shrink-0">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
-                    </div>
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por curso...',
+                    ])
                 </form>
             </div>
 

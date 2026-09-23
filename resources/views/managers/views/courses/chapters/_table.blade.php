@@ -59,6 +59,7 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="chapters-col-handle"></th>
                                     <th class="courses-col-checkbox">
                                         <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
@@ -71,16 +72,19 @@
                             </thead>
                             <tbody id="chapters-sortable" data-reorder-url="{{ route('manager.courses.chapters.reorder') }}">
                                 @foreach($chapters as $chapter)
+                                    @php $chapterTitle = Str::title(Str::lower($chapter->title)); @endphp
                                     <tr data-id="{{ $chapter->id }}">
+                                        <td class="text-center chapters-col-handle">
+                                            <i class="fas fa-bars text-muted drag-handle" title="Arrastra para reordenar"></i>
+                                        </td>
                                         <td>
                                             <input type="checkbox" class="form-check-input bulk-checkbox"
                                                    value="{{ $chapter->id }}">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">
-                                                <i class="fas fa-bars text-muted me-2 drag-handle" title="Arrastra para reordenar"></i>
-                                                {{ Str::words($chapter->title, 8, '...') }}
-                                            </div>
+                                            <span class="fw-semibold text-truncate d-inline-block chapters-title-truncate" title="{{ $chapterTitle }}">
+                                                {{ $chapterTitle }}
+                                            </span>
                                         </td>
                                         <td class="text-center">
                                             <span class="text-muted">{{ $chapter->position }}</span>
@@ -113,7 +117,7 @@
                                                     <li>
                                                         <a class="dropdown-item btn-delete" href="#"
                                                            data-url="{{ route('manager.courses.chapters.destroy', $chapter->slack) }}"
-                                                           data-title="Eliminar: {{ $chapter->title }}">
+                                                           data-title="Eliminar: {{ $chapterTitle }}">
                                                             Eliminar
                                                         </a>
                                                     </li>
@@ -127,7 +131,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-layer-group fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-layers', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') !== '' || ($available ?? '') !== '')
                                 No se encontraron resultados
@@ -147,10 +151,9 @@
                                 Ver todos
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary btn-new-chapter"
-                                    data-bs-toggle="modal" data-bs-target="#chapter-modal">
-                                Nuevo tema
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon btn-new-chapter"
+                                    data-bs-toggle="modal" data-bs-target="#chapter-modal"
+                                    title="Nuevo tema" aria-label="Nuevo tema">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif

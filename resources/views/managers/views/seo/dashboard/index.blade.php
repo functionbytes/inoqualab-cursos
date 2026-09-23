@@ -21,8 +21,6 @@
             'trendValues' => $trendValues,
             'trendLabels' => $trendLabels,
             'hasTrend' => $hasTrend,
-            'gradeTotal' => $gradeTotal,
-            'gradeDistribution' => $gradeDistribution,
         ];
     @endphp
 
@@ -72,7 +70,7 @@
                                 <h5 class="card-title fw-semibold mb-3">Total metas SEO</h5>
                                 <h4 class="fw-semibold mb-2">{{ number_format($metaStats['total']) }}</h4>
                                 <p class="fs-3 mb-0 text-muted">
-                                    <span class="badge bg-success-subtle text-success me-1">
+                                    <span class="badge bg-primary-subtle text-primary me-1">
                                         {{ number_format($metaStats['indexable']) }} indexables
                                     </span>
                                     <span class="badge brand-badge-noindex">
@@ -113,8 +111,8 @@
                                     @if($hasTrend)
                                         <div id="spark-redirects"></div>
                                     @else
-                                        <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-info-subtle">
-                                            <i class="fas fa-route text-info fs-4"></i>
+                                        <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center brand-box-dark">
+                                            <i class="fas fa-route fs-4"></i>
                                         </div>
                                     @endif
                                 </div>
@@ -170,8 +168,8 @@
                             </div>
                             <div class="col-4">
                                 <div class="d-flex justify-content-center">
-                                    <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-success-subtle">
-                                        <i class="fas fa-bullseye text-success fs-4"></i>
+                                    <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle">
+                                        <i class="fas fa-bullseye text-primary fs-4"></i>
                                     </div>
                                 </div>
                             </div>
@@ -208,8 +206,10 @@
         <div class="row g-3 mb-3">
             <div class="col-12">
                 <div class="card w-100">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Tendencia últimos 7 días</h6>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-semibold mb-3">Tendencia últimos 7 días</h5>
                         @if($hasTrend)
                             <div id="trendChart" class="seo-chart-260"></div>
                         @else
@@ -232,10 +232,53 @@
             {{-- Distribución por grado --}}
             <div class="col-lg-6">
                 <div class="card w-100 h-100">
-                    <div class="card-body">
-                        <h5 class="card-title fw-semibold mb-3">Distribución por grado</h5>
+                    <div class="card-header border-bottom d-flex align-items-start justify-content-between">
+                        <div>
+                            <h6 class="mb-1 fw-bold">Distribución por grado</h6>
+                            <p class="text-muted small mb-0">{{ number_format($gradeTotal) }} páginas evaluadas</p>
+                        </div>
                         @if($gradeTotal > 0)
-                            <div id="gradeDonut" class="seo-chart-260"></div>
+                            <div class="text-muted small text-end">
+                                Score prom.<br>
+                                <span class="seo-grade-score-inline">{{ $metaStats['avg_score'] > 0 ? $metaStats['avg_score'] : '—' }}</span>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="card-body">
+                        @if($gradeTotal > 0)
+                            @php
+                                // Mismos colores/cortes que metas/index y reporte (ver
+                                // public/managers/css/includes/seo-badges.css).
+                                $gradeMeta = [
+                                    'A' => ['range' => '90+',   'class' => 'seo-score--a'],
+                                    'B' => ['range' => '75–89', 'class' => 'seo-score--b'],
+                                    'C' => ['range' => '60–74', 'class' => 'seo-score--c'],
+                                    'D' => ['range' => '40–59', 'class' => 'seo-score--d'],
+                                    'F' => ['range' => '<40',   'class' => 'seo-score--f'],
+                                ];
+                            @endphp
+                            <div class="d-flex flex-column gap-3">
+                                @foreach($gradeMeta as $grade => $meta)
+                                    @php
+                                        $count = (int) ($gradeDistribution->{$grade} ?? 0);
+                                        $percent = round(($count / $gradeTotal) * 100);
+                                    @endphp
+                                    <div>
+                                        <div class="d-flex justify-content-between small mb-1">
+                                            <span class="fw-semibold seo-grade-bar-label">{{ $grade }} · {{ $meta['range'] }}</span>
+                                            <span class="text-muted">{{ number_format($count) }} {{ Str::plural('página', $count) }} · {{ $percent }}%</span>
+                                        </div>
+                                        <div class="progress seo-grade-bar-track">
+                                            <div class="progress-bar {{ $meta['class'] }} grade-progress-bar"
+                                                 role="progressbar"
+                                                 data-width="{{ $percent }}"
+                                                 aria-valuenow="{{ $percent }}"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         @else
                             <div class="text-center py-5">
                                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 seo-empty-icon-circle">
@@ -252,8 +295,10 @@
             {{-- Páginas con peor score --}}
             <div class="col-lg-6">
                 <div class="card w-100 h-100">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Páginas con peor score</h6>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title fw-semibold mb-3">Páginas con peor score</h5>
                         @if($worstPages->isEmpty())
                             <div class="text-center py-5">
                                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 seo-empty-icon-circle">
@@ -263,120 +308,47 @@
                                 <p class="text-muted">No hay metas con score calculado</p>
                             </div>
                         @else
-                            <div class="list-group list-group-flush">
-                                @foreach($worstPages as $page)
-                                    @php
-                                        // Mismos cortes y colores que metas/index y reporte (ver
-                                        // public/managers/css/includes/seo-badges.css).
-                                        $sc = $page->seo_score;
-                                        $scoreBg = match(true) {
-                                            $sc >= 90 => 'seo-score--a',
-                                            $sc >= 75 => 'seo-score--b',
-                                            $sc >= 60 => 'seo-score--c',
-                                            $sc >= 40 => 'seo-score--d',
-                                            default   => 'seo-score--f',
-                                        };
-                                        $typeLabel = match(true) {
-                                            str_contains($page->seoable_type ?? '', 'Course') => 'Curso',
-                                            str_contains($page->seoable_type ?? '', 'Blog')   => 'Blog',
-                                            str_contains($page->seoable_type ?? '', 'Bundle') => 'Bundle',
-                                            default => class_basename($page->seoable_type ?? ''),
-                                        };
-                                    @endphp
-                                    <div class="list-group-item px-0 py-2 border-0 border-bottom d-flex align-items-center gap-2">
-                                        <span class="badge {{ $scoreBg }} flex-shrink-0 seo-score-badge">
-                                            {{ $sc }}
-                                        </span>
-                                        <div class="flex-grow-1 text-truncate">
-                                            <span class="small fw-semibold text-truncate d-block">
-                                                {{ $page->title ?: ($typeLabel . ' #' . $page->seoable_id) }}
-                                            </span>
-                                        </div>
-                                        <a href="{{ route('manager.seo.metas.edit', $page->id) }}"
-                                           class="btn btn-sm btn-light flex-shrink-0">
-                                            <i class="fas fa-pen fs-7"></i>
-                                        </a>
+                            @php
+                                // Mismos cortes y colores que metas/index y reporte (ver
+                                // public/managers/css/includes/seo-badges.css). Bajo 70 se
+                                // agrupa como "prioridad" (por debajo del corte B/C de 75,
+                                // igual que el resto del dashboard).
+                                $worstCritical = $worstPages->filter(fn ($page) => $page->seo_score < 70)->values();
+                                $worstImprovable = $worstPages->filter(fn ($page) => $page->seo_score >= 70)->values();
+                            @endphp
+
+                            @if($worstCritical->isNotEmpty())
+                                <div class="mb-3">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="seo-worst-dot seo-worst-dot--critical"></span>
+                                        <span class="seo-worst-severity-label seo-worst-severity-label--critical">Prioridad — bajo 70</span>
                                     </div>
-                                @endforeach
-                            </div>
+                                    <div id="seo-worst-pages">
+                                        @foreach($worstCritical as $page)
+                                            @include('managers.views.seo.dashboard._worst-page-row', ['page' => $page, 'critical' => true])
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($worstImprovable->isNotEmpty())
+                                <div>
+                                    @if($worstCritical->isNotEmpty())
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <span class="seo-worst-dot seo-worst-dot--improvable"></span>
+                                            <span class="seo-worst-severity-label">Mejorable — 70 a 89</span>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        @foreach($worstImprovable as $page)
+                                            @include('managers.views.seo.dashboard._worst-page-row', ['page' => $page, 'critical' => false])
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
                         @endif
                     </div>
                 </div>
-            </div>
-
-        </div>
-
-        {{-- ── Acceso rápido ────────────────────────────────────────────────── --}}
-        <div class="row g-3">
-
-            <div class="col-12">
-                <h6 class="fw-semibold text-muted text-uppercase mb-3 seo-section-label">
-                    Acceso rápido
-                </h6>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('manager.seo.metas.index') }}" class="text-decoration-none">
-                    <div class="card w-100 h-100 border-0 shadow-sm seo-quick-card">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0">
-                                <i class="fas fa-tags text-primary fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-semibold mb-1">Metas SEO</h6>
-                                <p class="text-muted small mb-0">Gestionar títulos y descripciones</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('manager.seo.redirects.index') }}" class="text-decoration-none">
-                    <div class="card w-100 h-100 border-0 shadow-sm seo-quick-card">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-info-subtle flex-shrink-0">
-                                <i class="fas fa-route text-info fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-semibold mb-1">Redirects</h6>
-                                <p class="text-muted small mb-0">Gestionar redirecciones 301/302</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('manager.seo.logs.index') }}" class="text-decoration-none">
-                    <div class="card w-100 h-100 border-0 shadow-sm seo-quick-card">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center brand-box-red flex-shrink-0">
-                                <i class="fas fa-exclamation-triangle fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-semibold mb-1">Errores 404</h6>
-                                <p class="text-muted small mb-0">Revisar URLs no encontradas</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-                <a href="{{ route('manager.settings.seo.index') }}" class="text-decoration-none">
-                    <div class="card w-100 h-100 border-0 shadow-sm seo-quick-card">
-                        <div class="card-body d-flex align-items-center gap-3">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center brand-box-dark flex-shrink-0">
-                                <i class="fas fa-sliders fs-5"></i>
-                            </div>
-                            <div>
-                                <h6 class="fw-semibold mb-1">Configuracion SEO</h6>
-                                <p class="text-muted small mb-0">Robots, sitemap y ajustes generales</p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
             </div>
 
         </div>

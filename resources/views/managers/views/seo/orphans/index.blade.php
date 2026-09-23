@@ -50,7 +50,7 @@
             {{-- Stats --}}
             <div class="card-body border-bottom">
                 <div class="row g-3">
-                    <div class="col-6 col-md-4 col-xl-2">
+                    <div class="col-6 col-lg-4">
                         <div class="card bg-light-secondary h-100">
                             <div class="card-body">
                                 <h6 class="card-title mb-2 text-nowrap">Total sin SEO</h6>
@@ -60,7 +60,7 @@
                         </div>
                     </div>
                     @foreach($typeConfig as $typeKey => $cfg)
-                        <div class="col-6 col-md-4 col-xl-2">
+                        <div class="col-6 col-lg-4">
                             <div class="card bg-light-secondary h-100">
                                 <div class="card-body">
                                     <h6 class="card-title mb-2 text-nowrap">{{ $cfg['label'] }}</h6>
@@ -157,7 +157,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-check-circle fa-3x mb-3 text-success opacity-75"></i>
+                        <div class="mb-3 text-success opacity-75">{!! \App\Html\IconHelper::render('empty-check', 48) !!}</div>
                         <h5 class="fw-bold mb-2">Todo el contenido tiene SEO configurado</h5>
                         <p class="text-muted">No hay contenido sin metadatos SEO</p>
                     </div>

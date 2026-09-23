@@ -62,6 +62,7 @@
                                     <th class="text-center">Calificacion</th>
                                     <th>Comentario</th>
                                     <th class="text-center">Fecha</th>
+                                    <th class="text-center">Visibilidad</th>
                                     <th class="text-center">Acciones</th>
                                 </tr>
                             </thead>
@@ -76,9 +77,9 @@
                                             <span class="text-muted">{{ trim((optional($review->user)->firstname ?? 'Estudiante') . ' ' . (optional($review->user)->lastname ?? '')) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="text-warning">
+                                            <span class="reviews-stars">
                                                 @for($s = 1; $s <= 5; $s++)
-                                                    <i class="fa-{{ $s <= $review->rating ? 'solid' : 'regular' }} fa-star"></i>
+                                                    <i class="fas fa-star {{ $s <= $review->rating ? '' : 'reviews-star-empty' }}"></i>
                                                 @endfor
                                             </span>
                                         </td>
@@ -87,6 +88,13 @@
                                         </td>
                                         <td class="text-center">
                                             <span class="text-muted">{{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if($review->available)
+                                                <span class="badge bg-primary-subtle text-primary">Visible</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Oculta</span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
                                             <div class="dropdown">
@@ -98,12 +106,22 @@
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li>
                                                         <a class="dropdown-item btn-review-detail" href="#"
+                                                           data-id="{{ $review->id }}"
                                                            data-course="{{ optional($review->course)->title ?? 'Curso eliminado' }}"
                                                            data-student="{{ trim((optional($review->user)->firstname ?? 'Estudiante') . ' ' . (optional($review->user)->lastname ?? '')) }}"
                                                            data-rating="{{ $review->rating }}"
                                                            data-comment="{{ $review->comment ?? '' }}"
-                                                           data-date="{{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y H:i') }}">
+                                                           data-date="{{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y H:i') }}"
+                                                           data-available="{{ $review->available ? 1 : 0 }}"
+                                                           data-toggle-url="{{ route('manager.reviews.toggle', $review->id) }}">
                                                             Ver detalle
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item toggle-review-link" href="#"
+                                                           data-id="{{ $review->id }}"
+                                                           data-url="{{ route('manager.reviews.toggle', $review->id) }}">
+                                                            {{ $review->available ? 'Ocultar reseña' : 'Mostrar reseña' }}
                                                         </a>
                                                     </li>
                                                     <li><hr class="dropdown-divider"></li>
@@ -124,7 +142,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-star fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-star', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') || ($rating ?? '') !== '')
                                 No se encontraron resultados

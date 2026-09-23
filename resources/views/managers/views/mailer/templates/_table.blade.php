@@ -24,38 +24,46 @@
             {{-- Search --}}
             <div class="card-body border-bottom">
                 <form method="GET" action="{{ route('mailers.templates.index') }}" id="searchForm">
-                    <div class="d-flex flex-column flex-lg-row gap-3 align-items-stretch">
-                        <div class="flex-fill">
-                            <div class="input-group h-100">
-                                <span class="input-group-text bg-white border-end-1">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por nombre, key o descripción..."
-                                       value="{{ $search }}">
+                    @php
+                        $filterChips = [];
+                        if (($module ?? '') !== '') {
+                            $filterChips[] = [
+                                'label' => 'Módulo: ' . ucfirst($module),
+                                'clear_url' => url()->current() . '?' . http_build_query(request()->except('module')),
+                            ];
+                        }
+                    @endphp
+                    <input type="hidden" name="module" id="filterModule" value="{{ $module ?? '' }}">
+
+                    @if(!empty($modules))
+                        @php ob_start(); @endphp
+                        <div class="filter-popover-field">
+                            <div class="filter-popover-label">Módulo</div>
+                            <div class="filter-popover-options">
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_Module" value="" {{ ($module ?? '') === '' ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>Todos</span>
+                                </label>
+                                @foreach($modules as $mod)
+                                    <label class="filter-popover-option">
+                                        <input type="radio" data-filter-name="popover_Module" value="{{ $mod }}" {{ $module === $mod ? 'checked' : '' }}>
+                                        <span class="filter-popover-dot"></span>
+                                        <span>{{ ucfirst($mod) }}</span>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
-                        @if(!empty($modules))
-                            <div class="flex-shrink-0 filter-select-lg">
-                                <select name="module" class="form-select select2 h-100">
-                                    <option value="">Todos los módulos</option>
-                                    @foreach($modules as $mod)
-                                        <option value="{{ $mod }}" {{ $module === $mod ? 'selected' : '' }}>{{ ucfirst($mod) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-                        <div class="d-flex gap-2 flex-shrink-0">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search me-1"></i>
-                            </button>
-                            @if($search || $module)
-                                <a href="{{ route('mailers.templates.index') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            @endif
-                        </div>
-                    </div>
+                        @php $popoverBody = trim(ob_get_clean()); @endphp
+                    @endif
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $search ?? '',
+                        'searchPlaceholder' => 'Buscar por nombre, key o descripción...',
+                        'popoverBody' => $popoverBody ?? null,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 

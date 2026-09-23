@@ -21,12 +21,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Modificar fecha de curso</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Modificar fecha de curso</h6>
+                        <p class="text-muted small mb-0">
                             Ajusta el rango de fechas de la inscripción del cliente en el curso.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-12">

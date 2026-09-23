@@ -2,7 +2,7 @@
 
 
 @section('page_header')
-    @include('managers.includes.card', ['title' => 'Crear noticia'])
+    @include('managers.includes.card', ['title' => 'Crear banner'])
 @endsection
 @section('content')
 
@@ -30,12 +30,15 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Imagen</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Imagen</h6>
+                        <p class="text-muted small mb-0">
                             Sube la imagen que se mostrará en el banner.
                         </p>
-                        <div class="dropzone dz-clickable" id="thumbnail">
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
                                 <input type="file" hidden name="file">
                             </div>
@@ -46,7 +49,7 @@
                     <hr class="my-0">
 
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Crear noticia</h6>
+                        <h6 class="fw-bold text-dark mb-1">Crear banner</h6>
                         <p class="text-muted mb-3">
                             Completa los datos del banner. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>

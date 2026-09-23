@@ -80,7 +80,7 @@
             ])
         @else
             <div class="card-body text-center py-5">
-                <i class="fas fa-envelope-open-text fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
                 <h5 class="fw-bold mb-2">Sin correos registrados</h5>
                 <p class="text-muted mb-0">
                     Aún no se han enviado correos a este usuario.<br>

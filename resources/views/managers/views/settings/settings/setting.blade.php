@@ -40,11 +40,14 @@
 
                     <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Logo</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Logo</h6>
+                        <p class="text-muted small mb-0">
                             Logo principal del sitio. Se usa en el encabezado y en el pie de página del portal público.
                         </p>
+                    </div>
+
+                    <div class="card-body">
                         <div class="dropzone dz-clickable" id="logo">
                             <div class="fallback">
                                 <input type="file" hidden name="logo">

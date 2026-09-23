@@ -1,110 +1,90 @@
-@php use App\Models\Course\CourseProgress;
-@endphp
-
 @extends('layouts.managers')
 
 @section('page_header')
-    @include('supports.includes.card', ['title' => 'Resultados - ' . $course->title ])
+    @include('supports.includes.card', [
+        'title' => 'Resultados - '.$course->title,
+        'description' => 'Examen de '.$certificate->user->firstname.' '.$certificate->user->lastname,
+    ])
 @endsection
 
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-4 col-md-4 col-sm-12">
-            <!-- Yearly Breakup -->
-            <div class="card overflow-hidden">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <h5 class="card-title mb-3 fw-semibold">Preguntas incorrectas</h5>
-                        <h4 class="fw-semibold mb-3">{{ $wrongs }}</h4>
+    <div class="widget-content searchable-container list">
 
-                        <div id="customers"></div>
+        <div class="card">
 
+            {{-- Stats --}}
+            <div class="card-body border-bottom">
+                <div class="row g-3">
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Preguntas correctas</h6>
+                                <h4 class="mb-1 fw-bold">{{ $corrects ?? 0 }}</h4>
+                                <span class="text-muted">Respuestas acertadas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Preguntas incorrectas</h6>
+                                <h4 class="mb-1 fw-bold">{{ $wrongs ?? 0 }}</h4>
+                                <span class="text-muted">Respuestas erradas</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Calificación</h6>
+                                <h4 class="mb-1 fw-bold">{{ $exam->score ?? 'N/D' }}</h4>
+                                <span class="text-muted">Nota final del examen</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-12">
-            <!-- Yearly Breakup -->
 
-            <div class="card overflow-hidden">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <h5 class="card-title mb-3 fw-semibold">Preguntas correctas</h5>
-                        <h4 class="fw-semibold mb-3">{{ $corrects  }}</h4>
-
-                        <div id="customers1"></div>
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($answers && $answers->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pregunta</th>
+                                    <th>Respuesta del usuario</th>
+                                    <th>Respuesta correcta</th>
+                                    <th class="text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($answers as $answer)
+                                    <tr>
+                                        <td>{{ Str::words(ucfirst($answer->question->question), 12, '...') }}</td>
+                                        <td>{{ $answer->user_answer }}</td>
+                                        <td>{{ $answer->answer }}</td>
+                                        <td class="text-center">
+                                            <span class="badge {{ $answer->approved == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                                                {{ $answer->approved == 1 ? 'Correcta' : 'Incorrecta' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-4 col-sm-12">
-
-            <div class="card overflow-hidden">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <h5 class="card-title mb-3 fw-semibold">Calificación</h5>
-                        <h4 class="fw-semibold mb-3">{{ $exam->score }}</h4>
-
-                        <div id="customers2"></div>
-
+                @else
+                    <div class="text-center py-5">
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-question', 48) !!}</div>
+                        <h5 class="fw-bold mb-2">Sin examen registrado</h5>
+                        <p class="text-muted mb-0">Este certificado no tiene un examen asociado con respuestas para mostrar.</p>
                     </div>
-                </div>
+                @endif
             </div>
+
         </div>
     </div>
 
-    <div class="col-md-12 col-lg-12">
-
-        <div class="row">
-            <div class="card card-body">
-                <div class="table-responsive">
-                    <table class="table search-table align-middle text-nowrap">
-                        <thead class="header-item">
-                        <tr>
-                            <th scope="col">Pregunta</th>
-                            <th scope="col">R. usuario</th>
-                            <th scope="col">R. correcta</th>
-                            <th scope="col">Estado</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                       
-                        @foreach ($answers as $key => $answer)
-                            <tr class="search-items">
-
-                                <td>
-                                    <span class="usr-email-addr" data-email="{{ ucfirst($answer->question->question) }}">{{ Str::words($answer->question->question, 12, '...')  }}</span>
-                                </td>
-                                <td>
-                                    <span class="usr-email-addr" data-email="{{ $answer->user_answer }}">{{ $answer->user_answer }}</span>
-                                </td>
-                                <td>
-                                    <span class="usr-email-addr" data-email="{{ $answer->answer }}">{{ $answer->answer }}</span>
-                                </td>
-                                <td>
-                                  <span class="badge {{ $answer->approved == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-
-                                       {{ $answer->approved == 1 ? 'Correcta' : 'Incorrecta' }}
-                                  </span>
-                                </td>
-                            </tr>
-                        @endforeach
-
-                        </tbody>
-                    </table>
-                </div>
-                </div>
-
-        </div>
-
-    </div>
 @endsection
-
-
-
-@push('scripts')
-    <script src="{{ url('managers/libs/owl.carousel/dist/owl.carousel.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url('managers/libs/apexcharts/dist/apexcharts.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('supports/js/enterprises/users/results/view.js') }}"></script>
-@endpush

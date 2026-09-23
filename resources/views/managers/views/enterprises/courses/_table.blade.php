@@ -6,27 +6,11 @@
             {{-- Search --}}
             <div class="card-body border-bottom">
                 <form method="GET" action="{{ route('manager.enterprises.courses', $enterprise->slack) }}" id="searchForm">
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por título..."
-                                       value="{{ $searchKey ?? '' }}">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        @if($searchKey ?? '')
-                            <a href="{{ route('manager.enterprises.courses', $enterprise->slack) }}"
-                               class="btn btn-outline-secondary flex-shrink-0">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
-                    </div>
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por título...',
+                    ])
                 </form>
             </div>
 
@@ -86,7 +70,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-book-open fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-courses', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($searchKey ?? '')
                                 No se encontraron resultados

@@ -3,9 +3,15 @@
 @section('title', 'Email endpoints')
 
 @section('page_header')
+    @php ob_start(); @endphp
+    @can('newsletters.create')
+        <a href="{{ route('mailers.endpoints.create') }}" class="btn btn-primary btn-icon" title="Nuevo endpoint" aria-label="Nuevo endpoint">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    @endcan
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Endpoints configurados',
         'description' => 'Gestiona los endpoints para enviar correos desde aplicaciones externas',
+        'actions' => $headerActions,
     ])
 @endsection
 

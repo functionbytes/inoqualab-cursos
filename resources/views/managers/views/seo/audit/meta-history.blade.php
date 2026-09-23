@@ -63,7 +63,7 @@
 
         @if($logs->isEmpty())
             <div class="card-body text-center py-5">
-                <i class="fas fa-magnifying-glass fa-3x text-muted mb-3 d-block"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-search', 48) !!}</div>
                 <h6 class="text-muted">Sin auditorías registradas</h6>
                 <p class="text-muted mb-3">Ejecuta una auditoría para ver el historial de esta página.</p>
                 <a href="{{ route('manager.seo.audit.index') }}" class="btn btn-primary btn-sm">

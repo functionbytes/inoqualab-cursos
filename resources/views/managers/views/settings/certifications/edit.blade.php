@@ -31,11 +31,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Cerificado</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Certificado</h6>
+                        <p class="text-muted small mb-0">
                             Actualiza la imagen del certificado si deseas reemplazarla.
                         </p>
+                    </div>
+
+                    <div class="card-body">
                         <div class="dropzone dz-clickable dz-started" id="thumbnail">
                             <div class="fallback">
                                 <input type="file" hidden name="file">

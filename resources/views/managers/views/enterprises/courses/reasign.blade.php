@@ -6,71 +6,67 @@
 @endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formReport" enctype="multipart/form-data" role="form"
+                  data-reasign-url="{{ route('manager.enterprises.action.reasign') }}"
+                  data-redirect-url="{{ route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
 
-                <form id="formReport" enctype="multipart/form-data" role="form"
-                      data-reasign-url="{{ route('manager.enterprises.action.reasign') }}"
-                      data-redirect-url="{{ route('manager.enterprises.courses.view', [$enterprise->slack, $course->slack]) }}">
+                {{ csrf_field() }}
 
-                    {{ csrf_field() }}
+                <input id="old" name="old" type="hidden" value="{{ $course->slack }}">
+                <input id="enterprise" name="enterprise" type="hidden" value="{{ $enterprise->slack }}">
 
-                    <input  id="old" name="old" type="hidden" value="{{ $course->slack }}">
-                    <input  id="enterprise" name="enterprise" type="hidden" value="{{ $enterprise->slack }}">
+                <div class="card">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0"> Reasignar usuarios</h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reasignar usuarios</h6>
+                        <p class="text-muted small mb-0">
                             Selecciona el curso destino y los usuarios que deseas reasignar.
                         </p>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Curso</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"  value="{{ $course->title }}" placeholder="Ingresar celular" disabled>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Curso a reacionar</label>
-                                    <div class="input-group">
-                                        {!! Form::select('course', $courses, null , ['class' => 'select2 form-control' ,'name' => 'course', 'id' => 'course' ]) !!}
-                                    </div>
-                                    <label id="course-error" class="error d-none" for="course"></label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Usuarios</label>
-                                    <div class="input-group">
-                                        {!! Form::select('user[]', $users, null , ['class' => 'select2 form-control' ,'name' => 'user', 'id' => 'user' ]) !!}
-                                    </div>
-                                    <label id="user-error" class="error d-none" for="user"></label>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
-                     <div class="col-12"><div class="action-form border-top mt-4">
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                Guardar
-                            </button>
-                        </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Curso</label>
+                                <input type="text" class="form-control" value="{{ $course->title }}" placeholder="Ingresar celular" disabled>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Curso a reasignar</label>
+                                {!! Form::select('course', $courses, null , ['class' => 'select2 form-control' ,'name' => 'course', 'id' => 'course' ]) !!}
+                                <label id="course-error" class="error d-none" for="course"></label>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Usuarios</label>
+                                {!! Form::select('user[]', $users, null , ['class' => 'select2 form-control' ,'name' => 'user', 'id' => 'user' ]) !!}
+                                <label id="user-error" class="error d-none" for="user"></label>
+                            </div>
                         </div>
                     </div>
-                </form>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre esta reasignación</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">Los usuarios seleccionados se trasladan del curso actual al curso destino elegido.</p>
+                </div>
             </div>
-
         </div>
 
     </div>

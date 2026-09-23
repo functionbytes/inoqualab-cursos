@@ -10,38 +10,44 @@
     {{-- Filtros --}}
     <div class="card-body border-bottom">
         <form method="GET" action="{{ route('manager.seo.audit.history') }}" id="searchForm">
-            <div class="row g-2">
-                <div class="col-12 col-md">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="search" name="search" class="form-control border-start-0 ps-0"
-                               placeholder="Buscar por URL..."
-                               value="{{ request('search') }}">
-                    </div>
+            @php
+                $filterChips = [];
+                if ((request('grade') ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Grade: ' . request('grade'),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('grade')),
+                    ];
+                }
+            @endphp
+            <input type="hidden" name="grade" id="filterGrade" value="{{ request('grade') ?? '' }}">
+
+            @php ob_start(); @endphp
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Grade</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_Grade" value="" {{ (request('grade') ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach(['A', 'B', 'C', 'D', 'F'] as $g)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Grade" value="{{ $g }}" {{ request('grade') === $g ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $g }}</span>
+                        </label>
+                    @endforeach
                 </div>
-                <div class="col-6 col-md-auto">
-                    <select name="grade" class="form-select">
-                        <option value="">Grade</option>
-                        @foreach(['A', 'B', 'C', 'D', 'F'] as $g)
-                            <option value="{{ $g }}" @selected(request('grade') === $g)>{{ $g }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                @if(request('search') || request('grade'))
-                    <div class="col-auto">
-                        <a href="{{ route('manager.seo.audit.history') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i>
-                        </a>
-                    </div>
-                @endif
             </div>
+            @php $popoverBody = trim(ob_get_clean()); @endphp
+
+            @include('managers.includes.filter-toolbar', [
+                'searchName' => 'search',
+                'searchValue' => request('search') ?? '',
+                'searchPlaceholder' => 'Buscar por URL...',
+                'popoverBody' => $popoverBody,
+                'filterChips' => $filterChips,
+            ])
         </form>
     </div>
 
@@ -142,7 +148,7 @@
             </div>
         @else
             <div class="text-center py-5">
-                <i class="fas fa-history fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-history', 48) !!}</div>
                 <h5 class="fw-bold mb-2">
                     @if(request('search') || request('grade'))
                         No se encontraron resultados

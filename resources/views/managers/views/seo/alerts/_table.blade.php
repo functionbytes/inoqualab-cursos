@@ -232,7 +232,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-check-circle fa-3x mb-3 text-success opacity-50"></i>
+                        <div class="mb-3 text-success opacity-75">{!! \App\Html\IconHelper::render('empty-check', 48) !!}</div>
                         <h5 class="fw-bold mb-2">Sin alertas pendientes</h5>
                         <p class="text-muted mb-4">
                             @if(($search ?? '') || ($severity ?? '') !== '' || ($status ?? '') !== '')

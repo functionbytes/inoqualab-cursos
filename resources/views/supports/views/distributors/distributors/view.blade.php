@@ -11,77 +11,59 @@
 
       <div class="card w-100">
 
-        <div class="card-body border-top">
-          <div class="d-flex no-block align-items-center">
-            <h5 class="mb-0">Visualizar distribuidor</h5>
-          </div>
-          <p class="card-subtitle mb-3 mt-3">
+        <div class="card-header border-bottom">
+          <h6 class="mb-1 fw-bold">Visualizar distribuidor</h6>
+          <p class="text-muted small mb-0">
             Informacion del distribuidor. Estos datos son de solo lectura, para modificarlos utiliza la opcion de editar.
           </p>
+        </div>
 
-          <div class="row">
+        <div class="card-body">
+          <div class="row g-3">
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Titulo</label>
-                <input type="text" class="form-control" value="{{ $distributor->title }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Titulo</label>
+              <input type="text" class="form-control" value="{{ $distributor->title }}" disabled>
             </div>
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Nit</label>
-                <input type="text" class="form-control" value="{{ $distributor->nit }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Nit</label>
+              <input type="text" class="form-control" value="{{ $distributor->nit }}" disabled>
             </div>
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Celular</label>
-                <input type="text" class="form-control" value="{{ $distributor->cellphone }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Celular</label>
+              <input type="text" class="form-control" value="{{ $distributor->cellphone }}" disabled>
             </div>
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Dirección</label>
-                <input type="text" class="form-control" value="{{ $distributor->address }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Dirección</label>
+              <input type="text" class="form-control" value="{{ $distributor->address }}" disabled>
             </div>
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Estado</label>
-                <input type="text" class="form-control" value="{{ $distributor->available ? 'Publico' : 'Oculto' }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Estado</label>
+              <input type="text" class="form-control" value="{{ $distributor->available ? 'Publico' : 'Oculto' }}" disabled>
             </div>
 
             <div class="col-6">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Permisos empresa</label>
-                <input type="text" class="form-control" value="{{ $distributor->enterprise_generate ? 'Si' : 'No' }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Permisos empresa</label>
+              <input type="text" class="form-control" value="{{ $distributor->enterprise_generate ? 'Si' : 'No' }}" disabled>
             </div>
 
             <div class="col-12">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Correo electronico</label>
-                <input type="text" class="form-control" value="{{ $distributor->email }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Correo electronico</label>
+              <input type="text" class="form-control" value="{{ $distributor->email }}" disabled>
             </div>
 
             <div class="col-12">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Soporte</label>
-                <input type="text" class="form-control" value="{{ $distributor->supporting }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Soporte</label>
+              <input type="text" class="form-control" value="{{ $distributor->supporting }}" disabled>
             </div>
 
             <div class="col-12">
-              <div class="mb-3">
-                <label class="control-label col-form-label">Gerente</label>
-                <input type="text" class="form-control" value="{{ $distributor->leading }}" disabled>
-              </div>
+              <label class="form-label fw-semibold">Gerente</label>
+              <input type="text" class="form-control" value="{{ $distributor->leading }}" disabled>
             </div>
 
           </div>

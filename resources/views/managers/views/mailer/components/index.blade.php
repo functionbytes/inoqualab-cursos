@@ -3,9 +3,15 @@
 @section('title', 'Componentes de email')
 
 @section('page_header')
+    @php ob_start(); @endphp
+    @can('newsletters.create')
+        <a href="{{ route('mailers.components.create') }}" class="btn btn-primary btn-icon" title="Nuevo componente" aria-label="Nuevo componente">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    @endcan
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Componentes de email',
         'description' => 'Gestiona header, footer y otros componentes reutilizables para tus plantillas de email',
+        'actions' => $headerActions,
     ])
 @endsection
 

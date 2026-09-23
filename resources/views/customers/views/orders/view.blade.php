@@ -24,27 +24,43 @@
 @section('content')
 <section class="pnl-section">
 
-    <a href="{{ route('customers.orders') }}" class="ovw-back">
-        Volver a mis pedidos
-    </a>
+    @php
+        $heroState = $pagada ? 'ok' : ($puedePagar ? 'pending' : 'neutral');
+        $heroTitle = $pagada
+            ? 'Ya tienes acceso a tu capacitación'
+            : ($puedePagar ? 'Completa el pago para activar tu acceso' : $condTitle);
+        $heroTotalLabel = $pagada ? 'Total pagado' : ($puedePagar ? 'Total a pagar' : 'Total del pedido');
+    @endphp
+
+    <div class="ovw-hero ovw-hero--{{ $heroState }}">
+        <div class="ovw-hero-row">
+            <div class="ovw-hero-id">
+                <span class="ic">
+                    @include('customers.includes.icon', ['name' => $pagada ? 'circle-check' : ($puedePagar ? 'clock' : 'receipt')])
+                </span>
+                <div>
+                    <div class="eyebrow">Pedido {{ $order->slack }} · {{ $condTitle }}</div>
+                    <h1>{{ $heroTitle }}</h1>
+                    <div class="date">
+                        {{ $order->payment_at
+                            ? 'Pagado el '.\Carbon\Carbon::parse($order->payment_at)->locale('es')->isoFormat('D [de] MMMM [de] YYYY')
+                            : 'Creado el '.\Carbon\Carbon::parse($order->created_at)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}
+                    </div>
+                </div>
+            </div>
+            <div class="ovw-hero-total">
+                <span>{{ $heroTotalLabel }}</span>
+                <b>{{ $money($order->total_order_amount) }}</b>
+            </div>
+        </div>
+    </div>
 
     <div class="ovw-wrap">
 
         {{-- ===== Columna principal: recibo ===== --}}
         <div class="ovw-main">
             <div class="ovw-card">
-                <div class="ovw-head">
-                    <div>
-                        <div class="eyebrow">Pedido</div>
-                        <h1>{{ $order->slack }}</h1>
-                        <div class="date">
-                            {{ $order->payment_at
-                                ? 'Pagado el '.\Carbon\Carbon::parse($order->payment_at)->locale('es')->isoFormat('D [de] MMMM [de] YYYY')
-                                : 'Creado el '.\Carbon\Carbon::parse($order->created_at)->locale('es')->isoFormat('D [de] MMMM [de] YYYY') }}
-                        </div>
-                    </div>
-                    <span class="ovw-chip cnd-{{ $condSlug }}">{{ $condTitle }}</span>
-                </div>
+                <div class="ovw-card-title">Artículos del pedido</div>
 
                 <div class="ovw-cols">
                     <span>Artículo</span>
@@ -52,7 +68,7 @@
                 </div>
 
                 <div class="ovw-items">
-                    @forelse($order->items as $item)
+                    @forelse($items as $item)
                         @php
                             $itemable = $item->itemable;
                             $esBundle = $item->item_type && str_contains($item->item_type, 'Bundle');
@@ -72,79 +88,149 @@
                     @endforelse
                 </div>
 
-                <div class="ovw-totals">
-                    @if((float) $order->total_discount_amount > 0)
+                @if($items->hasPages())
+                    <div class="ovw-pag">
+                        {{ $items->links() }}
+                    </div>
+                @endif
+
+                {{-- Sin descuento, el total no se repite acá: ya está en
+                     grande arriba en .ovw-hero-total. Con descuento sí hace
+                     falta el desglose (subtotal/descuento/total) porque el
+                     hero solo muestra la cifra final. --}}
+                @if((float) $order->total_discount_amount > 0)
+                    <div class="ovw-totals">
                         <div class="row">
-                            <span>Descuento</span>
+                            <span>Subtotal</span>
+                            <b>{{ $money($order->total_before_discount) }}</b>
+                        </div>
+                        <div class="row">
+                            <span>
+                                Descuento
+                                @if($order->coupon)
+                                    <span class="coupon">{{ Str::upper($order->coupon->code) }}</span>
+                                @endif
+                            </span>
                             <b class="disc">-{{ $money($order->total_discount_amount) }}</b>
                         </div>
-                    @endif
-                    <div class="row total">
-                        <span>Total</span>
-                        <b>{{ $money($order->total_order_amount) }}</b>
+                        <div class="row total">
+                            <span>Total</span>
+                            <b>{{ $money($order->total_order_amount) }}</b>
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
 
-        {{-- ===== Panel lateral: estado + acción + datos ===== --}}
+        {{-- ===== Panel lateral: un solo componente (propuesta A del /design) =====
+             Antes: botones sueltos + una .ovw-info-card por sección, cada una
+             con su propio borde/sombra/radius. Ahora es una sola tarjeta con
+             las secciones (acciones, Cliente, Empresa/Distribuidor, Pago,
+             Acceso) separadas por border-top interno. --}}
         <aside class="ovw-side">
-            <div class="ovw-status st-{{ $pagada ? 'ok' : ($puedePagar ? 'pending' : 'neutral') }}">
-                <span class="ic">
-                    @include('customers.includes.icon', ['name' => $pagada ? 'circle-check' : ($puedePagar ? 'clock' : 'receipt')])
-                </span>
-                <div class="txt">
-                    <b>{{ $pagada ? 'Pedido pagado' : ($puedePagar ? 'Pago pendiente' : $condTitle) }}</b>
-                    <span>
-                        {{ $pagada
-                            ? 'Ya tienes acceso a las capacitaciones de este pedido.'
-                            : ($puedePagar ? 'Completa el pago para habilitar el acceso al curso.' : 'Este pedido no requiere acción de tu parte.') }}
-                    </span>
+            <div class="ovw-sidebar-card">
+
+                <div class="ovw-sb-actions">
+                    @if($puedePagar)
+                        <a href="{{ route('customers.orders.payments', $order->slack) }}" class="ovw-btn solid">
+                            {{ $reintento ? 'Reintentar pago' : 'Pagar ahora' }}
+                        </a>
+                    @endif
+
+                    @if($pagada)
+                        <a href="{{ route('customers.orders.invoice', $order->slack) }}" class="ovw-btn {{ $puedePagar ? 'ghost' : 'solid' }}" target="_blank">
+                            Descargar recibo
+                        </a>
+                    @endif
+
+                    <a href="{{ route('customers.orders') }}" class="ovw-btn ghost">
+                        Volver a mis pedidos
+                    </a>
                 </div>
-            </div>
 
-            @if($puedePagar)
-                <a href="{{ route('customers.orders.payments', $order->slack) }}" class="ovw-btn solid">
-                    {{ $reintento ? 'Reintentar pago' : 'Pagar ahora' }}
-                </a>
-            @endif
-
-            @if($pagada)
-                <a href="{{ route('customers.orders.invoice', $order->slack) }}" class="ovw-btn {{ $puedePagar ? 'ghost' : 'solid' }}" target="_blank">
-                    Descargar recibo
-                </a>
-            @endif
-
-            <div class="ovw-facts">
-                <h4>Datos del pedido</h4>
-                <div class="field">
-                    <span>Cliente</span>
-                    <b>{{ $cliente }}</b>
+                {{-- Cliente --}}
+                <div class="ovw-sb-section">
+                    <div class="ovw-info-label">Cliente</div>
+                    <div class="ovw-info-name">{{ $cliente }}</div>
+                    @if($order->user->identification ?? false)
+                        <div class="ovw-info-sub">Doc. {{ $order->user->identification }}</div>
+                    @endif
+                    @if($order->user->email ?? false)
+                        <div class="ovw-info-sub">{{ $order->user->email }}</div>
+                    @endif
+                    @if($order->user->address ?? false)
+                        <div class="ovw-info-sub">{{ Str::ucfirst(Str::lower($order->user->address)) }}</div>
+                    @endif
                 </div>
-                @if($order->user->email ?? false)
-                    <div class="field">
-                        <span>Correo</span>
-                        <b>{{ $order->user->email }}</b>
+
+                {{-- Empresa / Distribuidor: solo si el pedido se gestionó a
+                     través de uno (orders_activity) -- las compras directas
+                     del cliente en el checkout no tienen esta relación. --}}
+                @if($order->activity)
+                    <div class="ovw-sb-section">
+                        <div class="ovw-info-label">Empresa / Distribuidor</div>
+                        @if($order->activity->distributor)
+                            <div class="ovw-info-name">{{ $order->activity->distributor->title }}</div>
+                        @endif
+                        @if($order->activity->enterprise)
+                            <div class="ovw-info-sub">{{ $order->activity->enterprise->title }}</div>
+                        @endif
+                        @if($order->activity->staff)
+                            <div class="ovw-info-sub">Encargado: {{ $order->activity->staff->firstname }} {{ $order->activity->staff->lastname }}</div>
+                        @endif
                     </div>
                 @endif
-                @if($order->user->address ?? false)
-                    <div class="field">
-                        <span>Dirección</span>
-                        <b>{{ \Illuminate\Support\Str::ucfirst(\Illuminate\Support\Str::lower($order->user->address)) }}</b>
+
+                {{-- Pago --}}
+                <div class="ovw-sb-section">
+                    <div class="ovw-info-label">Pago</div>
+                    <div class="ovw-info-row">
+                        <span>Referencia</span>
+                        <b>{{ $order->reference }}</b>
+                    </div>
+                    @if($order->type)
+                        <div class="ovw-info-row">
+                            <span>Tipo</span>
+                            <b>{{ $order->type->title }}</b>
+                        </div>
+                    @endif
+                    @if($order->method)
+                        <div class="ovw-info-row">
+                            <span>Método</span>
+                            <b>{{ $order->method->title }}</b>
+                        </div>
+                    @endif
+                    <div class="ovw-info-row">
+                        <span>Creada</span>
+                        <b>{{ \Carbon\Carbon::parse($order->created_at)->locale('es')->isoFormat('D MMM YYYY') }}</b>
+                    </div>
+                    @if($order->payment_at)
+                        <div class="ovw-info-row">
+                            <span>Pagada</span>
+                            <b>{{ \Carbon\Carbon::parse($order->payment_at)->locale('es')->isoFormat('D MMM YYYY') }}</b>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Acceso --}}
+                @if($order->inscription && ($order->inscription->enroll_start || $order->inscription->enroll_expire))
+                    <div class="ovw-sb-section">
+                        <div class="ovw-info-label">Acceso</div>
+                        @if($order->inscription->enroll_start)
+                            <div class="ovw-info-row">
+                                <span>Inicio</span>
+                                <b>{{ \Carbon\Carbon::parse($order->inscription->enroll_start)->locale('es')->isoFormat('D MMM YYYY') }}</b>
+                            </div>
+                        @endif
+                        @if($order->inscription->enroll_expire)
+                            <div class="ovw-info-row">
+                                <span>Vence</span>
+                                <b>{{ \Carbon\Carbon::parse($order->inscription->enroll_expire)->locale('es')->isoFormat('D MMM YYYY') }}</b>
+                            </div>
+                        @endif
                     </div>
                 @endif
-                @if($order->inscription && $order->inscription->enroll_start)
-                    <div class="field">
-                        <span>Inicio de acceso</span>
-                        <b>{{ \Carbon\Carbon::parse($order->inscription->enroll_start)->locale('es')->isoFormat('D MMM YYYY') }}</b>
-                    </div>
-                @endif
-                @if($order->inscription && $order->inscription->enroll_expire)
-                    <div class="field">
-                        <span>Vence el acceso</span>
-                        <b>{{ \Carbon\Carbon::parse($order->inscription->enroll_expire)->locale('es')->isoFormat('D MMM YYYY') }}</b>
-                    </div>
-                @endif
+
             </div>
         </aside>
 

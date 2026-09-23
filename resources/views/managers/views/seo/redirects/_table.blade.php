@@ -5,38 +5,48 @@
 
             {{-- Search + Filters --}}
             <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if ((request('is_active') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Estado: ' . (request('is_active') === '1' ? 'Activos' : 'Inactivos'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('is_active')),
+                        ];
+                    }
+                @endphp
                 <form method="GET" action="{{ route('manager.seo.redirects.index') }}" id="searchForm">
-                    <div class="row g-2">
-                        <div class="col-12 col-lg">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por origen o destino..."
-                                       value="{{ request('search') }}">
-                            </div>
+                    <input type="hidden" name="is_active" id="filterIsActive" value="{{ request('is_active') ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_IsActive" value="" {{ (request('is_active') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_IsActive" value="1" {{ request('is_active') === '1' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Activos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_IsActive" value="0" {{ request('is_active') === '0' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Inactivos</span>
+                            </label>
                         </div>
-                        <div class="col-6 col-md-auto">
-                            <select name="is_active" class="form-select">
-                                <option value="">Todos los estados</option>
-                                <option value="1" @selected(request('is_active') === '1')>Activos</option>
-                                <option value="0" @selected(request('is_active') === '0')>Inactivos</option>
-                            </select>
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                        @if(request('search') || (request('is_active') !== null && request('is_active') !== ''))
-                            <div class="col-auto">
-                                <a href="{{ route('manager.seo.redirects.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </div>
-                        @endif
                     </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search') ?? '',
+                        'searchPlaceholder' => 'Buscar por origen o destino...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -90,12 +100,11 @@
                                             <span class="badge bg-light text-dark border">{{ number_format($redirect->hits_count ?? 0) }}</span>
                                         </td>
                                         <td>
-                                            <div class="form-check form-switch mb-0">
-                                                <input class="form-check-input toggle-active" type="checkbox"
-                                                       data-id="{{ $redirect->id }}"
-                                                       data-url="{{ route('manager.seo.redirects.toggle', $redirect->id) }}"
-                                                       @checked($redirect->is_active)>
-                                            </div>
+                                            @if($redirect->is_active)
+                                                <span class="badge bg-primary-subtle text-primary">Activo</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
+                                            @endif
                                         </td>
                                         <td class="text-center">
                                             <div class="dropdown">
@@ -105,6 +114,13 @@
                                                     <i class="fas fa-ellipsis-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item toggle-active-link" href="#"
+                                                           data-id="{{ $redirect->id }}"
+                                                           data-url="{{ route('manager.seo.redirects.toggle', $redirect->id) }}">
+                                                            {{ $redirect->is_active ? 'Desactivar' : 'Activar' }}
+                                                        </a>
+                                                    </li>
                                                     <li>
                                                         <a class="dropdown-item btn-edit-redirect" href="#"
                                                            data-id="{{ $redirect->id }}"
@@ -135,12 +151,11 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-route fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-link', 48) !!}</div>
                         <h5 class="fw-bold mb-2">No hay redirects configurados</h5>
                         <p class="text-muted mb-4">Aun no hay redirects configurados</p>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRedirect">
-                            Nuevo redirect
-                        </button>
+                        <button type="button" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#modalRedirect"
+                                title="Nuevo redirect" aria-label="Nuevo redirect">{!! \App\Html\IconHelper::render('plus') !!}</button>
                     </div>
                 @endif
             </div>

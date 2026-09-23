@@ -29,12 +29,15 @@
 
         <div class="card">
 
-          <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Imagen</h6>
-            <p class="text-muted mb-3">
-                Sube el logo de la empresa aliada.
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Imagen</h6>
+              <p class="text-muted small mb-0">
+                  Sube el logo de la empresa aliada.
             </p>
-            <div class="dropzone dz-clickable" id="thumbnail">
+            </div>
+
+            <div class="card-body">
+                <div class="dropzone dz-clickable" id="thumbnail">
                 <div class="fallback">
                     <input type="file" hidden name="file">
                 </div>
@@ -48,7 +51,8 @@
             <h6 class="fw-bold text-dark mb-1">Crear aliado</h6>
             <p class="text-muted mb-3">
               Completa los datos de la empresa aliada. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
-            </p>
+              </p>
+
             <div class="row g-3">
 
               <div class="col-6">

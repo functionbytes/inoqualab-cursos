@@ -20,10 +20,12 @@
             <div class="card">
 
                 {{-- Suscripciones --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Suscripciones</h6>
-                    <p class="text-muted mb-3">Controla si el formulario público de newsletter acepta nuevas suscripciones.</p>
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Suscripciones</h6>
+                    <p class="text-muted small mb-0">Controla si el formulario público de newsletter acepta nuevas suscripciones.</p>
+                </div>
 
+                <div class="card-body">
                     <div class="form-check form-switch mb-0">
                         <input class="form-check-input" type="checkbox" name="newsletter_enabled" id="newsletter_enabled"
                                @if(settingEnabled('newsletter_enabled', true)) checked @endif>
@@ -175,8 +177,10 @@
     <div class="col-lg-4">
 
         <div class="card mb-3">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">Suscriptores</h6>
+            </div>
             <div class="card-body">
-                <h6 class="fw-bold mb-1">Suscriptores</h6>
                 <p class="text-muted mb-3">Gestiona la lista de personas suscritas al boletín.</p>
                 <a href="{{ route('manager.newsletter.index') }}" class="btn btn-primary w-100">
                     Ver suscriptores

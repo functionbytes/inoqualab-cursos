@@ -54,58 +54,83 @@
 
             {{-- Filters --}}
             <div class="card-body border-bottom">
-                <form method="GET" action="{{ route('manager.seo.metas.index') }}" id="filter-form">
+                @php
+                    $sortByLabels = ['updated_at' => 'Actualizado', 'created_at' => 'Creado', 'title' => 'Título', 'seo_score' => 'Score SEO'];
+                    $sortDirLabels = ['desc' => 'Descendente', 'asc' => 'Ascendente'];
+                    $currentSortBy = request('sort_by', 'updated_at');
+                    $currentSortDir = request('sort_direction', 'desc');
+
+                    $filterChips = [];
+                    if ((request('seoable_type') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Tipo: ' . class_basename(request('seoable_type')),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('seoable_type')),
+                        ];
+                    }
+                    if ($currentSortBy !== 'updated_at' || $currentSortDir !== 'desc') {
+                        $filterChips[] = [
+                            'label' => 'Orden: ' . $sortByLabels[$currentSortBy] . ' (' . $sortDirLabels[$currentSortDir] . ')',
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('sort_by', 'sort_direction')),
+                        ];
+                    }
+                @endphp
+                <form method="GET" action="{{ route('manager.seo.metas.index') }}" id="searchForm">
                     <input type="hidden" name="tab" value="{{ $tab }}">
-                    <div class="d-flex flex-column flex-lg-row gap-3 align-items-stretch">
-                        <div class="flex-fill">
-                            <div class="input-group h-100">
-                                <span class="input-group-text bg-white">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search"
-                                       name="search"
-                                       class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar en título o descripción..."
-                                       value="{{ request('search') }}">
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 filter-select-lg">
-                            <select name="seoable_type" class="form-select">
-                                <option value="">Todos los tipos</option>
-                                @foreach($seoableTypes as $type)
-                                    <option value="{{ $type }}" @selected(request('seoable_type') === $type)>
-                                        {{ class_basename($type) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="flex-shrink-0 filter-select-md">
-                            <select name="sort_by" class="form-select">
-                                <option value="updated_at" @selected(request('sort_by', 'updated_at') === 'updated_at')>Actualizado</option>
-                                <option value="created_at" @selected(request('sort_by') === 'created_at')>Creado</option>
-                                <option value="title" @selected(request('sort_by') === 'title')>Título</option>
-                                <option value="seo_score" @selected(request('sort_by') === 'seo_score')>Score SEO</option>
-                            </select>
-                        </div>
-                        <div class="flex-shrink-0 filter-select-sm">
-                            <select name="sort_direction" class="form-select">
-                                <option value="desc" @selected(request('sort_direction', 'desc') === 'desc')>Descendente</option>
-                                <option value="asc" @selected(request('sort_direction') === 'asc')>Ascendente</option>
-                            </select>
-                        </div>
-                        <div class="d-flex gap-2 flex-shrink-0">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            @if(request()->hasAny(['search', 'seoable_type', 'sort_by', 'sort_direction']))
-                                <a href="{{ route('manager.seo.metas.index', ['tab' => $tab]) }}"
-                                   class="btn btn-outline-secondary"
-                                   title="Limpiar filtros">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            @endif
+                    <input type="hidden" name="seoable_type" id="filterSeoableType" value="{{ request('seoable_type') ?? '' }}">
+                    <input type="hidden" name="sort_by" id="filterSortBy" value="{{ $currentSortBy }}">
+                    <input type="hidden" name="sort_direction" id="filterSortDirection" value="{{ $currentSortDir }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Tipo</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_SeoableType" value="" {{ (request('seoable_type') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            @foreach($seoableTypes as $type)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_SeoableType" value="{{ $type }}" {{ request('seoable_type') === $type ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ class_basename($type) }}</span>
+                                </label>
+                            @endforeach
                         </div>
                     </div>
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Ordenar por</div>
+                        <div class="filter-popover-options">
+                            @foreach($sortByLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_SortBy" value="{{ $value }}" {{ $currentSortBy === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Dirección</div>
+                        <div class="filter-popover-options">
+                            @foreach($sortDirLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_SortDirection" value="{{ $value }}" {{ $currentSortDir === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search') ?? '',
+                        'searchPlaceholder' => 'Buscar en título o descripción...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -115,28 +140,24 @@
                     <a href="{{ route('manager.seo.metas.index', array_merge(request()->except('tab', 'page'), ['tab' => 'all'])) }}"
                        class="nav-link rounded-0 py-3 {{ $tab === 'all' ? 'active' : '' }}">
                         Todas
-                        <span class="badge seo-badge seo-badge--neutral ms-1">{{ $stats['total'] }}</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="{{ route('manager.seo.metas.index', array_merge(request()->except('tab', 'page'), ['tab' => 'indexable'])) }}"
                        class="nav-link rounded-0 py-3 {{ $tab === 'indexable' ? 'active' : '' }}">
                         Indexables
-                        <span class="badge seo-badge seo-badge--positive ms-1">{{ $stats['indexable'] }}</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="{{ route('manager.seo.metas.index', array_merge(request()->except('tab', 'page'), ['tab' => 'noindex'])) }}"
                        class="nav-link rounded-0 py-3 {{ $tab === 'noindex' ? 'active' : '' }}">
                         No indexables
-                        <span class="badge seo-badge seo-badge--negative ms-1">{{ $stats['noindex'] }}</span>
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a href="{{ route('manager.seo.metas.index', array_merge(request()->except('tab', 'page'), ['tab' => 'unoptimized'])) }}"
                        class="nav-link rounded-0 py-3 {{ $tab === 'unoptimized' ? 'active' : '' }}">
                         Sin optimizar
-                        <span class="badge seo-badge seo-badge--warning ms-1">{{ $stats['missing_description'] + $stats['missing_og_image'] }}</span>
                     </a>
                 </li>
             </ul>
@@ -164,7 +185,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th width="30">
-                                        <input type="checkbox" class="form-check-input" id="select-all-metas">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
                                     </th>
                                     <th>Título</th>
                                     <th>Tipo</th>

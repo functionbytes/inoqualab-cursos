@@ -21,20 +21,28 @@
 
                 <div class="card">
 
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Estado del servicio</h6>
+                        <p class="text-muted small mb-0">
+                            Habilita o deshabilita el horario de soporte mostrado a los usuarios.</p>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" name="hoursswitch" id="hoursswitch" @if(setting('hoursswitch')=='true' ) checked @endif>
+                            <label class="form-check-label fw-semibold" for="hoursswitch">Mostrar horario de soporte</label>
+                        </div>
+                        <small class="text-muted d-block">Si se deshabilita, el horario de soporte no se muestra a los usuarios.</small>
+                    </div>
+
+                    <div id="hoursFields" class="{{ setting('hoursswitch') == 'true' ? '' : 'd-none' }}">
+
+                    <hr class="my-0">
+
                     <div class="card-body">
                         <h6 class="fw-bold text-dark mb-1">Horario soporte</h6>
-                        <p class="text-muted mb-3">Titulo y subtitulo que se muestran a los usuarios en la seccion de horario de soporte.</p>
-
-                        <div class="row g-3 align-items-center mb-3">
-                            <div class="col-sm-11">
-                                <label class="form-label fw-semibold mb-0" for="hoursswitch">Mostrar horario de soporte</label>
-                            </div>
-                            <div class="col-sm-1 justify-content-end d-flex">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" name="hoursswitch" id="hoursswitch"   @if(setting('hoursswitch')=='true' ) checked @endif/>
-                                </div>
-                            </div>
-                        </div>
+                        <p class="text-muted mb-3">Titulo y subtitulo que se muestran a los usuarios en la seccion de horario de soporte.
+                        </p>
 
                         <div class="row g-3">
 
@@ -386,6 +394,8 @@
                         </div>
 
                     </div>
+
+                    </div>{{-- /#hoursFields --}}
 
                     <div class="card-footer">
                         <button type="submit" id="bussinesshourSubmit" class="btn btn-primary w-100">

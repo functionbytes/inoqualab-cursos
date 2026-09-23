@@ -9,15 +9,15 @@
 @section('context-stat-label', Str::plural('curso', $courses->total()))
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
+    <link rel="stylesheet" href="{{ asset('customers/css/aula.css') }}?v={{ @filemtime(public_path('customers/css/aula.css')) ?: 1 }}">
 @endpush
 
 @section('content')
-<section class="pnl-section" id="coursesContent">
-    @include('customers.partials.views.courses.list')
-</section>
+    <section class="pnl-section" id="coursesContent">
+        @include('customers.partials.views.courses.list')
+    </section>
 @endsection
 
 @push('scripts')
-<script src="{{ asset('customers/js/views/courses/index.js') }}"></script>
+    <script src="{{ asset('customers/js/views/courses/index.js') }}"></script>
 @endpush

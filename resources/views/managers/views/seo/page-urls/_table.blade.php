@@ -38,43 +38,81 @@
 
             {{-- Filters --}}
             <div class="card-body border-bottom">
-                <form method="GET" action="{{ route('manager.seo.page-urls.index') }}" id="filter-form">
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por título o URL..."
-                                       value="{{ request('search') }}">
-                            </div>
+                @php
+                    $filterChips = [];
+                    $__pageUrlsTypeLabels = ['Course' => 'Curso', 'Blog' => 'Blog', 'Bundle' => 'Bundle'];
+                    if ((request('type') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Tipo: ' . ($__pageUrlsTypeLabels[request('type')] ?? request('type')),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('type')),
+                        ];
+                    }
+                    if ((request('seo_status') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'SEO: ' . (request('seo_status') === 'with_seo' ? 'Con SEO' : 'Sin SEO'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('seo_status')),
+                        ];
+                    }
+                @endphp
+                <form method="GET" action="{{ route('manager.seo.page-urls.index') }}" id="searchForm">
+                    <input type="hidden" name="type" id="filterType" value="{{ request('type') ?? '' }}">
+                    <input type="hidden" name="seo_status" id="filterSeoStatus" value="{{ request('seo_status') ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Tipo</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Type" value="" {{ (request('type') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Type" value="Course" {{ request('type') === 'Course' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Curso</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Type" value="Blog" {{ request('type') === 'Blog' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Blog</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Type" value="Bundle" {{ request('type') === 'Bundle' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Bundle</span>
+                            </label>
                         </div>
-                        <div class="flex-shrink-0">
-                            <select name="type" class="form-select">
-                                <option value="">Todos los tipos</option>
-                                <option value="Course"  @selected(request('type') === 'Course')>Curso</option>
-                                <option value="Blog"    @selected(request('type') === 'Blog')>Blog</option>
-                                <option value="Bundle"  @selected(request('type') === 'Bundle')>Bundle</option>
-                            </select>
-                        </div>
-                        <div class="flex-shrink-0">
-                            <select name="seo_status" class="form-select">
-                                <option value="">Todos los estados SEO</option>
-                                <option value="with_seo"    @selected(request('seo_status') === 'with_seo')>Con SEO</option>
-                                <option value="without_seo" @selected(request('seo_status') === 'without_seo')>Sin SEO</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        @if(request('search') || request('type') || request('seo_status'))
-                            <a href="{{ route('manager.seo.page-urls.index') }}"
-                               class="btn btn-outline-secondary flex-shrink-0" title="Limpiar filtros">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
                     </div>
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado SEO</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_SeoStatus" value="" {{ (request('seo_status') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_SeoStatus" value="with_seo" {{ request('seo_status') === 'with_seo' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Con SEO</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_SeoStatus" value="without_seo" {{ request('seo_status') === 'without_seo' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Sin SEO</span>
+                            </label>
+                        </div>
+                    </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search') ?? '',
+                        'searchPlaceholder' => 'Buscar por título o URL...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -101,7 +139,7 @@
                                         $typeMap = [
                                             'Curso'  => ['Curso',  'bg-primary-subtle text-primary'],
                                             'Blog'   => ['Blog',   'bg-success-subtle text-success'],
-                                            'Bundle' => ['Bundle', 'bg-warning-subtle text-warning'],
+                                            'Bundle' => ['Bundle', 'bg-secondary-subtle text-secondary'],
                                         ];
                                         [$typeLabel, $typeBadge] = $typeMap[$page['type'] ?? ''] ?? [($page['type'] ?? 'Página'), 'bg-secondary-subtle text-secondary'];
 
@@ -125,20 +163,16 @@
                                                    @disabled($hasSeo)>
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">{{ $page['title'] }}</div>
+                                            <div class="fw-semibold pageurl-title" title="{{ $page['title'] }}">{{ $page['title'] }}</div>
                                         </td>
                                         <td class="text-center">
                                             <span class="badge {{ $typeBadge }} rounded-pill">{{ $typeLabel }}</span>
                                         </td>
                                         <td class="text-center">
                                             @if($hasSeo)
-                                                <span class="badge bg-success-subtle text-success">
-                                                    <i class="fas fa-check me-1"></i>Con SEO
-                                                </span>
+                                                <span class="badge bg-success-subtle text-success">Con SEO</span>
                                             @else
-                                                <span class="badge bg-danger-subtle text-danger">
-                                                    <i class="fas fa-times me-1"></i>Sin SEO
-                                                </span>
+                                                <span class="badge bg-danger-subtle text-danger">Sin SEO</span>
                                             @endif
                                         </td>
                                         <td class="text-center">
@@ -198,7 +232,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-link fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-link', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(request('search') || request('type') || request('seo_status'))
                                 No se encontraron resultados

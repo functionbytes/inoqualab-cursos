@@ -122,7 +122,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-building fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-building', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($searchKey || ($available ?? '') !== '')
                                 No se encontraron resultados

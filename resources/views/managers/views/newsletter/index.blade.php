@@ -5,9 +5,9 @@
 @section('page_header')
     @php ob_start(); @endphp
     <div class="btn-group">
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Acciones
+        <button type="button" class="btn btn-icon btn-actions-icon"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end">
             <a class="dropdown-item" href="{{ route('manager.newsletter.campaigns.index') }}">
@@ -135,7 +135,7 @@
                 <div class="modal-body text-center p-4 position-relative">
                     <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     <div class="mb-3 mt-2">
-                        <i class="fas fa-triangle-exclamation text-warning action-modal-icon"></i>
+                        <i class="fas fa-triangle-exclamation action-modal-icon"></i>
                     </div>
                     <h5 class="fw-bold mb-2" id="action-modal-title"></h5>
                     <p class="text-muted mb-4" id="action-modal-body"></p>

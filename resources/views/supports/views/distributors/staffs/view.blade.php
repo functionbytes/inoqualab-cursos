@@ -19,62 +19,49 @@
           <input type="hidden" id="slack" name="slack" value="{{ $user->slack }}">
           <input type="hidden" id="edit" name="edit" value="true">
 
-          <div class="card-body border-top">
-            <div class="d-flex no-block align-items-center">
-              <h5 class="mb-0">Visualizar empleado</h5>
-            </div>
-            <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+          <div class="card-header border-bottom">
+            <h6 class="mb-1 fw-bold">Visualizar empleado</h6>
+            <p class="text-muted small mb-0">
+              Información de contacto de este empleado del distribuidor. Estos datos son de solo
+              lectura desde esta pantalla.
             </p>
+          </div>
 
-            <div class="row">
+          <div class="card-body">
+            <div class="row g-3">
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Nombres</label>
-                    <input type="text" class="form-control" disabled id="firstname"  name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres">
-                </div>
+                <label class="form-label fw-semibold">Nombres</label>
+                <input type="text" class="form-control" disabled id="firstname" name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres">
               </div>
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Apellidos</label>
-                    <input type="text" class="form-control" disabled id="lastname"  name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido">
-                </div>
+                <label class="form-label fw-semibold">Apellidos</label>
+                <input type="text" class="form-control" disabled id="lastname" name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido">
               </div>
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Identificación</label>
-                    <input type="text" class="form-control" disabled id="identification"  name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación">
-                </div>
+                <label class="form-label fw-semibold">Identificación</label>
+                <input type="text" class="form-control" disabled id="identification" name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación">
               </div>
 
-                <div class="col-6">
-                    <div class="mb-3">
-                        <label  class="control-label col-form-label">Celular</label>
-                        <input type="text" class="form-control" disabled id="cellphone"  name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular">
-                    </div>
-                </div>
-
-              <div class="col-12">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Correo electronico</label>
-                    <input type="text" class="form-control" disabled id="email"  name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico">
-                </div>
+              <div class="col-6">
+                <label class="form-label fw-semibold">Celular</label>
+                <input type="text" class="form-control" disabled id="cellphone" name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular">
               </div>
 
               <div class="col-12">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Dirección</label>
-                    <input type="text" class="form-control" disabled id="address"  name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
-                </div>
+                <label class="form-label fw-semibold">Correo electronico</label>
+                <input type="text" class="form-control" disabled id="email" name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico">
               </div>
 
               <div class="col-12">
-                <div class="errors d-none">
-                </div>
+                <label class="form-label fw-semibold">Dirección</label>
+                <input type="text" class="form-control" disabled id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección">
               </div>
 
+              <div class="col-12">
+                <div class="errors d-none"></div>
+              </div>
 
             </div>
           </div>

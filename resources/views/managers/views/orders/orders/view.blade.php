@@ -14,181 +14,147 @@
 
 @section('content')
 
+    @php
+        $conditionBadge = match ((int) $order->condition_id) {
+            4 => ['bg' => 'invoice-status--paid', 'label' => $order->condition->title],
+            3 => ['bg' => 'invoice-status--rejected', 'label' => $order->condition->title],
+            2 => ['bg' => 'invoice-status--pending', 'label' => $order->condition->title],
+            default => ['bg' => 'invoice-status--draft', 'label' => $order->condition->title],
+        };
+    @endphp
 
     <div class="row">
-        <div class="col-lg-12 ">
-            <div class="checkout">
-                <div class="card ">
-                    <div class="card-body p-4">
-                        <div class="wizard-content">
-                            <form action="#" class="tab-wizard wizard-circle wizard clearfix" role="application" id="steps-uid-0">
-                                <div class="steps clearfix">
-                                </div>
-                                <div class="content clearfix">
-                                    <section id="steps-uid-0-p-1" role="tabpanel" >
-                                        <div class="billing-address-content">
-                                            <div class="row">
-                                                <div class="col-md-6 col-sm-12">
-                                                    <div class="text-left mx-3">
-                                                        <address>
-                                                            <h4 class="mb-3">Para</h4>
-                                                            <h6 class="mt-0 mb-0 fw-bold invoice-customer">
-                                                                <span>Cliente :</span>
-                                                                <strong>{{ Str::upper($order->user?->firstname ?? 'Usuario eliminado') }} {{ Str::upper($order->user?->lastname ?? '') }}</strong>
-                                                            </h6>
-                                                            <h6 class="mt-0 mb-0 fw-bold invoice-customer">
-                                                                <span>Indentificación :</span>
-                                                                <strong>{{ Str::upper(Str::lower($order->user?->identification ?? '—')) }}</strong>
-                                                            </h6>
-                                                            <p class="mt-0 mb-0 {{ $order->user?->address !=null ? '' : 'd-none' }}">
-                                                                <span>Dirección :</span>
-                                                                <strong>{{ Str::upper(Str::lower($order->user?->address ?? '')) }}</strong>
-                                                            </p>
-                                                            <p class="mt-0 mb-0 {{ $order->user?->cellphone !=null ? '' : 'd-none' }}">
-                                                                <span>Celular :</span>
-                                                                <strong>{{ Str::upper(Str::lower($order->user?->cellphone ?? '')) }}</strong>
-                                                            </p>
+        <div class="col-lg-12">
+            <div class="invoice-card">
 
-                                                        </address>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6 col-sm-12">
-                                                    <div class="text-left mx-3">
-                                                        <address>
-                                                            <br>
-                                                            @if( $order->activity !=null)
-                                                                {{-- distributor/enterprise/staff pueden haberse borrado (soft delete) después de la orden --}}
-                                                                <p class="mt-0 mb-0 ">
-                                                                    <span>Distribuidor :</span>
-                                                                    <strong>{{Str::upper($order->activity->distributor->title ?? 'N/D')}}</strong>
-                                                                </p>
-                                                                <p class="mt-0 mb-0 ">
-                                                                    <span>Empresa :</span>
-                                                                    <strong>{{Str::upper($order->activity->enterprise->title ?? 'N/D')}}</strong>
-                                                                </p>
-                                                                <p class="mt-0 mb-0 ">
-                                                                    <span>Encargado :</span>
-                                                                    <strong>{{Str::upper($order->activity->staff->firstname ?? 'N/D')}} {{Str::upper($order->activity->staff->lastname ?? '')}}</strong>
-                                                                </p>
-                                                            @endif
-                                                            <p class="mt-0 mb-0">
-                                                                <span>Referencia :</span>
-                                                                <strong>{{ Str::upper($order->reference)}}</strong>
-                                                            </p>
-                                                            <p class="mt-0 mb-0">
-                                                                <span>Tipo de pago :</span>
-                                                                <strong>{{ Str::upper($order->type->title)}}</strong>
-                                                            </p>
-                                                            <p class="mt-0 mb-0">
-                                                                <span>Metodo de pago :</span>
-                                                                <strong>{{ Str::upper($order->method->title)}}</strong>
-                                                            </p>
+                {{-- Encabezado --}}
+                <div class="invoice-header">
+                    <div class="invoice-brand">
+                        <div class="invoice-brand-name">{{ Str::upper(config('app.name')) }}</div>
+                        <div class="invoice-brand-sub">E-Learnings</div>
+                    </div>
+                    <div class="invoice-meta">
+                        <div class="invoice-meta-title">ORDEN {{ $order->slack }}</div>
+                        <div class="invoice-meta-sub">Referencia {{ $order->reference }}</div>
+                        <div class="invoice-meta-sub">Emitida el {{ date('d/m/Y', strtotime($order->created_at)) }}</div>
+                        <span class="invoice-status-badge {{ $conditionBadge['bg'] }}">{{ $conditionBadge['label'] }}</span>
+                    </div>
+                </div>
 
-                                                            <p class="mt-0 mb-0">
-                                                                <span>Fecha de creación :</span>
-                                                                <strong>{{ date('Y-m-d', strtotime($order->created_at)) }}</strong>
-                                                            </p>
-                                                            @if($order->payment_at !=null)
-                                                                <p class="mt-0 mb-0">
-                                                                    <span>Fecha de pago :</span>
-                                                                    <strong>{{ date('Y-m-d', strtotime($order->payment_at)) }}</strong>
-                                                                </p>
-                                                            @endif
+                {{-- Partes --}}
+                <div class="invoice-parties">
 
-                                                        </address>
-                                                    </div>
-                                                </div>
+                    <div class="invoice-party">
+                        <div class="invoice-party-label">Facturar a</div>
+                        <div class="invoice-party-name">{{ Str::upper($order->user?->firstname ?? 'Usuario eliminado') }} {{ Str::upper($order->user?->lastname ?? '') }}</div>
+                        <div class="invoice-party-line">Doc. {{ Str::upper(Str::lower($order->user?->identification ?? '—')) }}</div>
+                        @if($order->user?->address)
+                            <div class="invoice-party-line">{{ Str::upper(Str::lower($order->user->address)) }}</div>
+                        @endif
+                        @if($order->user?->cellphone)
+                            <div class="invoice-party-line">{{ Str::upper(Str::lower($order->user->cellphone)) }}</div>
+                        @endif
+                    </div>
 
+                    @if($order->activity != null)
+                        <div class="invoice-party">
+                            <div class="invoice-party-label">Vendido por cuenta de</div>
+                            <div class="invoice-party-name">{{ Str::upper($order->activity->distributor->title ?? 'N/D') }}</div>
+                            @if($order->activity->distributor->nit ?? null)
+                                <div class="invoice-party-line">NIT {{ $order->activity->distributor->nit }}</div>
+                            @endif
+                            <div class="invoice-party-line">{{ Str::upper($order->activity->enterprise->title ?? 'N/D') }}</div>
+                            <div class="invoice-party-line">Encargado: {{ Str::upper($order->activity->staff->firstname ?? 'N/D') }} {{ Str::upper($order->activity->staff->lastname ?? '') }}</div>
+                        </div>
+                    @endif
+
+                    <div class="invoice-party">
+                        <div class="invoice-party-label">Pago</div>
+                        <div class="invoice-party-line">{{ Str::upper($order->type->title) }} · {{ Str::upper($order->method->title) }}</div>
+                        @if($order->payment_at != null)
+                            <div class="invoice-party-line">Pagada el {{ date('d/m/Y', strtotime($order->payment_at)) }}</div>
+                        @endif
+                    </div>
+
+                </div>
+
+                {{-- Ítems --}}
+                <div class="table-responsive invoice-table-wrap">
+                    <table class="table invoice-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Descripción</th>
+                                <th class="text-center">Cant.</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($order->items as $item)
+                                @php $isBundle = $item->itemable instanceof \App\Models\Bundle\Bundle; @endphp
+                                <tr>
+                                    <td>
+                                        @if($item->itemable)
+                                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                <span class="fw-semibold">{{ $item->itemable->title }}</span>
+                                                @if($isBundle)
+                                                    <span class="badge invoice-item-badge">Paquete</span>
+                                                @else
+                                                    <span class="badge invoice-item-badge">Curso</span>
+                                                @endif
                                             </div>
-                                            <div class="row">
-                                                <div class="table-responsive">
-                                                    <hr>
-                                                    <table class="table align-middle text-nowrap mb-0">
+                                            @if($isBundle && $item->itemable->courses->isNotEmpty())
+                                                <small class="text-muted d-block mt-1">
+                                                    Incluye {{ $item->itemable->courses->count() }} cursos: {{ Str::limit($item->itemable->courses->pluck('title')->implode(', '), 90) }}
+                                                </small>
+                                            @endif
+                                        @else
+                                            <span class="fw-semibold text-danger">Producto no encontrado</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">{{ ceil($item->quantity) }}</td>
+                                    <td class="text-end fw-semibold">$ {{ number_format($item->amount) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-                                                        <thead>
-                                                        <tr>
-                                                            <th class="fw-bolder text-uppercase">Descripción</th>
-                                                            <th class=" fw-bolder text-uppercase">Cantidad</th>
-                                                            <th class=" fw-bolder text-uppercase">Total</th>
-                                                        </tr>
-                                                        </thead>
-
-                                                        <tbody>
-
-                                                        @foreach($order->items as $item)
-                                                            <tr>
-                                                                <td class="border-bottom-0">
-                                                                    @php $isBundle = $item->itemable instanceof \App\Models\Bundle\Bundle; @endphp
-                                                                    @if($item->itemable)
-                                                                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                                            <h6 class="fw-semibold fs-4 mb-0">{{ $item->itemable->title }}</h6>
-                                                                            @if($isBundle)
-                                                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2">Paquete</span>
-                                                                            @else
-                                                                                <span class="badge bg-info-subtle text-info rounded-pill px-2">Curso</span>
-                                                                            @endif
-                                                                        </div>
-                                                                        @if($isBundle && $item->itemable->courses->isNotEmpty())
-                                                                            <small class="text-muted d-block mt-1">
-                                                                                Incluye {{ $item->itemable->courses->count() }} cursos: {{ Str::limit($item->itemable->courses->pluck('title')->implode(', '), 90) }}
-                                                                            </small>
-                                                                        @endif
-                                                                    @else
-                                                                        <h6 class="fw-semibold fs-4 mb-0 text-danger">Producto no encontrado</h6>
-                                                                    @endif
-                                                                </td>
-                                                                <td class="border-bottom-0">
-                                                                    <div class="d-flex align-items-center gap-3">
-                                                                        <p class="mb-0">{{ ceil($item->quantity)}}</p>
-                                                                    </div>
-                                                                </td>
-                                                                <td class="border-bottom-0">
-                                                                    <div class="d-flex align-items-center gap-3">
-                                                                        <p class="mb-0">${{ number_format($item->amount)}}</p>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <div class="order-summary border rounded p-4 my-4">
-                                                <div class="mt-3 mb-3">
-                                                    <h5 class="fs-5 fw-semibold mb-4 text-uppercase">Resumen de factura</h5>
-
-                                                    @if($order->total_discount_amount>0)
-                                                        <div class="d-flex justify-content-between mb-4">
-                                                            <p class="mb-0 fs-4">Descuentos</p>
-                                                            <h6 class="mb-0 fs-4 fw-semibold">${{ number_format($order->total_discount_amount) }}</h6>
-                                                        </div>
-                                                    @endif
-
-                                                    @if($order->total_tax_amount>0)
-                                                        <div class="d-flex justify-content-between mb-4">
-                                                            <p class="mb-0 fs-4">Impuestos</p>
-                                                            <h6 class="mb-0 fs-4 fw-semibold">${{ number_format($order->total_tax_amount) }}</h6>
-                                                        </div>
-                                                    @endif
-
-                                                    <div class="d-flex justify-content-between mb-4">
-                                                        <h6 class="mb-0 fs-4 ">Subtotal</h6>
-                                                        <h6 class="mb-0 fs-5 fw-semibold">${{ number_format($order->total_after_discount) }}</h6>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between">
-                                                        <h6 class="mb-0 fs-4 fw-semibold">Total</h6>
-                                                        <h6 class="mb-0 fs-5 fw-semibold">${{ number_format($order->total_order_amount) }}</h6>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </section>
-                                </div>
-                            </form>
+                {{-- Totales --}}
+                <div class="invoice-totals-wrap">
+                    <div class="invoice-totals-box">
+                        @if($order->total_discount_amount > 0)
+                            <div class="invoice-totals-row">
+                                <span>Descuentos</span>
+                                <span>$ {{ number_format($order->total_discount_amount) }}</span>
+                            </div>
+                        @endif
+                        @if($order->total_tax_amount > 0)
+                            <div class="invoice-totals-row">
+                                <span>Impuestos</span>
+                                <span>$ {{ number_format($order->total_tax_amount) }}</span>
+                            </div>
+                        @endif
+                        <div class="invoice-totals-row">
+                            <span>Subtotal</span>
+                            <span>$ {{ number_format($order->total_after_discount) }}</span>
+                        </div>
+                        <div class="invoice-totals-row invoice-totals-row--grand">
+                            <span>TOTAL</span>
+                            <span>$ {{ number_format($order->total_order_amount) }}</span>
                         </div>
                     </div>
                 </div>
+
+                <div class="invoice-footer-note">
+                    Gracias por confiar en {{ Str::upper(config('app.name')) }}. Este documento es un comprobante de la orden generada en el sistema.
+                </div>
+
             </div>
         </div>
     </div>
+
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/orders/orders/view.css') }}">
+@endpush

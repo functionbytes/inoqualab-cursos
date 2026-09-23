@@ -79,6 +79,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Factura</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Metodo de pago</th>
@@ -90,15 +93,19 @@
                                 @foreach($invoices as $invoice)
                                     <tr>
                                         <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $invoice->id }}">
+                                        </td>
+                                        <td>
                                             <span class="fw-semibold">{{ $invoice->reference }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge {{ $invoice->condition->badge_class }} rounded-3 py-2 fw-semibold">
+                                            <span class="badge {{ $invoice->condition->badge_class }}">
                                                 {{ $invoice->condition->title }}
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold">
+                                            <span class="badge bg-primary-subtle text-primary">
                                                 {{ $invoice->method->title }}
                                             </span>
                                         </td>
@@ -140,7 +147,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-file-invoice fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-invoice', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') !== '' || ($condition ?? '') !== '' || ($method ?? '') !== '')
                                 No se encontraron resultados

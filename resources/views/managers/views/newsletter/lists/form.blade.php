@@ -18,7 +18,10 @@
         {{-- Columna izquierda: formulario --}}
         <div class="col-lg-8">
             <div class="card">
-                <div class="card-body p-4">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">{{ $list ? 'Editar lista' : 'Nueva lista' }}</h6>
+                </div>
+                <div class="card-body">
                     <form id="formList"
                           data-is-new="{{ $list ? 'false' : 'true' }}"
                           data-save-url="{{ $list ? route('manager.newsletter.lists.update', $list->id) : route('manager.newsletter.lists.store') }}"

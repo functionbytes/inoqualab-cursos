@@ -54,6 +54,10 @@ $(document).ready(function () {
             $('.bulk-checkbox').prop('checked', $(this).is(':checked'));
             updateBulkState();
         });
+
+        FilterToolbar.init({
+            fields: { filterSeoableType: 'popover_SeoableType' },
+        });
     }
 
     initMetasTable();

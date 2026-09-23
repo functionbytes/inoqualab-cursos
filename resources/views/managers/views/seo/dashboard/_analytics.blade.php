@@ -10,28 +10,11 @@
 <div class="card">
     <div class="card-body border-bottom">
         <form method="GET" action="{{ route('manager.seo.analytics') }}" id="searchForm">
-            <div class="d-flex flex-column flex-lg-row gap-3 align-items-stretch">
-                <div class="flex-fill">
-                    <div class="input-group h-100">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search text-muted"></i>
-                        </span>
-                        <input type="search" name="search" class="form-control border-start-0 ps-0"
-                               placeholder="Buscar por título o URL..."
-                               value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="d-flex gap-2 flex-shrink-0">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    @if(request('search'))
-                        <a href="{{ route('manager.seo.analytics') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
-                            <i class="fas fa-times"></i>
-                        </a>
-                    @endif
-                </div>
-            </div>
+            @include('managers.includes.filter-toolbar', [
+                'searchName' => 'search',
+                'searchValue' => request('search') ?? '',
+                'searchPlaceholder' => 'Buscar por título o URL...',
+            ])
         </form>
     </div>
 

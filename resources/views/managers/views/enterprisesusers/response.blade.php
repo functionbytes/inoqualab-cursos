@@ -9,15 +9,13 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <div class="card-body border-top">
-                    <div class="d-flex no-block align-items-center mb-3">
-                        <h5 class="mb-0">Resultado de importación de cursos</h5>
-                        <div class="ms-auto">
-                            <a href="{{ route('manager.enterprises.courses', $enterprise->slack) }}" class="btn btn-light btn-sm">
-                                <i class="fas fa-arrow-left me-1"></i> Volver
-                            </a>
-                        </div>
-                    </div>
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold">Resultado de importación de cursos</h6>
+                    <a href="{{ route('manager.enterprises.courses', $enterprise->slack) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Volver
+                    </a>
+                </div>
+                <div class="card-body">
 
                     @if(isset($error_message))
                     <div class="alert alert-danger mb-4">

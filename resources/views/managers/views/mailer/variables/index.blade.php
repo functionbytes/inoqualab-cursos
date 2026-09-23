@@ -3,9 +3,15 @@
 @section('title', 'Variables de email')
 
 @section('page_header')
+    @php ob_start(); @endphp
+    @can('newsletters.create')
+        <a href="{{ route('mailers.variables.create') }}" class="btn btn-primary btn-icon" title="Nueva variable" aria-label="Nueva variable">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    @endcan
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Variables de email',
         'description' => 'Gestiona variables dinámicas que se sustituyen automáticamente en plantillas y componentes',
+        'actions' => $headerActions,
     ])
 @endsection
 

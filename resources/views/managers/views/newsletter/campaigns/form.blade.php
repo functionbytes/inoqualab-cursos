@@ -288,7 +288,7 @@
                         @if($campaign->creator)
                         <div class="list-group-item px-3 py-2">
                             <small class="text-muted d-block">Por</small>
-                            <span class="small">{{ $campaign->creator->name ?: '—' }}</span>
+                            <span class="small">{{ $campaign->creator->full_name ?: '—' }}</span>
                         </div>
                         @endif
                     </div>

@@ -52,13 +52,11 @@
         <div class="row">
             <div class="col-lg-12 d-flex align-items-strech">
                 <div class="card w-100">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Detalle facturación</h6>
+                        <p class="text-muted small mb-0">Detalle de facturación de ordenes</p>
+                    </div>
                     <div class="card-body">
-                        <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">
-                            <div class="mb-3 mb-sm-0">
-                                <h5 class="card-title fw-semibold">Detalle facturación</h5>
-                                <p class="card-subtitle mb-0">Detalle de facturación de ordenes </p>
-                            </div>
-                        </div>
                         <div class="row align-items-center">
                             <div class="col-lg-8 col-md-8">
                                 <div id="invoices"></div>
@@ -105,12 +103,12 @@
             @if(count($yearInvoices)>0)
             <div class="col-lg-12 d-flex align-items-strech">
                 <div class="card w-100">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Facturas</h6>
+                        <p class="text-muted small mb-0">Detalle de facturas por mes</p>
+                    </div>
                     <div class="card-body">
-                        <div>
-                            <h5 class="card-title fw-semibold mb-1">Facturas</h5>
-                            <p class="card-subtitle mb-0">Detalle de facturas por mes</p>
-                            <div id="invoiceList" class="mb-7 pb-8"></div>
-                        </div>
+                        <div id="invoiceList" class="mb-7 pb-8"></div>
                     </div>
                 </div>
             </div>
@@ -121,13 +119,11 @@
                 <!-- Weekly Stats -->
 
                     <div class="card w-100">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-1 fw-bold">Reporte facturacion ultimos 7 dias</h6>
+                            <p class="text-muted small mb-0">Detalle de factura de los ultimos dias</p>
+                        </div>
                         <div class="card-body">
-                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-7">
-                                <div class="mb-3 mb-sm-0">
-                                    <h5 class="card-title fw-semibold">Reporte facturacion ultimos 7 dias</h5>
-                                    <p class="card-subtitle mb-0">Detalle de factura de los ultimos dias</p>
-                                </div>
-                            </div>
                             <div class="table-responsive">
                                 <table class="table align-middle text-nowrap mb-0">
                                     <thead>

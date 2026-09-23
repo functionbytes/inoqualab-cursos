@@ -32,12 +32,15 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Foto</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Foto</h6>
+                        <p class="text-muted small mb-0">
                             Foto del capacitador. Se muestra en el certificado emitido y en su perfil público.
                         </p>
-                        <div class="dropzone dz-clickable" id="thumbnail">
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
                                 <input type="file" hidden name="thumbnail">
                             </div>

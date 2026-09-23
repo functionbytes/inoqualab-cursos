@@ -6,10 +6,6 @@
     <div class="cx-band">
         <div class="cx-band-glow"></div>
         <div class="cx-band-tex"></div>
-        {{-- Contenedor centrado (mismo max-width que el resto del contenido):
-             sin él, en pantallas muy anchas el título quedaría pegado al
-             borde real de la ventana en vez de alinearse con las tarjetas
-             de abajo (que sí respetan el ancho máximo del portal). --}}
         <div class="cx-band-container">
             <div class="cx-band-crumb">
                 <a href="{{ route('home') }}">Inicio</a>
@@ -38,11 +34,16 @@
                     </div>
                 @endif
             </div>
-            @hasSection('context-tabs')
-                <div class="cx-band-tabs" role="tablist">
-                    @yield('context-tabs')
-                </div>
-            @endif
         </div>
     </div>
+    {{-- Las tabs (solo Configuración) viven FUERA de .cx-band a propósito:
+         adentro, la banda quedaba más alta que en el resto del portal (única
+         página con una franja extra), dando la impresión de un estilo
+         distinto pese a compartir el mismo título/subtítulo/stat. Como
+         hermano, .cx-band mantiene la misma altura en todas las vistas. --}}
+    @hasSection('context-tabs')
+        <div class="cx-band-tabs" role="tablist">
+            @yield('context-tabs')
+        </div>
+    @endif
 @endif

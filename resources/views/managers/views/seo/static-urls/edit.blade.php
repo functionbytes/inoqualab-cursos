@@ -13,21 +13,23 @@
 
         {{-- Formulario principal --}}
         <div class="col-lg-8">
-            <div class="card w-100">
+            <div class="card">
                 <form id="formStaticUrl" action="{{ route('manager.seo.static-urls.update', $staticUrl) }}" method="POST" novalidate>
                     @csrf
                     @method('PUT')
 
-                    <div class="card-body">
-                        <h5 class="mb-0">Editar URL estática</h5>
-                        <p class="text-muted mb-4 mt-1">Actualiza la configuracion de la URL estatica.</p>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Editar URL estática</h6>
+                        <p class="text-muted small mb-0">Actualiza la configuración de la URL estática.</p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row">
 
                             {{-- URL --}}
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         URL <span class="text-danger">*</span>
                                     </label>
                                     <input type="text"
@@ -49,7 +51,7 @@
                             {{-- Prioridad --}}
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         Prioridad <span class="text-danger">*</span>
                                     </label>
                                     @php
@@ -81,7 +83,7 @@
                             {{-- Frecuencia de cambio --}}
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         Frecuencia de cambio <span class="text-danger">*</span>
                                     </label>
                                     @php
@@ -111,7 +113,7 @@
                             {{-- Notas --}}
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">Notas</label>
+                                    <label class="form-label fw-semibold">Notas</label>
                                     <textarea class="form-control @error('notes') is-invalid @enderror"
                                               id="notes"
                                               name="notes"
@@ -128,7 +130,7 @@
                             {{-- Estado --}}
                             <div class="col-12">
                                 <div class="mb-0">
-                                    <label class="col-form-label fw-semibold">Estado</label>
+                                    <label class="form-label fw-semibold">Estado</label>
                                     @php $currentActive = old('is_active', $staticUrl->is_active ? '1' : '0'); @endphp
                                     <div class="form-check form-switch mt-1">
                                         <input class="form-check-input" type="checkbox"
@@ -164,8 +166,10 @@
 
             {{-- Metadatos del registro --}}
             <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Información del registro</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="mb-3">Informacion del registro</h6>
                     <dl class="row small mb-0">
                         <dt class="col-5 text-muted">ID</dt>
                         <dd class="col-7">{{ $staticUrl->id }}</dd>
@@ -179,8 +183,10 @@
 
             {{-- Guia rapida --}}
             <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Prioridad</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="mb-3">Prioridad</h6>
                     <div class="mb-2">
                         <span class="badge bg-primary-subtle text-primary mb-1">1.0 — Muy alta</span>
                         <p class="text-muted small mb-0">Para la pagina principal y secciones clave.</p>
@@ -202,9 +208,10 @@
                         <p class="text-muted small mb-0">Paginas de escasa relevancia SEO.</p>
                     </div>
                 </div>
-                <div class="card-body border-top">
-                    <h6 class="mb-3">Frecuencia de cambio</h6>
-                    <ul class="text-muted small mb-0 ps-3">
+                <hr class="my-0">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Frecuencia de cambio</h6>
+                    <ul class="text-muted small mb-0 ps-3 mt-2">
                         <li class="mb-1"><strong>always</strong> — Cambia en cada visita</li>
                         <li class="mb-1"><strong>hourly</strong> — Cambia cada hora</li>
                         <li class="mb-1"><strong>daily</strong> — Cambia a diario</li>
@@ -218,8 +225,10 @@
 
             {{-- Zona de peligro --}}
             <div class="card border-danger">
+                <div class="card-header border-bottom border-danger">
+                    <h6 class="mb-0 fw-bold">Zona de peligro</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="mb-2">Zona de peligro</h6>
                     <p class="text-muted small mb-3">
                         Eliminar esta URL no se puede deshacer y dejara de aparecer en el sitemap.
                     </p>

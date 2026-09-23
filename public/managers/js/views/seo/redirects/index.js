@@ -18,6 +18,9 @@ $(function () {
             applyBtn: '#bulk-apply-btn',
             entityLabel: 'redirect(s)',
         });
+        FilterToolbar.init({
+            fields: { filterIsActive: 'popover_IsActive' },
+        });
     }
 
     initRedirectsTable();

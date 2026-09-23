@@ -16,19 +16,16 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="card-header border-bottom p-3">
-                        <h5 class="mb-0 fw-bold">Editar plantilla SEO</h5>
-                        <p class="text-muted">Modifica los patrones y configuración de esta plantilla.</p>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Información básica</h6>
+                        <p class="text-muted small mb-0">Modifica los patrones y configuración de esta plantilla.</p>
                     </div>
 
                     <div class="card-body">
-
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Informacion basica</h6>
-
-                        <div class="row g-3 mb-4">
+                        <div class="row g-3">
 
                             <div class="col-12">
-                                <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
                                 <input type="text"
                                        name="name"
                                        class="form-control @error('name') is-invalid @enderror"
@@ -41,7 +38,7 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Tipo de modelo</label>
+                                <label class="form-label fw-semibold">Tipo de modelo</label>
                                 <select name="model_type" class="form-select select2 @error('model_type') is-invalid @enderror">
                                     <option value="">Global (todos los modelos)</option>
                                     <option value="App\Models\Course" {{ old('model_type', $seoTemplate->model_type) === 'App\\Models\\Course' ? 'selected' : '' }}>Curso</option>
@@ -54,7 +51,7 @@
                             </div>
 
                             <div class="col-12 col-md-6">
-                                <label class="form-label">Estado</label>
+                                <label class="form-label fw-semibold">Estado</label>
                                 <select name="is_active" class="form-select select2">
                                     <option value="1" {{ old('is_active', $seoTemplate->is_active ? '1' : '0') === '1' ? 'selected' : '' }}>Activo</option>
                                     <option value="0" {{ old('is_active', $seoTemplate->is_active ? '1' : '0') === '0' ? 'selected' : '' }}>Inactivo</option>
@@ -62,7 +59,7 @@
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label">Prioridad</label>
+                                <label class="form-label fw-semibold">Prioridad</label>
                                 <input type="number"
                                        name="priority"
                                        class="form-control @error('priority') is-invalid @enderror"
@@ -76,13 +73,18 @@
                             </div>
 
                         </div>
+                    </div>
 
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Patrones de contenido</h6>
+                    <hr class="my-0">
 
-                        <div class="row g-3 mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Patrones de contenido</h6>
+                        <p class="text-muted mb-3">Usa variables entre llaves para generar el título y la descripción automáticamente.</p>
+
+                        <div class="row g-3">
 
                             <div class="col-12">
-                                <label class="form-label">Patrón para título</label>
+                                <label class="form-label fw-semibold">Patrón para título</label>
                                 <input type="text"
                                        name="title_pattern"
                                        class="form-control @error('title_pattern') is-invalid @enderror"
@@ -96,7 +98,7 @@
                             </div>
 
                             <div class="col-12">
-                                <label class="form-label">Patrón para descripción</label>
+                                <label class="form-label fw-semibold">Patrón para descripción</label>
                                 <textarea name="description_pattern"
                                           class="form-control @error('description_pattern') is-invalid @enderror"
                                           rows="3"
@@ -109,13 +111,18 @@
                             </div>
 
                         </div>
+                    </div>
 
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Configuracion social y robots</h6>
+                    <hr class="my-0">
+
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Configuracion social y robots</h6>
+                        <p class="text-muted mb-3">Controla cómo se comparte y rastrea el contenido que usa esta plantilla.</p>
 
                         <div class="row g-3">
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label">Tipo OG</label>
+                                <label class="form-label fw-semibold">Tipo OG</label>
                                 <select name="og_type" class="form-select select2 @error('og_type') is-invalid @enderror">
                                     <option value="">Sin definir</option>
                                     <option value="website" {{ old('og_type', $seoTemplate->og_type) === 'website' ? 'selected' : '' }}>website</option>
@@ -128,7 +135,7 @@
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label">Twitter card</label>
+                                <label class="form-label fw-semibold">Twitter card</label>
                                 <select name="twitter_card" class="form-select select2 @error('twitter_card') is-invalid @enderror">
                                     <option value="">Sin definir</option>
                                     <option value="summary" {{ old('twitter_card', $seoTemplate->twitter_card) === 'summary' ? 'selected' : '' }}>summary</option>
@@ -140,7 +147,7 @@
                             </div>
 
                             <div class="col-12 col-md-4">
-                                <label class="form-label">Robots</label>
+                                <label class="form-label fw-semibold">Robots</label>
                                 <select name="robots" class="form-select select2 @error('robots') is-invalid @enderror">
                                     <option value="">Sin definir</option>
                                     <option value="index,follow" {{ old('robots', $seoTemplate->robots) === 'index,follow' ? 'selected' : '' }}>index, follow</option>
@@ -154,12 +161,10 @@
                             </div>
 
                         </div>
-
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary w-100 mb-1">Guardar cambios</button>
-                        <a href="{{ route('manager.seo.templates.index') }}" class="btn btn-light w-100">Cancelar</a>
+                        <button type="submit" class="btn btn-primary w-100">Guardar cambios</button>
                     </div>
 
                 </form>
@@ -171,8 +176,10 @@
 
             {{-- Apply to metas --}}
             <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Aplicar plantilla</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="card-title fw-bold mb-1">Aplicar plantilla</h6>
                     <p class="text-muted small mb-3">Aplica los patrones de esta plantilla a los registros de meta SEO existentes.</p>
                     <button type="button" class="btn btn-outline-primary w-100 apply-sidebar-btn"
                             data-preview-url="{{ route('manager.seo.templates.preview', $seoTemplate) }}"
@@ -185,8 +192,10 @@
 
             {{-- Variables help --}}
             <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Variables disponibles</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="card-title fw-bold mb-3">Variables disponibles</h6>
                     <ul class="list-unstyled mb-0">
                         <li class="d-flex align-items-start gap-2 mb-2">
                             <code class="bg-light px-2 py-1 rounded flex-shrink-0">{title}</code>

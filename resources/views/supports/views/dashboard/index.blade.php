@@ -1,197 +1,162 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('supports.includes.card', [
+        'title' => 'Panel de soporte',
+        'description' => 'Resumen general de la plataforma',
+    ])
+@endsection
 
-    @section('content')
-        <div class="container-fluid" id="dashboard-content" data-config='@php $__jsonInline1 = [
-            "numberEarnings" => $numberEanings,
-            "monthEarnings" => $monthEanings,
-            "viewOrders" => $viewOrders,
-        ]; @endphp@json($__jsonInline1)'>
+@section('content')
 
-            <div class="row">
-                <!-- Customers -->
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Cursos</p>
-                            <h4 class="fw-semibold fs-7">{{ $courses }}</h4>
+    <div class="widget-content">
 
+        {{-- Métricas --}}
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book"></i>
                         </div>
-                        <div class="customers" id="customers"></div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Empresas</p>
-                            <h4 class="fw-semibold fs-7">{{ $enterprises }}</h4>
-
-                        </div>
-                        <div class="customers2" id="customers2"></div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Blogs</p>
-                            <h4 class="fw-semibold fs-7">{{ $blogs }}</h4>
-
-                        </div>
-                        <div class="customers3" id="customers3"></div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Clientes</p>
-                            <h4 class="fw-semibold fs-7">{{ $usercustomers }}</h4>
-
-                        </div>
-                        <div class="customers4" id="customers4"></div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Administradores</p>
-                            <h4 class="fw-semibold fs-7">{{ $useradmins }}</h4>
-
-                        </div>
-                        <div class="customers5" id="customers5"></div>
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body pb-0 mb-xxl-2 pb-1">
-                            <p class="mb-1 fs-5">Pedidos</p>
-                            <h4 class="fw-semibold fs-7">{{ $orders }}</h4>
-
-                        </div>
-                        <div class="customers6" id="customers6"></div>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="row">
-{{--                <div class="col-lg-12 d-flex align-items-strech">--}}
-{{--                    <div class="card w-100">--}}
-{{--                        <div class="card-body">--}}
-{{--                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-9">--}}
-{{--                                <div class="mb-3 mb-sm-0">--}}
-{{--                                    <h5 class="card-title fw-semibold">Detalle facturación</h5>--}}
-{{--                                    <p class="card-subtitle mb-0">Detalle de facturación ordenes </p>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                            <div class="row align-items-center">--}}
-{{--                                <div class="col-lg-8 col-md-8">--}}
-{{--                                    <div id="charts"></div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-lg-4 col-md-4">--}}
-{{--                                    <div class="d-flex align-items-center mb-4 pb-1">--}}
-{{--                                        <div>--}}
-{{--                                            <h4 class="mb-0 fs-7 fw-semibold">${{ number_format($analyticsEanings->sum('total')) }}</h4>--}}
-{{--                                            <p class="fs-3 mb-0">Total ganancias</p>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                    <div>--}}
-{{--                                        <div class="d-flex align-items-baseline mb-4">--}}
-{{--                                            <span class="round-8 bg-primary rounded-circle me-6"></span>--}}
-{{--                                            <div>--}}
-{{--                                                <p class="fs-3 mb-1">Ordenes acuerdo</p>--}}
-{{--                                                <h6 class="fs-5 fw-semibold mb-0">{{ $analyticsEaning->where('method_id', 1)->count() }}</h6>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                        <div class="d-flex align-items-baseline mb-4 pb-1">--}}
-{{--                                            <span class="round-8 bg-secondary rounded-circle me-6"></span>--}}
-{{--                                            <div>--}}
-{{--                                                <p class="fs-3 mb-1">Ordenes online</p>--}}
-{{--                                                <h6 class="fs-5 fw-semibold mb-0">{{ $analyticsEaning->where('method_id', 2)->count() }}</h6>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                        <div>--}}
-{{--                                            <a href="{{ route('manager.orders') }}" class="btn btn-primary w-100">Visualiar ordenes</a>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-
-{{--                <div class="col-lg-12 d-flex align-items-strech">--}}
-{{--                    <div class="card w-100">--}}
-{{--                        <div class="card-body">--}}
-{{--                            <div>--}}
-{{--                                <h5 class="card-title fw-semibold mb-1">Ordenes</h5>--}}
-{{--                                <p class="card-subtitle mb-0">Detalle ordenes por mes</p>--}}
-{{--                                <div id="orders" class="mb-7 pb-8"></div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-                <!--  Row 3 -->
-                <div class="row">
-                    <!-- Weekly Stats -->
-                    <div class="col-lg-12 d-flex align-items-strech">
-                        <div class="card w-100">
-                            <div class="card-body">
-                                <div class="d-sm-flex d-block align-items-center justify-content-between mb-7">
-                                    <div class="mb-3 mb-sm-0">
-                                        <h5 class="card-title fw-semibold">Solicitudes contacto</h5>
-                                        <p class="card-subtitle mb-0">Detalle de las últimas solicitudes de soporte</p>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table align-middle text-nowrap mb-0">
-                                        <thead>
-                                        <tr class="text-muted fw-semibold">
-                                            <th scope="col" class="ps-0">Cliente</th>
-                                            <th scope="col">Estado</th>
-                                            <th scope="col">Acciones</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody class="border-top">
-                                        @foreach($contacts as $contact)
-                                            <tr>
-                                                <td class="ps-0">
-                                                    <div class="d-flex align-items-center">
-                                                        <div>
-                                                            <h6 class="fw-semibold mb-1">{{ Str::words( Str::upper(Str::lower($contact->firstname . ' ' . $contact->lastname)), 12, '...')  }}</h6>
-                                                            <p class="fs-2 mb-0 text-muted">{{{ $contact->slack }}}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                            <span class="badge {{ $contact->reviewed == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                                 {{ $contact->reviewed == 1 ? 'Gestionado' : 'Pendiente' }}
-                                              </span>
-                                                </td>
-                                                <td class="">
-                                                    <div class="dropdown">
-                                                        <a class="text-decoration-none" href="{{ route('support.contacts.edit', $contact->slack) }}" >
-                                                            <i class="fas fa-ellipsis-vertical fs-4"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div>
+                            <div class="text-muted small">Cursos</div>
+                            <div class="fs-4 fw-bold">{{ number_format($courses) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
-            @endsection
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Empresas</div>
+                            <div class="fs-4 fw-bold">{{ number_format($enterprises) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-file-lines"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Blogs</div>
+                            <div class="fs-4 fw-bold">{{ number_format($blogs) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Clientes</div>
+                            <div class="fs-4 fw-bold">{{ number_format($usercustomers) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Administradores</div>
+                            <div class="fs-4 fw-bold">{{ number_format($useradmins) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-bag-shopping"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small">Pedidos</div>
+                            <div class="fs-4 fw-bold">{{ number_format($orders) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        {{-- Solicitudes de contacto --}}
+        <div class="card">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0 fw-bold">Solicitudes de contacto</h6>
+                <p class="text-muted mb-0">Últimas solicitudes recibidas por soporte</p>
+            </div>
+            <div class="card-body p-0">
+                @if($contacts->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($contacts as $contact)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($contact->firstname.' '.$contact->lastname)), 12, '...') }}</div>
+                                            <div class="text-muted small">{{ $contact->slack }}</div>
+                                        </td>
+                                        <td>
+                                            @if($contact->reviewed == 1)
+                                                <span class="badge bg-success-subtle text-success">Gestionado</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Pendiente</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('support.contacts.edit', $contact->slack) }}">Editar</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
+                        <h5 class="fw-bold mb-2">No hay solicitudes</h5>
+                        <p class="text-muted mb-0">Aún no se han recibido solicitudes de contacto.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
 
+    </div>
 
-            @push('scripts')
+@endsection
 
-
-                <script src="{{ url('managers/libs/owl.carousel/dist/owl.carousel.min.js') }}" type="text/javascript"></script>
-                <script src="{{ url('managers/libs/apexcharts/dist/apexcharts.min.js') }}" type="text/javascript"></script>
-                <script src="{{ asset('supports/js/views/dashboard/index.js') }}"></script>
-        @endpush
+@push('css')
+<link rel="stylesheet" href="{{ asset('supports/css/views/dashboard/index.css') }}">
+@endpush

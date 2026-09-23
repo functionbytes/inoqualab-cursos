@@ -16,6 +16,10 @@ class Seo404LogController extends Controller
     {
         $logs = Seo404Log::query()
             ->when(
+                $request->filled('search'),
+                fn ($q) => $q->where('path', 'like', '%'.$request->input('search').'%')
+            )
+            ->when(
                 $request->filled('has_redirect'),
                 fn ($q) => $q->where('has_redirect', $request->boolean('has_redirect'))
             )

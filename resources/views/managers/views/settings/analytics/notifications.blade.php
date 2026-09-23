@@ -16,159 +16,149 @@
             <form action="{{ route('manager.settings.analytics.notifications.update') }}" method="POST">
                 @csrf
 
+                @if(session('success'))
+                    <div class="alert alert-success border-0 mb-3 py-2">
+                        <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="alert alert-danger border-0 mb-3 py-2">
+                        <i class="fas fa-exclamation-circle me-1"></i>
+                        <ul class="mb-0 ps-3">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="card">
 
-                    <div class="card-header border-bottom p-3">
-                        <h5 class="mb-0 fw-bold">Notificaciones de analytics</h5>
-                        <p class="text-muted">Configura los destinatarios para cada tipo de evento de reportes programados</p>
+                    {{-- Reporte enviado --}}
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte enviado</h6>
+                        <p class="text-muted small mb-0">
+                            Destinatarios que recibirán el correo cuando un reporte programado se genere sin errores.
+                            <span class="ms-1">
+                                @if(count($sentEmails) > 0)
+                                    <span class="badge bg-success-subtle text-success">Activo</span>
+                                @else
+                                    <span class="badge bg-light text-dark">Sin destinatarios</span>
+                                @endif
+                            </span>
+                        </p>
                     </div>
 
                     <div class="card-body">
-
-                        @if(session('success'))
-                            <div class="alert alert-success border-0 mb-4 py-2">
-                                <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
-                            </div>
-                        @endif
-
-                        @if($errors->any())
-                            <div class="alert alert-danger border-0 mb-4 py-2">
-                                <i class="fas fa-exclamation-circle me-1"></i>
-                                <ul class="mb-0 ps-3">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        {{-- Reporte enviado --}}
-                        <div class="mb-4">
-                            <h6 class="fw-bold mb-1">Reporte enviado</h6>
-                            <p class="text-muted mb-3">
-                                Destinatarios que recibirán el correo cuando un reporte programado se genere sin errores.
-                                <span class="ms-1">
-                                    @if(count($sentEmails) > 0)
-                                        <span class="badge bg-success-subtle text-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-light text-dark">Sin destinatarios</span>
-                                    @endif
-                                </span>
-                            </p>
-
-                            <div class="emails-container" id="sent-emails-container" data-name="sent_emails[]">
-                                @forelse($sentEmails as $i => $email)
-                                    <div class="mb-2 email-row">
-                                        <div class="input-group">
-                                            <input type="email"
-                                                   class="form-control @error('sent_emails.'.$i) is-invalid @enderror"
-                                                   name="sent_emails[]"
-                                                   value="{{ $email }}"
-                                                   placeholder="correo@ejemplo.com">
-                                            <button type="button" class="btn btn-info remove-email">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                            @if($loop->last)
-                                                <button type="button" class="btn btn-outline-secondary add-email">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            @endif
-                                        </div>
-                                        @error('sent_emails.'.$i)
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                @empty
-                                    <div class="mb-2 email-row">
-                                        <div class="input-group">
-                                            <input type="email" class="form-control" name="sent_emails[]"
-                                                   placeholder="correo@ejemplo.com">
-                                            <button type="button" class="btn btn-info remove-email">
-                                                <i class="fas fa-times"></i>
-                                            </button>
+                        <div class="emails-container" id="sent-emails-container" data-name="sent_emails[]">
+                            @forelse($sentEmails as $i => $email)
+                                <div class="mb-2 email-row">
+                                    <div class="input-group">
+                                        <input type="email"
+                                               class="form-control @error('sent_emails.'.$i) is-invalid @enderror"
+                                               name="sent_emails[]"
+                                               value="{{ $email }}"
+                                               placeholder="correo@ejemplo.com">
+                                        <button type="button" class="btn btn-info remove-email">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        @if($loop->last)
                                             <button type="button" class="btn btn-outline-secondary add-email">
                                                 <i class="fas fa-plus"></i>
                                             </button>
-                                        </div>
+                                        @endif
                                     </div>
-                                @endforelse
-                            </div>
-
-                            <div class="alert alert-info border-0 mb-0 py-2 small mt-3">
-                                <i class="fas fa-circle-info me-1"></i>
-                                Incluye el reporte adjunto en el formato configurado (PDF, Excel o CSV).
-                            </div>
+                                    @error('sent_emails.'.$i)
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @empty
+                                <div class="mb-2 email-row">
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" name="sent_emails[]"
+                                               placeholder="correo@ejemplo.com">
+                                        <button type="button" class="btn btn-info remove-email">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary add-email">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforelse
                         </div>
 
-                        <hr class="my-4">
+                        <div class="alert alert-info border-0 mb-0 py-2 small mt-3">
+                            <i class="fas fa-circle-info me-1"></i>
+                            Incluye el reporte adjunto en el formato configurado (PDF, Excel o CSV).
+                        </div>
+                    </div>
 
-                        {{-- Error en reporte --}}
-                        <div>
-                            <h6 class="fw-bold mb-1">Error en reporte</h6>
-                            <p class="text-muted mb-3">
-                                Destinatarios que recibirán el correo cuando un reporte falle. Se incluye el mensaje de error.
-                                <span class="ms-1">
-                                    @if(count($failedEmails) > 0)
-                                        <span class="badge bg-success-subtle text-success">Activo</span>
-                                    @else
-                                        <span class="badge bg-light text-dark">Sin destinatarios</span>
-                                    @endif
-                                </span>
-                            </p>
+                    <hr class="my-0">
 
-                            <div class="emails-container" id="failed-emails-container" data-name="failed_emails[]">
-                                @forelse($failedEmails as $i => $email)
-                                    <div class="mb-2 email-row">
-                                        <div class="input-group">
-                                            <input type="email"
-                                                   class="form-control @error('failed_emails.'.$i) is-invalid @enderror"
-                                                   name="failed_emails[]"
-                                                   value="{{ $email }}"
-                                                   placeholder="correo@ejemplo.com">
-                                            <button type="button" class="btn btn-info remove-email">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                            @if($loop->last)
-                                                <button type="button" class="btn btn-outline-secondary add-email">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            @endif
-                                        </div>
-                                        @error('failed_emails.'.$i)
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                @empty
-                                    <div class="mb-2 email-row">
-                                        <div class="input-group">
-                                            <input type="email" class="form-control" name="failed_emails[]"
-                                                   placeholder="correo@ejemplo.com">
-                                            <button type="button" class="btn btn-info remove-email">
-                                                <i class="fas fa-times"></i>
-                                            </button>
+                    {{-- Error en reporte --}}
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Error en reporte</h6>
+                        <p class="text-muted mb-3">
+                            Destinatarios que recibirán el correo cuando un reporte falle. Se incluye el mensaje de error.
+                            <span class="ms-1">
+                                @if(count($failedEmails) > 0)
+                                    <span class="badge bg-success-subtle text-success">Activo</span>
+                                @else
+                                    <span class="badge bg-light text-dark">Sin destinatarios</span>
+                                @endif
+                            </span>
+                        </p>
+
+                        <div class="emails-container" id="failed-emails-container" data-name="failed_emails[]">
+                            @forelse($failedEmails as $i => $email)
+                                <div class="mb-2 email-row">
+                                    <div class="input-group">
+                                        <input type="email"
+                                               class="form-control @error('failed_emails.'.$i) is-invalid @enderror"
+                                               name="failed_emails[]"
+                                               value="{{ $email }}"
+                                               placeholder="correo@ejemplo.com">
+                                        <button type="button" class="btn btn-info remove-email">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        @if($loop->last)
                                             <button type="button" class="btn btn-outline-secondary add-email">
                                                 <i class="fas fa-plus"></i>
                                             </button>
-                                        </div>
+                                        @endif
                                     </div>
-                                @endforelse
-                            </div>
-
-                            <div class="alert alert-warning border-0 mb-0 py-2 small mt-3">
-                                <i class="fas fa-triangle-exclamation me-1"></i>
-                                Se recomienda añadir al menos un destinatario para detectar fallos en reportes programados.
-                            </div>
+                                    @error('failed_emails.'.$i)
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @empty
+                                <div class="mb-2 email-row">
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" name="failed_emails[]"
+                                               placeholder="correo@ejemplo.com">
+                                        <button type="button" class="btn btn-info remove-email">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary add-email">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforelse
                         </div>
 
+                        <div class="alert alert-warning border-0 mb-0 py-2 small mt-3">
+                            <i class="fas fa-triangle-exclamation me-1"></i>
+                            Se recomienda añadir al menos un destinatario para detectar fallos en reportes programados.
+                        </div>
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
                             Guardar ajustes
                         </button>
-                        <a href="{{ route('manager.settings.analytics') }}" class="btn btn-light w-100">
-                            Volver a configuración
-                        </a>
                     </div>
 
                 </div>
@@ -195,8 +185,10 @@
             </div>
 
             <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Reportes programados</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="mb-1 fw-semibold">Reportes programados</h6>
                     <p class="text-muted mb-2">Configura o revisa los reportes que se envían automáticamente.</p>
                     <a href="{{ route('manager.settings.analytics.schedules.index') }}" class="btn btn-outline-primary w-100">
                         Ver reportes

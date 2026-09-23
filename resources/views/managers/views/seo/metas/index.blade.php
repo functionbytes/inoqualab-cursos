@@ -5,9 +5,9 @@
 @section('page_header')
     @php ob_start(); @endphp
 <div class="btn-group">
-                            <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Acciones
+                            <button type="button" class="btn btn-icon btn-actions-icon"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+                                <i class="fas fa-ellipsis-vertical"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="{{ route('manager.seo.metas.export') }}">Exportar CSV</a>
@@ -39,39 +39,15 @@
     @include('managers.includes.delete')
 
     <div id="metas-config" class="d-none"
-         data-bulk-destroy-url="{{ route('manager.seo.metas.bulk-destroy') }}"
-         data-inline-base-url="{{ url('panel/seo/metas') }}"></div>
+         data-inline-base-url="{{ url('panel/seo/metas') }}"
+         data-bulk-action-url="{{ route('manager.seo.metas.bulk-action') }}"></div>
 
-    {{-- Bulk toolbar --}}
-    <div id="bulk-toolbar" class="position-fixed bottom-0 start-50 translate-middle-x mb-4 d-none bulk-toolbar-float">
-        <div class="card shadow-lg border-0">
-            <div class="card-body py-2 px-4 d-flex align-items-center gap-3">
-                <span class="text-muted small"><span data-bulk-count>0</span> seleccionados</span>
-                <button type="button" class="btn btn-danger btn-sm" id="bulk-delete-btn">Eliminar</button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" id="bulk-cancel">Cancelar</button>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal eliminación masiva --}}
-    <div id="bulk-modal" class="modal fade">
-        <div class="modal-dialog modal-md modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0 pb-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center px-4 pb-2">
-                    <div class="display-4 text-warning mb-3"><i class="fas fa-exclamation-triangle"></i></div>
-                    <h4 class="my-0">¿Eliminar registros seleccionados?</h4>
-                    <p class="text-muted mt-2">Se eliminarán <strong id="bulk-count">0</strong> registros meta SEO. Esta acción no se puede deshacer.</p>
-                </div>
-                <div class="modal-footer flex-column gap-1 border-0 pt-0">
-                    <button type="button" id="bulk-delete-confirm" class="btn btn-danger w-100 mb-1">Confirmar eliminación</button>
-                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'meta(s) SEO',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
 @endsection
 
 @push('css')

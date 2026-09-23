@@ -20,8 +20,6 @@
 @section('content')
 
 @php
-    $certifierThumbnail = optional($course->certifier)->getFirstMedia('thumbnail');
-
     $progress = $inscription->progress();
     $last = $progress->first();
     $lastchapter = $last == null ? null : $last->chapter_id;
@@ -39,14 +37,21 @@
             : route('customers.courses.lesion', $firstLesson->id);
     }
 
-    $typeIcons = [
-        'video' => 'video', 'text' => 'text', 'audio' => 'audio',
-        'image' => 'image', 'pdf' => 'pdf', 'zip' => 'zip', 'quiz' => 'quiz',
-    ];
-    $typeLabels = [
-        'video' => 'Video', 'text' => 'Lectura', 'audio' => 'Audio',
-        'image' => 'Imagen', 'pdf' => 'PDF', 'zip' => 'Recurso', 'quiz' => 'Evaluación',
-    ];
+    // El boton/modal de "continuar" decian "donde lo dejaste" pero
+    // $lastlesson (la ultima leccion con progreso) nunca se usaba: el link
+    // siempre apuntaba a la primera leccion del curso, sin importar cuanto
+    // hubiera avanzado el alumno. $chapters ya trae lessons.type eager
+    // loaded (evita el N+1 que tendria buscar en $lessions plano).
+    $lastLessonModel = $lastlesson ? $chapters->flatMap->lessons->firstWhere('id', $lastlesson) : null;
+    $resumeHref = $lastLessonModel
+        ? ($lastLessonModel->type->slug == 'quiz'
+            ? route('customers.courses.quiz', $lastLessonModel->id)
+            : route('customers.courses.lesion', $lastLessonModel->id))
+        : $startHref;
+
+    // Solo tiene sentido preguntar "¿continuar donde quedaste?" si hay
+    // progreso real que retomar y el curso todavia no esta terminado.
+    $showResumePrompt = $completedClass > 0 && $resumeHref && $percent < 100 && ! $certificate;
 @endphp
 
 @if(setting('aula_version') == '2')
@@ -82,7 +87,7 @@
                             </div>
                         </div>
                         @if ($inscription->expire == 0 && $startHref)
-                            <a class="lv-markbtn" href="{{ $startHref }}">
+                            <a class="lv-markbtn" href="{{ $completedClass > 0 ? $resumeHref : $startHref }}">
                                 {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         @endif
@@ -232,7 +237,7 @@
                     @if ($inscription->expire == 0 && $startHref)
                         <div class="lp-nav">
                             <span class="lp-navnote">{{ $completedClass > 0 ? 'Retoma donde lo dejaste' : 'Empieza tu aprendizaje ahora' }}</span>
-                            <a class="lv-markbtn" href="{{ $startHref }}">
+                            <a class="lv-markbtn" href="{{ $completedClass > 0 ? $resumeHref : $startHref }}">
                                 {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
                             </a>
                         </div>
@@ -255,4 +260,32 @@
     </div>
 
 @endif
+
+@if ($showResumePrompt)
+    {{-- Mismo patrón visual .ax-modal que quiz.blade.php / assessment-exit-guard.
+         Sin boton de cerrar y sin backdrop/Escape: el alumno elige "Continuar"
+         o "Volver", no hay una tercera forma de descartarlo. --}}
+    <div class="modal fade" id="resumeModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content ax-modal">
+                <div class="modal-body">
+                    <div class="ax-ico" aria-hidden="true">
+                        @include('customers.includes.icon', ['name' => 'play-circle'])
+                    </div>
+                    <h5 class="ax-title">¿Continuar donde lo dejaste?</h5>
+                    <p class="ax-text">Llevas {{ $progressPercentage }}% del curso. Puedes retomar la última clase que viste o volver al temario completo.</p>
+                    <div class="ax-actions">
+                        <a class="ax-btn ax-accent" href="{{ $resumeHref }}">Continuar donde quedé</a>
+                        <button type="button" class="ax-btn ax-leave" data-bs-dismiss="modal">Volver al temario</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif
+
 @endsection
+
+@push('scripts')
+<script src="{{ asset('customers/js/views/courses/content-resume-prompt.js') }}"></script>
+@endpush

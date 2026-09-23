@@ -35,6 +35,16 @@
              llegar al final), tapando su texto. --}}
         <div class="lv-rail-body">
 
+        @php
+            // Cruza capítulos (no se reinicia por capítulo, a diferencia de
+            // $counter): sin esto, una lección pendiente que NO es la primera
+            // de su capítulo aparecía "bloqueada" en esta vista (portada del
+            // curso) aunque el servidor SÍ la permitiera (assertLessonAccessible
+            // usa el mismo criterio: completada, o la anterior en el curso
+            // completo está completada). Ocurría siempre que la lección
+            // pendiente no era ni la primera de su capítulo ni la "actual".
+            $previousLessonDone = true;
+        @endphp
         @if($chapters->isNotEmpty())
             @foreach ($chapters as $chapter)
                 @php
@@ -66,7 +76,7 @@
                             @php
                                 $validate = in_array($lesson->id, $completedLessonIds);
                                 $isCurrent = $lastlesson == $lesson->id && $percent < 100;
-                                $clickable = $validate == 1 || $counter == 0 || $isCurrent;
+                                $clickable = $validate == 1 || $previousLessonDone || $isCurrent;
                                 $href = $lesson->type->slug == 'quiz'
                                     ? route('customers.courses.quiz', $lesson->id)
                                     : route('customers.courses.lesion', $lesson->id);
@@ -89,7 +99,7 @@
                                     <span class="li-meta">{{ $label }}</span>
                                 </span>
                             </a>
-                            @php $counter++; @endphp
+                            @php $counter++; $previousLessonDone = $validate == 1; @endphp
                         @endforeach
                     </div>
                 </div>
@@ -170,6 +180,12 @@
             </div>
         </div>
 
+        @php
+            // Ver comentario equivalente en el rail v2 más arriba: cruza
+            // capítulos para reflejar la misma regla de acceso que el server
+            // (assertLessonAccessible), no solo "primera lección del capítulo".
+            $previousLessonDone = true;
+        @endphp
         @if($chapters->isNotEmpty())
             @foreach ($chapters as $chapter)
                 @php
@@ -193,7 +209,7 @@
                                 @php
                                     $validate = in_array($lesson->id, $completedLessonIds);
                                     $isCurrent = $lastlesson == $lesson->id && $percent < 100;
-                                    $clickable = $validate == 1 || $counter == 0 || $isCurrent;
+                                    $clickable = $validate == 1 || $previousLessonDone || $isCurrent;
                                     $href = $lesson->type->slug == 'quiz'
                                         ? route('customers.courses.quiz', $lesson->id)
                                         : route('customers.courses.lesion', $lesson->id);
@@ -221,7 +237,7 @@
                                         @endif
                                     </span>
                                 </a>
-                                @php $counter++; @endphp
+                                @php $counter++; $previousLessonDone = $validate == 1; @endphp
                             @endforeach
                         </div>
                     </div>

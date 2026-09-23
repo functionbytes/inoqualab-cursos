@@ -35,6 +35,10 @@ $(document).ready(function () {
             $('.bulk-checkbox:not(:disabled)').prop('checked', this.checked);
             syncBulkState();
         });
+
+        FilterToolbar.init({
+            fields: { filterType: 'popover_Type', filterSeoStatus: 'popover_SeoStatus' },
+        });
     }
 
     initPageUrlsTable();

@@ -15,35 +15,71 @@
     {{-- Filter --}}
     <div class="card-body border-bottom">
         <form method="GET" action="{{ route('mailers.endpoints.logs', $endpoint) }}" id="searchForm">
-            <div class="row g-2">
-                <div class="col-md-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                        <input type="search" name="email" class="form-control"
-                               placeholder="Buscar email..."
-                               value="{{ $searchEmail ?? '' }}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select select2" name="status">
-                        <option value="">Todos los estados</option>
-                        <option value="pending" @if(($filterStatus ?? '') === 'pending') selected @endif>Pendiente</option>
-                        <option value="success" @if(($filterStatus ?? '') === 'success') selected @endif>Éxito</option>
-                        <option value="failed" @if(($filterStatus ?? '') === 'failed') selected @endif>Fallido</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select select2" name="period">
-                        <option value="">Todos los períodos</option>
-                        <option value="24h" @if(($period ?? '') === '24h') selected @endif>Últimas 24 horas</option>
-                        <option value="7d" @if(($period ?? '') === '7d') selected @endif>Últimos 7 días</option>
-                        <option value="30d" @if(($period ?? '') === '30d') selected @endif>Últimos 30 días</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            @php
+                $statusLabels = ['pending' => 'Pendiente', 'success' => 'Éxito', 'failed' => 'Fallido'];
+                $periodLabels = ['24h' => 'Últimas 24 horas', '7d' => 'Últimos 7 días', '30d' => 'Últimos 30 días'];
+
+                $filterChips = [];
+                if (($filterStatus ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Estado: ' . ($statusLabels[$filterStatus] ?? $filterStatus),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('status')),
+                    ];
+                }
+                if (($period ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Período: ' . ($periodLabels[$period] ?? $period),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('period')),
+                    ];
+                }
+            @endphp
+            <input type="hidden" name="status" id="filterStatus" value="{{ $filterStatus ?? '' }}">
+            <input type="hidden" name="period" id="filterPeriod" value="{{ $period ?? '' }}">
+
+            @php ob_start(); @endphp
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Estado</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_Status" value="" {{ ($filterStatus ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($statusLabels as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Status" value="{{ $value }}" {{ ($filterStatus ?? '') === $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
                 </div>
             </div>
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Período</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_Period" value="" {{ ($period ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($periodLabels as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Period" value="{{ $value }}" {{ ($period ?? '') === $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            @php $popoverBody = trim(ob_get_clean()); @endphp
+
+            @include('managers.includes.filter-toolbar', [
+                'searchName' => 'email',
+                'searchValue' => $searchEmail ?? '',
+                'searchPlaceholder' => 'Buscar email...',
+                'popoverBody' => $popoverBody,
+                'filterChips' => $filterChips,
+            ])
         </form>
     </div>
 
@@ -108,7 +144,7 @@
             </div>
         @else
             <div class="text-center py-5">
-                <i class="fas fa-inbox fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
                 <h6 class="mb-1">No hay logs registrados</h6>
                 <p class="text-muted mb-0">
                     @if(!empty($searchEmail) || !empty($filterStatus) || !empty($period))

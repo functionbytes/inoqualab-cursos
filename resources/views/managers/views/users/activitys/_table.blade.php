@@ -101,7 +101,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-clock-rotate-left fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-history', 48) !!}</div>
                         <h5 class="fw-bold mb-2">Sin actividades registradas</h5>
                         <p class="text-muted mb-0">No hay eventos de auditoría para este usuario{{ $model ? ' con el filtro aplicado' : '' }}.</p>
                     </div>

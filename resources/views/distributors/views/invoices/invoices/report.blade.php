@@ -6,49 +6,58 @@
 @endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
-            <div class="card w-100">
-                <form id="formReport" role="form" onSubmit="return false"
-                      data-generate-url="{{ route('distributor.invoices.generate') }}">
-                    {{ csrf_field() }}
+    <div class="row g-4 align-items-start">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center mb-3">
-                            <h5 class="mb-0">Reporte de facturas</h5>
-                        </div>
-                        <p class="card-subtitle mb-4">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formReport" role="form" onSubmit="return false"
+                  data-generate-url="{{ route('distributor.invoices.generate') }}">
+                {{ csrf_field() }}
+
+                <div class="card">
+
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte de facturas</h6>
+                        <p class="text-muted small mb-0">
                             Filtra y descarga el reporte de facturas en Excel.
                         </p>
+                    </div>
 
-                        <div class="row">
+                    <div class="card-body">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Método de pago</label>
-                                    {!! Form::select('method', $methods, null, ['class' => 'select2 form-control', 'id' => 'method']) !!}
-                                </div>
+                                <label class="form-label fw-semibold">Método de pago</label>
+                                {!! Form::select('method', $methods, null, ['class' => 'select2 form-control', 'id' => 'method']) !!}
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Condición</label>
-                                    {!! Form::select('condition', $conditions, null, ['class' => 'select2 form-control', 'id' => 'condition']) !!}
-                                </div>
+                                <label class="form-label fw-semibold">Condición</label>
+                                {!! Form::select('condition', $conditions, null, ['class' => 'select2 form-control', 'id' => 'condition']) !!}
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-12">
-                        <div class="action-form border-top mt-4">
-                            <div class="text-center p-3">
-                                <button type="submit" class="btn btn-primary px-4 w-100">
-                                    Descargar reporte
-                                </button>
-                            </div>
-                        </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Descargar reporte
+                        </button>
                     </div>
-                </form>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre este reporte</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El reporte se descarga en Excel con las facturas que coincidan con los filtros seleccionados.</p>
+                </div>
             </div>
         </div>
+
     </div>
 
 @endsection

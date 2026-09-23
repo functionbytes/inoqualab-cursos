@@ -26,7 +26,7 @@
                 <div class="col-md-3">
                     <div class="card bg-light h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-warning mb-2">Inactivos</h6>
+                            <h6 class="card-title mb-2">Inactivos</h6>
                             <h4 class="mb-1 fw-bold">{{ $stats['inactive'] }}</h4>
                             <p class="text-muted">Desactivados</p>
                         </div>
@@ -35,7 +35,7 @@
                 <div class="col-md-3">
                     <div class="card bg-light h-100">
                         <div class="card-body">
-                            <h6 class="card-title text-info mb-2">Total requests</h6>
+                            <h6 class="card-title mb-2">Total requests</h6>
                             <h4 class="mb-1 fw-bold">{{ number_format($stats['total_requests']) }}</h4>
                             <p class="text-muted">Enviados</p>
                         </div>
@@ -47,34 +47,71 @@
         {{-- Search & Filter --}}
         <div class="card-body border-bottom">
             <form method="GET" action="{{ route('mailers.endpoints.index') }}" id="searchForm">
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                            <input type="search" name="search" class="form-control"
-                                   placeholder="Buscar por nombre o slug..."
-                                   value="{{ $search ?? '' }}">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <select name="source" class="form-select select2">
-                            <option value="">Todas las fuentes</option>
-                            @foreach($sources as $src)
-                                <option value="{{ $src }}" @if(($source ?? '') === $src) selected @endif>{{ $src }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select name="status" class="form-select select2">
-                            <option value="">Todos los estados</option>
-                            <option value="active" @if(($status ?? '') === 'active') selected @endif>Activos</option>
-                            <option value="inactive" @if(($status ?? '') === 'inactive') selected @endif>Inactivos</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">Buscar</button>
+                @php
+                    $filterChips = [];
+                    if (($source ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Fuente: ' . $source,
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('source')),
+                        ];
+                    }
+                    if (($status ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Estado: ' . ($status === 'active' ? 'Activos' : 'Inactivos'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('status')),
+                        ];
+                    }
+                @endphp
+                <input type="hidden" name="source" id="filterSource" value="{{ $source ?? '' }}">
+                <input type="hidden" name="status" id="filterStatus" value="{{ $status ?? '' }}">
+
+                @php ob_start(); @endphp
+                <div class="filter-popover-field">
+                    <div class="filter-popover-label">Fuente</div>
+                    <div class="filter-popover-options">
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Source" value="" {{ ($source ?? '') === '' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Todas</span>
+                        </label>
+                        @foreach($sources as $src)
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_Source" value="{{ $src }}" {{ ($source ?? '') === $src ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>{{ $src }}</span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
+                <div class="filter-popover-field">
+                    <div class="filter-popover-label">Estado</div>
+                    <div class="filter-popover-options">
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Status" value="" {{ ($status ?? '') === '' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Todos</span>
+                        </label>
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Status" value="active" {{ ($status ?? '') === 'active' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Activos</span>
+                        </label>
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Status" value="inactive" {{ ($status ?? '') === 'inactive' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Inactivos</span>
+                        </label>
+                    </div>
+                </div>
+                @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                @include('managers.includes.filter-toolbar', [
+                    'searchName' => 'search',
+                    'searchValue' => $search ?? '',
+                    'searchPlaceholder' => 'Buscar por nombre o slug...',
+                    'popoverBody' => $popoverBody,
+                    'filterChips' => $filterChips,
+                ])
             </form>
         </div>
 
@@ -176,7 +213,7 @@
                 </div>
             @else
                 <div class="text-center py-5">
-                    <i class="fas fa-inbox fa-3x mb-3 text-muted opacity-50"></i>
+                    <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
                     <h6 class="mb-1">No hay endpoints configurados</h6>
                     <p class="text-muted mb-3">
                         @if(request('search'))

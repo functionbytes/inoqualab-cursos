@@ -62,36 +62,41 @@
                     if (($status ?? '') !== '') {
                         $filterChips[] = [
                             'label'     => 'Estado: ' . ($statusLabels[$status] ?? $status),
-                            'clear_url' => route('manager.cart-abandonments.index', array_filter(['search' => $search ?? ''])),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('status')),
                         ];
                     }
                 @endphp
                 <form method="GET" action="{{ route('manager.cart-abandonments.index') }}" id="searchForm">
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por correo..."
-                                       value="{{ $search ?? '' }}">
-                            </div>
+
+                    <input type="hidden" name="status" id="filterStatus" value="{{ $status ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_status" value="" {{ ($status ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            @foreach($statusLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_status" value="{{ $value }}" {{ ($status ?? '') === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
                         </div>
-
-                        <select name="status" id="status-filter" class="form-select flex-shrink-0 w-auto">
-                            <option value="">Todos los estados</option>
-                            <option value="pending" @selected(($status ?? '') === 'pending')>Sin recordar</option>
-                            <option value="reminded" @selected(($status ?? '') === 'reminded')>Recordados</option>
-                            <option value="converted" @selected(($status ?? '') === 'converted')>Convertidos</option>
-                        </select>
-
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
-                        </button>
                     </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
 
-                    @include('managers.includes.filter-chips', ['chips' => $filterChips])
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $search ?? '',
+                        'searchPlaceholder' => 'Buscar por correo...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -119,6 +124,13 @@
                                     $items = $abandonment->items ?? [];
                                     $firstTitle = $items[0]['title'] ?? '—';
                                     $extraCount = count($items) - 1;
+                                    $abandonmentStatus = $abandonment->converted_at ? 'converted' : ($abandonment->reminded_at ? 'reminded' : 'pending');
+                                    $abandonmentItemsJson = collect($items)->map(fn ($line) => [
+                                        'title' => $line['title'] ?? '',
+                                        'type' => $line['type'] ?? '',
+                                        'qty' => $line['qty'] ?? 1,
+                                        'amount' => $line['amount'] ?? 0,
+                                    ])->values()->toJson();
                                 @endphp
                                 <tr>
                                     <td>
@@ -144,7 +156,7 @@
                                         @if($abandonment->converted_at)
                                             <span class="badge bg-success-subtle text-success">Convertido</span>
                                         @elseif($abandonment->reminded_at)
-                                            <span class="badge bg-warning-subtle text-warning">Recordado</span>
+                                            <span class="badge bg-primary-subtle text-primary">Recordado</span>
                                         @else
                                             <span class="badge bg-secondary-subtle text-secondary">Sin recordar</span>
                                         @endif
@@ -153,10 +165,35 @@
                                         <p class="text-muted mb-0">{{ $abandonment->created_at->format('d/m/Y H:i') }}</p>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('cart.restore', $abandonment->slack) }}" target="_blank"
-                                           class="text-muted" title="Ver el carrito como lo vería el cliente">
-                                            <i class="fas fa-arrow-up-right-from-square"></i>
-                                        </a>
+                                        <div class="dropdown">
+                                            <a href="#" class="text-muted" data-bs-toggle="dropdown" data-bs-boundary="viewport">
+                                                <i class="fas fa-ellipsis-vertical"></i>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <button type="button" class="dropdown-item btn-view-abandonment"
+                                                            data-email="{{ $abandonment->email }}"
+                                                            data-name="{{ $abandonment->user ? trim($abandonment->user->firstname.' '.$abandonment->user->lastname) : '' }}"
+                                                            data-cellphone="{{ $abandonment->user->cellphone ?? '' }}"
+                                                            data-identification="{{ $abandonment->user->identification ?? '' }}"
+                                                            data-total="{{ number_format((float) $abandonment->total, 0, ',', '.') }}"
+                                                            data-status="{{ $abandonmentStatus }}"
+                                                            data-created="{{ $abandonment->created_at->format('d/m/Y H:i') }}"
+                                                            data-reminded="{{ $abandonment->reminded_at?->format('d/m/Y H:i') }}"
+                                                            data-converted="{{ $abandonment->converted_at?->format('d/m/Y H:i') }}"
+                                                            data-cart-url="{{ route('cart.restore', $abandonment->slack) }}"
+                                                            data-remind-url="{{ route('manager.cart-abandonments.remind', $abandonment->id) }}"
+                                                            data-items="{{ $abandonmentItemsJson }}">
+                                                        Ver detalle
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('cart.restore', $abandonment->slack) }}" target="_blank">
+                                                        Ver carrito como cliente
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -167,7 +204,7 @@
             @else
             <div class="card-body">
                 <div class="text-center py-5">
-                    <i class="fas fa-cart-shopping fa-3x mb-3 text-muted opacity-50"></i>
+                    <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-cart', 48) !!}</div>
                     <h5 class="fw-bold mb-2">No hay carritos incompletos</h5>
                     <p class="text-muted mb-0">
                         @if($search || ($status ?? '') !== '')

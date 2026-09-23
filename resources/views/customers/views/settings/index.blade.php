@@ -107,7 +107,7 @@
                         </div>
 
                         <div class="pnl-actions">
-                            <button type="submit" class="pnl-save" id="cfgSave">Guardar cambios</button>
+                            <button type="submit" class="pnl-save is-blue" id="cfgSave">Guardar cambios</button>
                             <span class="hint">Los cambios se aplican de inmediato</span>
                         </div>
                     </div>
@@ -133,21 +133,36 @@
                                 {{-- Se exige también si el correo cambió en la sección Perfil
                                      de este mismo formulario -- ver UpdateSettingsRequest. --}}
                                 <label for="current_password">Contraseña actual</label>
-                                <input class="control" type="password" id="current_password" name="current_password" placeholder="Requerida para cambiar el correo o la contraseña" autocomplete="current-password">
+                                <div class="pw-wrap">
+                                    <input class="control" type="password" id="current_password" name="current_password" placeholder="Requerida para cambiar el correo o la contraseña" autocomplete="current-password">
+                                    <button type="button" class="pw-toggle" data-target="current_password" aria-label="Mostrar contraseña">
+                                        <span class="ic-on">@include('customers.includes.icon', ['name' => 'eye', 'size' => 16])</span>
+                                        <span class="ic-off">@include('customers.includes.icon', ['name' => 'eye-off', 'size' => 16])</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="field">
                                 <label for="password">Nueva contraseña</label>
                                 <div class="pw-wrap">
                                     <input class="control" type="password" id="password" name="password" placeholder="Mínimo 8 caracteres">
-                                    <button type="button" class="pw-toggle" id="cfgPwToggle" aria-label="Mostrar contraseña">@include('customers.includes.icon', ['name' => 'search', 'size' => 16])</button>
+                                    <button type="button" class="pw-toggle" data-target="password" aria-label="Mostrar contraseña">
+                                        <span class="ic-on">@include('customers.includes.icon', ['name' => 'eye', 'size' => 16])</span>
+                                        <span class="ic-off">@include('customers.includes.icon', ['name' => 'eye-off', 'size' => 16])</span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="field">
                                 <label for="password_confirmation">Confirmar nueva contraseña</label>
-                                <input class="control" type="password" id="password_confirmation" name="password_confirmation" placeholder="Repetir contraseña">
+                                <div class="pw-wrap">
+                                    <input class="control" type="password" id="password_confirmation" name="password_confirmation" placeholder="Repetir contraseña">
+                                    <button type="button" class="pw-toggle" data-target="password_confirmation" aria-label="Mostrar contraseña">
+                                        <span class="ic-on">@include('customers.includes.icon', ['name' => 'eye', 'size' => 16])</span>
+                                        <span class="ic-off">@include('customers.includes.icon', ['name' => 'eye-off', 'size' => 16])</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <button type="submit" class="pnl-save is-ghost" id="cfgPwSave">Actualizar contraseña</button>
+                        <button type="submit" class="pnl-save is-blue" id="cfgPwSave">Actualizar contraseña</button>
                     </div>
                 </div>
             </form>

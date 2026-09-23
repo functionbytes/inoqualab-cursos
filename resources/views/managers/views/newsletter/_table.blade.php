@@ -248,7 +248,7 @@
             @else
             <div class="card-body">
                 <div class="text-center py-5">
-                    <i class="fas fa-paper-plane fa-3x mb-3 text-muted opacity-50"></i>
+                    <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-send', 48) !!}</div>
                     <h5 class="fw-bold mb-2">No hay suscriptores</h5>
                     <p class="text-muted mb-4">
                         @if($search || ($status !== null && $status !== '') || ($source !== null && $source !== ''))

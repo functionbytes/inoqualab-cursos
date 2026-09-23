@@ -21,21 +21,15 @@
                     @csrf
                     @method('PUT')
 
-                    <div class="card-header border-bottom p-3">
-                        <h5 class="mb-0 fw-bold">Editar reporte programado</h5>
-                        <span class="text-muted">Modifica la configuracion del reporte.</span>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Información básica</h6>
+                        <p class="text-muted small mb-0">
+                            Configura el nombre, la frecuencia de envío y el formato del archivo adjunto que recibirán los destinatarios.
+                        </p>
                     </div>
 
                     <div class="card-body">
-
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Informacion basica</h6>
-                        <div class="row g-3 mb-4">
-
-                            <div class="col-12">
-                                <p class="text-muted mb-0">
-                                    Configura el nombre, la frecuencia de envio y el formato del archivo adjunto que recibiran los destinatarios.
-                                </p>
-                            </div>
+                        <div class="row g-3">
 
                             {{-- Nombre --}}
                             <div class="col-12">
@@ -112,15 +106,16 @@
                             </div>
 
                         </div>
+                    </div>
 
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Destinatario</h6>
-                        <div class="row g-3 mb-4">
+                    <hr class="my-0">
 
-                            <div class="col-12">
-                                <p class="text-muted mb-0">
-                                    Indica la direccion de correo que recibira el reporte en cada envio programado.
-                                </p>
-                            </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Destinatario</h6>
+                        <p class="text-muted mb-3">
+                            Indica la direccion de correo que recibira el reporte en cada envio programado.
+                        </p>
+                        <div class="row g-3">
 
                             {{-- Email --}}
                             <div class="col-12">
@@ -141,14 +136,17 @@
                             </div>
 
                         </div>
+                    </div>
 
-                        <h6 class="fw-bold mb-3 border-bottom pb-2">Configuracion</h6>
+                    <hr class="my-0">
+
+                    <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-1">Configuracion</h6>
+                        <p class="text-muted mb-3">
+                            Controla si el reporte se ejecuta automaticamente. Puedes cambiar el estado en cualquier momento.
+                        </p>
                         <div class="row g-3">
-
                             <div class="col-12">
-                                <p class="text-muted mb-3">
-                                    Controla si el reporte se ejecuta automaticamente. Puedes cambiar el estado en cualquier momento.
-                                </p>
                                 <label class="form-label fw-semibold" for="isActive">Estado del reporte</label>
                                 <select class="form-select select2 @error('is_active') is-invalid @enderror"
                                         id="isActive" name="is_active">
@@ -165,19 +163,13 @@
                                     </span>
                                 @enderror
                             </div>
-
                         </div>
-
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
                             Guardar cambios
                         </button>
-                        <a href="{{ route('manager.settings.analytics.schedules.index') }}"
-                           class="btn btn-light w-100">
-                            Cancelar
-                        </a>
                     </div>
 
                 </form>
@@ -187,10 +179,12 @@
         {{-- Panel informativo --}}
         <div class="col-lg-4">
             <div class="card">
-                <div class="card-body">
-                    <h6 class="card-title mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">
                         Frecuencias disponibles
                     </h6>
+                </div>
+                <div class="card-body">
                     <dl class="mb-0">
                         <dt class="fw-semibold">Diario</dt>
                         <dd class="text-muted mb-2">Se envia cada dia a las 8:00 AM.</dd>

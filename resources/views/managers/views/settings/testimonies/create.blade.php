@@ -25,11 +25,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Crear testimonio</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Crear testimonio</h6>
+                        <p class="text-muted small mb-0">
                             Completa los datos del testimonio. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
+                    </div>
+
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-6">
@@ -71,7 +74,7 @@
                                 <label class="form-label fw-semibold">Orden</label>
                                 <input type="number" class="form-control" id="position"  name="position" value="0" min="0" placeholder="0">
                             </div>
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label class="form-label fw-semibold">Estado</label>
                                 <div class="input-group">
                                     {!! Form::select('available', $availables, null , ['class' => 'select2 form-control','id' => 'available']) !!}

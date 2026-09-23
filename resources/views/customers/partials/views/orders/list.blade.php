@@ -3,24 +3,6 @@
      (ver el script en orders/index.blade.php) sin recargar la página. --}}
 @if($orders->isEmpty())
 
-    {{-- El filtro debe verse incluso cuando el estado elegido no tiene
-         resultados, para poder volver a "Todos" o cambiar de pestaña. --}}
-    @if($totalOrdersCount > 0)
-        <div class="pnl-filter" role="group" aria-label="Filtrar mis pedidos">
-            <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
-               class="{{ $condition ? '' : 'active' }}">
-                Todos<span class="cnt">{{ $totalOrdersCount }}</span>
-            </a>
-            @foreach($conditions as $c)
-                <a href="{{ route('customers.orders', array_filter(['search' => $searchKey, 'condition' => $c->id])) }}"
-                   class="{{ (string) $condition === (string) $c->id ? 'active' : '' }}">
-                    {{ $c->title }}<span class="cnt">{{ $conditionCounts->get($c->id, 0) }}</span>
-                </a>
-            @endforeach
-        </div>
-        <div class="pnl-gap"></div>
-    @endif
-
     <div class="pnl-card pnl-head pnl-head-row">
         <div>
             {{-- El título ya lo muestra la banda de contexto del header. --}}
@@ -38,6 +20,25 @@
     </div>
 
     <div class="pnl-gap"></div>
+
+    {{-- El filtro debe verse incluso cuando el estado elegido no tiene
+         resultados, para poder volver a "Todos" o cambiar de pestaña. Va
+         entre el buscador y el listado (antes iba primero). --}}
+    @if($totalOrdersCount > 0)
+        <div class="pnl-filter" role="group" aria-label="Filtrar mis pedidos">
+            <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
+               class="{{ $condition ? '' : 'active' }}">
+                Todos<span class="cnt">{{ $totalOrdersCount }}</span>
+            </a>
+            @foreach($conditions as $c)
+                <a href="{{ route('customers.orders', array_filter(['search' => $searchKey, 'condition' => $c->id])) }}"
+                   class="{{ (string) $condition === (string) $c->id ? 'active' : '' }}">
+                    {{ $c->title }}<span class="cnt">{{ $conditionCounts->get($c->id, 0) }}</span>
+                </a>
+            @endforeach
+        </div>
+        <div class="pnl-gap"></div>
+    @endif
 
     @if($searchKey)
         <div class="od-searching">
@@ -70,6 +71,18 @@
          una tarjeta aparte flotando encima de la tabla, con espacio
          visible entre ambas. --}}
     <div class="od-table">
+        <div class="od-head">
+            <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
+            <form class="pnl-search" action="{{ route('customers.orders') }}" method="GET" role="search">
+                @include('customers.includes.icon', ['name' => 'search'])
+                @if($condition)<input type="hidden" name="condition" value="{{ $condition }}">@endif
+                <input type="search" name="search" placeholder="Nº de pedido…" autocomplete="off"
+                       value="{{ $searchKey ?? '' }}" aria-label="Buscar por número de pedido">
+            </form>
+        </div>
+
+        {{-- Entre el buscador y el listado (antes iba primero, arriba del
+             buscador). --}}
         @if($totalOrdersCount > 0)
             <div class="pnl-filter pnl-filter-flat" role="group" aria-label="Filtrar mis pedidos">
                 <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
@@ -85,16 +98,6 @@
             </div>
         @endif
 
-        <div class="od-head">
-            <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
-            <form class="pnl-search" action="{{ route('customers.orders') }}" method="GET" role="search">
-                @include('customers.includes.icon', ['name' => 'search'])
-                @if($condition)<input type="hidden" name="condition" value="{{ $condition }}">@endif
-                <input type="search" name="search" placeholder="Nº de pedido…" autocomplete="off"
-                       value="{{ $searchKey ?? '' }}" aria-label="Buscar por número de pedido">
-            </form>
-        </div>
-
         @if($searchKey)
             <div class="od-searching od-searching-inline">
                 Resultados para <b>{{ $searchKey }}</b>
@@ -104,12 +107,16 @@
 
         <div class="od-cols">
             <span>Pedido</span>
-            <span>Contenido</span>
             <span>Total</span>
             <span>Estado</span>
             <span></span>
         </div>
 
+        {{-- Sin columna "Contenido": un pedido puede tener varios paquetes/
+             cursos y no cabe resumirlo en una línea de la lista. La fila
+             completa lleva al detalle (ver .od-row[data-href] en
+             views/orders/index.js) -- ya no hace falta un botón "Ver
+             detalle" aparte. --}}
         @foreach($orders as $order)
             @php
                 // El importe se toma de total_order_amount cuando existe, como
@@ -118,26 +125,13 @@
                 // se renderiza solo, desde la respuesta AJAX del controller.
                 $monto = (float) ($order->total_order_amount ?? $order->total ?? 0);
                 $puedePagar = in_array($order->condition_id, [1, 2], true) && $monto > 0;
-                $items = $order->items;
-                $primero = $items->first();
-                $tituloItem = optional(optional($primero)->itemable)->title;
             @endphp
 
-            <div class="od-row">
+            <div class="od-row" data-href="{{ route('customers.orders.view', $order->slack) }}"
+                 role="link" tabindex="0" aria-label="Ver detalle del pedido {{ $order->slack }}">
                 <div class="od-id">
                     <b>{{ $order->slack }}</b>
                     <span>{{ \Carbon\Carbon::parse($order->updated_at)->locale('es')->isoFormat('D MMM YYYY') }}</span>
-                </div>
-
-                <div class="od-items">
-                    @if($tituloItem)
-                        <b>{{ $tituloItem }}</b>
-                        @if($items->count() > 1)
-                            <span>y {{ $items->count() - 1 }} {{ $items->count() - 1 === 1 ? 'artículo más' : 'artículos más' }}</span>
-                        @endif
-                    @else
-                        <span class="muted">Sin detalle de artículos</span>
-                    @endif
                 </div>
 
                 <div class="od-total">$ {{ number_format($monto, 0, ',', '.') }}</div>
@@ -148,10 +142,9 @@
                     </span>
                 </div>
 
-                {{-- Las acciones dejan de estar escondidas en un menú de tres
-                     puntos: pagar era la más importante y costaba encontrarla. --}}
+                {{-- Pagar sigue siendo un botón explícito (no basta con el
+                     click de fila): es una acción, no solo navegación. --}}
                 <div class="od-act">
-                    <a class="ghost" href="{{ route('customers.orders.view', $order->slack) }}">Ver detalle</a>
                     @if($puedePagar)
                         <a class="solid" href="{{ route('customers.orders.payments', $order->slack) }}">Pagar</a>
                     @endif

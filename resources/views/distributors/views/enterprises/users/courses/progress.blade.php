@@ -68,13 +68,11 @@
             @foreach ($chapters->sortBy('position') as $key => $chapter)
                 <div class="col-md-6 col-lg-12">
                     <div class="card w-100">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-1 fw-bold">{{ $chapter->first()->chapter->title }}</h6>
+                            <p class="text-muted small mb-0">Detalle del curso y seguimiento del progreso</p>
+                        </div>
                         <div class="card-body">
-                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-3">
-                                <div class="mb-3 mb-sm-0">
-                                    <h5 class="card-title fw-semibold">{{ $chapter->first()->chapter->title }}</h5>
-                                    <p class="card-subtitle">Detalle del curso y seguimiento del progreso</p>
-                                </div>
-                            </div>
                             <div class="table-responsive">
                                 <table class="table align-middle text-nowrap mb-0">
                                     <thead>

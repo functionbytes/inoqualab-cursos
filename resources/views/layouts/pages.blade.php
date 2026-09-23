@@ -99,7 +99,7 @@
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ setting('google_analytics_measurement_id') }}" data-ga-measurement-id="{{ setting('google_analytics_measurement_id') }}"></script>
         @endif
 
-        @if(setting('meta_pixel_id'))
+        @if(setting('meta_pixel_enable') === 'true' && setting('meta_pixel_id'))
         {{-- Meta Pixel --}}
         <div class="d-none" id="meta-pixel-config" data-meta-pixel-id="{{ setting('meta_pixel_id') }}"></div>
         <noscript><img height="1" width="1" class="d-none"

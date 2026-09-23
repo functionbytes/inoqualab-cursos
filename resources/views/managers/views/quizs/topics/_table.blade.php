@@ -120,7 +120,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-question-circle fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-question', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') !== '' || ($available ?? '') !== '')
                                 No se encontraron resultados
@@ -140,10 +140,9 @@
                                 Ver todas
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary btn-new-question"
-                                    data-bs-toggle="modal" data-bs-target="#question-modal">
-                                Nueva pregunta
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon btn-new-question"
+                                    data-bs-toggle="modal" data-bs-target="#question-modal"
+                                    title="Nueva pregunta" aria-label="Nueva pregunta">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif

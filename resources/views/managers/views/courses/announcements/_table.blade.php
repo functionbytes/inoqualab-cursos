@@ -76,7 +76,7 @@
                                                    value="{{ $announcement->id }}">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">{{ Str::words(Str::title(Str::lower($announcement->title)), 10, '...') }}</div>
+                                            <div class="fw-semibold announcements-title-normal">{{ Str::words(Str::title(Str::lower($announcement->title)), 10, '...') }}</div>
                                         </td>
                                         <td class="text-center">
                                             @if($announcement->available)
@@ -120,7 +120,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-bullhorn fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-announce', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($searchKey || ($available ?? '') !== '')
                                 No se encontraron resultados
@@ -140,9 +140,8 @@
                                 Ver todos
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#announcement-modal">
-                                Nuevo anuncio
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#announcement-modal"
+                                    title="Nuevo anuncio" aria-label="Nuevo anuncio">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif

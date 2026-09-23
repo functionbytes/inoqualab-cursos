@@ -95,13 +95,14 @@
                             </thead>
                             <tbody>
                                 @foreach($quizs as $quiz)
+                                    @php $quizTitle = Str::title(Str::lower($quiz->title)); @endphp
                                     <tr>
                                         <td>
                                             <input type="checkbox" class="form-check-input bulk-checkbox"
                                                    value="{{ $quiz->id }}">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">{{ Str::upper(Str::lower($quiz->title)) }}</div>
+                                            <div class="fw-semibold quizs-title-normal">{{ $quizTitle }}</div>
                                         </td>
                                         <td class="text-center">
                                             @if($quiz->available)
@@ -137,7 +138,7 @@
                                                     <li>
                                                         <a class="dropdown-item btn-delete" href="#"
                                                            data-url="{{ route('manager.courses.quiz.destroy', $quiz->slack) }}"
-                                                           data-title="Eliminar: {{ $quiz->title }}">
+                                                           data-title="Eliminar: {{ $quizTitle }}">
                                                             Eliminar
                                                         </a>
                                                     </li>
@@ -151,17 +152,17 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-question-circle fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-question', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($searchKey || ($lesson ?? '') !== '' || ($available ?? '') !== '')
                                 No se encontraron resultados
                             @else
-                                No hay quizs
+                                No hay quizzes
                             @endif
                         </h5>
                         <p class="text-muted mb-4">
                             @if($searchKey || ($lesson ?? '') !== '' || ($available ?? '') !== '')
-                                No hay quizs que coincidan con los filtros aplicados.
+                                No hay quizzes que coincidan con los filtros aplicados.
                             @else
                                 Crea el primer quiz de este curso.
                             @endif
@@ -171,10 +172,9 @@
                                 Ver todos
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary btn-new-quiz"
-                                    data-bs-toggle="modal" data-bs-target="#quiz-modal">
-                                Nuevo quiz
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon btn-new-quiz"
+                                    data-bs-toggle="modal" data-bs-target="#quiz-modal"
+                                    title="Nuevo quiz" aria-label="Nuevo quiz">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif
@@ -182,7 +182,7 @@
 
             @include('managers.includes.pagination-footer', [
                 'paginator' => $quizs,
-                'itemLabel' => 'quizs',
+                'itemLabel' => 'quizzes',
             ])
 
         </div>

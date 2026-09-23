@@ -131,12 +131,17 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-book-open fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-courses', 48) !!}</div>
                         <h5 class="fw-bold mb-2">No hay inscripciones</h5>
                         <p class="text-muted mb-0">Este usuario aún no tiene inscripciones registradas.</p>
                     </div>
                 @endif
             </div>
+
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $inscriptions,
+                'itemLabel' => 'inscripciones',
+            ])
 
         </div>
     </div>

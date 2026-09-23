@@ -109,6 +109,29 @@
         </div>
     </div>
 
+    {{-- Modal confirmar limpieza de registros antiguos --}}
+    <div class="modal fade" id="modalCleanOld" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Limpiar registros antiguos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">¿Eliminar todos los registros 404 con más de 90 días de antigüedad? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer d-block">
+                    <button type="button" class="btn btn-primary w-100 mb-2" id="btn-confirm-clean-old">
+                        Limpiar registros
+                    </button>
+                    <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('css')

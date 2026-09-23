@@ -112,6 +112,7 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="lessons-col-handle"></th>
                                     <th class="text-center"><input type="checkbox" class="form-check-input" id="select-all"></th>
                                     <th>Título</th>
                                     <th class="text-center">Posición</th>
@@ -124,24 +125,32 @@
                             </thead>
                             <tbody id="lessons-sortable" data-reorder-url="{{ route('manager.courses.lessons.reorder') }}">
                                 @foreach($lessons as $lesson)
+                                    @php
+                                        $lessonTitle = Str::title(Str::lower($lesson->title));
+                                        $chapterTitle = Str::title(Str::lower($lesson->chapter->title));
+                                    @endphp
                                     <tr data-id="{{ $lesson->id }}">
+                                        <td class="text-center lessons-col-handle">
+                                            <i class="fas fa-bars text-muted drag-handle" title="Arrastra para reordenar"></i>
+                                        </td>
                                         <td class="text-center">
                                             <input type="checkbox" class="form-check-input bulk-checkbox" value="{{ $lesson->id }}">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">
-                                                <i class="fas fa-bars text-muted me-2 drag-handle" title="Arrastra para reordenar"></i>
-                                                {{ Str::words($lesson->title, 8, '...') }}
-                                            </div>
+                                            <span class="fw-semibold text-truncate d-inline-block lessons-title-truncate" title="{{ $lessonTitle }}">
+                                                {{ $lessonTitle }}
+                                            </span>
                                         </td>
                                         <td class="text-center">
                                             <span class="text-muted">{{ $lesson->position }}</span>
                                         </td>
                                         <td>
-                                            <span class="text-muted">{{ $lesson->chapter->title }}</span>
+                                            <span class="text-muted text-truncate d-inline-block lessons-title-truncate" title="{{ $chapterTitle }}">
+                                                {{ $chapterTitle }}
+                                            </span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-secondary-subtle text-secondary">{{ $lesson->type->title }}</span>
+                                            <span class="badge bg-secondary-subtle text-secondary">{{ Str::ucfirst(Str::lower($lesson->type->title)) }}</span>
                                         </td>
                                         <td class="text-center">
                                             @if($lesson->available)
@@ -171,7 +180,7 @@
                                                     <li>
                                                         <a class="dropdown-item btn-delete" href="#"
                                                            data-url="{{ route('manager.courses.lessons.destroy', $lesson->slack) }}"
-                                                           data-title="Eliminar: {{ $lesson->title }}">
+                                                           data-title="Eliminar: {{ $lessonTitle }}">
                                                             Eliminar
                                                         </a>
                                                     </li>
@@ -185,7 +194,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-play-circle fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-courses', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($searchKey || $activeFilters > 0)
                                 No se encontraron resultados
@@ -205,10 +214,9 @@
                                 Ver todas
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary btn-new-lesson"
-                                    data-bs-toggle="modal" data-bs-target="#lesson-modal">
-                                Nueva clase
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon btn-new-lesson"
+                                    data-bs-toggle="modal" data-bs-target="#lesson-modal"
+                                    title="Nueva clase" aria-label="Nueva clase">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif

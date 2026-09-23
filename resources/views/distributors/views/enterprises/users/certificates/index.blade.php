@@ -1,104 +1,124 @@
 @extends('layouts.managers')
 
 @section('page_header')
-    @include('distributors.includes.card', ['title' => 'Certificados - ' . $user->firstname .' '. $user->lastname])
+    @php ob_start(); @endphp
+    @if (count($certificates) > 1)
+        <a href="{{ route('distributor.enterprises.users.certificate.broad', $user->slack) }}" class="btn btn-primary btn-icon" title="Descargar todos" aria-label="Descargar todos">
+            <i class="fas fa-certificate"></i>
+        </a>
+    @endif
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('distributors.includes.card', [
+        'title' => 'Certificados - '.$user->firstname.' '.$user->lastname,
+        'actions' => $headerActions,
+    ])
 @endsection
 
 @section('content')
 
     <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="course" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar curso</option>
-                                        @foreach($courses as $item)
-                                            <option value="{{ $item->id }}" @if (isset($course) && $course ==  $item->id ) selected @endif>{{ $item->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            @if (count($certificates) > 1)
-                                <div class="col-auto">
-                                    <a href=" {{ route('distributor.enterprises.users.certificate.broad', $user->slack) }}" class="btn btn-primary">
-                                        <i class="fa-solid fa-certificate"></i>
-                                    </a>
-                                </div>
-                             @endif
+
+        <div class="card">
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if (($course ?? '') !== '' && ($course ?? null) !== null) {
+                        $filterChips[] = [
+                            'label' => 'Curso: '.optional($courses->firstWhere('id', $course))->title,
+                            'clear_url' => url()->current().'?'.http_build_query(request()->except('course')),
+                        ];
+                    }
+                @endphp
+                <form method="GET" action="{{ route('distributor.enterprises.users.certificates', $user->slack) }}" id="searchForm">
+
+                    <input type="hidden" name="course" id="filterCourse" value="{{ $course ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Curso</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_course" value="" {{ ($course ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            @foreach($courses as $item)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_course" value="{{ $item->id }}" {{ (string) ($course ?? '') === (string) $item->id ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $item->title }}</span>
+                                </label>
+                            @endforeach
                         </div>
-                    </form>
+                    </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por curso...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-nowrap mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Curso</th>
+                            <th>Ano</th>
+                            <th>Fecha</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        @foreach ($certificates as $certificate)
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($certificate->course->title)), 12, '...') }}</div>
+                                </td>
+                                <td>{{ date('Y', strtotime($certificate->start_at)) }}</td>
+                                <td>
+                                    <span class="text-muted">{{ date('Y-m-d', strtotime($certificate->updated_at)) }}</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport">
+                                            <i class="fas fa-ellipsis-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('distributor.enterprises.users.certificate.course', $certificate->slack) }}">Descargar</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th>Curso</th>
-                        <th>Año</th>
-                        <th>Fecha</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($certificates as $key => $certificate)
-                        <tr class="search-items">
 
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $certificate->course->title }}">{{ Str::words( Str::upper(Str::lower($certificate->course->title)), 12, '...')  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y', strtotime($certificate->start_at)) }}">{{ date('Y', strtotime($certificate->start_at)) }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" data-phone="{{ date('Y-m-d', strtotime($certificate->updated_at)) }}">{{ date('Y-m-d', strtotime($certificate->updated_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('distributor.enterprises.users.certificate.course', $certificate->slack) }}">Descargar</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $certificates->firstItem() }}-{{ $certificates->lastItem() }} de {{ $certificates->total() }} resultados</span>
-                <nav>
-                    {{ $certificates->appends(request()->input())->links() }}
-                </nav>
-            </div>
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $certificates,
+                'itemLabel' => 'certificados',
+            ])
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('distributors/js/enterprises/users/certificates/index.js') }}"></script>
+@endpush
 

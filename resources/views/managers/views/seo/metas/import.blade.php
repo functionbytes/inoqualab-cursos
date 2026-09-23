@@ -19,7 +19,12 @@
             <div class="card">
                 <form action="{{ route('manager.seo.metas.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    
+
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Importar desde CSV</h6>
+                        <p class="text-muted small mb-0">Carga un archivo CSV para importar o actualizar metadatos SEO.</p>
+                    </div>
+
                     <div class="card-body">
 
                         @if($errors->any())
@@ -87,7 +92,7 @@
         {{-- Help panel --}}
         <div class="col-12 col-lg-4">
             <div class="card">
-                <div class="card-header p-4 border-bottom border-light">
+                <div class="card-header border-bottom">
                     <h6 class="mb-0 fw-bold">Formato del CSV</h6>
                 </div>
                 <div class="card-body">

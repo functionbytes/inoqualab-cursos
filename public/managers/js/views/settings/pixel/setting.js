@@ -5,36 +5,28 @@ $(document).on('submit', '#formPixel', function (e) {
 $(document).ready(function () {
     var urls = $('#formPixel').data('urls');
 
-    $('.form-check-input').click(function () {
-        var check = $(this).prop('checked');
-        $(this).prop('checked', check == true);
+    $('#metaPixelEnable').on('change', function () {
+        $('#metaPixelFields').toggleClass('d-none', !this.checked);
     });
 
     $('#formPixel').validate({
         submit: false,
-        ignore: '.ignore',
+        ignore: ':hidden',
         rules: {
-            fb_pixel: {
-                required: true,
-                minlength: 1,
-                maxlength: 100,
+            meta_pixel_id: {
+                digits: true,
+                maxlength: 50,
             },
         },
         messages: {
-            fb_pixel: {
-                required: 'El parametro es necesario.',
-                minlength: 'Debe contener al menos 1 caracter',
-                maxlength: 'Debe contener al menos 100 caracter',
+            meta_pixel_id: {
+                digits: 'El ID solo puede contener números.',
+                maxlength: 'Debe contener como máximo 50 caracteres',
             },
         },
         submitHandler: function (form) {
             var $form = $('#formPixel');
             var formData = new FormData($form[0]);
-            var fbPixel = $('#fb_pixel').val();
-            var fbPixelEnable = $('#fb_pixel_enable').is(':checked');
-
-            formData.append('fb_pixel', fbPixel);
-            formData.append('fb_pixel_enable', fbPixelEnable);
 
             var $submitButton = $('button[type="submit"]');
             $submitButton.prop('disabled', true);

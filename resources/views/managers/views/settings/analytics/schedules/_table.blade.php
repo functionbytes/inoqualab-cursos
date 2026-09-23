@@ -273,7 +273,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-calendar-alt fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-calendar', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($search)
                                 No se encontraron resultados

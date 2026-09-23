@@ -21,19 +21,19 @@
         {{-- Columna izquierda: formulario --}}
         <div class="col-lg-8">
             <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Importar datos de Search Console</h6>
+                    <p class="text-muted small mb-0">
+                        Sube un archivo CSV exportado desde Google Search Console para vincular métricas SEO a tus páginas.
+                    </p>
+                </div>
                 <div class="card-body">
 
                     <div class="mb-4 text-center">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3 icon-box-80">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 icon-box-80">
                             <i class="fab fa-google fa-3x text-primary"></i>
                         </div>
-                        <h5 class="fw-bold">Importar datos de Search Console</h5>
-                        <p class="text-muted mb-0">
-                            Sube un archivo CSV exportado desde Google Search Console para vincular métricas SEO a tus páginas.
-                        </p>
                     </div>
-
-                    <hr class="my-4">
 
                     <form id="import-form" action="{{ route('manager.seo.search-console.import.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf

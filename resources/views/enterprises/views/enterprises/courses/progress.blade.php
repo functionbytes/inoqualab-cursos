@@ -1,125 +1,94 @@
-@php use App\Models\Course\CourseProgress;
- @endphp
-
 @extends('layouts.managers')
+
+@php
+    // La inscripcion es la fuente de verdad de si el curso esta
+    // culminado. Algunas inscripciones antiguas solo tienen un
+    // registro "resumen" en course_progress (lesson_id null) sin
+    // el detalle por leccion: contarlo con count($progress) infla
+    // el % (1 de 16 = 6%) mientras la tabla de abajo (que exige
+    // lesson_id valido) mostraba todo "Pendiente" -- contradictorio
+    // con un curso ya culminado.
+    $totalClass = count($class);
+    if ($inscription->culminated == 1) {
+        $progres = 100;
+    } elseif ($totalClass == 0) {
+        $progres = 0;
+    } else {
+        $progres = ($completedLessons->count() / $totalClass) * 100;
+    }
+@endphp
+
+@section('page_header')
+    @include('enterprises.includes.card', [
+        'title' => 'Progreso - '.$course->title,
+        'description' => 'Detalle del curso y seguimiento de '.$user->firstname.' '.$user->lastname,
+    ])
+@endsection
 
 @section('content')
 
+    <div class="widget-content searchable-container list">
 
-    <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-12">
-            <!-- Yearly Breakup -->
-            <div class="card overflow-hidden">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                            <h5 class="card-title mb-9 fw-semibold">CLASES </h5>
-                            <h4 class="fw-semibold mb-3">{{ count($class) }}</h4>
+        <div class="card">
 
-                            <div id="customers"></div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6 col-sm-12">
-            <!-- Yearly Breakup -->
-            @php
-
-                $total_class = $class;
-                $total_count = count($total_class);
-
-                $total_per = 100;
-                $read_class = $progress;
-                $read_count = count($read_class);
-
-                if($total_count == 0){
-                    $progres = 0;
-                }else{
-                    $progres = ($read_count / $total_count) * $total_per;
-                }
-
-            @endphp
-
-
-            <div class="card overflow-hidden">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                            <h5 class="card-title mb-9 fw-semibold">PORCENTAJE</h5>
-                            <h4 class="fw-semibold mb-3">{{ round($progres)  }}%</h4>
-
-                            <div id="customers1"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="col-md-12 col-lg-12">
-        @php
-            $chapters = $class->groupBy('chapter_id');
-
-        @endphp
-
-        <div class="row">
-            @foreach ($chapters->sortBy('position') as $key => $chapter)
-                <div class="col-md-6 col-lg-12">
-                    <div class="card w-100">
-                        <div class="card-body">
-                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-3">
-                                <div class="mb-3 mb-sm-0">
-                                    <h5 class="card-title fw-semibold">{{ $chapter->first()->chapter->title }}</h5>
-                                    <p class="card-subtitle">Detalle del curso y seguimiento del progreso</p>
-                                </div>
+            {{-- Stats --}}
+            <div class="card-body border-bottom">
+                <div class="row g-3">
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Clases</h6>
+                                <h4 class="mb-1 fw-bold">{{ $totalClass }}</h4>
+                                <span class="text-muted">Lecciones del curso</span>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table align-middle text-nowrap mb-0">
-                                    <thead>
-
-                                    </thead>
-                                    <tbody class="border-top">
-
-                                    @foreach ($chapter as $key => $class)
-
-                                        @php
-                                        $validate = $completedLessons->has($class->id);
-                                        @endphp
-
-                                        <tr>
-                                            <td class="ps-0">
-                                                <div class="d-flex align-items-center">
-                                                    <div>
-                                                        <h6 class="fw-semibold mb-1">{{ $class->title }}</h6>
-                                                        <p class="fs-2 mb-0 text-muted">{{ $class->chapter->title }}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td>
-                                                    <span class="badge {{ $validate  ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                                    {{ $validate == 1 ? 'Culminado' : 'Pendiente' }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                    </tbody>
-                                </table>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Porcentaje</h6>
+                                <h4 class="mb-1 fw-bold">{{ round($progres) }}%</h4>
+                                <span class="text-muted">Avance completado</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            {{-- Capítulos --}}
+            <div class="card-body">
+                @php $chapters = $class->groupBy('chapter_id'); @endphp
+                @foreach ($chapters->sortBy('position') as $chapter)
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-muted mb-3 border-bottom pb-2">{{ $chapter->first()->chapter->title }}</h6>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Lección</th>
+                                        <th class="text-center" style="width:160px">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($chapter as $lesson)
+                                        @php $validate = $completedLessons->has($lesson->id) || $inscription->culminated == 1; @endphp
+                                        <tr>
+                                            <td class="fw-semibold">{{ $lesson->title }}</td>
+                                            <td class="text-center">
+                                                <span class="badge {{ $validate ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }}">
+                                                    {{ $validate ? 'Culminado' : 'Pendiente' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
         </div>
-
     </div>
+
 @endsection
-
-
-
-@push('scripts')
-
-
-    <script src="{{ url('managers/libs/owl.carousel/dist/owl.carousel.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url('managers/libs/apexcharts/dist/apexcharts.min.js') }}" type="text/javascript"></script>
-    <script src="{{ asset('enterprises/js/views/enterprises/courses/progress.js') }}"></script>
-@endpush

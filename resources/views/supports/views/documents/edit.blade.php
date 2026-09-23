@@ -29,10 +29,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Documento</h6>
-                        <p class="text-muted mb-3">Reemplaza el archivo adjunto si es necesario.</p>
-                        <div class="dropzone dz-clickable dz-started" id="files">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Documento</h6>
+                        <p class="text-muted small mb-0">
+                            Reemplaza el archivo adjunto si es necesario.</p>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dropzone dz-clickable dz-started" id="files">
                             <div class="fallback">
                                 <input type="file" hidden name="file">
                             </div>

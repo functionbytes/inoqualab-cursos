@@ -12,73 +12,55 @@
       <div class="card w-100">
 
 
-          <div class="card-body border-top">
-            <div class="d-flex no-block align-items-center">
-              <h5 class="mb-0">Visualizar distribuidor</h5>
-            </div>
-            <p class="card-subtitle mb-3 mt-3">
-              Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+          <div class="card-header border-bottom">
+            <h6 class="mb-1 fw-bold">Visualizar distribuidor</h6>
+            <p class="text-muted small mb-0">
+              Información de contacto de este distribuidor. Estos datos son de solo lectura desde
+              esta pantalla.
             </p>
+          </div>
 
-            <div class="row">
+          <div class="card-body">
+            <div class="row g-3">
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Titulo</label>
-                    <input type="text" class="form-control" id="title"  name="title"  value="{{ $distributor->title }}"   placeholder="Ingresa titulo" disabled>
-                </div>
+                <label class="form-label fw-semibold">Titulo</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ $distributor->title }}" placeholder="Ingresa titulo" disabled>
               </div>
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Nit</label>
-                    <input type="text" class="form-control" id="nit"  name="nit"  value="{{ $distributor->nit }}"  placeholder="Ingresa nit" disabled>
-                </div>
+                <label class="form-label fw-semibold">Nit</label>
+                <input type="text" class="form-control" id="nit" name="nit" value="{{ $distributor->nit }}" placeholder="Ingresa nit" disabled>
               </div>
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Celular</label>
-                    <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $distributor->cellphone }}"   placeholder="Ingresa telefono" disabled>
-                </div>
+                <label class="form-label fw-semibold">Celular</label>
+                <input type="text" class="form-control" id="cellphone" name="cellphone" value="{{ $distributor->cellphone }}" placeholder="Ingresa telefono" disabled>
               </div>
 
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Dirección</label>
-                    <input type="text" class="form-control" id="address"  name="address" value="{{ $distributor->address }}"   placeholder="Ingresa dirección" disabled>
-                </div>
+                <label class="form-label fw-semibold">Dirección</label>
+                <input type="text" class="form-control" id="address" name="address" value="{{ $distributor->address }}" placeholder="Ingresa dirección" disabled>
               </div>
               <div class="col-6">
-                <div class="mb-3">
-                    <label  class="control-label col-form-label">Correo electronico</label>
-                    <input type="text" class="form-control" id="email"  name="email" value="{{ $distributor->email }}"  placeholder="Ingresa correo electronico" disabled>
-                </div>
+                <label class="form-label fw-semibold">Correo electronico</label>
+                <input type="text" class="form-control" id="email" name="email" value="{{ $distributor->email }}" placeholder="Ingresa correo electronico" disabled>
               </div>
               <div class="col-6">
-                <div class="mb-3">
-                  <label class="control-label col-form-label">Estado</label>
-                  <div class="input-group">
-                    {!! Form::select('available', $availables, $distributor->available , ['class' => 'select2 form-control' ,'name' => 'available', 'id' => 'available', 'disabled' => 'disabled'  ]) !!}
-                  </div>
-                  <label id="available-error" class="error d-none" for="available"></label>
-                </div>
+                <label class="form-label fw-semibold">Estado</label>
+                {!! Form::select('available', $availables, $distributor->available , ['class' => 'select2 form-control' ,'name' => 'available', 'id' => 'available', 'disabled' => 'disabled'  ]) !!}
+                <label id="available-error" class="error d-none" for="available"></label>
               </div>
 
               <div class="col-12">
-                <div class="mb-3">
-                  <label  class="control-label col-form-label">Soporte</label>
-                  <input type="text" class="form-control" id="supporting"  name="supporting"  value="{{ $distributor->supporting }}" placeholder="Ingresa el encargado de soporte" disabled>
-                </div>
+                <label class="form-label fw-semibold">Soporte</label>
+                <input type="text" class="form-control" id="supporting" name="supporting" value="{{ $distributor->supporting }}" placeholder="Ingresa el encargado de soporte" disabled>
               </div>
 
               <div class="col-12">
-                <div class="mb-3">
-                  <label  class="control-label col-form-label">Gerente</label>
-                  <input type="text" class="form-control" id="leading"  name="leading"  value="{{ $distributor->leading }}" placeholder="Ingresa el encargado de gerente" disabled>
-                </div>
+                <label class="form-label fw-semibold">Gerente</label>
+                <input type="text" class="form-control" id="leading" name="leading" value="{{ $distributor->leading }}" placeholder="Ingresa el encargado de gerente" disabled>
               </div>
-
 
             </div>
           </div>

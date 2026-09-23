@@ -30,12 +30,15 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Documento</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Documento</h6>
+                        <p class="text-muted small mb-0">
                             Adjunta el archivo del documento. Se aceptan formatos PDF, JPG o PNG.
                         </p>
-                        <div class="dropzone dz-clickable" id="files">
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dropzone dz-clickable" id="files">
                             <div class="fallback">
                                 <input type="file" hidden name="file">
                             </div>
@@ -50,6 +53,7 @@
                         <p class="text-muted mb-3">
                             Completa los datos del documento. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
+
                         <div class="row g-3">
 
                             <div class="col-12">

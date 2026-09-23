@@ -22,10 +22,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Modo mantenimiento</h6>
-                        <p class="text-muted mb-3">Si se habilita, los clientes solo podrán ver la vista de mantenimiento hasta que se deshabilite de nuevo.</p>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Modo mantenimiento</h6>
+                        <p class="text-muted small mb-0">
+                            Si se habilita, los clientes solo podrán ver la vista de mantenimiento hasta que se deshabilite de nuevo.
+                        </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3 align-items-center">
                             <div class="col-sm-11">
                                 <label class="form-label fw-semibold mb-0" for="maintenance_mode">Habilitar modo mantenimiento</label>

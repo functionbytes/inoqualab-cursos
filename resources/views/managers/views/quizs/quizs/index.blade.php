@@ -1,21 +1,23 @@
 @extends('layouts.managers')
 
+@section('title', 'Quiz')
+
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" class="btn btn-primary btn-new-quiz"
-                                data-bs-toggle="modal" data-bs-target="#quiz-modal">
-                            Nuevo quiz
-                        </button>
+<button type="button" class="btn btn-primary btn-icon btn-new-quiz"
+                                data-bs-toggle="modal" data-bs-target="#quiz-modal"
+                                title="Nuevo quiz" aria-label="Nuevo quiz">{!! \App\Html\IconHelper::render('plus') !!}</button>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Quizs del curso',
-        'description' => 'Gestiona los quizs y sus preguntas',
+        'description' => 'Gestiona los quizzes y sus preguntas',
         'actions' => $headerActions,
     ])
 @endsection
 
 @section('content')
 
+    @include('managers.includes.course-subnav', ['course' => $course, 'active' => 'quiz'])
 
     <div class="widget-content searchable-container list" id="quizs-index"
          data-flash-success="{{ session('success') }}"
@@ -47,6 +49,17 @@
                     <div class="modal-body">
                         <input type="hidden" id="quizSlack" name="slack" value="">
                         <input type="hidden" name="course" value="{{ $course->slack }}">
+
+                        @if($lessonOptions->count() <= 1)
+                            <div class="alert alert-warning d-flex align-items-start gap-2 mb-3">
+                                <i class="fas fa-triangle-exclamation mt-1"></i>
+                                <div>
+                                    Este curso todavía no tiene clases de tipo <strong>Quiz</strong>.
+                                    <a href="{{ route('manager.courses.lessons', $course->slack) }}">Crea una clase de tipo Quiz</a>
+                                    antes de continuar: cada quiz debe asociarse a una.
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="row g-3">
                             <div class="col-12">

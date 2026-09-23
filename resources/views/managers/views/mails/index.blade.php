@@ -5,9 +5,9 @@
 @section('page_header')
     @php ob_start(); @endphp
     <div class="btn-group">
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Acciones
+        <button type="button" class="btn btn-icon btn-actions-icon"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end">
             <button type="button" class="dropdown-item" id="aliases-btn">
@@ -154,6 +154,29 @@
 
             {{-- Filtros --}}
             <div class="card-body border-bottom">
+                @php
+                    $statusLabels = ['pending_review' => 'Pendientes', 'processed' => 'Procesados', 'failed' => 'Fallidos', 'ignored' => 'Ignorados'];
+                    $confidenceLabels = ['high' => 'Alta (≥ 90%)', 'medium' => 'Media (50–89%)', 'low' => 'Baja (< 50%)'];
+                    $assignedLabels = ['me' => 'Mis correos', 'unassigned' => 'Sin asignar'];
+
+                    $filterChips = [];
+                    if (request('status', '') !== '') {
+                        $filterChips[] = ['label' => 'Estado: ' . ($statusLabels[request('status')] ?? request('status')), 'clear_url' => url()->current() . '?' . http_build_query(request()->except('status'))];
+                    }
+                    if (request('enterprise_id', '') !== '' && $selectedEnterprise) {
+                        $filterChips[] = ['label' => 'Empresa: ' . $selectedEnterprise->title, 'clear_url' => url()->current() . '?' . http_build_query(request()->except('enterprise_id'))];
+                    }
+                    if (request('confidence', '') !== '') {
+                        $filterChips[] = ['label' => 'Confianza: ' . ($confidenceLabels[request('confidence')] ?? request('confidence')), 'clear_url' => url()->current() . '?' . http_build_query(request()->except('confidence'))];
+                    }
+                    if (request('assigned_to', '') !== '') {
+                        $assignedLabel = $assignedLabels[request('assigned_to')] ?? optional($reviewers->firstWhere('id', (int) request('assigned_to')))->firstname;
+                        $filterChips[] = ['label' => 'Revisor: ' . ($assignedLabel ?? request('assigned_to')), 'clear_url' => url()->current() . '?' . http_build_query(request()->except('assigned_to'))];
+                    }
+                    if (request('date_from') && request('date_to')) {
+                        $filterChips[] = ['label' => 'Fechas: ' . request('date_from') . ' – ' . request('date_to'), 'clear_url' => url()->current() . '?' . http_build_query(request()->except(['date_from', 'date_to']))];
+                    }
+                @endphp
                 <form method="GET" action="{{ route('manager.mails.index') }}" id="searchForm">
 
                     <input type="hidden" name="status"        id="filterStatus"     value="{{ request('status', '') }}">
@@ -163,49 +186,92 @@
                     <input type="hidden" id="date_from" name="date_from" value="{{ request('date_from', '') }}">
                     <input type="hidden" id="date_to"   name="date_to"   value="{{ request('date_to', '') }}">
 
-                    <div class="d-flex gap-2 align-items-center flex-wrap">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0 text-muted">
-                                    {!! \App\Html\IconHelper::render('search') !!}
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por remitente o asunto..."
-                                       value="{{ request('search') }}">
-                            </div>
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_status" value="" {{ request('status', '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            @foreach($statusLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_status" value="{{ $value }}" {{ request('status') === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
                         </div>
-
-                        <div class="flex-shrink-0">
-                            <input type="text" class="form-control daterange mails-daterange-input" id="daterange"
-                                   placeholder="Rango de fechas" autocomplete="off"
-                                   value="{{ (request('date_from') && request('date_to')) ? request('date_from') . ' - ' . request('date_to') : '' }}">
-                        </div>
-
-                        @php
-                            $activeFilters = (int)(request('status', '') !== '')
-                                + (int)(request('enterprise_id', '') !== '')
-                                + (int)(request('confidence', '') !== '')
-                                + (int)(request('assigned_to', '') !== '');
-                        @endphp
-                        <button type="button" class="btn btn-outline-secondary btn-icon flex-shrink-0" title="Filtros"
-                                data-bs-toggle="modal" data-bs-target="#filters-modal">
-                            {!! \App\Html\IconHelper::render('sliders') !!}
-                            @if($activeFilters > 0)
-                                <span class="badge bg-primary ms-1">{{ $activeFilters }}</span>
-                            @endif
-                        </button>
-
-                        <button type="submit" class="btn btn-primary btn-icon flex-shrink-0" title="Buscar" aria-label="Buscar">
-                            {!! \App\Html\IconHelper::render('search') !!}
-                        </button>
-
-                        @if(request('search') || request('status') || request('enterprise_id') || request('confidence') || request('assigned_to') || request('date_from'))
-                            <a href="{{ route('manager.mails.index') }}" class="btn btn-outline-secondary flex-shrink-0"
-                               title="Limpiar filtros">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
                     </div>
+
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Empresa</div>
+                        <select id="modalEnterprise" class="form-select w-100">
+                            @if($selectedEnterprise)
+                                <option value="{{ $selectedEnterprise->id }}" selected>{{ $selectedEnterprise->title }}</option>
+                            @endif
+                        </select>
+                    </div>
+
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Confianza</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_confidence" value="" {{ request('confidence', '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Cualquiera</span>
+                            </label>
+                            @foreach($confidenceLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_confidence" value="{{ $value }}" {{ request('confidence') === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Revisor</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_assignedTo" value="" {{ request('assigned_to', '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos los revisores</span>
+                            </label>
+                            @foreach($assignedLabels as $value => $label)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_assignedTo" value="{{ $value }}" {{ request('assigned_to') === $value ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $label }}</span>
+                                </label>
+                            @endforeach
+                            @foreach($reviewers as $reviewer)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_assignedTo" value="{{ $reviewer->id }}" {{ (string) request('assigned_to') === (string) $reviewer->id ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ trim($reviewer->firstname . ' ' . $reviewer->lastname) }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Rango de fechas</div>
+                        <input type="text" class="form-control daterange mails-daterange-input" id="daterange"
+                               placeholder="Todas las fechas" autocomplete="off"
+                               value="{{ (request('date_from') && request('date_to')) ? request('date_from') . ' - ' . request('date_to') : '' }}">
+                    </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search', ''),
+                        'searchPlaceholder' => 'Buscar por remitente o asunto...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -269,73 +335,6 @@
                 </div>
             </div>
 
-        </div>
-    </div>
-
-    {{-- Filters modal --}}
-    <div class="modal fade" id="filters-modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Filtros avanzados</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Estado</label>
-                        <select id="modalStatus" class="form-select">
-                            <option value="">Todos los estados</option>
-                            <option value="pending_review" {{ request('status') === 'pending_review' ? 'selected' : '' }}>Pendientes</option>
-                            <option value="processed"      {{ request('status') === 'processed'      ? 'selected' : '' }}>Procesados</option>
-                            <option value="failed"         {{ request('status') === 'failed'         ? 'selected' : '' }}>Fallidos</option>
-                            <option value="ignored"        {{ request('status') === 'ignored'        ? 'selected' : '' }}>Ignorados</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Empresa</label>
-                        <select id="modalEnterprise" class="form-select w-100">
-                            @if($selectedEnterprise)
-                                <option value="{{ $selectedEnterprise->id }}" selected>{{ $selectedEnterprise->title }}</option>
-                            @endif
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Confianza</label>
-                        <select id="modalConfidence" class="form-select">
-                            <option value="">Cualquier confianza</option>
-                            <option value="high"   {{ request('confidence') === 'high'   ? 'selected' : '' }}>Alta (≥ 90%)</option>
-                            <option value="medium" {{ request('confidence') === 'medium' ? 'selected' : '' }}>Media (50–89%)</option>
-                            <option value="low"    {{ request('confidence') === 'low'    ? 'selected' : '' }}>Baja (&lt; 50%)</option>
-                        </select>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold">Revisor</label>
-                        <select id="modalAssignedTo" class="form-select">
-                            <option value=""          {{ request('assigned_to') === ''           ? 'selected' : '' }}>Todos los revisores</option>
-                            <option value="me"        {{ request('assigned_to') === 'me'         ? 'selected' : '' }}>Mis correos</option>
-                            <option value="unassigned" {{ request('assigned_to') === 'unassigned' ? 'selected' : '' }}>Sin asignar</option>
-                            @if($reviewers->isNotEmpty())
-                                <optgroup label="Por revisor">
-                                    @foreach($reviewers as $reviewer)
-                                        <option value="{{ $reviewer->id }}"
-                                            {{ (string) request('assigned_to') === (string) $reviewer->id ? 'selected' : '' }}>
-                                            {{ trim($reviewer->firstname . ' ' . $reviewer->lastname) }}
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer flex-column">
-                    <button type="button" id="applyFiltersBtn" class="btn btn-primary w-100 mb-2">
-                        Aplicar filtros
-                    </button>
-                    <a href="{{ route('manager.mails.index') }}" class="btn btn-secondary w-100">
-                        Limpiar filtros
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -446,6 +445,7 @@
 @endpush
 
 @push('scripts')
+<script src="{{ url('managers/libs/apexcharts/dist/apexcharts.min.js') }}" type="text/javascript"></script>
 <script src="{{ url('managers/libs/daterangepicker/moment.min.js') }}"></script>
 <script src="{{ url('managers/libs/daterangepicker/daterangepicker.js') }}"></script>
 <script src="{{ asset('managers/js/views/mails/index.js') }}"></script>

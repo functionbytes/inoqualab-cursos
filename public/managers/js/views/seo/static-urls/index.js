@@ -8,6 +8,9 @@ $(function () {
         url: $('#bulk-config').data('bulk-url'),
         entityLabel: 'URL(s)',
     });
+        FilterToolbar.init({
+            fields: { filterStatus: 'popover_Status' },
+        });
     }
 
     initSeoStaticUrlsTable();

@@ -21,12 +21,14 @@
 
         <div class="card">
 
-          <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Editar empresa</h6>
-            <p class="text-muted mb-3">
-              Actualiza los datos de contacto de la empresa. El título y el NIT son gestionados por el distribuidor y no se pueden modificar aquí.
-            </p>
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Editar empresa</h6>
+              <p class="text-muted small mb-0">
+                  Actualiza los datos de contacto de la empresa. El título y el NIT son gestionados por el distribuidor y no se pueden modificar aquí.
+              </p>
+          </div>
 
+          <div class="card-body">
             <div class="row g-3">
 
               <div class="col-6">

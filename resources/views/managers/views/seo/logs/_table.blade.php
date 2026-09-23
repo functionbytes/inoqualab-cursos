@@ -38,26 +38,48 @@
 
             {{-- Filtros --}}
             <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if ((request('has_redirect') ?? '') !== '') {
+                        $filterChips[] = [
+                            'label' => 'Estado: ' . (request('has_redirect') === '1' ? 'Resueltos' : 'Sin resolver'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('has_redirect')),
+                        ];
+                    }
+                @endphp
                 <form method="GET" action="{{ route('manager.seo.logs.index') }}" id="searchForm">
-                    <div class="row g-2">
-                        <div class="col-6 col-md-auto">
-                            <select name="has_redirect" class="form-select">
-                                <option value="">Todos</option>
-                                <option value="0" @selected(request('has_redirect') === '0')>Sin resolver</option>
-                                <option value="1" @selected(request('has_redirect') === '1')>Resueltos</option>
-                            </select>
+                    <input type="hidden" name="has_redirect" id="filterHasRedirect" value="{{ request('has_redirect') ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_HasRedirect" value="" {{ (request('has_redirect') ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_HasRedirect" value="0" {{ request('has_redirect') === '0' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Sin resolver</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_HasRedirect" value="1" {{ request('has_redirect') === '1' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Resueltos</span>
+                            </label>
                         </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
-                        </div>
-                        @if(request('has_redirect') !== null && request('has_redirect') !== '')
-                            <div class="col-auto">
-                                <a href="{{ route('manager.seo.logs.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            </div>
-                        @endif
                     </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => request('search') ?? '',
+                        'searchPlaceholder' => 'Buscar por URL...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -89,7 +111,7 @@
                                             <code class="small text-break">{{ Str::limit($log->path, 70) }}</code>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $log->hit_count >= 100 ? 'bg-danger-subtle text-danger' : ($log->hit_count >= 10 ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary') }}">
+                                            <span class="badge {{ $log->hit_count >= 10 ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary' }}">
                                                 {{ number_format($log->hit_count) }}
                                             </span>
                                         </td>
@@ -103,7 +125,7 @@
                                             @if($log->has_redirect)
                                                 <span class="badge bg-success-subtle text-success">Resuelto</span>
                                             @else
-                                                <span class="badge bg-danger-subtle text-danger">Sin redirect</span>
+                                                <span class="badge bg-secondary-subtle text-secondary">Sin redirect</span>
                                             @endif
                                         </td>
                                         <td class="text-center">
@@ -125,7 +147,7 @@
                                                         <a class="dropdown-item btn-mark-resolved" href="#"
                                                            data-id="{{ $log->id }}"
                                                            data-url="{{ route('manager.seo.logs.mark-resolved', $log->id) }}">
-                                                            Marcar resuelto
+                                                            Eliminar registro
                                                         </a>
                                                     </li>
                                                 </ul>
@@ -138,7 +160,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-circle-check fa-3x mb-3 text-success opacity-75"></i>
+                        <div class="mb-3 text-success opacity-75">{!! \App\Html\IconHelper::render('empty-check', 48) !!}</div>
                         <h5 class="fw-bold mb-2">No hay errores 404 registrados</h5>
                         <p class="text-muted mb-4">El sitio no tiene errores 404 pendientes</p>
                     </div>

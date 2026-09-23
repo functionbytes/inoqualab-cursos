@@ -143,6 +143,7 @@
 
 <script src="{{ asset('managers/js/layout.js') }}" type="text/javascript"></script>
 <script src="{{ asset('managers/js/table-scroll-hint.js') }}" type="text/javascript"></script>
+<script src="{{ asset('managers/js/dropdown-boundary-fix.js') }}" type="text/javascript"></script>
 
 @stack('scripts')
 

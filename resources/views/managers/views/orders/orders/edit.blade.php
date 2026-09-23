@@ -28,12 +28,14 @@
 
                     <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Editar orden</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Editar orden</h6>
+                        <p class="text-muted small mb-0">
                             Actualiza los datos de la orden. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-6">

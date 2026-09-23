@@ -263,10 +263,10 @@
         <img class="signature" src="{{ public_path() .$signature }}" />
 
         <div class="certifier">
-            <p class="text-certifier">{{ $certifier['firstname'] }} {{ $certifier['lastname'] }}</p>
+            <p class="text-certifier">{{ $certifier['firstname'] ?? '' }} {{ $certifier['lastname'] ?? '' }}</p>
         </div>
         <div class="certifier-description">
-            <p class="text-certifier-description">{!! clean($certifier['description'], 'content') !!}</p>
+            <p class="text-certifier-description">{!! clean($certifier['description'] ?? '', 'content') !!}</p>
         </div>
 
 

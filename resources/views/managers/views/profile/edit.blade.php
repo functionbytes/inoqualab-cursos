@@ -19,9 +19,10 @@
         {{-- Información básica --}}
         <div class="col-lg-7">
             <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Información básica</h6>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title fw-semibold mb-4">Información básica</h5>
-
                     <form id="profileForm" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="_method" value="PUT">
@@ -73,10 +74,10 @@
                             </div>
                         </div>
 
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary" id="profileSubmit">Guardar cambios</button>
-                        </div>
                     </form>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100" id="profileSubmit" form="profileForm">Guardar cambios</button>
                 </div>
             </div>
         </div>
@@ -84,9 +85,10 @@
         {{-- Seguridad --}}
         <div class="col-lg-5">
             <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Seguridad</h6>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title fw-semibold mb-4">Seguridad</h5>
-
                     <form id="passwordForm">
                         @csrf
                         <input type="hidden" name="_method" value="PUT">
@@ -107,10 +109,10 @@
                             <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" autocomplete="new-password">
                         </div>
 
-                        <div class="mt-2">
-                            <button type="submit" class="btn btn-primary" id="passwordSubmit">Actualizar contraseña</button>
-                        </div>
                     </form>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100" id="passwordSubmit" form="passwordForm">Actualizar contraseña</button>
                 </div>
             </div>
         </div>

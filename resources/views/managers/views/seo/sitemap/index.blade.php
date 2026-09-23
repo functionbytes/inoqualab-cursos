@@ -63,7 +63,7 @@
                                         <th>Nombre</th>
                                         <th>URL</th>
                                         <th class="text-center">Estado caché</th>
-                                        <th class="text-end">Acciones</th>
+                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -77,15 +77,24 @@
                                                 @if($sitemap['has_cache'])
                                                     <span class="badge bg-success-subtle text-success">En caché</span>
                                                 @else
-                                                    <span class="badge bg-warning-subtle text-warning">Sin caché</span>
+                                                    <span class="badge bg-secondary-subtle text-secondary">Sin caché</span>
                                                 @endif
                                             </td>
-                                            <td class="text-end">
-                                                <a href="{{ $sitemap['url'] }}"
-                                                   target="_blank"
-                                                   class="btn btn-sm btn-outline-secondary">
-                                                    Ver
-                                                </a>
+                                            <td class="text-center">
+                                                <div class="dropdown">
+                                                    <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                            data-bs-toggle="dropdown"
+                                                            data-bs-boundary="viewport">
+                                                        <i class="fas fa-ellipsis-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end">
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ $sitemap['url'] }}" target="_blank">
+                                                                Ver
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty

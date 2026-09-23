@@ -39,11 +39,14 @@
 
                     <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Imagen</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Imagen</h6>
+                        <p class="text-muted small mb-0">
                             Cambia la imagen de portada del curso si lo necesitas. Se mostrará en el catálogo y en la página del curso.
                         </p>
+                    </div>
+
+                    <div class="card-body">
                         <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
                                 <input type="file" hidden name="file">
@@ -56,7 +59,8 @@
 
                     <div class="card-body">
                         <h6 class="fw-bold text-dark mb-1">Información general</h6>
-                        <p class="text-muted mb-3">Datos básicos que identifican el curso: título, video de presentación y duración.</p>
+                        <p class="text-muted mb-3">Datos básicos que identifican el curso: título, video de presentación y duración.
+                        </p>
 
                         <div class="row g-3">
 

@@ -17,9 +17,11 @@
             {{-- Card 1: General --}}
             <div class="card mb-4">
                 <form id="formSeoGeneral">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">General</h6>
+                        <p class="text-muted small mb-0">Configuración básica del SEO del sitio</p>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">General</h6>
-                        <p class="text-muted mb-3">Configuración básica del SEO del sitio</p>
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Nombre del sitio</label>
@@ -70,9 +72,11 @@
             {{-- Card 2: Verificaciones de buscadores --}}
             <div class="card mb-4">
                 <form id="formSeoVerifications">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Verificaciones de buscadores</h6>
+                        <p class="text-muted small mb-0">Códigos de verificación para webmaster tools</p>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Verificaciones de buscadores</h6>
-                        <p class="text-muted mb-3">Códigos de verificación para webmaster tools</p>
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-semibold">Google Search Console</label>
@@ -129,7 +133,7 @@
                                         </div>
                                         <div class="form-text">Notifica a Bing/Yandex al publicar contenido.</div>
                                     </div>
-                                    <div class="col-12 col-md-9">
+                                    <div class="col-12 col-md-9 {{ ($settings['seo_indexnow_enabled'] ?? '') === '1' ? '' : 'd-none' }}" id="indexNowFields">
                                         <label class="form-label fw-semibold">Clave IndexNow</label>
                                         <div class="input-group">
                                             <input type="text" class="form-control font-monospace"
@@ -161,9 +165,11 @@
             {{-- Card 3: robots.txt --}}
             <div class="card mb-4">
                 <form id="formRobots">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">robots.txt</h6>
+                        <p class="text-muted small mb-0">Controla qué rastreadores pueden indexar</p>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">robots.txt</h6>
-                        <p class="text-muted mb-3">Controla qué rastreadores pueden indexar</p>
                         <textarea class="form-control font-monospace" name="robots_txt" rows="10"
                                   placeholder="User-agent: *&#10;Allow: /&#10;Disallow: /panel/">{{ $settings['robots_txt'] ?? '' }}</textarea>
                         <div class="form-text mt-2">
@@ -184,9 +190,11 @@
             {{-- Card 4: llms.txt --}}
             <div class="card">
                 <form id="formLlms">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">llms.txt</h6>
+                        <p class="text-muted small mb-0">Instrucciones para modelos de lenguaje (LLMs)</p>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">llms.txt</h6>
-                        <p class="text-muted mb-3">Instrucciones para modelos de lenguaje (LLMs)</p>
                         <textarea class="form-control font-monospace" name="llms_txt" rows="8"
                                   placeholder="# Mi Sitio&#10;&#10;Descripción breve del sitio para LLMs...">{{ $settings['llms_txt'] ?? '' }}</textarea>
                         <div class="form-text mt-2">

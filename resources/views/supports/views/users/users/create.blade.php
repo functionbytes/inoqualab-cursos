@@ -23,12 +23,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Crear usuario</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Crear usuario</h6>
+                        <p class="text-muted small mb-0">
                             Completa los datos del nuevo usuario. Los campos obligatorios deben diligenciarse para poder guardarlo.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-6">
@@ -95,12 +97,9 @@
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                        <button type="submit" class="btn btn-primary w-100">
                             Guardar
                         </button>
-                        <a href="{{ route('support.users') }}" class="btn btn-light w-100">
-                            Cancelar
-                        </a>
                     </div>
 
                 </div>

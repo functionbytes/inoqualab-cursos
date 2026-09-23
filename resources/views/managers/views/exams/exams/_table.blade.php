@@ -70,13 +70,14 @@
                             </thead>
                             <tbody>
                                 @foreach($exams as $exam)
+                                    @php $examTitle = Str::title(Str::lower($exam->title)); @endphp
                                     <tr>
                                         <td>
                                             <input type="checkbox" class="form-check-input bulk-checkbox"
                                                    value="{{ $exam->id }}">
                                         </td>
                                         <td>
-                                            <div class="fw-semibold">{{ Str::upper(Str::lower($exam->title)) }}</div>
+                                            <div class="fw-semibold exams-title-normal">{{ $examTitle }}</div>
                                         </td>
                                         <td class="text-center">
                                             @if($exam->available)
@@ -112,7 +113,7 @@
                                                     <li>
                                                         <a class="dropdown-item btn-delete" href="#"
                                                            data-url="{{ route('manager.courses.exam.destroy', $exam->slack) }}"
-                                                           data-title="Eliminar: {{ $exam->title }}">
+                                                           data-title="Eliminar: {{ $examTitle }}">
                                                             Eliminar
                                                         </a>
                                                     </li>
@@ -126,7 +127,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-file-alt fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-document', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') || ($available ?? '') !== '')
                                 No se encontraron resultados
@@ -146,10 +147,9 @@
                                 Ver todos
                             </a>
                         @else
-                            <button type="button" class="btn btn-primary btn-new-exam"
-                                    data-bs-toggle="modal" data-bs-target="#exam-modal">
-                                Nuevo examen
-                            </button>
+                            <button type="button" class="btn btn-primary btn-icon btn-new-exam"
+                                    data-bs-toggle="modal" data-bs-target="#exam-modal"
+                                    title="Nuevo examen" aria-label="Nuevo examen">{!! \App\Html\IconHelper::render('plus') !!}</button>
                         @endif
                     </div>
                 @endif

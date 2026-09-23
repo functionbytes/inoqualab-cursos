@@ -121,12 +121,14 @@
             <form id="formPortal" role="form" data-update-url="{{ route('manager.settings.portal.update') }}">
                 {{ csrf_field() }}
 
-                <div class="card-body border-top">
-
-                    <h5 class="mb-1">Portal del alumno</h5>
-                    <p class="card-subtitle mb-4 mt-0">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Portal del alumno</h6>
+                    <p class="text-muted small mb-0">
                         Elige qué diseño ve el alumno en cada pantalla. El cambio se aplica de inmediato para todos los alumnos.
                     </p>
+                </div>
+
+                <div class="card-body">
 
                     @foreach($secciones as $seccion)
                         @php $actual = setting($seccion['key'], $seccion['default'] ?? 'a'); @endphp
@@ -158,12 +160,12 @@
                         </div>
                     @endforeach
 
-                    <div class="border-top pt-3">
-                        <button type="submit" class="btn btn-info px-4 waves-effect waves-light mt-2 w-100">
-                            Guardar
-                        </button>
-                    </div>
+                </div>
 
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Guardar
+                    </button>
                 </div>
             </form>
         </div>

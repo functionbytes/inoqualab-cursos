@@ -92,7 +92,9 @@
             {{-- ── Páginas con peor rendimiento ───────────────────────────────── --}}
             <div class="col-12 col-lg-7">
                 <div class="card h-100">
-                    
+                    <div class="card-header p-4 border-bottom border-light">
+                        <h5 class="mb-0 fw-bold">Páginas con peor rendimiento</h5>
+                    </div>
                     <div class="card-body p-0">
                         @if($worstPages->isEmpty())
                             <div class="text-center py-5">

@@ -24,12 +24,14 @@
 
                     <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Reporte factura</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte factura</h6>
+                        <p class="text-muted small mb-0">
                             Selecciona la empresa, la condición y el tipo de factura, junto con el rango de fechas, para generar el reporte de facturas.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-12">

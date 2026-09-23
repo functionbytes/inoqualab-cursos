@@ -23,10 +23,12 @@ Para el patrón de **listados** (`index.blade.php` con `<table>`) ver
 
             <div class="card">
 
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">{Título de sección}</h6>
-                    <p class="text-muted mb-3">{descripción breve de la sección}</p>
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">{Título de sección}</h6>
+                    <p class="text-muted small mb-0">{descripción breve de la sección}</p>
+                </div>
 
+                <div class="card-body">
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="form-label fw-semibold">{Campo} <span class="text-danger">*</span></label>
@@ -39,7 +41,12 @@ Para el patrón de **listados** (`index.blade.php` con `<table>`) ver
 
                 <hr class="my-0"> {{-- separador entre secciones de la MISMA card --}}
 
-                <div class="card-body">{{-- siguiente sección --}}</div>
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">{Título de sub-sección}</h6>
+                    <p class="text-muted small mb-3">{descripción breve de la sub-sección, opcional}</p>
+                    {{-- siguiente sección: el h6/descripción interno solo aplica a partir de la 2a sección,
+                         va dentro del card-body (no hay card-header intermedio) --}}
+                </div>
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary w-100">Guardar</button>
@@ -72,6 +79,17 @@ Referencia canónica (la más completa, con 4 secciones y sidebar de 3 tarjetas)
 - **Una sola card** en la columna izquierda; secciones separadas con
   `<hr class="my-0">` entre `card-body`, no con `card w-100` + `border-top`
   repetido (patrón viejo).
+- **card-header obligatorio**: el título principal del formulario, JUNTO con
+  su descripción breve, van dentro de un
+  `<div class="card-header border-bottom">` al inicio de la card (mismo
+  estilo que ya usa el sidebar) — NO como `<h6>` suelto ni `<p>` de
+  descripción dentro del primer `card-body`. Dentro del header: el título es
+  `<h6 class="mb-1 fw-bold">` y la descripción `<p class="text-muted small
+  mb-0">`, ambos antes del `border-bottom`. Si hay secciones adicionales
+  separadas por `<hr>`, esas SÍ mantienen su propio `<h6 class="fw-bold
+  text-dark mb-1">` (+ `<p class="text-muted small mb-3">` si aplica) dentro
+  de su `card-body` — el `card-header` es solo para el título de la card
+  completa, no se repite por sección.
 - **Labels**: `form-label fw-semibold` (nunca `control-label col-form-label`,
   que es el patrón viejo).
 - **Botón guardar**: `btn btn-primary w-100` dentro de `card-footer` (nunca

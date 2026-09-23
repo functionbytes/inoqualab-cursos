@@ -19,6 +19,9 @@ $(function () {
             applyBtn: '#bulk-apply-btn',
             entityLabel: 'registro(s)',
         });
+        FilterToolbar.init({
+            fields: { filterHasRedirect: 'popover_HasRedirect' },
+        });
     }
 
     initLogsTable();
@@ -89,8 +92,10 @@ $(function () {
 
     // ── Limpiar registros viejos ──────────────────────────────────────────────
     $('#btn-clean-old').on('click', function () {
-        if (!confirm('¿Eliminar todos los registros 404 con más de 90 días de antigüedad?')) return;
+        $('#modalCleanOld').modal('show');
+    });
 
+    $('#btn-confirm-clean-old').on('click', function () {
         var $btn = $(this).prop('disabled', true).text('Limpiando...');
 
         $.ajax({
@@ -99,13 +104,14 @@ $(function () {
             headers: { 'X-CSRF-TOKEN': csrfToken },
             success: function (response) {
                 toastr.success(response.message ?? 'Registros eliminados');
+                $('#modalCleanOld').modal('hide');
                 setTimeout(function () { location.reload(); }, 800);
             },
             error: function () {
                 toastr.error('Error al limpiar los registros');
             },
             complete: function () {
-                $btn.prop('disabled', false).text('Limpiar registros (+90 días)');
+                $btn.prop('disabled', false).text('Limpiar registros');
             }
         });
     });

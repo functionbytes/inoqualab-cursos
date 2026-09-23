@@ -168,7 +168,7 @@
         @else
         <div class="card-body">
             <div class="text-center py-5">
-                <i class="fas fa-inbox fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
                 <h5 class="fw-bold mb-2">No hay variables</h5>
                 <p class="text-muted mb-4">
                     @if(request('search') || request('module') || request('category'))

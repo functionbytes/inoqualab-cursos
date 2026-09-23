@@ -76,17 +76,26 @@
         });
     });
 
+    var $deleteRow = null;
+
     $(document).on('click', '.btn-delete', function () {
-        if (!confirm('¿Eliminar esta campaña? La acción no se puede deshacer.')) return;
-        var $row = $(this).closest('tr');
+        $deleteRow = $(this).closest('tr');
+        $('#delete-form').attr('action', $(this).data('url'));
+        $('#delete-modal').modal('show');
+    });
+
+    $('#delete-form').on('submit', function (e) {
+        e.preventDefault();
+        var $row = $deleteRow;
 
         $.ajax({
-            url: $(this).data('url'),
+            url: $(this).attr('action'),
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             success: function (response) {
                 toastr.success(response.message);
-                $row.fadeOut(400, function () { $(this).remove(); });
+                $('#delete-modal').modal('hide');
+                if ($row) $row.fadeOut(400, function () { $(this).remove(); });
             },
             error: function (xhr) {
                 toastr.error(xhr.responseJSON?.message || 'Error al eliminar.');

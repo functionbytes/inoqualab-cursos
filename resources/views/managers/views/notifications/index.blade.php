@@ -64,7 +64,7 @@
                     </ul>
                 @empty
                     <div class="text-center py-5">
-                        <i class="fas fa-bell-slash fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('bell-slash', 48) !!}</div>
                         <h5 class="fw-bold mb-2">No hay notificaciones</h5>
                         <p class="text-muted mb-0">Las notificaciones aparecerán aquí cuando se generen.</p>
                     </div>

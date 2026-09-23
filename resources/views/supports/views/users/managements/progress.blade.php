@@ -35,10 +35,10 @@
                 $read_class = $progress;
                 $read_count = count($read_class);
 
-                if($read_count == 0){
+                if($total_count == 0){
                     $progres = 0;
                 }else{
-                    $progres = ($total_count / $read_count) * $total_per;
+                    $progres = ($read_count / $total_count) * $total_per;
                 }
 
             @endphp
@@ -68,17 +68,14 @@
             @foreach ($chapters->sortBy('position') as $key => $chapter)
                 <div class="col-md-6 col-lg-12">
                     <div class="card w-100">
-                        <div class="card-body">
-                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-3">
-                                <div class="mb-3 mb-sm-0">
-                                    <h5 class="card-title fw-semibold">{{ $chapter->first()->chapter->title }}</h5>
-                                    <p class="card-subtitle">Detalle del curso y seguimiento del progreso</p>
-
-
-                                    <a class="dropdown-item d-flex align-items-center gap-3 confirm-delete" data-href="{{ route('support.enterprises.users.managements.progress.restore', $inscription->slack) }}"> progreso</a>
-
-                                </div>
+                        <div class="card-header border-bottom d-flex align-items-center justify-content-between">
+                            <div>
+                                <h6 class="mb-1 fw-bold">{{ $chapter->first()->chapter->title }}</h6>
+                                <p class="text-muted small mb-0">Detalle del curso y seguimiento del progreso</p>
                             </div>
+                            <a class="btn btn-outline-danger btn-sm confirm-delete" data-href="{{ route('support.enterprises.users.managements.progress.restore', $inscription->slack) }}">Restaurar progreso</a>
+                        </div>
+                        <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table align-middle text-nowrap mb-0">
                                     <thead>

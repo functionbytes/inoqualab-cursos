@@ -23,18 +23,28 @@
 
     <div class="widget-content searchable-container list" id="orders-index"
          data-flash-success="{{ session('success') }}"
-         data-flash-error="{{ session('error') }}">
+         data-flash-error="{{ session('error') }}"
+         data-bulk-action-url="{{ route('manager.orders.bulk-action') }}">
 
                 <div id="ajax-table-root">
             @include('managers.views.orders.orders._table')
         </div>
     </div>
 
-    
-
     @include('managers.includes.delete')
 
+    @include('managers.includes.bulk-toolbar-modal', [
+        'bulkEntityLabel' => 'orden(es)',
+        'bulkActions' => [
+            ['value' => 'delete', 'label' => 'Eliminar'],
+        ],
+    ])
+
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/shared/tables.css') }}">
+@endpush
 
 @push('scripts')
 <script src="{{ asset('managers/js/views/orders/orders/index.js') }}"></script>

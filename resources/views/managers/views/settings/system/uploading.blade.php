@@ -17,6 +17,11 @@
 
                 <div class="card">
 
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Límites de carga</h6>
+                        <p class="text-muted small mb-0">Define el tamaño máximo y la cantidad de archivos que se pueden subir simultáneamente.</p>
+                    </div>
+
                     @if ($errors->any())
                         <div class="card-body pb-0">
                             <div class="alert alert-danger border-0 mb-0 py-2">
@@ -30,11 +35,7 @@
                         </div>
                     @endif
 
-                    {{-- Límites de carga --}}
                     <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Límites de carga</h6>
-                        <p class="text-muted mb-3">Define el tamaño máximo y la cantidad de archivos que se pueden subir simultáneamente.</p>
-
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="maxFileSize" class="form-label fw-semibold">Tamaño máximo por archivo (KB) <span class="text-danger">*</span></label>

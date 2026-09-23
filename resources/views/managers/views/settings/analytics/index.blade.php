@@ -20,10 +20,12 @@
 
                     <div class="card mb-4">
 
-                        <div class="card-body">
-                            <h6 class="fw-bold text-dark mb-1">Estado del servicio</h6>
-                            <p class="text-muted mb-3">Habilita o deshabilita Google Analytics GA4 en el sitio.</p>
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-1 fw-bold">Estado del servicio</h6>
+                            <p class="text-muted small mb-0">Habilita o deshabilita Google Analytics GA4 en el sitio.</p>
+                        </div>
 
+                        <div class="card-body">
                             <div class="form-check form-switch mb-2">
                                 <input class="form-check-input" type="checkbox" id="googleAnalyticsEnable"
                                        name="google_analytics_enable" value="1"
@@ -152,28 +154,17 @@
 
                     <div class="card">
 
-                        <div class="card-body">
-                            <h6 class="fw-bold text-dark mb-1">Pixels de seguimiento</h6>
-                            <p class="text-muted mb-0">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-1 fw-bold">Pixels de seguimiento</h6>
+                            <p class="text-muted small mb-0">
                                 Ingresa los IDs de cada plataforma. Deja vacío los que no uses.
                                 Los scripts se inyectan automáticamente en el sitio público.
                             </p>
+                            <p class="text-muted small mb-0 mt-2">
+                                El Meta Pixel (Facebook / Instagram) se configura aparte, en
+                                <a href="{{ route('manager.settings.pixel') }}">Pixel Analytics</a>.
+                            </p>
                         </div>
-
-                        <hr class="my-0">
-
-                        {{-- Meta Pixel --}}
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-2">Meta Pixel (Facebook / Instagram)</h6>
-                            <input type="text" class="form-control font-monospace" name="meta_pixel_id"
-                                   placeholder="123456789012345"
-                                   value="{{ $settings['meta_pixel_id'] }}">
-                            <small class="text-muted d-block mt-1">
-                                Meta Ads Manager → Fuentes de datos → Pixels → ID numérico.
-                            </small>
-                        </div>
-
-                        <hr class="my-0">
 
                         {{-- Microsoft Clarity --}}
                         <div class="card-body">
@@ -232,8 +223,10 @@
 
                 {{-- Reportes programados --}}
                 <div class="card mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Reportes programados</h6>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold mb-1">Reportes programados</h6>
                         <p class="text-muted mb-3">Configura el envío automático de reportes por email con frecuencia y formato personalizados.</p>
                         <a href="{{ route('manager.settings.analytics.schedules.index') }}" class="btn btn-primary w-100">
                             Gestionar reportes
@@ -243,8 +236,10 @@
 
                 {{-- Notificaciones --}}
                 <div class="card mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Notificaciones</h6>
+                    </div>
                     <div class="card-body">
-                        <h6 class="fw-bold mb-1">Notificaciones</h6>
                         <p class="text-muted mb-3">Configura los destinatarios que reciben alertas cuando un reporte se envía o falla.</p>
                         <a href="{{ route('manager.settings.analytics.notifications') }}" class="btn btn-outline-secondary w-100">
                             Configurar notificaciones
@@ -254,10 +249,12 @@
 
                 {{-- Cómo configurar GA4 --}}
                 <div class="card mb-4">
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">
                             Cómo configurar GA4
                         </h6>
+                    </div>
+                    <div class="card-body">
                         <ol class="ps-3 mb-0 small">
                             <li>Ve a <a href="https://analytics.google.com" target="_blank">analytics.google.com</a></li>
                             <li>Admin → Configuración de la propiedad → copia el <strong>Property ID</strong></li>
@@ -274,10 +271,12 @@
 
                 {{-- Estado actual --}}
                 <div class="card">
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">
                             Estado actual
                         </h6>
+                    </div>
+                    <div class="card-body">
                         <div class="d-flex flex-column gap-2 small">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-muted">Seguimiento web (gtag.js)</span>
@@ -293,14 +292,6 @@
                                     <span class="badge bg-success-subtle text-success">Configurado</span>
                                 @else
                                     <span class="badge bg-warning-subtle text-warning">Sin configurar</span>
-                                @endif
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-muted">Meta Pixel</span>
-                                @if($settings['meta_pixel_id'])
-                                    <span class="badge bg-success-subtle text-success">Activo</span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary">Inactivo</span>
                                 @endif
                             </div>
                             <div class="d-flex justify-content-between align-items-center">

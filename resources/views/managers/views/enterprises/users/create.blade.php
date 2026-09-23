@@ -24,12 +24,14 @@
 
         <div class="card">
 
-          <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Crear usuario</h6>
-            <p class="text-muted mb-3">
-              Completa los datos del nuevo usuario de la empresa. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
-            </p>
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Crear usuario</h6>
+              <p class="text-muted small mb-0">
+                  Completa los datos del nuevo usuario de la empresa. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
+              </p>
+          </div>
 
+          <div class="card-body">
             <div class="row g-3">
 
               <div class="col-6">

@@ -27,7 +27,10 @@
 
         {{-- ── Auditoría por URL ────────────────────────────────────────────── --}}
         <div class="card mb-3">
-            
+            <div class="card-header p-4 border-bottom border-light">
+                <h5 class="mb-1 fw-bold">Auditoría por URL</h5>
+                <p class="mb-0 text-muted">Analiza una URL específica y obtén el score SEO con detalles</p>
+            </div>
             <div class="card-body">
                 <div class="row g-2 align-items-end mb-3">
                     <div class="col-12 col-md">
@@ -249,7 +252,7 @@
             </div>
 
             <div id="bulk-empty" class="card-body text-center py-5 d-none">
-                <i class="fas fa-magnifying-glass fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-search', 48) !!}</div>
                 <h5 class="fw-bold mb-2">Sin resultados de auditoría</h5>
                 <p class="text-muted mb-0">Ejecuta la auditoría masiva para ver los resultados</p>
             </div>
@@ -327,7 +330,7 @@
             </div>
 
             <div id="canonical-empty" class="card-body text-center py-5 d-none">
-                <i class="fas fa-link fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-link', 48) !!}</div>
                 <h5 class="fw-bold mb-2">Sin datos de canonicals</h5>
                 <p class="text-muted mb-0">Ejecuta la verificación para ver el estado</p>
             </div>
@@ -367,7 +370,7 @@
             </div>
 
             <div id="broken-empty" class="card-body text-center py-5 d-none">
-                <i class="fas fa-circle-check fa-3x mb-3 text-success opacity-75"></i>
+                <div class="mb-3 text-success opacity-75">{!! \App\Html\IconHelper::render('empty-check', 48) !!}</div>
                 <h5 class="fw-bold mb-2">No se encontraron links rotos</h5>
                 <p class="text-muted mb-0">Todos los enlaces verificados responden correctamente</p>
             </div>
@@ -453,7 +456,7 @@
             </div>
 
             <div id="internal-empty" class="card-body text-center py-5 d-none">
-                <i class="fas fa-sitemap fa-3x mb-3 text-muted opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-search', 48) !!}</div>
                 <h5 class="fw-bold mb-2">Sin análisis de links internos</h5>
                 <p class="text-muted mb-0">Ejecuta el análisis para ver la estructura de enlaces</p>
             </div>

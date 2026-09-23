@@ -30,11 +30,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Cerificado</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Certificado</h6>
+                        <p class="text-muted small mb-0">
                             Sube la imagen del certificado. El formato recomendado es JPG o PNG.
                         </p>
+                    </div>
+
+                    <div class="card-body">
                         <div class="dropzone dz-clickable" id="thumbnail">
                             <div class="fallback">
                                 <input type="file" hidden name="file">
@@ -50,6 +53,7 @@
                         <p class="text-muted mb-3">
                             Completa los datos de la certificación. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
                         </p>
+
                         <div class="row g-3">
 
                             <div class="col-6">

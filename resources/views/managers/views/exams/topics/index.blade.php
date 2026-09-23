@@ -4,10 +4,9 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" class="btn btn-primary btn-new-question"
-                                data-bs-toggle="modal" data-bs-target="#question-modal">
-                            Nueva pregunta
-                        </button>
+<button type="button" class="btn btn-primary btn-icon btn-new-question"
+                                data-bs-toggle="modal" data-bs-target="#question-modal"
+                                title="Nueva pregunta" aria-label="Nueva pregunta">{!! \App\Html\IconHelper::render('plus') !!}</button>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Preguntas del examen',

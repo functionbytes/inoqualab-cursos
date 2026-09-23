@@ -19,16 +19,16 @@
 
                     <input  id="slack" name="slack" type="hidden" value="{{ $distributor->slack }}">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0"> Tarifas de cursos</h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Tarifas de cursos</h6>
+                        <p class="text-muted small mb-0">
+                            Define el precio que este distribuidor paga por cada curso. Ajusta los
+                            valores y guarda para actualizar todas las tarifas a la vez.
                         </p>
+                    </div>
 
-                        <div class="mb-4 row align-items-center">
+                    <div class="card-body">
+                        <div class="mb-0 row align-items-center">
                             <div class="table-responsive table-bussiness-hours">
                                 <table class="table card-table table-vcenter text-nowrap mb-0">
                                     <thead>
@@ -60,16 +60,13 @@
                             </div>
                         </div>
 
-                        <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
-                            </div>
-                        </div>
-
                     </div>
-            </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
                 </form>
             </div>
 

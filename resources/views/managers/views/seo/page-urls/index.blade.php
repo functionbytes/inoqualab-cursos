@@ -2,6 +2,10 @@
 
 @section('title', 'URLs del sitio')
 
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/page-urls/index.css') }}">
+@endpush
+
 @section('page_header')
     @include('managers.includes.card', [
         'title' => 'URLs del sitio',

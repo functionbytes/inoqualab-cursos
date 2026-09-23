@@ -31,12 +31,15 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Imagen</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Imagen</h6>
+                        <p class="text-muted small mb-0">
                             Portada del paquete. Se muestra en el catálogo público y en las tarjetas de paquetes.
                         </p>
-                         <div class="dropzone dz-clickable" id="thumbnail">
+                         </div>
+
+                         <div class="card-body">
+                             <div class="dropzone dz-clickable" id="thumbnail">
                                 <div class="fallback">
                                        <input type="file" hidden name="file">
                                 </div>
@@ -51,6 +54,7 @@
                         <p class="text-muted mb-3">
                             Completa los datos del paquete. Los campos marcados como obligatorios deben diligenciarse para poder guardarlo.
                         </p>
+
                         <div class="row g-3">
 
                             <div class="col-12">

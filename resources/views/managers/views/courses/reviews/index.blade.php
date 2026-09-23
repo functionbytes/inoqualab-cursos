@@ -29,31 +29,36 @@
     {{-- Detalle de la reseña --}}
     <div class="modal fade" id="review-detail-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalle de la reseña</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-content review-modal-content">
+                <div class="review-modal-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="review-avatar" id="review-detail-avatar"></div>
+                        <div>
+                            <div class="review-modal-name" id="review-detail-student"></div>
+                            <div class="review-modal-course" id="review-detail-course"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white review-modal-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold d-block">Curso</label>
-                        <span id="review-detail-course" class="text-muted"></span>
+                    <div class="review-rating-row">
+                        <span id="review-detail-rating" class="reviews-stars reviews-stars-lg"></span>
+                        <span class="review-modal-date" id="review-detail-date"></span>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold d-block">Estudiante</label>
-                        <span id="review-detail-student" class="text-muted"></span>
+
+                    <div class="review-comment-card">
+                        <i class="fas fa-quote-left review-comment-icon"></i>
+                        <p class="mb-0" id="review-detail-comment"></p>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold d-block">Calificacion</label>
-                        <span id="review-detail-rating" class="text-warning"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold d-block">Comentario</label>
-                        <span id="review-detail-comment" class="text-muted"></span>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold d-block">Fecha</label>
-                        <span id="review-detail-date" class="text-muted"></span>
+
+                    <div class="review-visibility-row" id="review-visibility-row">
+                        <div>
+                            <div class="review-visibility-label">Visibilidad publica</div>
+                            <div class="text-muted small" id="review-visibility-hint">Se muestra en la pagina del curso</div>
+                        </div>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input review-visibility-switch" type="checkbox" role="switch" id="review-visibility-switch">
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

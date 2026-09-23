@@ -32,13 +32,24 @@
                 $total_count = count($total_class);
 
                 $total_per = 100;
-                $read_class = $progress;
-                $read_count = count($read_class);
+                // La formula estaba invertida (total/read en vez de read/total):
+                // con progreso parcial normal (3 de 16 lecciones) daba 533% en
+                // vez de 19%. Ademas, la inscripcion es la fuente de verdad de
+                // si el curso esta culminado: algunas inscripciones antiguas
+                // solo tienen un registro "resumen" en course_progress sin
+                // detalle por leccion.
+                $read_count = \App\Models\Course\CourseProgress::where('inscription_id', $inscription->id)
+                    ->where('user_id', $user->id)
+                    ->where('culminated', 1)
+                    ->whereNotNull('lesson_id')
+                    ->count();
 
-                if($read_count == 0){
+                if ($inscription->culminated == 1) {
+                    $progres = 100;
+                } elseif ($total_count == 0) {
                     $progres = 0;
-                }else{
-                    $progres = ($total_count / $read_count) * $total_per;
+                } else {
+                    $progres = ($read_count / $total_count) * $total_per;
                 }
 
             @endphp
@@ -68,13 +79,11 @@
             @foreach ($chapters->sortBy('position') as $key => $chapter)
                 <div class="col-md-6 col-lg-12">
                     <div class="card w-100">
+                        <div class="card-header border-bottom">
+                            <h6 class="mb-1 fw-bold">{{ $chapter->first()->chapter->title }}</h6>
+                            <p class="text-muted small mb-0">Detalle del curso y seguimiento del progreso</p>
+                        </div>
                         <div class="card-body">
-                            <div class="d-sm-flex d-block align-items-center justify-content-between mb-3">
-                                <div class="mb-3 mb-sm-0">
-                                    <h5 class="card-title fw-semibold">{{ $chapter->first()->chapter->title }}</h5>
-                                    <p class="card-subtitle">Detalle del curso y seguimiento del progreso</p>
-                                </div>
-                            </div>
                             <div class="table-responsive">
                                 <table class="table align-middle text-nowrap mb-0">
                                     <thead>
@@ -85,7 +94,7 @@
                                     @foreach ($chapter as $key => $class)
 
                                         @php
-                                        $validate = App\Models\Course\CourseProgress::validate($class->id,$inscription->id,$user->id);
+                                        $validate = App\Models\Course\CourseProgress::validate($class->id,$inscription->id,$user->id) || $inscription->culminated == 1;
                                         @endphp
 
                                         <tr>

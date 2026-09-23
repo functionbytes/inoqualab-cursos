@@ -57,10 +57,10 @@
 <div class="d-flex gap-2 align-items-center filter-toolbar-bar">
     <div class="flex-fill">
         <div class="input-group">
-            <span class="input-group-text bg-white border-end-0 text-muted">
+            <span class="input-group-text text-muted">
                 {!! \App\Html\IconHelper::render('search') !!}
             </span>
-            <input type="search" name="{{ $searchName ?? 'search' }}" class="form-control border-start-0 ps-0"
+            <input type="search" name="{{ $searchName ?? 'search' }}" class="form-control border-start-0"
                    placeholder="{{ $searchPlaceholder ?? 'Buscar...' }}"
                    value="{{ $searchValue ?? '' }}">
         </div>
@@ -97,9 +97,7 @@
         </button>
     @endif
 
-    <button type="submit" class="btn btn-primary btn-icon flex-shrink-0" title="Buscar" aria-label="Buscar">
-        {!! \App\Html\IconHelper::render('search') !!}
-    </button>
+    <button type="submit" class="visually-hidden" tabindex="-1" aria-hidden="true">Buscar</button>
 </div>
 
 @if(!empty($filterChips))

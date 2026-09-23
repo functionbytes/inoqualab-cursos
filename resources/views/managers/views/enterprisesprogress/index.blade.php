@@ -9,15 +9,13 @@
     <div class="row">
         <div class="col-lg-12 d-flex align-items-stretch">
             <div class="card w-100">
-                <div class="card-body border-top">
-                    <div class="d-flex no-block align-items-center mb-4">
-                        <h5 class="mb-0">Progreso — {{ $user->firstname }} {{ $user->lastname }}</h5>
-                        <div class="ms-auto">
-                            <a href="{{ route('manager.enterprises.courses.view', [$user->relations?->slack ?? '', $course->slack]) }}" class="btn btn-light btn-sm">
-                                Volver
-                            </a>
-                        </div>
-                    </div>
+                <div class="card-header border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold">Progreso — {{ $user->firstname }} {{ $user->lastname }}</h6>
+                    <a href="{{ route('manager.enterprises.courses.view', [$user->relations?->slack ?? '', $course->slack]) }}" class="btn btn-light btn-sm">
+                        Volver
+                    </a>
+                </div>
+                <div class="card-body">
 
                     <div class="row mb-4">
                         <div class="col-md-4">

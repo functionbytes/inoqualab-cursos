@@ -15,6 +15,25 @@
 
             <div class="card">
 
+                {{-- Estado del servicio --}}
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Estado del servicio</h6>
+                    <p class="text-muted small mb-0">Habilita o deshabilita el envío de correos (SMTP) en el sitio.</p>
+                </div>
+
+                <div class="card-body">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="mail_status" id="mail_status"
+                            @if(setting('mail_status') !== 'false') checked @endif>
+                        <label class="form-check-label fw-semibold" for="mail_status">Habilitar envío de correos (SMTP)</label>
+                    </div>
+                    <small class="text-muted d-block">Si se deshabilita, los correos no se envían realmente: quedan registrados en el log.</small>
+                </div>
+
+                <div id="smtpFields" class="{{ setting('mail_status') !== 'false' ? '' : 'd-none' }}">
+
+                <hr class="my-0">
+
                 {{-- SMTP / ENVÍO DE CORREOS --}}
                 <div class="card-body">
                     <h6 class="fw-bold text-dark mb-1">Configuración SMTP (envío de correos)</h6>
@@ -63,6 +82,8 @@
                     </div>
                 </div>
 
+                </div>{{-- /#smtpFields --}}
+
                 <hr class="my-0">
 
                 {{-- IMAP / RECEPCIÓN DE CORREOS --}}
@@ -70,6 +91,19 @@
                     <h6 class="fw-bold text-dark mb-1">Configuración IMAP (recepción de correos)</h6>
                     <p class="text-muted mb-3">Conexión al buzón de entrada. Usado para procesar correos entrantes y crear órdenes/matrículas automáticamente.</p>
 
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="imap_status" id="imap_status"
+                            @if(setting('imap_status') == 'true') checked @endif>
+                        <label class="form-check-label fw-semibold" for="imap_status">IMAP activo</label>
+                    </div>
+                    <small class="text-muted d-block">Activar el procesamiento de correos entrantes para crear órdenes y matrículas.</small>
+                </div>
+
+                <div id="imapFields" class="{{ setting('imap_status') == 'true' ? '' : 'd-none' }}">
+
+                <hr class="my-0">
+
+                <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label for="imap_host" class="form-label fw-semibold">Host IMAP</label>
@@ -103,16 +137,10 @@
                             <input type="password" class="form-control" id="imap_password" name="imap_password"
                                 placeholder="{{ setting('imap_password') ? '••••••••' : 'Ingresar contraseña' }}">
                         </div>
-                        <div class="col-12">
-                            <div class="form-check form-switch mt-2">
-                                <input class="form-check-input" type="checkbox" name="imap_status" id="imap_status"
-                                    @if(setting('imap_status') == 'true') checked @endif>
-                                <label class="form-check-label fw-semibold" for="imap_status">IMAP activo</label>
-                            </div>
-                            <small class="text-muted d-block mt-1">Activar el procesamiento de correos entrantes para crear órdenes y matrículas.</small>
-                        </div>
                     </div>
                 </div>
+
+                </div>{{-- /#imapFields --}}
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary w-100">

@@ -13,20 +13,22 @@
 
         {{-- Formulario principal --}}
         <div class="col-lg-8">
-            <div class="card w-100">
+            <div class="card">
                 <form id="formStaticUrl" action="{{ route('manager.seo.static-urls.store') }}" method="POST" novalidate>
                     @csrf
 
-                    <div class="card-body">
-                        <h5 class="mb-0">Nueva URL estática</h5>
-                        <p class="text-muted mb-4 mt-1">Agrega una URL estática para incluirla en el sitemap XML.</p>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Nueva URL estática</h6>
+                        <p class="text-muted small mb-0">Agrega una URL estática para incluirla en el sitemap XML.</p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row">
 
                             {{-- URL --}}
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         URL <span class="text-danger">*</span>
                                     </label>
                                     <input type="text"
@@ -48,7 +50,7 @@
                             {{-- Prioridad --}}
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         Prioridad <span class="text-danger">*</span>
                                     </label>
                                     @php
@@ -79,7 +81,7 @@
                             {{-- Frecuencia de cambio --}}
                             <div class="col-12 col-md-6">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">
+                                    <label class="form-label fw-semibold">
                                         Frecuencia de cambio <span class="text-danger">*</span>
                                     </label>
                                     @php
@@ -108,7 +110,7 @@
                             {{-- Notas --}}
                             <div class="col-12">
                                 <div class="mb-3">
-                                    <label class="col-form-label fw-semibold">Notas</label>
+                                    <label class="form-label fw-semibold">Notas</label>
                                     <textarea class="form-control @error('notes') is-invalid @enderror"
                                               id="notes"
                                               name="notes"
@@ -125,7 +127,7 @@
                             {{-- Estado --}}
                             <div class="col-12">
                                 <div class="mb-0">
-                                    <label class="col-form-label fw-semibold">Estado</label>
+                                    <label class="form-label fw-semibold">Estado</label>
                                     <div class="form-check form-switch mt-1">
                                         <input class="form-check-input" type="checkbox"
                                                id="is_active"
@@ -158,14 +160,17 @@
         {{-- Panel informativo --}}
         <div class="col-lg-4">
             <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Guía rápida</h6>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title mb-2">Guia rapida</h5>
-                    <p class="card-text text-muted small">
-                        Las URLs estaticas son paginas que no se generan dinamicamente pero deben aparecer en el sitemap para que los motores de busqueda las indexen.
+                    <p class="text-muted small mb-0">
+                        Las URLs estáticas son páginas que no se generan dinámicamente pero deben aparecer en el sitemap para que los motores de búsqueda las indexen.
                     </p>
                 </div>
-                <div class="card-body border-top">
-                    <h6 class="mb-3">Prioridad</h6>
+                <hr class="my-0">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Prioridad</h6>
                     <div class="mb-2">
                         <span class="badge bg-primary-subtle text-primary mb-1">1.0 — Muy alta</span>
                         <p class="text-muted small mb-0">Para la pagina principal y secciones clave.</p>
@@ -187,9 +192,10 @@
                         <p class="text-muted small mb-0">Paginas de escasa relevancia SEO.</p>
                     </div>
                 </div>
-                <div class="card-body border-top">
-                    <h6 class="mb-3">Frecuencia de cambio</h6>
-                    <ul class="text-muted small mb-0 ps-3">
+                <hr class="my-0">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Frecuencia de cambio</h6>
+                    <ul class="text-muted small mb-0 ps-3 mt-2">
                         <li class="mb-1"><strong>always</strong> — El contenido cambia en cada visita</li>
                         <li class="mb-1"><strong>hourly</strong> — Cambia cada hora</li>
                         <li class="mb-1"><strong>daily</strong> — Cambia a diario</li>

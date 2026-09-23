@@ -3,33 +3,41 @@
 @section('title', 'Automatizaciones de remarketing')
 
 @section('page_header')
-    @php ob_start(); @endphp
-<a href="{{ route('manager.newsletter.lists.index') }}" class="btn btn-outline-secondary">Listas</a>
-    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Automatizaciones de remarketing',
         'description' => 'Correos de ciclo de vida programados y su actividad reciente.',
-        'actions' => $headerActions,
     ])
 @endsection
 
 @section('content')
 
+    @php
+        $automationIcons = [
+            'course_completed' => 'remarketing-crosssell',
+            'certificate_expiring' => 'remarketing-certificate',
+            'course_access_expiring' => 'remarketing-access',
+        ];
+    @endphp
+
     <div class="widget-content searchable-container list">
 
         <div class="card">
-            
 
             {{-- Tarjetas por automatización --}}
-            <div class="card-body">
+            <div class="card-body border-bottom">
                 <div class="row g-3">
                     @foreach($automations as $auto)
                         <div class="col-12 col-lg-4">
-                            <div class="card h-100 border">
+                            <div class="card h-100 border remarketing-auto-card">
                                 <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="fw-bold mb-0">{{ $auto['label'] }}</h6>
-                                        <span class="badge bg-light-secondary text-muted">{{ $auto['schedule'] }}</span>
+                                    <div class="d-flex align-items-start gap-3 mb-3">
+                                        <div class="remarketing-auto-icon">
+                                            {!! \App\Html\IconHelper::render($automationIcons[$auto['list_trigger']] ?? 'dot', 26) !!}
+                                        </div>
+                                        <div class="flex-fill">
+                                            <h6 class="fw-bold mb-1">{{ $auto['label'] }}</h6>
+                                            <span class="badge bg-light-secondary text-muted">{{ $auto['schedule'] }}</span>
+                                        </div>
                                     </div>
                                     <p class="small text-muted mb-3">{{ $auto['description'] }}</p>
 
@@ -71,8 +79,9 @@
             </div>
 
             {{-- Historial reciente --}}
-            <div class="card-header border-top border-bottom bg-light">
-                <h6 class="fw-bold mb-0">Actividad reciente</h6>
+            <div class="card-body border-bottom">
+                <h6 class="fw-bold mb-1">Actividad reciente</h6>
+                <p class="text-muted mb-0">Últimas corridas de los comandos programados</p>
             </div>
             <div class="card-body">
                 @if($recentRuns->count() > 0)
@@ -112,3 +121,7 @@
     </div>
 
 @endsection
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/views/newsletter/remarketing/index.css') }}">
+@endpush

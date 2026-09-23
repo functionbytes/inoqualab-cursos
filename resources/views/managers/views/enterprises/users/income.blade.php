@@ -6,69 +6,69 @@
 @endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formAction" enctype="multipart/form-data" role="form"
+                  data-incoming-url="{{ route('manager.enterprises.users.incoming') }}">
 
-                <form id="formAction" enctype="multipart/form-data" role="form"
-                      data-incoming-url="{{ route('manager.enterprises.users.incoming') }}">
+                {{ csrf_field() }}
 
-                    {{ csrf_field() }}
+                <input name="order" id="enterprise" type="hidden" value="{{ $enterprise->id }}">
 
-                    <input name="order" id="enterprise"  type="hidden" value="{{ $enterprise->id }}">
+                <div class="card">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0"> Reporte usuarios</h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte usuarios</h6>
+                        <p class="text-muted small mb-0">
                             Selecciona el curso y el rango de fechas para generar el reporte de ingresos.
                         </p>
+                    </div>
 
-                        <div class="row">
+                    <div class="card-body">
+                        <div class="row g-3">
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Empresa</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control"  value="{{ Str::upper(Str::lower($enterprise->title))  }}" placeholder="Ingresar celular" disabled>
-                                    </div>
-                                </div>
+                                <label class="form-label fw-semibold">Empresa</label>
+                                <input type="text" class="form-control" value="{{ Str::upper(Str::lower($enterprise->title))  }}" placeholder="Ingresar celular" disabled>
                             </div>
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Cursos</label>
-                                    <div class="input-group">
-                                        {!! Form::select('course', $courses, null , ['class' => 'select2 form-control' ,'name' => 'course', 'id' => 'course' ]) !!}
-                                    </div>
-                                    <label id="course-error" class="error d-none" for="course"></label>
-                                </div>
+                                <label class="form-label fw-semibold">Cursos</label>
+                                {!! Form::select('course', $courses, null , ['class' => 'select2 form-control' ,'name' => 'course', 'id' => 'course' ]) !!}
+                                <label id="course-error" class="error d-none" for="course"></label>
                             </div>
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha</label>
-                                    <div class="input-group">
-                                        <input type="text" id="range" name="range" class="form-control daterange" />
-                                        <span class="input-group-text">
-                                          <i class="fas fa-calendar fs-5"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12">
-                                <div class="border-top pt-1 mt-4">
-                                    <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                    </button>
+                                <label class="form-label fw-semibold">Fecha</label>
+                                <div class="input-group">
+                                    <input type="text" id="range" name="range" class="form-control daterange" />
+                                    <span class="input-group-text">
+                                      <i class="fas fa-calendar fs-5"></i>
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
 
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre este reporte</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El reporte incluye los usuarios inscritos en el curso seleccionado dentro del rango de fechas indicado.</p>
+                </div>
+            </div>
         </div>
 
     </div>

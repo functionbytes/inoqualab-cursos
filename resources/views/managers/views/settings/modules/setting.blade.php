@@ -121,11 +121,15 @@
     {{-- Sidebar --}}
     <div class="col-lg-4">
         <div class="card">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">¿Qué hace esta configuración?</h6>
+            </div>
             <div class="card-body">
-                <h6 class="fw-bold mb-2">¿Qué hace esta configuración?</h6>
                 <p class="text-muted">Activa o desactiva la visibilidad de módulos en el panel de administración. Los módulos desactivados dejan de aparecer en el menú lateral.</p>
-                <hr>
-                <h6 class="fw-bold mb-2">Notas importantes</h6>
+            </div>
+            <hr class="my-0">
+            <div class="card-body">
+                <h6 class="fw-bold text-dark mb-1">Notas importantes</h6>
                 <ul class="text-muted ps-3 mb-0 modules-notes-list">
                     <li class="mb-1">Desactivar un módulo <strong>no elimina</strong> los datos existentes.</li>
                     <li class="mb-1">Puedes reactivarlo en cualquier momento y los datos estarán intactos.</li>

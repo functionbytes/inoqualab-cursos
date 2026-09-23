@@ -1,23 +1,24 @@
 <div id="delete-modal" class="modal fade">
     <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="display-4 text-danger"><i class="fas fa-circle-xmark"></i></div>
-                <h4 class="my-0">¿Estás seguro de eliminar esto?</h4>
-                <p>Todos los datos relacionados con esto pueden eliminarse</p>
-                <div class="row justify-content-center mt-20  ">
-                    <div class="col-sm-12 col-md-5">
-                        <a href="" id="delete-link" class="btn btn-danger w-100">Confirmar</a>
-                    </div>
-                    <div class="col-sm-12 col-md-5">
-                        <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">Cancelar</button>
-                    </div>
+            <div class="modal-body text-center p-4 position-relative">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <div class="mb-3 mt-2">
+                    <i class="fas fa-triangle-exclamation text-warning delete-modal-icon"></i>
                 </div>
+                <h5 class="fw-bold mb-2">¿Estás seguro de eliminar esto?</h5>
+                <p class="text-muted mb-4">Esta acción no se puede deshacer. Todos los datos relacionados pueden eliminarse.</p>
+                <form id="delete-form" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Confirmar eliminación</button>
+                    <button type="button" class="btn btn-dark w-100" data-bs-dismiss="modal">Cancelar</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+@push('css')
+<link rel="stylesheet" href="{{ asset('managers/css/includes/delete.css') }}">
+@endpush

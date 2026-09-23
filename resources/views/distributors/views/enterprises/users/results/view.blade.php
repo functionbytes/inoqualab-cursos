@@ -44,7 +44,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <h5 class="card-title mb-3 fw-semibold">Calificación</h5>
-                        <h4 class="fw-semibold mb-3">{{ $exam->score }}</h4>
+                        <h4 class="fw-semibold mb-3">{{ $exam->score ?? 'N/D' }}</h4>
 
                         <div id="customers2"></div>
 
@@ -70,7 +70,7 @@
                         </thead>
                         <tbody>
                        
-                        @foreach ($answers as $key => $answer)
+                        @foreach (($answers ?? []) as $key => $answer)
                             <tr class="search-items">
 
                                 <td>

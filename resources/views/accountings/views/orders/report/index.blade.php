@@ -6,103 +6,89 @@
 @endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
+    <div class="row g-4 align-items-start">
 
-            <div class="card w-100">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formReport" enctype="multipart/form-data" role="form"
+                  data-get-enterprises-url="{{ route('accounting.orders.get.enterprises') }}"
+                  data-generate-url="{{ route('accounting.orders.generate') }}">
 
-                <form id="formReport" enctype="multipart/form-data" role="form"
-                      data-get-enterprises-url="{{ route('accounting.orders.get.enterprises') }}"
-                      data-generate-url="{{ route('accounting.orders.generate') }}">
+                {{ csrf_field() }}
 
-                    {{ csrf_field() }}
+                <div class="card">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-                            <h5 class="mb-0"> Reporte ordenes</h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte ordenes</h6>
+                        <p class="text-muted small mb-0">
+                            Genera el reporte de órdenes filtrando por distribuidor, empresa, condición,
+                            tipo de factura y rango de fechas.
                         </p>
+                    </div>
 
-                        <div class="row">
+                    <div class="card-body">
+                        <div class="row g-3">
                             <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Distribuidor</label>
-                                    <div class="input-group">
-                                        {!! Form::select('distributor', $distributors, null , ['class' => 'select2 form-control' ,'name' => 'distributor', 'id' => 'distributor' ]) !!}
-                                    </div>
-                                    <label id="distributor-error" class="error d-none" for="distributor"></label>
-                                </div>
-                            </div>
-
-
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Empresas</label>
-                                    <div class="input-group">
-                                        {!! Form::select('enterprise', [], null , ['class' => 'select2 form-control' ,'name' => 'enterprise', 'id' => 'enterprise' ]) !!}
-                                    </div>
-                                    <label id="enterprise-error" class="error d-none" for="enterprise"></label>
-                                </div>
-                            </div>
-
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Condición</label>
-                                    <div class="input-group">
-                                        {!! Form::select('condition', $conditions, null , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
-                                    </div>
-                                    <label id="condition-error" class="error d-none" for="condition"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Tipo de factura</label>
-                                    <div class="input-group">
-                                        {!! Form::select('method', $methods, null , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
-                                    </div>
-                                    <label id="method-error" class="error d-none" for="method"></label>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Tipo de factura</label>
-                                    <div class="input-group">
-                                        {!! Form::select('type', $types, null , ['class' => 'select2 form-control' ,'name' => 'type', 'id' => 'type' ]) !!}
-                                    </div>
-                                    <label id="type-error" class="error d-none" for="type"></label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label  class="control-label col-form-label">Fecha</label>
-                                    <div class="input-group">
-                                        <input type="text" id="range" name="range" class="form-control daterange" />
-                                        <span class="input-group-text">
-                                              <i class="fas fa-calendar fs-5"></i>
-                                            </span>
-                                    </div>
-                                </div>
+                                <label class="form-label fw-semibold">Distribuidor</label>
+                                {!! Form::select('distributor', $distributors, null , ['class' => 'select2 form-control' ,'name' => 'distributor', 'id' => 'distributor' ]) !!}
+                                <label id="distributor-error" class="error d-none" for="distributor"></label>
                             </div>
 
                             <div class="col-12">
-                            <div class="border-top pt-1 mt-4">
-                                <button type="submit" class="btn btn-info  px-4 waves-effect waves-light mt-2 w-100">
-                                        Guardar
-                                </button>
+                                <label class="form-label fw-semibold">Empresas</label>
+                                {!! Form::select('enterprise', [], null , ['class' => 'select2 form-control' ,'name' => 'enterprise', 'id' => 'enterprise' ]) !!}
+                                <label id="enterprise-error" class="error d-none" for="enterprise"></label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Condición</label>
+                                {!! Form::select('condition', $conditions, null , ['class' => 'select2 form-control' ,'name' => 'condition', 'id' => 'condition' ]) !!}
+                                <label id="condition-error" class="error d-none" for="condition"></label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Tipo de factura</label>
+                                {!! Form::select('method', $methods, null , ['class' => 'select2 form-control' ,'name' => 'method', 'id' => 'method' ]) !!}
+                                <label id="method-error" class="error d-none" for="method"></label>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Tipo de factura</label>
+                                {!! Form::select('type', $types, null , ['class' => 'select2 form-control' ,'name' => 'type', 'id' => 'type' ]) !!}
+                                <label id="type-error" class="error d-none" for="type"></label>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Fecha</label>
+                                <div class="input-group">
+                                    <input type="text" id="range" name="range" class="form-control daterange" />
+                                    <span class="input-group-text">
+                                          <i class="fas fa-calendar fs-5"></i>
+                                        </span>
+                                </div>
                             </div>
                         </div>
-
                     </div>
-                </div>
-                </form>
-            </div>
 
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre este reporte</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El reporte se genera con las órdenes que coincidan con los filtros seleccionados.</p>
+                </div>
+            </div>
         </div>
 
     </div>

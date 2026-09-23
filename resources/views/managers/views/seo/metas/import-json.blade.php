@@ -19,7 +19,12 @@
             <div class="card">
                 <form action="{{ route('manager.seo.metas.import-json') }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    
+
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Importar backup JSON</h6>
+                        <p class="text-muted small mb-0">Restaura metadatos SEO a partir de un archivo de backup.</p>
+                    </div>
+
                     <div class="card-body">
 
                         @if($errors->any())
@@ -87,7 +92,7 @@
         {{-- Help panel --}}
         <div class="col-12 col-lg-4">
             <div class="card">
-                <div class="card-header p-4 border-bottom border-light">
+                <div class="card-header border-bottom">
                     <h6 class="mb-0 fw-bold">Sobre este formato</h6>
                 </div>
                 <div class="card-body">

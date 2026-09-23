@@ -32,7 +32,7 @@
     <div class="card-body p-0">
         @if ($versions->isEmpty())
             <div class="text-center py-5 text-muted">
-                <i class="fas fa-history fa-3x mb-3 opacity-50"></i>
+                <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-history', 48) !!}</div>
                 <p class="mb-0">No hay versiones guardadas para esta plantilla aún.</p>
                 <small>Las versiones se crean automáticamente al guardar cambios.</small>
             </div>

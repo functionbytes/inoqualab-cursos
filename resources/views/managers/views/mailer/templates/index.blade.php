@@ -3,9 +3,15 @@
 @section('title', 'Plantillas de email')
 
 @section('page_header')
+    @php ob_start(); @endphp
+    @can('newsletters.create')
+        <a href="{{ route('mailers.templates.create') }}" class="btn btn-primary btn-icon" title="Nueva plantilla" aria-label="Nueva plantilla">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    @endcan
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Plantillas de email',
         'description' => 'Gestiona plantillas de email para documentos, órdenes y notificaciones',
+        'actions' => $headerActions,
     ])
 @endsection
 
@@ -75,7 +81,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary w-100 mb-1" id="sendTestSubmitBtn">
+                        <button type="submit" class="btn btn-primary w-100 mb-2" id="sendTestSubmitBtn">
                             Enviar ahora
                         </button>
                         <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>

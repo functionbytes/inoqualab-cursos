@@ -5,9 +5,9 @@
 @section('page_header')
     @php ob_start(); @endphp
     <div class="btn-group">
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Acciones
+        <button type="button" class="btn btn-icon btn-actions-icon"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end">
             <a class="dropdown-item" href="{{ route('manager.newsletter.index') }}">
@@ -19,11 +19,12 @@
             <a class="dropdown-item" href="{{ route('manager.newsletter.remarketing') }}">
                 Remarketing
             </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{{ route('manager.newsletter.campaigns.create') }}">
+                + Nueva campaña
+            </a>
         </div>
     </div>
-    <a href="{{ route('manager.newsletter.campaigns.create') }}" class="btn btn-primary">
-        + Nueva campaña
-    </a>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Campañas de newsletter',
@@ -76,6 +77,8 @@
         ['value' => 'delete', 'label' => 'Eliminar'],
     ],
 ])
+
+@include('managers.includes.delete')
 
 @endsection
 

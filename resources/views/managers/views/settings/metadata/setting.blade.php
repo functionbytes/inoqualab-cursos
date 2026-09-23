@@ -28,12 +28,15 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Imagen por defecto</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Imagen por defecto</h6>
+                        <p class="text-muted small mb-0">
                             Se usa como miniatura social (og:image) cuando un curso, blog o paquete no tiene portada propia.
                         </p>
-                        <div class="dropzone dz-clickable" id="metadata">
+                        </div>
+
+                        <div class="card-body">
+                            <div class="dropzone dz-clickable" id="metadata">
                             <div class="fallback">
                                 <input type="file" hidden name="metadata">
                             </div>

@@ -4,9 +4,8 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRedirect">
-                            Nuevo redirect
-                        </button>
+<button type="button" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#modalRedirect"
+                                title="Nuevo redirect" aria-label="Nuevo redirect">{!! \App\Html\IconHelper::render('plus') !!}</button>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Redirects SEO',

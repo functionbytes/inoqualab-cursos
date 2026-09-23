@@ -19,12 +19,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Crear factura</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Crear factura</h6>
+                        <p class="text-muted small mb-0">
                             Completa los datos para generar una nueva factura: distribuidor, condición y método de pago, y el rango de fechas correspondiente.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-12">

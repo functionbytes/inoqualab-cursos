@@ -1,5 +1,8 @@
 @extends('layouts.managers')
 
+@push('css')
+<link rel="stylesheet" href="{{ url('managers/css/views/settings/incoming-mail/setting.css') }}?v={{ filemtime(public_path('managers/css/views/settings/incoming-mail/setting.css')) }}">
+@endpush
 
 @section('page_header')
     @include('managers.includes.card', ['title' => 'Correos entrantes'])
@@ -30,12 +33,15 @@
             <div class="card">
 
                 {{-- Habilitar servicio --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Servicio habilitado</h6>
-                    <p class="text-muted mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Servicio habilitado</h6>
+                    <p class="text-muted small mb-0">
                         Activa o desactiva el polling IMAP por completo. Si está desactivado,
                         el comando <code>mail:fetch-orders</code> no hace nada aunque el scheduler lo ejecute.
                     </p>
+                </div>
+
+                <div class="card-body">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox"
                             name="incoming_mail_enabled" id="incoming_mail_enabled"
@@ -43,6 +49,8 @@
                         <label class="form-check-label fw-semibold" for="incoming_mail_enabled">Habilitar servicio</label>
                     </div>
                 </div>
+
+                <div id="incomingMailFields" class="{{ $enabled ? '' : 'd-none' }}">
 
                 <hr class="my-0">
 
@@ -92,17 +100,17 @@
                     <h6 class="fw-bold text-dark mb-1">
                         Modo de prueba
                         @if($trustAll)
-                            <span class="badge bg-danger ms-1">ACTIVO</span>
+                            <span class="badge badge-brand-danger ms-1">ACTIVO</span>
                         @endif
                     </h6>
                     <p class="text-muted mb-3">
                         Procesa correos de <strong>cualquier remitente</strong> usando el parser por defecto
                         (ignora la lista de remitentes de confianza).
-                        <strong class="text-danger d-block mt-1">
-                            <i class="fas fa-triangle-exclamation me-1"></i>
-                            Solo para pruebas. Desactivar antes de pasar a producción.
-                        </strong>
                     </p>
+                    <div class="alert alert-plain-gray py-2 mb-3 d-flex align-items-center gap-2">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <span>Solo para pruebas. Desactivar antes de pasar a producción.</span>
+                    </div>
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox"
                             name="incoming_mail_trust_all_senders" id="incoming_mail_trust_all_senders"
@@ -110,6 +118,8 @@
                         <label class="form-check-label fw-semibold" for="incoming_mail_trust_all_senders">Modo de prueba</label>
                     </div>
                 </div>
+
+                </div>{{-- /#incomingMailFields --}}
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary w-100" id="btnSaveIncomingMail">
@@ -124,29 +134,56 @@
     {{-- Columna derecha: sidebar informativo --}}
     <div class="col-lg-4">
 
-        <div class="card">
+        <div class="card mb-3">
             <div class="card-header border-bottom">
                 <h6 class="mb-0 fw-bold">Estadísticas</h6>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
-                    <li class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-check-circle text-success me-1"></i> Procesados</span>
+                    <li class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="d-flex align-items-center gap-2">
+                            <span class="stat-icon-circle stat-icon-circle--processed"><i class="fas fa-check"></i></span>
+                            Procesados
+                        </span>
                         <strong>{{ $stats['processed'] }}</strong>
                     </li>
-                    <li class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-clock text-warning me-1"></i> Pendientes revisión</span>
+                    <li class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="d-flex align-items-center gap-2">
+                            <span class="stat-icon-circle stat-icon-circle--pending"><i class="fas fa-clock"></i></span>
+                            Pendientes revisión
+                        </span>
                         <strong>{{ $stats['pending_review'] }}</strong>
                     </li>
-                    <li class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted"><i class="fas fa-times-circle text-danger me-1"></i> Fallidos</span>
+                    <li class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="d-flex align-items-center gap-2">
+                            <span class="stat-icon-circle stat-icon-circle--failed"><i class="fas fa-xmark"></i></span>
+                            Fallidos
+                        </span>
                         <strong>{{ $stats['failed'] }}</strong>
                     </li>
                     <li class="d-flex justify-content-between align-items-center">
-                        <span class="text-muted"><i class="fas fa-ban text-secondary me-1"></i> Ignorados</span>
+                        <span class="d-flex align-items-center gap-2">
+                            <span class="stat-icon-circle stat-icon-circle--ignored"><i class="fas fa-ban"></i></span>
+                            Ignorados
+                        </span>
                         <strong>{{ $stats['ignored'] }}</strong>
                     </li>
                 </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header border-bottom">
+                <h6 class="mb-0 fw-bold">Sobre estos ajustes</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-semibold mb-2">Reglas de confianza</h6>
+                <p class="text-muted mb-3">Cada empresa puede tener su propia regla de auto-confirmación en <a href="{{ route('manager.mails') }}">Correos entrantes</a>, que baja el umbral necesario para auto-procesar sus correos sin revisión manual.</p>
+
+                <hr class="my-3">
+
+                <h6 class="fw-semibold mb-2">Correos fallidos</h6>
+                <p class="text-muted mb-0">Tras corregir datos (empresa, curso, regla), usa <code>mails:reparse-failed</code> para reintentar los correos que quedaron en estado fallido.</p>
             </div>
         </div>
 

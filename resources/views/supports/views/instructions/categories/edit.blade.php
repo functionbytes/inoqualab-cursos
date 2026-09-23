@@ -22,12 +22,14 @@
 
         <div class="card">
 
-          <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Editar categoria</h6>
-            <p class="text-muted mb-3">
-              Actualiza los datos de la categoría. Los cambios se guardarán al hacer clic en Guardar.
-            </p>
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Editar categoria</h6>
+              <p class="text-muted small mb-0">
+                  Actualiza los datos de la categoría. Los cambios se guardarán al hacer clic en Guardar.
+              </p>
+          </div>
 
+          <div class="card-body">
             <div class="row g-3">
 
               <div class="col-12">

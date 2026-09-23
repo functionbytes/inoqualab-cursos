@@ -32,93 +32,70 @@ Visualizar
 
 
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center">
-
-                            <h5 class="mb-0">Visualizar
-                                @if ($user->role == 'manager')
-                                    administrador
-                                @elseif($user->role == 'customer')
-                                    cliente
-                                @elseif($user->role == 'enterprise')
-                                    empresa
-                                @elseif($user->role == 'distributor')
-                                    distribuidor
-                                @elseif($user->role == 'accounting')
-                                    contabilidad
-                                @endif
-                            </h5>
-
-                        </div>
-                        <p class="card-subtitle mb-3 mt-3">
-                            Este espacio está diseñado para que puedas actualizar y modificar la información de manera eficiente y segura. A continuación, encontrarás diversos campos que corresponden a los datos previamente suministrados. Te invitamos a revisar y ajustar cualquier información que consideres necesario actualizar para mantener tus datos al día.
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Visualizar
+                            @if ($user->role == 'manager')
+                                administrador
+                            @elseif($user->role == 'customer')
+                                cliente
+                            @elseif($user->role == 'enterprise')
+                                empresa
+                            @elseif($user->role == 'distributor')
+                                distribuidor
+                            @elseif($user->role == 'accounting')
+                                contabilidad
+                            @endif
+                        </h6>
+                        <p class="text-muted small mb-0">
+                            Información general de esta cuenta. Estos datos son de solo lectura desde
+                            esta pantalla.
                         </p>
+                    </div>
 
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Nombres</label>
-                                                    <input type="text" class="form-control" id="firstname"  name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Apellidos</label>
-                                                    <input type="text" class="form-control" id="lastname"  name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Identificación</label>
-                                                    <input type="text" class="form-control" id="identification"  name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación" disabled>
-
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Correo electronico</label>
-                                                    <input type="text" class="form-control" id="email"  name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Celular</label>
-                                                    <input type="text" class="form-control" id="cellphone"  name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Dirección</label>
-                                                    <input type="text" class="form-control" id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Estado</label>
-                                                    <input type="text" class="form-control" id="available" name="available" value="{{ $user->available ? 'Activo' : 'Inactivo' }}" disabled>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="mb-3">
-                                                    <label  class="control-label col-form-label">Perfil</label>
-                                                    @php
-                                                        $roleLabels = [
-                                                            'manager' => 'Administrador',
-                                                            'customer' => 'Cliente',
-                                                            'enterprise' => 'Empresa',
-                                                            'distributor' => 'Empleado distribuidor',
-                                                            'support' => 'Soporte',
-                                                            'accounting' => 'Contabilidad',
-                                                        ];
-                                                    @endphp
-                                                    <input type="text" class="form-control" id="role" name="role" value="{{ $roleLabels[$user->role] ?? 'Sin rol' }}" disabled>
-                                                </div>
-                                            </div>
-
-
-
-                                        </div>
-
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Nombres</label>
+                                <input type="text" class="form-control" id="firstname" name="firstname" value="{{ $user->firstname }}" placeholder="Ingresar nombres" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Apellidos</label>
+                                <input type="text" class="form-control" id="lastname" name="lastname" value="{{ $user->lastname }}" placeholder="Ingresar apellido" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Identificación</label>
+                                <input type="text" class="form-control" id="identification" name="identification" value="{{ $user->identification }}" placeholder="Ingresar identificación" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Correo electronico</label>
+                                <input type="text" class="form-control" id="email" name="email" value="{{ $user->email }}" placeholder="Ingresar correo electronico" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Celular</label>
+                                <input type="text" class="form-control" id="cellphone" name="cellphone" value="{{ $user->cellphone }}" placeholder="Ingresar celular" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Dirección</label>
+                                <input type="text" class="form-control" id="address" name="address" value="{{ $user->address }}" placeholder="Ingresar dirección" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Estado</label>
+                                <input type="text" class="form-control" id="available" name="available" value="{{ $user->available ? 'Activo' : 'Inactivo' }}" disabled>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Perfil</label>
+                                @php
+                                    $roleLabels = [
+                                        'manager' => 'Administrador',
+                                        'customer' => 'Cliente',
+                                        'enterprise' => 'Empresa',
+                                        'distributor' => 'Empleado distribuidor',
+                                        'support' => 'Soporte',
+                                        'accounting' => 'Contabilidad',
+                                    ];
+                                @endphp
+                                <input type="text" class="form-control" id="role" name="role" value="{{ $roleLabels[$user->role] ?? 'Sin rol' }}" disabled>
+                            </div>
                         </div>
 
                     </div>

@@ -18,19 +18,21 @@
         {{-- Columna izquierda: datos del correo --}}
         <div class="col-12 col-lg-5">
             <div class="card">
-                <div class="card-body border-top">
-                    <h5 class="mb-3">Datos del correo</h5>
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Datos del correo</h6>
+                </div>
+                <div class="card-body">
 
                     <div class="mb-2">
-                        <label class="control-label col-form-label fw-semibold">Remitente</label>
+                        <label class="form-label fw-semibold">Remitente</label>
                         <input type="text" class="form-control" value="{{ $mail->from }}" disabled>
                     </div>
                     <div class="mb-2">
-                        <label class="control-label col-form-label fw-semibold">Asunto</label>
+                        <label class="form-label fw-semibold">Asunto</label>
                         <input type="text" class="form-control" value="{{ $mail->subject }}" disabled>
                     </div>
                     <div class="mb-2">
-                        <label class="control-label col-form-label fw-semibold">Recibido</label>
+                        <label class="form-label fw-semibold">Recibido</label>
                         <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($mail->received_at)->format('Y-m-d H:i') }}" disabled>
                     </div>
 
@@ -40,42 +42,42 @@
 
                         @if(!empty($payload['document']))
                             <div class="mb-2">
-                                <label class="control-label col-form-label fw-semibold">Documento</label>
+                                <label class="form-label fw-semibold">Documento</label>
                                 <input type="text" class="form-control" value="{{ $payload['document'] }}" disabled>
                             </div>
                         @endif
 
                         @if(!empty($payload['name']))
                             <div class="mb-2">
-                                <label class="control-label col-form-label fw-semibold">Nombre</label>
+                                <label class="form-label fw-semibold">Nombre</label>
                                 <input type="text" class="form-control" value="{{ $payload['name'] }}" disabled>
                             </div>
                         @endif
 
                         @if(!empty($payload['enterprise_raw']) || !empty($payload['enterprise_code']))
                             <div class="mb-2">
-                                <label class="control-label col-form-label fw-semibold">Empresa detectada</label>
+                                <label class="form-label fw-semibold">Empresa detectada</label>
                                 <input type="text" class="form-control" value="{{ $payload['enterprise_raw'] ?? '' }}{{ !empty($payload['enterprise_code']) ? ' (' . $payload['enterprise_code'] . ')' : '' }}" disabled>
                             </div>
                         @endif
 
                         @if(!empty($payload['enterprise_name']))
                             <div class="mb-2">
-                                <label class="control-label col-form-label fw-semibold">Nombre empresa</label>
+                                <label class="form-label fw-semibold">Nombre empresa</label>
                                 <input type="text" class="form-control" value="{{ $payload['enterprise_name'] }}" disabled>
                             </div>
                         @endif
 
                         @if(!empty($payload['ips']))
                             <div class="mb-2">
-                                <label class="control-label col-form-label fw-semibold">IPS</label>
+                                <label class="form-label fw-semibold">IPS</label>
                                 <input type="text" class="form-control" value="{{ is_array($payload['ips']) ? implode(', ', $payload['ips']) : $payload['ips'] }}" disabled>
                             </div>
                         @endif
 
                         @if(!empty($payload['courses']))
                             <div class="mb-3">
-                                <label class="control-label col-form-label fw-semibold">Cursos en el correo</label>
+                                <label class="form-label fw-semibold">Cursos en el correo</label>
                                 <ul class="list-group list-group-flush">
                                     @foreach($payload['courses'] as $courseText)
                                         <li class="list-group-item px-0">
@@ -107,12 +109,14 @@
                       data-confirm-url="{{ route('support.mails.confirm', $mail->slack) }}"
                       data-discard-url="{{ route('support.mails.discard', $mail->slack) }}"
                       data-index-url="{{ route('support.mails.index') }}">
-                    <div class="card-body border-top">
-                        <h5 class="mb-3">Confirmar orden</h5>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Confirmar orden</h6>
+                    </div>
+                    <div class="card-body">
 
                         {{-- Empresa --}}
                         <div class="mb-3">
-                            <label class="control-label col-form-label fw-semibold" for="enterprise_id">Empresa</label>
+                            <label class="form-label fw-semibold" for="enterprise_id">Empresa</label>
                             <select class="form-select select2" id="enterprise_id" name="enterprise_id">
                                 <option value="">Seleccionar empresa</option>
                                 @foreach($enterprises as $ent)
@@ -126,7 +130,7 @@
                         {{-- Mapeo de cursos --}}
                         <div id="course-matches-container">
                             @if($courseMatches->count())
-                                <label class="control-label col-form-label fw-semibold">Mapeo de cursos</label>
+                                <label class="form-label fw-semibold">Mapeo de cursos</label>
                                 @foreach($courseMatches as $cm)
                                     <div class="mb-3 border rounded p-3 course-match-row">
                                         <div class="mb-1">

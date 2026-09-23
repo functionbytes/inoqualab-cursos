@@ -5,9 +5,9 @@
 @section('page_header')
     @php ob_start(); @endphp
     <div class="btn-group">
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Acciones
+        <button type="button" class="btn btn-icon btn-actions-icon"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
         </button>
         <div class="dropdown-menu dropdown-menu-end">
             <a class="dropdown-item" href="{{ route('manager.activity.export', request()->query()) }}">Exportar CSV</a>
@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="activity-filter-apply-btn" class="btn btn-primary w-100 mb-1">Aplicar filtros</button>
+                    <button type="button" id="activity-filter-apply-btn" class="btn btn-primary w-100 mb-2">Aplicar filtros</button>
                     <button type="button" id="activity-filter-clear-btn" class="btn btn-secondary w-100">Limpiar</button>
                 </div>
             </div>

@@ -1,125 +1,175 @@
 @extends('layouts.managers')
 
 @section('page_header')
-    @include('enterprises.includes.card', ['title' => "Usuarios - " . $course->title ])
+    @include('enterprises.includes.card', ['title' => 'Usuarios - '.$course->title])
 @endsection
 
 @section('content')
 
-<div class="widget-content searchable-container list">
-    
-    <div class="card card-body">
-        <div class="row">
-            <div class="col-md-12 col-xl-12">
-                <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                    <div class="row justify-content-between g-2 ">
-                        <div class="col-auto flex-grow-1">
-                            <div class="tt-search-box">
-                                <div class="input-group">
-                                    <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                    <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="input-group">
-                                <select class="form-select select2" name="year" data-minimum-results-for-search="Infinity">
-                                    <option value="">Seleccionar año</option>
-                                    @foreach($years as $item)
-                                    <option value="{{ $item }}" @if (isset($year) && $year == $item) selected @endif>{{ $item }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <div class="input-group">
-                                <select class="form-select select2" name="culminated" data-minimum-results-for-search="Infinity">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="1" @isset($culminated) @if ($culminated==1) selected @endif @endisset>  Culminado </option>
-                                    <option value="0" @isset($culminated) @if ($culminated==0) selected  @endif @endisset>  Pendiente</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa-duotone fa-magnifying-glass"></i>
-                            </button>
+    <div class="widget-content searchable-container list">
+
+        <div class="card">
+
+            {{-- Search + Filtros --}}
+            <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if (($year ?? '') !== '' && ($year ?? null) !== null) {
+                        $filterChips[] = [
+                            'label' => 'Año: '.$year,
+                            'clear_url' => url()->current().'?'.http_build_query(request()->except('year')),
+                        ];
+                    }
+                    if (($culminated ?? '') !== '' && ($culminated ?? null) !== null) {
+                        $filterChips[] = [
+                            'label' => 'Estado: '.($culminated == 1 ? 'Culminado' : 'Pendiente'),
+                            'clear_url' => url()->current().'?'.http_build_query(request()->except('culminated')),
+                        ];
+                    }
+                @endphp
+                <form method="GET" action="{{ route('enterprise.courses.view', $course->slack) }}" id="searchForm">
+
+                    <input type="hidden" name="year" id="filterYear" value="{{ $year ?? '' }}">
+                    <input type="hidden" name="culminated" id="filterCulminated" value="{{ $culminated ?? '' }}">
+
+                    @php ob_start(); @endphp
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Año</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_year" value="" {{ ($year ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            @foreach($years as $item)
+                                <label class="filter-popover-option">
+                                    <input type="radio" data-filter-name="popover_year" value="{{ $item }}" {{ (string) ($year ?? '') === (string) $item ? 'checked' : '' }}>
+                                    <span class="filter-popover-dot"></span>
+                                    <span>{{ $item }}</span>
+                                </label>
+                            @endforeach
                         </div>
                     </div>
+                    <div class="filter-popover-field">
+                        <div class="filter-popover-label">Estado</div>
+                        <div class="filter-popover-options">
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_culminated" value="" {{ ($culminated ?? '') === '' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Todos</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_culminated" value="1" {{ (string) ($culminated ?? '') === '1' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Culminado</span>
+                            </label>
+                            <label class="filter-popover-option">
+                                <input type="radio" data-filter-name="popover_culminated" value="0" {{ (string) ($culminated ?? '') === '0' ? 'checked' : '' }}>
+                                <span class="filter-popover-dot"></span>
+                                <span>Pendiente</span>
+                            </label>
+                        </div>
+                    </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por nombre, correo o identificación...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
-        </div>
-    </div>
-    <div class="card card-body">
-        <div class="table-responsive">
-            <table class="table search-table align-middle text-nowrap">
-                <thead class="header-item">
-                <tr>
-                    <th scope="col">Identificación</th>
-                    <th scope="col">Cliente</th>
-                    <th scope="col">Año</th>
-                    <th scope="col">Estado</th>
-                    <th scope="col">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-               
-                @foreach ($inscriptions as $key => $inscription)
-                <tr class="search-items">
-                    <td>
-                        <span class="usr-email-addr" data-email="{{ $inscription->identification }}">{{ ucfirst($inscription->identification) }}</span>
-                    </td>
-                    <td>
-                        <span class="usr-email-addr" data-email="{{ $inscription->firstname . ' ' . $inscription->lastname }}">{{ Str::words( Str::upper(Str::lower($inscription->firstname . ' ' . $inscription->lastname)), 12, '...')  }}</span>
-                    </td>
-                    <td>
-                        <span class="usr-email-addr" data-email="{{ date('Y', strtotime($inscription->enroll_culminated)) }}">{{ $inscription->enroll_culminated!=null ?  date('Y', strtotime($inscription->enroll_culminated))  : '--' }}</span>
-                    </td>
-                    <td>
-                                    <span class="badge {{ $inscription->culminated == 1 ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary' }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                        {{ $inscription->culminated == 1 ? 'Culminado' : 'Pendiente' }}
-                                    </span>
-                    </td>
-                    <td class="text-center">
-                        <div class="dropdown dropstart">
-                            <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-vertical fs-5"></i>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-                                <li class="{{ $inscription->culminated == 1 ? '' : 'd-none'}}">
-                                    <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('enterprise.users.certificate.user', $inscription->slack) }}">
-                                        Certificado
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item  d-flex align-items-center gap-3" href="{{ route('enterprise.courses.details', $inscription->slack) }}">
-                                        Detalle
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item  d-flex align-items-center gap-3" href="{{ route('enterprise.courses.progress', $inscription->slack) }}">
-                                        Progreso
-                                    </a>
-                                </li>
-                               
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
 
-                </tbody>
-            </table>
-        </div>
-        <div class="result-body ">
-            <span>Mostrar {{ $inscriptions->firstItem() }}-{{ $inscriptions->lastItem() }} de {{ $inscriptions->total() }} resultados</span>
-            <nav>
-                {{ $inscriptions->appends(request()->input())->links() }}
-            </nav>
+            {{-- Tabla --}}
+            <div class="card-body">
+                @if($inscriptions->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Identificación</th>
+                                    <th>Cliente</th>
+                                    <th>Año</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($inscriptions as $inscription)
+                                    <tr>
+                                        <td>{{ Str::upper($inscription->identification) }}</td>
+                                        <td>
+                                            <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($inscription->firstname.' '.$inscription->lastname)), 12, '...') }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="text-muted">{{ $inscription->enroll_culminated != null ? date('Y', strtotime($inscription->enroll_culminated)) : '—' }}</span>
+                                        </td>
+                                        <td>
+                                            @if($inscription->culminated == 1)
+                                                <span class="badge bg-success-subtle text-success">Culminado</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">Pendiente</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    @if($inscription->culminated == 1)
+                                                        <li>
+                                                            <a class="dropdown-item" href="{{ route('enterprise.users.certificate.user', $inscription->slack) }}">Certificado</a>
+                                                        </li>
+                                                    @endif
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('enterprise.courses.details', $inscription->slack) }}">Detalle</a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('enterprise.courses.progress', $inscription->slack) }}">Progreso</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-results', 48) !!}</div>
+                        <h5 class="fw-bold mb-2">
+                            @if($searchKey || ($year ?? '') !== '' || ($culminated ?? '') !== '')
+                                No se encontraron resultados
+                            @else
+                                No hay usuarios inscritos
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-0">
+                            @if($searchKey || ($year ?? '') !== '' || ($culminated ?? '') !== '')
+                                No hay usuarios que coincidan con los filtros aplicados.
+                            @else
+                                Aún no hay usuarios inscritos en este curso.
+                            @endif
+                        </p>
+                    </div>
+                @endif
+            </div>
+
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $inscriptions,
+                'itemLabel' => 'usuarios',
+            ])
         </div>
     </div>
-</div>
 
 @endsection
 
-
+@push('scripts')
+    <script src="{{ asset('enterprises/js/views/enterprises/courses/view.js') }}"></script>
+@endpush

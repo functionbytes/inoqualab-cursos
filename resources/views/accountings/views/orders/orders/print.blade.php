@@ -1,179 +1,146 @@
-<!-- resources/views/accountings/views/orders/orders/view.blade.php -->
-<html>
+<!-- resources/views/accountings/views/orders/orders/print.blade.php -->
+<!DOCTYPE html>
+<html lang="es">
 <head>
+    <meta charset="utf-8">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-weight: 400;
+            src: url({{ storage_path('fonts/PlusJakartaSans-Regular.ttf') }}) format("truetype");
         }
-
-        /* Container */
-        .container {
-            padding: 20px;
+        @font-face {
+            font-family: 'Plus Jakarta Sans';
+            font-weight: 700;
+            src: url({{ storage_path('fonts/PlusJakartaSans-Bold.ttf') }}) format("truetype");
         }
-
-        /* Two-column layout using tables */
-        .table-layout {
-            width: 100%;
-            border-spacing: 0;
-            margin-bottom: 20px;
-        }
-
-        .table-layout td {
-            padding: 10px;
-            vertical-align: top;
-        }
-
-        .col-half {
-            width: 50%;
-        }
-
-        .col-full {
-            width: 100%;
-        }
-
-        .fw-semibold {
-            font-weight: 600;
-        }
-
-        h4, h5, h6 {
-            margin-bottom: 10px;
-        }
-
-        /* Table Styling */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f7f7f7;
-            font-weight: bold;
-        }
-
-        /* Invoice header and section */
-        .invoice-header {
-            font-size: 1.2em;
-            font-weight: bold;
-        }
-
-        .invoice-summary {
-            margin-top: 20px;
-            border-top: 2px solid #ccc;
-            padding-top: 10px;
-        }
-
-        .invoice-summary h6 {
-            font-weight: bold;
-        }
-
-        /* Responsive Design */
-        .text-uppercase {
-            text-transform: uppercase;
-        }
-
-        .d-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .d-flex p, .d-flex h6 {
-            margin: 0;
-        }
+        * { box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: #1b2a3a; font-size: 12px; margin: 0; }
+        .accent { background: #008bce; height: 6px; width: 100%; }
+        .wrap { padding: 28px 34px; }
+        .head { width: 100%; border-bottom: 2px solid #0d1b2a; padding-bottom: 14px; margin-bottom: 22px; }
+        .head td { vertical-align: middle; }
+        .brand-logo { height: 40px; width: auto; }
+        .brand { font-size: 20px; font-weight: bold; color: #0d1b2a; }
+        .doc { text-align: right; }
+        .doc .t { font-size: 16px; font-weight: bold; color: #006fa3; }
+        .doc .ref { color: #6a7888; font-size: 11px; }
+        .meta { width: 100%; margin-bottom: 20px; }
+        .meta td { vertical-align: top; padding-right: 16px; width: 50%; }
+        .meta .sec { color: #0d1b2a; font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+        .meta .lbl { color: #8d9db5; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+        .meta .val { font-size: 12px; color: #1b2a3a; margin-bottom: 6px; }
+        table.items { width: 100%; border-collapse: collapse; margin-bottom: 18px; table-layout: fixed; }
+        table.items th { background: #0d1b2a; color: #fff; text-align: left; padding: 8px 10px; font-size: 11px; }
+        table.items td { padding: 8px 10px; border-bottom: 1px solid #e7ecf1; }
+        table.items td.r, table.items th.r { text-align: right; white-space: nowrap; }
+        table.items th.c-product { width: auto; }
+        table.items th.c-qty, table.items th.c-subtotal { width: 90px; }
+        .totals { width: 45%; margin-left: 55%; }
+        .totals td { padding: 5px 10px; white-space: nowrap; }
+        .totals td.r { text-align: right; }
+        .totals .grand td { border-top: 2px solid #0d1b2a; font-size: 15px; font-weight: bold; color: #006fa3; padding-top: 8px; }
+        .foot { margin-top: 30px; color: #8d9db5; font-size: 10.5px; text-align: center; border-top: 1px solid #e7ecf1; padding-top: 14px; }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- Two Column Layout with Table -->
-    <table class="table-layout">
+<div class="accent"></div>
+<div class="wrap">
+
+    <table class="head">
         <tr>
-            <!-- Customer Info Column -->
-            <td class="col-half">
-                <h4 class="fw-semibold">Para</h4>
-                <p><strong>Cliente :</strong> {{ Str::upper(Str::lower(($order->user->firstname ?? 'N/D'))) }} {{ Str::upper(Str::lower(($order->user->lastname ?? ''))) }}</p>
-                <p><strong>Indentificación :</strong> {{ Str::upper(Str::lower(($order->user->identification ?? 'N/D'))) }}</p>
-                <p class="{{ ($order->user->address ?? null) !=null ? '' : 'd-none' }}"><strong>Dirección :</strong> {{ Str::upper(Str::lower(($order->user->address ?? ''))) }}</p>
-                <p class="{{ ($order->user->cellphone ?? null) !=null ? '' : 'd-none' }}"><strong>Celular :</strong> {{ Str::upper(Str::lower(($order->user->cellphone ?? ''))) }}</p>
+            <td>
+                @if($logo)
+                    <img class="brand-logo" src="{{ $logo }}" alt="{{ $brand }}">
+                @else
+                    <span class="brand">{{ $brand }}</span>
+                @endif
+            </td>
+            <td class="doc">
+                <div class="t">Detalle de orden</div>
+                <div class="ref">Ref. {{ Str::upper($order->reference) }}</div>
+                <div class="ref">{{ date('Y-m-d', strtotime($order->created_at)) }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="meta">
+        <tr>
+            <td>
+                <div class="sec">Para</div>
+                <div class="lbl">Cliente</div>
+                <div class="val">{{ Str::upper(Str::lower(($order->user->firstname ?? 'N/D'))) }} {{ Str::upper(Str::lower(($order->user->lastname ?? ''))) }}</div>
+                <div class="lbl">Identificación</div>
+                <div class="val">{{ Str::upper(Str::lower(($order->user->identification ?? 'N/D'))) }}</div>
+                @if($order->user->address ?? null)
+                    <div class="lbl">Dirección</div>
+                    <div class="val">{{ Str::upper(Str::lower($order->user->address)) }}</div>
+                @endif
+                @if($order->user->cellphone ?? null)
+                    <div class="lbl">Celular</div>
+                    <div class="val">{{ Str::upper(Str::lower($order->user->cellphone)) }}</div>
+                @endif
             </td>
 
-            <!-- Distributor Info Column -->
-            <td class="col-half">
-                <h4 class="fw-semibold">Distribuidor</h4>
+            <td>
+                <div class="sec">Distribuidor</div>
                 @if($order->activity != null)
                     {{-- distributor/enterprise pueden haberse borrado (soft delete) después de la orden --}}
-                    <p><strong>Distribuidor :</strong> {{ Str::upper($order->activity->distributor->title ?? 'N/D') }}</p>
-                    <p><strong>Empresa :</strong> {{ Str::upper($order->activity->enterprise->title ?? 'N/D') }}</p>
+                    <div class="lbl">Distribuidor</div>
+                    <div class="val">{{ Str::upper($order->activity->distributor->title ?? 'N/D') }}</div>
+                    <div class="lbl">Empresa</div>
+                    <div class="val">{{ Str::upper($order->activity->enterprise->title ?? 'N/D') }}</div>
                     @if($order->activity->staff != null)
-                        <p><strong>Encargado :</strong> {{ Str::upper($order->activity->staff->firstname) }} {{ Str::upper($order->activity->staff->lastname) }}</p>
+                        <div class="lbl">Encargado</div>
+                        <div class="val">{{ Str::upper($order->activity->staff->firstname) }} {{ Str::upper($order->activity->staff->lastname) }}</div>
                     @endif
                 @endif
-                <p><strong>Referencia :</strong> {{ Str::upper($order->reference) }}</p>
-                <p><strong>Tipo de pago :</strong> {{ Str::upper($order->type->title) }}</p>
-                <p><strong>Metodo de pago :</strong> {{ Str::upper($order->method->title) }}</p>
-                <p><strong>Fecha de creación :</strong> {{ date('Y-m-d', strtotime($order->created_at)) }}</p>
+                <div class="lbl">Tipo de pago</div>
+                <div class="val">{{ Str::upper($order->type->title) }}</div>
+                <div class="lbl">Método de pago</div>
+                <div class="val">{{ Str::upper($order->method->title) }}</div>
                 @if($order->payment_at != null)
-                    <p><strong>Fecha de pago :</strong> {{ date('Y-m-d', strtotime($order->payment_at)) }}</p>
+                    <div class="lbl">Fecha de pago</div>
+                    <div class="val">{{ date('Y-m-d', strtotime($order->payment_at)) }}</div>
                 @endif
             </td>
         </tr>
     </table>
 
-    <!-- Itemized Order Details -->
-    <table>
+    <table class="items">
         <thead>
-        <tr>
-            <th class="text-uppercase">Descripción</th>
-            <th class="text-uppercase">Cantidad</th>
-            <th class="text-uppercase">Total</th>
-        </tr>
+            <tr>
+                <th class="c-product">Descripción</th>
+                <th class="r c-qty">Cantidad</th>
+                <th class="r c-subtotal">Total</th>
+            </tr>
         </thead>
         <tbody>
-        @foreach($order->items as $item)
-            <tr>
-                <td><strong>{{ $item->itemable->title }}</strong></td>
-                <td>{{ ceil($item->quantity) }}</td>
-                <td>${{ number_format($item->amount) }}</td>
-            </tr>
-        @endforeach
+            @foreach($order->items as $item)
+                <tr>
+                    <td>{{ $item->itemable->title }}</td>
+                    <td class="r">{{ ceil($item->quantity) }}</td>
+                    <td class="r">${{ number_format($item->amount) }}</td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
 
-    <!-- Order Summary -->
-    <div class="invoice-summary">
-        <div class="d-flex">
-            <p><strong>Subtotal</strong></p>
-            <h6>${{ number_format($order->total_after_discount) }}</h6>
-        </div>
-
+    <table class="totals">
+        <tr><td>Subtotal</td><td class="r">${{ number_format($order->total_after_discount) }}</td></tr>
         @if($order->total_discount_amount > 0)
-            <div class="d-flex">
-                <p><strong>Descuentos</strong></p>
-                <h6>${{ number_format($order->total_discount_amount) }}</h6>
-            </div>
+            <tr><td>Descuentos</td><td class="r">–${{ number_format($order->total_discount_amount) }}</td></tr>
         @endif
-
         @if($order->total_tax_amount > 0)
-            <div class="d-flex">
-                <p><strong>Impuestos</strong></p>
-                <h6>${{ number_format($order->total_tax_amount) }}</h6>
-            </div>
+            <tr><td>Impuestos</td><td class="r">${{ number_format($order->total_tax_amount) }}</td></tr>
         @endif
+        <tr class="grand"><td>Total</td><td class="r">${{ number_format($order->total_order_amount) }}</td></tr>
+    </table>
 
-        <div class="d-flex">
-            <p><strong>Total</strong></p>
-            <h6>${{ number_format($order->total_order_amount) }}</h6>
-        </div>
+    <div class="foot">
+        Este documento es un comprobante de orden generado por {{ $brand }}.
     </div>
+
 </div>
 </body>
 </html>

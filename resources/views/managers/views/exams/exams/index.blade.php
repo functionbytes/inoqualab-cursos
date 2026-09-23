@@ -4,10 +4,9 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" class="btn btn-primary btn-new-exam"
-                                data-bs-toggle="modal" data-bs-target="#exam-modal">
-                            Nuevo examen
-                        </button>
+<button type="button" class="btn btn-primary btn-icon btn-new-exam"
+                                data-bs-toggle="modal" data-bs-target="#exam-modal"
+                                title="Nuevo examen" aria-label="Nuevo examen">{!! \App\Html\IconHelper::render('plus') !!}</button>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Examenes del curso',
@@ -18,6 +17,7 @@
 
 @section('content')
 
+    @include('managers.includes.course-subnav', ['course' => $course, 'active' => 'exam'])
 
     <div class="widget-content searchable-container list" id="exams-index"
          data-flash-success="{{ session('success') }}"

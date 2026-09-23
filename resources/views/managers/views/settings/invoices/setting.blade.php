@@ -20,10 +20,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Numeración</h6>
-                        <p class="text-muted mb-3">Define el consecutivo y la periodicidad con la que se generan las facturas.</p>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Numeración</h6>
+                        <p class="text-muted small mb-0">
+                            Define el consecutivo y la periodicidad con la que se generan las facturas.
+                        </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="invoice_default" class="form-label fw-semibold">Consecutivo de facturación</label>

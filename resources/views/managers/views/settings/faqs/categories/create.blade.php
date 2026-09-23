@@ -21,11 +21,14 @@
 
         <div class="card">
 
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Crear categoria</h6>
+              <p class="text-muted small mb-0">
+                  Completa los datos de la categoria de preguntas frecuentes. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
+              </p>
+          </div>
+
           <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Crear categoria</h6>
-            <p class="text-muted mb-3">
-              Completa los datos de la categoria de preguntas frecuentes. Los campos marcados como obligatorios deben diligenciarse para poder guardarla.
-            </p>
             <div class="row g-3">
 
               <div class="col-6">

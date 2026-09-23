@@ -48,21 +48,11 @@
             {{-- Search --}}
             <div class="card-body border-bottom">
                 <form action="{{ route('manager.roles.index') }}" method="GET" id="searchForm">
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-magnifying-glass text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por nombre..." value="{{ $searchKey ?? '' }}">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Buscar</button>
-                        @if($searchKey)
-                            <a href="{{ route('manager.roles.index') }}" class="btn btn-outline-secondary">Limpiar</a>
-                        @endif
-                    </div>
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por nombre...',
+                    ])
                 </form>
             </div>
 

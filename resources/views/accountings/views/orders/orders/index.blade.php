@@ -1,153 +1,184 @@
 @extends('layouts.managers')
 
 @section('page_header')
-    @include('accountings.includes.card', ['title' => 'Ordenes'])
+    @php ob_start(); @endphp
+    <a href="{{ route('accounting.orders.report') }}" class="btn btn-primary btn-icon" title="Reporte" aria-label="Reporte">
+        <i class="fas fa-chart-bar"></i>
+    </a>
+    <a href="{{ route('accounting.orders.resumen') }}" class="btn btn-primary btn-icon" title="Resumen" aria-label="Resumen">
+        <i class="fas fa-clipboard-list"></i>
+    </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
+    @include('accountings.includes.card', [
+        'title' => 'Ordenes',
+        'actions' => $headerActions,
+    ])
 @endsection
 
 @section('content')
 
-    <div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="condition" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar estado</option>
-                                        @foreach($conditions as $item)
-                                                <option value="{{ $item->id }}" @if (isset($condition) && $condition ==  $item->id ) selected @endif>
-                                                    {{ $item->title }}
-                                                </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="type" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar tipo</option>
-                                        @foreach($types as $item)
-                                             <option value="{{ $item->id }}" @if (isset($type) && $type==$item->id ) selected @endif>
-                                            {{ $item->title }}
-                                        </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <div class="input-group">
-                                    <select class="form-select select2" name="methods" data-minimum-results-for-search="Infinity">
-                                        <option value="">Seleccionar metodo</option>
-                                        @foreach($methods as $item)
-                                            <option value="{{ $item->id }}" @if (isset($method) && $method ==  $item->id ) selected @endif>
-                                                {{ $item->title }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Buscar">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('accounting.orders.report') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reporte">
-                                    <i class="fa-solid fa-file-chart-column"></i>
-                                </a>
-                            </div>
-                            <div class="col-auto">
-                                <a href="{{ route('accounting.orders.resumen') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Resumen">
-                                    <i class="fa-solid fa-memo-circle-info"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </form>
+  <div class="widget-content searchable-container list">
+
+    <div class="card">
+
+      {{-- Search + Filtros --}}
+      <div class="card-body border-bottom">
+        @php
+            $filterChips = [];
+            if (($condition ?? '') !== '' && ($condition ?? null) !== null) {
+                $filterChips[] = [
+                    'label' => 'Estado: ' . optional($conditions->firstWhere('id', $condition))->title,
+                    'clear_url' => url()->current() . '?' . http_build_query(request()->except('condition')),
+                ];
+            }
+            if (($type ?? '') !== '' && ($type ?? null) !== null) {
+                $filterChips[] = [
+                    'label' => 'Tipo: ' . optional($types->firstWhere('id', $type))->title,
+                    'clear_url' => url()->current() . '?' . http_build_query(request()->except('type')),
+                ];
+            }
+            if (($method ?? '') !== '' && ($method ?? null) !== null) {
+                $filterChips[] = [
+                    'label' => 'Metodo: ' . optional($methods->firstWhere('id', $method))->title,
+                    'clear_url' => url()->current() . '?' . http_build_query(request()->except('methods')),
+                ];
+            }
+        @endphp
+        <form method="GET" action="{{ route('accounting.orders') }}" id="searchForm">
+
+            <input type="hidden" name="condition" id="filterCondition" value="{{ $condition ?? '' }}">
+            <input type="hidden" name="type" id="filterType" value="{{ $type ?? '' }}">
+            <input type="hidden" name="methods" id="filterMethods" value="{{ $method ?? '' }}">
+
+            @php ob_start(); @endphp
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Estado</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_condition" value="" {{ ($condition ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($conditions as $item)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_condition" value="{{ $item->id }}" {{ (string) ($condition ?? '') === (string) $item->id ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $item->title }}</span>
+                        </label>
+                    @endforeach
                 </div>
             </div>
-        </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-
-                        <th scope="col">Numero</th>
-                        <th scope="col">Cliente</th>
-                        <th scope="col">Estado pago</th>
-                        <th scope="col">Tipo pago</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($orders as $key =>$order)
-                        <tr class="search-items">
-
-                            <td>
-                                <span class="usr-email-addr" >{{$order->reference }}</span>
-                            </td>
-
-                            <td>
-                                <span class="usr-email-addr" >{{strtoupper(($order->user->firstname ?? 'N/D') . ' ' . ($order->user->lastname ?? '')) }}</span>
-                            </td>
-                            <td>
-                                <span class="badge {{ $order->condition->badge_class }} rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                    {{ $order->condition->title }}
-                                </span>
-                            </td>
-                            <td>
-                                <span
-                                    class="badge  bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold fs-2 d-inline-flex align-items-center gap-1">
-                                    {{ $order->type->title }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" >{{ date('Y-m-d', strtotime($order->created_at)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('accounting.orders.view',$order->slack) }}">Visualizar</a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('accounting.orders.edit',$order->slack) }}">Editar</a>
-                                            </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Tipo</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_type" value="" {{ ($type ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($types as $item)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_type" value="{{ $item->id }}" {{ (string) ($type ?? '') === (string) $item->id ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $item->title }}</span>
+                        </label>
                     @endforeach
+                </div>
+            </div>
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Metodo de pago</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_methods" value="" {{ ($method ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($methods as $item)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_methods" value="{{ $item->id }}" {{ (string) ($method ?? '') === (string) $item->id ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $item->title }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            @php $popoverBody = trim(ob_get_clean()); @endphp
 
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $orders->firstItem() }}-{{ $orders->lastItem() }} de {{ $orders->total() }} resultados</span>
-                <nav>
-                    {{ $orders->appends(request()->input())->links() }}
-                </nav>
-            </div>
+            @include('managers.includes.filter-toolbar', [
+                'searchName' => 'search',
+                'searchValue' => $searchKey ?? '',
+                'searchPlaceholder' => 'Buscar por orden, cliente o identificacion...',
+                'popoverBody' => $popoverBody,
+                'filterChips' => $filterChips,
+            ])
+        </form>
+      </div>
+
+      {{-- Tabla --}}
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle text-nowrap mb-0">
+            <thead class="table-light">
+            <tr>
+              <th>Numero</th>
+              <th>Cliente</th>
+              <th class="text-center">Estado pago</th>
+              <th class="text-center">Tipo pago</th>
+              <th>Fecha</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            @foreach ($orders as $order)
+              <tr>
+                <td>{{ $order->reference }}</td>
+                <td>
+                  {{ Str::upper(($order->user->firstname ?? 'N/D') . ' ' . ($order->user->lastname ?? '')) }}
+                </td>
+                <td class="text-center">
+                  <span class="badge {{ $order->condition->badge_class }}">{{ $order->condition->title }}</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-secondary-subtle text-secondary">{{ $order->type->title }}</span>
+                </td>
+                <td>
+                  <span class="text-muted">{{ $order->created_at->format('d/m/Y') }}</span>
+                </td>
+                <td class="text-center">
+                  <div class="dropdown">
+                    <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                            data-bs-toggle="dropdown"
+                            data-bs-boundary="viewport">
+                      <i class="fas fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item" href="{{ route('accounting.orders.view', $order->slack) }}">Visualizar</a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="{{ route('accounting.orders.edit', $order->slack) }}">Editar</a>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            @endforeach
+
+            </tbody>
+          </table>
         </div>
+      </div>
+
+      @include('managers.includes.pagination-footer', [
+          'paginator' => $orders,
+          'itemLabel' => 'ordenes',
+      ])
     </div>
+  </div>
+
 @endsection
 
-
-
-
+@push('scripts')
+    <script src="{{ asset('accountings/js/views/orders/orders/index.js') }}"></script>
+@endpush

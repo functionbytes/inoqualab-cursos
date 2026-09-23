@@ -103,6 +103,9 @@
                         <table class="table table-hover align-middle text-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th class="col-checkbox">
+                                        <input type="checkbox" class="form-check-input" id="select-all">
+                                    </th>
                                     <th>Orden</th>
                                     <th>Cliente</th>
                                     <th>Metodo pago</th>
@@ -116,23 +119,27 @@
                                 @foreach($orders as $order)
                                     <tr>
                                         <td>
+                                            <input type="checkbox" class="form-check-input bulk-checkbox"
+                                                   value="{{ $order->id }}">
+                                        </td>
+                                        <td>
                                             <span class="fw-semibold">{{ $order->slack }}</span>
                                         </td>
                                         <td>
                                             {{ $order->user ? strtoupper($order->user->firstname.' '.$order->user->lastname) : 'USUARIO ELIMINADO' }}
                                         </td>
                                         <td>
-                                            <span class="badge {{ $order->condition->badge_class }} rounded-3 py-2 fw-semibold">
-                                                {{ $order->condition->title }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold">
+                                            <span class="badge bg-primary-subtle text-primary">
                                                 {{ $order->method->title }}
                                             </span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-secondary-subtle text-secondary rounded-3 py-2 fw-semibold">
+                                            <span class="badge {{ $order->condition->badge_class }}">
+                                                {{ $order->condition->title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">
                                                 {{ $order->type->title }}
                                             </span>
                                         </td>
@@ -169,7 +176,7 @@
                     </div>
                 @else
                     <div class="text-center py-5">
-                        <i class="fas fa-receipt fa-3x mb-3 text-muted opacity-50"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-invoice', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if(($searchKey ?? '') !== '' || $activeFilters > 0)
                                 No se encontraron resultados

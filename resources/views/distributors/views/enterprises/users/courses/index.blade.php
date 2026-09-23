@@ -6,81 +6,75 @@
 
 @section('content')
 
-<div class="widget-content searchable-container list">
-        
-        <div class="card card-body">
-            <div class="row">
-                <div class="col-md-12 col-xl-12">
-                    <form class="position-relative form-search" action="{{ Request::fullUrl() }}" method="GET">
-                        <div class="row justify-content-between g-2 ">
-                            <div class="col-auto flex-grow-1">
-                                <div class="tt-search-box">
-                                    <div class="input-group">
-                                        <span class="position-absolute top-50 start-0 translate-middle-y ms-2"> <i class="fas fa-magnifying-glass"></i></span>
-                                        <input class="form-control rounded-start w-100 ps-5" type="text" id="search" name="search" placeholder="Buscar" @isset($searchKey) value="{{ $searchKey }}" @endisset>
+    <div class="widget-content searchable-container list">
+
+        <div class="card">
+
+            {{-- Search --}}
+            <div class="card-body border-bottom">
+                <form method="GET" action="{{ Request::fullUrl() }}" id="searchForm">
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por curso...',
+                    ])
+                </form>
+            </div>
+
+            {{-- Tabla --}}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-nowrap mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Titulo</th>
+                            <th>Fecha</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        @foreach ($inscriptions as $inscription)
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">{{ Str::words(Str::upper(Str::lower($inscription->course->title)), 12, '...') }}</div>
+                                </td>
+                                <td>{{ date('Y', strtotime($inscription->enroll_start)) }}</td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                data-bs-toggle="dropdown"
+                                                data-bs-boundary="viewport">
+                                            <i class="fas fa-ellipsis-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('distributor.enterprises.courses.details', $inscription->slack) }}">Detalle</a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('distributor.enterprises.courses.progress', $inscription->slack) }}">Progreso</a>
+                                            </li>
+                                        </ul>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-duotone fa-magnifying-glass"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
-        <div class="card card-body">
-            <div class="table-responsive">
-                <table class="table search-table align-middle text-nowrap">
-                    <thead class="header-item">
-                    <tr>
-                        <th scope="col">Titulo</th>
-                        <th scope="col">Fecha</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                   
-                    @foreach ($inscriptions as $key => $inscription)
-                        <tr class="search-items">
 
-                            <td>
-                                <span class="usr-email-addr" data-email="{{ $inscription->course->title }}">{{ Str::words( Str::upper(Str::lower($inscription->course->title)), 12, '...')  }}</span>
-                            </td>
-                            <td>
-                                <span class="usr-ph-no" >{{ date('Y', strtotime($inscription->enroll_start)) }}</span>
-                            </td>
-                            <td class="text-left">
-                                <div class="dropdown dropstart">
-                                    <a href="#" class="text-muted" id="dropdownMenuButton-{{ $loop->index }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fas fa-ellipsis-vertical fs-5"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-{{ $loop->index }}">
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('distributor.enterprises.courses.details', $inscription->slack) }}">Detalle</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center gap-3" href="{{ route('distributor.enterprises.courses.progress', $inscription->slack) }}">Progreso</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    </tbody>
-                </table>
-            </div>
-            <div class="result-body ">
-                <span>Mostrar {{ $inscriptions->firstItem() }}-{{ $inscriptions->lastItem() }} de {{ $inscriptions->total() }} resultados</span>
-                <nav>
-                    {{ $inscriptions->appends(request()->input())->links() }}
-                </nav>
-            </div>
+            @include('managers.includes.pagination-footer', [
+                'paginator' => $inscriptions,
+                'itemLabel' => 'cursos',
+            ])
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('distributors/js/enterprises/users/courses/index.js') }}"></script>
+@endpush
 
 

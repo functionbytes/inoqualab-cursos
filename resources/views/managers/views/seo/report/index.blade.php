@@ -112,7 +112,11 @@
             {{-- ── Exportar datos ───────────────────────────────────────────────── --}}
             <div class="col-12 col-lg-4">
                 <div class="card h-100">
-                    
+
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Exportar datos</h6>
+                    </div>
+
                     <div class="card-body d-flex flex-column gap-3">
 
                         <div class="border rounded p-3">
@@ -142,8 +146,8 @@
             {{-- ── Distribución de grades ───────────────────────────────────────── --}}
             <div class="col-12 col-lg-8">
                 <div class="card h-100">
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-0 fw-bold">Distribución de grades</h5>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Distribución de grades</h6>
                     </div>
                     <div class="card-body">
                         @if($gradeTotal === 0)

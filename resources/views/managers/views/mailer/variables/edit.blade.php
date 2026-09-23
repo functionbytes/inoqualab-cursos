@@ -35,25 +35,15 @@
                     <input type="hidden" name="is_system" value="1">
                 @endif
 
-                <div class="card-header border-bottom p-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h5 class="mb-1 fw-bold">Editar: {{ $variable->key }}</h5>
-                            <p class="text-muted mb-0">Actualiza la información de la variable.</p>
-                        </div>
-                        <a href="{{ route('mailers.variables.index') }}" class="btn btn-light">
-                            Volver
-                        </a>
-                    </div>
+                <div class="card-header border-bottom">
+                    <h6 class="mb-1 fw-bold">Editar: {{ $variable->key }}</h6>
+                    <p class="text-muted small mb-0">Actualiza la información de la variable.</p>
                 </div>
 
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="key" class="form-label">
-                                Clave de variable <span class="text-danger">*</span>
-                                <p class="text-muted">(solo mayúsculas y guiones bajos)</p>
-                            </label>
+                            <label for="key" class="form-label fw-semibold">Clave de variable <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('key') is-invalid @enderror"
                                    id="key" name="key"
                                    value="{{ old('key', $variable->key) }}" required
@@ -64,11 +54,13 @@
                                 <small class="form-text text-warning">
                                     <i class="fas fa-exclamation-triangle me-1"></i>No se puede modificar la clave de variables del sistema
                                 </small>
+                            @else
+                                <small class="form-text text-muted">Solo mayúsculas y guiones bajos</small>
                             @endif
                         </div>
 
                         <div class="col-md-6">
-                            <label for="name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                            <label for="name" class="form-label fw-semibold">Nombre <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror"
                                    id="name" name="name"
                                    value="{{ old('name', $variable->name) }}" required>
@@ -76,7 +68,7 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label for="category" class="form-label">Categoría <span class="text-danger">*</span></label>
+                            <label for="category" class="form-label fw-semibold">Categoría <span class="text-danger">*</span></label>
                             <select class="form-select select2 @error('category') is-invalid @enderror"
                                     id="category" name="category" required
                                     @if($variable->is_system) disabled @endif>
@@ -89,7 +81,7 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label for="module" class="form-label">Módulo <span class="text-danger">*</span></label>
+                            <label for="module" class="form-label fw-semibold">Módulo <span class="text-danger">*</span></label>
                             <select class="form-select select2 @error('module') is-invalid @enderror"
                                     id="module" name="module" required
                                     @if($variable->is_system) disabled @endif>
@@ -102,7 +94,7 @@
                         </div>
 
                         <div class="col-md-4">
-                            <label for="is_enabled" class="form-label">Estado</label>
+                            <label for="is_enabled" class="form-label fw-semibold">Estado</label>
                             <select class="form-select select2 @error('is_enabled') is-invalid @enderror" id="is_enabled" name="is_enabled">
                                 <option value="1" @if(old('is_enabled', $variable->is_enabled) == 1) selected @endif>Habilitada</option>
                                 <option value="0" @if(old('is_enabled', $variable->is_enabled) == 0) selected @endif>Deshabilitada</option>
@@ -111,7 +103,7 @@
                         </div>
 
                         <div class="col-12">
-                            <label for="description" class="form-label">Descripción</label>
+                            <label for="description" class="form-label fw-semibold">Descripción</label>
                             <textarea class="form-control @error('description') is-invalid @enderror"
                                       id="description" name="description"
                                       placeholder="Describe qué representa esta variable"
@@ -127,24 +119,25 @@
                                 </div>
                             </div>
                         @endif
-
-                        <div class="col-12">
-                            <hr>
-                            <h6 class="fw-bold mb-1">Valor de prueba</h6>
-                            <p class="text-muted mb-2 small">Valor visual de ejemplo que se usará en previsualizaciones</p>
-                            <textarea class="form-control @error('test_value') is-invalid @enderror"
-                                      id="test_value" name="test_value"
-                                      placeholder="Valor de ejemplo para esta variable"
-                                      rows="2">{{ old('test_value', $variable->test_value ?? '') }}</textarea>
-                            @error('test_value')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                            <small class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Dejar vacío para usar el valor predeterminado del sistema</small>
-                        </div>
                     </div>
                 </div>
 
-                <div class="card-footer border-top">
-                    <button type="submit" class="btn btn-primary w-100 mb-1">Guardar</button>
-                    <a href="{{ route('mailers.variables.index') }}" class="btn btn-light w-100">Cancelar</a>
+                <hr class="my-0">
+
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-1">Valor de prueba</h6>
+                    <p class="text-muted mb-3">Valor visual de ejemplo que se usará en previsualizaciones.</p>
+
+                    <textarea class="form-control @error('test_value') is-invalid @enderror"
+                              id="test_value" name="test_value"
+                              placeholder="Valor de ejemplo para esta variable"
+                              rows="2">{{ old('test_value', $variable->test_value ?? '') }}</textarea>
+                    @error('test_value')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <small class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Dejar vacío para usar el valor predeterminado del sistema</small>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary w-100">Guardar</button>
                 </div>
             </form>
         </div>
@@ -154,8 +147,10 @@
     <div class="col-lg-4">
         @if($variable->is_system)
             <div class="card mb-3">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold"><i class="fas fa-shield-alt me-1 text-info"></i>Variable del sistema</h6>
+                </div>
                 <div class="card-body">
-                    <h6 class="fw-bold mb-2"><i class="fas fa-shield-alt me-1 text-info"></i>Variable del sistema</h6>
                     <p class="text-muted small mb-0">La clave, categoría y módulo no se pueden modificar. Solo puedes cambiar el nombre, la descripción, el estado y el valor de prueba.</p>
                 </div>
             </div>

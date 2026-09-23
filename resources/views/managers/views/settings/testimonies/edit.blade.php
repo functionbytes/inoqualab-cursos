@@ -26,12 +26,14 @@
 
                 <div class="card">
 
-                    <div class="card-body">
-                        <h6 class="fw-bold text-dark mb-1">Editar testimonios</h6>
-                        <p class="text-muted mb-3">
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Editar testimonios</h6>
+                        <p class="text-muted small mb-0">
                             Actualiza los datos del testimonio. Los cambios se guardarán al hacer clic en Guardar.
                         </p>
+                    </div>
 
+                    <div class="card-body">
                         <div class="row g-3">
 
                             <div class="col-6">
@@ -74,7 +76,7 @@
                                 <input type="number" class="form-control" id="position"  name="position" value="{{ $testimonie->position }}" min="0" placeholder="0">
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label class="form-label fw-semibold">Estado</label>
                                 <div class="input-group">
                                     {!! Form::select('available', $availables, $testimonie->available , ['class' => 'select2 form-control','id' => 'available']) !!}

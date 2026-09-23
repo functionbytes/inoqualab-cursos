@@ -12,6 +12,14 @@
             'active' => request()->routeIs('customers.orders*')],
         ['href' => route('customers.documents'), 'icon' => 'folder', 'label' => 'Documentos',
             'active' => request()->routeIs('customers.documents*')],
+        // Instrucciones y Notificaciones tenían rutas y vistas completas, pero
+        // ningún punto de entrada en la navegación -- solo accesibles
+        // escribiendo la URL a mano. Sin este ítem eran invisibles para
+        // cualquier alumno real.
+        ['href' => route('customers.instructions'), 'icon' => 'circle-question', 'label' => 'Instrucciones',
+            'active' => request()->routeIs('customers.instructions*')],
+        ['href' => route('customers.notifications'), 'icon' => 'bell', 'label' => 'Notificaciones',
+            'active' => request()->routeIs('customers.notifications*')],
         ['href' => route('customers.settings'), 'icon' => 'gear', 'label' => 'Configuración',
             'active' => request()->routeIs('customers.settings*')],
     ];

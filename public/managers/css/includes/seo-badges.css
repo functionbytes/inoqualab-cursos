@@ -16,6 +16,13 @@
    1. Estado (.seo-badge--*): Indexables/No indexables/Sin optimizar en
       las pestañas, y la columna Robots.
    2. Score (.seo-score--*): grado A-F en metas, dashboard y reporte.
+
+   Colores tomados de la tabla corporativa (rules/pages-views.md): oscuro
+   principal #081A28, azul de acento #008bce, texto secundario #5A7093,
+   texto suave #8D9DB5. Sin verde/ambar/naranja -- "negativo" reusa el
+   rojo #b10100 ya usado en el resto del panel para errores (brand-box-red
+   en seo/dashboard), no es parte de la tabla de 4 colores pero es el
+   unico rojo de marca ya establecido.
    ======================================== */
 
 .seo-badge--neutral {
@@ -24,41 +31,41 @@
 }
 
 .seo-badge--positive {
-    background-color: #e6f7ec !important;
-    color: #15803d !important;
+    background-color: #eaf6fc !important;
+    color: #008bce !important;
 }
 
 .seo-badge--negative {
-    background-color: #fdecea !important;
-    color: #b91c1c !important;
+    background-color: #fbe9e9 !important;
+    color: #b10100 !important;
 }
 
 .seo-badge--warning {
-    background-color: #fff4e0 !important;
-    color: #92610a !important;
+    background-color: #eef1f5 !important;
+    color: #5a7093 !important;
 }
 
 .seo-score--a {
-    background-color: #16a34a !important;
+    background-color: #081a28 !important;
     color: #fff !important;
 }
 
 .seo-score--b {
-    background-color: #0d9488 !important;
+    background-color: #008bce !important;
     color: #fff !important;
 }
 
 .seo-score--c {
-    background-color: #f59e0b !important;
+    background-color: #5a7093 !important;
     color: #fff !important;
 }
 
 .seo-score--d {
-    background-color: #ea580c !important;
+    background-color: #8d9db5 !important;
     color: #fff !important;
 }
 
 .seo-score--f {
-    background-color: #dc2626 !important;
+    background-color: #b10100 !important;
     color: #fff !important;
 }

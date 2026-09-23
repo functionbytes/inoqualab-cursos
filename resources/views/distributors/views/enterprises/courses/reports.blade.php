@@ -6,46 +6,57 @@
 @endsection
 @section('content')
 
-    <div class="row">
-        <div class="col-lg-12 d-flex align-items-stretch">
-            <div class="card w-100">
-                <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false"
-                      data-generate-url="{{ route('distributor.enterprises.courses.generate') }}">
-                    {{ csrf_field() }}
-                    <input type="hidden" id="enterprise" name="enterprise" value="{{ $enterprise->id }}">
-                    <input type="hidden" id="course" name="course" value="{{ $course->id }}">
+    <div class="row g-4 align-items-start">
 
-                    <div class="card-body border-top">
-                        <div class="d-flex no-block align-items-center mb-3">
-                            <h5 class="mb-0">Reporte de usuarios — {{ $course->title }}</h5>
-                        </div>
-                        <p class="card-subtitle mb-3">
+        {{-- Columna izquierda: formulario --}}
+        <div class="col-lg-8">
+            <form id="formReport" enctype="multipart/form-data" role="form" onSubmit="return false"
+                  data-generate-url="{{ route('distributor.enterprises.courses.generate') }}">
+                {{ csrf_field() }}
+                <input type="hidden" id="enterprise" name="enterprise" value="{{ $enterprise->id }}">
+                <input type="hidden" id="course" name="course" value="{{ $course->id }}">
+
+                <div class="card">
+
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-1 fw-bold">Reporte de usuarios — {{ $course->title }}</h6>
+                        <p class="text-muted small mb-0">
                             Selecciona la modalidad y descarga el reporte en Excel.
                         </p>
+                    </div>
 
-                        <div class="row">
+                    <div class="card-body">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Modalidad</label>
-                                    {!! Form::select('modalitie', $modalities, null, ['class' => 'select2 form-control', 'id' => 'modalitie']) !!}
-                                    <label id="modalitie-error" class="error d-none" for="modalitie"></label>
-                                </div>
+                                <label class="form-label fw-semibold">Modalidad</label>
+                                {!! Form::select('modalitie', $modalities, null, ['class' => 'select2 form-control', 'id' => 'modalitie']) !!}
+                                <label id="modalitie-error" class="error d-none" for="modalitie"></label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-12">
-                        <div class="action-form border-top mt-4">
-                            <div class="text-center p-3">
-                                <button type="submit" class="btn btn-primary px-4 w-100">
-                                    Descargar reporte
-                                </button>
-                            </div>
-                        </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Descargar reporte
+                        </button>
                     </div>
-                </form>
+
+                </div>
+            </form>
+        </div>
+
+        {{-- Columna derecha: sidebar informativo --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header border-bottom">
+                    <h6 class="mb-0 fw-bold">Sobre este reporte</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">El reporte se descarga en Excel con los usuarios inscritos en este curso según la modalidad seleccionada.</p>
+                </div>
             </div>
         </div>
+
     </div>
 
 @endsection

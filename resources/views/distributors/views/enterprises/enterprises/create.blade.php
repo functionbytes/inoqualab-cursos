@@ -19,12 +19,14 @@
 
         <div class="card">
 
-          <div class="card-body">
-            <h6 class="fw-bold text-dark mb-1">Crear empresa</h6>
-            <p class="text-muted mb-3">
-              Completa los datos para registrar una nueva empresa: título, NIT, datos de contacto y dirección.
-            </p>
+          <div class="card-header border-bottom">
+              <h6 class="mb-1 fw-bold">Crear empresa</h6>
+              <p class="text-muted small mb-0">
+                  Completa los datos para registrar una nueva empresa: título, NIT, datos de contacto y dirección.
+              </p>
+          </div>
 
+          <div class="card-body">
             <div class="row g-3">
 
               <div class="col-6">

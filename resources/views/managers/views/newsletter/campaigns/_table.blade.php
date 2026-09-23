@@ -105,7 +105,7 @@
             @if($campaigns->isEmpty())
                 <div class="card-body">
                     <div class="text-center py-5 text-muted">
-                        <i class="fas fa-paper-plane fa-3x mb-3 d-block opacity-25"></i>
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-send', 48) !!}</div>
                         <h5 class="fw-bold mb-2">
                             @if($search || $status) No se encontraron campañas @else No hay campañas @endif
                         </h5>
@@ -134,6 +134,7 @@
                                     </th>
                                     <th>Nombre</th>
                                     <th>Asunto</th>
+                                    <th>Audiencia</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Enviados</th>
                                     <th>Fecha</th>
@@ -150,6 +151,9 @@
                                     <td class="fw-medium">{{ $campaign->name }}</td>
                                     <td class="text-muted small text-truncate" title="{{ $campaign->subject }}">
                                         {{ $campaign->subject }}
+                                    </td>
+                                    <td class="text-muted small">
+                                        {{ $campaign->list->name ?? 'Todos los suscriptores' }}
                                     </td>
                                     <td class="text-center">
                                         @switch($campaign->status)
@@ -169,16 +173,23 @@
                                                 @break
                                         @endswitch
                                     </td>
-                                    <td class="text-center small">
+                                    <td class="text-center small campaigns-progress-col">
                                         @if($campaign->isSent())
                                             <span class="text-success fw-medium">{{ number_format($campaign->sent_count) }}</span>
-                                            @if($campaign->failed_count > 0)
-                                                <span class="text-muted"> / </span>
-                                                <span class="text-danger">{{ number_format($campaign->failed_count) }} err.</span>
-                                            @endif
+                                            <span class="text-muted"> / </span>
+                                            <span class="{{ $campaign->failed_count > 0 ? 'text-danger' : 'text-muted' }}">{{ number_format($campaign->failed_count) }} err.</span>
                                             <br><p class="text-muted">de {{ number_format($campaign->recipients_count) }}</p>
                                         @elseif($campaign->isSending())
-                                            <span class="text-warning">{{ number_format($campaign->recipients_count) }} dest.</span>
+                                            @php
+                                                $sendingTotal = max($campaign->recipients_count, 1);
+                                                $sendingPercent = (int) round(($campaign->sent_count / $sendingTotal) * 100);
+                                            @endphp
+                                            <span class="text-warning fw-medium">{{ number_format($campaign->sent_count) }}</span>
+                                            <span class="text-muted"> de {{ number_format($campaign->recipients_count) }}</span>
+                                            <div class="progress campaigns-progress-bar" role="progressbar"
+                                                 aria-valuenow="{{ $sendingPercent }}" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar bg-warning" style="width: {{ $sendingPercent }}%"></div>
+                                            </div>
                                         @else
                                             <span class="text-muted">—</span>
                                         @endif
@@ -190,6 +201,9 @@
                                             Iniciada {{ $campaign->started_at->diffForHumans() }}
                                         @else
                                             Creada {{ $campaign->created_at->diffForHumans() }}
+                                        @endif
+                                        @if($campaign->creator)
+                                            <br><span class="campaigns-creator">por {{ $campaign->creator->full_name }}</span>
                                         @endif
                                     </td>
                                     <td class="text-end">
