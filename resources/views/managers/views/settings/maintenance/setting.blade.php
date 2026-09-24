@@ -46,11 +46,11 @@
                                 <label class="form-label fw-semibold">Llave secreta</label>
                                 <div class="input-group">
                                     <input type="password" id="maintenance_mode_value" name="maintenance_mode_value" value="" class="form-control" readonly placeholder="•••••••• (guardada — usa 'Revelar' para verla)">
-                                    <button type="button" id="btnToggleSecret" class="btn btn-outline-secondary">
+                                    <button type="button" id="btnToggleSecret" class="btn btn-secondary">
                                         <i id="eyeIconSecret" class="fas fa-eye"></i>
                                     </button>
-                                    <button type="button" id="btnCopySecret" class="btn btn-outline-secondary">
-                                        Copiar
+                                    <button type="button" id="btnCopySecret" class="btn btn-outline-secondary" title="Copiar llave" aria-label="Copiar llave">
+                                        {!! \App\Html\IconHelper::render('copy') !!}
                                     </button>
                                 </div>
                                 <small class="text-muted d-block mt-1">Se agrega al final de la URL del sitio para acceder mientras está en mantenimiento.</small>

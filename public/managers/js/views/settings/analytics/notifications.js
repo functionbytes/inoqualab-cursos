@@ -1,42 +1,29 @@
 $(document).ready(function () {
     var page = $('#analyticsNotificationsPage');
 
-    // Añadir fila — quita + de la última fila actual, agrega nueva fila con +
+    function toggleEmpty($container) {
+        $container.siblings('.repeater-empty').toggleClass('d-none', $container.children().length > 0);
+    }
+
+    // Botón + de cada sección: agrega una fila vacía a su lista
     $(document).on('click', '.add-email', function () {
-        var $container = $(this).closest('.emails-container');
-        var name = $container.data('name');
+        var $container = $($(this).attr('data-target'));
+        var $row = $($('#emailRowTemplate').html().trim());
 
-        $(this).remove();
-
-        var $row = $('<div class="mb-2 email-row"><div class="input-group">' +
-            '<input type="email" class="form-control" name="' + name + '" placeholder="correo@ejemplo.com">' +
-            '<button type="button" class="btn btn-info remove-email"><i class="fas fa-times"></i></button>' +
-            '<button type="button" class="btn btn-outline-secondary add-email"><i class="fas fa-plus"></i></button>' +
-            '</div></div>');
+        $row.find('input').attr('name', $container.attr('data-name'));
         $container.append($row);
-        $row.find('input').focus();
+        toggleEmpty($container);
+        $row.find('input').trigger('focus');
     });
 
-    // Eliminar fila — limpia si es la última, sino elimina y asegura + en la nueva última
+    // Papelera: quita la fila (una lista vacía se guarda como "sin destinatarios")
     $(document).on('click', '.remove-email', function () {
         var $container = $(this).closest('.emails-container');
-        var $rows = $container.find('.email-row');
-
-        if ($rows.length > 1) {
-            var $row = $(this).closest('.email-row');
-            var wasLast = $row.is(':last-child');
-            $row.remove();
-            if (wasLast) {
-                $container.find('.email-row:last .input-group').append(
-                    '<button type="button" class="btn btn-outline-secondary add-email"><i class="fas fa-plus"></i></button>'
-                );
-            }
-        } else {
-            $container.find('.email-row input').val('');
-        }
+        $(this).closest('.email-row').remove();
+        toggleEmpty($container);
     });
 
-    var flashSuccess = page.data('flash-success');
+    var flashSuccess = page.attr('data-flash-success');
     if (flashSuccess) {
         toastr.success(flashSuccess);
     }
