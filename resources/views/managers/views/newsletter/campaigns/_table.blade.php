@@ -44,7 +44,7 @@
                     </div>
                     @if(($stats['sending'] ?? 0) > 0)
                     <div class="col-6 col-md">
-                        <div class="card bg-warning-subtle h-100">
+                        <div class="card bg-light-secondary h-100">
                             <div class="card-body">
                                 <h6 class="card-title mb-2">Enviando</h6>
                                 <h4 class="mb-1 fw-bold">{{ number_format($stats['sending']) }}</h4>
@@ -161,9 +161,7 @@
                                                 <span class="badge bg-secondary-subtle text-secondary">Borrador</span>
                                                 @break
                                             @case('sending')
-                                                <span class="badge bg-warning-subtle text-warning">
-                                                    <i class="fas fa-circle-notch fa-spin me-1"></i>Enviando
-                                                </span>
+                                                <span class="badge bg-secondary-subtle text-secondary">Enviando</span>
                                                 @break
                                             @case('sent')
                                                 <span class="badge bg-success-subtle text-success">Enviada</span>
@@ -184,11 +182,11 @@
                                                 $sendingTotal = max($campaign->recipients_count, 1);
                                                 $sendingPercent = (int) round(($campaign->sent_count / $sendingTotal) * 100);
                                             @endphp
-                                            <span class="text-warning fw-medium">{{ number_format($campaign->sent_count) }}</span>
+                                            <span class="text-secondary fw-medium">{{ number_format($campaign->sent_count) }}</span>
                                             <span class="text-muted"> de {{ number_format($campaign->recipients_count) }}</span>
                                             <div class="progress campaigns-progress-bar" role="progressbar"
                                                  aria-valuenow="{{ $sendingPercent }}" aria-valuemin="0" aria-valuemax="100">
-                                                <div class="progress-bar bg-warning" style="width: {{ $sendingPercent }}%"></div>
+                                                <div class="progress-bar bg-secondary" style="width: {{ $sendingPercent }}%"></div>
                                             </div>
                                         @else
                                             <span class="text-muted">—</span>
@@ -208,7 +206,7 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary" type="button"
+                                            <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
                                                 data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-vertical"></i>
                                             </button>

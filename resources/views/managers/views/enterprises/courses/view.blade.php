@@ -3,6 +3,16 @@
 @section('title', $course->title . ' — ' . $enterprise->title)
 
 @section('page_header')
+    @php ob_start(); @endphp
+    <a href="{{ route('manager.enterprises.courses.insert', [$enterprise->slack, $course->slack]) }}"
+       class="btn btn-outline-secondary btn-icon" title="Ingresar usuario" aria-label="Ingresar usuario">
+        <i class="fas fa-download"></i>
+    </a>
+    <a href="{{ route('manager.enterprises.courses.reasign', [$enterprise->slack, $course->slack]) }}"
+       class="btn btn-outline-secondary btn-icon" title="Reasignar" aria-label="Reasignar">
+        <i class="fas fa-exchange-alt"></i>
+    </a>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => $course->title,
         'breadcrumbs' => [
@@ -10,6 +20,7 @@
             ['label' => $enterprise->title, 'url' => route('manager.enterprises.courses', $enterprise->slack)],
             ['label' => $course->title],
         ],
+        'actions' => $headerActions,
     ])
 @endsection
 
@@ -32,4 +43,4 @@
 <script src="{{ asset('managers/js/views/enterprises/courses/view.js') }}"></script>
 @endpush
 
-@endsection§§   §1§1    Q   1
+@endsection

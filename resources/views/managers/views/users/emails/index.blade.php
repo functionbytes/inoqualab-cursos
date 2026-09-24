@@ -2,9 +2,15 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-    <a href="{{ route('manager.users.edit', $user->slack) }}" class="btn btn-secondary btn-sm">
-        Volver al usuario
-    </a>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <a href="{{ route('manager.users.edit', $user->slack) }}" class="dropdown-item">Volver al usuario</a>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Historial de correos',

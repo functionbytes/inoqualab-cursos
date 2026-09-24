@@ -4,10 +4,21 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<a href="{{ route('manager.enterprises.users.reports', $enterprise->slack) }}" class="btn btn-outline-secondary">
-                            Reporte
-                        </a>
-                        <a href="{{ route('manager.enterprises.users.create', $enterprise->slack) }}" class="btn btn-primary btn-icon" title="Nuevo usuario" aria-label="Nuevo usuario">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <a class="dropdown-item" href="{{ route('manager.enterprises.users.reports', $enterprise->slack) }}">
+                Reporte
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{{ route('manager.enterprises.users.create', $enterprise->slack) }}">
+                Nuevo usuario
+            </a>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Usuarios de la empresa',
