@@ -105,7 +105,8 @@ class InvoicesControllerTest extends TestCase
             ->get(route('distributor.invoices.detail', $invoice->slack));
 
         $response->assertOk()
-            ->assertSee('33,000')
-            ->assertDontSee('99,000');
+            // Formato COP del diseño de documentos ($ 33.000, no 33,000).
+            ->assertSee('$ 33.000', false)
+            ->assertDontSee('$ 99.000', false);
     }
 }

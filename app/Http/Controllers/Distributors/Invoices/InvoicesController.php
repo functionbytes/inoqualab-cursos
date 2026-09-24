@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Distributors\Invoices;
 
 use App\Exports\Distributors\Invoices\InvoicesExport;
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice\InvoiceCondition;
 use App\Models\Invoice\InvoiceMethod;
@@ -97,6 +98,23 @@ class InvoicesController extends Controller
 
         }
 
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'details',
+                'design' => $design,
+                'invoice' => $invoice,
+                'details' => $details,
+                'title' => 'Reparto de la factura '.$invoice->reference,
+                'breadcrumbs' => [
+                    ['label' => 'Facturas', 'url' => route('distributor.invoices')],
+                    ['label' => $invoice->reference, 'url' => DocumentFormat::link(route('distributor.invoices.view', $invoice->slack))],
+                    ['label' => 'Reparto por empresa'],
+                ],
+                'actions' => [],
+                'links' => ['view' => DocumentFormat::link(route('distributor.invoices.view', $invoice->slack))],
+            ]);
+        }
+
         return view('distributors.views.invoices.invoices.details')->with([
             'invoice' => $invoice,
             'details' => $details,
@@ -108,6 +126,18 @@ class InvoicesController extends Controller
 
         $invoice = app('distributor')->invoices()->where('slack', $slack)->firstOrFail();
         $orders = $invoice->orders;
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'invoice',
+                'design' => $design,
+                'invoice' => $invoice,
+                'title' => 'Factura '.$invoice->reference,
+                'breadcrumbs' => [['label' => 'Facturas', 'url' => route('distributor.invoices')], ['label' => $invoice->reference]],
+                'actions' => [],
+                'links' => ['details' => DocumentFormat::link(route('distributor.invoices.detail', $invoice->slack))],
+            ]);
+        }
 
         return view('distributors.views.invoices.invoices.view')->with([
             'invoice' => $invoice,

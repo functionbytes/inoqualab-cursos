@@ -1,0 +1,43 @@
+/* Selector de diseño de órdenes y facturas */
+.doc-design-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    height: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1px solid #e3e7ea;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.doc-design-option:hover {
+    border-color: #bfe0f2;
+}
+
+.doc-design-option:has(input:checked) {
+    border-color: #008bce;
+    background-color: #f3f9fd;
+}
+
+.doc-design-option .form-check-input {
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.doc-design-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.doc-design-name {
+    font-weight: 600;
+    color: #0d1b2a;
+}
+
+.doc-design-desc {
+    font-size: 13px;
+    color: #6c757d;
+}

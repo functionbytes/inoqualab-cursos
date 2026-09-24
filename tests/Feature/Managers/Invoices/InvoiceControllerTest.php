@@ -297,8 +297,10 @@ class InvoiceControllerTest extends TestCase
         $invoice->to_at = '2025-06-01';
         $invoice->save();
 
+        // La vista original (el bug estaba ahí); el diseño por defecto actual
+        // formatea las fechas distinto, ver DocumentDesignTest.
         $response = $this->actingAs($this->manager)
-            ->get(route('manager.invoices.view', $invoice->slack));
+            ->get(route('manager.invoices.view', [$invoice->slack, 'diseno' => 'original']));
 
         $response->assertOk()
             ->assertSee($invoice->created_at->format('Y-m-d'))

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accountings\Invoices;
 
 use App\Events\Invoices\InvoiceCreated;
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Accountings\StoreInvoiceRequest;
 use App\Http\Requests\Accountings\UpdateInvoiceRequest;
@@ -59,6 +60,21 @@ class InvoicesController extends Controller
     {
         $invoice = Invoice::slack($slack);
 
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'invoice',
+                'design' => $design,
+                'invoice' => $invoice,
+                'title' => 'Factura '.$invoice->reference,
+                'breadcrumbs' => [['label' => 'Facturas', 'url' => route('accounting.invoices')], ['label' => $invoice->reference]],
+                'actions' => [
+                    ['label' => 'Descargar PDF', 'url' => route('accounting.invoices.pdf', $invoice->slack), 'newTab' => true],
+                    ['label' => 'Editar factura', 'url' => route('accounting.invoices.edit', $invoice->slack), 'primary' => true],
+                ],
+                'links' => ['details' => DocumentFormat::link(route('accounting.invoices.details', $invoice->slack))],
+            ]);
+        }
+
         return view('accountings.views.invoices.invoices.view')->with([
             'invoice' => $invoice,
         ]);
@@ -102,6 +118,23 @@ class InvoicesController extends Controller
             }
 
             $details[$enterprise]['totalEnterprise'] = $totalEnterprise;
+        }
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'details',
+                'design' => $design,
+                'invoice' => $invoice,
+                'details' => $details,
+                'title' => 'Reparto de la factura '.$invoice->reference,
+                'breadcrumbs' => [
+                    ['label' => 'Facturas', 'url' => route('accounting.invoices')],
+                    ['label' => $invoice->reference, 'url' => DocumentFormat::link(route('accounting.invoices.view', $invoice->slack))],
+                    ['label' => 'Reparto por empresa'],
+                ],
+                'actions' => [['label' => 'Editar factura', 'url' => route('accounting.invoices.edit', $invoice->slack), 'primary' => true]],
+                'links' => ['view' => DocumentFormat::link(route('accounting.invoices.view', $invoice->slack))],
+            ]);
         }
 
         return view('accountings.views.invoices.invoices.details')->with([

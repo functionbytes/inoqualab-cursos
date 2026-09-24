@@ -21,6 +21,10 @@ class InvoicesSettingsController extends Controller
         $data['invoice_default'] = $request->invoice_default;
         $data['invoice_days'] = $request->invoice_days;
 
+        if ($request->filled('panel_documents_design')) {
+            $data['panel_documents_design'] = $request->validated('panel_documents_design');
+        }
+
         updateSettings($data);
 
         return response()->json([

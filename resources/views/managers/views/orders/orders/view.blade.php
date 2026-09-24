@@ -9,6 +9,7 @@
             ['label' => 'Órdenes', 'url' => route('manager.orders')],
             ['label' => $order->slack],
         ],
+        'actions' => view('managers.includes.design-switcher', ['design' => null])->render(),
     ])
 @endsection
 
@@ -158,3 +159,5 @@
 @push('css')
 <link rel="stylesheet" href="{{ asset('managers/css/views/orders/orders/view.css') }}">
 @endpush
+
+@include('managers.views.documents._assets')

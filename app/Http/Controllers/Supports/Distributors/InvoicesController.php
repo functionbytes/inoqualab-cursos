@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Distributors;
 
 use App\Exports\Distributors\Invoices\InvoicesExport;
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
 use App\Models\Invoice\Invoice;
@@ -152,6 +153,23 @@ class InvoicesController extends Controller
 
         }
 
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'details',
+                'design' => $design,
+                'invoice' => $invoice,
+                'details' => $details,
+                'title' => 'Reparto de la factura '.$invoice->reference,
+                'breadcrumbs' => [
+                    ['label' => 'Facturas', 'url' => route('support.distributors.invoices', $invoice->distributor->slack)],
+                    ['label' => $invoice->reference, 'url' => DocumentFormat::link(route('support.distributors.invoices.view', $invoice->slack))],
+                    ['label' => 'Reparto por empresa'],
+                ],
+                'actions' => [],
+                'links' => ['view' => DocumentFormat::link(route('support.distributors.invoices.view', $invoice->slack))],
+            ]);
+        }
+
         return view('supports.views.distributors.invoices.invoices.details')->with([
             'invoice' => $invoice,
             'details' => $details,
@@ -168,6 +186,18 @@ class InvoicesController extends Controller
         abort_unless($invoice->distributor instanceof Distributor, 404, 'El distribuidor de esta factura ya no existe.');
 
         $orders = $invoice->orders;
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'invoice',
+                'design' => $design,
+                'invoice' => $invoice,
+                'title' => 'Factura '.$invoice->reference,
+                'breadcrumbs' => [['label' => 'Facturas', 'url' => route('support.distributors.invoices', $invoice->distributor->slack)], ['label' => $invoice->reference]],
+                'actions' => [],
+                'links' => ['details' => DocumentFormat::link(route('support.distributors.invoices.detail', $invoice->slack))],
+            ]);
+        }
 
         return view('supports.views.distributors.invoices.invoices.view')->with([
             'invoice' => $invoice,

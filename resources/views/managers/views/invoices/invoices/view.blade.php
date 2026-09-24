@@ -1,6 +1,9 @@
 @extends('layouts.managers')
 @section('page_header')
-    @include('managers.includes.card', ['title' => 'Detalle Factura '. $invoice->slack])
+    @include('managers.includes.card', [
+        'title' => 'Detalle Factura '. $invoice->slack,
+        'actions' => view('managers.includes.design-switcher', ['design' => null])->render(),
+    ])
 @endsection
 @section('content')
 
@@ -138,3 +141,5 @@
         </div>
     </div>
 @endsection
+
+@include('managers.views.documents._assets')

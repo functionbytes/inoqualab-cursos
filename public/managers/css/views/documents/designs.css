@@ -1,0 +1,875 @@
+/* Propuestas A/B/C para orden, factura y detalle de factura (?diseno=a|b|c).
+   A · Comprobante con sello   B · Mesa de trabajo   C · Ficha técnica
+   Vistas: resources/views/managers/views/{orders/orders,invoices/invoices}/{view,details}-{a,b,c}.blade.php */
+
+:root {
+    --doc-ink: #0d1b2a;
+    --doc-brand: #008bce;
+    --doc-brand-tint: #e6f3fa;
+    --doc-mist: #f5f6f8;
+    --doc-rule: #e3e7ea;
+    --doc-hair: #eef0f2;
+    --doc-muted: #5f7182;
+    --doc-danger: #a8402f;
+    --doc-danger-tint: #f7e2df;
+}
+
+.doc-num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ── Selector de propuestas (cabecera) ──────────────────────────────── */
+.design-switcher {
+    display: inline-flex;
+    flex-wrap: wrap;
+    padding: 3px;
+    border: 1px solid var(--doc-rule);
+    border-radius: 10px;
+    background-color: var(--doc-mist);
+}
+
+.design-switcher-item {
+    padding: 6px 12px;
+    border-radius: 7px;
+    color: var(--doc-muted);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.design-switcher-item:hover {
+    color: var(--doc-ink);
+}
+
+.design-switcher-item.is-active {
+    background-color: #fff;
+    color: var(--doc-ink);
+    box-shadow: 0 1px 2px rgba(13, 27, 42, .08);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   A · Comprobante con sello — una hoja centrada; el sello es lo memorable
+   ════════════════════════════════════════════════════════════════════ */
+.doc-a-sheet {
+    position: relative;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 60px 44px;
+    border: 1px solid var(--doc-hair);
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(13, 27, 42, .04);
+    color: var(--doc-ink);
+}
+
+.doc-a-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--doc-rule);
+}
+
+.doc-a-brand {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .02em;
+}
+
+.doc-a-kind {
+    margin-top: 2px;
+    color: var(--doc-muted);
+    font-size: 13px;
+}
+
+.doc-a-number {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -.02em;
+}
+
+.doc-a-number small {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--doc-muted);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-align: right;
+}
+
+/* Sello entintado: doble borde, leve giro, textura por opacidad */
+.doc-a-stamp {
+    position: absolute;
+    top: 36px;
+    right: 50%;
+    transform: translateX(50%) rotate(-7deg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 20px 7px;
+    border: 1.5px solid currentColor;
+    border-radius: 6px;
+    color: var(--doc-brand);
+    opacity: .85;
+    text-align: center;
+    pointer-events: none;
+}
+
+.doc-a-stamp strong {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    line-height: 1.1;
+}
+
+.doc-a-stamp span {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.doc-a-stamp.is-open {
+    color: #7b8a97;
+}
+
+.doc-a-stamp.is-rejected {
+    color: var(--doc-danger);
+}
+
+.doc-a-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin: 24px 0 0;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--doc-hair);
+}
+
+.doc-a-facts dt,
+.doc-a-party-label {
+    margin-bottom: 4px;
+    color: var(--doc-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.doc-a-facts dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.doc-a-parties {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px;
+    padding: 24px 0 28px;
+}
+
+.doc-a-party-name {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.doc-a-party-line {
+    color: var(--doc-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.doc-a-items {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.doc-a-items th {
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--doc-rule);
+    color: var(--doc-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.doc-a-items td {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--doc-hair);
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.doc-a-items .doc-a-line {
+    width: 36px;
+    color: var(--doc-muted);
+}
+
+.doc-a-items .doc-a-qty {
+    width: 70px;
+    text-align: center;
+}
+
+.doc-a-items .doc-a-amount {
+    width: 140px;
+    text-align: right;
+}
+
+.doc-a-item-title {
+    font-weight: 600;
+}
+
+.doc-a-item-note {
+    margin-top: 2px;
+    color: var(--doc-muted);
+    font-size: 12px;
+}
+
+.doc-a-group {
+    margin-top: 28px;
+}
+
+.doc-a-group-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.doc-a-group-head h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.doc-a-group-head span {
+    color: var(--doc-muted);
+    font-size: 13px;
+}
+
+.doc-a-totals {
+    width: 320px;
+    max-width: 100%;
+    margin: 20px 0 0 auto;
+    font-size: 14px;
+}
+
+.doc-a-totals-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+    color: var(--doc-muted);
+}
+
+.doc-a-totals-row.is-grand {
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--doc-rule);
+    color: var(--doc-ink);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.doc-a-foot {
+    margin-top: 48px;
+    color: var(--doc-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   B · Mesa de trabajo — contenido a la izquierda, resumen fijo + línea de vida
+   ════════════════════════════════════════════════════════════════════ */
+.doc-b-aside {
+    position: sticky;
+    top: 96px;
+}
+
+.doc-b-total-label {
+    color: var(--doc-muted);
+    font-size: 13px;
+}
+
+.doc-b-total {
+    margin: 2px 0 14px;
+    color: var(--doc-ink);
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    line-height: 1.1;
+}
+
+.doc-b-lines {
+    margin: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--doc-hair);
+    list-style: none;
+    font-size: 13px;
+}
+
+.doc-b-lines li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 4px 0;
+    color: var(--doc-muted);
+}
+
+.doc-b-lines li strong {
+    color: var(--doc-ink);
+    font-weight: 600;
+}
+
+/* Línea de vida: fechas reales del documento */
+.doc-b-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.doc-b-event {
+    position: relative;
+    padding: 0 0 18px 26px;
+}
+
+.doc-b-event:last-child {
+    padding-bottom: 0;
+}
+
+.doc-b-event::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--doc-brand);
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.doc-b-event:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 18px;
+    bottom: 2px;
+    left: 5px;
+    width: 2px;
+    background-color: var(--doc-brand-tint);
+}
+
+.doc-b-event.is-done::before {
+    background-color: var(--doc-brand);
+}
+
+.doc-b-event.is-waiting::before {
+    border-color: #b8c2cb;
+    border-style: dashed;
+}
+
+.doc-b-event.is-rejected::before {
+    border-color: var(--doc-danger);
+    background-color: var(--doc-danger);
+}
+
+.doc-b-event-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--doc-ink);
+}
+
+.doc-b-event-date {
+    color: var(--doc-muted);
+    font-size: 12px;
+}
+
+.doc-b-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--doc-hair);
+}
+
+.doc-b-item:first-child {
+    padding-top: 0;
+}
+
+.doc-b-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.doc-b-item-title {
+    font-weight: 600;
+    color: var(--doc-ink);
+}
+
+.doc-b-item-meta {
+    margin-top: 2px;
+    color: var(--doc-muted);
+    font-size: 13px;
+}
+
+.doc-b-item-amount {
+    flex-shrink: 0;
+    font-weight: 700;
+    color: var(--doc-ink);
+    text-align: right;
+}
+
+.doc-b-item-amount small {
+    display: block;
+    color: var(--doc-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.doc-b-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+    margin: 0;
+}
+
+.doc-b-facts dt {
+    color: var(--doc-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.doc-b-facts dd {
+    margin: 2px 0 0;
+    color: var(--doc-ink);
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Detalle por empresa: <details> nativo, sin JS */
+.doc-b-group {
+    border-bottom: 1px solid var(--doc-hair);
+}
+
+.doc-b-group:last-child {
+    border-bottom: 0;
+}
+
+.doc-b-group summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.doc-b-group summary::-webkit-details-marker {
+    display: none;
+}
+
+.doc-b-group summary:hover {
+    background-color: var(--doc-mist);
+}
+
+.doc-b-group summary:focus-visible {
+    outline: 2px solid var(--doc-brand);
+    outline-offset: -2px;
+}
+
+.doc-b-group-name {
+    font-weight: 700;
+    color: var(--doc-ink);
+}
+
+.doc-b-group-meta {
+    color: var(--doc-muted);
+    font-size: 12px;
+}
+
+.doc-b-chevron {
+    flex-shrink: 0;
+    color: var(--doc-muted);
+    transition: transform .15s ease;
+}
+
+.doc-b-group[open] .doc-b-chevron {
+    transform: rotate(90deg);
+}
+
+.doc-b-group-body {
+    padding: 0 20px 14px;
+}
+
+.doc-b-group-body table {
+    width: 100%;
+    font-size: 13px;
+}
+
+.doc-b-group-body td {
+    padding: 6px 0;
+    border-top: 1px solid var(--doc-hair);
+    color: var(--doc-ink);
+}
+
+.doc-b-share {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.doc-b-share li + li {
+    margin-top: 12px;
+}
+
+.doc-b-share-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+.doc-b-share-name {
+    overflow: hidden;
+    color: var(--doc-ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.doc-bar {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background-color: var(--doc-mist);
+}
+
+.doc-bar span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: 3px;
+    background-color: var(--doc-brand);
+    transition: width .5s ease;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   C · Ficha técnica — informe de laboratorio: franja + cuadrícula de celdas
+   ════════════════════════════════════════════════════════════════════ */
+.doc-c {
+    overflow: hidden;
+    border: 1px solid var(--doc-hair);
+    border-radius: 12px;
+    background-color: #fff;
+    color: var(--doc-ink);
+}
+
+.doc-c-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background-color: var(--doc-ink);
+    color: #fff;
+}
+
+.doc-c-band-kind {
+    color: #9fb1c1;
+    font-size: 13px;
+}
+
+.doc-c-band-code {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+}
+
+.doc-c-state {
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.doc-c-state.is-paid {
+    border-color: var(--doc-brand);
+    background-color: var(--doc-brand);
+}
+
+.doc-c-state.is-rejected {
+    border-color: #e3a79d;
+    background-color: var(--doc-danger);
+}
+
+/* Cuadrícula: el gap de 1px sobre fondo gris dibuja los bordes compartidos
+   (funciona igual con celdas anchas, sin depender de :nth-child) */
+.doc-c-grid,
+.doc-c-sum {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background-color: var(--doc-hair);
+}
+
+.doc-c-grid {
+    border-bottom: 1px solid var(--doc-hair);
+}
+
+.doc-c-cell {
+    min-width: 0;
+    padding: 12px 16px;
+    background-color: #fff;
+}
+
+.doc-c-cell.is-wide {
+    grid-column: span 2;
+}
+
+.doc-c-cell-label {
+    color: var(--doc-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.doc-c-cell-value {
+    margin-top: 2px;
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.doc-c-section {
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--doc-hair);
+    background-color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.doc-c-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.doc-c-table th {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--doc-rule);
+    color: var(--doc-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.doc-c-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--doc-hair);
+    vertical-align: top;
+}
+
+.doc-c-table .doc-c-line {
+    width: 48px;
+    color: var(--doc-muted);
+    text-align: center;
+}
+
+.doc-c-table .is-end {
+    text-align: right;
+}
+
+.doc-c-table .is-center {
+    text-align: center;
+}
+
+.doc-c-table tr.is-group td {
+    background-color: var(--doc-mist);
+    font-weight: 700;
+}
+
+.doc-c-table tr.is-sub td:nth-child(2) {
+    padding-left: 32px;
+}
+
+.doc-c-sum .doc-c-cell.is-total {
+    background-color: var(--doc-brand-tint);
+}
+
+.doc-c-sum .doc-c-cell.is-total .doc-c-cell-value {
+    color: var(--doc-ink);
+    font-size: 22px;
+    font-weight: 800;
+}
+
+/* Barra de reparto por empresa (detalle de factura) */
+.doc-c-split {
+    padding: 18px 24px 20px;
+    border-bottom: 1px solid var(--doc-hair);
+}
+
+.doc-c-split-bar {
+    display: flex;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background-color: var(--doc-mist);
+}
+
+.doc-c-split-bar span {
+    width: 0;
+    height: 100%;
+    transition: width .6s ease;
+}
+
+.doc-c-split-bar span + span {
+    border-left: 1px solid #fff;
+}
+
+.doc-c-seg-1 { background-color: #0d1b2a; }
+.doc-c-seg-2 { background-color: #1f4e6e; }
+.doc-c-seg-3 { background-color: #008bce; }
+.doc-c-seg-4 { background-color: #5cb3de; }
+.doc-c-seg-5 { background-color: #a9d6ee; }
+.doc-c-seg-rest { background-color: #cfd6dc; }
+
+.doc-c-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    color: var(--doc-muted);
+}
+
+.doc-c-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.doc-c-legend i {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.doc-c-legend strong {
+    color: var(--doc-ink);
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-bar span,
+    .doc-c-split-bar span,
+    .doc-b-chevron {
+        transition: none;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .doc-b-aside {
+        position: static;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .doc-a-sheet {
+        padding: 32px 20px 28px;
+    }
+
+    .doc-a-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .doc-a-number {
+        font-size: 30px;
+    }
+
+    .doc-a-number small {
+        text-align: left;
+    }
+
+    .doc-a-stamp {
+        top: 24px;
+        right: 20px;
+        transform: rotate(-7deg);
+    }
+
+    .doc-a-facts,
+    .doc-c-grid,
+    .doc-c-sum {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .doc-a-parties,
+    .doc-b-facts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .doc-c-band {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Contenedor propio en vez de .table-responsive: el tema le da alto mínimo
+   y sombras de scroll que dejaban un hueco antes de los totales. */
+.doc-c-table-wrap {
+    overflow-x: auto;
+}
+
+/* Logo de la marca en cada propuesta */
+.doc-a-logo {
+    display: block;
+    width: auto;
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.doc-b-logo {
+    display: block;
+    width: auto;
+    height: 30px;
+    margin-bottom: 20px;
+}
+
+.doc-c-band-id {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* La franja es oscura: el logo va en blanco */
+.doc-c-logo {
+    width: auto;
+    height: 34px;
+    filter: brightness(0) invert(1);
+}
+
+.doc-c-band-rule {
+    width: 1px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, .2);
+}
+
+@media (max-width: 767.98px) {
+    .doc-c-band-rule {
+        display: none;
+    }
+
+    .doc-c-band-id {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}

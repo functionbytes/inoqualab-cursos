@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Supports\Distributors\Orders;
 
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Models\Distributor\Distributor;
 use App\Models\Order\Order;
@@ -112,6 +113,18 @@ class OrdersController extends Controller
         // El cliente puede haberse borrado (soft delete) después de la orden;
         // la vista lee $order->user->firstname sin null-check.
         abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'order',
+                'design' => $design,
+                'order' => $order,
+                'title' => 'Orden '.$order->slack,
+                'breadcrumbs' => [['label' => 'Órdenes'], ['label' => $order->slack]],
+                'actions' => [],
+                'links' => [],
+            ]);
+        }
 
         return view('supports.views.distributors.orders.orders.view')->with([
             'order' => $order,

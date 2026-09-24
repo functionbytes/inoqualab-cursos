@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Accountings\Orders;
 
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Accountings\UpdateOrderRequest;
 use App\Models\Order\Order;
@@ -80,6 +81,21 @@ class OrdersController extends Controller
         // El cliente puede haberse borrado (soft delete) después de la orden;
         // la vista lee $order->user->firstname sin null-check.
         abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'order',
+                'design' => $design,
+                'order' => $order,
+                'title' => 'Orden '.$order->slack,
+                'breadcrumbs' => [['label' => 'Órdenes', 'url' => route('accounting.orders')], ['label' => $order->slack]],
+                'actions' => [
+                    ['label' => 'Imprimir', 'url' => route('accounting.orders.print', $order->slack), 'newTab' => true],
+                    ['label' => 'Editar orden', 'url' => route('accounting.orders.edit', $order->slack), 'primary' => true],
+                ],
+                'links' => [],
+            ]);
+        }
 
         return view('accountings.views.orders.orders.view')->with([
             'order' => $order,

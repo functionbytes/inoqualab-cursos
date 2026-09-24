@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Managers\Orders;
 
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\BulkActionOrderRequest;
 use App\Http\Requests\Managers\UpdateOrderRequest;
@@ -79,8 +80,23 @@ class OrdersController extends Controller
 
         $this->authorize('view', $order);
 
-        return view('managers.views.orders.orders.view')->with([
+        // Diseño elegido en Configuración de facturación (?diseno= para previsualizar).
+        $design = DocumentFormat::design();
+
+        $order->loadMissing(['items.itemable', 'user', 'condition', 'type', 'method', 'coupon', 'activity']);
+
+        if (! $design) {
+            return view('managers.views.orders.orders.view', ['order' => $order, 'design' => null]);
+        }
+
+        return view('managers.views.documents.page', [
+            'kind' => 'order',
+            'design' => $design,
             'order' => $order,
+            'title' => 'Orden '.$order->slack,
+            'breadcrumbs' => [['label' => 'Órdenes', 'url' => route('manager.orders')], ['label' => $order->slack]],
+            'actions' => [['label' => 'Editar orden', 'url' => route('manager.orders.edit', $order->slack), 'primary' => true]],
+            'links' => [],
         ]);
     }
 

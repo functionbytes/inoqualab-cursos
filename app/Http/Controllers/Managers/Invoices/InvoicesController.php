@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Invoices;
 
 use App\Events\Invoices\InvoiceCreated;
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Managers\BulkActionInvoiceRequest;
 use App\Http\Requests\Managers\StoreInvoiceRequest;
@@ -79,8 +80,23 @@ class InvoicesController extends Controller
 
         $this->authorize('view', $invoice);
 
-        return view('managers.views.invoices.invoices.view')->with([
+        // Diseño elegido en Configuración de facturación (?diseno= para previsualizar).
+        $design = DocumentFormat::design();
+
+        $invoice->loadMissing(['items.course', 'distributor', 'condition', 'method']);
+
+        if (! $design) {
+            return view('managers.views.invoices.invoices.view', ['invoice' => $invoice, 'design' => null]);
+        }
+
+        return view('managers.views.documents.page', [
+            'kind' => 'invoice',
+            'design' => $design,
             'invoice' => $invoice,
+            'title' => 'Factura '.$invoice->reference,
+            'breadcrumbs' => [['label' => 'Facturas', 'url' => route('manager.invoices')], ['label' => $invoice->reference]],
+            'actions' => [['label' => 'Editar factura', 'url' => route('manager.invoices.edit', $invoice->slack), 'primary' => true]],
+            'links' => ['details' => DocumentFormat::link(route('manager.invoices.details', $invoice->slack))],
         ]);
 
     }
@@ -125,9 +141,27 @@ class InvoicesController extends Controller
             $details[$enterprise]['totalEnterprise'] = $totalEnterprise;
         }
 
-        return view('managers.views.invoices.invoices.details')->with([
+        $design = DocumentFormat::design();
+
+        $invoice->loadMissing(['distributor', 'condition', 'method']);
+
+        if (! $design) {
+            return view('managers.views.invoices.invoices.details', ['invoice' => $invoice, 'details' => $details, 'design' => null]);
+        }
+
+        return view('managers.views.documents.page', [
+            'kind' => 'details',
+            'design' => $design,
             'invoice' => $invoice,
             'details' => $details,
+            'title' => 'Reparto de la factura '.$invoice->reference,
+            'breadcrumbs' => [
+                ['label' => 'Facturas', 'url' => route('manager.invoices')],
+                ['label' => $invoice->reference, 'url' => DocumentFormat::link(route('manager.invoices.view', $invoice->slack))],
+                ['label' => 'Reparto por empresa'],
+            ],
+            'actions' => [['label' => 'Editar factura', 'url' => route('manager.invoices.edit', $invoice->slack), 'primary' => true]],
+            'links' => ['view' => DocumentFormat::link(route('manager.invoices.view', $invoice->slack))],
         ]);
 
     }

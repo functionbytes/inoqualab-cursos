@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Distributors\Orders;
 
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Controller;
 use App\Models\Order\OrderCondition;
 use App\Models\Order\OrderMethod;
@@ -74,6 +75,18 @@ class OrdersController extends Controller
         $order = app('distributor')->ordersActititys()
             ->where('orders.slack', $slack)
             ->firstOrFail();
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'order',
+                'design' => $design,
+                'order' => $order,
+                'title' => 'Orden '.$order->slack,
+                'breadcrumbs' => [['label' => 'Órdenes', 'url' => route('distributor.orders')], ['label' => $order->slack]],
+                'actions' => [['label' => 'Imprimir', 'url' => route('distributor.orders.print', $order->slack), 'newTab' => true]],
+                'links' => [],
+            ]);
+        }
 
         return view('distributors.views.orders.orders.view')->with([
             'order' => $order,

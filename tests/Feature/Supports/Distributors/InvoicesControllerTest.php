@@ -94,8 +94,10 @@ class InvoicesControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->support)
-            ->get(route('support.distributors.invoices.view', $invoice->slack));
+            ->get(route('support.distributors.invoices.view', [$invoice->slack, 'diseno' => 'original']));
 
+        // Vista original: el bug del epoch estaba ahí. El diseño por defecto
+        // muestra las fechas en español (ver DocumentDesignTest).
         $response->assertOk()
             ->assertSee($invoice->created_at->format('Y-m-d'))
             ->assertSee('2025-05-01')
@@ -138,7 +140,8 @@ class InvoicesControllerTest extends TestCase
             ->get(route('support.distributors.invoices.detail', $invoice->slack));
 
         $response->assertOk()
-            ->assertSee('33,000')
-            ->assertDontSee('99,000');
+            // Formato COP del diseño de documentos ($ 33.000, no 33,000).
+            ->assertSee('$ 33.000', false)
+            ->assertDontSee('$ 99.000', false);
     }
 }
