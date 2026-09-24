@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Supports\Users;
 
 use App\Enums\OrderCondition as Condition;
+use App\Html\DocumentFormat;
 use App\Http\Controllers\Concerns\RestrictsManageableUsers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Supports\Users\BulkActionUserOrderRequest;
@@ -24,19 +25,45 @@ class OrdersController extends Controller
 
         $user = $this->guardManageableUser(User::slack($slack));
         $searchKey = $request->search;
+        $condition = $request->condition ?: null;
 
         $orders = $user->orders()
+            ->with('condition')
             ->when($searchKey, fn ($q) => $q->where(fn ($q) => $q
                 ->where('slack', 'like', '%'.$searchKey.'%')
                 ->orWhere('reference', 'like', '%'.$searchKey.'%')))
+            ->when($condition, fn ($q) => $q->where('condition_id', $condition))
             ->latest()
             ->paginate(paginationNumber());
+
+        // Stats con una sola query de agregación (mismos 4 estados que
+        // distributors/orders/orders/_table.blade.php, para el mismo diseño
+        // de tarjetas de resumen).
+        $agg = $user->orders()->selectRaw(
+            'COUNT(*) total,
+             SUM(condition_id = ?) paid,
+             SUM(condition_id IN (?, ?)) pending,
+             SUM(condition_id = ?) rejected',
+            [Condition::Pagada->value, Condition::Generada->value, Condition::Pendiente->value, Condition::Rechazada->value]
+        )->first();
+
+        $stats = [
+            'total' => (int) $agg->total,
+            'paid' => (int) $agg->paid,
+            'pending' => (int) $agg->pending,
+            'rejected' => (int) $agg->rejected,
+        ];
+
+        $conditions = OrderCondition::latest()->get();
 
         $view = $request->ajax() ? 'supports.views.users.users._orders_table' : 'supports.views.users.users.orders';
 
         return view($view)->with([
             'user' => $user,
             'orders' => $orders,
+            'stats' => $stats,
+            'conditions' => $conditions,
+            'condition' => $condition,
             'searchKey' => $searchKey,
         ]);
 
@@ -112,6 +139,21 @@ class OrdersController extends Controller
         abort_unless($order->user instanceof User, 404, 'El cliente de esta orden ya no existe.');
 
         $this->guardManageableOrderOwner($order);
+
+        if ($design = DocumentFormat::design()) {
+            return view('managers.views.documents.page', [
+                'kind' => 'order',
+                'design' => $design,
+                'order' => $order,
+                'title' => 'Orden '.$order->slack,
+                'breadcrumbs' => [['label' => 'Órdenes del usuario', 'url' => route('support.users.orders.index', $order->user->slack)], ['label' => $order->slack]],
+                'actions' => [
+                    ['label' => 'Imprimir', 'url' => route('support.users.orders.print', $order->slack), 'newTab' => true],
+                    ['label' => 'Editar orden', 'url' => route('support.users.orders.edit', $order->slack), 'primary' => true],
+                ],
+                'links' => [],
+            ]);
+        }
 
         return view('supports.views.distributors.orders.orders.view')->with([
             'order' => $order,

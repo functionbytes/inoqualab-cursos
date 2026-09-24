@@ -6,6 +6,10 @@ $(function () {
             url: $container.data('bulkUrl'),
             entityLabel: $container.data('bulkEntityLabel'),
         });
+
+        FilterToolbar.init({
+            fields: { filterCondition: 'popover_Condition' },
+        });
     }
 
     initUserOrdersTable();

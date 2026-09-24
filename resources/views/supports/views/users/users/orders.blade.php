@@ -28,9 +28,9 @@
 @endsection
 
 @push('css')
-    <link rel="stylesheet" href="{{ asset('supports/css/views/users/users/orders.css') }}">
+    <link rel="stylesheet" href="{{ asset('supports/css/views/users/users/orders.css') }}?v={{ @filemtime(public_path('supports/css/views/users/users/orders.css')) ?: 1 }}">
 @endpush
 
 @push('scripts')
-    <script src="{{ asset('supports/js/views/users/users/orders.js') }}"></script>
+    <script src="{{ asset('supports/js/views/users/users/orders.js') }}?v={{ @filemtime(public_path('supports/js/views/users/users/orders.js')) ?: 1 }}"></script>
 @endpush

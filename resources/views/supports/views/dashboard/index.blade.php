@@ -16,12 +16,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-book"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Cursos</div>
-                            <div class="fs-4 fw-bold">{{ number_format($courses) }}</div>
+                            <div class="text-muted dashboard-metric-label">Cursos</div>
+                            <div class="dashboard-metric-value">{{ number_format($courses) }}</div>
                         </div>
                     </div>
                 </div>
@@ -29,12 +29,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-building"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Empresas</div>
-                            <div class="fs-4 fw-bold">{{ number_format($enterprises) }}</div>
+                            <div class="text-muted dashboard-metric-label">Empresas</div>
+                            <div class="dashboard-metric-value">{{ number_format($enterprises) }}</div>
                         </div>
                     </div>
                 </div>
@@ -42,12 +42,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-file-lines"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Blogs</div>
-                            <div class="fs-4 fw-bold">{{ number_format($blogs) }}</div>
+                            <div class="text-muted dashboard-metric-label">Blogs</div>
+                            <div class="dashboard-metric-value">{{ number_format($blogs) }}</div>
                         </div>
                     </div>
                 </div>
@@ -55,12 +55,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-users"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Clientes</div>
-                            <div class="fs-4 fw-bold">{{ number_format($usercustomers) }}</div>
+                            <div class="text-muted dashboard-metric-label">Clientes</div>
+                            <div class="dashboard-metric-value">{{ number_format($usercustomers) }}</div>
                         </div>
                     </div>
                 </div>
@@ -68,12 +68,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-key"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Administradores</div>
-                            <div class="fs-4 fw-bold">{{ number_format($useradmins) }}</div>
+                            <div class="text-muted dashboard-metric-label">Administradores</div>
+                            <div class="dashboard-metric-value">{{ number_format($useradmins) }}</div>
                         </div>
                     </div>
                 </div>
@@ -81,12 +81,12 @@
             <div class="col-md-4">
                 <div class="card h-100">
                     <div class="card-body d-flex align-items-center gap-3">
-                        <div class="dashboard-metric-icon rounded-3 d-flex align-items-center justify-content-center">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
                             <i class="fas fa-bag-shopping"></i>
                         </div>
                         <div>
-                            <div class="text-muted small">Pedidos</div>
-                            <div class="fs-4 fw-bold">{{ number_format($orders) }}</div>
+                            <div class="text-muted dashboard-metric-label">Pedidos</div>
+                            <div class="dashboard-metric-value">{{ number_format($orders) }}</div>
                         </div>
                     </div>
                 </div>

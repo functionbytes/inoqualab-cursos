@@ -1,8 +1,21 @@
 .dashboard-metric-icon {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
-    font-size: 22px;
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    font-size: 32px;
     background: #eaf3fb;
     color: #008bce;
+}
+
+/* Tamaños propios en vez de las utilidades .fs-* de Bootstrap: theme.css
+   redefine .fs-1..fs-11 con !important en una escala INVERTIDA (fs-1 es la
+   más chica, 0.625rem; fs-8+ la más grande) -- lo opuesto a Bootstrap
+   estándar. Usar .fs-1 pensando que sería grande rindió texto de 10px. */
+.dashboard-metric-label {
+    font-size: 16px;
+}
+.dashboard-metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.2;
 }

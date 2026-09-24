@@ -2,11 +2,21 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<a href="{{ route('support.distributors.staffs.reports', $distributor->slack) }}"
-                           class="btn btn-outline-secondary" title="Reporte">
-                            <i class="fa-duotone fa-file-chart-column"></i>
-                        </a>
-                        <a href="{{ route('support.distributors.staffs.create', $distributor->slack) }}" class="btn btn-primary btn-icon" title="Nuevo empleado" aria-label="Nuevo empleado">{!! \App\Html\IconHelper::render('plus') !!}</a>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <a class="dropdown-item" href="{{ route('support.distributors.staffs.reports', $distributor->slack) }}">
+                Reporte
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="{{ route('support.distributors.staffs.create', $distributor->slack) }}">
+                Nuevo empleado
+            </a>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('supports.includes.card', [
         'title' => 'Empleados de ' . $distributor->title,

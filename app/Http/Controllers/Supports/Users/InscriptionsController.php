@@ -18,11 +18,13 @@ class InscriptionsController extends Controller
 
         $user = $this->guardManageableUser(User::slack($slack));
         $searchKey = $request->search;
+        $culminated = $request->culminated ?: null;
 
         $inscriptions = Inscription::query()
             ->with('course')
             ->where('user_id', $user->id)
             ->when($searchKey, fn ($q) => $q->whereHas('course', fn ($q) => $q->where('title', 'like', '%'.$searchKey.'%')))
+            ->when($culminated !== null, fn ($q) => $q->where('culminated', $culminated))
             ->orderByDesc('created_at')
             ->paginate(paginationNumber());
 
@@ -44,6 +46,7 @@ class InscriptionsController extends Controller
             'inscriptions' => $inscriptions,
             'stats' => $stats,
             'searchKey' => $searchKey,
+            'culminated' => $culminated,
         ]);
 
     }

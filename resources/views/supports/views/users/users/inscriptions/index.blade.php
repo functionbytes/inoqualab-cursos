@@ -49,24 +49,51 @@
                 </div>
             </div>
 
-            {{-- Search --}}
+            {{-- Search + Filtros --}}
             <div class="card-body border-bottom">
+                @php
+                    $filterChips = [];
+                    if (($culminated ?? null) !== null) {
+                        $filterChips[] = [
+                            'label' => 'Estado: ' . ((string) $culminated === '1' ? 'Culminado' : 'Pendiente'),
+                            'clear_url' => url()->current() . '?' . http_build_query(request()->except('culminated')),
+                        ];
+                    }
+                @endphp
                 <form method="GET" action="{{ Request::url() }}" id="searchForm">
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="flex-fill">
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="search" name="search" class="form-control border-start-0 ps-0"
-                                       placeholder="Buscar por curso..."
-                                       value="{{ $searchKey ?? '' }}">
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary flex-shrink-0">
-                            <i class="fas fa-search"></i>
-                        </button>
+
+                    <input type="hidden" name="culminated" id="filterCulminated" value="{{ $culminated ?? '' }}">
+
+                    @php ob_start(); @endphp
+                <div class="filter-popover-field">
+                    <div class="filter-popover-label">Estado</div>
+                    <div class="filter-popover-options">
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Culminated" value="" {{ ($culminated ?? null) === null ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Todos</span>
+                        </label>
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Culminated" value="1" {{ (string) ($culminated ?? '') === '1' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Culminado</span>
+                        </label>
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_Culminated" value="0" {{ (string) ($culminated ?? '') === '0' ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>Pendiente</span>
+                        </label>
                     </div>
+                </div>
+                    @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                    @include('managers.includes.filter-toolbar', [
+                        'searchName' => 'search',
+                        'searchValue' => $searchKey ?? '',
+                        'searchPlaceholder' => 'Buscar por curso...',
+                        'popoverBody' => $popoverBody,
+                        'filterChips' => $filterChips,
+                    ])
                 </form>
             </div>
 
@@ -132,8 +159,20 @@
                 @else
                     <div class="text-center py-5">
                         <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-courses', 48) !!}</div>
-                        <h5 class="fw-bold mb-2">No hay inscripciones</h5>
-                        <p class="text-muted mb-0">Este usuario aún no tiene inscripciones registradas.</p>
+                        <h5 class="fw-bold mb-2">
+                            @if(($searchKey ?? '') !== '' || ($culminated ?? null) !== null)
+                                No se encontraron resultados
+                            @else
+                                No hay inscripciones
+                            @endif
+                        </h5>
+                        <p class="text-muted mb-0">
+                            @if(($searchKey ?? '') !== '' || ($culminated ?? null) !== null)
+                                No hay inscripciones que coincidan con los filtros aplicados.
+                            @else
+                                Este usuario aún no tiene inscripciones registradas.
+                            @endif
+                        </p>
                     </div>
                 @endif
             </div>
@@ -147,3 +186,7 @@
     </div>
 
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('supports/js/views/users/users/inscriptions/index.js') }}?v={{ @filemtime(public_path('supports/js/views/users/users/inscriptions/index.js')) ?: 1 }}"></script>
+@endpush
