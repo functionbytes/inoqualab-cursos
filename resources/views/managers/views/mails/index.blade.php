@@ -5,7 +5,7 @@
 @section('page_header')
     @php ob_start(); @endphp
     <div class="btn-group">
-        <button type="button" class="btn btn-icon btn-actions-icon"
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
             <i class="fas fa-ellipsis-vertical"></i>
         </button>
