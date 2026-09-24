@@ -20,25 +20,18 @@
     line-height: 1.2;
 }
 
-/* Enlace "Ver todas las órdenes" del card-header: mismo tinte de marca que
-   los íconos de métricas, en vez del outline gris genérico. */
-.dashboard-view-all {
-    flex-shrink: 0;
-    padding: 8px 16px;
-    border: 0;
-    border-radius: 8px;
-    background: #eaf3fb;
-    color: #008bce;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
+.dashboard-total-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
 }
-.dashboard-view-all:hover,
-.dashboard-view-all:focus-visible {
-    background: #008bce;
-    color: #fff;
+
+.dashboard-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
 }
-.dashboard-view-all:focus-visible {
-    outline: 2px solid #008bce;
-    outline-offset: 2px;
-}
+.dashboard-dot-primary { background: #008bce; }
+.dashboard-dot-dark { background: #0d1b2a; }
+.dashboard-dot-muted { background: #adb5bd; }

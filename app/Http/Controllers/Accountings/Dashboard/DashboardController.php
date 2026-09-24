@@ -102,7 +102,8 @@ class DashboardController extends Controller
 
         return view('accountings.views.dashboard.index')->with(array_merge($totals, [
             'yearInvoices' => $yearInvoices,
-            'monthlyInvoices' => $monthlyInvoices,
+            // La tabla muestra solo las 10 más recientes del año, no el año completo sin paginar.
+            'latestInvoices' => $yearInvoices->sortByDesc('created_at')->take(10),
             'viewsSixMonths' => $lastSixMonths,
             'monthValues' => $monthsInRange->values(), // Valores de las facturas
             'monthNames' => $monthsInRange->keys(),

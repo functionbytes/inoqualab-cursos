@@ -2,12 +2,20 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-    <a href="{{ route('accounting.orders.report') }}" class="btn btn-primary btn-icon" title="Reporte" aria-label="Reporte">
-        <i class="fas fa-chart-bar"></i>
-    </a>
-    <a href="{{ route('accounting.orders.resumen') }}" class="btn btn-primary btn-icon" title="Resumen" aria-label="Resumen">
-        <i class="fas fa-clipboard-list"></i>
-    </a>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones" aria-label="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <a class="dropdown-item" href="{{ route('accounting.orders.resumen') }}">
+                Resumen
+            </a>
+            <a class="dropdown-item" href="{{ route('accounting.orders.report') }}">
+                Reporte
+            </a>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('accountings.includes.card', [
         'title' => 'Ordenes',

@@ -1,133 +1,133 @@
 @extends('layouts.managers')
 
+@section('page_header')
+    @include('distributors.includes.card', [
+        'title' => 'Panel de distribuidor',
+        'description' => 'Gestiona tus empresas, matrículas, órdenes y facturas desde un solo lugar',
+    ])
+@endsection
+
 @section('content')
 
-<div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
-        <div class="card w-100 content-dashboard">
-            <div class="position-relative">
-                <div class="row">
-                    <div class="col-sm-7">
-                        <div class="mb-7 mt-6">
-                            <h2 class="fw-semibold mb-1 text-uppercase">Bienvenido!</h2>
-                            <p class="text-black">Como distribuidor puedes gestionar tus empresas, matricular estudiantes y hacer seguimiento a sus inscripciones, pedidos y facturas desde un solo lugar.</p>
+    <div class="widget-content">
+
+        {{-- Métricas --}}
+        <div class="row g-3 mb-4">
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
+                            {!! \App\Html\IconHelper::render('nav-enterprises', 34) !!}
+                        </div>
+                        <div>
+                            <div class="text-muted dashboard-metric-label">Empresas</div>
+                            <div class="dashboard-metric-value">{{ number_format($enterprisesCount) }}</div>
                         </div>
                     </div>
-                    <div class="col-sm-5">
-                        <div class="welcome-bg-img mb-n7 text-end">
-                            <img src="/customers/images/dashboard/dashboard.svg" alt="" class="img-fluid">
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
+                            {!! \App\Html\IconHelper::render('nav-people', 34) !!}
+                        </div>
+                        <div>
+                            <div class="text-muted dashboard-metric-label">Matriculados</div>
+                            <div class="dashboard-metric-value">{{ number_format($usersCount) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
+                            {!! \App\Html\IconHelper::render('user-orders', 34) !!}
+                        </div>
+                        <div>
+                            <div class="text-muted dashboard-metric-label">Órdenes</div>
+                            <div class="dashboard-metric-value">{{ number_format($ordersCount) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center gap-3">
+                        <div class="dashboard-metric-icon rounded-4 d-flex align-items-center justify-content-center">
+                            {!! \App\Html\IconHelper::render('nav-invoices', 34) !!}
+                        </div>
+                        <div>
+                            <div class="text-muted dashboard-metric-label">Facturas</div>
+                            <div class="dashboard-metric-value">{{ number_format($invoicesCount) }}</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row g-3 mb-1">
-
-    <div class="col-6 col-lg-3">
-        <div class="card w-100 h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="dist-stat-icon dist-stat-icon--enterprises">
-                    <i class="fas fa-building"></i>
-                </div>
+        {{-- Órdenes recientes --}}
+        <div class="card">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between gap-3">
                 <div>
-                    <h4 class="fw-semibold mb-0">{{ number_format($enterprisesCount) }}</h4>
-                    <p class="text-muted mb-0">Empresas</p>
+                    <h6 class="mb-0 fw-bold">Órdenes recientes</h6>
+                    <p class="text-muted mb-0">Últimas órdenes registradas en tus empresas</p>
                 </div>
+                <a href="{{ route('distributor.orders') }}" class="btn dashboard-view-all">Ver todas las órdenes</a>
             </div>
-        </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-        <div class="card w-100 h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="dist-stat-icon dist-stat-icon--users">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div>
-                    <h4 class="fw-semibold mb-0">{{ number_format($usersCount) }}</h4>
-                    <p class="text-muted mb-0">Usuarios matriculados</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-        <div class="card w-100 h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="dist-stat-icon dist-stat-icon--orders">
-                    <i class="fas fa-cart-shopping"></i>
-                </div>
-                <div>
-                    <h4 class="fw-semibold mb-0">{{ number_format($ordersCount) }}</h4>
-                    <p class="text-muted mb-0">Ordenes</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-        <div class="card w-100 h-100">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="dist-stat-icon dist-stat-icon--invoices">
-                    <i class="fas fa-file-invoice"></i>
-                </div>
-                <div>
-                    <h4 class="fw-semibold mb-0">{{ number_format($invoicesCount) }}</h4>
-                    <p class="text-muted mb-0">Facturas</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="row">
-    <div class="col-lg-12 d-flex align-items-stretch">
-        <div class="card w-100">
-            <div class="card-header border-bottom d-sm-flex d-block align-items-center justify-content-between">
-                <div>
-                    <h6 class="mb-1 fw-bold">Ordenes recientes</h6>
-                    <p class="text-muted small mb-0">Ultimas ordenes registradas en tus empresas</p>
-                </div>
-                <a href="{{ route('distributor.orders') }}" class="btn btn-sm btn-outline-brand mt-2 mt-sm-0">Ver todas</a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table align-middle text-nowrap mb-0">
-                        <thead>
-                            <tr class="text-muted fw-semibold">
-                                <th scope="col">Orden</th>
-                                <th scope="col">Cliente</th>
-                                <th scope="col">Empresa</th>
-                                <th scope="col">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody class="border-top">
-                            @forelse ($recentOrders as $order)
+            <div class="card-body p-0">
+                @if($recentOrders->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle text-nowrap mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ $order->slack }}</td>
-                                    <td>{{ Str::upper(trim(($order->user->firstname ?? 'Usuario eliminado').' '.($order->user->lastname ?? ''))) }}</td>
-                                    <td>{{ Str::upper($order->activity?->enterprise?->title ?? 'N/D') }}</td>
-                                    <td><span class="text-muted">{{ $order->updated_at->format('d/m/Y') }}</span></td>
+                                    <th>Orden</th>
+                                    <th>Empresa</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Acciones</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Aun no hay ordenes registradas.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody>
+                                @foreach($recentOrders as $order)
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold">{{ $order->slack }}</div>
+                                            <div class="text-muted small">{{ Str::upper(trim(($order->user->firstname ?? 'Usuario eliminado').' '.($order->user->lastname ?? ''))) }}</div>
+                                        </td>
+                                        <td>{{ Str::upper($order->activity?->enterprise?->title ?? 'N/D') }}</td>
+                                        <td class="text-muted">{{ $order->updated_at->format('d/m/Y') }}</td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
+                                                        data-bs-toggle="dropdown"
+                                                        data-bs-boundary="viewport">
+                                                    <i class="fas fa-ellipsis-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li><a class="dropdown-item" href="{{ route('distributor.orders.view', $order->slack) }}">Ver</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
+                        <h5 class="fw-bold mb-2">No hay órdenes</h5>
+                        <p class="text-muted mb-0">Aún no hay órdenes registradas en tus empresas.</p>
+                    </div>
+                @endif
             </div>
         </div>
+
     </div>
-</div>
 
 @endsection
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('distributors/css/views/dashboard/index.css') }}">
+    <link rel="stylesheet" href="{{ asset('distributors/css/views/dashboard/index.css') }}">
 @endpush
