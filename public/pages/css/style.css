@@ -14985,7 +14985,7 @@ input:-webkit-autofill, input:-webkit-autofill:focus {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.iq-user-menu-head span {
+.iq-user-menu-head div span {
   display: block;
   font-size: 12.5px;
   color: #5A7093;
@@ -15780,39 +15780,34 @@ a.contact-cta-item:hover {
 .iq-footer-links ul li a { color: inherit; transition: color .3s ease-in-out; }
 .iq-footer-links ul li a:hover { color: #fff; }
 
+/* Datos de contacto del footer: rejilla de 3 columnas iguales con divisorias
+   verticales en escritorio; apilado con divisorias horizontales en pantallas
+   menores (antes con flex + ancho automático el tercer bloque saltaba de línea
+   entre 768 y 1199px y las divisorias quedaban desalineadas). */
 .iq-footer-contact-list {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 20px 80px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
     border-top: 1px solid rgba(255,255,255,.14);
     padding-top: 40px;
     margin-top: 60px;
 }
-@media (max-width: 991px) { .iq-footer-contact-list { gap: 30px 40px; padding-top: 30px; margin-top: 40px; } }
-
 .iq-footer-contact-item {
     position: relative;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     gap: 15px;
-    width: calc(33.33% - 53.33px);
+    min-width: 0;
+    padding: 4px 32px;
 }
-@media (max-width: 1199px) { .iq-footer-contact-item { width: auto; } }
-@media (max-width: 767px) { .iq-footer-contact-item { width: 100%; } }
-.iq-footer-contact-item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -40px;
-    width: 1px;
-    height: 100%;
-    background: rgba(255,255,255,.14);
+.iq-footer-contact-item:first-child { padding-left: 0; }
+.iq-footer-contact-item:last-child { padding-right: 0; }
+.iq-footer-contact-item + .iq-footer-contact-item { border-left: 1px solid rgba(255,255,255,.14); }
+@media (max-width: 991px) {
+    .iq-footer-contact-list { grid-template-columns: minmax(0, 1fr); padding-top: 10px; margin-top: 40px; }
+    .iq-footer-contact-item, .iq-footer-contact-item:first-child, .iq-footer-contact-item:last-child { padding: 20px 0; }
+    .iq-footer-contact-item + .iq-footer-contact-item { border-left: 0; border-top: 1px solid rgba(255,255,255,.14); }
 }
-@media (max-width: 991px) { .iq-footer-contact-item::before { right: -20px; } }
-@media (max-width: 767px) { .iq-footer-contact-item::before { display: none; } }
-.iq-footer-contact-item:last-child::before { display: none; }
 
 .iq-footer-contact-icon {
     position: relative;
@@ -15831,9 +15826,9 @@ a.contact-cta-item:hover {
 }
 .iq-footer-contact-item:hover .iq-footer-contact-icon { background: #fff; color: #081a28; }
 
-.iq-footer-contact-content { width: calc(100% - 65px); }
+.iq-footer-contact-content { flex: 1; min-width: 0; }
 .iq-footer-contact-content p { margin: 0 0 4px; color: rgba(255,255,255,.6); font-size: 14px; }
-.iq-footer-contact-content h3 { margin: 0; color: #fff; font-size: 20px; line-height: 1.35; }
+.iq-footer-contact-content h3 { margin: 0; color: #fff; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.35; overflow-wrap: break-word; }
 @media (max-width: 767px) { .iq-footer-contact-content h3 { font-size: 18px; } }
 .iq-footer-contact-content h3 a { color: inherit; transition: color .3s ease-in-out; }
 .iq-footer-contact-content h3 a:hover { color: #008bce; }

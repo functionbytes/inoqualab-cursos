@@ -4,6 +4,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ url('/pages/css/cursos.css') }}">
+    <link rel="stylesheet" href="{{ url('/pages/css/partials/components/course-card.css') }}?v={{ @filemtime(public_path('pages/css/partials/components/course-card.css')) ?: '1' }}">
 @endpush
 
 @section('content')

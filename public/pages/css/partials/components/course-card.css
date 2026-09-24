@@ -1,0 +1,419 @@
+/* Tarjeta de curso — resources/views/pages/partials/components/course-card.blade.php
+   (+ course-card/{a,b,c,d}.blade.php). El diseño lo elige el manager en
+   Configuración › Sitio web. Clases con prefijo propio (.crs-card) para no
+   chocar con los .ccard que todavía definen cursos.css / storefront.css /
+   style.css. Sin font-family: hereda la tipografía de cada página. */
+
+/* ===== Base común ===== */
+.crs-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #e7ecf1;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 22px rgba(13, 27, 42, .07);
+    color: #1b2a3a;
+    text-decoration: none;
+    transition: transform .25s cubic-bezier(.22, .61, .36, 1), box-shadow .25s cubic-bezier(.22, .61, .36, 1), border-color .25s cubic-bezier(.22, .61, .36, 1);
+}
+.crs-card:hover,
+.crs-card:focus-visible {
+    color: #1b2a3a;
+    text-decoration: none;
+    transform: translateY(-4px);
+    border-color: #008bcd;
+    box-shadow: 0 18px 44px rgba(13, 27, 42, .14);
+}
+
+.crs-card-media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #081A28 0%, #0d2a40 60%, #0a3050 100%);
+}
+.crs-card-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .35s cubic-bezier(.22, .61, .36, 1);
+}
+.crs-card:hover .crs-card-media img { transform: scale(1.04); }
+
+.crs-card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(13, 27, 42, .82);
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+.crs-card-badge.is-free { background: #008bcd; }
+
+.crs-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px 20px 20px;
+}
+
+.crs-card-kicker {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #008bcd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crs-card-title {
+    margin: 7px 0 0;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -.01em;
+    color: #1b2a3a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(1em * 1.35 * 2);
+}
+
+.crs-card-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #6a7888;
+}
+.crs-card-meta.is-split { justify-content: space-between; }
+
+.crs-card-rating { display: inline-flex; align-items: center; gap: 6px; }
+.crs-card-rating b { color: #1b2a3a; font-weight: 800; }
+.crs-card-rating-empty { font-size: 11.5px; color: #93a0ad; }
+.crs-card-stars { display: inline-flex; gap: 2px; color: #e2e7ee; }
+.crs-card-stars svg { width: 13px; height: 13px; }
+.crs-card-stars svg.on { color: #f5b740; }
+
+.crs-card-price-now {
+    font-size: 21px;
+    font-weight: 800;
+    color: #0d1b2a;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+.crs-card small { font-size: 11px; font-weight: 700; color: #6a7888; }
+
+.crs-card-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+    background: #0d1b2a;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 12px 18px;
+    border-radius: 10px;
+    transition: background .18s cubic-bezier(.22, .61, .36, 1);
+}
+.crs-card-cta svg,
+.crs-card-link svg { width: 14px; height: 14px; transition: transform .18s cubic-bezier(.22, .61, .36, 1); }
+.crs-card-cta svg { color: #008bcd; }
+.crs-card:hover .crs-card-cta { background: #16304a; }
+.crs-card:hover .crs-card-cta svg,
+.crs-card:hover .crs-card-link svg { transform: translateX(3px); }
+
+/* ===== A · Hermana del paquete ===== */
+.crs-card--a .crs-card-pricing {
+    margin-top: auto;
+    padding: 14px 0 16px;
+    border-top: 1px solid #eef2f6;
+    border-bottom: 1px solid #eef2f6;
+}
+.crs-card--a .crs-card-meta { margin-bottom: 16px; }
+.crs-card--a .crs-card-price-label { font-size: 12px; font-weight: 600; color: #93a0ad; }
+.crs-card--a .crs-card-price-label.is-was { text-decoration: line-through; }
+.crs-card--a .crs-card-price-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.crs-card--a .crs-card-price-now { font-size: 25px; }
+.crs-card--a .crs-card-pill {
+    background: rgba(0, 139, 205, .12);
+    color: #008bcd;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+.crs-card--a .crs-card-cta { width: 100%; margin-top: 14px; padding: 13px 16px; }
+
+/* ===== B · Precio sobre la imagen ===== */
+.crs-card--b .crs-card-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(13, 27, 42, 0) 45%, rgba(13, 27, 42, .88) 100%);
+}
+.crs-card--b .crs-card-off {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    background: #008bcd;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 800;
+    padding: 5px 10px;
+    border-radius: 6px;
+}
+.crs-card--b .crs-card-overlay-price {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #fff;
+}
+.crs-card--b .crs-card-overlay-price .crs-card-price-now { color: #fff; font-size: 22px; }
+.crs-card--b .crs-card-overlay-price small { color: rgba(255, 255, 255, .8); }
+.crs-card--b .crs-card-overlay-price del { font-size: 12px; font-weight: 600; color: rgba(255, 255, 255, .72); }
+.crs-card--b .crs-card-body { padding: 16px 18px 0; }
+.crs-card--b .crs-card-foot {
+    margin-top: auto;
+    padding: 14px 18px 16px;
+    border-top: 1px solid #eef2f6;
+    margin-top: 16px;
+}
+.crs-card--b .crs-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #008bcd;
+}
+
+/* ===== C · Ficha con datos (canvas YQuNRgfE4bNYVefRT7kFnP, tablero C) ===== */
+.crs-card--c { padding: 10px; }
+.crs-card--c .crs-card-media { aspect-ratio: 16 / 9; border-radius: 12px; }
+.crs-card--c .crs-card-cat {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+    max-width: calc(100% - 24px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: #fff;
+    color: #008bcd;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(13, 27, 42, .18);
+}
+.crs-card--c .crs-card-body { padding: 14px 8px 6px; }
+.crs-card--c .crs-card-title { margin: 0; font-size: 16.5px; text-transform: uppercase; letter-spacing: 0; }
+
+/* Datos: mini tabla gris de tres columnas */
+.crs-card--c .crs-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: #f7f9fb;
+    border: 1px solid #e7ecf1;
+    border-radius: 10px;
+}
+.crs-card--c .crs-card-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.crs-card--c .crs-card-stat-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    /* Misma fuente de display que los títulos del sitio (Cal Sans solo tiene
+       peso 400: ya es gruesa, no se le fuerza negrita). */
+    font-family: "Cal Sans", sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #0d1b2a;
+    line-height: 1.2;
+}
+.crs-card--c .crs-card-stat-value svg { width: 15px; height: 15px; color: #f5b740; }
+.crs-card--c .crs-card-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #6a7888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Precio antes/ahora entre separadores */
+.crs-card--c .crs-card-pricing {
+    margin-top: auto;
+    padding: 14px 0;
+    border-top: 1px solid #eef1f4;
+    border-bottom: 1px solid #eef1f4;
+}
+.crs-card--c .crs-card-stats { margin-bottom: 16px; }
+.crs-card--c .crs-card-price-label { font-size: 12.5px; font-weight: 600; color: #93a0ad; }
+.crs-card--c .crs-card-price-label.is-was { text-decoration: line-through; }
+.crs-card--c .crs-card-price-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.crs-card--c .crs-card-price-now { font-family: "Cal Sans", sans-serif; font-weight: 400; font-size: 26px; letter-spacing: 0; }
+.crs-card--c .crs-card-price-row small { font-size: 12px; }
+.crs-card--c .crs-card-pill {
+    margin-left: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #0077b3;
+    background: #e3f2fa;
+    padding: 5px 10px;
+    border-radius: 30px;
+}
+
+/* Botón a ancho completo */
+.crs-card--c .crs-card-cta {
+    width: 100%;
+    height: 50px;
+    margin-top: 16px;
+    padding: 0 16px;
+    gap: 10px;
+    font-size: 14px;
+    border-radius: 10px;
+}
+.crs-card--c .crs-card-cta svg { width: 15px; height: 15px; color: #3a9fe0; }
+
+/* ===== D · Base oscura corporativa ===== */
+.crs-card--d .crs-card-body { padding: 16px 20px 18px; }
+.crs-card--d .crs-card-meta { margin-top: 14px; }
+.crs-card--d .crs-card-chips { display: inline-flex; gap: 6px; }
+.crs-card--d .crs-card-chips span {
+    background: #f7f9fb;
+    border: 1px solid #e7ecf1;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.crs-card--d .crs-card-band {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #0d1b2a;
+}
+.crs-card--d .crs-card-price-label { font-size: 11.5px; font-weight: 600; color: #93a0ad; white-space: nowrap; }
+.crs-card--d .crs-card-price-label b { color: #4fb6e8; font-weight: 800; }
+.crs-card--d .crs-card-band .crs-card-price-now { color: #fff; font-size: 22px; }
+.crs-card--d .crs-card-band small { color: #93a0ad; }
+.crs-card--d .crs-card-band-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+}
+.crs-card--d .crs-card-band-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #008bcd;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .18s cubic-bezier(.22, .61, .36, 1);
+}
+.crs-card--d .crs-card-band-icon svg { width: 15px; height: 15px; color: #fff; }
+.crs-card--d:hover .crs-card-band-icon { transform: translateX(3px); }
+
+/* ===== Catálogo (/courses): 2 columnas (col-6) en escritorio, 1 en móvil ===== */
+.cursos-page .cat-grid:not(.list) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 767px) {
+    .cursos-page .cat-grid:not(.list) { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Vista lista del catálogo (toggle data-view="list") */
+.cat-grid.list .crs-card { flex-direction: row; }
+.cat-grid.list .crs-card-media { width: 300px; aspect-ratio: auto; min-height: 190px; }
+.cat-grid.list .crs-card--c { gap: 18px; }
+.cat-grid.list .crs-card--c .crs-card-body { padding: 6px 8px 6px 0; }
+.cat-grid.list .crs-card-title { font-size: 18px; min-height: 0; }
+.cat-grid.list .crs-card--c .crs-card-stats { max-width: 460px; }
+.cat-grid.list .crs-card--b .crs-card-foot,
+.cat-grid.list .crs-card--d .crs-card-band { display: none; }
+@media (max-width: 920px) {
+    .cat-grid.list .crs-card { flex-direction: column; }
+    .cat-grid.list .crs-card-media { width: 100%; aspect-ratio: 16 / 10; min-height: 0; }
+    .cat-grid.list .crs-card--c { gap: 0; }
+    .cat-grid.list .crs-card--c .crs-card-body { padding: 14px 8px 6px; }
+    .cat-grid.list .crs-card--b .crs-card-foot,
+    .cat-grid.list .crs-card--d .crs-card-band { display: flex; }
+}
+
+/* ===== Grilla del home ("Explora nuestros cursos"): 3 por fila en desktop,
+   2 en tablet, 1 en móvil. Flex (no grid) para que la última fila incompleta
+   quede centrada en vez de pegada a la izquierda. ===== */
+.crs-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+}
+.crs-grid > * { flex: 0 0 calc((100% - 48px) / 3); max-width: calc((100% - 48px) / 3); }
+@media (max-width: 1199px) { .crs-grid > * { flex: 0 0 calc(50% - 12px); max-width: calc(50% - 12px); } }
+@media (max-width: 767px) { .crs-grid > * { flex: 0 0 100%; max-width: 100%; } }
+.crs-grid .crs-card-title { font-size: 15.5px; }
+.crs-grid .crs-card-body { padding-left: 16px; padding-right: 16px; }
+.crs-grid .crs-card--c .crs-card-body { padding-left: 6px; padding-right: 6px; }
+.crs-grid .crs-card--c .crs-card-title { font-size: 15px; }
+.crs-grid .crs-card--c .crs-card-stat-value { font-size: 18px; }
+.crs-grid .crs-card--c .crs-card-stats { padding: 9px 10px; gap: 6px; }
+.crs-grid .crs-card--c .crs-card-stat-label { font-size: 10.5px; letter-spacing: 0; text-transform: none; }
+.crs-grid .crs-card--c .crs-card-price-now { font-size: 22px; }
+.crs-grid .crs-card--d .crs-card-band { padding: 12px 16px; }
+.crs-grid .crs-card--d .crs-card-band-text { display: none; }
+.crs-grid .crs-card--d .crs-card-chips span { padding: 2px 6px; font-size: 11px; }
+.crs-grid .crs-card--b .crs-card-body { padding: 16px 16px 0; }
+.crs-grid .crs-card--b .crs-card-foot { padding-left: 16px; padding-right: 16px; }
+
+/* Carrusel de destacados del home (slick) */
+.crs-slider .slick-track { display: flex; }
+.crs-slider .slick-slide { height: auto; padding: 8px 12px 16px; }
+.crs-slider .slick-slide > div { height: 100%; }
+
+/* Vista previa en Configuración › Sitio web (panel manager): la tarjeta se
+   renderiza de verdad pero no debe navegar al hacer clic en el selector. */
+.crs-preview { pointer-events: none; max-width: 340px; margin: 0 auto; }
+.crs-preview .crs-card { height: auto; }

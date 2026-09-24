@@ -5,6 +5,7 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ url('/pages/css/storefront.css') }}?v={{ @filemtime(public_path('pages/css/storefront.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ url('/pages/css/cursos.css') }}?v={{ @filemtime(public_path('pages/css/cursos.css')) ?: '1' }}">
 <link rel="stylesheet" href="{{ asset('pages/css/views/bundles/index.css') }}">
 @endpush
 
@@ -23,8 +24,10 @@
         </div>
     </div>
 
-    {{-- ===== Listado de paquetes ===== --}}
-    <main class="pkglist">
+    {{-- ===== Listado de paquetes =====
+         Misma tarjeta que la franja del inicio (pages.partials.components.bundle-card);
+         sus estilos viven en cursos.css bajo .cursos-page .bundles-strip. --}}
+    <main class="pkglist cursos-page">
         <div class="container">
 
             @if ($bundles->isEmpty())
@@ -34,72 +37,14 @@
                     Mostrando <b>{{ $bundles->count() }}</b> {{ $bundles->count() == 1 ? 'paquete' : 'paquetes' }}
                 </p>
 
-                <div class="pkglist-grid">
-                    @foreach ($bundles as $bundle)
-                        @php
-                            // Thumbnail: primer curso del paquete con media 'thumbnail'
-                            $bundleThumb = null;
-                            $coursesSum = 0;
-                            $allPriced = $bundle->courses->isNotEmpty();
-                            foreach ($bundle->courses as $bc) {
-                                if (! $bundleThumb) {
-                                    $bundleThumb = $bc->getFirstMedia('thumbnail');
-                                }
-                                if ($bc->price && $bc->price > 0) {
-                                    $coursesSum += (float) $bc->price;
-                                } else {
-                                    $allPriced = false;
-                                }
-                            }
-
-                            // Ahorro real: solo si todos los cursos tienen precio y la suma supera el precio del paquete
-                            $showSave = $allPriced && $coursesSum > (float) $bundle->price && $bundle->price > 0;
-                            $offPct = $showSave ? (int) round(($coursesSum - $bundle->price) / $coursesSum * 100) : 0;
-                        @endphp
-
-                        <a class="plcard" href="{{ route('bundles.view', [$bundle->slug ?? $bundle->slack]) }}">
-                            <div class="plcard-media">
-                                @if ($bundleThumb)
-                                    <img src="{{ $bundleThumb->getFullUrl() }}" alt="{{ $bundle->title }}" loading="lazy"
-                                         class="js-img-fallback" data-fallback-action="hide-sibling">
-                                    <i class="fas fa-box-open pkico js-hidden"></i>
-                                @else
-                                    <i class="fas fa-box-open pkico"></i>
-                                @endif
-                                <span class="plcard-badge">Paquete</span>
-                                @if ($showSave)
-                                    <span class="plcard-off">-{{ $offPct }}%</span>
-                                @endif
+                <div class="bundles-strip bundles-strip--page">
+                    <div class="row">
+                        @foreach ($bundles as $bundle)
+                            <div class="col-lg-4 col-md-6">
+                                @include('pages.partials.components.bundle-card', ['bundle' => $bundle])
                             </div>
-
-                            <div class="plcard-body">
-                                <div class="plcard-cat">
-                                    {{ $bundle->courses_count }} {{ $bundle->courses_count == 1 ? 'curso' : 'cursos' }}
-                                </div>
-                                <div class="plcard-title">{{ $bundle->title }}</div>
-
-                                <div class="plcard-meta">
-                                    <span><i class="fas fa-circle-play"></i> {{ $bundle->courses_count }} {{ $bundle->courses_count == 1 ? 'curso' : 'cursos' }}</span>
-                                    @if ($bundle->duration)
-                                        <span><i class="far fa-clock"></i> {{ $bundle->duration }}h</span>
-                                    @endif
-                                    <span><i class="fas fa-award"></i> Certificado</span>
-                                </div>
-
-                                <div class="plcard-foot">
-                                    <span class="plcard-price">
-                                        <span class="now">$ {{ number_format($bundle->price, 0, ',', '.') }} <small>COP</small></span>
-                                        @if ($showSave)
-                                            <span class="was">$ {{ number_format($coursesSum, 0, ',', '.') }} COP</span>
-                                        @endif
-                                    </span>
-                                    <span class="plcard-btn">
-                                        Ver paquete <i class="fas fa-arrow-right"></i>
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
             @endif
 

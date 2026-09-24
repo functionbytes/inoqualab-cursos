@@ -96,6 +96,7 @@ use App\Http\Controllers\Managers\Settings\SlidersController;
 use App\Http\Controllers\Managers\Settings\TestimoniesController;
 use App\Http\Controllers\Managers\Settings\TrustedsController;
 use App\Http\Controllers\Managers\Settings\UploadingSettingsController;
+use App\Http\Controllers\Managers\Settings\WebsiteSettingsController;
 use App\Http\Controllers\Managers\Users\ActivitysController;
 use App\Http\Controllers\Managers\Users\CertificatesController;
 use App\Http\Controllers\Managers\Users\InscriptionsController as UsersInscriptionsController;
@@ -530,6 +531,9 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         Route::get('/portal', [PortalSettingsController::class, 'index'])->name('manager.settings.portal');
         Route::post('/portal/update', [PortalSettingsController::class, 'update'])->name('manager.settings.portal.update');
 
+        Route::get('/website', [WebsiteSettingsController::class, 'index'])->name('manager.settings.website');
+        Route::post('/website/update', [WebsiteSettingsController::class, 'update'])->name('manager.settings.website.update');
+
         Route::get('/invoices', [InvoicesSettingsController::class, 'index'])->name('manager.settings.invoices');
         Route::post('/invoices/update', [InvoicesSettingsController::class, 'update'])->name('manager.settings.invoices.update');
 
@@ -582,6 +586,7 @@ Route::group(['prefix' => 'panel', 'middleware' => ['auth', 'manager', 'session'
         // el propio controller comprueba y que 'support' SÍ tiene completo.
         Route::get('/mails', [MailAutoConfirmRulesController::class, 'index'])->name('manager.mails');
         Route::post('/mails/rules', [MailAutoConfirmRulesController::class, 'store'])->name('manager.mails.rules.store');
+        Route::post('/mails/rules/bulk-action', [MailAutoConfirmRulesController::class, 'bulkAction'])->name('manager.mails.rules.bulk-action');
         Route::patch('/mails/rules/{rule}/toggle', [MailAutoConfirmRulesController::class, 'toggle'])->name('manager.mails.rules.toggle');
         Route::delete('/mails/rules/{rule}', [MailAutoConfirmRulesController::class, 'destroy'])->name('manager.mails.rules.destroy');
 

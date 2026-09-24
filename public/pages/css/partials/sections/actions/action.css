@@ -1,0 +1,179 @@
+/* Home: "Por qué aprender con nosotros" — el certificado como protagonista */
+.benefits-section {
+    --bn-ink: #081A28;
+    --bn-blue: #008bce;
+    --bn-sky: #5cc8f5;
+    --bn-muted: #5A7093;
+    --bn-soft: #f3f8fc;
+    --bn-tint: #e3f2fc;
+}
+
+.benefits-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    max-width: 1080px;
+    margin: 40px auto 0;
+}
+
+.benefits-section svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.benefit-accent {
+    stroke: var(--bn-blue);
+}
+
+/* Bloque principal: certificado */
+.benefit-goal {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 48px;
+    border-radius: 20px;
+    background: var(--bn-ink);
+}
+
+.benefit-goal__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    height: 128px;
+    border-radius: 32px;
+    background: #12314a;
+    color: #fff;
+}
+
+.benefit-goal__icon svg {
+    width: 72px;
+    height: 72px;
+}
+
+.benefit-goal__icon .benefit-accent {
+    stroke: var(--bn-sky);
+}
+
+.benefit-goal__title {
+    margin-bottom: 12px;
+    font-size: 40px;
+    line-height: 1.05;
+    text-transform: none;
+    color: #fff;
+}
+
+.benefit-goal__text {
+    max-width: 420px;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #b9c8d8;
+}
+
+/* Bloques secundarios: material y tips */
+.benefit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.benefit-item {
+    display: flex;
+    flex-grow: 1;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 32px;
+    border-radius: 20px;
+    background: var(--bn-soft);
+}
+
+.benefit-item__icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--bn-tint);
+    color: var(--bn-ink);
+}
+
+.benefit-item__icon svg {
+    width: 52px;
+    height: 52px;
+}
+
+.benefit-item__title {
+    margin-bottom: 8px;
+    font-size: 22px;
+    line-height: 1.2;
+    text-transform: none;
+    color: var(--bn-ink);
+}
+
+.benefit-item__text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--bn-muted);
+}
+
+@media (max-width: 991px) {
+    .benefits-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .benefit-goal {
+        padding: 36px;
+    }
+
+    .benefit-goal__title {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 575px) {
+    .benefit-goal {
+        gap: 28px;
+        padding: 28px;
+    }
+
+    .benefit-goal__icon {
+        width: 104px;
+        height: 104px;
+        border-radius: 26px;
+    }
+
+    .benefit-goal__icon svg {
+        width: 60px;
+        height: 60px;
+    }
+
+    .benefit-goal__title {
+        font-size: 28px;
+    }
+
+    .benefit-item {
+        flex-direction: column;
+        gap: 20px;
+        padding: 24px;
+    }
+
+    .benefit-item__icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+    }
+
+    .benefit-item__icon svg {
+        width: 44px;
+        height: 44px;
+    }
+}

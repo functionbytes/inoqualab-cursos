@@ -6,6 +6,7 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ url('/pages/css/storefront.css') }}?v={{ @filemtime(public_path('pages/css/storefront.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ url('/pages/css/partials/components/course-card.css') }}?v={{ @filemtime(public_path('pages/css/partials/components/course-card.css')) ?: '1' }}">
 @endpush
 
 @section('content')
@@ -192,7 +193,7 @@
                             <span class="buy-off">-{{ $discountPct }}% OFF</span>
                         @endif
                         @if ($course->film != null)
-                            <a href="{{ $course->film }}" class="play-badge popup-video"><i class="fa-solid fa-circle-play"></i> Vista previa</a>
+                            <a href="{{ $course->film }}" class="play-badge js-course-preview"><i class="fa-solid fa-circle-play"></i> Vista previa</a>
                         @endif
                     </div>
 

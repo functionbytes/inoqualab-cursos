@@ -1,7 +1,7 @@
 (function () {
     var grid = document.getElementById('catGrid');
     if (!grid) return;
-    var cards = Array.prototype.slice.call(grid.querySelectorAll('.ccard'));
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.crs-card'));
     var countEl = document.getElementById('catCount');
     var emptyEl = document.getElementById('catEmpty');
     var searchEl = document.getElementById('catSearch');

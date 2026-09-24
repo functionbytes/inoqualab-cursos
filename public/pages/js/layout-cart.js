@@ -17,8 +17,15 @@
             e.preventDefault();
 
             var $form = $(this);
+            // Botones del formulario + los que lo envían desde fuera con form="id"
+            // (barra de compra fija del detalle de curso). Cada uno guarda SU texto:
+            // antes se guardaba el del primero y al terminar se ponía en todos, y
+            // "Agregar al carrito" quedaba diciendo "Comprar ahora".
             var $btn = $form.find('button[type=submit]');
-            var originalHtml = $btn.html();
+            if (this.id) {
+                $btn = $btn.add($('button[type=submit][form="' + this.id + '"]'));
+            }
+            $btn.each(function () { $(this).data('originalHtml', $(this).html()); });
 
             $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Agregando...');
 
@@ -77,7 +84,7 @@
                     if (typeof toastr !== 'undefined') toastr.error('Error al agregar al carrito. Inténtalo de nuevo.');
                 },
                 complete: function () {
-                    $btn.prop('disabled', false).html(originalHtml);
+                    $btn.prop('disabled', false).each(function () { $(this).html($(this).data('originalHtml')); });
                 }
             });
         });

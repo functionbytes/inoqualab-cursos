@@ -201,7 +201,7 @@
      data-store-url="{{ route('newsletters.store') }}"></div>
 @endif
 
-<script src="{{ asset('pages/js/layout-cart.js') }}" type="text/javascript"></script>
+<script src="{{ asset('pages/js/layout-cart.js') }}?v={{ @filemtime(public_path('pages/js/layout-cart.js')) ?: '1' }}" type="text/javascript"></script>
 
 </body>
 

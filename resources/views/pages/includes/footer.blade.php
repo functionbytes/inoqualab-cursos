@@ -92,7 +92,8 @@
                     <div class="iq-footer-contact-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
                     <div class="iq-footer-contact-content">
                         <p>Correo electrónico</p>
-                        <h3><a href="mailto:{{ setting('page_email') }}">{{ setting('page_email') }}</a></h3>
+                        {{-- <wbr> tras la @: si no cabe, el correo parte ahí y no a mitad de palabra --}}
+                        <h3><a href="mailto:{{ setting('page_email') }}">{!! str_replace('@', '@<wbr>', e(setting('page_email'))) !!}</a></h3>
                     </div>
                 </div>
             @endif

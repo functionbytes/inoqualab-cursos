@@ -316,6 +316,37 @@
             });
         }
 
+        // 12a. Bundles Slider (home, franja "Paquetes de cursos") -- mismo
+        // guard que Coach Slider: slidesToShow no debe superar el nº de
+        // slides con infinite:true.
+        if ($('.bundles-slider').length) {
+            var bundleSlides = $('.bundles-slider').children().length;
+            $('.bundles-slider').slick({
+                slidesToShow: Math.min(3, bundleSlides),
+                slidesToScroll: 1,
+                infinite: bundleSlides > 3,
+                speed: 400,
+                autoplay: true,
+                arrows: false,
+                dots: true,
+                autoplaySpeed: 5000,
+                responsive: [
+                    {
+                        breakpoint: 1199,
+                        settings: {
+                            slidesToShow: Math.min(2, bundleSlides),
+                        }
+                    },
+                    {
+                        breakpoint: 767,
+                        settings: {
+                            slidesToShow: 1,
+                        }
+                    }
+                ]
+            });
+        }
+
         // 12b. Testimonial Slider (home) -- mismo guard que Coach Slider: sin
         // limitar slidesToShow al nº real de slides, infinite:true rompe slick
         // (initADA) cuando hay menos slides que columnas.

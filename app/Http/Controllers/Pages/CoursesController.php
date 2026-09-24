@@ -22,7 +22,7 @@ class CoursesController extends Controller
             ->get();
 
         $categories = CourseCategorie::available()->get();
-        $bundles = Bundle::available()->latest()->withCount('courses')->with('courses')->limit(4)->get();
+        $bundles = Bundle::available()->latest()->withCount('courses')->with('courses.media')->limit(4)->get();
 
         return view('pages.views.courses.index')->with([
             'courses' => $courses,
@@ -37,7 +37,7 @@ class CoursesController extends Controller
 
         abort_unless($course instanceof Course, 404);
 
-        $course->load(['seoMeta', 'media', 'categorie', 'chapters']);
+        $course->load(['seoMeta', 'media', 'categorie', 'chapters.lessons', 'certifier.media']);
 
         $courseImage = $course->getFirstMediaUrl('thumbnail') ?: getMeta();
 
@@ -58,7 +58,12 @@ class CoursesController extends Controller
         $leasons = $course->lessons()->orderBy('position', 'ASC')->get();
 
         $relateds = $categorie
-            ? $categorie->courses()->withCount(['lessons', 'chapters'])->get()->shuffle()->take(3)
+            ? $categorie->courses()
+                ->available()->website()
+                ->whereKeyNot($course->getKey())
+                ->with(['categorie', 'media'])
+                ->withCount(['lessons', 'chapters'])
+                ->get()->shuffle()->take(3)
             : collect();
 
         $categories = CourseCategorie::available()->get();
@@ -78,7 +83,13 @@ class CoursesController extends Controller
             $inscriptionSlack = $inscription?->slack;
         }
 
-        return view('pages.views.courses.view')->with([
+        // Modalidad elegida en Configuración › Sitio web: '1' = view (actual),
+        // '2' = view-editorial ("Editorial con imagen y ruta"). Mismos datos.
+        $detailView = setting('pages_course_detail_variant', '1') == 2
+            ? 'pages.views.courses.view-editorial'
+            : 'pages.views.courses.view';
+
+        return view($detailView)->with([
             'course' => $course,
             'chapters' => $chapters,
             'categories' => $categories,

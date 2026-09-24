@@ -27,7 +27,7 @@ class PagesController extends Controller
             'courses' => Course::latest()->available()->two(5)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'bpms' => Course::latest()->available()->one(23)->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
             'populars' => Course::latest()->available()->featured()->website()->with(['categorie', 'media'])->withCount(['lessons', 'chapters'])->get(),
-            'bundles' => Bundle::available()->latest()->withCount('courses')->with('courses')->limit(4)->get(),
+            'bundles' => Bundle::available()->latest()->withCount('courses')->with('courses.media')->limit(4)->get(),
             'homeFaqs' => Faq::take(5)->get(),
             // limit(12), no 6: los testimonios previos a esta feature (sin position
             // ni fecha reciente) empatan en position=0 con los nuevos y, ordenados
@@ -66,7 +66,23 @@ class PagesController extends Controller
     {
         seo()->setTitle('Sobre nosotros')->setCanonical(url()->current());
 
-        return view('pages.views.about')->with([
+        // Diseño elegido en Configuración › Sitio web ('1' = el original).
+        // Un manager con sesión puede previsualizar otro con ?diseno=a|b|c|d sin
+        // cambiar lo que ven los visitantes.
+        $views = [
+            '1' => 'pages.views.about',
+            'a' => 'pages.views.about.informe',
+            'b' => 'pages.views.about.petri',
+            'c' => 'pages.views.about.norma',
+            'd' => 'pages.views.about.combinada',
+        ];
+        $variant = (string) setting('pages_about_variant', '1');
+        $preview = (string) request()->query('diseno', '');
+        if ($preview !== '' && isset($views[$preview]) && auth()->user()?->role === 'manager') {
+            $variant = $preview;
+        }
+
+        return view($views[$variant] ?? $views['1'])->with([
             'enterprises' => Enterprise::count(),
             'users' => User::count(),
         ]);

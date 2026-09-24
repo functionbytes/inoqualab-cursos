@@ -1,0 +1,91 @@
+/* "Sobre nosotros" — Diseño C "Norma 2674" (views/about/norma.blade.php) */
+
+.ab-c-hero { position: relative; background: var(--ab-navy); color: #fff; padding: 70px 0 90px; overflow: hidden; }
+/* El número de la resolución, en contorno: el elemento memorable de este diseño */
+.ab-c-number {
+    position: absolute;
+    right: -3%;
+    top: -60px;
+    font-family: 'Cal Sans', sans-serif;
+    font-size: clamp(220px, 32vw, 470px);
+    line-height: 1;
+    letter-spacing: -.04em;
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(0, 139, 205, .55);
+    pointer-events: none;
+    user-select: none;
+}
+.ab-c-hero-inner { position: relative; }
+.ab-c-hero-copy { max-width: 760px; }
+.ab-c-lede { color: var(--ab-blue-soft); font-size: 16px; }
+.ab-c-title { color: #fff; font-size: 70px; line-height: 1; letter-spacing: -.02em; margin: 18px 0 0; }
+.ab-c-intro { font-size: 19px; line-height: 1.65; color: #c3d0dc; margin: 26px 0 0; max-width: 600px; }
+.ab-c-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 80px; }
+.ab-c-strip .ab-photo { aspect-ratio: 4 / 3; border-radius: 18px; }
+
+/* Cifras dentro de una frase */
+.ab-c-sentence { padding: 110px 0 100px; }
+.ab-c-sentence p { font-size: 54px; line-height: 1.18; margin: 0; max-width: 1150px; }
+.ab-c-sentence span { color: var(--ab-blue); }
+
+/* Quiénes somos */
+.ab-c-who { padding: 0 0 110px; }
+.ab-c-who-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 80px; align-items: start; }
+.ab-c-h2 { font-size: 40px; line-height: 1.08; margin: 0; }
+.ab-c-big { font-size: 18px; line-height: 1.7; color: var(--ab-ink); margin: 22px 0 0; }
+.ab-c-text { font-size: 17px; line-height: 1.75; color: var(--ab-grey); margin: 16px 0 0; }
+.ab-c-help { background: var(--ab-paper); border-radius: 24px; padding: 40px; }
+.ab-c-help h3 { font-size: 28px; margin: 0 0 10px; }
+.ab-c-help-item { padding: 22px 0; border-top: 1px solid var(--ab-line); }
+.ab-c-help-item:first-of-type { border-top: 0; }
+.ab-c-help-item strong { font-size: 18px; font-weight: 800; color: var(--ab-navy); }
+.ab-c-help-item p { font-size: 15.5px; line-height: 1.6; color: var(--ab-grey); margin: 6px 0 0; }
+
+/* Ventajas en una fila de cinco columnas */
+.ab-c-adv-box { border: 1px solid var(--ab-line); border-radius: 24px; overflow: hidden; }
+.ab-c-adv-box .ab-c-h2 { padding: 36px 28px 0; }
+.ab-c-adv-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin-top: 10px; }
+.ab-c-adv-item { padding: 34px 28px; border-left: 1px solid var(--ab-line); }
+.ab-c-adv-item:first-child { border-left: 0; }
+.ab-c-adv-icon { color: var(--ab-blue); display: inline-flex; }
+.ab-c-adv-icon .ab-ico { width: 34px; height: 34px; stroke-width: 1.5; }
+.ab-c-adv-item h3 { font-size: 22px; line-height: 1.15; margin: 22px 0 0; }
+.ab-c-adv-item p { font-size: 14.5px; line-height: 1.6; color: var(--ab-grey); margin: 10px 0 0; }
+
+/* Misión y visión en dos mitades de color, solo texto */
+.ab-c-mv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 110px 0; }
+.ab-c-mv-half { color: #fff; padding: 96px 72px; display: flex; }
+.ab-c-mv-half--navy { background: var(--ab-navy); justify-content: flex-end; }
+.ab-c-mv-half--blue { background: var(--ab-blue); }
+.ab-c-mv-copy { max-width: 540px; }
+.ab-c-mv-label { font-size: 44px; line-height: 1; color: #fff; margin: 0; }
+.ab-c-mv-main { color: #e8eff5; font-size: 20px; font-weight: 500; line-height: 1.6; margin: 24px 0 0; }
+.ab-c-mv-sub { font-size: 16px; line-height: 1.7; color: #a9bbcc; margin: 26px 0 0; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .16); }
+
+@media (max-width: 1199px) {
+    .ab-c-title { font-size: 56px; }
+    .ab-c-sentence p { font-size: 44px; }
+    .ab-c-adv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ab-c-adv-item:nth-child(4) { border-left: 0; }
+    .ab-c-adv-item:nth-child(n+4) { border-top: 1px solid var(--ab-line); }
+}
+@media (max-width: 991px) {
+    .ab-c-who-grid, .ab-c-mv { grid-template-columns: minmax(0, 1fr); }
+    .ab-c-title { font-size: 44px; }
+    .ab-c-sentence { padding: 72px 0; }
+    .ab-c-sentence p { font-size: 34px; }
+    .ab-c-strip { margin-top: 48px; }
+    .ab-c-mv-half { padding: 64px 24px; }
+    .ab-c-mv-half--navy { justify-content: flex-start; }
+    .ab-c-mv-main { font-size: 18px; }
+    .ab-c-mv-label { font-size: 34px; }
+}
+@media (max-width: 575px) {
+    .ab-c-title { font-size: 36px; }
+    .ab-c-sentence p { font-size: 28px; }
+    .ab-c-strip { grid-template-columns: minmax(0, 1fr); }
+    .ab-c-strip .ab-photo:nth-child(n+2) { display: none; }
+    .ab-c-adv-grid { grid-template-columns: minmax(0, 1fr); }
+    .ab-c-adv-item { border-left: 0; border-top: 1px solid var(--ab-line); }
+    .ab-c-help { padding: 28px; }
+}

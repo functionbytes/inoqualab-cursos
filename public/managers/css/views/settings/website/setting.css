@@ -1,0 +1,66 @@
+/* Selector de diseño de la tarjeta de curso: 4 opciones con la tarjeta real
+   renderizada (course-card.css) como vista previa. En pantallas anchas van las
+   4 en una fila y la tarjeta se muestra a escala; si no, 2 por fila (.pv-grid). */
+.ws-preview-note { font-size: 13px; color: #6a7888; margin: 0 0 18px; }
+.ws-preview-note strong { color: #1b2a3a; }
+
+@media (min-width: 1400px) {
+    .ws-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ws-card-grid .crs-preview { zoom: .82; }
+    .ws-card-grid .ws-preview-stage { padding: 12px 8px; }
+    .ws-card-grid .pv-opt label { padding: 14px 12px; }
+}
+@media (max-width: 767px) { .ws-card-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.ws-card-grid .pv-opt label { display: flex; flex-direction: column; }
+.ws-card-grid .pv-head { align-items: flex-start; min-height: 40px; }
+.ws-card-grid .pv-name { line-height: 1.35; }
+.ws-card-grid .pv-tag { white-space: nowrap; }
+
+.ws-preview-stage {
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    background: #f3f6f9;
+    border: 1px solid #e7ecf1;
+    border-radius: 10px;
+    padding: 18px 14px;
+}
+.ws-preview-stage .crs-preview { width: 100%; font-family: 'Figtree', sans-serif; }
+
+/* Marca de la opción activa */
+.ws-in-use {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #fff;
+    background: #008bce;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+.pv-opt input:checked + label .ws-in-use { display: inline-flex; }
+.pv-opt input:checked + label .pv-tag { display: none; }
+
+/* En la fila de 4 la tarjeta queda estrecha: misma versión compacta que usa
+   la grilla del inicio (.crs-grid) para que no se corten las etiquetas de C. */
+@media (min-width: 1400px) {
+    .ws-card-grid .crs-card--c .crs-card-stat-label { font-size: 10.5px; letter-spacing: 0; text-transform: none; }
+}
+.pv-opt input:checked + label .ws-preview-stage { background: #eaf4fb; border-color: #bfe0f2; }
+
+/* Detalle de curso: captura de cada modalidad (public/managers/images/settings/website/) */
+.ws-detail-grid .pv-opt label { display: flex; flex-direction: column; }
+.ws-shot {
+    border: 1px solid #e7ecf1;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f3f6f9;
+    aspect-ratio: 16 / 9;
+}
+.ws-shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.pv-opt input:checked + label .ws-shot { border-color: #bfe0f2; }
+@media (max-width: 767px) { .ws-detail-grid { grid-template-columns: minmax(0, 1fr); } }

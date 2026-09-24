@@ -4,6 +4,7 @@
 
 @push('css')
     <link rel="stylesheet" href="{{ url('/pages/css/cursos.css') }}?v={{ @filemtime(public_path('pages/css/cursos.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{{ url('/pages/css/partials/components/course-card.css') }}?v={{ @filemtime(public_path('pages/css/partials/components/course-card.css')) ?: '1' }}">
 @endpush
 
 @section('content')
@@ -122,68 +123,7 @@
 
                     <div class="cat-grid" id="catGrid">
                         @foreach ($courses as $course)
-                            @php
-                                $isFree   = $course->payment != 1;
-                                $onSale   = ! $isFree && $course->promotion == 1 && $course->discount < $course->price;
-                                $effPrice = $isFree ? 0 : ($course->promotion == 1 ? $course->discount : $course->price);
-                                $offPct   = $onSale ? round(($course->price - $course->discount) / $course->price * 100) : 0;
-                                $thumb    = $course->getFirstMedia('thumbnail');
-                                $rating   = (float) ($course->rating ?? 0);
-                                $starSvg  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.9 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
-                            @endphp
-                            <a class="ccard" href="{{ route('courses.view', [$course->slack]) }}"
-                               data-cat="{{ $course->categorie->title ?? '' }}"
-                               data-price="{{ $effPrice }}"
-                               data-discount="{{ $onSale ? 1 : 0 }}"
-                               data-level="{{ $course->level ?? '' }}"
-                               data-rating="{{ $rating ? floor($rating) : 0 }}"
-                               data-title="{{ \Illuminate\Support\Str::lower($course->title) }}">
-                                <div class="ccard-media">
-                                    @if ($thumb)
-                                        <img src="{{ $course->cardImageUrl() }}" alt="{{ $course->title }}" loading="lazy"
-                                             class="js-img-fallback" data-fallback-action="hide-sibling">
-                                        <div class="ph ph--hidden"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
-                                    @else
-                                        <div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1 2.7 3 6 3s6-2 6-3v-5"/></svg></div>
-                                    @endif
-                                    <span class="ccard-badge {{ $isFree ? 'free' : 'premium' }}">{{ $isFree ? 'Gratis' : 'Premium' }}</span>
-                                    @if ($onSale)<span class="ccard-off">-{{ $offPct }}%</span>@endif
-                                </div>
-                                <div class="ccard-body">
-                                    <div class="ccard-cathead">
-                                        @if ($course->categorie)
-                                            <div class="ccard-cat">{{ $course->categorie->title }}</div>
-                                        @endif
-                                    </div>
-                                    <div class="ccard-title">{{ str($course->title)->lower()->ucfirst() }}</div>
-                                    <div class="ccard-rating">
-                                        <span class="stars">
-                                            @for ($s = 1; $s <= 5; $s++)
-                                                <span class="{{ $rating > 0 && $s <= round($rating) ? '' : 'off' }}">{!! $starSvg !!}</span>
-                                            @endfor
-                                        </span>
-                                        @if ($rating > 0)
-                                            <span class="num">{{ number_format($rating, 1) }}</span>
-                                        @else
-                                            <span class="num-empty">Sin calificaciones</span>
-                                        @endif
-                                    </div>
-                                    <div class="ccard-meta">
-                                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z" fill="currentColor" stroke="none"/></svg> {{ $course->lessons_count ?? 0 }} clases</span>
-                                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg> {{ $course->chapters_count ?? 0 }} temas</span>
-                                                    </div>
-                                    <div class="ccard-foot">
-                                        @if ($isFree)
-                                            <span class="ccard-price free">Gratis</span>
-                                        @elseif ($course->promotion == 1)
-                                            <span class="ccard-price has-sale"><span class="price-new">$ {{ number_format($course->discount, 0, ',', '.') }} <small>COP</small></span><del class="price-old">$ {{ number_format($course->price, 0, ',', '.') }}</del></span>
-                                        @else
-                                            <span class="ccard-price">$ {{ number_format($course->price, 0, ',', '.') }} <small>COP</small></span>
-                                        @endif
-                                        <span class="ccard-cta">Ver curso <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-                                    </div>
-                                </div>
-                            </a>
+                            @include('pages.partials.components.course-card', ['course' => $course, 'filterable' => true])
                         @endforeach
                     </div>
 
@@ -195,9 +135,6 @@
                 </div>
 
             </div>
-
-            {{-- Franja de paquetes --}}
-            @include('pages.partials.sections.bundles-strip')
 
         </div>
     </main>

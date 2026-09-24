@@ -62,7 +62,10 @@
 .cursos-page .cat-side { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 16px; }
 .cursos-page .fblock { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-soft); padding: 20px 20px 22px; }
 .cursos-page .fblock--compact { padding-top: 14px; padding-bottom: 14px; }
-.cursos-page .ph--hidden { display: none; }
+/* Debe ganarle a `.cursos-page .ccard-media .ph { display: flex }` (más
+   específica): si no, el ícono de reemplazo se pinta encima de la foto. */
+.cursos-page .ph--hidden,
+.cursos-page .ccard-media .ph.ph--hidden { display: none; }
 .cursos-page .fblock h4 { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 15px; display: flex; align-items: center; gap: 9px; }
 .cursos-page .fblock h4::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: var(--green); }
 .cursos-page .fsearch { position: relative; display: flex; align-items: center; }
@@ -155,28 +158,34 @@
 .cursos-page .cat-empty p { color: var(--muted); font-size: 15px; margin: 0 0 16px; }
 .cursos-page .cat-empty button { background: var(--navy); color: #fff; border: none; border-radius: 10px; padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; }
 
-/* franja de paquetes destacados */
+/* franja de paquetes destacados: carrusel Slick (mismo patrón que .crs-slider
+   en partials/components/course-card.css) */
 .cursos-page .bundles-strip { margin-top: 52px; }
-.cursos-page .bundles-strip .row > [class*="col-"] { margin-bottom: 22px; }
 .cursos-page .bundles-strip .ccard { height: 100%; }
+.cursos-page .bundles-slider .slick-track { display: flex; }
+.cursos-page .bundles-slider .slick-slide { height: auto; padding: 8px 12px 16px; }
+.cursos-page .bundles-slider .slick-slide > div { height: 100%; }
 .cursos-page .bundles-strip .ccard-title { text-transform: uppercase; }
 .cursos-page .bs-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
 .cursos-page .bs-kicker { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--green-deep); }
 .cursos-page .bs-title { font-size: 24px; font-weight: 800; letter-spacing: -.01em; margin: 4px 0 0; color: var(--navy); }
-.cursos-page .bs-all { font-size: 12px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--navy); background: #fff; border: 1px solid var(--line); padding: 10px 20px; border-radius: 30px; box-shadow: var(--shadow-soft); display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: border-color .18s var(--ease), color .18s var(--ease); }
-.cursos-page .bs-all:hover { border-color: var(--green); color: var(--green-deep); }
-.cursos-page .bs-all svg { width: 16px; height: 16px; }
+.cursos-page .bs-all { font-size: 13.5px; font-weight: 800; color: var(--green-deep); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: color .18s var(--ease); }
+.cursos-page .bs-all:hover { color: var(--navy); }
+.cursos-page .bs-all svg { width: 16px; height: 16px; transition: transform .18s var(--ease); }
+.cursos-page .bs-all:hover svg { transform: translateX(3px); }
 
 /* tarjeta de paquete: cursos incluidos + precio antes/ahora + botón de ancho completo */
+.cursos-page .bundles-strip .ccard-body { padding: 16px 20px 20px; }
+.cursos-page .ccard-top { padding-bottom: 16px; }
 .cursos-page .ccard-courses { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
 .cursos-page .ccard-course-chip { background: var(--field); border: 1px solid var(--line); color: var(--muted); font-size: 10.5px; font-weight: 700; padding: 4px 8px; border-radius: 6px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cursos-page .ccard-pricing { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+.cursos-page .ccard-pricing { margin-top: auto; padding: 14px 0 16px; border-top: 1px solid var(--line-2, #eef2f6); border-bottom: 1px solid var(--line-2, #eef2f6); }
 .cursos-page .ccard-was { font-size: 12px; font-weight: 600; color: var(--muted-2); text-decoration: line-through; }
-.cursos-page .ccard-now { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-.cursos-page .ccard-now-price { font-size: 21px; font-weight: 800; color: var(--navy); letter-spacing: -.01em; }
+.cursos-page .ccard-now { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.cursos-page .ccard-now-price { font-size: 25px; font-weight: 800; color: var(--navy); letter-spacing: -.01em; line-height: 1.2; }
 .cursos-page .ccard-now-cur { font-size: 11px; font-weight: 700; color: var(--muted); }
-.cursos-page .ccard-off-pill { background: rgba(0,139,205,.12); color: var(--green-deep); font-size: 11.5px; font-weight: 800; padding: 3px 9px; border-radius: 20px; }
-.cursos-page .ccard-buy { margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; background: var(--navy); color: #fff; font-weight: 800; font-size: 13px; padding: 12px 16px; border-radius: 10px; transition: background .18s var(--ease); }
+.cursos-page .ccard-off-pill { background: rgba(0,139,205,.12); color: var(--green-deep); font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+.cursos-page .ccard-buy { margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; background: var(--navy); color: #fff; font-weight: 800; font-size: 13px; padding: 13px 16px; border-radius: 10px; transition: background .18s var(--ease); }
 .cursos-page .ccard:hover .ccard-buy { background: var(--navy-soft); }
 .cursos-page .ccard-buy svg { width: 15px; height: 15px; color: var(--green); transition: transform .18s var(--ease); }
 .cursos-page .ccard:hover .ccard-buy svg { transform: translateX(3px); }

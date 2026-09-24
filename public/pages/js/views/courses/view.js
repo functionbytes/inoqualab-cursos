@@ -55,4 +55,25 @@ $(document).ready(function () {
     // Diferenciar "Compra ahora" vs "Agregar al carrito"
     $(document).on('click', '#btnBuyNow', function () { $('#buyNow').val('1'); });
     $(document).on('click', '#btnAddCart', function () { $('#buyNow').val(''); });
+
+    // Vista previa del curso en modal (Vimeo/YouTube), en ambas modalidades.
+    // magnific-popup viene en layouts/pages. El patrón por defecto de Vimeo no
+    // entiende las URLs player.vimeo.com/video/ID que guarda el campo "film".
+    if ($.fn.magnificPopup) {
+        $('.js-course-preview').magnificPopup({
+            type: 'iframe',
+            iframe: {
+                patterns: {
+                    vimeo: {
+                        index: 'vimeo.com/',
+                        id: function (url) {
+                            var m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+                            return m ? m[1] : null;
+                        },
+                        src: 'https://player.vimeo.com/video/%id%?autoplay=1'
+                    }
+                }
+            }
+        });
+    }
 });

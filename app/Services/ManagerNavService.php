@@ -188,6 +188,7 @@ class ManagerNavService extends BaseNavService
                             ['label' => 'Reportes programados', 'route' => 'manager.settings.analytics.schedules.index'],
                             ['label' => 'Pixel Analytics', 'route' => 'manager.settings.pixel'],
                             ['label' => 'Portal del alumno', 'route' => 'manager.settings.portal'],
+                            ['label' => 'Sitio web', 'route' => 'manager.settings.website'],
                             ['label' => 'Smtp', 'route' => 'manager.settings.emails'],
                             ['label' => 'Seo', 'route' => 'manager.settings.metadata'],
                             ['label' => 'Configuración SEO', 'route' => 'manager.settings.seo.index'],

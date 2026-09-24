@@ -14,7 +14,10 @@ class BundlesController extends Controller
     {
         seo()->setTitle('Paquetes')->setCanonical(url()->current());
 
-        $bundles = Bundle::available()->latest()->withCount('courses')->with(['courses' => fn ($q) => $q->with('media')->limit(1)])->get();
+        $bundles = Bundle::available()->latest()->withCount('courses')
+            // Todos los cursos (no solo el primero): la tarjeta suma sus precios
+            // para el "antes/ahora" y lista sus nombres.
+            ->with(['courses.media'])->get();
 
         return view('pages.views.bundles.index')->with([
             'bundles' => $bundles,

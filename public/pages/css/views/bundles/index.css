@@ -1,8 +1,6 @@
-.plcard-media img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 1;
-}
+/* /bundles usa la misma tarjeta que la franja del inicio
+   (pages.partials.components.bundle-card, estilos en cursos.css bajo
+   .cursos-page .bundles-strip). Aquí solo se anula el margen superior que
+   la franja necesita en el inicio y se ajusta la fuente del contador. */
+.pkglist.cursos-page .bundles-strip--page { margin-top: 0; }
+.pkglist.cursos-page .pkglist-count { font-family: inherit; }

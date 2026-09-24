@@ -1,0 +1,13 @@
+/* "Sobre nosotros" — Diseño D "Combinada (A + C)" (views/about/combinada.blade.php).
+   Usa informe.css (hero, ventajas) y norma.css (quiénes somos, misión/visión);
+   aquí solo se ajustan los espacios entre secciones que vienen de diseños distintos. */
+
+/* El informe del hero sobresale ~120px: "Quiénes somos" deja ese aire arriba */
+.ab-d .ab-c-who { padding: 170px 0 110px; }
+
+/* Misión/visión va justo después del bloque gris de ventajas */
+.ab-d .ab-c-mv { margin: 0 0 110px; }
+
+@media (max-width: 991px) {
+    .ab-d .ab-c-who { padding: 80px 0 72px; }
+}
