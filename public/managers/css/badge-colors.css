@@ -47,27 +47,31 @@
 }
 
 /*
- * Paleta armonizada con el azul corporativo (#008bce): "success" (positivo)
- * usa un azul mas oscuro/profundo en vez del verde de Bootstrap (pedido
- * explicito: nada de verde en los badges), "danger" rojo suave y "warning"
- * ambar suave se mantienen para poder distinguir negativo/advertencia de
- * un vistazo, y "secondary" gris azulado para estados neutros.
+ * Paleta armonizada con el azul corporativo del nav (#008bce): primary,
+ * success e info usan EXACTAMENTE ese azul (pedido explicito: el azul debe
+ * ser el mismo del nav en todo el panel; nada de verde ni de otros tonos de
+ * azul). Familia: #008bce solido, #0077b3 hover, #006ea3 activo, #e6f3fa
+ * fondo suave, #bfe0f2 borde suave. "danger" rojo suave se mantiene para
+ * distinguir lo negativo de un vistazo; los badges "warning" usan el mismo
+ * gris neutro que "secondary" (texto/iconos .text-warning siguen ambar).
  */
 
 /* Solidos: fondo de color fuerte + texto blanco (badge por defecto) */
 .badge.bg-primary   { background-color: #008bce !important; }
 .badge.bg-secondary { background-color: #5b7285 !important; }
-.badge.bg-success   { background-color: #0a6ca0 !important; }
-.badge.bg-info      { background-color: #2ea8e0 !important; }
-.badge.bg-warning   { background-color: #d98c1f !important; }
+.badge.bg-success   { background-color: #008bce !important; }
+.badge.bg-info      { background-color: #008bce !important; }
+/* warning en gris neutro (pedido explicito: "Sin configurar", "Pendiente"...
+   no deben verse ambar). color !important le gana a text-dark/text-white. */
+.badge.bg-warning   { background-color: #e6ebed !important; color: #4f6672 !important; }
 .badge.bg-danger    { background-color: #c1594c !important; }
 
 /* Subtle: fondo pastel + texto del mismo tono, oscurecido para contraste */
-.badge.bg-primary-subtle   { background-color: #dcf0fb !important; color: #0074a8 !important; }
+.badge.bg-primary-subtle   { background-color: #e6f3fa !important; color: #008bce !important; }
 .badge.bg-secondary-subtle { background-color: #e6ebed !important; color: #4f6672 !important; }
-.badge.bg-success-subtle   { background-color: #dde9f2 !important; color: #0a5478 !important; }
-.badge.bg-info-subtle      { background-color: #e2f4fc !important; color: #1f7fa8 !important; }
-.badge.bg-warning-subtle   { background-color: #faedd7 !important; color: #93630f !important; }
+.badge.bg-success-subtle   { background-color: #e6f3fa !important; color: #008bce !important; }
+.badge.bg-info-subtle      { background-color: #e6f3fa !important; color: #008bce !important; }
+.badge.bg-warning-subtle   { background-color: #e6ebed !important; color: #4f6672 !important; }
 .badge.bg-danger-subtle    { background-color: #f7e2df !important; color: #a8402f !important; }
 
 /*
@@ -78,18 +82,18 @@
  */
 
 /* Fondos solidos sueltos (iconos, barras de progreso, indicadores) */
-.bg-success:not(.badge) { background-color: #0a6ca0 !important; }
-.bg-info:not(.badge)    { background-color: #2ea8e0 !important; }
+.bg-success:not(.badge) { background-color: #008bce !important; }
+.bg-info:not(.badge)    { background-color: #008bce !important; }
 .bg-danger:not(.badge)  { background-color: #c1594c !important; }
 
 /* Fondos subtle sueltos (tarjetas, icon-boxes de KPIs) */
-.bg-success-subtle:not(.badge) { background-color: #dde9f2 !important; }
-.bg-info-subtle:not(.badge)    { background-color: #e2f4fc !important; }
+.bg-success-subtle:not(.badge) { background-color: #e6f3fa !important; }
+.bg-info-subtle:not(.badge)    { background-color: #e6f3fa !important; }
 .bg-danger-subtle:not(.badge)  { background-color: #f7e2df !important; }
 
 /* Texto de estado plano (activo/inactivo, valido/invalido en listados) */
-.text-success:not(.badge) { color: #0a5478 !important; }
-.text-info:not(.badge)    { color: #1f7fa8 !important; }
+.text-success:not(.badge) { color: #008bce !important; }
+.text-info:not(.badge)    { color: #008bce !important; }
 .text-warning:not(.badge) { color: #93630f !important; }
 .text-danger:not(.badge)  { color: #a8402f !important; }
 
@@ -97,17 +101,17 @@
    btn-primary; se fija toda la cadena bg/border/hover/active/disabled. */
 .btn.btn-info {
     --bs-btn-color: #fff !important;
-    --bs-btn-bg: #2ea8e0 !important;
-    --bs-btn-border-color: #2ea8e0 !important;
+    --bs-btn-bg: #008bce !important;
+    --bs-btn-border-color: #008bce !important;
     --bs-btn-hover-color: #fff !important;
-    --bs-btn-hover-bg: #1f8fc2 !important;
-    --bs-btn-hover-border-color: #1c84b3 !important;
+    --bs-btn-hover-bg: #0077b3 !important;
+    --bs-btn-hover-border-color: #0077b3 !important;
     --bs-btn-active-color: #fff !important;
-    --bs-btn-active-bg: #1c84b3 !important;
-    --bs-btn-active-border-color: #1a7aa8 !important;
+    --bs-btn-active-bg: #006ea3 !important;
+    --bs-btn-active-border-color: #006ea3 !important;
     --bs-btn-disabled-color: #fff !important;
-    --bs-btn-disabled-bg: #2ea8e0 !important;
-    --bs-btn-disabled-border-color: #2ea8e0 !important;
+    --bs-btn-disabled-bg: #008bce !important;
+    --bs-btn-disabled-border-color: #008bce !important;
 }
 
 .btn.btn-danger {
@@ -130,17 +134,17 @@
    queda gris liso (pierde el tinte). Impacto bajo (pocos usos reales) pero
    igual de barato de fijar con el mismo patron. */
 .alert-success {
-    --bs-alert-color: #0a5478 !important;
-    --bs-alert-bg: #dde9f2 !important;
-    --bs-alert-border-color: #b9d3e3 !important;
-    --bs-alert-link-color: #0a5478 !important;
+    --bs-alert-color: #008bce !important;
+    --bs-alert-bg: #e6f3fa !important;
+    --bs-alert-border-color: #bfe0f2 !important;
+    --bs-alert-link-color: #0077b3 !important;
 }
 
 .alert-info {
-    --bs-alert-color: #1f7fa8 !important;
-    --bs-alert-bg: #e2f4fc !important;
-    --bs-alert-border-color: #b8e2f5 !important;
-    --bs-alert-link-color: #1f7fa8 !important;
+    --bs-alert-color: #008bce !important;
+    --bs-alert-bg: #e6f3fa !important;
+    --bs-alert-border-color: #bfe0f2 !important;
+    --bs-alert-link-color: #0077b3 !important;
 }
 
 .alert-warning {
@@ -157,33 +161,102 @@
     --bs-alert-link-color: #a8402f !important;
 }
 
+/* .alert-light hereda --bs-light-* de un SEGUNDO bloque :root en style.css
+   (pensado para un tema oscuro, sin selector [data-color-theme] que lo
+   aisle -- mismo bug de fondo descrito arriba) que pisa al primero: texto
+   casi blanco (#F6F9FC) sobre fondo navy (#343a40) en vez de gris claro
+   sobre blanco. Se ve como una alerta oscura pese al nombre "light". */
+.alert-light {
+    --bs-alert-color: #495057 !important;
+    --bs-alert-bg: #f7f9fb !important;
+    --bs-alert-border-color: #eaeff4 !important;
+    --bs-alert-link-color: #495057 !important;
+}
+
 /* Bordes sueltos: mismo rgba(var(--bs-*-rgb)) invalido que .bg-*, el
    borde queda transparente. Uso real bajo (2 archivos) pero mismo costo. */
-.border-success { border-color: #0a6ca0 !important; }
+.border-success { border-color: #008bce !important; }
 .border-danger  { border-color: #c1594c !important; }
 
 /* Boton "Acciones" del header de listados (mails, activity, newsletter,
-   newsletter/campaigns, seo/metas): icono cuadrado gris en vez de boton
+   newsletter/campaigns, seo/metas, orders): icono cuadrado en vez de boton
    con texto + caret, mismo tamano/forma que los botones icon-only ya
-   usados en el buscador de las tablas (.btn-icon). */
+   usados en el buscador de las tablas (.btn-icon) y mismos colores que
+   .filter-trigger-btn (boton "Filtros" de filter-toolbar.css), para que
+   ambos icon-only del header/toolbar luzcan consistentes. Va dentro de un
+   .btn-group (por el dropdown-menu hermano) -- el HTML lleva tambien las
+   clases "dropdown-toggle arrow-none" para que Bootstrap no le recorte el
+   border-radius del lado derecho (regla ".btn-group>.btn:not(.dropdown-toggle)")
+   sin mostrar el caret que agregaria dropdown-toggle. */
 .btn-actions-icon {
-    background-color: #5b7285 !important;
-    border-color: #5b7285 !important;
-    color: #fff !important;
+    background-color: #f5f6f8 !important;
+    border-color: #dee2e6 !important;
+    color: #495057 !important;
 }
 
 .btn-actions-icon:hover,
 .btn-actions-icon:focus,
 .btn-actions-icon:active {
-    background-color: #4f6672 !important;
-    border-color: #4f6672 !important;
-    color: #fff !important;
+    background-color: #e9ecef !important;
+    border-color: #ced4da !important;
+    color: #212529 !important;
 }
 
-/* Badge "ACTIVO" del modo de prueba en panel/settings/incoming-mail: rojo
-   de marca en vez de bg-danger/bg-primary (mismo tono que .badge.bg-danger
-   de arriba, como clase aparte para no heredar cambios futuros de esa regla). */
-.badge-brand-danger {
-    background-color: #b10100 !important;
-    color: #fff !important;
+/* El boton de acciones (kebab) de CADA FILA en los listados (HTML calcado en
+   53 _table.blade.php distintos: <button class="btn btn-sm btn-link
+   text-muted p-0 border-0" data-bs-toggle="dropdown">) se queda tal cual lo
+   define ese markup -- sin caja ni borde, plano -- a diferencia del boton
+   "Acciones" del header (.btn-actions-icon, arriba), que si los tiene. */
+
+/* Tabs de secciones dentro de una card (.user-profile-tab, usadas por
+   primera vez en panel/seo/metas/{id}/edit, pensadas para reusarse en
+   cualquier otra vista que necesite el mismo patron): texto compacto en
+   case normal + pastilla gris en la pestaña activa, en vez del
+   uppercase+negrita+subrayado azul que theme.css le da por defecto a
+   ".nav-pills .nav-link" (pensado para otro tipo de tab, no para esta).
+   theme.css ademas fuerza "color: var(--bs-nav-pills-link-active-color)
+   !important" (blanco) en la pestaña activa -- con fondo transparente eso
+   dejaba el texto blanco sobre blanco, invisible; mismo tipo de bug ya
+   documentado arriba para .badge/.bg-*/.text-*. */
+.user-profile-tab {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+.user-profile-tab .nav-item .nav-link {
+    text-transform: none !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: #6c757d !important;
+    padding: 7px 14px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background-color: transparent !important;
+}
+.user-profile-tab .nav-item .nav-link:hover {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+.user-profile-tab .nav-item .nav-link.active {
+    background-color: #f1f3f5 !important;
+    color: #212529 !important;
+    font-weight: 600 !important;
+    border-bottom: none !important;
+}
+
+/* Badge solo-icono ("Sistema" con estrella/candado en mailer/components y
+   mailer/variables): el .badge de Bootstrap trae padding pensado para texto
+   (0.35em 0.65em), que deja el icono desproporcionadamente grande cuando es
+   lo unico que contiene. */
+.badge-icon-only {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font-size: 11px;
+    flex-shrink: 0;
 }

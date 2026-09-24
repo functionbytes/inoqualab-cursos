@@ -100,7 +100,7 @@
                     <h6 class="fw-bold text-dark mb-1">
                         Modo de prueba
                         @if($trustAll)
-                            <span class="badge badge-brand-danger ms-1">ACTIVO</span>
+                            <span class="badge bg-secondary-subtle ms-1">ACTIVO</span>
                         @endif
                     </h6>
                     <p class="text-muted mb-3">

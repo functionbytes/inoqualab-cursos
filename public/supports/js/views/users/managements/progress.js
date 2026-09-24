@@ -4,7 +4,7 @@ $(document).ready(function () {
             id: 'sparkline3',
             type: 'area',
             fontFamily: "Plus Jakarta Sans', sans-serif",
-            foreColor: '#4784d9',
+            foreColor: '#008bce',
             height: 60,
             sparkline: {
                 enabled: true,
