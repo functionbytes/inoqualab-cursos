@@ -7,6 +7,47 @@
     o paginar. Ver public/managers/js/ajax-table.js.
 --}}
 <div class="card">
+
+    {{-- Stats --}}
+    <div class="card-body border-bottom">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="card bg-light-secondary h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-2">Total auditorías</h6>
+                        <h4 class="mb-1 fw-bold">{{ number_format($stats['total_audits'] ?? 0) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-light-secondary h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-2">Score promedio</h6>
+                        <h4 class="mb-1 fw-bold">
+                            {{ isset($stats['avg_score']) && $stats['avg_score'] > 0 ? $stats['avg_score'] : '—' }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-light-secondary h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-2">Grade A</h6>
+                        <h4 class="mb-1 fw-bold">{{ number_format($stats['grade_a'] ?? 0) }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-light-secondary h-100">
+                    <div class="card-body">
+                        <h6 class="card-title mb-2">Grade F</h6>
+                        <h4 class="mb-1 fw-bold">{{ number_format($stats['grade_f'] ?? 0) }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Filtros --}}
     <div class="card-body border-bottom">
         <form method="GET" action="{{ route('manager.seo.audit.history') }}" id="searchForm">
@@ -66,7 +107,6 @@
                             <th class="text-center">Grade</th>
                             <th class="text-center">Issues</th>
                             <th>Fecha auditoría</th>
-                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -80,7 +120,11 @@
                                     default => 'danger',
                                 };
                             @endphp
-                            <tr>
+                            {{-- Sin dropdown de acciones: la fila abre la meta SEO
+                                 vinculada directamente (cuando existe); eliminar se
+                                 hace por selección + bulk ("Eliminar" en la barra
+                                 inferior), ya no por fila. --}}
+                            <tr @if($log->seoMeta) class="cursor-pointer" data-href="{{ route('manager.seo.audit.history.meta', $log->seoMeta->id) }}" title="Ver meta SEO" @endif>
                                 <td>
                                     <input type="checkbox" class="form-check-input bulk-checkbox"
                                            value="{{ $log->id }}">
@@ -112,34 +156,6 @@
                                     <p class="text-muted">
                                         {{ $log->created_at->format('d/m/Y H:i') }}
                                     </p>
-                                </td>
-                                <td class="text-center">
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
-                                                data-bs-toggle="dropdown"
-                                                data-bs-boundary="viewport">
-                                            <i class="fas fa-ellipsis-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            @if($log->seoMeta)
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                       href="{{ route('manager.seo.audit.history.meta', $log->seoMeta->id) }}">
-                                                        Ver meta SEO
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                            @endif
-                                            <li>
-                                                <button type="button" class="dropdown-item btn-delete-log"
-                                                        data-id="{{ $log->id }}"
-                                                        data-url="{{ route('manager.seo.audit.history.destroy', $log->id) }}"
-                                                        data-title="Eliminar auditoría del {{ $log->created_at->format('d/m/Y H:i') }}">
-                                                    Eliminar
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </td>
                             </tr>
                         @endforeach

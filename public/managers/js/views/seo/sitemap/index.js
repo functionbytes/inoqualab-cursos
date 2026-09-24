@@ -1,5 +1,11 @@
 $(document).ready(function () {
 
+    // Fila completa clicable: abre la URL del sitemap en una pestaña nueva
+    // (reemplaza al dropdown de acciones, que solo tenia la opcion "Ver").
+    $(document).on('click', 'tbody tr[data-href]', function () {
+        window.open($(this).data('href'), '_blank');
+    });
+
     // Limpiar caché
     $('#btn-clear-cache').on('click', function () {
         var $btn = $(this);

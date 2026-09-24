@@ -4,7 +4,8 @@
 
 @section('page_header')
     @include('managers.includes.card', [
-        'title' => 'Páginas con peor rendimiento',
+        'title' => 'Core Web Vitals',
+        'description' => 'Métricas de rendimiento y experiencia de usuario del sitio',
     ])
 @endsection
 
@@ -15,10 +16,10 @@
         $metrics = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'];
 
         $ratingClasses = [
-            'good'              => 'bg-success',
-            'needs-improvement' => 'bg-warning text-dark',
-            'poor'              => 'bg-danger',
-            'unknown'           => 'bg-secondary',
+            'good'              => 'bg-success-subtle text-success',
+            'needs-improvement' => 'bg-warning-subtle text-warning',
+            'poor'              => 'bg-danger-subtle text-danger',
+            'unknown'           => 'bg-secondary-subtle text-secondary',
         ];
 
         $ratingLabels = [
@@ -27,64 +28,56 @@
             'poor'              => 'Malo',
             'unknown'           => 'Sin datos',
         ];
-
-        $metricIcons = [
-            'LCP'  => ['fas fa-image',      'bg-primary-subtle',  'text-primary'],
-            'INP'  => ['fas fa-hand-pointer','bg-info-subtle',     'text-info'],
-            'CLS'  => ['fas fa-arrows-alt',  'bg-warning-subtle',  'text-warning'],
-            'FCP'  => ['fas fa-paint-brush', 'bg-success-subtle',  'text-success'],
-            'TTFB' => ['fas fa-server',      'bg-secondary-subtle','text-secondary'],
-        ];
     @endphp
 
     <div class="widget-content">
 
-        {{-- Periodo --}}
-        <p class="text-muted mb-3">
-            Datos del período: {{ $since->format('d/m/Y') }} — hoy
-            &middot; <strong>{{ number_format($totalSamples) }}</strong> muestras totales
-        </p>
+        <div class="card mb-3">
 
-        {{-- ── Tarjetas p75 globales ───────────────────────────────────────── --}}
-        <div class="row g-3 mb-4">
-            @foreach($metrics as $metric)
-                @php
-                    $data    = $globalP75[$metric] ?? null;
-                    $rating  = $data['rating'] ?? 'unknown';
-                    $value   = $data['value']  ?? null;
-                    $samples = $data['samples'] ?? 0;
-                    $isCls   = $metric === 'CLS';
+            {{-- Stats: p75 globales por métrica --}}
+            <div class="card-body border-bottom">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small">
+                        Datos del período: {{ $since->format('d/m/Y') }} — hoy
+                    </span>
+                    <span class="text-muted small">
+                        <strong>{{ number_format($totalSamples) }}</strong> muestras totales
+                    </span>
+                </div>
+                <div class="row g-3">
+                    @foreach($metrics as $metric)
+                        @php
+                            $data    = $globalP75[$metric] ?? null;
+                            $rating  = $data['rating'] ?? 'unknown';
+                            $value   = $data['value']  ?? null;
+                            $samples = $data['samples'] ?? 0;
+                            $isCls   = $metric === 'CLS';
 
-                    if ($value !== null) {
-                        $formatted = $isCls
-                            ? number_format($value, 3)
-                            : number_format($value) . ' ms';
-                    } else {
-                        $formatted = '—';
-                    }
+                            if ($value !== null) {
+                                $formatted = $isCls
+                                    ? number_format($value, 3)
+                                    : number_format($value) . ' ms';
+                            } else {
+                                $formatted = '—';
+                            }
 
-                    [$icon, $bgClass, $textClass] = $metricIcons[$metric];
-                    $badgeClass = $ratingClasses[$rating] ?? 'bg-secondary';
-                    $badgeLabel = $ratingLabels[$rating]  ?? 'Sin datos';
-                @endphp
-                <div class="col-6 col-md-4 col-xl">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <div class="cwv-icon-box rounded-2 d-flex align-items-center justify-content-center {{ $bgClass }} flex-shrink-0">
-                                    <i class="{{ $icon }} {{ $textClass }}"></i>
+                            $badgeClass = $ratingClasses[$rating] ?? 'bg-secondary-subtle text-secondary';
+                            $badgeLabel = $ratingLabels[$rating]  ?? 'Sin datos';
+                        @endphp
+                        <div class="col-6 col-md-4 col-xl">
+                            <div class="card bg-light-secondary h-100">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">{{ $metric }}</h6>
+                                    <h4 class="mb-1 fw-bold">{{ $formatted }}</h4>
+                                    <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
+                                    <span class="text-muted d-block mt-1">{{ number_format($samples) }} muestras</span>
                                 </div>
-                                <span class="fw-semibold">{{ $metric }}</span>
-                            </div>
-                            <div class="h4 fw-bold mb-1">{{ $formatted }}</div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge {{ $badgeClass }}">{{ $badgeLabel }}</span>
-                                <p class="text-muted">{{ number_format($samples) }} muestras</p>
                             </div>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            </div>
+
         </div>
 
         <div class="row g-3">
@@ -92,8 +85,8 @@
             {{-- ── Páginas con peor rendimiento ───────────────────────────────── --}}
             <div class="col-12 col-lg-7">
                 <div class="card h-100">
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-0 fw-bold">Páginas con peor rendimiento</h5>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Páginas con peor rendimiento</h6>
                     </div>
                     <div class="card-body p-0">
                         @if($worstPages->isEmpty())
@@ -103,7 +96,7 @@
                             </div>
                         @else
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
+                                <table class="table table-hover align-middle mb-0 text-nowrap">
                                     <thead class="table-light">
                                         <tr>
                                             <th>URL</th>
@@ -152,8 +145,8 @@
             {{-- ── Por dispositivo ─────────────────────────────────────────────── --}}
             <div class="col-12 col-lg-5">
                 <div class="card h-100">
-                    <div class="card-header p-4 border-bottom border-light">
-                        <h5 class="mb-0 fw-bold">Por dispositivo</h5>
+                    <div class="card-header border-bottom">
+                        <h6 class="mb-0 fw-bold">Por dispositivo</h6>
                     </div>
                     <div class="card-body p-0">
                         @if($byDevice->isEmpty())
@@ -163,7 +156,7 @@
                             </div>
                         @else
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
+                                <table class="table table-hover align-middle mb-0 text-nowrap">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Dispositivo</th>

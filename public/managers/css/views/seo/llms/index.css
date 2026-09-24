@@ -1,14 +1,35 @@
-.llms-editor-textarea {
-    resize: vertical;
+/* Wrapper de CodeMirror: mismo look que un .form-control (borde, radius),
+   CodeMirror por si solo no trae ninguno de los dos. */
+.llms-editor-wrapper {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.llms-editor-wrapper .CodeMirror {
+    height: 460px;
     font-size: 13px;
     line-height: 1.6;
 }
-.badge-fs-10 {
-    font-size: 10px;
+
+/* Botón "Guardar": azul de marca (#008bce), no el navy de .btn-primary en
+   este tema -- mismo estilo que la referencia (inoqualab.test). */
+.btn-llms-save {
+    background-color: #008bce;
+    border-color: #008bce;
+    color: #fff;
 }
-.text-fs-11 {
-    font-size: 11px;
+.btn-llms-save:hover,
+.btn-llms-save:focus {
+    background-color: #0077b3;
+    border-color: #0077b3;
+    color: #fff;
 }
+
+/* "Restaurar al default" usa .btn-llms-save (mismo azul solido que
+   "Guardar"): pedido explícito de un único estilo de botón azul para ambas
+   acciones, igual en todos los forms de este tipo (ver también
+   seo/robots/index.css). */
+
 .llms-example-pre {
     font-size: 0.72rem;
     white-space: pre-wrap;

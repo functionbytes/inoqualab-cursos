@@ -5,7 +5,7 @@
 @section('page_header')
     @php ob_start(); @endphp
 <div class="btn-group">
-                            <button type="button" class="btn btn-icon btn-actions-icon"
+                            <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
                                 <i class="fas fa-ellipsis-vertical"></i>
                             </button>
@@ -52,9 +52,9 @@
 
 @push('css')
 <link rel="stylesheet" href="{{ asset('managers/css/includes/seo-badges.css') }}">
-<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/index.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/index.css') }}?v={{ @filemtime(public_path('managers/css/views/seo/metas/index.css')) ?: 1 }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('managers/js/views/seo/metas/index.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/metas/index.js') }}?v={{ @filemtime(public_path('managers/js/views/seo/metas/index.js')) ?: 1 }}"></script>
 @endpush

@@ -1,3 +1,35 @@
 .robots-snippet-pre {
     font-size: 0.78rem;
 }
+
+/* Wrapper de CodeMirror: mismo look que un .form-control (borde, radius),
+   CodeMirror por si solo no trae ninguno de los dos -- mismo patrón que
+   seo/llms/index.css. */
+.robots-editor-wrapper {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.robots-editor-wrapper .CodeMirror {
+    height: 460px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Botón "Guardar": azul de marca (#008bce), no el navy de .btn-primary en
+   este tema -- mismo estilo que la referencia (inoqualab.test). */
+.btn-robots-save {
+    background-color: #008bce;
+    border-color: #008bce;
+    color: #fff;
+}
+.btn-robots-save:hover,
+.btn-robots-save:focus {
+    background-color: #0077b3;
+    border-color: #0077b3;
+    color: #fff;
+}
+
+/* "Restaurar al default" usa el .btn-primary de serie del tema (navy), no
+   un color custom -- mismo criterio que seo/llms/index.blade.php: solo
+   "Guardar" lleva el azul de marca. */

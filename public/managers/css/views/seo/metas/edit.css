@@ -1,3 +1,37 @@
 .og-image-preview-img {
     max-height: 120px;
 }
+
+/* Pestañas Básico/Open Graph/Twitter/Técnico/Schema.org: estilo neutro,
+   pastilla gris clara sutil en la activa (no un borde de color) + una sola
+   línea divisoria debajo de TODA la fila de pestañas (#seoMetaTab.nav-tabs),
+   no el pill con fondo solido que trae .nav-tabs .nav-link.active por
+   defecto del tema (#081A28, ver comentario en edit.blade.php).
+   !important en el border-bottom: el <ul> lleva la clase Bootstrap
+   "border-0" (".border-0{border:0!important}"), que sin esto le sigue
+   ganando al borde de abajo y la línea desaparece. */
+#seoMetaTab.nav-tabs {
+    border-bottom: 1px solid #e5e7eb !important;
+    gap: 4px;
+}
+
+#seoMetaTab .nav-link {
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: #64748b !important;
+    font-size: 14px;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#seoMetaTab .nav-link:hover,
+#seoMetaTab .nav-link:focus {
+    color: #334155 !important;
+}
+
+#seoMetaTab .nav-link.active {
+    color: #495057 !important;
+    background-color: #f1f3f5 !important;
+    font-weight: 600;
+}

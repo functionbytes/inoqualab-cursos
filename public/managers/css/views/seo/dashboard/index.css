@@ -106,8 +106,10 @@
     border-radius: 50%;
     flex-shrink: 0;
 }
+/* "Prioridad — bajo 70" en gris neutro en vez de rojo de alerta (pedido
+   explícito) -- dot, texto del label y fondo de fila, los 3 al mismo tono. */
 .seo-worst-dot--critical {
-    background: #b10100;
+    background: #6c757d;
 }
 .seo-worst-dot--improvable {
     background: #008bce;
@@ -120,7 +122,7 @@
     color: #5a7093;
 }
 .seo-worst-severity-label--critical {
-    color: #b10100;
+    color: #6c757d;
 }
 .seo-worst-row {
     padding: 8px 10px;
@@ -130,7 +132,7 @@
     margin-bottom: 2px;
 }
 .seo-worst-row--critical {
-    background: #fbe9e9;
+    background: #f1f3f5;
 }
 .seo-worst-row-edit {
     width: 28px;

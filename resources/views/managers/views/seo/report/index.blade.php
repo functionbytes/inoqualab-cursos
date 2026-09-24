@@ -4,7 +4,8 @@
 
 @section('page_header')
     @include('managers.includes.card', [
-        'title' => 'Exportar datos',
+        'title' => 'Reporte SEO',
+        'description' => 'Exporta datos y monitorea la calidad de tus metadatos',
     ])
 @endsection
 
@@ -32,76 +33,44 @@
          data-flash-success="{{ session('success') }}" data-flash-success-title="Éxito"
          data-flash-error="{{ session('error') }}" data-flash-error-title="Error">
 
-        {{-- ── Tarjetas de resumen ──────────────────────────────────────────── --}}
-        <div class="row g-3 mb-4">
+        <div class="card mb-3">
 
-            <div class="col-6 col-md-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-primary-subtle flex-shrink-0">
-                                <i class="fas fa-tags text-primary"></i>
-                            </div>
-                            <span class="text-muted small">Total metas</span>
-                        </div>
-                        <div class="h4 fw-bold mb-0">{{ number_format($stats['total_metas'] ?? 0) }}</div>
-                    </div>
-                </div>
-            </div>
+            {{-- ── Tarjetas de resumen ──────────────────────────────────────────── --}}
+            <div class="card-body border-bottom">
+                <div class="row g-3">
 
-            <div class="col-6 col-md-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-success-subtle flex-shrink-0">
-                                <i class="fas fa-star text-success"></i>
+                    <div class="col-6 col-md-4">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Total metas</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['total_metas'] ?? 0) }}</h4>
+                                <span class="text-muted">Metadatos configurados</span>
                             </div>
-                            <span class="text-muted small">Score promedio</span>
-                        </div>
-                        <div class="h4 fw-bold mb-0">
-                            {{ $stats['avg_score'] > 0 ? $stats['avg_score'] : '—' }}
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="col-6 col-md-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-info-subtle flex-shrink-0">
-                                <i class="fas fa-route text-info"></i>
+                    <div class="col-6 col-md-4">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Score promedio</h6>
+                                <h4 class="mb-1 fw-bold">
+                                    {{ $stats['avg_score'] > 0 ? $stats['avg_score'] : '—' }}
+                                </h4>
+                                <span class="text-muted">Sobre 100 puntos</span>
                             </div>
-                            <span class="text-muted small">Total redirects</span>
-                        </div>
-                        <div class="h4 fw-bold mb-0">{{ number_format($stats['total_redirects'] ?? 0) }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-md-3">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <div class="seo-icon-box rounded-2 d-flex align-items-center justify-content-center bg-warning-subtle flex-shrink-0">
-                                <i class="fas fa-chart-pie text-warning"></i>
-                            </div>
-                            <span class="text-muted small">Distribución grades</span>
-                        </div>
-                        <div class="d-flex flex-wrap gap-1 mt-1">
-                            @foreach($gradeConfig as $grade => $cfg)
-                                @php $count = $gradeDistribution[$grade] ?? 0; @endphp
-                                @if($count > 0)
-                                    <span class="badge {{ $cfg['class'] }}">
-                                        {{ $grade }}: {{ number_format($count) }}
-                                    </span>
-                                @endif
-                            @endforeach
-                            @if($gradeTotal === 0)
-                                <span class="text-muted small">Sin datos</span>
-                            @endif
                         </div>
                     </div>
+
+                    <div class="col-6 col-md-4">
+                        <div class="card bg-light-secondary h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Total redirects</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['total_redirects'] ?? 0) }}</h4>
+                                <span class="text-muted">Reglas activas</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

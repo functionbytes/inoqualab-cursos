@@ -48,11 +48,13 @@
 
     <div id="bulk-config" class="d-none" data-bulk-url="{{ route('manager.seo.templates.bulk-action') }}"></div>
 
+    {{-- Activar/Desactivar se quitaron del menú de acciones masivas: el
+         estado ya se controla por fila con el switch de la columna
+         "Estado" en _table.blade.php -- tener las dos formas era
+         redundante. --}}
     @include('managers.includes.bulk-toolbar-modal', [
         'bulkEntityLabel' => 'plantilla(s)',
         'bulkActions' => [
-            ['value' => 'activate', 'label' => 'Activar'],
-            ['value' => 'deactivate', 'label' => 'Desactivar'],
             ['value' => 'delete', 'label' => 'Eliminar'],
         ],
     ])

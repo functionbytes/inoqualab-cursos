@@ -1,16 +1,117 @@
-.icon-box-36 {
-    width: 36px;
-    height: 36px;
+/* Pasos de conexión: marcador numerado unido por una línea vertical.
+   Estados: is-done (check azul), is-current (borde azul), is-locked (atenuado). */
+.gsc-steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
-.icon-box-40 {
-    width: 40px;
-    height: 40px;
+
+.gsc-step {
+    position: relative;
+    display: flex;
+    gap: 16px;
+    padding-bottom: 24px;
 }
-.icon-box-44 {
-    width: 44px;
-    height: 44px;
+
+.gsc-step:last-child {
+    padding-bottom: 0;
 }
-.icon-box-64 {
-    width: 64px;
-    height: 64px;
+
+.gsc-step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 34px;
+    bottom: 4px;
+    left: 15px;
+    width: 2px;
+    background-color: #e3e7ea;
+}
+
+.gsc-step.is-done:not(:last-child)::before {
+    background-color: #bfe0f2;
+}
+
+.gsc-step-marker {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: 0 0 32px;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    background-color: #fff;
+    color: #6c757d;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.gsc-step.is-done .gsc-step-marker {
+    border-color: #008bce;
+    background-color: #008bce;
+    color: #fff;
+}
+
+.gsc-step.is-current .gsc-step-marker {
+    border-color: #008bce;
+    color: #008bce;
+}
+
+.gsc-step.is-locked .gsc-step-body {
+    opacity: .55;
+}
+
+.gsc-step-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-top: 5px;
+}
+
+.gsc-step-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.gsc-env {
+    padding: 12px 14px;
+    border: 1px solid #e3e7ea;
+    border-radius: var(--bs-border-radius);
+    background-color: #f5f6f8;
+    color: #33475b;
+    font-size: 12px;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.gsc-import-form {
+    display: flex;
+    gap: 8px;
+    max-width: 420px;
+}
+
+.gsc-import-form .form-select {
+    flex: 1 1 auto;
+}
+
+.gsc-import-form .btn {
+    flex-shrink: 0;
+}
+
+.gsc-metric {
+    height: 100%;
+    padding: 16px;
+    border-radius: var(--bs-border-radius);
+    background-color: #f5f6f8;
+}
+
+@media (max-width: 575.98px) {
+    .gsc-step-row,
+    .gsc-import-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

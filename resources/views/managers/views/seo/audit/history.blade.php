@@ -3,9 +3,27 @@
 @section('title', 'Historial de auditorías SEO')
 
 @section('page_header')
+    @php ob_start(); @endphp
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            {{-- id="btn-clear-history": public/managers/js/views/seo/audit/history.js
+                 ya escuchaba el click de este id para abrir #modal-clear-history,
+                 pero ningún botón con ese id existía en la vista -- el modal de
+                 confirmación quedaba sin forma de abrirse. --}}
+            <button type="button" class="dropdown-item" id="btn-clear-history">
+                Limpiar historial
+            </button>
+        </div>
+    </div>
+    @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Historial de auditorías SEO',
         'description' => 'Registro de todas las auditorías ejecutadas sobre metas SEO',
+        'actions' => $headerActions,
     ])
 @endsection
 
@@ -14,49 +32,8 @@
 
     <div class="widget-content searchable-container list">
 
-        <div class="card mb-3">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-6 col-md-3">
-                        <div class="card bg-light-secondary h-100">
-                            <div class="card-body text-center py-3">
-                                <h6 class="card-title mb-1 text-muted small">Total auditorías</h6>
-                                <h4 class="mb-0 fw-bold">{{ number_format($stats['total_audits'] ?? 0) }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card bg-light-secondary h-100">
-                            <div class="card-body text-center py-3">
-                                <h6 class="card-title mb-1 text-muted small">Score promedio</h6>
-                                <h4 class="mb-0 fw-bold">
-                                    {{ isset($stats['avg_score']) && $stats['avg_score'] > 0 ? $stats['avg_score'] : '—' }}
-                                </h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card bg-light-secondary h-100">
-                            <div class="card-body text-center py-3">
-                                <h6 class="card-title mb-1 text-muted small">Grade A</h6>
-                                <h4 class="mb-0 fw-bold text-success">{{ number_format($stats['grade_a'] ?? 0) }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <div class="card bg-light-secondary h-100">
-                            <div class="card-body text-center py-3">
-                                <h6 class="card-title mb-1 text-muted small">Grade F</h6>
-                                <h4 class="mb-0 fw-bold text-danger">{{ number_format($stats['grade_f'] ?? 0) }}</h4>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="ajax-table-root">
-            @include('managers.views.seo.audit._history', ['logs' => $logs])
+            @include('managers.views.seo.audit._history', ['logs' => $logs, 'stats' => $stats])
         </div>
 
     </div>
@@ -98,33 +75,6 @@
                         Cancelar
                     </button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Delete modal individual --}}
-    <div id="delete-modal" class="modal fade">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <form id="delete-form" method="POST" action="">
-                    @csrf
-                    @method('DELETE')
-                    <div class="modal-header">
-                        <h5 class="modal-title">Confirmar eliminacion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body text-center py-4">
-                        <div class="display-4 text-warning mb-3">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <h5 class="fw-bold mb-2" id="delete-modal-title">¿Estas seguro?</h5>
-                        <p class="text-muted">Esta accion no se puede deshacer.</p>
-                    </div>
-                    <div class="modal-footer flex-column">
-                        <button type="submit" class="btn btn-primary w-100 mb-2">Confirmar eliminacion</button>
-                        <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

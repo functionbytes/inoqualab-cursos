@@ -4,10 +4,21 @@ $(document).ready(function () {
     var updateUrl = $editor.data('update-url');
     var resetUrl = $editor.data('reset-url');
 
+    // ── CodeMirror ────────────────────────────────────────────────────────
+    // El textarea #llms-editor queda oculto (d-none): solo guarda el valor
+    // inicial/de fallback. CodeMirror monta en #llmsEditorWrapper y es la
+    // fuente real del contenido via editor.getValue()/.setValue().
+    var editor = CodeMirror(document.getElementById('llmsEditorWrapper'), {
+        value: $editor.val(),
+        mode: 'markdown',
+        lineNumbers: true,
+        lineWrapping: true,
+    });
+
     // Guardar llms.txt via AJAX
     $('#btn-save-llms').on('click', function () {
         var $btn = $(this);
-        var content = $editor.val();
+        var content = editor.getValue();
 
         $btn.prop('disabled', true).html(
             '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...'
@@ -34,7 +45,7 @@ $(document).ready(function () {
                 toastr.error(msg);
             },
             complete: function () {
-                $btn.prop('disabled', false).html('Guardar llms.txt');
+                $btn.prop('disabled', false).html('Guardar');
             }
         });
     });
@@ -58,7 +69,7 @@ $(document).ready(function () {
             success: function (response) {
                 toastr.success(response.message ?? 'Contenido restaurado al valor por defecto');
                 if (response.content !== undefined) {
-                    $editor.val(response.content);
+                    editor.setValue(response.content);
                 } else {
                     setTimeout(function () { window.location.reload(); }, 800);
                 }
@@ -68,7 +79,7 @@ $(document).ready(function () {
                 toastr.error(msg);
             },
             complete: function () {
-                $btn.prop('disabled', false).html('Restaurar default');
+                $btn.prop('disabled', false).html('Restaurar al default');
             }
         });
     });

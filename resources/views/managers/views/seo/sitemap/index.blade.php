@@ -63,12 +63,13 @@
                                         <th>Nombre</th>
                                         <th>URL</th>
                                         <th class="text-center">Estado caché</th>
-                                        <th class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($sitemaps as $sitemap)
-                                        <tr>
+                                        {{-- Sin dropdown de acciones: la única acción por fila era
+                                             "Ver", así que la fila completa abre la URL directamente. --}}
+                                        <tr class="cursor-pointer" data-href="{{ $sitemap['url'] }}" title="Ver {{ $sitemap['name'] }}">
                                             <td class="fw-semibold">{{ $sitemap['name'] }}</td>
                                             <td>
                                                 <code class="small text-break">{{ $sitemap['url'] }}</code>
@@ -80,26 +81,10 @@
                                                     <span class="badge bg-secondary-subtle text-secondary">Sin caché</span>
                                                 @endif
                                             </td>
-                                            <td class="text-center">
-                                                <div class="dropdown">
-                                                    <button type="button" class="btn btn-sm btn-link text-muted p-0 border-0"
-                                                            data-bs-toggle="dropdown"
-                                                            data-bs-boundary="viewport">
-                                                        <i class="fas fa-ellipsis-vertical"></i>
-                                                    </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end">
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ $sitemap['url'] }}" target="_blank">
-                                                                Ver
-                                                            </a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted py-5">
+                                            <td colspan="3" class="text-center text-muted py-5">
                                                 <i class="fas fa-sitemap fs-2 d-block mb-2 opacity-50"></i>
                                                 No hay sitemaps disponibles
                                             </td>

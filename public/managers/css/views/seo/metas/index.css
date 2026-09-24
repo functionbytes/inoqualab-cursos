@@ -7,9 +7,12 @@
 
 /* Pestañas Todas/Indexables/No indexables/Sin optimizar: estilo underline
    (como el monitor de colas), no el "pill" con fondo solido que trae
-   .nav-tabs .nav-link.active por defecto del tema. */
+   .nav-tabs .nav-link.active por defecto del tema.
+   !important en el border-bottom: el <ul> lleva la clase Bootstrap
+   "border-0" (".border-0{border:0!important}"), que sin esto le sigue
+   ganando al borde de abajo y la línea desaparece. */
 #seo-meta-tab.nav-tabs {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb !important;
     gap: 4px;
 }
 

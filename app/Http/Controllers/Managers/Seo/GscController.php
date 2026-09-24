@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Managers\Seo;
 
 use App\Http\Controllers\Controller;
+use App\Models\Seo\SeoMeta;
 use App\Services\GoogleSearchConsoleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,9 @@ class GscController extends Controller
             'configured' => $service->isConfigured(),
             'connected' => $service->isConnected(),
             'property_url' => config('services.gsc.property_url') ?: config('app.url'),
+            // Tercer paso del checklist: al menos una meta con datos de GSC
+            // importados (gsc_updated_at), no solo la propiedad configurada.
+            'imported' => SeoMeta::query()->whereNotNull('gsc_updated_at')->exists(),
         ];
 
         return view('managers.views.seo.gsc.index', compact('status'));

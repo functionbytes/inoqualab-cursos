@@ -10,7 +10,7 @@
     transition: border-color 0.3s ease;
 }
 .seo-score-circle.grade-a { border-color: #198754; background: #d1e7dd; }
-.seo-score-circle.grade-b { border-color: #0d6efd; background: #cfe2ff; }
+.seo-score-circle.grade-b { border-color: #008bce; background: #e6f3fa; }
 .seo-score-circle.grade-c { border-color: #ffc107; background: #fff3cd; }
 .seo-score-circle.grade-d,
 .seo-score-circle.grade-f { border-color: #dc3545; background: #f8d7da; }

@@ -16,28 +16,28 @@
                         </div>
                     </div>
                     <div class="col-6 col-md">
-                        <div class="card bg-danger-subtle h-100">
+                        <div class="card bg-light-secondary h-100">
                             <div class="card-body">
-                                <h6 class="card-title mb-2 text-danger">Criticas</h6>
-                                <h4 class="mb-1 fw-bold text-danger">{{ number_format($stats['critical']) }}</h4>
+                                <h6 class="card-title mb-2">Criticas</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['critical']) }}</h4>
                                 <span class="text-muted">Alta prioridad</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-6 col-md">
-                        <div class="card bg-warning-subtle h-100">
+                        <div class="card bg-light-secondary h-100">
                             <div class="card-body">
-                                <h6 class="card-title mb-2 text-warning">Advertencias</h6>
-                                <h4 class="mb-1 fw-bold text-warning">{{ number_format($stats['warning']) }}</h4>
+                                <h6 class="card-title mb-2">Advertencias</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['warning']) }}</h4>
                                 <span class="text-muted">Media prioridad</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-6 col-md">
-                        <div class="card bg-info-subtle h-100">
+                        <div class="card bg-light-secondary h-100">
                             <div class="card-body">
-                                <h6 class="card-title mb-2 text-info">Informativas</h6>
-                                <h4 class="mb-1 fw-bold text-info">{{ number_format($stats['info']) }}</h4>
+                                <h6 class="card-title mb-2">Informativas</h6>
+                                <h4 class="mb-1 fw-bold">{{ number_format($stats['info']) }}</h4>
                                 <span class="text-muted">Baja prioridad</span>
                             </div>
                         </div>
@@ -152,7 +152,7 @@
                                     @php
                                         $severityMap = [
                                             'critical' => ['color' => 'danger',    'label' => 'Critica'],
-                                            'warning'  => ['color' => 'warning',   'label' => 'Advertencia'],
+                                            'warning'  => ['color' => 'secondary', 'label' => 'Advertencia'],
                                             'info'     => ['color' => 'info',      'label' => 'Info'],
                                         ];
                                         $sev = $severityMap[$alert->severity] ?? ['color' => 'secondary', 'label' => $alert->severity];

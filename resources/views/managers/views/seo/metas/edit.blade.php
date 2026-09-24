@@ -8,38 +8,71 @@
 
 @section('content')
 
-
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{{ route('home') }}">Inicio</a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="{{ route('manager.seo.metas.index') }}">SEO metas</a>
-            </li>
-            <li class="breadcrumb-item active">Editar</li>
-        </ol>
-    </nav>
-
     <div class="row g-3">
 
         {{-- Columna principal --}}
         <div class="col-12 col-lg-8">
             <form id="formSeoMeta" data-update-url="{{ route('manager.seo.metas.update', $seoMeta->id) }}">
 
-                {{-- Acordeón de secciones --}}
-                <div class="accordion" id="seoAccordion">
+                {{-- Secciones por pestañas en vez de acordeón: una sola
+                     sección visible a la vez, sin scroll de acordeón
+                     abriendo/cerrando. Estilo neutro (texto gris/negro, sin
+                     acento de color) -- antes esta vista usaba
+                     .user-profile-tab (pastilla gris en la activa),
+                     inconsistente con el resto de la sección SEO. El fix
+                     real va en edit.css (#seoMetaTab): .nav-tabs por si solo
+                     no alcanza, theme.css redefine --bs-nav-tabs-link-active-bg
+                     a #081A28 (mismo bug documentado en badge-colors.css). --}}
+                <div class="card mb-3">
 
-                    {{-- Básico --}}
-                    <div class="accordion-item border rounded mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button fw-semibold" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseBasico">
+                    <div class="card-header p-4 border-bottom">
+                        <h5 class="mb-1 fw-bold">Metadatos SEO</h5>
+                        <p class="small mb-0 text-muted">Título, descripción, Open Graph, Twitter y datos técnicos de esta página.</p>
+                    </div>
+
+                    <ul class="nav nav-tabs border-0" id="seoMetaTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3 active" id="tab-basico" data-bs-toggle="pill"
+                                    data-bs-target="#pane-basico" type="button" role="tab"
+                                    aria-controls="pane-basico" aria-selected="true">
                                 Básico
                             </button>
-                        </h2>
-                        <div id="collapseBasico" class="accordion-collapse collapse show" data-bs-parent="#seoAccordion">
-                            <div class="accordion-body">
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3" id="tab-og" data-bs-toggle="pill"
+                                    data-bs-target="#pane-og" type="button" role="tab"
+                                    aria-controls="pane-og" aria-selected="false">
+                                Open Graph
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3" id="tab-twitter" data-bs-toggle="pill"
+                                    data-bs-target="#pane-twitter" type="button" role="tab"
+                                    aria-controls="pane-twitter" aria-selected="false">
+                                Twitter / X
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3" id="tab-tecnico" data-bs-toggle="pill"
+                                    data-bs-target="#pane-tecnico" type="button" role="tab"
+                                    aria-controls="pane-tecnico" aria-selected="false">
+                                Técnico
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-0 py-3" id="tab-schema" data-bs-toggle="pill"
+                                    data-bs-target="#pane-schema" type="button" role="tab"
+                                    aria-controls="pane-schema" aria-selected="false">
+                                Schema.org
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="card-body">
+                        <div class="tab-content" id="seoMetaTabContent">
+
+                            {{-- Básico --}}
+                            <div role="tabpanel" class="tab-pane fade show active" id="pane-basico" aria-labelledby="tab-basico">
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">Title
@@ -85,19 +118,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- Open Graph --}}
-                    <div class="accordion-item border rounded mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseOG">
-                                Open Graph
-                            </button>
-                        </h2>
-                        <div id="collapseOG" class="accordion-collapse collapse" data-bs-parent="#seoAccordion">
-                            <div class="accordion-body">
+                            {{-- Open Graph --}}
+                            <div role="tabpanel" class="tab-pane fade" id="pane-og" aria-labelledby="tab-og">
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">OG Title
@@ -125,7 +148,7 @@
                                             <img src="" alt="Vista previa OG" class="img-fluid rounded border og-image-preview-img">
                                         </div>
                                     </div>
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12">
                                         <label class="form-label fw-semibold">OG Type</label>
                                         <select class="form-select" name="og_type">
                                             @foreach(['website' => 'Website', 'article' => 'Article', 'product' => 'Product'] as $val => $label)
@@ -135,21 +158,11 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- Twitter --}}
-                    <div class="accordion-item border rounded mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseTwitter">
-                                Twitter / X
-                            </button>
-                        </h2>
-                        <div id="collapseTwitter" class="accordion-collapse collapse" data-bs-parent="#seoAccordion">
-                            <div class="accordion-body">
+                            {{-- Twitter --}}
+                            <div role="tabpanel" class="tab-pane fade" id="pane-twitter" aria-labelledby="tab-twitter">
                                 <div class="row g-3">
-                                    <div class="col-12 col-md-6">
+                                    <div class="col-12">
                                         <label class="form-label fw-semibold">Twitter card</label>
                                         <select class="form-select" name="twitter_card">
                                             <option value="summary" @selected(old('twitter_card', $seoMeta->twitter_card) === 'summary')>Summary</option>
@@ -176,19 +189,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- Técnico --}}
-                    <div class="accordion-item border rounded mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseTecnico">
-                                Técnico
-                            </button>
-                        </h2>
-                        <div id="collapseTecnico" class="accordion-collapse collapse" data-bs-parent="#seoAccordion">
-                            <div class="accordion-body">
+                            {{-- Técnico --}}
+                            <div role="tabpanel" class="tab-pane fade" id="pane-tecnico" aria-labelledby="tab-tecnico">
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label class="form-label fw-semibold">URL canónica</label>
@@ -217,38 +220,30 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {{-- Schema.org custom --}}
-                    <div class="accordion-item border rounded mb-2">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#collapseSchema">
-                                Schema.org personalizado
-                            </button>
-                        </h2>
-                        <div id="collapseSchema" class="accordion-collapse collapse" data-bs-parent="#seoAccordion">
-                            <div class="accordion-body">
+                            {{-- Schema.org custom --}}
+                            <div role="tabpanel" class="tab-pane fade" id="pane-schema" aria-labelledby="tab-schema">
                                 <label class="form-label fw-semibold">JSON-LD personalizado</label>
                                 <textarea class="form-control font-monospace" id="schema_custom" name="schema_custom"
                                           rows="10"
                                           placeholder='{"@@context":"https://schema.org","@@type":"Course","name":"..."}'>{{ old('schema_custom', $seoMeta->schema_custom ? json_encode($seoMeta->schema_custom, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
-                                <div class="mt-2 d-flex gap-2 align-items-center">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-validate-json">
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-primary w-100" id="btn-validate-json">
                                         Validar JSON
                                     </button>
-                                    <span id="json-validation-msg" class="small"></span>
+                                    <span id="json-validation-msg" class="small d-block mt-2"></span>
                                 </div>
                             </div>
+
                         </div>
                     </div>
 
-                </div>
-
-                {{-- Botones --}}
-                <div class="card mt-3">
-                    <div class="card-footer bg-white">
+                    {{-- Botones dentro de la MISMA card (no una card aparte
+                         con espacio de por medio) -- mismo patrón que
+                         "Configuración del sistema" en webadmin, donde el
+                         card-footer con los botones cierra directamente el
+                         card que contiene las tabs. --}}
+                    <div class="card-footer">
                         <button type="button" class="btn btn-primary w-100 mb-2" id="btn-save-meta">
                             Guardar cambios
                         </button>
@@ -261,76 +256,77 @@
             </form>
         </div>
 
-        {{-- Columna de ayuda --}}
+        {{-- Columna de ayuda: una sola tarjeta combinada (propuesta A del
+             /design) en vez de dos tarjetas separadas -- filas de
+             información en línea (label izquierda, valor derecha) en vez de
+             list-group apilado, y el checklist con circulos de check en vez
+             de icono suelto. --}}
         <div class="col-12 col-lg-4">
-            <div class="card mb-3">
-                <div class="card-header border-bottom p-3">
-                    <h6 class="mb-0 fw-bold">Información del recurso</h6>
-                    <p class="text-muted">Página vinculada a este meta</p>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item px-3 py-2">
-                            <small class="text-muted d-block">Tipo</small>
-                            <span class="small fw-semibold">{{ class_basename($seoMeta->seoable_type) }}</span>
-                        </div>
-                        <div class="list-group-item px-3 py-2">
-                            <small class="text-muted d-block">ID del recurso</small>
-                            <span class="small fw-semibold">#{{ $seoMeta->seoable_id }}</span>
-                        </div>
-                        <div class="list-group-item px-3 py-2">
-                            <small class="text-muted d-block">Creado</small>
-                            <span class="small">{{ $seoMeta->created_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <div class="list-group-item px-3 py-2">
-                            <small class="text-muted d-block">Última actualización</small>
-                            <span class="small">{{ $seoMeta->updated_at->diffForHumans() }}</span>
-                        </div>
-                        @if($seoMeta->score)
-                            <div class="list-group-item px-3 py-2">
-                                <small class="text-muted d-block">Score SEO</small>
-                                @php
-                                    $sc = $seoMeta->score;
-                                    $scClass = match($sc) {
-                                        'A' => 'bg-success', 'B' => 'bg-info',
-                                        'C' => 'bg-warning text-dark',
-                                        default => 'bg-danger'
-                                    };
-                                @endphp
-                                <span class="badge {{ $scClass }}">{{ $sc }}</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
             <div class="card">
-                <div class="card-header border-bottom p-3">
-                    <h6 class="mb-0 fw-bold">Guía rápida</h6>
+                <div class="card-body p-4">
+                    <h6 class="mb-1 fw-bold">Información del recurso</h6>
+                    <p class="text-muted small mb-0">Página vinculada a este meta</p>
                 </div>
-                <div class="card-body p-3">
-                    <ul class="list-unstyled mb-0 small text-muted">
-                        <li class="mb-2">
-                            <i class="fas fa-circle-check text-success me-1"></i>
-                            Title: entre 50 y 70 caracteres
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-circle-check text-success me-1"></i>
-                            Description: entre 120 y 170 caracteres
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-circle-check text-success me-1"></i>
-                            OG Image: 1200×630 px recomendado
-                        </li>
-                        <li class="mb-2">
-                            <i class="fas fa-circle-check text-success me-1"></i>
-                            Incluye la keyword principal en el título
-                        </li>
-                        <li>
-                            <i class="fas fa-circle-check text-success me-1"></i>
-                            JSON-LD debe ser JSON válido
-                        </li>
-                    </ul>
+
+                <div class="px-4 pb-2">
+                    <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                        <span class="small text-muted fw-semibold">Tipo</span>
+                        <span class="small fw-bold">{{ class_basename($seoMeta->seoable_type) }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                        <span class="small text-muted fw-semibold">ID del recurso</span>
+                        <span class="small fw-bold">#{{ $seoMeta->seoable_id }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                        <span class="small text-muted fw-semibold">Creado</span>
+                        <span class="small fw-semibold">{{ $seoMeta->created_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                        <span class="small text-muted fw-semibold">Última actualización</span>
+                        <span class="small fw-semibold">{{ $seoMeta->updated_at->diffForHumans() }}</span>
+                    </div>
+                    @if($seoMeta->score)
+                        @php
+                            $sc = $seoMeta->score;
+                            $scClass = match($sc) {
+                                'A' => 'bg-success', 'B' => 'bg-info',
+                                'C' => 'bg-warning text-dark',
+                                default => 'bg-danger'
+                            };
+                        @endphp
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                            <span class="small text-muted fw-semibold">Score SEO</span>
+                            <span class="badge {{ $scClass }}">{{ $sc }}</span>
+                        </div>
+                    @endif
+                </div>
+
+                <hr class="my-0">
+
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3">Guía rápida</h6>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-circle-check text-success mt-1"></i>
+                            <span class="small text-muted">Title: entre 50 y 70 caracteres</span>
+                        </div>
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-circle-check text-success mt-1"></i>
+                            <span class="small text-muted">Description: entre 120 y 170 caracteres</span>
+                        </div>
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-circle-check text-success mt-1"></i>
+                            <span class="small text-muted">OG Image: 1200×630 px recomendado</span>
+                        </div>
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-circle-check text-success mt-1"></i>
+                            <span class="small text-muted">Incluye la keyword principal en el título</span>
+                        </div>
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="fas fa-circle-check text-success mt-1"></i>
+                            <span class="small text-muted">JSON-LD debe ser JSON válido</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -340,9 +336,12 @@
 @endsection
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/edit.css') }}">
+{{-- ?v=filemtime: sin esto el navegador puede servir una copia en caché de
+     antes del último cambio a este CSS -- pasó justo con el fix del
+     border-bottom de #seoMetaTab, invisible hasta forzar recarga. --}}
+<link rel="stylesheet" href="{{ asset('managers/css/views/seo/metas/edit.css') }}?v={{ @filemtime(public_path('managers/css/views/seo/metas/edit.css')) ?: 1 }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('managers/js/views/seo/metas/edit.js') }}"></script>
+<script src="{{ asset('managers/js/views/seo/metas/edit.js') }}?v={{ @filemtime(public_path('managers/js/views/seo/metas/edit.js')) ?: 1 }}"></script>
 @endpush

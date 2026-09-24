@@ -4,12 +4,20 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" id="btn-generate-all" class="btn btn-primary"
-                                data-generate-url="{{ route('manager.seo.orphans.generate') }}"
-                                data-bulk-url="{{ route('manager.seo.orphans.bulk-generate') }}"
-                                {{ $total === 0 ? 'disabled' : '' }}>
-                            Generar todo
-                        </button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <button type="button" id="btn-generate-all" class="dropdown-item"
+                    data-generate-url="{{ route('manager.seo.orphans.generate') }}"
+                    data-bulk-url="{{ route('manager.seo.orphans.bulk-generate') }}"
+                    {{ $total === 0 ? 'disabled' : '' }}>
+                Generar todo
+            </button>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Contenido sin SEO',

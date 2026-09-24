@@ -273,14 +273,14 @@
                                         @if($tab === 'unoptimized')
                                             <td class="text-center">
                                                 @if(empty($meta->description))
-                                                    <i class="fas fa-times-circle text-danger"></i>
+                                                    <i class="fas fa-times-circle text-dark"></i>
                                                 @else
                                                     <i class="fas fa-check-circle text-success"></i>
                                                 @endif
                                             </td>
                                             <td class="text-center">
                                                 @if(empty($meta->og_image))
-                                                    <i class="fas fa-times-circle text-danger"></i>
+                                                    <i class="fas fa-times-circle text-dark"></i>
                                                 @else
                                                     <i class="fas fa-check-circle text-success"></i>
                                                 @endif

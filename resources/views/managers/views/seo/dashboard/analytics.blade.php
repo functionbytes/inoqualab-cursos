@@ -4,9 +4,7 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-    <a href="{{ route('manager.seo.search-console.import') }}" class="btn btn-primary">
-        Importar datos
-    </a>
+    <a href="{{ route('manager.seo.search-console.import') }}" class="btn btn-primary btn-icon" title="Importar datos" aria-label="Importar datos">{!! \App\Html\IconHelper::render('plus') !!}</a>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Analytics SEO — Google Search Console',

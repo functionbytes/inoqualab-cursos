@@ -125,19 +125,14 @@
                             </div>
 
                             {{-- Estado --}}
-                            <div class="col-12">
+                            <div class="col-12 col-md-6">
                                 <div class="mb-0">
                                     <label class="form-label fw-semibold">Estado</label>
-                                    <div class="form-check form-switch mt-1">
-                                        <input class="form-check-input" type="checkbox"
-                                               id="is_active"
-                                               name="is_active"
-                                               value="1"
-                                               {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="is_active">
-                                            Activa — se incluirá en el sitemap
-                                        </label>
-                                    </div>
+                                    <select class="form-select select2" id="is_active" name="is_active">
+                                        <option value="1" {{ old('is_active', '1') == '1' ? 'selected' : '' }}>Activa</option>
+                                        <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Inactiva</option>
+                                    </select>
+                                    <small class="form-text text-muted">Activa — se incluirá en el sitemap</small>
                                 </div>
                             </div>
 

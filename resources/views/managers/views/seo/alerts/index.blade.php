@@ -4,9 +4,17 @@
 
 @section('page_header')
     @php ob_start(); @endphp
-<button type="button" class="btn btn-outline-secondary" id="acknowledge-all-btn">
-                                Marcar todas como revisadas
-                            </button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+            <i class="fas fa-ellipsis-vertical"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end">
+            <button type="button" class="dropdown-item" id="acknowledge-all-btn">
+                Marcar todas como revisadas
+            </button>
+        </div>
+    </div>
     @php $headerActions = trim(ob_get_clean()) ?: null; @endphp
     @include('managers.includes.card', [
         'title' => 'Alertas SEO',

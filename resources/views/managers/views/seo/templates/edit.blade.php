@@ -181,7 +181,7 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3">Aplica los patrones de esta plantilla a los registros de meta SEO existentes.</p>
-                    <button type="button" class="btn btn-outline-primary w-100 apply-sidebar-btn"
+                    <button type="button" class="btn btn-primary w-100 apply-sidebar-btn"
                             data-preview-url="{{ route('manager.seo.templates.preview', $seoTemplate) }}"
                             data-apply-url="{{ route('manager.seo.templates.bulk-apply', $seoTemplate) }}"
                             data-id="{{ $seoTemplate->id }}">

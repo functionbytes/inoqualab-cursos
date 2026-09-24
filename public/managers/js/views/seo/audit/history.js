@@ -20,11 +20,12 @@ $(function () {
     initHistoryTable();
     AjaxTable.init({ onLoaded: initHistoryTable });
 
-    // ── Delete individual ─────────────────────────────────────────────────────
-    $(document).on('click', '.btn-delete-log', function () {
-        $('#delete-modal-title').text($(this).data('title'));
-        $('#delete-form').attr('action', $(this).data('url'));
-        $('#delete-modal').modal('show');
+    // ── Fila clicable: abre la meta SEO vinculada ────────────────────────────
+    $(document).on('click', 'tbody tr[data-href]', function (e) {
+        if ($(e.target).is('input, label')) {
+            return;
+        }
+        window.location.href = $(this).data('href');
     });
 
     // ── Limpiar historial ─────────────────────────────────────────────────────
