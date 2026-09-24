@@ -57,7 +57,8 @@
 
     <div class="ovw-wrap">
 
-        {{-- ===== Columna principal: recibo ===== --}}
+        {{-- ===== Columna principal: recibo (propuesta A del /design: ícono
+             por ítem + footer de totales con fondo resaltado) ===== --}}
         <div class="ovw-main">
             <div class="ovw-card">
                 <div class="ovw-card-title">Artículos del pedido</div>
@@ -74,11 +75,11 @@
                             $esBundle = $item->item_type && str_contains($item->item_type, 'Bundle');
                         @endphp
                         <div class="ovw-item">
-                            <span class="tag">{{ $esBundle ? 'Paquete' : 'Curso' }}</span>
                             <div class="txt">
+                                <span class="tag">{{ $esBundle ? 'Paquete' : 'Curso' }}</span>
                                 <b>{{ optional($itemable)->title ?? 'Artículo del pedido' }}</b>
                                 @if(optional(optional($itemable)->categorie)->title)
-                                    <span>{{ $itemable->categorie->title }}</span>
+                                    <span class="cat">{{ $itemable->categorie->title }}</span>
                                 @endif
                             </div>
                             <div class="price">{{ $money($item->amount) }}</div>
@@ -94,17 +95,18 @@
                     </div>
                 @endif
 
-                {{-- Sin descuento, el total no se repite acá: ya está en
-                     grande arriba en .ovw-hero-total. Con descuento sí hace
-                     falta el desglose (subtotal/descuento/total) porque el
-                     hero solo muestra la cifra final. --}}
-                @if((float) $order->total_discount_amount > 0)
-                    <div class="ovw-totals">
-                        <div class="row">
+                {{-- El footer de totales siempre se muestra (evita que el
+                     pedido termine sin un cierre visual en esta tarjeta); el
+                     desglose Subtotal/Descuento solo aparece cuando de verdad
+                     hubo un cupón aplicado -- sin descuento sería repetir el
+                     mismo número dos veces sin aportar nada nuevo. --}}
+                <div class="ovw-totals">
+                    @if((float) $order->total_discount_amount > 0)
+                        <div class="ovw-tot-row">
                             <span>Subtotal</span>
                             <b>{{ $money($order->total_before_discount) }}</b>
                         </div>
-                        <div class="row">
+                        <div class="ovw-tot-row">
                             <span>
                                 Descuento
                                 @if($order->coupon)
@@ -113,12 +115,12 @@
                             </span>
                             <b class="disc">-{{ $money($order->total_discount_amount) }}</b>
                         </div>
-                        <div class="row total">
-                            <span>Total</span>
-                            <b>{{ $money($order->total_order_amount) }}</b>
-                        </div>
+                    @endif
+                    <div class="ovw-tot-row ovw-tot-final">
+                        <span>Total</span>
+                        <b>{{ $money($order->total_order_amount) }}</b>
                     </div>
-                @endif
+                </div>
             </div>
         </div>
 

@@ -85,17 +85,6 @@
         </div>
     </div>
 
-    {{-- ===== Chips de resumen: mismo dato que antes vivía en la franja
-         inferior ("Resumen"), pero como contexto rápido junto al saludo en
-         vez de una tarjeta aparte al final de la página. ===== --}}
-    <div class="pb-chips">
-        <span class="pb-chip"><b>{{ $activos->count() }}</b>{{ $activos->count() === 1 ? 'Curso activo' : 'Cursos activos' }}</span>
-        <span class="pb-chip"><b>{{ $certificatesCount }}</b>{{ $certificatesCount === 1 ? 'Certificado' : 'Certificados' }}</span>
-        @if($expirados->count() > 0)
-            <span class="pb-chip is-warn"><b>{{ $expirados->count() }}</b>Por vencer</span>
-        @endif
-    </div>
-
     {{-- ===== Banda de próxima acción: fusiona el hero de "retomar" y la
          tarjeta "Próximo hito" de antes en un único bloque -- un solo lugar
          que le dice al alumno qué hacer ahora, no dos que repetían lo
@@ -146,13 +135,21 @@
             </span>
         </div>
 
-        <div class="pb-list">
+        {{-- Un solo contenedor con filas divididas por borde interno (mismo
+             patrón que "Artículos del pedido" en el detalle de orden), en vez
+             de una tarjeta suelta por curso -- así no quedan flotando con
+             espacio vacío entre ellas. --}}
+        <div class="pb-table">
+            <div class="pb-table-head">
+                <span>Curso</span>
+                <span>Estado</span>
+            </div>
             @foreach($ruta as $insc)
                 @php
                     $st = $statusOf($insc);
                     $percent = (int) round(min(100, (float) $insc->percent));
                 @endphp
-                <div class="pb-row st-{{ $st }}">
+                <div class="pb-table-row st-{{ $st }}">
                     <span class="ic">
                         @if($st === 'done')
                             @include('customers.includes.icon', ['name' => 'award'])
@@ -171,7 +168,11 @@
                         <a class="act" href="{{ route('customers.courses') }}">Renovar</a>
                     @elseif($st === 'done')
                         @if($insc->certificate)
-                            <a class="act" href="{{ route('customers.certificate.download', $insc->certificate->slack) }}">Certificado</a>
+                            {{-- A la página de vista del certificado (con su
+                                 propio botón "Descargar" ahí), no directo a
+                                 la descarga del PDF -- así el usuario ve el
+                                 certificado antes de bajarlo. --}}
+                            <a class="act" href="{{ route('customers.certificate.view', $insc->certificate->slack) }}">Certificado</a>
                         @else
                             <a class="act" href="{{ route('customers.courses.content', $insc->slack) }}">Repasar</a>
                         @endif

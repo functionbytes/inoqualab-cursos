@@ -53,6 +53,15 @@ $(function () {
             if ($header.length) {
                 document.documentElement.style.setProperty('--cx-band-bleed-left', (parseFloat($header.css('padding-left')) || 0) + 'px');
                 document.documentElement.style.setProperty('--cx-band-bleed-right', (parseFloat($header.css('padding-right')) || 0) + 'px');
+                // Alto REAL de .app-header, para el layout de dos columnas del
+                // aula (rail + lección, ver .lv-shell/.lv-rail/.lv-main en
+                // aula.css): esas reglas usaban un 56px fijo asumiendo un alto
+                // de header constante, pero .app-header puede medir bastante
+                // más (ej. 102px) según el contenido de esa página -- con el
+                // valor fijo corto, el panel de lección se quedaba sin alto
+                // suficiente y terminaba scrolleando la página completa en vez
+                // de solo su contenido interno.
+                document.documentElement.style.setProperty('--app-header-height', $header[0].getBoundingClientRect().height + 'px');
             }
         };
 

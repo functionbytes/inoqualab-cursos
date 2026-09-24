@@ -52,6 +52,11 @@
     // Solo tiene sentido preguntar "¿continuar donde quedaste?" si hay
     // progreso real que retomar y el curso todavia no esta terminado.
     $showResumePrompt = $completedClass > 0 && $resumeHref && $percent < 100 && ! $certificate;
+
+    // Simetrico al de "continuar": si el alumno todavia no arranco el curso,
+    // el modal de inicio reemplaza al botón "Comenzar curso" (que se quita
+    // de la vista) como único punto de entrada a la primera clase.
+    $showStartPrompt = $completedClass === 0 && $inscription->expire == 0 && $startHref && ! $certificate;
 @endphp
 
 @if(setting('aula_version') == '2')
@@ -86,10 +91,11 @@
                                 <span>@include('customers.includes.icon', ['name' => 'chart-simple']) {{ $progressPercentage }}% completado</span>
                             </div>
                         </div>
-                        @if ($inscription->expire == 0 && $startHref)
-                            <a class="lv-markbtn" href="{{ $completedClass > 0 ? $resumeHref : $startHref }}">
-                                {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
-                            </a>
+                        {{-- "Comenzar curso" se quita: el modal de inicio ($showStartPrompt,
+                             más abajo) es ahora el único punto de entrada cuando no hay
+                             progreso todavía -- este botón solo aplica para retomar. --}}
+                        @if ($inscription->expire == 0 && $startHref && $completedClass > 0)
+                            <a class="lv-markbtn" href="{{ $resumeHref }}">Continuar curso</a>
                         @endif
                     </div>
 
@@ -234,12 +240,13 @@
                         </div>
                     </div>
 
-                    @if ($inscription->expire == 0 && $startHref)
+                    {{-- "Comenzar curso" se quita: el modal de inicio ($showStartPrompt,
+                         más abajo) es ahora el único punto de entrada cuando no hay
+                         progreso todavía -- este bloque solo aplica para retomar. --}}
+                    @if ($inscription->expire == 0 && $startHref && $completedClass > 0)
                         <div class="lp-nav">
-                            <span class="lp-navnote">{{ $completedClass > 0 ? 'Retoma donde lo dejaste' : 'Empieza tu aprendizaje ahora' }}</span>
-                            <a class="lv-markbtn" href="{{ $completedClass > 0 ? $resumeHref : $startHref }}">
-                                {{ $completedClass > 0 ? 'Continuar curso' : 'Comenzar curso' }}
-                            </a>
+                            <span class="lp-navnote">Retoma donde lo dejaste</span>
+                            <a class="lv-markbtn" href="{{ $resumeHref }}">Continuar curso</a>
                         </div>
                     @endif
 
@@ -277,6 +284,29 @@
                     <div class="ax-actions">
                         <a class="ax-btn ax-accent" href="{{ $resumeHref }}">Continuar donde quedé</a>
                         <button type="button" class="ax-btn ax-leave" data-bs-dismiss="modal">Volver al temario</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@elseif ($showStartPrompt)
+    {{-- Simetrico al de "continuar": aparece cuando el alumno todavia no
+         registra ningun progreso, en vez del botón "Comenzar curso". --}}
+    <div class="modal fade" id="startModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content ax-modal">
+                <div class="modal-body">
+                    <div class="ax-ico" aria-hidden="true">
+                        @include('customers.includes.icon', ['name' => 'play-circle'])
+                    </div>
+                    <h5 class="ax-title">¿Listo para comenzar?</h5>
+                    <p class="ax-text">Todavía no has iniciado este curso. Empieza por la primera clase del temario.</p>
+                    <div class="ax-actions">
+                        <a class="ax-btn ax-accent" href="{{ $startHref }}">Comenzar curso</a>
+                        {{-- Enlace, no dismiss: al no existir ya el botón "Comenzar curso"
+                             fuera del modal, cerrar sin más dejaba al alumno en una página
+                             sin ninguna acción posible (temario bloqueado hasta iniciar). --}}
+                        <a class="ax-btn ax-leave" href="{{ route('customers.courses') }}">Volver a mis cursos</a>
                     </div>
                 </div>
             </div>

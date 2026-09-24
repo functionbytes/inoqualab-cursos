@@ -41,6 +41,8 @@
   --amber-soft: #fbf4e3;
   --red: #d24a43;
   --red-soft: #fbecea;
+  --slate: #51667e;
+  --slate-soft: #eaeff4;
   --shadow-soft: 0 6px 22px rgba(13,27,42,.07);
   --shadow-card: 0 14px 40px rgba(13,27,42,.10), 0 2px 6px rgba(13,27,42,.05);
   --ease: cubic-bezier(.22,.61,.36,1);
@@ -127,6 +129,11 @@
 }
 .pnl-empty > a:hover { background: var(--navy-soft); color: #fff; }
 
+/* Dentro de .od-table (Mis pedidos) el estado vacío ya no es una tarjeta
+   punteada flotando dentro de otra tarjeta -- .od-table ya trae su propio
+   borde/sombra, así que .pnl-empty se aplana a solo contenido. */
+.od-table .pnl-empty { border: none; border-radius: 0; background: transparent; }
+
 /* ===== Ruta formativa (rail del panel) ==================================== */
 .pnl-route { display: flex; flex-direction: column; }
 .pnl-route .step { display: flex; gap: 13px; align-items: stretch; }
@@ -175,18 +182,6 @@
 
 .pb-sub { font-size: 13.5px; font-weight: 600; color: var(--muted); margin: 8px 0 0; }
 
-/* ===== Chips de resumen ===== */
-.pb-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px; }
-.pb-chip {
-    display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line);
-    border-radius: 20px; padding: 8px 16px 8px 8px; font-size: 12.5px; font-weight: 700; color: var(--ink);
-}
-.pb-chip b {
-    display: flex; align-items: center; justify-content: center; width: 22px; height: 22px;
-    border-radius: 50%; background: var(--navy); color: #fff; font-size: 11px;
-}
-.pb-chip.is-warn b { background: var(--amber); }
-
 /* ===== Banda de próxima acción: fusiona "retomar" + "próximo hito" ===== */
 .pb-next {
     position: relative; overflow: hidden; background: var(--navy); border-radius: 18px;
@@ -226,37 +221,49 @@
 .pb-sec h3 { font-size: 19px; font-weight: 800; margin: 0; letter-spacing: -.015em; }
 .pb-sec .note { font-size: 12.5px; color: var(--muted); font-weight: 700; }
 
-/* ===== Todos tus cursos: filas compactas con barra inline ===== */
-.pb-list { display: flex; flex-direction: column; gap: 10px; }
-.pb-row {
-    display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--line);
-    border-radius: 13px; padding: 14px 16px;
+/* ===== Todos tus cursos: tabla unificada (propuesta D del /design) =====
+   Un solo contenedor con fila de encabezado y filas divididas por borde
+   interno -- antes cada curso era una tarjeta suelta con gap entre ellas,
+   lo que dejaba la sección flotando con espacio vacío alrededor de cada
+   fila en vez de leerse como un solo bloque. */
+.pb-table {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow-soft); overflow: hidden;
 }
-.pb-row .ic {
+.pb-table-head {
+    display: flex; justify-content: space-between; padding: 13px 22px;
+    background: var(--field); border-bottom: 1px solid var(--line-2);
+}
+.pb-table-head span {
+    font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2);
+}
+.pb-table-row { display: flex; align-items: center; gap: 14px; padding: 16px 22px; }
+.pb-table-row + .pb-table-row { border-top: 1px solid var(--line-2); }
+.pb-table-row .ic {
     flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; background: var(--field);
     color: var(--muted-2); display: flex; align-items: center; justify-content: center;
 }
-.pb-row .ic svg { width: 17px; height: 17px; }
-.pb-row.st-done .ic { background: var(--green-soft); color: var(--green-deep); }
-.pb-row.st-expired .ic { background: var(--red-soft); color: var(--red); }
-.pb-row .txt { flex: 1; min-width: 0; }
-.pb-row .txt b {
+.pb-table-row .ic svg { width: 17px; height: 17px; }
+.pb-table-row.st-done .ic { background: var(--green-soft); color: var(--green-deep); }
+.pb-table-row.st-expired .ic { background: var(--red-soft); color: var(--red); }
+.pb-table-row .txt { flex: 1; min-width: 0; }
+.pb-table-row .txt b {
     display: block; font-size: 13px; font-weight: 800; overflow: hidden; text-overflow: ellipsis;
     white-space: nowrap;
 }
-.pb-row .txt span { font-size: 11.5px; font-weight: 700; color: var(--muted); }
-.pb-row .bar { width: 90px; height: 6px; border-radius: 4px; background: var(--line-2); overflow: hidden; flex: 0 0 auto; }
-.pb-row .bar i {
+.pb-table-row .txt span { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.pb-table-row .bar { width: 90px; height: 6px; border-radius: 4px; background: var(--line-2); overflow: hidden; flex: 0 0 auto; }
+.pb-table-row .bar i {
     display: block; height: 100%; width: var(--p, 0%); border-radius: 4px;
     background: linear-gradient(90deg, var(--green), #0072a8);
 }
-.pb-row .pct { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: var(--muted); width: 34px; text-align: right; }
-.pb-row .act {
+.pb-table-row .pct { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: var(--muted); width: 34px; text-align: right; }
+.pb-table-row .act {
     flex: 0 0 auto; font-size: 12px; font-weight: 800; padding: 8px 16px; border-radius: 9px;
     border: 1.5px solid var(--line); color: var(--navy); text-decoration: none;
     transition: border-color .15s var(--ease), background .15s var(--ease);
 }
-.pb-row .act:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
+.pb-table-row .act:hover { border-color: var(--green); background: var(--green-soft); color: var(--green-deep); }
 
 .pb-cta {
     display: inline-block; background: var(--navy); color: #fff; font-size: 13px; font-weight: 800;
@@ -267,9 +274,9 @@
 @media (max-width: 620px) {
     .pb-next { padding: 20px; }
     .pb-next .pb-cta { width: 100%; text-align: center; }
-    .pb-row { flex-wrap: wrap; }
-    .pb-row .bar { order: 3; flex: 1 1 100%; width: auto; }
-    .pb-row .pct { order: 2; }
+    .pb-table-row { flex-wrap: wrap; }
+    .pb-table-row .bar { order: 3; flex: 1 1 100%; width: auto; }
+    .pb-table-row .pct { order: 2; }
 }
 
 /* ===========================================================================
@@ -827,10 +834,13 @@
    ninguno de los dos matcheaba antes, así que ambos caían al estilo base
    (celeste/verde), incluido "Rechazada" mostrándose como un estado
    positivo. Se mantienen los alias en inglés por si algún otro dato legacy
-   los usa. */
+   los usa. "Generada" (slug "generada") tampoco tenía regla propia y caía
+   al mismo estilo base sin color -- de ahí que se viera "distinta" al
+   filtrar por esa pestaña frente a las otras 3, que sí tienen su color. */
 .od-chip.cnd-payment { background: var(--green-soft); border-color: #cbe6f7; color: var(--green-deep); }
 .od-chip.cnd-pending, .od-chip.cnd-pendiente { background: var(--amber-soft); border-color: #f0ddb0; color: var(--amber); }
 .od-chip.cnd-rechazada, .od-chip.cnd-canceled, .od-chip.cnd-cancelado, .od-chip.cnd-rejected { background: var(--red-soft); border-color: #f3d8d5; color: var(--red); }
+.od-chip.cnd-generada { background: var(--slate-soft); border-color: #dbe2e9; color: var(--slate); }
 
 .od-act { display: flex; gap: 8px; justify-content: flex-end; }
 .od-act a {

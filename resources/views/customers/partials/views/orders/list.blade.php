@@ -1,13 +1,16 @@
 {{-- Contenido de Mis pedidos: filtro por estado, buscador, tabla y
      paginador. Vive en un partial aparte para poder re-renderizarlo por AJAX
-     (ver el script en orders/index.blade.php) sin recargar la página. --}}
-@if($orders->isEmpty())
+     (ver el script en orders/index.blade.php) sin recargar la página.
 
-    <div class="pnl-card pnl-head pnl-head-row">
-        <div>
-            {{-- El título ya lo muestra la banda de contexto del header. --}}
-            <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
-        </div>
+     Una sola estructura (.od-table) para los casos CON y SIN resultados --
+     antes el caso vacío usaba una tarjeta de buscador aparte + un filtro
+     "isla" flotante + una card punteada de empty-state, mientras que el caso
+     con resultados ya vivía todo junto en una sola caja. Se veían como dos
+     diseños distintos de la misma pantalla (ver [[project_customer_panel_qa]]
+     "el mismo diseño, aunque no tenga items"). --}}
+<div class="od-table">
+    <div class="od-head">
+        <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
         <form class="pnl-search" action="{{ route('customers.orders') }}" method="GET" role="search">
             @include('customers.includes.icon', ['name' => 'search'])
             {{-- Un form GET descarta el query string del "action" -- sin este
@@ -19,13 +22,10 @@
         </form>
     </div>
 
-    <div class="pnl-gap"></div>
-
     {{-- El filtro debe verse incluso cuando el estado elegido no tiene
-         resultados, para poder volver a "Todos" o cambiar de pestaña. Va
-         entre el buscador y el listado (antes iba primero). --}}
+         resultados, para poder volver a "Todos" o cambiar de pestaña. --}}
     @if($totalOrdersCount > 0)
-        <div class="pnl-filter" role="group" aria-label="Filtrar mis pedidos">
+        <div class="pnl-filter pnl-filter-flat" role="group" aria-label="Filtrar mis pedidos">
             <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
                class="{{ $condition ? '' : 'active' }}">
                 Todos<span class="cnt">{{ $totalOrdersCount }}</span>
@@ -37,73 +37,35 @@
                 </a>
             @endforeach
         </div>
-        <div class="pnl-gap"></div>
     @endif
 
     @if($searchKey)
-        <div class="od-searching">
+        <div class="od-searching od-searching-inline">
             Resultados para <b>{{ $searchKey }}</b>
             <a href="{{ route('customers.orders') }}">Quitar búsqueda</a>
         </div>
     @endif
 
-    <div class="pnl-empty">
-        <span class="ic">@include('customers.includes.icon', ['name' => 'receipt'])</span>
-        @if($searchKey)
-            <h3>Ningún pedido coincide con «{{ $searchKey }}»</h3>
-            <p>Revisa el número o quita la búsqueda para ver todo tu historial.</p>
-            <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
-        @elseif($condition)
-            <h3>No tienes pedidos en este estado</h3>
-            <p>Prueba con otra pestaña para ver el resto de tu historial.</p>
-            <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
-        @else
-            <h3>Todavía no tienes pedidos</h3>
-            <p>Cuando compres una capacitación, aquí tendrás el pedido, su estado de pago y la factura.</p>
-            <a href="{{ route('home') }}">Explorar el catálogo</a>
-        @endif
-    </div>
+    @if($orders->isEmpty())
 
-@else
-
-    {{-- Filtro por estado, título, buscador, columnas, filas y el pie con
-         el paginador viven en la misma caja -- el filtro quedaba como
-         una tarjeta aparte flotando encima de la tabla, con espacio
-         visible entre ambas. --}}
-    <div class="od-table">
-        <div class="od-head">
-            <div class="sub">Historial de compras y facturas de tus capacitaciones</div>
-            <form class="pnl-search" action="{{ route('customers.orders') }}" method="GET" role="search">
-                @include('customers.includes.icon', ['name' => 'search'])
-                @if($condition)<input type="hidden" name="condition" value="{{ $condition }}">@endif
-                <input type="search" name="search" placeholder="Nº de pedido…" autocomplete="off"
-                       value="{{ $searchKey ?? '' }}" aria-label="Buscar por número de pedido">
-            </form>
+        <div class="pnl-empty">
+            <span class="ic">@include('customers.includes.icon', ['name' => 'receipt'])</span>
+            @if($searchKey)
+                <h3>Ningún pedido coincide con «{{ $searchKey }}»</h3>
+                <p>Revisa el número o quita la búsqueda para ver todo tu historial.</p>
+                <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
+            @elseif($condition)
+                <h3>No tienes pedidos en este estado</h3>
+                <p>Prueba con otra pestaña para ver el resto de tu historial.</p>
+                <a href="{{ route('customers.orders') }}">Ver todos los pedidos</a>
+            @else
+                <h3>Todavía no tienes pedidos</h3>
+                <p>Cuando compres una capacitación, aquí tendrás el pedido, su estado de pago y la factura.</p>
+                <a href="{{ route('home') }}">Explorar el catálogo</a>
+            @endif
         </div>
 
-        {{-- Entre el buscador y el listado (antes iba primero, arriba del
-             buscador). --}}
-        @if($totalOrdersCount > 0)
-            <div class="pnl-filter pnl-filter-flat" role="group" aria-label="Filtrar mis pedidos">
-                <a href="{{ route('customers.orders', array_filter(['search' => $searchKey])) }}"
-                   class="{{ $condition ? '' : 'active' }}">
-                    Todos<span class="cnt">{{ $totalOrdersCount }}</span>
-                </a>
-                @foreach($conditions as $c)
-                    <a href="{{ route('customers.orders', array_filter(['search' => $searchKey, 'condition' => $c->id])) }}"
-                       class="{{ (string) $condition === (string) $c->id ? 'active' : '' }}">
-                        {{ $c->title }}<span class="cnt">{{ $conditionCounts->get($c->id, 0) }}</span>
-                    </a>
-                @endforeach
-            </div>
-        @endif
-
-        @if($searchKey)
-            <div class="od-searching od-searching-inline">
-                Resultados para <b>{{ $searchKey }}</b>
-                <a href="{{ route('customers.orders') }}">Quitar búsqueda</a>
-            </div>
-        @endif
+    @else
 
         <div class="od-cols">
             <span>Pedido</span>
@@ -156,6 +118,6 @@
             <span>Mostrando {{ $orders->firstItem() }}-{{ $orders->lastItem() }} de {{ $orders->total() }} resultados</span>
             <nav>{{ $orders->appends(request()->input())->links() }}</nav>
         </div>
-    </div>
 
-@endif
+    @endif
+</div>

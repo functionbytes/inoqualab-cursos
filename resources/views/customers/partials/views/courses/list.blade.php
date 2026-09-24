@@ -146,7 +146,10 @@
                                 </div>
 
                                 @if($status === 'done' && $certificate)
-                                    <a class="pc-btn ghost" href="{{ route('customers.certificate.download', $certificate->slack) }}" target="_blank">
+                                    {{-- A la página de vista del certificado (con su propio
+                                         botón "Descargar" ahí), no directo a la descarga del
+                                         PDF -- mismo criterio que el dashboard. --}}
+                                    <a class="pc-btn ghost" href="{{ route('customers.certificate.view', $certificate->slack) }}">
                                         Ver certificado
                                     </a>
                                 @elseif($status === 'expired')
