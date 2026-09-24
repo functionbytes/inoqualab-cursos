@@ -1,15 +1,47 @@
-.stat-card-soft-primary {
-    background: rgba(0, 139, 206, 0.10);
-}
-.stat-card-soft-info {
-    background: rgba(23, 162, 184, 0.10);
-}
-.stat-card-soft-success {
-    background: rgba(54, 199, 108, 0.12);
-}
-.stat-card-soft-danger {
-    background: rgba(220, 53, 69, 0.12);
-}
 .progress-thin {
     height: 8px;
+}
+
+.success-rate-value {
+    flex-shrink: 0;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.success-rate-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.success-rate-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.success-rate-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+/* Ejemplo de request: gris claro como las tarjetas del panel, no negro */
+.example-request-pre {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid #e3e7ea;
+    border-radius: var(--bs-border-radius);
+    background-color: #f5f6f8;
+    color: #33475b;
+    font-size: 11px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
 }

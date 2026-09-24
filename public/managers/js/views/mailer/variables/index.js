@@ -1,13 +1,19 @@
 $(document).ready(function () {
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.select2').select2({ allowClear: false, width: '100%' });
-    }
-
+    // FilterToolbar y BulkActions se enlazan al HTML de #ajax-table-root, que
+    // AjaxTable reemplaza en cada carga, asi que se re-inicializan en onLoaded.
     function initMailerVariablesTable() {
+        FilterToolbar.init({
+            fields: {
+                filterModule: 'popover_module',
+                filterCategory: 'popover_category',
+                filterStatus: 'popover_status',
+            },
+        });
+
         BulkActions.init({
-        url: $('#bulk-config').data('bulk-url'),
-        entityLabel: 'variable(s)',
-    });
+            url: $('#bulk-config').data('bulk-url'),
+            entityLabel: 'variable(s)',
+        });
     }
 
     initMailerVariablesTable();
@@ -16,21 +22,5 @@ $(document).ready(function () {
 
     $(document).on('click', '.js-delete-variable', function () {
         $('#delete-form').attr('action', $(this).data('delete-url'));
-    });
-
-    $(document).on('change', '.toggle-status', function () {
-        const $toggle = $(this);
-        $.ajax({
-            url: $toggle.data('url'),
-            method: 'POST',
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            success: function (data) {
-                if (!data.success) $toggle.prop('checked', !$toggle.prop('checked'));
-            },
-            error: function () {
-                $toggle.prop('checked', !$toggle.prop('checked'));
-                toastr.error('Error al cambiar el estado');
-            }
-        });
     });
 });

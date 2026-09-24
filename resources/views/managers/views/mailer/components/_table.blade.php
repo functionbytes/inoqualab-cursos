@@ -9,7 +9,7 @@
 <div class="card">
     {{-- Info --}}
     <div class="card-body border-bottom">
-        <div class="alert alert-info border-0 mb-0">
+        <div class="alert alert-light border mb-0">
             <div class="d-flex align-items-start">
                 <i class="fas fa-info-circle fs-5 me-3 mt-1"></i>
                 <div>
@@ -37,40 +37,48 @@
         </div>
     @endif
 
-    {{-- Filters --}}
+    {{-- Search + Filtros --}}
     <div class="card-body border-bottom">
+        @php
+            $filterChips = [];
+            if (($type ?? '') !== '') {
+                $filterChips[] = [
+                    'label' => 'Tipo: ' . ($types[$type] ?? ucfirst($type)),
+                    'clear_url' => url()->current() . '?' . http_build_query(request()->except('type')),
+                ];
+            }
+        @endphp
         <form method="GET" action="{{ route('mailers.components.index') }}" id="searchForm">
-            <div class="row g-3 align-items-end">
-                <div class="col-12 col-md-7">
-                    <label for="search" class="form-label fw-semibold">Búsqueda</label>
-                    <input type="text" id="search" name="search" class="form-control"
-                           placeholder="Buscar por alias, nombre o código..."
-                           value="{{ $search ?? '' }}">
-                </div>
 
-                @if(!empty($types))
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <label for="type" class="form-label fw-semibold">Tipo</label>
-                        <select class="form-select select2" id="type" name="type">
-                            <option value="">Todos los tipos</option>
-                            @foreach($types as $t)
-                                <option value="{{ $t }}" @if(($type ?? '') === $t) selected @endif>{{ ucfirst($t) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endif
+            <input type="hidden" name="type" id="filterType" value="{{ $type ?? '' }}">
 
-                <div class="col-12 col-sm-6 col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary flex-grow-1">
-                        Buscar
-                    </button>
-                    @if(!empty($search) || !empty($type))
-                        <a href="{{ route('mailers.components.index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-times"></i>
-                        </a>
-                    @endif
+            @php ob_start(); @endphp
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Tipo</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_type" value="" {{ ($type ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($types as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_type" value="{{ $value }}" {{ ($type ?? '') === $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
                 </div>
             </div>
+            @php $popoverBody = trim(ob_get_clean()); @endphp
+
+            @include('managers.includes.filter-toolbar', [
+                'searchName' => 'search',
+                'searchValue' => $search ?? '',
+                'searchPlaceholder' => 'Buscar por nombre o alias...',
+                'popoverBody' => $popoverBody,
+                'filterChips' => $filterChips,
+            ])
         </form>
     </div>
 
@@ -102,31 +110,27 @@
                                        value="{{ $component->id }}">
                             </td>
                             <td>
-                                <strong class="d-block">{{ $component->subject ?? $component->alias }}</strong>
+                                <span class="d-flex align-items-center gap-2">
+                                    <strong>{{ $component->subject ?? $component->alias }}</strong>
+                                    @if($isCritical)
+                                        <span class="badge bg-secondary-subtle badge-icon-only" title="Sistema" aria-label="Sistema">
+                                            <i class="fas fa-star"></i>
+                                        </span>
+                                    @endif
+                                </span>
                                 <small class="text-muted d-block">{{ $component->alias }}</small>
-                                @if($isCritical)
-                                    <span class="badge bg-light text-warning mt-1">
-                                        <i class="fas fa-star"></i> Sistema
-                                    </span>
-                                @endif
                             </td>
                             <td>
                                 <code class="text-muted">{{ $component->code }}</code>
                             </td>
                             <td>
-                                @if($component->type === 'partial')
-                                    <span class="badge bg-light text-info">Parcial</span>
-                                @elseif($component->type === 'layout')
-                                    <span class="badge bg-light text-success">Layout</span>
-                                @else
-                                    <span class="badge bg-light text-secondary">{{ ucfirst($component->type) }}</span>
-                                @endif
+                                <span class="badge bg-{{ $component->type === 'layout' ? 'primary' : 'secondary' }}-subtle">{{ $types[$component->type] ?? ucfirst($component->type) }}</span>
                             </td>
                             <td>
                                 @if($isCritical)
-                                    <span class="badge bg-light text-warning">Protegido</span>
+                                    <span class="badge bg-secondary-subtle">Protegido</span>
                                 @else
-                                    <span class="badge bg-light text-secondary">Personalizado</span>
+                                    <span class="badge bg-secondary-subtle">Personalizado</span>
                                 @endif
                             </td>
                             <td class="text-center">
@@ -197,44 +201,44 @@
         <p class="text-muted mb-4">Estos componentes son esenciales y se aplican automáticamente a todas las plantillas.</p>
         <div class="row g-3">
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card bg-light h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                <i class="fas fa-arrow-up text-primary"></i>
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                <i class="fas fa-arrow-up text-white"></i>
                             </div>
                             <h6 class="fw-bold mb-0">Header</h6>
                         </div>
                         <p class="text-muted mb-2 small">Se inserta al inicio de cada email. Incluye logo, estilos CSS y apertura de HTML.</p>
-                        <code class="small text-primary">email_template_header</code>
+                        <code class="small text-muted">email_template_header</code>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card bg-light h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                <i class="fas fa-arrow-down text-success"></i>
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                <i class="fas fa-arrow-down text-white"></i>
                             </div>
                             <h6 class="fw-bold mb-0">Footer</h6>
                         </div>
                         <p class="text-muted mb-2 small">Se inserta al final de cada email. Incluye información de la empresa y cierre de HTML.</p>
-                        <code class="small text-success">email_template_footer</code>
+                        <code class="small text-muted">email_template_footer</code>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
+                <div class="card bg-light h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
-                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                <i class="fas fa-layer-group text-info"></i>
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                <i class="fas fa-layer-group text-white"></i>
                             </div>
                             <h6 class="fw-bold mb-0">Wrapper</h6>
                         </div>
                         <p class="text-muted mb-2 small">Layout completo que combina header + contenido + footer.</p>
-                        <code class="small text-info">email_template_wrapper</code>
+                        <code class="small text-muted">email_template_wrapper</code>
                     </div>
                 </div>
             </div>

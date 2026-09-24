@@ -20,9 +20,12 @@ class StoreMailerEndpointRequest extends FormRequest
             'type' => ['required', 'in:transactional,notification,marketing'],
             'description' => ['nullable', 'string'],
             'mailer_template_id' => ['nullable', 'exists:mailer_templates,id'],
-            'expected_variables' => ['nullable', 'array'],
+            'expected_variables' => ['nullable', 'array', 'max:50'],
+            'expected_variables.*' => ['nullable', 'string', 'max:100'],
             'required_variables' => ['nullable', 'array'],
-            'variable_mappings' => ['nullable', 'array'],
+            'required_variables.*' => ['string', 'max:100'],
+            'variable_mappings' => ['nullable', 'array', 'max:50'],
+            'variable_mappings.*' => ['string', 'max:100'],
             'is_active' => ['boolean'],
         ];
     }
@@ -41,6 +44,10 @@ class StoreMailerEndpointRequest extends FormRequest
             'type.required' => 'El tipo es obligatorio.',
             'type.in' => 'El tipo debe ser transactional, notification o marketing.',
             'mailer_template_id.exists' => 'La plantilla seleccionada no existe.',
+            'expected_variables.max' => 'No puedes agregar más de 50 variables.',
+            'expected_variables.*.max' => 'Cada variable puede tener como máximo 100 caracteres.',
+            'variable_mappings.max' => 'No puedes agregar más de 50 mapeos.',
+            'variable_mappings.*.max' => 'Cada variable de plantilla puede tener como máximo 100 caracteres.',
         ];
     }
 

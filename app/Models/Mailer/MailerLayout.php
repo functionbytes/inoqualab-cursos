@@ -13,6 +13,14 @@ class MailerLayout extends Model
 
     protected $table = 'mailer_layouts';
 
+    /** Tipos válidos (mismos que validan Store/UpdateMailerComponentRequest). */
+    public const TYPES = [
+        'layout' => 'Layout',
+        'header' => 'Header',
+        'footer' => 'Footer',
+        'component' => 'Componente',
+    ];
+
     protected $fillable = [
         'uid', 'name', 'alias', 'code', 'type', 'group_name',
         'subject', 'content', 'is_protected', 'is_enabled',

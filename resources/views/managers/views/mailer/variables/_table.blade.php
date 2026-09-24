@@ -4,7 +4,7 @@
 
         {{-- Info --}}
         <div class="card-body border-bottom">
-            <div class="alert alert-info border-0 mb-0">
+            <div class="alert alert-light border mb-0">
                 <div class="d-flex align-items-start">
                     <i class="fas fa-info-circle fs-5 me-3 mt-1"></i>
                     <div>
@@ -32,45 +32,97 @@
             </div>
         @endif
 
-        {{-- Filters --}}
+        {{-- Search + Filtros --}}
         <div class="card-body border-bottom">
+            @php
+                $statuses = ['1' => 'Activa', '0' => 'Inactiva'];
+                $filterChips = [];
+                if (($module ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Módulo: ' . ($modules[$module] ?? $module),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('module')),
+                    ];
+                }
+                if (($category ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Categoría: ' . ($categories[$category] ?? $category),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('category')),
+                    ];
+                }
+                if (($status ?? '') !== '') {
+                    $filterChips[] = [
+                        'label' => 'Estado: ' . ($statuses[$status] ?? $status),
+                        'clear_url' => url()->current() . '?' . http_build_query(request()->except('status')),
+                    ];
+                }
+            @endphp
             <form method="GET" action="{{ route('mailers.variables.index') }}" id="searchForm">
-                <div class="row g-3 align-items-end">
-                    <div class="col-12 col-md-4">
-                        <label for="search" class="form-label fw-semibold">Búsqueda</label>
-                        <input type="text" id="search" name="search" class="form-control"
-                               placeholder="Buscar por clave o nombre..."
-                               value="{{ request('search') }}">
-                    </div>
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <label for="module" class="form-label fw-semibold">Módulo</label>
-                        <select class="form-select select2" id="module" name="module">
-                            <option value="">Todos los módulos</option>
-                            @foreach($modules as $value => $label)
-                                <option value="{{ $value }}" @selected(request('module') === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <label for="category" class="form-label fw-semibold">Categoría</label>
-                        <select class="form-select select2" id="category" name="category">
-                            <option value="">Todas las categorías</option>
-                            @foreach($categories as $value => $label)
-                                <option value="{{ $value }}" @selected(request('category') === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary flex-grow-1">
-                            Buscar
-                        </button>
-                        @if(request('search') || request('module') || request('category'))
-                            <a href="{{ route('mailers.variables.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        @endif
-                    </div>
+
+                <input type="hidden" name="module" id="filterModule" value="{{ $module ?? '' }}">
+                <input type="hidden" name="category" id="filterCategory" value="{{ $category ?? '' }}">
+                <input type="hidden" name="status" id="filterStatus" value="{{ $status ?? '' }}">
+
+                @php ob_start(); @endphp
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Módulo</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_module" value="" {{ ($module ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($modules as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_module" value="{{ $value }}" {{ (string) ($module ?? '') === (string) $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
                 </div>
+            </div>
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Categoría</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_category" value="" {{ ($category ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todas</span>
+                    </label>
+                    @foreach($categories as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_category" value="{{ $value }}" {{ (string) ($category ?? '') === (string) $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+            <div class="filter-popover-field">
+                <div class="filter-popover-label">Estado</div>
+                <div class="filter-popover-options">
+                    <label class="filter-popover-option">
+                        <input type="radio" data-filter-name="popover_status" value="" {{ ($status ?? '') === '' ? 'checked' : '' }}>
+                        <span class="filter-popover-dot"></span>
+                        <span>Todos</span>
+                    </label>
+                    @foreach($statuses as $value => $label)
+                        <label class="filter-popover-option">
+                            <input type="radio" data-filter-name="popover_status" value="{{ $value }}" {{ (string) ($status ?? '') === (string) $value ? 'checked' : '' }}>
+                            <span class="filter-popover-dot"></span>
+                            <span>{{ $label }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+                @php $popoverBody = trim(ob_get_clean()); @endphp
+
+                @include('managers.includes.filter-toolbar', [
+                    'searchName' => 'search',
+                    'searchValue' => $search ?? '',
+                    'searchPlaceholder' => 'Buscar por clave, nombre o descripción...',
+                    'popoverBody' => $popoverBody,
+                    'filterChips' => $filterChips,
+                ])
             </form>
         </div>
 
@@ -89,7 +141,6 @@
                             <th width="12%">Categoría</th>
                             <th width="12%">Módulo</th>
                             <th width="10%">Tipo</th>
-                            <th width="8%">Estado</th>
                             <th width="18%" class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -101,12 +152,14 @@
                                            value="{{ $variable->id }}">
                                 </td>
                                 <td>
-                                    <code class="text-primary d-block">{{ $variable->key }}</code>
-                                    @if($variable->is_system)
-                                        <span class="badge bg-light text-warning mt-1">
-                                            <i class="fas fa-lock"></i> Sistema
-                                        </span>
-                                    @endif
+                                    <span class="d-flex align-items-center gap-2">
+                                        <code class="text-muted">{{ $variable->key }}</code>
+                                        @if($variable->is_system)
+                                            <span class="badge bg-secondary-subtle badge-icon-only" title="Sistema" aria-label="Sistema">
+                                                <i class="fas fa-lock"></i>
+                                            </span>
+                                        @endif
+                                    </span>
                                 </td>
                                 <td>
                                     <strong class="d-block">{{ $variable->name }}</strong>
@@ -115,25 +168,17 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-secondary">{{ \App\Models\Mailer\MailerVariable::CATEGORIES[$variable->category] ?? $variable->category }}</span>
+                                    <span class="badge bg-secondary-subtle">{{ \App\Models\Mailer\MailerVariable::CATEGORIES[$variable->category] ?? $variable->category }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-primary">{{ \App\Models\Mailer\MailerVariable::MODULES[$variable->module] ?? $variable->module }}</span>
+                                    <span class="badge bg-primary-subtle">{{ \App\Models\Mailer\MailerVariable::MODULES[$variable->module] ?? $variable->module }}</span>
                                 </td>
                                 <td>
                                     @if($variable->is_system)
-                                        <span class="badge bg-light text-warning">Protegido</span>
+                                        <span class="badge bg-secondary-subtle">Protegido</span>
                                     @else
-                                        <span class="badge bg-light text-secondary">Personalizado</span>
+                                        <span class="badge bg-secondary-subtle">Personalizado</span>
                                     @endif
-                                </td>
-                                <td>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input toggle-status" type="checkbox"
-                                               @checked($variable->is_enabled)
-                                               data-url="{{ route('mailers.variables.toggle-status', $variable) }}"
-                                               title="{{ $variable->is_enabled ? 'Activa' : 'Inactiva' }}">
-                                    </div>
                                 </td>
                                 <td class="text-center">
                                     <div class="dropdown">
@@ -171,13 +216,13 @@
                 <div class="mb-3 text-muted opacity-50">{!! \App\Html\IconHelper::render('empty-inbox', 48) !!}</div>
                 <h5 class="fw-bold mb-2">No hay variables</h5>
                 <p class="text-muted mb-4">
-                    @if(request('search') || request('module') || request('category'))
+                    @if(!empty($search) || !empty($module) || !empty($category) || ($status ?? '') !== '')
                         No se encontraron resultados con los filtros aplicados.
                     @else
                         Comienza creando tu primera variable de email para usar en plantillas.
                     @endif
                 </p>
-                @if(request('search') || request('module') || request('category'))
+                @if(!empty($search) || !empty($module) || !empty($category) || ($status ?? '') !== '')
                     <a href="{{ route('mailers.variables.index') }}" class="btn btn-secondary">Ver todas</a>
                 @else
                     <a href="{{ route('mailers.variables.create') }}" class="btn btn-primary">Crear ahora</a>
@@ -197,44 +242,44 @@
             <p class="text-muted mb-4">Las variables se organizan en categorías según el tipo de dato que representan.</p>
             <div class="row g-3">
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card bg-light h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                    <i class="fas fa-cog text-primary"></i>
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                    <i class="fas fa-cog text-white"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Sistema</h6>
                             </div>
                             <p class="text-muted mb-2 small">Variables globales del sistema como nombre de la empresa, URL, información de contacto.</p>
-                            <code class="small text-primary">&#123;&#123;company_name&#125;&#125;</code>
+                            <code class="small text-muted">&#123;&#123;company_name&#125;&#125;</code>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card bg-light h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                    <i class="fas fa-user text-info"></i>
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                    <i class="fas fa-user text-white"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Cliente</h6>
                             </div>
                             <p class="text-muted mb-2 small">Datos del cliente destinatario del email como nombre, email, dirección.</p>
-                            <code class="small text-info">&#123;&#123;customer_name&#125;&#125;</code>
+                            <code class="small text-muted">&#123;&#123;customer_name&#125;&#125;</code>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card h-100">
+                    <div class="card bg-light h-100">
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-3">
-                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3 icon-circle-48">
-                                    <i class="fas fa-file-alt text-warning"></i>
+                                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center me-3 icon-circle-48">
+                                    <i class="fas fa-file-alt text-white"></i>
                                 </div>
                                 <h6 class="fw-bold mb-0">Documento/Pedido</h6>
                             </div>
                             <p class="text-muted mb-2 small">Información específica de documentos, pedidos y transacciones.</p>
-                            <code class="small text-warning">&#123;&#123;order_number&#125;&#125;</code>
+                            <code class="small text-muted">&#123;&#123;order_number&#125;&#125;</code>
                         </div>
                     </div>
                 </div>

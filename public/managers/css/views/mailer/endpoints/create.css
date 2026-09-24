@@ -1,3 +1,13 @@
+/* Ejemplo de request: gris claro como las tarjetas del panel, no negro */
 .example-request-pre {
-    font-size: 10px;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid #e3e7ea;
+    border-radius: var(--bs-border-radius);
+    background-color: #f5f6f8;
+    color: #33475b;
+    font-size: 11px;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
 }

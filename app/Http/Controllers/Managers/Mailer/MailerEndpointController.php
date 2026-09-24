@@ -78,8 +78,8 @@ class MailerEndpointController extends Controller
             return back()->withInput()->with('error', "El slug '{$validated['slug']}' está reservado.");
         }
 
-        $validated['is_active'] = $request->has('is_active');
-        $endpoint = MailerEndpoint::create($validated);
+        $validated['is_active'] = $request->boolean('is_active');
+        $endpoint = MailerEndpoint::create($this->normalizeVariables($validated));
 
         return redirect()->route('mailers.endpoints.edit', $endpoint->id)
             ->with('success', "Endpoint '{$endpoint->name}' creado.");
@@ -104,8 +104,8 @@ class MailerEndpointController extends Controller
     {
         $validated = $request->validated();
 
-        $validated['is_active'] = $request->has('is_active');
-        $endpoint->update($validated);
+        $validated['is_active'] = $request->boolean('is_active');
+        $endpoint->update($this->normalizeVariables($validated));
 
         return redirect()->route('mailers.endpoints.edit', $endpoint->id)
             ->with('success', 'Endpoint actualizado.');
@@ -273,5 +273,34 @@ class MailerEndpointController extends Controller
             'success_rate' => $endpoint->successRate(),
             'last_request_at' => $endpoint->last_request_at?->toIso8601String(),
         ]);
+    }
+
+    /**
+     * Un formulario no envía arrays vacíos: sin esto, quitar todas las
+     * variables/mapeos no se guardaba (la clave faltaba en $validated y
+     * update() conservaba lo anterior). Además limpia vacíos y duplicados, y
+     * descarta obligatorias que ya no están entre las esperadas.
+     */
+    private function normalizeVariables(array $validated): array
+    {
+        $expected = collect($validated['expected_variables'] ?? [])
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $validated['expected_variables'] = $expected->all();
+        $validated['required_variables'] = collect($validated['required_variables'] ?? [])
+            ->map(fn ($name) => trim((string) $name))
+            ->filter(fn ($name) => $expected->contains($name))
+            ->unique()
+            ->values()
+            ->all();
+        $validated['variable_mappings'] = collect($validated['variable_mappings'] ?? [])
+            ->mapWithKeys(fn ($templateVar, $jsonPath) => [trim((string) $jsonPath) => trim((string) $templateVar)])
+            ->filter(fn ($templateVar, $jsonPath) => $jsonPath !== '' && $templateVar !== '')
+            ->all();
+
+        return $validated;
     }
 }

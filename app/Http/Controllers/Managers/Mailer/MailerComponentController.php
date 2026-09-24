@@ -36,10 +36,11 @@ class MailerComponentController extends Controller
         }
 
         $components = $query->paginate(paginationNumber(20));
+        $types = MailerLayout::TYPES;
 
         $view = $request->ajax() ? 'managers.views.mailer.components._table' : 'managers.views.mailer.components.index';
 
-        return view($view, compact('components', 'search', 'type'));
+        return view($view, compact('components', 'search', 'type', 'types'));
     }
 
     public function create(): View

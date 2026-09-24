@@ -19,6 +19,7 @@ class MailerVariableController extends Controller
         $search = $request->input('search');
         $module = $request->input('module');
         $category = $request->input('category');
+        $status = $request->input('status');
 
         $query = MailerVariable::query()->orderBy('module')->orderBy('category')->orderBy('key');
 
@@ -35,6 +36,9 @@ class MailerVariableController extends Controller
         if ($category) {
             $query->where('category', $category);
         }
+        if (in_array($status, ['0', '1'], true)) {
+            $query->where('is_enabled', $status === '1');
+        }
 
         $variables = $query->paginate(paginationNumber(30));
         $modules = MailerVariable::MODULES;
@@ -42,7 +46,7 @@ class MailerVariableController extends Controller
 
         $view = request()->ajax() ? 'managers.views.mailer.variables._table' : 'managers.views.mailer.variables.index';
 
-        return view($view, compact('variables', 'search', 'module', 'category', 'modules', 'categories'));
+        return view($view, compact('variables', 'search', 'module', 'category', 'status', 'modules', 'categories'));
     }
 
     public function create(): View

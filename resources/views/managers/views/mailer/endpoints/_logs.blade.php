@@ -95,12 +95,11 @@
                             <th>Asunto</th>
                             <th class="text-center">Estado</th>
                             <th>Error</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($logs as $log)
-                            <tr>
+                            <tr class="log-row-clickable" data-bs-toggle="modal" data-bs-target="#logDetailModal{{ $log->id }}">
                                 <td>
                                     <span class="fw-semibold d-block">{{ $log->created_at->format('d/m/Y') }}</span>
                                     <p class="text-muted">{{ $log->created_at->format('H:i:s') }}</p>
@@ -129,13 +128,6 @@
                                     @else
                                         <p class="text-muted">-</p>
                                     @endif
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-outline-primary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#logDetailModal{{ $log->id }}">
-                                        Ver
-                                    </button>
                                 </td>
                             </tr>
                         @endforeach

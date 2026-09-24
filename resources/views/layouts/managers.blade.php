@@ -58,6 +58,9 @@
          ninguna en particular. Ver comentario en el propio archivo. --}}
     <link rel="stylesheet" href="{{ url('managers/css/table-scroll-hint.css') }}?v={{ filemtime(public_path('managers/css/table-scroll-hint.css')) }}">
 
+    {{-- Listas repetibles (fila + papelera, boton + en la cabecera) --}}
+    <link rel="stylesheet" href="{{ url('managers/css/repeater.css') }}?v={{ filemtime(public_path('managers/css/repeater.css')) }}">
+
     {{-- Estado de carga de managers/js/ajax-table.js (busqueda/filtro/paginacion
          sin recargar la pagina). --}}
     <link rel="stylesheet" href="{{ url('managers/css/includes/ajax-table.css') }}?v={{ filemtime(public_path('managers/css/includes/ajax-table.css')) }}">

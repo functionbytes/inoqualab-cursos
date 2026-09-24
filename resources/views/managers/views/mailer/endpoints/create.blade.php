@@ -30,7 +30,7 @@
                 {{-- Información básica --}}
                 <div class="card-header border-bottom">
                     <h6 class="mb-1 fw-bold">Información básica</h6>
-                    <p class="text-muted small mb-0">Define el nombre, slug único y la fuente del endpoint. El slug se usará en la URL de la API.</p>
+                    <p class="text-muted small mb-0">Cómo se identifica el endpoint. El slug forma la URL de la API y no se puede cambiar después de crearlo; la fuente y el tipo solo sirven para organizar.</p>
                 </div>
 
                 <div class="card-body">
@@ -48,8 +48,8 @@
                             <label class="form-label fw-semibold">Slug (único) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('slug') is-invalid @enderror"
                                    id="slug" name="slug" value="{{ old('slug') }}"
-                                   placeholder="prestashop_password_reset" required maxlength="255"
-                                   pattern="[a-z0-9\-_]+">
+                                   placeholder="prestashop-password-reset" required maxlength="100"
+                                   pattern="[a-z0-9\-]+" title="Solo minúsculas, números y guiones">
                             <small class="form-text text-muted">
                                 URL: <code>/api/email-endpoints/<span id="slugPreview">slug</span>/send</code>
                             </small>
@@ -86,16 +86,13 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <div class="border rounded p-3">
-                                <div class="form-check form-switch">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked>
-                                    <label class="form-check-label" for="is_active">
-                                        <strong>Endpoint activo</strong>
-                                        <small class="d-block text-muted">Los endpoints inactivos rechazarán las peticiones entrantes</small>
-                                    </label>
-                                </div>
-                            </div>
+                            <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                            <select class="form-select select2 @error('is_active') is-invalid @enderror" id="is_active" name="is_active" required>
+                                <option value="1" @if((string) old('is_active', '1') === '1') selected @endif>Activo</option>
+                                <option value="0" @if(! ((string) old('is_active', '1') === '1')) selected @endif>Inactivo</option>
+                            </select>
+                            <small class="form-text text-muted">Los endpoints inactivos rechazarán las peticiones entrantes</small>
+                            @error('is_active')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -105,7 +102,7 @@
                 {{-- Plantilla --}}
                 <div class="card-body">
                     <h6 class="fw-bold text-dark mb-1">Plantilla de email</h6>
-                    <p class="text-muted mb-3">Selecciona la plantilla de email que se usará para los envíos.</p>
+                    <p class="text-muted small mb-3">Define el asunto y el diseño del correo. Sin plantilla, las peticiones se aceptan pero el envío queda como fallido. Sus variables son las que puedes elegir en el mapeo.</p>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -125,63 +122,7 @@
                     </div>
                 </div>
 
-                <hr class="my-0">
-
-                {{-- Variables esperadas --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Variables esperadas</h6>
-                    <p class="text-muted mb-3">Define las variables que esperas recibir en el JSON desde el sistema externo.</p>
-
-                    <div class="alert alert-light border mb-3">
-                        <i class="fas fa-lightbulb me-2 text-warning"></i>
-                        <strong>Ejemplo:</strong> Si tu JSON envía <code>{"customer_email": "user@example.com"}</code>, agrega <code>customer_email</code> como variable.
-                    </div>
-                    <div id="expectedVariablesContainer" class="mb-3"></div>
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="addExpectedVariable">
-                        Agregar variable
-                    </button>
-                </div>
-
-                <hr class="my-0">
-
-                {{-- Variables obligatorias --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Variables obligatorias</h6>
-                    <p class="text-muted mb-3">Marca las variables que son obligatorias en cada request.</p>
-
-                    <div id="requiredVariablesContainer">
-                        <p class="text-muted"><i class="fas fa-info-circle me-1"></i>Primero agrega variables esperadas arriba</p>
-                    </div>
-                </div>
-
-                <hr class="my-0">
-
-                {{-- Mapeo de variables --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Mapeo de variables (opcional)</h6>
-                    <p class="text-muted mb-3">Si los nombres en el JSON no coinciden con los de la plantilla, puedes mapearlos aquí.</p>
-
-                    <div class="alert alert-light border mb-3">
-                        <i class="fas fa-info-circle me-2 text-info"></i>
-                        <strong>Ejemplo:</strong> Si tu JSON envía <code>user.email</code> pero la plantilla usa <code>{email}</code>, mapea: <code>email</code> → <code>user.email</code>
-                    </div>
-                    <div class="bg-light p-3 rounded">
-                        <div id="mappingsContainer">
-                            <div class="row g-2 mb-2">
-                                <div class="col-5">
-                                    <label class="form-label small fw-bold text-uppercase">Variable plantilla</label>
-                                </div>
-                                <div class="col-5">
-                                    <label class="form-label small fw-bold text-uppercase">Ruta JSON</label>
-                                </div>
-                                <div class="col-2"></div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addMapping">
-                            Agregar mapeo
-                        </button>
-                    </div>
-                </div>
+                @include('managers.views.mailer.endpoints._variables')
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary w-100">Crear endpoint</button>
@@ -200,12 +141,12 @@
             </div>
             <div class="card-body">
                 <ul class="text-muted ps-3 mb-3">
-                    <li class="mb-2">El <strong>token API</strong> se genera automáticamente al crear el endpoint</li>
-                    <li class="mb-2">Podrás ver <strong>estadísticas</strong> y <strong>logs</strong> de uso</li>
-                    <li>Los endpoints inactivos <strong>rechazarán</strong> todas las peticiones</li>
+                    <li class="mb-2">El token API se genera al crear el endpoint; lo verás en la pantalla de edición.</li>
+                    <li class="mb-2">El destinatario va en el campo <code>email</code> (o <code>recipient_email</code>) del JSON y es obligatorio.</li>
+                    <li>Si el endpoint está inactivo, la API responde 404 a cada petición.</li>
                 </ul>
                 <p class="small mb-1 fw-semibold">Ejemplo de request:</p>
-                <pre class="bg-dark text-light p-2 rounded mb-0 example-request-pre"><code>POST /api/email-endpoints/slug/send
+                <pre class="example-request-pre"><code>POST /api/email-endpoints/slug/send
 Header: X-API-Token: abc123...
 {"email": "user@example.com"}</code></pre>
             </div>
@@ -218,9 +159,11 @@ Header: X-API-Token: abc123...
 @endsection
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/create.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/create.css') }}?v={{ @filemtime(public_path('managers/css/views/mailer/endpoints/create.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/variables.css') }}?v={{ @filemtime(public_path('managers/css/views/mailer/endpoints/variables.css')) ?: '1' }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('managers/js/views/mailer/endpoints/create.js') }}"></script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/create.js') }}?v={{ @filemtime(public_path('managers/js/views/mailer/endpoints/create.js')) ?: '1' }}"></script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/variables.js') }}?v={{ @filemtime(public_path('managers/js/views/mailer/endpoints/variables.js')) ?: '1' }}"></script>
 @endpush

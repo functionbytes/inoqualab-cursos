@@ -9,3 +9,6 @@
 .bg-danger-soft {
     background: rgba(220, 53, 69, 0.10);
 }
+.log-row-clickable {
+    cursor: pointer;
+}

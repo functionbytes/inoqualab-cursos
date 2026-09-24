@@ -31,98 +31,113 @@
                 {{-- Token API --}}
                 <div class="card-header border-bottom">
                     <h6 class="mb-1 fw-bold">Token API</h6>
-                    <p class="text-muted small mb-0">Envía este token en el header <code>X-API-Token</code> para autenticar las peticiones.</p>
+                    <p class="text-muted small mb-0">Clave con la que el sistema externo se identifica. Envíala en el header <code>X-API-Token</code> (o como <code>Bearer</code>) en cada petición; sin ella la API responde 401.</p>
                 </div>
 
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12 col-lg-8">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-lock text-primary"></i></span>
-                                <input type="text" class="form-control font-monospace bg-light" id="tokenInput"
-                                       value="{{ $endpoint->api_token }}" readonly>
-                                <button class="btn btn-outline-secondary" type="button" id="copyTokenBtn" title="Copiar token">
-                                    <i class="fas fa-copy"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="col-12 col-lg-4">
-                            <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal" data-bs-target="#regenerateTokenModal">
-                                Regenerar token
-                            </button>
-                            <small class="form-text text-muted d-block text-center mt-1">
-                                <i class="fas fa-exclamation-triangle me-1 text-warning"></i>El token anterior dejará de funcionar
-                            </small>
-                        </div>
+                    <label class="form-label fw-semibold" for="tokenInput">Token actual</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control font-monospace" id="tokenInput"
+                               value="{{ $endpoint->api_token }}" readonly>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#regenerateTokenModal"
+                                title="Regenerar token" aria-label="Regenerar token">
+                            {!! \App\Html\IconHelper::render('refresh') !!}
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="copyTokenBtn" title="Copiar token" aria-label="Copiar token">
+                            {!! \App\Html\IconHelper::render('copy') !!}
+                        </button>
                     </div>
+                    <small class="text-muted d-block mt-1">Si lo regeneras, el token anterior deja de funcionar de inmediato.</small>
                 </div>
 
                 <hr class="my-0">
 
                 {{-- Estadísticas --}}
                 <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Estadísticas de uso</h6>
+                    <div class="repeater-head">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Estadísticas de uso</h6>
+                            <p class="text-muted small mb-0">Peticiones recibidas desde que se creó el endpoint. Un fallo puede ser un envío rechazado por el servidor de correo o un endpoint sin plantilla.</p>
+                        </div>
+                        <a href="{{ route('mailers.endpoints.logs', $endpoint) }}" class="btn btn-icon btn-sm repeater-add" title="Ver todos los logs" aria-label="Ver todos los logs">
+                            {!! \App\Html\IconHelper::render('list') !!}
+                        </a>
+                    </div>
 
                     @php $successRate = $stats['total'] > 0 ? round(($stats['success'] / $stats['total']) * 100, 1) : 0; @endphp
 
                     <div class="row g-3">
-                        <div class="col-6 col-md-3">
-                            <div class="card border-0 stat-card-soft-primary">
-                                <div class="card-body p-3 text-center">
-                                    <h3 class="mb-1 fw-bold text-primary">{{ number_format($stats['total']) }}</h3>
-                                    <p class="text-muted">Total requests</p>
+                        <div class="col-12 col-sm-6">
+                            <div class="card bg-light-secondary h-100 mb-0">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">Total</h6>
+                                    <h4 class="mb-1 fw-bold">{{ number_format($stats['total']) }}</h4>
+                                    <span class="text-muted">Solicitudes recibidas</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <div class="card border-0 stat-card-soft-info">
-                                <div class="card-body p-3 text-center">
-                                    <h3 class="mb-1 fw-bold text-info">{{ number_format($stats['last_24h']) }}</h3>
-                                    <p class="text-muted">Últimas 24h</p>
+                        <div class="col-12 col-sm-6">
+                            <div class="card bg-light-secondary h-100 mb-0">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">Últimas 24 h</h6>
+                                    <h4 class="mb-1 fw-bold">{{ number_format($stats['last_24h']) }}</h4>
+                                    <span class="text-muted">Solicitudes recientes</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <div class="card border-0 stat-card-soft-success">
-                                <div class="card-body p-3 text-center">
-                                    <h3 class="mb-1 fw-bold text-success">{{ number_format($stats['success']) }}</h3>
-                                    <p class="text-muted">Exitosos</p>
+                        <div class="col-12 col-sm-6">
+                            <div class="card bg-light-secondary h-100 mb-0">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">Exitosos</h6>
+                                    <h4 class="mb-1 fw-bold">{{ number_format($stats['success']) }}</h4>
+                                    <span class="text-muted">Correos enviados</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 col-md-3">
-                            <div class="card border-0 stat-card-soft-danger">
-                                <div class="card-body p-3 text-center">
-                                    <h3 class="mb-1 fw-bold text-danger">{{ number_format($stats['failed']) }}</h3>
-                                    <p class="text-muted">Fallidos</p>
+                        <div class="col-12 col-sm-6">
+                            <div class="card bg-light-secondary h-100 mb-0">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-2">Fallidos</h6>
+                                    <h4 class="mb-1 fw-bold">{{ number_format($stats['failed']) }}</h4>
+                                    <span class="text-muted">Con error</span>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="fw-semibold">Tasa de éxito</small>
-                                <small class="fw-semibold {{ $successRate >= 90 ? 'text-success' : ($successRate >= 70 ? 'text-warning' : 'text-danger') }}">{{ $successRate }}%</small>
-                            </div>
-                            <div class="progress progress-thin">
-                                <div id="successRateBar"
-                                     class="progress-bar {{ $successRate >= 90 ? 'bg-success' : ($successRate >= 70 ? 'bg-warning' : 'bg-danger') }}"
-                                     data-width="{{ $successRate }}"></div>
-                            </div>
-                            @if($endpoint->last_request_at)
-                                <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-clock me-1"></i>Última solicitud: {{ $endpoint->last_request_at->diffForHumans() }}
-                                </small>
-                            @endif
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <a href="{{ route('mailers.endpoints.logs', $endpoint) }}" class="btn btn-outline-primary w-100">
-                                Ver todos los logs
-                            </a>
                         </div>
                     </div>
+                </div>
+
+                <hr class="my-0">
+
+                {{-- Tasa de éxito --}}
+                @php
+                    $rateColor = $successRate >= 90 ? 'success' : ($successRate >= 70 ? 'warning' : 'danger');
+                @endphp
+                <div class="card-body">
+                    <div class="repeater-head">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Tasa de éxito</h6>
+                            <p class="text-muted small mb-0">Porcentaje de peticiones que terminaron en un correo enviado. El color de la barra indica si hay que revisar los logs.</p>
+                        </div>
+                        <span class="success-rate-value text-{{ $rateColor }}">{{ $stats['total'] > 0 ? $successRate . '%' : '—' }}</span>
+                    </div>
+
+                    <div class="progress progress-thin">
+                        <div id="successRateBar" class="progress-bar bg-{{ $rateColor }}" data-width="{{ $successRate }}"></div>
+                    </div>
+
+                    <ul class="success-rate-legend">
+                        <li><span class="success-rate-dot bg-success"></span>90% o más: funciona bien</li>
+                        <li><span class="success-rate-dot bg-warning"></span>70–89%: revisa los fallos</li>
+                        <li><span class="success-rate-dot bg-danger"></span>Menos de 70%: la integración tiene un problema</li>
+                    </ul>
+
+                    <small class="text-muted d-block mt-2">
+                        @if($endpoint->last_request_at)
+                            Última solicitud: {{ $endpoint->last_request_at->diffForHumans() }}
+                        @else
+                            Aún no ha recibido solicitudes.
+                        @endif
+                    </small>
                 </div>
 
                 <hr class="my-0">
@@ -130,7 +145,7 @@
                 {{-- Información básica --}}
                 <div class="card-body">
                     <h6 class="fw-bold text-dark mb-1">Información básica</h6>
-                    <p class="text-muted mb-3">Nombre, slug único y fuente del endpoint.</p>
+                    <p class="text-muted small mb-3">Cómo se identifica el endpoint en el panel. La fuente y el tipo solo sirven para organizar; no cambian cómo se envía el correo. Si lo desactivas, la API responde 404 a cada petición.</p>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -142,14 +157,11 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-semibold">Slug (único) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('slug') is-invalid @enderror"
-                                   id="slug" name="slug" value="{{ old('slug', $endpoint->slug) }}"
-                                   required maxlength="255" pattern="[a-z0-9\-_]+">
+                            <label class="form-label fw-semibold">Slug</label>
+                            <input type="text" class="form-control bg-light" id="slug" value="{{ $endpoint->slug }}" readonly>
                             <small class="form-text text-muted">
-                                URL: <code>/api/email-endpoints/<strong>{{ $endpoint->slug }}</strong>/send</code>
+                                No se puede cambiar: las integraciones ya llaman a <code>/api/email-endpoints/{{ $endpoint->slug }}/send</code>
                             </small>
-                            @error('slug')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
                         <div class="col-12 col-md-6">
@@ -180,16 +192,13 @@
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <div class="border rounded p-3">
-                                <div class="form-check form-switch">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" @if($endpoint->is_active) checked @endif>
-                                    <label class="form-check-label" for="is_active">
-                                        <strong>Endpoint activo</strong>
-                                        <small class="d-block text-muted">Los endpoints inactivos rechazarán las peticiones entrantes</small>
-                                    </label>
-                                </div>
-                            </div>
+                            <label class="form-label fw-semibold">Estado <span class="text-danger">*</span></label>
+                            <select class="form-select select2 @error('is_active') is-invalid @enderror" id="is_active" name="is_active" required>
+                                <option value="1" @if((string) old('is_active', $endpoint->is_active ? '1' : '0') === '1') selected @endif>Activo</option>
+                                <option value="0" @if(! ((string) old('is_active', $endpoint->is_active ? '1' : '0') === '1')) selected @endif>Inactivo</option>
+                            </select>
+                            <small class="form-text text-muted">Los endpoints inactivos rechazarán las peticiones entrantes</small>
+                            @error('is_active')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
                     </div>
                 </div>
@@ -199,7 +208,7 @@
                 {{-- Plantilla --}}
                 <div class="card-body">
                     <h6 class="fw-bold text-dark mb-1">Plantilla de email</h6>
-                    <p class="text-muted mb-3">Selecciona la plantilla que se usará para los envíos.</p>
+                    <p class="text-muted small mb-3">Define el asunto y el diseño del correo. Sin plantilla, las peticiones se aceptan pero el envío queda como fallido. Sus variables son las que puedes elegir en el mapeo.</p>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
@@ -218,97 +227,21 @@
                     </div>
                 </div>
 
-                <hr class="my-0">
-
-                {{-- Variables esperadas --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Variables esperadas</h6>
-                    <p class="text-muted mb-3">Variables que esperas recibir en el JSON desde el sistema externo.</p>
-
-                    <div class="alert alert-light border mb-3">
-                        <i class="fas fa-lightbulb me-2 text-warning"></i>
-                        <strong>Ejemplo:</strong> Si tu JSON envía <code>{"customer_email": "user@example.com"}</code>, agrega <code>customer_email</code> como variable.
-                    </div>
-                    <div id="expectedVariablesContainer" class="mb-3">
-                        @foreach($endpoint->expected_variables ?? [] as $var)
-                            <div class="input-group mb-2">
-                                <span class="input-group-text bg-light"><i class="fas fa-cube text-primary"></i></span>
-                                <input type="text" class="form-control expected-var-input" name="expected_variables[]"
-                                       placeholder="Ej: customer_email" value="{{ $var }}">
-                                <button type="button" class="btn btn-outline-danger remove-variable"><i class="fas fa-times"></i></button>
-                            </div>
-                        @endforeach
-                    </div>
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="addExpectedVariable">
-                        Agregar variable
-                    </button>
-                </div>
-
-                <hr class="my-0">
-
-                {{-- Variables obligatorias --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Variables obligatorias</h6>
-                    <p class="text-muted mb-3">Marca las variables que son obligatorias en cada request.</p>
-
-                    <div id="requiredVariablesContainer">
-                        @if(!empty($endpoint->expected_variables))
-                            @foreach($endpoint->expected_variables as $index => $var)
-                                <div class="form-check form-check-inline mb-2">
-                                    <input class="form-check-input" type="checkbox" name="required_variables[]"
-                                           id="required_{{ $index }}" value="{{ $var }}"
-                                           @if(in_array($var, $endpoint->required_variables ?? [])) checked @endif>
-                                    <label class="form-check-label" for="required_{{ $index }}">
-                                        <span class="badge bg-light text-dark border rounded-pill py-1 px-2">{{ $var }}</span>
-                                    </label>
-                                </div>
-                            @endforeach
-                        @else
-                            <p class="text-muted"><i class="fas fa-info-circle me-1"></i>Primero agrega variables esperadas arriba</p>
-                        @endif
-                    </div>
-                </div>
-
-                <hr class="my-0">
-
-                {{-- Mapeo de variables --}}
-                <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Mapeo de variables (opcional)</h6>
-                    <p class="text-muted mb-3">Si los nombres en el JSON no coinciden con los de la plantilla, puedes mapearlos aquí.</p>
-
-                    <div class="bg-light p-3 rounded">
-                        <div id="mappingsContainer">
-                            <div class="row g-2 mb-2">
-                                <div class="col-5"><label class="form-label small fw-bold text-uppercase">Variable plantilla</label></div>
-                                <div class="col-5"><label class="form-label small fw-bold text-uppercase">Ruta JSON</label></div>
-                                <div class="col-2"></div>
-                            </div>
-                            @php $mappings = $endpoint->variable_mappings ?? []; @endphp
-                            @foreach($mappings as $templateVar => $jsonPath)
-                                <div class="row g-2 mb-2 mapping-row">
-                                    <div class="col-5">
-                                        <input type="text" class="form-control form-control-sm mapping-template" placeholder="email" value="{{ $templateVar }}">
-                                    </div>
-                                    <div class="col-5">
-                                        <input type="text" class="form-control form-control-sm mapping-json" placeholder="user.email" value="{{ $jsonPath }}">
-                                    </div>
-                                    <div class="col-2">
-                                        <button type="button" class="btn btn-sm btn-outline-danger remove-mapping w-100"><i class="fas fa-times"></i></button>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addMapping">
-                            Agregar mapeo
-                        </button>
-                    </div>
-                </div>
+                @include('managers.views.mailer.endpoints._variables')
 
                 <hr class="my-0">
 
                 {{-- Logs recientes --}}
                 <div class="card-body">
-                    <h6 class="fw-bold text-dark mb-1">Logs recientes</h6>
+                    <div class="repeater-head">
+                        <div>
+                            <h6 class="fw-bold text-dark mb-1">Logs recientes</h6>
+                            <p class="text-muted small mb-0">Las últimas 5 peticiones. En el historial completo puedes ver el payload recibido y el motivo de cada fallo.</p>
+                        </div>
+                        <a href="{{ route('mailers.endpoints.logs', $endpoint) }}" class="btn btn-icon btn-sm repeater-add" title="Ver todos los logs" aria-label="Ver todos los logs">
+                            {!! \App\Html\IconHelper::render('list') !!}
+                        </a>
+                    </div>
 
                     @if($recentLogs->count() > 0)
                         <div class="table-responsive mb-0">
@@ -343,10 +276,7 @@
                             </table>
                         </div>
                     @else
-                        <div class="alert alert-light border text-center mb-0">
-                            <i class="fas fa-inbox fs-4 text-muted mb-2 d-block"></i>
-                            <p class="text-muted mb-0">No hay logs registrados aún</p>
-                        </div>
+                        <p class="repeater-empty text-muted small mb-0">Este endpoint todavía no ha recibido peticiones.</p>
                     @endif
                 </div>
 
@@ -389,12 +319,12 @@
             </div>
             <div class="card-body">
                 <ul class="text-muted ps-3 mb-3">
-                    <li class="mb-2">El <strong>token API</strong> se envía en el header <code>X-API-Token</code></li>
-                    <li class="mb-2">Regenerar el token invalida el anterior de inmediato</li>
-                    <li>Los endpoints inactivos <strong>rechazarán</strong> todas las peticiones</li>
+                    <li class="mb-2">El destinatario va en el campo <code>email</code> (o <code>recipient_email</code>) del JSON y es obligatorio.</li>
+                    <li class="mb-2">La API responde 202 cuando acepta la petición; el correo se envía en segundo plano y el resultado queda en los logs.</li>
+                    <li>El JSON puede pesar como máximo 256 KB.</li>
                 </ul>
                 <p class="small mb-1 fw-semibold">Ejemplo de request:</p>
-                <pre class="bg-dark text-light p-2 rounded mb-0 example-request-pre"><code>POST /api/email-endpoints/{{ $endpoint->slug }}/send
+                <pre class="example-request-pre"><code>POST /api/email-endpoints/{{ $endpoint->slug }}/send
 Header: X-API-Token: {{ Str::limit($endpoint->api_token, 12, '...') }}
 {"email": "user@example.com"}</code></pre>
             </div>
@@ -409,25 +339,18 @@ Header: X-API-Token: {{ Str::limit($endpoint->api_token, 12, '...') }}
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Regenerar token API
-                </h5>
+                <h5 class="modal-title fw-bold">Regenerar token API</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="alert alert-warning border-0">
-                    <strong><i class="fas fa-exclamation-circle me-1"></i>Advertencia:</strong>
-                    Al regenerar el token, el token anterior dejará de funcionar inmediatamente.
-                </div>
+                <p class="mb-2">Al regenerar el token, el anterior deja de funcionar de inmediato y cada integración deberá usar el nuevo.</p>
                 <p class="mb-0 fw-semibold">¿Deseas continuar?</p>
             </div>
             <div class="modal-footer d-block">
                 <form method="POST" action="{{ route('mailers.endpoints.regenerate-token', $endpoint) }}">
                     @csrf
-                    <button type="submit" class="btn btn-warning w-100 mb-2">
-                        Regenerar
-                    </button>
-                    <button type="button" class="btn btn-light w-100" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-2">Regenerar token</button>
+                    <button type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
                 </form>
             </div>
         </div>
@@ -437,9 +360,11 @@ Header: X-API-Token: {{ Str::limit($endpoint->api_token, 12, '...') }}
 @endsection
 
 @push('css')
-<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/edit.css') }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/edit.css') }}?v={{ @filemtime(public_path('managers/css/views/mailer/endpoints/edit.css')) ?: '1' }}">
+<link rel="stylesheet" href="{{ asset('managers/css/views/mailer/endpoints/variables.css') }}?v={{ @filemtime(public_path('managers/css/views/mailer/endpoints/variables.css')) ?: '1' }}">
 @endpush
 
 @push('scripts')
-<script src="{{ asset('managers/js/views/mailer/endpoints/edit.js') }}"></script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/edit.js') }}?v={{ @filemtime(public_path('managers/js/views/mailer/endpoints/edit.js')) ?: '1' }}"></script>
+<script src="{{ asset('managers/js/views/mailer/endpoints/variables.js') }}?v={{ @filemtime(public_path('managers/js/views/mailer/endpoints/variables.js')) ?: '1' }}"></script>
 @endpush

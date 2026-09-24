@@ -1,0 +1,80 @@
+/* Listas repetibles del panel: cabecera con botón + a la derecha, filas con
+   el campo pegado a una papelera y aviso cuando la lista está vacía.
+   Usado en mailer/endpoints (create/edit) y settings/analytics/notifications.
+
+   <div class="repeater-head"> <div>h6 + p</div> <button class="btn btn-icon btn-sm repeater-add"> </div>
+   <div class="repeater-list"> <div class="repeater-row"> input.form-control + button.btn.repeater-remove </div> </div>
+   <p class="repeater-empty">...</p> */
+
+.repeater-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+/* Botón + : mismo gris que los icon-only del panel (filtros / acciones) */
+.repeater-add.btn {
+    flex-shrink: 0;
+    background-color: #f5f6f8;
+    border: 1px solid #dee2e6;
+    color: #495057;
+}
+
+.repeater-add.btn:hover,
+.repeater-add.btn:focus-visible {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #212529;
+}
+
+.repeater-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.repeater-list:empty {
+    display: none;
+}
+
+/* Fila: campos pegados a la papelera, como un input-group */
+.repeater-row {
+    display: flex;
+    align-items: stretch;
+}
+
+.repeater-row > .form-control {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.repeater-row .repeater-remove.btn {
+    flex: 0 0 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-left: 0;
+    border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+    color: #6c757d;
+}
+
+.repeater-row .repeater-remove.btn:hover,
+.repeater-row .repeater-remove.btn:focus-visible {
+    background-color: #f7e2df;
+    border-color: #efc9c3;
+    color: #a8402f;
+}
+
+.repeater-empty {
+    padding: 14px 16px;
+    border: 1px dashed #dee2e6;
+    border-radius: var(--bs-border-radius);
+    background-color: #fbfbfc;
+}

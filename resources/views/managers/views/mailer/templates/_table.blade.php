@@ -5,14 +5,11 @@
 
             {{-- Info --}}
             <div class="card-body border-bottom">
-                <div class="alert alert-info border-0 mb-0">
+                <div class="alert alert-light border mb-0">
                     <div class="d-flex align-items-center justify-content-between gap-3">
-                        <div class="d-flex align-items-start">
-                            <i class="fas fa-info-circle fs-5 me-3 mt-1"></i>
-                            <div>
-                                <h6 class="fw-bold mb-1">¿Necesitas editar el Header o Footer?</h6>
-                                <p class="mb-0 small">Los componentes como header, footer y otros elementos reutilizables se gestionan por separado. Edítalos una vez y se aplicarán automáticamente a todas las plantillas.</p>
-                            </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">¿Necesitas editar el Header o Footer?</h6>
+                            <p class="mb-0 small">Los componentes como header, footer y otros elementos reutilizables se gestionan por separado. Edítalos una vez y se aplicarán automáticamente a todas las plantillas.</p>
                         </div>
                         <a href="{{ route('mailers.components.index') }}" class="btn btn-info btn-sm flex-shrink-0">
                             Ver

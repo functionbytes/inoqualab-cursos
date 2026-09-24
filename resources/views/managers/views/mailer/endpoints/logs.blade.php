@@ -35,12 +35,16 @@
             <span class="badge bg-light text-dark rounded-pill py-1 px-2">{{ $endpoint->type }}</span>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('mailers.endpoints.edit', $endpoint) }}" class="btn btn-sm btn-outline-primary me-1">
-                Editar
-            </a>
-            <a href="{{ route('mailers.endpoints.index') }}" class="btn btn-sm btn-light">
-                Atrás
-            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-icon btn-actions-icon dropdown-toggle arrow-none"
+                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Acciones">
+                    <i class="fas fa-ellipsis-vertical"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end">
+                    <a href="{{ route('mailers.endpoints.edit', $endpoint) }}" class="dropdown-item">Editar</a>
+                    <a href="{{ route('mailers.endpoints.index') }}" class="dropdown-item">Atrás</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -50,16 +54,16 @@
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-3">
-                <div class="card bg-light h-100">
+                <div class="card bg-light shadow-none h-100">
                     <div class="card-body">
-                        <h6 class="card-title text-primary mb-2">Total logs</h6>
+                        <h6 class="card-title mb-2">Total logs</h6>
                         <h4 class="mb-1 fw-bold">{{ $stats['total'] }}</h4>
                         <p class="text-muted">Registrados</p>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-light h-100">
+                <div class="card bg-light shadow-none h-100">
                     <div class="card-body">
                         <h6 class="card-title mb-2">Exitosos</h6>
                         <h4 class="mb-1 fw-bold">{{ $stats['success'] }}</h4>
@@ -68,7 +72,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-light h-100">
+                <div class="card bg-light shadow-none h-100">
                     <div class="card-body">
                         <h6 class="card-title mb-2">Fallidos</h6>
                         <h4 class="mb-1 fw-bold">{{ $stats['failed'] }}</h4>
@@ -77,9 +81,9 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card bg-light h-100">
+                <div class="card bg-light shadow-none h-100">
                     <div class="card-body">
-                        <h6 class="card-title text-info mb-2">Tasa de éxito</h6>
+                        <h6 class="card-title mb-2">Tasa de éxito</h6>
                         <h4 class="mb-1 fw-bold">{{ $stats['success_rate'] }}%</h4>
                         <p class="text-muted">Rendimiento</p>
                     </div>

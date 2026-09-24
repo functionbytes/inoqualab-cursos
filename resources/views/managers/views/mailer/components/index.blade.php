@@ -20,7 +20,7 @@
 <div class="widget-content searchable-container list">
 
     <div id="ajax-table-root">
-        @include('managers.views.mailer.components._table', ['components' => $components, 'search' => $search ?? '', 'type' => $type ?? '', 'types' => $types ?? []])
+        @include('managers.views.mailer.components._table')
     </div>
 
 </div>
